@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -30,11 +31,13 @@ import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,14 +77,18 @@ public class WorkspaceRuntimes {
     private final ConcurrentMap<String, RuntimeState> runtimes;
     private final EventService                        eventService;
     private final WorkspaceSharedPool                 sharedPool;
+    private final WorkspaceDao                        workspaceDao;
 
     @Inject
     public WorkspaceRuntimes(EventService eventService,
                              Set<RuntimeInfrastructure> infrastructures,
-                             WorkspaceSharedPool sharedPool) {
+                             WorkspaceSharedPool sharedPool,
+                             WorkspaceDao workspaceDao,
+                             @SuppressWarnings("unused") DBInitializer ignored) {
         this.runtimes = new ConcurrentHashMap<>();
         this.eventService = eventService;
         this.sharedPool = sharedPool;
+        this.workspaceDao = workspaceDao;
 
         // TODO: consider extracting to a strategy interface(1. pick the last, 2. fail with conflict)
         Map<String, RuntimeInfrastructure> tmp = new HashMap<>();
@@ -99,6 +106,12 @@ public class WorkspaceRuntimes {
             }
         }
         infraByRecipe = ImmutableMap.copyOf(tmp);
+    }
+
+    @PostConstruct
+    private void init() {
+        subscribeCleanupOnAbnormalRuntimeStopEvent();
+        recover();
     }
 
     // TODO Doesn't look like correct place for this logic. Where this code should be?
@@ -317,41 +330,67 @@ public class WorkspaceRuntimes {
         return runtimes.containsKey(workspaceId);
     }
 
-    @PostConstruct
-    private void init() {
-        recover();
-        subscribeCleanupOnAbnormalRuntimeStopEvent();
-    }
-
     private void recover() {
         for (RuntimeInfrastructure infra : infraByRecipe.values()) {
             try {
-                for (RuntimeIdentity id : infra.getIdentities()) {
-                    // TODO how to identify correct state of runtime
-                    if (runtimes.putIfAbsent(id.getWorkspaceId(),
-                                             new RuntimeState(validate(infra.getRuntime(id)), RUNNING)) != null) {
-                        // should not happen, violation of SPI contract
-                        LOG.error("More than 1 runtime of workspace found. " +
-                                  "Runtime identity of duplicate is '{}'. Skipping duplicate.", id);
-                    }
+                for (RuntimeIdentity identity : infra.getIdentities()) {
+                    recoverOne(infra, identity);
                 }
             } catch (UnsupportedOperationException x) {
                 LOG.warn("Not recoverable infrastructure: '{}'", infra.getName());
-            } catch (InfrastructureException x) {
+            } catch (ServerException | InfrastructureException x) {
                 LOG.error("An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
-                          infra.getName(),
-                          x.getMessage());
+                          infra.getName(), x.getMessage());
             }
+        }
+    }
+
+    @VisibleForTesting
+    void recoverOne(RuntimeInfrastructure infra, RuntimeIdentity identity) throws ServerException {
+        Workspace workspace;
+        try {
+            workspace = workspaceDao.get(identity.getWorkspaceId());
+        } catch (NotFoundException x) {
+            LOG.error("Workspace configuration is missing for the runtime '{}:{}'. Runtime won't be recovered",
+                      identity.getWorkspaceId(),
+                      identity.getEnvName());
+            return;
+        }
+
+        Environment environment = workspace.getConfig().getEnvironments().get(identity.getEnvName());
+        if (environment == null) {
+            LOG.error("Environment configuration is missing for the runtime '{}:{}'. Runtime won't be recovered",
+                      identity.getWorkspaceId(),
+                      identity.getEnvName());
+            return;
+        }
+
+        InternalRuntime runtime;
+        try {
+            runtime = infra.prepare(identity, environment).getRuntime();
+        } catch (InfrastructureException | ValidationException x) {
+            LOG.error("Couldn't recover runtime '{}:{}'. Error: {}",
+                      identity.getWorkspaceId(),
+                      identity.getEnvName(),
+                      x.getMessage());
+            return;
+        }
+
+        RuntimeState prev = runtimes.putIfAbsent(identity.getWorkspaceId(), new RuntimeState(runtime, RUNNING));
+        if (prev == null) {
+            LOG.info("Successfully recovered workspace runtime '{}'", identity.getWorkspaceId(), identity.getEnvName());
+        } else {
+            LOG.error("More than 1 runtime with id '{}:{}' found. " +
+                      "Duplicate provided by infrastructure '{}' will be skipped",
+                      identity.getWorkspaceId(),
+                      identity.getEnvName(),
+                      prev.runtime.getContext().getInfrastructure().getName(),
+                      infra.getName());
         }
     }
 
     private void subscribeCleanupOnAbnormalRuntimeStopEvent() {
         eventService.subscribe(new CleanupRuntimeOnAbnormalRuntimeStop());
-    }
-
-    //TODO do we need some validation on start?
-    private InternalRuntime validate(InternalRuntime runtime) {
-        return runtime;
     }
 
     private static EnvironmentImpl copyEnv(Workspace workspace, String envName) {
@@ -375,7 +414,7 @@ public class WorkspaceRuntimes {
                 if (state != null) {
                     eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                                    .withWorkspaceId(state.runtime.getContext().getIdentity()
-                                                                         .getWorkspaceId())
+                                                                                 .getWorkspaceId())
                                                    .withPrevStatus(WorkspaceStatus.RUNNING)
                                                    .withStatus(STOPPED)
                                                    .withError("Error occurs on workspace runtime stop. Error: " +

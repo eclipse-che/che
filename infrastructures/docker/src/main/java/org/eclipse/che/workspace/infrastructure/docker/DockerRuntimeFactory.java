@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import com.google.inject.assistedinject.Assisted;
-
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 
 import java.util.List;
 
@@ -21,9 +18,6 @@ import java.util.List;
  * @author Alexander Garagatyi
  */
 public interface DockerRuntimeFactory {
-    DockerInternalRuntime createRuntime(@Assisted DockerRuntimeContext context,
-                                        @Assisted String devMachineName,
-                                        @Assisted List<String> orderedContainers,
-                                        @Assisted DockerEnvironment dockerEnvironment,
-                                        @Assisted RuntimeIdentity identity);
+    DockerInternalRuntime create(DockerRuntimeContext context);
+    DockerInternalRuntime create(DockerRuntimeContext context, List<ContainerListEntry> containers);
 }

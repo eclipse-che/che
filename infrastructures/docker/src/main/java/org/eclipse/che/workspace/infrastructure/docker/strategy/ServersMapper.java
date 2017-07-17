@@ -54,8 +54,9 @@ public class ServersMapper {
         Map<String, List<String>> port2refs = new HashMap<>();
         for (Map.Entry<String, ServerConfig> entry : configs.entrySet()) {
             port2refs.compute(entry.getValue().getPort(), (port, list) -> {
-                if (list == null)
+                if (list == null) {
                     list = new ArrayList<>();
+                }
                 list.add(entry.getKey());
                 return list;
             });

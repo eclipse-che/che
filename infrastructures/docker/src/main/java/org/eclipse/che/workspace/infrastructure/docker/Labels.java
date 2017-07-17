@@ -30,11 +30,12 @@ import java.util.regex.Pattern;
  */
 public final class Labels {
 
-    private static final String LABEL_PREFIX              = "org.eclipse.che.";
+    public static final String LABEL_PREFIX          = "org.eclipse.che.";
+    public static final String LABEL_WORKSPACE_ID    = LABEL_PREFIX + "workspace.id";
+    public static final String LABEL_WORKSPACE_ENV   = LABEL_PREFIX + "workspace.env";
+    public static final String LABEL_WORKSPACE_OWNER = LABEL_PREFIX + "workspace.owner";
+
     private static final String LABEL_MACHINE_NAME        = LABEL_PREFIX + "machine.name";
-    private static final String LABEL_WORKSPACE_ID        = LABEL_PREFIX + "workspace.id";
-    private static final String LABEL_WORKSPACE_ENV       = LABEL_PREFIX + "workspace.env";
-    private static final String LABEL_WORKSPACE_OWNER     = LABEL_PREFIX + "workspace.owner";
     private static final String SERVER_PORT_LABEL_FMT     = LABEL_PREFIX + "server.%s.port";
     private static final String SERVER_PROTOCOL_LABEL_FMT = LABEL_PREFIX + "server.%s.protocol";
     private static final String SERVER_PATH_LABEL_FMT     = LABEL_PREFIX + "server.%s.path";

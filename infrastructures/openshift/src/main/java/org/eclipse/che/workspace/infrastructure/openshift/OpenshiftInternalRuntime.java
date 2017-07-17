@@ -82,7 +82,7 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
                                     EventService eventService,
                                     OpenshiftBootstrapperFactory openshiftBootstrapperFactory,
                                     @Named("che.infra.openshift.machine_start_timeout_min") int machineStartTimeoutMin) {
-        super(context, urlRewriter);
+        super(context, urlRewriter, false);
         this.identity = identity;
         this.kubernetesEnvironment = openshiftEnvironment;
         this.clientFactory = clientFactory;

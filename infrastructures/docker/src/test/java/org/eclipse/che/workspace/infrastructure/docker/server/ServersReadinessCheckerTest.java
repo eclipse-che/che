@@ -29,6 +29,7 @@ import java.util.function.Consumer;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
@@ -63,7 +64,7 @@ public class ServersReadinessCheckerTest {
                 .thenReturn(connectionChecker);
         when(connectionChecker.getReportCompFuture()).thenReturn(compFuture);
 
-        checker = new ServersReadinessChecker(MACHINE_NAME, getDefaultServers(), readinessHandler, factory);
+        checker = new ServersReadinessChecker(MACHINE_NAME, getDefaultServers(), factory);
     }
 
     @AfterMethod(timeOut = 1000)
@@ -75,7 +76,7 @@ public class ServersReadinessCheckerTest {
 
     @Test(timeOut = 1000)
     public void shouldNotifyReadinessHandlerAboutEachServerReadiness() throws Exception {
-        checker.startAsync();
+        checker.startAsync(readinessHandler);
 
         verify(readinessHandler, timeout(500).never()).accept(anyString());
 
@@ -86,7 +87,7 @@ public class ServersReadinessCheckerTest {
 
     @Test(timeOut = 1000)
     public void shouldThrowExceptionIfAServerIsUnavailable() throws Exception {
-        checker.startAsync();
+        checker.startAsync(readinessHandler);
 
         connectionChecker.getReportCompFuture()
                          .completeExceptionally(new InfrastructureException("my exception"));
@@ -102,9 +103,9 @@ public class ServersReadinessCheckerTest {
     public void shouldNotCheckNotHardcodedServers() throws Exception {
         Map<String, ServerImpl> servers = ImmutableMap.of("wsagent", new ServerImpl("http://localhost"),
                                                           "not-hardcoded", new ServerImpl("http://localhost"));
-        checker = new ServersReadinessChecker(MACHINE_NAME, servers, readinessHandler, factory);
+        checker = new ServersReadinessChecker(MACHINE_NAME, servers, factory);
 
-        checker.startAsync();
+        checker.startAsync(readinessHandler);
         connectionChecker.getReportCompFuture().complete("test_ref");
         checker.await();
 
@@ -120,7 +121,7 @@ public class ServersReadinessCheckerTest {
                                                      .thenReturn(future2)
                                                      .thenReturn(future3);
 
-        checker.startAsync();
+        checker.startAsync(readinessHandler);
 
         future2.completeExceptionally(new InfrastructureException("error"));
 
@@ -135,6 +136,13 @@ public class ServersReadinessCheckerTest {
             verify(future2).completeExceptionally(any(Throwable.class));
             verify(future3, never()).completeExceptionally(any(Throwable.class));
         }
+    }
+
+    @Test(expectedExceptions = InfrastructureException.class, expectedExceptionsMessageRegExp = "oops!")
+    public void throwsExceptionIfAnyServerIsNotAvailable() throws InfrastructureException {
+        doThrow(new InfrastructureException("oops!")).when(connectionChecker).checkOnce();
+
+        checker.checkOnce();
     }
 
     Map<String, ServerImpl> getDefaultServers() {

@@ -175,7 +175,11 @@ public class CascadeRemovalTest {
 //                install(new MachineJpaModule());
                 bind(WorkspaceManager.class);
                 
-                WorkspaceRuntimes wR = spy(new WorkspaceRuntimes(mock(EventService.class), Collections.emptySet(), mock(WorkspaceSharedPool.class)));
+                WorkspaceRuntimes wR = spy(new WorkspaceRuntimes(mock(EventService.class),
+                                                                 Collections.emptySet(),
+                                                                 mock(WorkspaceSharedPool.class),
+                                                                 mock(WorkspaceDao.class),
+                                                                 mock(DBInitializer.class)));
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);
