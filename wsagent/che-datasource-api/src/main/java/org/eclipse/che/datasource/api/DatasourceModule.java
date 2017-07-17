@@ -12,9 +12,9 @@ import org.eclipse.che.datasource.api.ssl.TrustStoreObject;
 public class DatasourceModule extends AbstractModule{
     @Override
     protected void configure() {
-//        bind(JdbcConnectionFactory.class);
-//        bind(KeyStoreObject.class);
-//        bind(TrustStoreObject.class);
+        bind(JdbcConnectionFactory.class);
+        bind(KeyStoreObject.class);
+        bind(TrustStoreObject.class);
         bind(SslKeyStoreService.class);
         bind(AvailableDriversService.class);
         bind(TestConnectionService.class);
