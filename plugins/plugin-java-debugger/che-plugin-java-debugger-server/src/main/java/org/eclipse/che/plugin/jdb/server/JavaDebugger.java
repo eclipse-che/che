@@ -534,6 +534,51 @@ public class JavaDebugger implements EventsHandler, Debugger {
     }
 
     @Override
+    public SimpleValue getValue(VariablePath variablePath, long threadId, int frameIndex) throws DebuggerException {
+        JdbStackFrame jdbStackFrame = null;
+        try {
+            for (ThreadReference t : vm.allThreads()) {
+                if (t.uniqueID() == threadId) {
+                    jdbStackFrame = new JdbStackFrame(t.frame(frameIndex));
+                    break;
+                }
+            }
+
+            if (jdbStackFrame == null) {
+                throw new DebuggerException(format("Frame %d in thread %d not found.", frameIndex, threadId));
+            }
+        } catch (IncompatibleThreadStateException e) {
+            throw new DebuggerException("Thread is not suspended", e);
+        } catch (IndexOutOfBoundsException e) {
+            throw new DebuggerException(format("Frame %d in thread %d not found.", frameIndex, threadId));
+        }
+
+        Optional<? extends Variable> targetVar;
+
+        List<String> path = variablePath.getPath();
+        if ("this".equals(path.get(0)) || "static".equals(path.get(0))) {
+            targetVar = jdbStackFrame.getFields()
+                                     .stream()
+                                     .filter(f -> f.getVariablePath().equals(variablePath))
+                                     .findAny();
+        } else {
+            targetVar = jdbStackFrame.getVariables()
+                                     .stream()
+                                     .filter(v -> v.getVariablePath().equals(variablePath))
+                                     .findAny();
+        }
+
+        if (!targetVar.isPresent()) {
+            throw new DebuggerException(format("Variable %s in the frame %d of the thread %d not found.",
+                                               variablePath.getPath().toString(),
+                                               frameIndex,
+                                               threadId));
+        }
+
+        return targetVar.get().getValue();
+    }
+
+    @Override
     public void setValue(Variable variable) throws DebuggerException {
         StringBuilder expression = new StringBuilder();
         for (String s : variable.getVariablePath().getPath()) {

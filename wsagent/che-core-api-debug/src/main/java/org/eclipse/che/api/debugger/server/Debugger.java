@@ -122,13 +122,39 @@ public interface Debugger {
     /**
      * Gets the current value of the given variable.
      *
+     * @deprecated
+     * @see #getValue(VariablePath, long, int)
+     *
      * @param variablePath
      *      the path to the variable
      * @return {@link SimpleValue}
      * @throws DebuggerException
      *      if any error occur
      */
+    @Deprecated
     SimpleValue getValue(VariablePath variablePath) throws DebuggerException;
+
+
+    /**
+     * Gets the value of the given variable.
+     *
+     * @param variablePath
+     *      the path to the variable
+     * @param threadId
+     *      the unique thread id
+     * @param frameIndex
+     *      the frame index inside thread
+     * @return {@link SimpleValue}
+     * @throws DebuggerException
+     *      if any error occur
+     */
+    default SimpleValue getValue(VariablePath variablePath, long threadId, int frameIndex) throws DebuggerException {
+        if (threadId == -1 || frameIndex == -1) {
+            return getValue(variablePath);
+        }
+
+        throw new DebuggerException("Unsupported operation for current debugger implementation.");
+    }
 
     /**
      * Sets the new value {@link Variable#getValue()} of the variable {@link Variable#getVariablePath()}.
@@ -215,6 +241,10 @@ public interface Debugger {
      *      if any error occur
      */
     default StackFrameDump getStackFrameDump(long threadId, int frameIndex) throws DebuggerException {
+        if (threadId == -1 || frameIndex == -1) {
+            return dumpStackFrame();
+        }
+
         throw new DebuggerException("Unsupported operation for current debugger implementation.");
     }
 

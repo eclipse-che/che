@@ -45,8 +45,8 @@ public class JavaDebuggerUtils {
 
         try {
             vm.exit(0);
-            vm.process().waitFor();
         } catch (Exception ignored) {
+            // quietly ignore exception, if VM has been already terminated
         }
     }
 
