@@ -10,22 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.server.rest;
 
+import com.google.inject.Inject;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
-import com.google.inject.Inject;
-
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
+import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
+import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
-import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.maven.server.MavenTerminal;
+import org.eclipse.che.plugin.maven.lsp.MavenLanguageServer;
 import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
 import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
@@ -33,7 +34,6 @@ import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
-import org.eclipse.che.plugin.maven.server.core.reconcile.PomReconciler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 
@@ -43,6 +43,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+
+import java.io.File;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,7 +77,7 @@ public class MavenServerService {
     private ClasspathManager classpathManager;
 
     @Inject
-    private PomReconciler pomReconciler;
+    private LanguageServerRegistry lsRegistry;
 
     @Inject
     public MavenServerService(MavenWrapperManager wrapperManager,
@@ -152,10 +155,14 @@ public class MavenServerService {
     @Path("pom/reconcile")
     @ApiOperation(value = "Reconcile pom.xml file")
     @ApiResponses({@ApiResponse(code = 200, message = "OK")})
-    @Produces("application/json")
-    public List<Problem> reconcilePom(@ApiParam(value = "The paths to pom.xml file which need to be reconciled")
+    public void reconcile(@ApiParam(value = "The paths to pom.xml file which need to be reconciled")
                                       @QueryParam("pompath") String pomPath)
             throws ForbiddenException, ConflictException, NotFoundException, ServerException {
-        return pomReconciler.reconcile(pomPath);
+        String projectPath = new File(pomPath).getParent();
+        List<Collection<InitializedLanguageServer>> languageServers = lsRegistry.getApplicableLanguageServers(LanguageServiceUtils.prefixURI(pomPath));
+        languageServers.stream().flatMap(Collection::stream).map(InitializedLanguageServer::getServer).filter(ls -> ls instanceof MavenLanguageServer).findAny().ifPresent(ls -> {
+            ((MavenLanguageServer) ls).reconcile(pomPath, projectPath);
+        });
+        
     }
 }
