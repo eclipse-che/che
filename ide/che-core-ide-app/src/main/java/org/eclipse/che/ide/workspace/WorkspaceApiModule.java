@@ -16,10 +16,9 @@ public class WorkspaceApiModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
+        bind(CurrentWorkspaceManager.class).asEagerSingleton();
+
         bind(WorkspaceStatusNotification.class).asEagerSingleton();
         bind(StartWorkspaceNotification.class).asEagerSingleton();
-        bind(WorkspaceSnapshotNotifier.class).asEagerSingleton();
-
-        bind(CurrentWorkspaceManager.class).asEagerSingleton();
     }
 }
