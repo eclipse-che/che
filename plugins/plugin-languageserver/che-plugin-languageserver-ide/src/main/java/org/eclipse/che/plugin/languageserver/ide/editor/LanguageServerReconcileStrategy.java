@@ -13,8 +13,8 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
 import org.eclipse.che.ide.api.editor.events.DocumentChangingEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangingHandler;
 import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
@@ -57,9 +57,9 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
 
     @Override
     public void setDocument(Document document) {
-        document.getDocumentHandle().getDocEventBus().addHandler(DocumentChangeEvent.TYPE, new DocumentChangeHandler() {
+        document.getDocumentHandle().getDocEventBus().addHandler(DocumentChangedEvent.TYPE, new DocumentChangedHandler() {
             @Override
-            public void onDocumentChange(DocumentChangeEvent event) {
+            public void onDocumentChanged(DocumentChangedEvent event) {
                 synchronize.syncTextDocument(event.getDocument().getDocument(), lastEventStart, lastEventEnd, event.getText(), ++version);
             }
         });

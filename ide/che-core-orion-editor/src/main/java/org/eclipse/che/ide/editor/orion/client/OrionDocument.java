@@ -14,7 +14,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.eclipse.che.ide.api.editor.document.AbstractDocument;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.CursorActivityHandler;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangingEvent;
 import org.eclipse.che.ide.api.editor.events.HasCursorActivityHandlers;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
@@ -78,7 +78,7 @@ public class OrionDocument extends AbstractDocument {
 
         String text = editorOverlay.getModel().getText(startOffset, startOffset + addedCharCount);
 
-        final DocumentChangeEvent event = new DocumentChangeEvent(this,
+        final DocumentChangedEvent event = new DocumentChangedEvent(this,
                                                                   startOffset,
                                                                   addedCharCount,
                                                                   text,

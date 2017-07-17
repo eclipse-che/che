@@ -13,10 +13,10 @@ package org.eclipse.che.ide.api.editor.events;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import com.google.gwt.event.shared.GwtEvent;
 
-public class DocumentChangeEvent extends GwtEvent<DocumentChangeHandler> {
+public class DocumentChangedEvent extends GwtEvent<DocumentChangedHandler> {
 
     /** The type instance for this event. */
-    public static final Type<DocumentChangeHandler> TYPE = new Type<>();
+    public static final Type<DocumentChangedHandler> TYPE = new Type<>();
 
     /** The document handle */
     private final DocumentHandle document;
@@ -32,7 +32,7 @@ public class DocumentChangeEvent extends GwtEvent<DocumentChangeHandler> {
 
     private final int removedCharCount;
 
-    public DocumentChangeEvent(final DocumentHandle document, final int offset, final int length, final String text, int removedCharCount) {
+    public DocumentChangedEvent(final DocumentHandle document, final int offset, final int length, final String text, int removedCharCount) {
         this.offset = offset;
         this.length = length;
         this.text = text;
@@ -41,13 +41,13 @@ public class DocumentChangeEvent extends GwtEvent<DocumentChangeHandler> {
     }
 
     @Override
-    public Type<DocumentChangeHandler> getAssociatedType() {
+    public Type<DocumentChangedHandler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(final DocumentChangeHandler handler) {
-        handler.onDocumentChange(this);
+    protected void dispatch(final DocumentChangedHandler handler) {
+        handler.onDocumentChanged(this);
     }
 
     public int getOffset() {
