@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.service;
+package org.eclipse.che.api.workspace.server.bootstrap;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.notification.EventService;
@@ -28,8 +28,6 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class InstallerService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(InstallerService.class);
 
     private final RequestHandlerConfigurator requestHandler;
     private final EventService eventService;

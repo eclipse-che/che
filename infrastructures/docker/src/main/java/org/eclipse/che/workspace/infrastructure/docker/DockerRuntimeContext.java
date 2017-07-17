@@ -29,7 +29,7 @@ import javax.ws.rs.core.UriBuilderException;
 import java.net.URI;
 import java.util.List;
 
-import static org.eclipse.che.workspace.infrastructure.docker.output.OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE;
+import static org.eclipse.che.api.workspace.server.OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE;
 
 /**
  * Docker specific implementation of {@link RuntimeContext}.

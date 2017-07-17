@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.server;
+package org.eclipse.che.api.workspace.server.bootstrap;
 
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.impl.BasicWebSocketEndpoint;
@@ -24,8 +24,8 @@ import javax.websocket.server.ServerEndpoint;
  *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
-
-@ServerEndpoint(value = InstallerEndpoint.INSTALLER_WEBSOCKET_ENDPOINT_BASE + "{endpoint-id}", configurator = GuiceInjectorEndpointConfigurator.class)
+@ServerEndpoint(value = InstallerEndpoint.INSTALLER_WEBSOCKET_ENDPOINT_BASE + "{endpoint-id}",
+                configurator = GuiceInjectorEndpointConfigurator.class)
 public class InstallerEndpoint extends BasicWebSocketEndpoint {
 
     public static final String INSTALLER_WEBSOCKET_ENDPOINT_BASE = "/installer/websocket/";

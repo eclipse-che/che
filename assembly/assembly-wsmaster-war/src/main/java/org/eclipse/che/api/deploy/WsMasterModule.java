@@ -120,6 +120,8 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
         bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
         bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
+        bind(org.eclipse.che.api.workspace.server.OutputService.class);
+        bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
         bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();
         bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class).asEagerSingleton();
         bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);

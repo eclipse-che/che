@@ -19,13 +19,13 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.FileCleaner;
+import org.eclipse.che.api.workspace.server.OutputEndpoint;
+import org.eclipse.che.api.workspace.server.bootstrap.InstallerEndpoint;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
 import org.eclipse.che.commons.lang.TarUtils;
-import org.eclipse.che.workspace.infrastructure.docker.output.OutputEndpoint;
-import org.eclipse.che.workspace.infrastructure.docker.server.InstallerEndpoint;
 
 import javax.inject.Inject;
 import javax.inject.Named;
