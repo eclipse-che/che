@@ -98,8 +98,12 @@ public class CSharpOutputCustomizerTest extends BaseOutputCustomizerTest {
      */
     @Test
     public void testNonCSharpStackTraceLines() throws Exception {
+        // Terminal Console
+        testStackTraceLine("[STDOUT] Listening for transport dt_socket at address: 4403");
         testStackTraceLine(
-                "[STDOUT] Listening for transport dt_socket at address: 4403");
+                "[STDOUT] 2017-07-06 08:58:34,647 [ForkJoinPool.commonPool-worker-3] DEBUG o.j.t.l.t.DocumentManager.findSelectedWord - Looking for word at Position 2 in 'textDocument/badWord:Warning:name:So bad! '");
+
+        // Java Stacktrace
         testStackTraceLine(
                 "org.test.HighLevelException: org.test.MidLevelException: org.test.LowLevelException");
         testStackTraceLine(
@@ -115,5 +119,16 @@ public class CSharpOutputCustomizerTest extends BaseOutputCustomizerTest {
         testStackTraceLine(
                 "   at MyClass$ThrowInConstructor.<init>(MyClass.java:16)");
         testStackTraceLine("   ... 1 more");
+        
+        // C/CPP 
+        testStackTraceLine(
+                "hello.cc: In function ‘int main()’:");
+        testStackTraceLine(
+                "hello.cc:8:13: warning: division by zero [-Wdiv-by-zero]");
+        testStackTraceLine("hello.cc:8:2: error: ‘Module’ was not declared in this scope");
+        testStackTraceLine("hello.cc:4:25: fatal error: module/Module: No such file or directory");
+        testStackTraceLine("/projects/console-cc-simple/hello.cc:23: undefined reference to `Module::sayHello[abi:cxx11]()'");
+        testStackTraceLine("     return 0/0;");
+        testStackTraceLine("             ^");
     }
 }

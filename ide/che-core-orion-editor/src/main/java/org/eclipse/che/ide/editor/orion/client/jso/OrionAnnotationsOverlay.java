@@ -8,17 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.client.editor;
 
-import org.eclipse.che.ide.api.editor.EditorWithErrors;
-import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
+
+package org.eclipse.che.ide.editor.orion.client.jso;
+
+import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * Factory class for creating PomReconcilingStrategy
- *
- * @author Evgen Vidolob
+ * Annotations object, returned by 'orion/editor/annotations' AMD module
  */
-public interface PomReconcilingStrategyFactory {
+public class OrionAnnotationsOverlay extends JavaScriptObject {
+    protected OrionAnnotationsOverlay() {
+    }
 
-    PomReconcilingStrategy create(AnnotationModel annotationModel, EditorWithErrors editor);
+    public native final OrionAnnotationTypeOverlay getAnnotationType() /*-{
+        return this.AnnotationType;
+    }-*/;
 }

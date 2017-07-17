@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Rogue Wave Software, Inc.
+ * Copyright (c) 2016-2017 Rogue Wave Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.composer.server.projecttype;
+package org.eclipse.che.plugin.composer.server.executor;
 
 import org.eclipse.che.plugin.composer.shared.dto.ComposerOutput;
 
@@ -33,5 +33,15 @@ public class ComposerOutputImpl implements ComposerOutput {
     @Override
     public State getState() {
         return state;
+    }
+
+    @Override
+    public void setOutput(String output) {
+        this.output = output;
+    }
+
+    @Override
+    public void setState(State state) {
+        this.state = state;
     }
 }

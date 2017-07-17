@@ -37,6 +37,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
@@ -194,7 +195,7 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
         if (!Objects.equals(eventModificationStamp, currentStamp)) {
             replaceContent(document, newContent, oldContent, cursorPosition);
 
-            notificationManager.notify("External operation", "File '" + file.getName() + "' is updated", SUCCESS, EMERGE_MODE);
+            notificationManager.notify("External operation", "File '" + file.getName() + "' is updated", SUCCESS, NOT_EMERGE_MODE);
         }
     }
 
