@@ -31,9 +31,6 @@ import org.eclipse.che.ide.ui.loaders.DownloadWorkspaceOutputEvent;
 import org.eclipse.che.ide.ui.loaders.PopupLoader;
 import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
 import org.eclipse.che.ide.ui.loaders.PopupLoaderMessages;
-import org.eclipse.che.ide.workspace.events.SnapshotCreatedEvent;
-import org.eclipse.che.ide.workspace.events.SnapshotCreatingEvent;
-import org.eclipse.che.ide.workspace.events.SnapshotCreationErrorEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +39,6 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.CREATING_WORKSPACE_SNAPSHOT;
 import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.STARTING_WORKSPACE_RUNTIME;
 import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.STOPPING_WORKSPACE;
 import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.WORKSPACE_STOPPED;
@@ -115,10 +111,6 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
                 }
             }
         });
-
-        eventBus.addHandler(SnapshotCreatingEvent.TYPE, e -> show(CREATING_WORKSPACE_SNAPSHOT));
-        eventBus.addHandler(SnapshotCreatedEvent.TYPE, e -> setSuccess(CREATING_WORKSPACE_SNAPSHOT));
-        eventBus.addHandler(SnapshotCreationErrorEvent.TYPE, e -> setError(CREATING_WORKSPACE_SNAPSHOT));
     }
 
     /**
@@ -158,9 +150,6 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
                 break;
             case CREATING_PROJECT:
                 popup = popupLoaderFactory.getPopup(locale.creatingProject(), locale.creatingProjectDescription());
-                break;
-            case CREATING_WORKSPACE_SNAPSHOT:
-                popup = popupLoaderFactory.getPopup(locale.snapshottingWorkspace(), locale.snapshottingWorkspaceDescription());
                 break;
             case STOPPING_WORKSPACE:
                 popup = popupLoaderFactory.getPopup(locale.stoppingWorkspace(), locale.stoppingWorkspaceDescription());
@@ -214,9 +203,7 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
         STARTING_WORKSPACE_RUNTIME,
         STARTING_WORKSPACE_AGENT,
         CREATING_PROJECT,
-        CREATING_WORKSPACE_SNAPSHOT,
         STOPPING_WORKSPACE,
         WORKSPACE_STOPPED
     }
-
 }
