@@ -54,11 +54,16 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -304,17 +309,29 @@ public class ProjectManager {
                    IOException {
         fileWatcherManager.suspend();
         try {
-            final List<RegisteredProject> projects = new ArrayList<>(projectConfigList.size());
             validateProjectConfigurations(projectConfigList, rewrite);
 
-            final List<NewProjectConfig> sortedConfigList = projectConfigList
-                    .stream()
-                    .sorted((config1, config2) -> config1.getPath().compareTo(config2.getPath()))
-                    .collect(Collectors.toList());
+            Map<NewProjectConfig, RegisteredProject> projects =
+                    projectConfigList.stream()
+                                     .collect(Collectors.toMap(Function.identity(), newProjectConfig -> {
+                                         try {
+                                             return projectRegistry.putProject(newProjectConfig, null, true, false);
+                                         } catch (ServerException e) {
+                                             LOG.warn(e.getLocalizedMessage());
+                                             return null;
+                                         }
+                                     }, (u, v) -> {
+                                         throw new IllegalStateException(String.format("Duplicate key %s", u));
+                                     }, () -> new TreeMap<>(Comparator.comparing(ProjectConfig::getPath))));
 
-            for (NewProjectConfig projectConfig : sortedConfigList) {
+            if (projects.values().parallelStream().anyMatch(Objects::isNull)) {
+                rollbackCreatingBatchProjects(projects.values());
+                throw new ServerException("Configuration has not been created for new projects");
+            }
+
+            for (NewProjectConfig projectConfig : projects.keySet()) {
                 RegisteredProject registeredProject;
-                final String pathToProject = projectConfig.getPath();
+                String pathToProject = projectConfig.getPath();
 
                 //creating project(by config or by importing source code)
                 try {
@@ -322,13 +339,12 @@ public class ProjectManager {
                     if (sourceStorage != null && !isNullOrEmpty(sourceStorage.getLocation())) {
                         doImportProject(pathToProject, sourceStorage, rewrite, lineConsumerFactory.setProjectName(projectConfig.getPath()));
                     } else if (!isVirtualFileExist(pathToProject)) {
-                        registeredProject = doCreateProject(projectConfig, projectConfig.getOptions());
-                        projects.add(registeredProject);
+                        doCreateProject(projectConfig, projectConfig.getOptions());
                         continue;
                     }
                 } catch (Exception e) {
                     if (!isVirtualFileExist(pathToProject)) {//project folder is absent
-                        rollbackCreatingBatchProjects(projects);
+                        rollbackCreatingBatchProjects(projects.values());
                         throw e;
                     }
                 }
@@ -347,17 +363,17 @@ public class ProjectManager {
                     registeredProject = projectRegistry.putProject(projectConfig, null, true, false);
                 }
 
-                projects.add(registeredProject);
+                projects.put(projectConfig, registeredProject);
             }
 
-            return projects;
+            return projects.values().stream().collect(Collectors.toList());
 
         } finally {
             fileWatcherManager.resume();
         }
     }
 
-    private void rollbackCreatingBatchProjects(List<RegisteredProject> projects) {
+    private void rollbackCreatingBatchProjects(Collection<RegisteredProject> projects) {
         for (RegisteredProject project : projects) {
             try {
                 final FolderEntry projectFolder = project.getBaseFolder();
