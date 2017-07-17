@@ -15,7 +15,7 @@
       <div layout="column" layout-align="center center" lass="workspace-machine-item-icon">
         <span class="workspace-machine-item-icon chefont cheico-stacks"></span>
       </div>
-      <div flex layout="row" layout-align="start center">
+      <div flex layout="row" layout-align="start center" class="machine-items-area">
         <!-- Name -->
         <div flex="30" layout="column" layout-align="center start">
           <span class="che-list-item-name workspace-machine-item-item-name">{{machine.name}}</span>
@@ -49,8 +49,8 @@
           </ng-form>
         </div>
         <!-- Actions -->
-        <div flex="10" layout="column" layout-align="center end">
-          <did flax layout="row" class="machine-actions">
+        <div flex="10" layout="column" layout-align="center end" class="machine-actions">
+          <did flex layout="row">
             <div ng-click="editMachine({name: machine.name, event: $event})">
               <span class="fa fa-pencil"></span>
             </div>

@@ -71,7 +71,7 @@ export class WorkspaceDetailsController {
 
   usedNamesList: any = [];
 
-  forms: Map<number, any> = new Map();
+  forms: Map<string, any> = new Map();
   tab: {[key: string]: string} = {};
 
   private confirmDialogService: ConfirmDialogService;
@@ -778,21 +778,21 @@ export class WorkspaceDetailsController {
   /**
    * Register form for corresponding tab.
    *
-   * @param tabIndex {Number}
+   * @param tabIndex {string}
    * @param form
    */
-  setForm(tabIndex: number, form: ng.IFormController): void {
+  setForm(tabIndex: string, form: ng.IFormController): void {
     this.forms.set(tabIndex, form);
   }
 
   /**
    * Returns false if all forms from specified tabs are valid
    *
-   * @param tabIndex {Number}
+   * @param tabIndex {string}
    * @returns {Boolean}
    */
-  checkFormsNotValid(tabIndex: number): boolean {
-    let form = this.forms.get(tabIndex);
+  checkFormsNotValid(tabIndex: string): boolean {
+    const form = this.forms.get(tabIndex);
     return form && form.$invalid;
   }
 
@@ -802,11 +802,11 @@ export class WorkspaceDetailsController {
    * @returns {boolean}
    */
   isSaveButtonDisabled(): boolean {
-    let tabs = [(<any>this.tab).Settings, (<any>this.tab).Config, (<any>this.tab).Runtime];
+    const tabs = Object.keys(this.tab).filter((tabKey: string) => {
+      return !isNaN(parseInt(tabKey, 10));
+    });
 
-    return tabs.some((tabIndex: number) => {
-        return this.checkFormsNotValid(tabIndex);
-      }) || this.isDisableWorkspaceCreation();
+    return tabs.some((tabKey: string) => this.checkFormsNotValid(tabKey)) || this.isDisableWorkspaceCreation();
   }
 
   /**
@@ -869,7 +869,7 @@ export class WorkspaceDetailsController {
    * @returns {boolean|string}
    */
   isDisableWorkspaceCreation(): boolean {
-    let namespaces = this.cheNamespaceRegistry.getNamespaces();
+    const namespaces = this.cheNamespaceRegistry.getNamespaces();
     return this.isCreationFlow && (!namespaces || namespaces.length === 0) && this.cheNamespaceRegistry.getEmptyMessage() !== null;
   }
 }

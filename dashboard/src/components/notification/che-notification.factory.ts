@@ -169,7 +169,7 @@ export class CheNotification {
         this.timeoutPromiseMap.set(notificationId, timeoutPromise);
     }
 
-    showError(text) {
+    showError(text: string) {
         let notificationId = this._getNextNotificationId();
         let jqErrorNotificationElement = angular.element('<che-error-notification/>');
 
