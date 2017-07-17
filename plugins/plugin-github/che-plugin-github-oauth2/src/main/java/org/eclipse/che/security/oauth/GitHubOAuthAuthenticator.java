@@ -30,23 +30,32 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-
 /** OAuth authentication for github account. */
 @Singleton
 public class GitHubOAuthAuthenticator extends OAuthAuthenticator {
     @Inject
-    public GitHubOAuthAuthenticator(@Nullable @Named("che.oauth.github.clientid") String clientId,
-                                    @Nullable @Named("che.oauth.github.clientsecret") String clientSecret,
-                                    @Nullable @Named("che.oauth.github.redirecturis") String[] redirectUris,
-                                    @Nullable @Named("che.oauth.github.authuri") String authUri,
-                                    @Nullable @Named("che.oauth.github.tokenuri") String tokenUri) throws IOException {
-        if (!isNullOrEmpty(clientId)
-            && !isNullOrEmpty(clientSecret)
-            && !isNullOrEmpty(authUri)
-            && !isNullOrEmpty(tokenUri)
+    public GitHubOAuthAuthenticator(@Nullable @Named("che.oauth.github.clientid") String clientId, //
+                                    @Nullable @Named("che.oauth.github.clientsecret") String clientSecret, //
+                                    @Nullable @Named("che.oauth.github.redirecturis") String[] redirectUris, //
+                                    @Nullable @Named("che.oauth.github.authuri") String authUri, //
+                                    @Nullable @Named("che.oauth.github.tokenuri") String tokenUri, //
+                                    @Named("che.oauth.github.forceactivation") boolean forceActivation) throws IOException {
+        if (!isNullOrEmpty(clientId) //
+            && !isNullOrEmpty(clientSecret) //
+            && !isNullOrEmpty(authUri) //
+            && !isNullOrEmpty(tokenUri) //
             && redirectUris != null && redirectUris.length != 0) {
 
             configure(clientId, clientSecret, redirectUris, authUri, tokenUri, new MemoryDataStoreFactory());
+            return;
+        }
+
+        if (forceActivation && //
+            !isNullOrEmpty(authUri) && //
+            !isNullOrEmpty(tokenUri) && //
+            redirectUris != null && redirectUris.length != 0) {
+
+            configure("NULL", "NULL", redirectUris, authUri, tokenUri, new MemoryDataStoreFactory());
         }
     }
 
