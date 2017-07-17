@@ -661,8 +661,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
             volumes = devMachineSystemVolumes;
 
             env = new HashMap<>(devMachineEnvVariables);
-            env.put(DockerInstanceRuntimeInfo.USER_TOKEN, getUserToken(workspaceId));
-            env.put(DockerInstanceRuntimeInfo.MACHINE_TOKEN, getMachineToken(workspaceId));
+            env.put(DockerInstanceRuntimeInfo.USER_TOKEN, getMachineToken(workspaceId));
         } else {
             portsToExpose = commonMachinePortsToExpose;
             env = new HashMap<>(commonMachineEnvVariables);

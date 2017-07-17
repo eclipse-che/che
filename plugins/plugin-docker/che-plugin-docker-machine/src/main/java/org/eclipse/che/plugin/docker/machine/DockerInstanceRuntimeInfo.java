@@ -84,8 +84,6 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
      */
     public static final String USER_TOKEN = "USER_TOKEN";
 
-    public static final String MACHINE_TOKEN = "MACHINE_TOKEN";
-
     private final ContainerInfo                    info;
     private final Map<String, ServerConfImpl>      serversConf;
     private final String                           internalHost;

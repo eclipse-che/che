@@ -14,6 +14,8 @@ import com.google.inject.AbstractModule;
 
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.machine.authentication.agent.token.HeaderRequestTokenExtractor;
+import org.eclipse.che.machine.authentication.agent.token.RequestTokenExtractor;
 
 /**
  *
@@ -23,5 +25,6 @@ public class WsAgentKeycloakModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(HttpJsonRequestFactory.class).to(AgentKeycloakHttpJsonRequestFactory.class);
+        bind(RequestTokenExtractor.class).to(HeaderRequestTokenExtractor.class);
     }
 }

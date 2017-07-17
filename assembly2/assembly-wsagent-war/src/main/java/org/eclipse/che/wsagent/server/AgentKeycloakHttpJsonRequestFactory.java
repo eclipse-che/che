@@ -32,12 +32,12 @@ public class AgentKeycloakHttpJsonRequestFactory extends DefaultHttpJsonRequestF
 
     @Override
     public HttpJsonRequest fromUrl(@NotNull String url) {
-        return super.fromUrl(url).setAuthorizationHeader("bearer " + TOKEN);
+        return super.fromUrl(url).setAuthorizationHeader(TOKEN);
     }
 
     @Override
     public HttpJsonRequest fromLink(@NotNull Link link) {
-        return super.fromLink(link).setAuthorizationHeader("bearer " + TOKEN);
+        return super.fromLink(link).setAuthorizationHeader(TOKEN);
     }
 
 }

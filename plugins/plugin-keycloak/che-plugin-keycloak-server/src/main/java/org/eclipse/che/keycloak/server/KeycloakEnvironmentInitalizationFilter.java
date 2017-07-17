@@ -22,6 +22,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.machine.authentication.server.MachineTokenRegistry;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.OidcKeycloakAccount;
 import org.keycloak.adapters.spi.KeycloakAccount;
@@ -54,6 +55,9 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
     @Inject
     private AccountManager accountManager;
 
+    @Inject
+    private MachineTokenRegistry machineTokenRegistry;
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -77,16 +81,25 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
                 context = keycloakAccount.getKeycloakSecurityContext();
             }
         }
+        String tokenString;
+        User user;
         if (context == null) {
-            throw new ServletException("Unable to get security context.");
+            try {
+                tokenString =  httpRequest.getHeader("Authorization");
+?                String userId = machineTokenRegistry.getUserId(tokenString);
+                user = userManager.getById(userId);
+            } catch (NotFoundException | ServerException e) {
+                throw new ServletException("Cannot detect or instantiate user");
+            }
+        } else {
+            final IDToken token = context.getIdToken() != null ? context.getIdToken() : context.getToken();
+            tokenString = context.getTokenString();
+            user = getOrCreateUser(token.getSubject(), token.getEmail(), token.getPreferredUsername());
+            getOrCreateAccount(token.getPreferredUsername(), token.getPreferredUsername());
         }
-        final IDToken token = context.getIdToken() != null ? context.getIdToken() : context.getToken();
-
-        User user = getOrCreateUser(token.getSubject(), token.getEmail(), token.getPreferredUsername());
-        getOrCreateAccount(token.getPreferredUsername(), token.getPreferredUsername());
 
         final Subject subject =
-                new SubjectImpl(user.getName(), user.getId(), context.getTokenString(), false);
+                new SubjectImpl(user.getName(), user.getId(), tokenString, false);
         httpRequest.getSession().setAttribute("codenvy_user", subject);
 
         try {
