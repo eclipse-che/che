@@ -30,9 +30,15 @@
         <span class="che-tab-label-title">Overview</span>
       </md-tab-label>
       <md-tab-body>
-
-
-
+        <ng-form name="workspaceOverviewForm">
+          <div flex layout="column"
+               ng-if="workspaceDetailsController.workspaceDetails"
+               ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Overview, workspaceOverviewForm)">
+            <workspace-details-overview overview-form="workspaceOverviewForm"
+                                             on-change="workspaceDetailsController.switchEditMode()"
+                                             workspace-details="workspaceDetailsController.workspaceDetails"></workspace-details-overview>
+          </div>
+        </ng-form>
       </md-tab-body>
     </md-tab>
 
@@ -192,7 +198,7 @@
     <md-tab ng-if="workspaceDetailsController.isCreationFlow === false"
             ng-init="workspaceDetailsController.addTab(section.title);"
             md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab[section.title]);"
-            ng-repeat="section in workspaceDetailsController.getPages() track by $index" >
+            ng-repeat="section in workspaceDetailsController.getPages()" >
       <md-tab-label>
         <span class="che-tab-label-title">{{section.title}}</span>
       </md-tab-label>

@@ -1,0 +1,296 @@
+/*
+ * Copyright (c) 2015-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ */
+'use strict';
+import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
+import {CheUser} from '../../../../components/api/che-user.factory';
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
+import {NamespaceSelectorSvc} from '../../create-workspace/namespace-selector/namespace-selector.service';
+import {WorkspaceDetailsService} from '../workspace-details.service';
+
+/**
+ * @ngdoc controller
+ * @name workspaces.details.overview.controller:WorkspaceDetailsOverviewController
+ * @description This class is handling the controller for details of workspace : section overview
+ * @author Oleksii Orel
+ */
+export class WorkspaceDetailsOverviewController {
+  onChange: Function;
+
+  private $q: ng.IQService;
+  private $route: ng.route.IRouteService;
+  private $location: ng.ILocationService;
+  private cheUser: CheUser;
+  private cheWorkspace: CheWorkspace;
+  private cheNotification: CheNotification;
+  private confirmDialogService: ConfirmDialogService;
+  private lodash: any;
+  private overviewForm: ng.IFormController;
+  private workspaceDetails: che.IWorkspace;
+  private namespaceSelectorSvc: NamespaceSelectorSvc;
+  private workspaceDetailsService: WorkspaceDetailsService;
+  private namespaceId: string;
+  private workspaceName: string;
+  private usedNamesList: Array<string>;
+  private inputmodel: ng.INgModelController;
+
+  /**
+   * Default constructor that is using resource
+   * @ngInject for Dependency injection
+   */
+  constructor($q: ng.IQService, $route: ng.route.IRouteService, $location: ng.ILocationService, lodash: any, cheUser: CheUser, cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
+    this.$q = $q;
+    this.$route = $route;
+    this.$location = $location;
+    this.lodash = lodash;
+    this.cheUser = cheUser;
+    this.cheWorkspace = cheWorkspace;
+    this.cheNotification = cheNotification;
+    this.confirmDialogService = confirmDialogService;
+    this.namespaceSelectorSvc = namespaceSelectorSvc;
+    this.workspaceDetailsService = workspaceDetailsService;
+
+    const routeParams = $route.current.params;
+    this.namespaceId = routeParams.namespace;
+    this.workspaceName = routeParams.workspaceName;
+
+    const inputName = 'name';
+    if (this.overviewForm && this.overviewForm[inputName]) {
+      this.inputmodel = this.overviewForm[inputName] as ng.INgModelController;
+    }
+
+    this.fillInListOfUsedNames();
+  }
+
+  /**
+   * Returns namespace by its ID
+   *
+   * @param {string} namespaceId
+   * @return {INamespace|{label: string, location: string}}
+   */
+  getNamespace(namespaceId: string): che.INamespace | { label: string, location: string } {
+    const namespaces = this.getNamespaces();
+    if (!namespaces || namespaces.length === 0) {
+      return {label: '', location: ''};
+    }
+    return this.getNamespaces().find((namespace: any) => {
+      return namespace.id === namespaceId;
+    });
+  }
+
+  /**
+   * Returns namespace's label
+   *
+   * @param {string} namespaceId
+   * @return {string}
+   */
+  getNamespaceLabel(namespaceId: string): string {
+    let namespace = this.getNamespace(namespaceId);
+    if (namespace) {
+      return namespace.label;
+    } else {
+      return namespaceId;
+    }
+  }
+
+  /**
+   * Fills in list of workspace's name in current namespace,
+   * and triggers validation of entered workspace's name
+   */
+  fillInListOfUsedNames(): void {
+    const defer = this.$q.defer();
+    this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
+    if (this.namespaceId) {
+      defer.resolve();
+    } else {
+      this.namespaceSelectorSvc.fetchNamespaces().then((namespaceId: string) => {
+        this.namespaceId = namespaceId;
+        defer.resolve();
+      }, (error: any) => {
+        defer.reject(error);
+      });
+    }
+    defer.promise.then(() => {
+      return this.getOrFetchWorkspacesByNamespace();
+    }).catch(() => {
+      return this.getOrFetchWorkspaces();
+    }).then((workspaces: Array<che.IWorkspace>) => {
+      this.usedNamesList = this.buildInListOfUsedNames(workspaces);
+      this.reValidateName();
+    });
+  }
+
+
+  /**
+   * Triggers form validation.
+   */
+  reValidateName(): void {
+    if (!this.inputmodel) {
+      return;
+    }
+    this.inputmodel.$validate();
+  }
+
+  /**
+   * Returns promise for getting list of workspaces owned by user
+   *
+   * @return {ng.IPromise<any>}
+   */
+  getOrFetchWorkspaces(): ng.IPromise<any> {
+    const defer = this.$q.defer();
+    const workspacesList = this.cheWorkspace.getWorkspaces();
+    if (workspacesList.length) {
+      defer.resolve(workspacesList);
+    } else {
+      this.cheWorkspace.fetchWorkspaces().finally(() => {
+        defer.resolve(this.cheWorkspace.getWorkspaces());
+      });
+    }
+
+    return defer.promise;
+  }
+
+  /**
+   * Filters list of workspaces by current namespace and
+   * builds list of names for current namespace.
+   *
+   * @param {Array<che.IWorkspace>} workspaces list of workspaces
+   * @return {Array<string>}
+   */
+  buildInListOfUsedNames(workspaces: Array<che.IWorkspace>): Array<string> {
+    return workspaces.filter((workspace: che.IWorkspace) => {
+      return workspace.namespace === this.namespaceId && workspace.config.name !== this.workspaceName;
+    }).map((workspace: che.IWorkspace) => {
+      return workspace.config.name;
+    });
+  }
+
+  /**
+   * Returns promise for getting list of workspaces by namespace.
+   *
+   * @return {ng.IPromise<any>}
+   */
+  getOrFetchWorkspacesByNamespace(): ng.IPromise<any> {
+    const defer = this.$q.defer();
+    if (!this.namespaceId) {
+      defer.reject([]);
+      return defer.promise;
+    }
+    const workspacesByNamespaceList = this.cheWorkspace.getWorkspacesByNamespace(this.namespaceId) || [];
+    if (workspacesByNamespaceList.length) {
+      defer.resolve(workspacesByNamespaceList);
+    } else {
+      this.cheWorkspace.fetchWorkspacesByNamespace(this.namespaceId).then(() => {
+        defer.resolve(this.cheWorkspace.getWorkspacesByNamespace(this.namespaceId) || []);
+      }, (error: any) => {
+        defer.reject(error);
+      });
+    }
+
+    return defer.promise;
+  }
+
+  /**
+   * Returns <code>false</code> if workspace's name is not unique in the namespace.
+   * Only member with 'manageWorkspaces' permission can definitely know whether
+   * name is unique or not.
+   *
+   * @param {string} name workspace's name
+   */
+  isNameUnique(name: string): boolean {
+    return !angular.isArray(this.usedNamesList) || this.usedNamesList.indexOf(name) === -1;
+  }
+
+  /**
+   * Returns current status of workspace.
+   *
+   * @returns {string}
+   */
+  getWorkspaceStatus(): string {
+    const workspace = this.cheWorkspace.getWorkspaceById(this.workspaceDetails.id);
+    return workspace ? workspace.status : 'unknown';
+  }
+
+  /**
+   * Removes current workspace.
+   */
+  deleteWorkspace(): void {
+    const content = 'Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?';
+    this.confirmDialogService.showConfirmDialog('Delete workspace', content, 'Delete').then(() => {
+      if (this.getWorkspaceStatus() === 'RUNNING') {
+        this.cheWorkspace.stopWorkspace(this.workspaceDetails.id, false);
+      }
+      this.cheWorkspace.fetchStatusChange(this.workspaceDetails.id, 'STOPPED').then(() => {
+        this.cheWorkspace.deleteWorkspaceConfig(this.workspaceDetails.id).then(() => {
+          this.$location.path('/workspaces').search({});
+        }, (error: any) => {
+          this.cheNotification.showError(error && error.data && angular.isString(error.data.message) ? error.data.message : 'Delete workspace failed.');
+        });
+      });
+    });
+  }
+
+  /**
+   * Callback when Team button is clicked in Edit mode.
+   * Redirects to billing details or team details.
+   *
+   * @param {string} namespaceId
+   */
+  namespaceOnClick(namespaceId: string): void {
+    let namespace = this.getNamespace(namespaceId);
+    this.$location.path(namespace.location);
+  }
+
+  /**
+   * Returns workspace details section.
+   *
+   * @returns {*}
+   */
+  getSections(): any {
+    return this.workspaceDetailsService.getSections();
+  }
+
+  /**
+   * Returns list of namespaces.
+   *
+   * @return {Array<che.INamespace>}
+   */
+  getNamespaces(): Array<che.INamespace> {
+    return this.namespaceSelectorSvc.getNamespaces();
+  }
+
+  /**
+   * Returns the namespace link.
+   *
+   * @return {string}
+   */
+  getNamespaceLink(): string {
+    return this.getNamespace(this.namespaceId).location;
+  }
+
+  /**
+   * Returns namespaces empty message if set.
+   *
+   * @returns {string}
+   */
+  getNamespaceEmptyMessage(): string {
+    return this.namespaceSelectorSvc.getNamespaceEmptyMessage();
+  }
+
+  /**
+   * Returns namespaces caption.
+   *
+   * @returns {string}
+   */
+  getNamespaceCaption(): string {
+    return this.namespaceSelectorSvc.getNamespaceCaption();
+  }
+}

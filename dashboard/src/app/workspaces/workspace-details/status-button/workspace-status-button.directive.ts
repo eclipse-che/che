@@ -48,7 +48,7 @@ const SNAPSHOTTING = 'SNAPSHOTTING';
 
 export class CheWorkspaceStatusButton {
   restrict = 'E';
-  templateUrl = 'app/workspaces/workspace-buttons/workspace-status-button.html';
+  templateUrl = 'app/workspaces/workspace-details/status-button/workspace-status-button.html';
 
   // scope values
   scope = {

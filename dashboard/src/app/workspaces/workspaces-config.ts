@@ -111,7 +111,7 @@ import {ListAgents} from  './workspace-details/environments/list-agents/list-age
 import {StackSelectorScopeFilter} from './create-workspace/stack-selector/stack-selector-scope.filter';
 import {StackSelectorSearchFilter} from './create-workspace/stack-selector/stack-selector-search.filter';
 import {StackSelectorTagsFilter} from './create-workspace/stack-selector/stack-selector-tags.filter';
-import {CheWorkspaceStatusButton} from './workspace-buttons/workspace-status-button.directive';
+import {CheWorkspaceStatusButton} from './workspace-details/status-button/workspace-status-button.directive';
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
 
@@ -122,6 +122,8 @@ import {WorkspaceMachinesController} from './workspace-details/workspace-machine
 import {WorkspaceMachineItem} from './workspace-details/workspace-machines/machine-item/workspace-machine-item.directive';
 import {EditMachineDialogController} from './workspace-details/workspace-machines/edit-machine-dialog/edit-machine-dialog.controller';
 import {ChangeDevMachineDialogController} from './workspace-details/workspace-machines/change-dev-machine-dialog/change-dev-machine-dialog.controller';
+import {WorkspaceDetailsOverviewController} from './workspace-details/workspace-overview/workspace-details-overview.controller';
+import {WorkspaceDetailsOverview} from './workspace-details/workspace-overview/workspace-details-overview.directive';
 
 
 /**
@@ -268,6 +270,9 @@ export class WorkspacesConfig {
     register.service('createWorkspaceSvc', CreateWorkspaceSvc);
 
     register.service('workspaceConfigService', WorkspaceConfigService);
+
+    register.controller('WorkspaceDetailsOverviewController', WorkspaceDetailsOverviewController);
+    register.directive('workspaceDetailsOverview', WorkspaceDetailsOverview);
 
     // config routes
     register.app.config(($routeProvider: che.route.IRouteProvider) => {
