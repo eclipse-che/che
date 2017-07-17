@@ -5,10 +5,6 @@
 
 **Merged pull requests:**
 
-- Make JSON RPC initialization steps depend on the appropriate servers' statuses [\#5455](https://github.com/eclipse/che/pull/5455) ([azatsarynnyy](https://github.com/azatsarynnyy))
-- Rework IDE loading relying on servers' statuses \(w/o pinging ws-agent\) [\#5445](https://github.com/eclipse/che/pull/5445) ([azatsarynnyy](https://github.com/azatsarynnyy))
-- CHE-4101 Rework docker infrastructure to use bootstrapper to start agents [\#5414](https://github.com/eclipse/che/pull/5414) ([sleshchenko](https://github.com/sleshchenko))
-- Add machine + runtime identity to docker labels serialization [\#5499](https://github.com/eclipse/che/pull/5499) ([evoevodin](https://github.com/evoevodin))
 - Merge Bartlomiej Laczkowski PhpUnit testing PR  [\#5468](https://github.com/eclipse/che/pull/5468) ([vparfonov](https://github.com/vparfonov))
 - CODENVY-2284: Add additional logs if start from snapshot fail [\#5465](https://github.com/eclipse/che/pull/5465) ([mmorhun](https://github.com/mmorhun))
 - Remove not used implementation, mark interface as deprecated.  [\#5448](https://github.com/eclipse/che/pull/5448) ([vparfonov](https://github.com/vparfonov))
@@ -24,12 +20,6 @@
 
 **Merged pull requests:**
 
-- CHE-5093: hardcode server status check in docker infra  [\#5405](https://github.com/eclipse/che/pull/5405) ([garagatyi](https://github.com/garagatyi))
-- Implement golang bootstrapper [\#5399](https://github.com/eclipse/che/pull/5399) ([evoevodin](https://github.com/evoevodin))
-- The next phase of adapting IDE to CHE 6 events model [\#5397](https://github.com/eclipse/che/pull/5397) ([azatsarynnyy](https://github.com/azatsarynnyy))
-- CHE-5092 Fix returning of runtime while it is starting [\#5381](https://github.com/eclipse/che/pull/5381) ([sleshchenko](https://github.com/sleshchenko))
-- Factorize code of `ServerEvaluationStrategy` classes, to use the Custom strategy as the basis of other strategies [\#5366](https://github.com/eclipse/che/pull/5366) ([davidfestal](https://github.com/davidfestal))
-- \[MERGE-AFTER-PR-5366\] Multi-container workspace Support [\#5110](https://github.com/eclipse/che/pull/5110) ([davidfestal](https://github.com/davidfestal))
 - Add stacks archetype [\#5417](https://github.com/eclipse/che/pull/5417) ([mkuznyetsov](https://github.com/mkuznyetsov))
 - Set correct scopes for dependencies [\#5416](https://github.com/eclipse/che/pull/5416) ([mkuznyetsov](https://github.com/mkuznyetsov))
 - CHE-5390: Fix bug when failed to commit renamed files [\#5394](https://github.com/eclipse/che/pull/5394) ([vinokurig](https://github.com/vinokurig))
@@ -49,21 +39,7 @@
 
 **Merged pull requests:**
 
-- Change the way the invalid symbols in command are handled. By default… [\#5393](https://github.com/eclipse/che/pull/5393) ([l0rd](https://github.com/l0rd))
-- Fix maven build [\#5354](https://github.com/eclipse/che/pull/5354) ([azatsarynnyy](https://github.com/azatsarynnyy))
-- CHE-280: Adding container's state info to the 'inspectContainer' API [\#5353](https://github.com/eclipse/che/pull/5353) ([ibuziuk](https://github.com/ibuziuk))
-- Handling bootstrapper & installer events. [\#5345](https://github.com/eclipse/che/pull/5345) ([mshaposhnik](https://github.com/mshaposhnik))
-- adapt che-server entrypoint.sh to environments without write permissions in '/' [\#5344](https://github.com/eclipse/che/pull/5344) ([riuvshin](https://github.com/riuvshin))
-- CHE-5125 Add publishing of event about machine status changes [\#5318](https://github.com/eclipse/che/pull/5318) ([sleshchenko](https://github.com/sleshchenko))
-- CHE-272: Removing setting GitHub access token functionality [\#5313](https://github.com/eclipse/che/pull/5313) ([ibuziuk](https://github.com/ibuziuk))
-- Recent changes required access to `/` which is impossible under Openshift [\#5305](https://github.com/eclipse/che/pull/5305) ([davidfestal](https://github.com/davidfestal))
-- Move start/stop into InternalRuntime. [\#5295](https://github.com/eclipse/che/pull/5295) ([mshaposhnik](https://github.com/mshaposhnik))
-- CHE-272: Making 'AuthorizationCodeFlow' field from OAuthAuthenticator protected [\#5294](https://github.com/eclipse/che/pull/5294) ([ibuziuk](https://github.com/ibuziuk))
 - Add CentOS based Golang stack to default assembly [\#5282](https://github.com/eclipse/che/pull/5282) ([dharmit](https://github.com/dharmit))
-- CHE-102 - Idle detection of che-server and workspaces [\#5278](https://github.com/eclipse/che/pull/5278) ([snjeza](https://github.com/snjeza))
-- Deprecate DevMachine and ActiveRuntime classes [\#5248](https://github.com/eclipse/che/pull/5248) ([azatsarynnyy](https://github.com/azatsarynnyy))
-- Spi cleanup [\#5233](https://github.com/eclipse/che/pull/5233) ([mshaposhnik](https://github.com/mshaposhnik))
-- added subscription manager [\#5226](https://github.com/eclipse/che/pull/5226) ([dkuleshov](https://github.com/dkuleshov))
 - che-5371: Avoid stack updating on several clicks on same stack item [\#5378](https://github.com/eclipse/che/pull/5378) ([ashumilova](https://github.com/ashumilova))
 - \#5373 fix sending ClientCapabilities object by removing anonymous class [\#5376](https://github.com/eclipse/che/pull/5376) ([evidolob](https://github.com/evidolob))
 - Fix build module 'agents/go-agents' for maven 3.3.3 [\#5364](https://github.com/eclipse/che/pull/5364) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
@@ -115,8 +91,6 @@
 
 **Merged pull requests:**
 
-- Use Workdspace's and Factory's model objects in IDE [\#5221](https://github.com/eclipse/che/pull/5221) ([azatsarynnyy](https://github.com/azatsarynnyy))
-- Spi-snapshot [\#5213](https://github.com/eclipse/che/pull/5213) ([mshaposhnik](https://github.com/mshaposhnik))
 - Use Authorization header instead of session-access-key cookie [\#5210](https://github.com/eclipse/che/pull/5210) ([evoevodin](https://github.com/evoevodin))
 - CHE-2287: Change octocat icon color [\#5200](https://github.com/eclipse/che/pull/5200) ([tolusha](https://github.com/tolusha))
 - CHE-5156: Fix ability start new debug session after disconnect from previous session. [\#5167](https://github.com/eclipse/che/pull/5167) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
@@ -140,12 +114,7 @@
 
 **Merged pull requests:**
 
-- Add/Update OpenShiftConnector tests [\#5217](https://github.com/eclipse/che/pull/5217) ([amisevsk](https://github.com/amisevsk))
 - Temporary disable test after pr\#5180 [\#5181](https://github.com/eclipse/che/pull/5181) ([vparfonov](https://github.com/vparfonov))
-- IDE code refactoring and clean-up [\#5177](https://github.com/eclipse/che/pull/5177) ([azatsarynnyy](https://github.com/azatsarynnyy))
-- Add workaround for ws-agent state checking [\#5162](https://github.com/eclipse/che/pull/5162) ([azatsarynnyy](https://github.com/azatsarynnyy))
-- CHE-220: Improving 'removeContainer' API. Refactoring [\#5157](https://github.com/eclipse/che/pull/5157) ([ibuziuk](https://github.com/ibuziuk))
-- Repair Processes panel [\#5153](https://github.com/eclipse/che/pull/5153) ([azatsarynnyy](https://github.com/azatsarynnyy))
 - Move exec-agent/process -\> core/process [\#5184](https://github.com/eclipse/che/pull/5184) ([evoevodin](https://github.com/evoevodin))
 - Interpolate correctly resource paths in maven project inside maven server implementation [\#5180](https://github.com/eclipse/che/pull/5180) ([vzhukovskii](https://github.com/vzhukovskii))
 - Add ability to interpolate target directory from maven project model [\#5173](https://github.com/eclipse/che/pull/5173) ([vzhukovskii](https://github.com/vzhukovskii))
