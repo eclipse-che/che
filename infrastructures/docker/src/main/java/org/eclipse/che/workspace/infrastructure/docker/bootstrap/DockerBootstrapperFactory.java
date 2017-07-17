@@ -8,21 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker;
+package org.eclipse.che.workspace.infrastructure.docker.bootstrap;
 
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.workspace.infrastructure.docker.DockerMachine;
 
 import java.util.List;
 
 /**
  * @author Sergii Leshchenko
  */
-public interface BootstrapperFactory {
-    Bootstrapper create(@Assisted String machineName,
-                        @Assisted RuntimeIdentity runtimeIdentity,
-                        @Assisted DockerMachine dockerMachine,
-                        @Assisted List<InstallerImpl> agents);
+public interface DockerBootstrapperFactory {
+    DockerBootstrapper create(@Assisted String machineName,
+                              @Assisted RuntimeIdentity runtimeIdentity,
+                              @Assisted List<InstallerImpl> installers,
+                              @Assisted DockerMachine dockerMachine);
 }

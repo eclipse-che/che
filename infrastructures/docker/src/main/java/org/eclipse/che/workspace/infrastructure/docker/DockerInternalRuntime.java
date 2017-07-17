@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -22,7 +21,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
@@ -31,6 +29,7 @@ import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -38,6 +37,8 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactory;
 import org.eclipse.che.workspace.infrastructure.docker.server.ServersReadinessChecker;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotException;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
@@ -65,19 +66,19 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     private static final Logger LOG = getLogger(DockerInternalRuntime.class);
 
-    private final StartSynchronizer    startSynchronizer;
-    private final Map<String, String>  properties;
-    private final Queue<String>        startQueue;
-    private final NetworkLifecycle     dockerNetworkLifecycle;
-    private final String               devMachineName;
-    private final DockerEnvironment    dockerEnvironment;
-    private final DockerMachineStarter containerStarter;
-    private final SnapshotDao          snapshotDao;
-    private final DockerRegistryClient dockerRegistryClient;
-    private final RuntimeIdentity      identity;
-    private final EventService         eventService;
-    private final BootstrapperFactory  bootstrapperFactory;
-    private final ServerCheckerFactory serverCheckerFactory;
+    private final StartSynchronizer         startSynchronizer;
+    private final Map<String, String>       properties;
+    private final Queue<String>             startQueue;
+    private final NetworkLifecycle          dockerNetworkLifecycle;
+    private final String                    devMachineName;
+    private final DockerEnvironment         dockerEnvironment;
+    private final DockerMachineStarter      containerStarter;
+    private final SnapshotDao               snapshotDao;
+    private final DockerRegistryClient      dockerRegistryClient;
+    private final RuntimeIdentity           identity;
+    private final EventService              eventService;
+    private final DockerBootstrapperFactory bootstrapperFactory;
+    private final ServerCheckerFactory      serverCheckerFactory;
 
     @Inject
     public DockerInternalRuntime(@Assisted DockerRuntimeContext context,
@@ -91,7 +92,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                  SnapshotDao snapshotDao,
                                  DockerRegistryClient dockerRegistryClient,
                                  EventService eventService,
-                                 BootstrapperFactory bootstrapperFactory,
+                                 DockerBootstrapperFactory bootstrapperFactory,
                                  ServerCheckerFactory serverCheckerFactory) {
         super(context, urlRewriter);
         this.devMachineName = devMachineName;
@@ -217,7 +218,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             destroyMachineQuietly(name, machine);
             throw e;
         }
-        bootstrapperFactory.create(name, identity, machine, machineCfg.getInstallers()).bootstrap();
+        bootstrapperFactory.create(name, identity, machineCfg.getInstallers(), machine).bootstrap();
 
         ServersReadinessChecker readinessChecker = new ServersReadinessChecker(name,
                                                                                machine.getServers(),
