@@ -15,6 +15,13 @@ public class PortBinding {
     private String hostIp;
     private String hostPort;
 
+    public PortBinding() {}
+
+    public PortBinding(String hostIp, String hostPort) {
+        this.hostIp = hostIp;
+        this.hostPort = hostPort;
+    }
+
     public String getHostIp() {
         return hostIp;
     }

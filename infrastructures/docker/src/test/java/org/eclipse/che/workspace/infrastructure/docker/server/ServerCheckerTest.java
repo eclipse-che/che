@@ -104,6 +104,11 @@ public class ServerCheckerTest {
         }
     }
 
+    @Test(expectedExceptions = InfrastructureException.class)
+    public void checkOnceThrowsExceptionIfServerIsNotAvailable() throws InfrastructureException {
+        new TestServerChecker("test", "test", 1, 1, TimeUnit.SECONDS, null).checkOnce();
+    }
+
     private static class TestServerChecker extends ServerChecker {
         protected TestServerChecker(String machineName, String serverRef, long period, long timeout,
                                     TimeUnit timeUnit, Timer timer) {

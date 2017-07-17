@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
@@ -29,12 +30,15 @@ import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.plugin.docker.client.ProgressMonitor;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
+import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactory;
 import org.eclipse.che.workspace.infrastructure.docker.server.ServersReadinessChecker;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
@@ -44,7 +48,6 @@ import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotExceptio
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,53 +71,115 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     private final StartSynchronizer         startSynchronizer;
     private final Map<String, String>       properties;
-    private final Queue<String>             startQueue;
-    private final NetworkLifecycle          dockerNetworkLifecycle;
-    private final String                    devMachineName;
-    private final DockerEnvironment         dockerEnvironment;
+    private final NetworkLifecycle          networks;
     private final DockerMachineStarter      containerStarter;
     private final SnapshotDao               snapshotDao;
     private final DockerRegistryClient      dockerRegistryClient;
-    private final RuntimeIdentity           identity;
     private final EventService              eventService;
     private final DockerBootstrapperFactory bootstrapperFactory;
     private final ServerCheckerFactory      serverCheckerFactory;
+    private final MachineLoggersFactory     loggers;
 
-    @Inject
+    /**
+     * Creates non running runtime.
+     * Normally created by {@link DockerRuntimeFactory#create(DockerRuntimeContext)}.
+     */
+    @AssistedInject
     public DockerInternalRuntime(@Assisted DockerRuntimeContext context,
-                                 @Assisted String devMachineName,
-                                 @Assisted List<String> orderedContainers,
-                                 @Assisted DockerEnvironment dockerEnvironment,
-                                 @Assisted RuntimeIdentity identity,
                                  URLRewriter urlRewriter,
-                                 NetworkLifecycle dockerNetworkLifecycle,
-                                 DockerMachineStarter containerStarter,
+                                 NetworkLifecycle networks,
+                                 DockerMachineStarter machineStarter,
                                  SnapshotDao snapshotDao,
                                  DockerRegistryClient dockerRegistryClient,
                                  EventService eventService,
                                  DockerBootstrapperFactory bootstrapperFactory,
-                                 ServerCheckerFactory serverCheckerFactory) {
-        super(context, urlRewriter);
-        this.devMachineName = devMachineName;
-        this.dockerEnvironment = dockerEnvironment;
-        this.identity = identity;
+                                 ServerCheckerFactory serverCheckerFactory,
+                                 MachineLoggersFactory loggers) {
+        this(context,
+             urlRewriter,
+             false, // <- non running
+             networks,
+             machineStarter,
+             snapshotDao,
+             dockerRegistryClient,
+             eventService,
+             bootstrapperFactory,
+             serverCheckerFactory,
+             loggers);
+    }
+
+    /**
+     * Creates a running runtime from the list of given containers.
+     * Normally created by {@link DockerRuntimeFactory#create(DockerRuntimeContext, List)}.
+     */
+    @AssistedInject
+    public DockerInternalRuntime(@Assisted DockerRuntimeContext context,
+                                 @Assisted List<ContainerListEntry> containers,
+                                 URLRewriter urlRewriter,
+                                 NetworkLifecycle networks,
+                                 DockerMachineStarter machineStarter,
+                                 SnapshotDao snapshotDao,
+                                 DockerRegistryClient dockerRegistryClient,
+                                 EventService eventService,
+                                 DockerBootstrapperFactory bootstrapperFactory,
+                                 ServerCheckerFactory serverCheckerFactory,
+                                 MachineLoggersFactory loggers,
+                                 DockerMachineCreator machineCreator,
+                                 DockerMachineStopDetector stopDetector) throws InfrastructureException {
+        this(context,
+             urlRewriter,
+             true, // <- running
+             networks,
+             machineStarter,
+             snapshotDao,
+             dockerRegistryClient,
+             eventService,
+             bootstrapperFactory,
+             serverCheckerFactory,
+             loggers);
+
+        for (ContainerListEntry container : containers) {
+            DockerMachine machine = machineCreator.create(container);
+            String name = Labels.newDeserializer(container.getLabels()).machineName();
+
+            startSynchronizer.addMachine(name, machine);
+            stopDetector.startDetection(container.getId(), name, new AbnormalMachineStopHandlerImpl());
+            streamLogsAsync(name, container.getId());
+        }
+    }
+
+    private DockerInternalRuntime(DockerRuntimeContext context,
+                                  URLRewriter urlRewriter,
+                                  boolean running,
+                                  NetworkLifecycle networks,
+                                  DockerMachineStarter machineStarter,
+                                  SnapshotDao snapshotDao,
+                                  DockerRegistryClient dockerRegistryClient,
+                                  EventService eventService,
+                                  DockerBootstrapperFactory bootstrapperFactory,
+                                  ServerCheckerFactory serverCheckerFactory,
+                                  MachineLoggersFactory loggers) {
+        super(context, urlRewriter, running);
+        this.networks = networks;
+        this.containerStarter = machineStarter;
+        this.snapshotDao = snapshotDao;
+        this.dockerRegistryClient = dockerRegistryClient;
         this.eventService = eventService;
         this.bootstrapperFactory = bootstrapperFactory;
         this.serverCheckerFactory = serverCheckerFactory;
         this.properties = new HashMap<>();
         this.startSynchronizer = new StartSynchronizer();
-        this.dockerNetworkLifecycle = dockerNetworkLifecycle;
-        this.containerStarter = containerStarter;
-        this.snapshotDao = snapshotDao;
-        this.dockerRegistryClient = dockerRegistryClient;
-        this.startQueue = new ArrayDeque<>(orderedContainers);
+        this.loggers = loggers;
     }
 
     @Override
     protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
         startSynchronizer.setStartThread();
+
+        DockerEnvironment dockerEnvironment = getContext().getDockerEnvironment();
+        Queue<String> startQueue = new ArrayDeque<>(getContext().getOrderedContainers());
         try {
-            dockerNetworkLifecycle.createNetwork(dockerEnvironment.getNetwork());
+            networks.createNetwork(getContext().getDockerEnvironment().getNetwork());
 
             boolean restore = isRestoreEnabled(startOptions);
 
@@ -178,6 +243,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     private void restoreMachine(String name, DockerContainerConfig originalConfig)
             throws InfrastructureException, InterruptedException {
+        RuntimeIdentity identity = getContext().getIdentity();
         try {
             SnapshotImpl snapshot = snapshotDao.getSnapshot(identity.getWorkspaceId(), identity.getEnvName(), name);
             startMachine(name, configForSnapshot(snapshot, originalConfig));
@@ -192,23 +258,22 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
     }
 
+    /** Checks servers availability on all the machines. */
+    void checkServers() throws InfrastructureException {
+        for (Map.Entry<String, ? extends DockerMachine> entry : startSynchronizer.getMachines().entrySet()) {
+            new ServersReadinessChecker(entry.getKey(), entry.getValue().getServers(), serverCheckerFactory).checkOnce();
+        }
+    }
+
     private void startMachine(String name, DockerContainerConfig containerConfig)
             throws InfrastructureException, InterruptedException {
         InternalMachineConfig machineCfg = getContext().getMachineConfigs().get(name);
 
-        Map<String, String> labels = new HashMap<>(containerConfig.getLabels());
-        labels.putAll(Labels.newSerializer()
-                            .machineName(name)
-                            .runtimeId(identity)
-                            .servers(machineCfg.getServers())
-                            .labels());
-        containerConfig.setLabels(labels);
-
-        DockerMachine machine = containerStarter.startContainer(dockerEnvironment.getNetwork(),
+        DockerMachine machine = containerStarter.startContainer(getContext().getDockerEnvironment().getNetwork(),
                                                                 name,
                                                                 containerConfig,
-                                                                identity,
-                                                                devMachineName.equals(name),
+                                                                getContext().getIdentity(),
+                                                                getContext().getDevMachineName().equals(name),
                                                                 new AbnormalMachineStopHandlerImpl());
         try {
             startSynchronizer.addMachine(name, machine);
@@ -218,13 +283,12 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             destroyMachineQuietly(name, machine);
             throw e;
         }
-        bootstrapperFactory.create(name, identity, machineCfg.getInstallers(), machine).bootstrap();
+        bootstrapperFactory.create(name, getContext().getIdentity(), machineCfg.getInstallers(), machine).bootstrap();
 
         ServersReadinessChecker readinessChecker = new ServersReadinessChecker(name,
                                                                                machine.getServers(),
-                                                                               new ServerReadinessHandler(name),
                                                                                serverCheckerFactory);
-        readinessChecker.startAsync();
+        readinessChecker.startAsync(new ServerReadinessHandler(name));
         readinessChecker.await();
     }
 
@@ -236,6 +300,14 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     // TODO support configuration properties as well
     private boolean isSnapshotEnabled(Map<String, String> stopOpts) {
         return stopOpts != null && Boolean.parseBoolean(stopOpts.get("create-snapshot"));
+    }
+
+    // TODO stream bootstrapper logs as well
+    private void streamLogsAsync(String name, String containerId) {
+        containerStarter.readContainerLogsInSeparateThread(containerId,
+                                                           getContext().getIdentity().getWorkspaceId(),
+                                                           name,
+                                                           loggers.newLogsProcessor(name, getContext().getIdentity()));
     }
 
     private class ServerReadinessHandler implements Consumer<String> {
@@ -255,7 +327,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             machine.setServerStatus(serverRef, ServerStatus.RUNNING);
 
             eventService.publish(DtoFactory.newDto(ServerStatusEvent.class)
-                                           .withIdentity(DtoConverter.asDto(identity))
+                                           .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
                                            .withMachineName(machineName)
                                            .withServerName(serverRef)
                                            .withStatus(ServerStatus.RUNNING)
@@ -307,10 +379,14 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
         for (Map.Entry<String, DockerMachine> entry : machines.entrySet()) {
             destroyMachineQuietly(entry.getKey(), entry.getValue());
+            eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
+                                           .withEventType(MachineStatus.STOPPED)
+                                           .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
+                                           .withMachineName(entry.getKey()));
             sendStoppedEvent(entry.getKey());
         }
         // TODO what happens when context throws exception here
-        dockerNetworkLifecycle.destroyNetwork(dockerEnvironment.getNetwork());
+        networks.destroyNetwork(getContext().getDockerEnvironment().getNetwork());
     }
 
     /**
@@ -337,6 +413,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private void snapshotMachines(Map<String, DockerMachine> machines) {
         List<SnapshotImpl> newSnapshots = new ArrayList<>();
         final RuntimeIdentity identity = getContext().getIdentity();
+        String devMachineName = getContext().getDevMachineName();
         for (Map.Entry<String, DockerMachine> dockerMachineEntry : machines.entrySet()) {
             SnapshotImpl snapshot = SnapshotImpl.builder()
                                                 .generateId()
@@ -349,7 +426,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                                 .useCurrentCreationDate()
                                                 .build();
             try {
-                DockerMachineSource machineSource = dockerMachineEntry.getValue().saveToSnapshot();
+                ProgressMonitor monitor = loggers.newProgressMonitor(dockerMachineEntry.getKey(), identity);
+                DockerMachineSource machineSource = dockerMachineEntry.getValue().saveToSnapshot(monitor);
                 snapshot.setMachineSource(new MachineSourceImpl(machineSource));
                 newSnapshots.add(snapshot);
             } catch (SnapshotException e) {
@@ -401,7 +479,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                 LOG.error(e.getLocalizedMessage(), e);
             } finally {
                 eventService.publish(DtoFactory.newDto(RuntimeStatusEvent.class)
-                                               .withIdentity(DtoConverter.asDto(identity))
+                                               .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
                                                .withStatus("STOPPED")
                                                .withPrevStatus("RUNNING")
                                                .withFailed(true)
@@ -412,21 +490,21 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     private void sendStartingEvent(String machineName) {
         eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
-                                       .withIdentity(DtoConverter.asDto(identity))
+                                       .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
                                        .withEventType(MachineStatus.STARTING)
                                        .withMachineName(machineName));
     }
 
     private void sendRunningEvent(String machineName) {
         eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
-                                       .withIdentity(DtoConverter.asDto(identity))
+                                       .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
                                        .withEventType(MachineStatus.RUNNING)
                                        .withMachineName(machineName));
     }
 
     private void sendFailedEvent(String machineName, String message) {
         eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
-                                       .withIdentity(DtoConverter.asDto(identity))
+                                       .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
                                        .withEventType(MachineStatus.FAILED)
                                        .withMachineName(machineName)
                                        .withError(message));
@@ -435,7 +513,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     private void sendStoppedEvent(String machineName) {
         eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
                                        .withEventType(MachineStatus.STOPPED)
-                                       .withIdentity(DtoConverter.asDto(identity))
+                                       .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
                                        .withMachineName(machineName));
     }
 

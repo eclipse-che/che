@@ -24,6 +24,14 @@ import java.util.Map;
  * @author Alexander Garagatyi
  */
 public class Filters {
+
+    private static final String LABEL_FILTER = "label";
+
+    /** Creates filters with {@value #LABEL_FILTER} filter initialized to the given values. */
+    public static Filters label(String... values) {
+        return new Filters().withFilter(LABEL_FILTER, values);
+    }
+
     private final Map<String, List<String>> filters = new HashMap<>();
 
     public Map<String, List<String>> getFilters() {

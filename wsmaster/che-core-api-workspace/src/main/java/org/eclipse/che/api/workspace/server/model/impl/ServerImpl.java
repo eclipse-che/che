@@ -13,12 +13,14 @@ package org.eclipse.che.api.workspace.server.model.impl;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 
+import java.util.Objects;
+
 /**
  * @author gazarenkov
  */
 public class ServerImpl implements Server {
 
-    private String url;
+    private String       url;
     private ServerStatus status;
 
     public ServerImpl(String url) {
@@ -50,5 +52,31 @@ public class ServerImpl implements Server {
 
     public void setStatus(ServerStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return url;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Server)) {
+            return false;
+        }
+        final Server that = (Server)obj;
+        return Objects.equals(url, that.getUrl())
+               && Objects.equals(status, that.getStatus());
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(url);
+        hash = 31 * hash + Objects.hashCode(status);
+        return hash;
     }
 }

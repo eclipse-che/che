@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
 
 import javax.annotation.PostConstruct;
@@ -44,7 +45,7 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
     public static final String ALLOW_FOLDERS_CREATION_ENV_VARIABLE = "CHE_WORKSPACE_STORAGE_CREATE_FOLDERS";
     public static final String WORKSPACE_STORAGE_PATH_ENV_VARIABLE = "CHE_WORKSPACE_STORAGE";
 
-    private final Provider<WorkspaceManager> workspaceManager;
+    private final WorkspaceDao               workspaceDao;
     private final boolean                    isWindows;
 
     /**
@@ -81,9 +82,9 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
 
     @Inject
     public LocalWorkspaceFolderPathProvider(@Named("che.workspace.storage") String workspacesMountPoint,
-                                            Provider<WorkspaceManager> workspaceManager) throws IOException {
+                                            WorkspaceDao workspaceDao) throws IOException {
         this.workspacesMountPoint = workspacesMountPoint;
-        this.workspaceManager = workspaceManager;
+        this.workspaceDao = workspaceDao;
         this.isWindows = SystemInfo.isWindows();
     }
 
@@ -91,10 +92,10 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
     protected LocalWorkspaceFolderPathProvider(String workspacesMountPoint,
                                                String oldWorkspacesMountPoint,
                                                String projectsFolder,
-                                               Provider<WorkspaceManager> workspaceManager,
                                                boolean createFolders,
+                                               WorkspaceDao workspaceDao,
                                                boolean isWindows) throws IOException {
-        this.workspaceManager = workspaceManager;
+        this.workspaceDao = workspaceDao;
         this.workspacesMountPoint = workspacesMountPoint;
         this.hostProjectsFolder = projectsFolder;
         this.createFolders = createFolders;
@@ -108,8 +109,7 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
             return hostProjectsFolder;
         }
         try {
-            WorkspaceManager workspaceManager = this.workspaceManager.get();
-            Workspace workspace = workspaceManager.getWorkspace(workspaceId);
+            Workspace workspace = workspaceDao.get(workspaceId);
             String wsName = workspace.getConfig().getName();
             return doGetPathByName(wsName);
         } catch (NotFoundException | ServerException e) {

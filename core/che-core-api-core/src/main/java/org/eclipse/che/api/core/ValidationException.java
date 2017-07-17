@@ -26,4 +26,12 @@ public class ValidationException extends Exception {
     public ValidationException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    /**
+     * Creates an exception with a formatted message.
+     * Please follow {@link String#format(String, Object...)} formatting patterns.
+     */
+    public ValidationException(String fmt, Object... args) {
+        this(String.format(fmt, args));
+    }
 }

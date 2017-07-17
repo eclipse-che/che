@@ -21,6 +21,8 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver;
 import org.eclipse.che.plugin.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapper;
+import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.docker.config.DockerExtraHostsFromPropertyProvider;
 import org.eclipse.che.workspace.infrastructure.docker.config.dns.DnsResolversModule;
 import org.eclipse.che.workspace.infrastructure.docker.config.env.ApiEndpointEnvVariableProvider;
@@ -106,8 +108,8 @@ public class DockerInfraModule extends AbstractModule {
         bind(DockerRegistryDynamicAuthResolver.class).to(NoOpDockerRegistryDynamicAuthResolverImpl.class);
 
         install(new FactoryModuleBuilder().build(DockerRuntimeFactory.class));
-
         install(new FactoryModuleBuilder().build(DockerBootstrapperFactory.class));
+        install(new FactoryModuleBuilder().build(DockerRuntimeContextFactory.class));
 
         bind(ServerCheckerFactory.class).to(ServerCheckerFactoryImpl.class);
     }

@@ -101,24 +101,6 @@ public abstract class RuntimeInfrastructure {
     }
 
     /**
-     * An Infrastructure MAY track Runtimes. In this case the method should be overridden.
-     * <p>
-     * One of the reason for infrastructure to support this is ability to recover infrastructure
-     * after shutting down Master server.
-     *
-     * @param id
-     *         the RuntimeIdentityImpl
-     * @return the Runtime
-     * @throws UnsupportedOperationException
-     *         if implementation does not support runtimes tracking
-     * @throws InfrastructureException
-     *         if any other error occurred
-     */
-    public InternalRuntime getRuntime(RuntimeIdentity id) throws InfrastructureException {
-        throw new UnsupportedOperationException("The implementation does not track runtimes");
-    }
-
-    /**
      * Making Runtime is a two phase process.
      * On the first phase implementation MUST prepare RuntimeContext, this is supposedly "fast" method
      * On the second phase Runtime is created with RuntimeContext.start() which is supposedly "long" method

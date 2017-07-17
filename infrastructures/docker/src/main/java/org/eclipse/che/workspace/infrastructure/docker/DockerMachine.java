@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
@@ -23,7 +21,6 @@ import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
@@ -33,11 +30,8 @@ import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotException;
-import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategy;
-import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -57,11 +51,11 @@ public class DockerMachine implements Machine {
     /**
      * Name of the latest tag used in Docker image.
      */
-    public static final  String LATEST_TAG             = "latest";
+    public static final String LATEST_TAG             = "latest";
     /**
      * Env variable that points to root folder of projects in dev machine
      */
-    public static final  String PROJECTS_ROOT_VARIABLE = "CHE_PROJECTS_ROOT";
+    public static final String PROJECTS_ROOT_VARIABLE = "CHE_PROJECTS_ROOT";
 
     /**
      * Env variable for jvm settings
@@ -89,43 +83,31 @@ public class DockerMachine implements Machine {
      */
     public static final String USER_TOKEN = "USER_TOKEN";
 
-    private final String                           container;
-    private final DockerConnector                  docker;
-    private final String                           image;
-    private final DockerMachineStopDetector        dockerMachineStopDetector;
-    private final String                           registry;
-    private final String                           registryNamespace;
-    private final boolean                          snapshotUseRegistry;
-    private final ContainerInfo                    info;
-    private final ServerEvaluationStrategyProvider provider;
-    private final ProgressMonitor                  progressMonitor;
+    private final String                    container;
+    private final DockerConnector           docker;
+    private final String                    image;
+    private final DockerMachineStopDetector dockerMachineStopDetector;
+    private final String                    registry;
+    private final String                    registryNamespace;
+    private final boolean                   snapshotUseRegistry;
+    private final Map<String, ServerImpl>   servers;
 
-    private Map<String, ServerImpl> servers;
-
-    @Inject
-    public DockerMachine(DockerConnector docker,
+    public DockerMachine(String containerId,
+                         String image,
+                         DockerConnector docker,
+                         Map<String, ServerImpl> servers,
                          String registry,
-                         String registryNamespace,
                          boolean snapshotUseRegistry,
-                         @Assisted("container") String container,
-                         @Assisted("image") String image,
-                         ServerEvaluationStrategyProvider provider,
-                         DockerMachineStopDetector dockerMachineStopDetector,
-                         ProgressMonitor progressMonitor) throws InfrastructureException {
-        this.container = container;
+                         String registryNamespace,
+                         DockerMachineStopDetector dockerMachineStopDetector) {
+        this.container = containerId;
         this.docker = docker;
         this.image = image;
         this.registry = registry;
         this.registryNamespace = registryNamespace;
         this.snapshotUseRegistry = snapshotUseRegistry;
         this.dockerMachineStopDetector = dockerMachineStopDetector;
-        this.progressMonitor = progressMonitor;
-        try {
-            this.info = docker.inspectContainer(container);
-        } catch (IOException e) {
-            throw new InfrastructureException(e.getLocalizedMessage(), e);
-        }
-        this.provider = provider;
+        this.servers = servers;
     }
 
     @Override
@@ -135,10 +117,6 @@ public class DockerMachine implements Machine {
 
     @Override
     public Map<String, ServerImpl> getServers() {
-        if(servers == null) {
-            ServerEvaluationStrategy strategy = provider.get();
-            servers = strategy.getServers(info, "localhost", Collections.emptyMap());
-        }
         return servers;
     }
 
@@ -203,17 +181,16 @@ public class DockerMachine implements Machine {
                ", image='" + image + '\'' +
                ", registry='" + registry + '\'' +
                ", registryNamespace='" + registryNamespace + '\'' +
-               ", snapshotUseRegistry='" + snapshotUseRegistry  +
-               ", info=" + info +
-               ", provider=" + provider +
+               ", snapshotUseRegistry='" + snapshotUseRegistry +
+               ", container=" + container +
                '}';
     }
 
 
-    public DockerMachineSource saveToSnapshot() throws SnapshotException {
+    public DockerMachineSource saveToSnapshot(ProgressMonitor progressMonitor) throws SnapshotException {
         try {
             String image = generateRepository();
-            if(!snapshotUseRegistry) {
+            if (!snapshotUseRegistry) {
                 commitContainer(image, LATEST_TAG);
                 return new DockerMachineSource(image).withTag(LATEST_TAG);
             }

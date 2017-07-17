@@ -105,18 +105,9 @@ public class InstallerConfigApplier {
     }
 
     private void addLabels(DockerContainerConfig container, Map<String, ? extends ServerConfig> servers) {
-        for (Map.Entry<String, ? extends ServerConfig> entry : servers.entrySet()) {
-            String ref = entry.getKey();
-            ServerConfig conf = entry.getValue();
-
-            container.getLabels().put("che:server:" + conf.getPort() + ":protocol", conf.getProtocol());
-            container.getLabels().put("che:server:" + conf.getPort() + ":ref", ref);
-
-            String path = conf.getPath();
-            if (!isNullOrEmpty(path)) {
-                container.getLabels().put("che:server:" + conf.getPort() + ":path", path);
-            }
-        }
+        container.getLabels().putAll(Labels.newSerializer()
+                                           .servers(servers)
+                                           .labels());
     }
 
     private void addEnv(DockerContainerConfig container, Map<String, String> properties) {

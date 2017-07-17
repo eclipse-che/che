@@ -42,10 +42,9 @@ public class ServersReadinessChecker {
                                                                                      "terminal", "/");
     private final String                  machineName;
     private final Map<String, ServerImpl> servers;
-    private final Consumer<String>        serverReadinessHandler;
     private final ServerCheckerFactory    serverCheckerFactory;
-    private final Timer                   timer;
 
+    private Timer             timer;
     private long              resultTimeoutSeconds;
     private CompletableFuture result;
 
@@ -56,16 +55,12 @@ public class ServersReadinessChecker {
      *         name of machine whose servers will be checked by this method
      * @param servers
      *         map of servers in a machine
-     * @param serverReadinessHandler
-     *         consumer which will be called with server reference as the argument when server become available
      */
     public ServersReadinessChecker(String machineName,
                                    Map<String, ServerImpl> servers,
-                                   Consumer<String> serverReadinessHandler,
                                    ServerCheckerFactory serverCheckerFactory) {
         this.machineName = machineName;
         this.servers = servers;
-        this.serverReadinessHandler = serverReadinessHandler;
         this.serverCheckerFactory = serverCheckerFactory;
         this.timer = new Timer("ServerReadinessChecker", true);
     }
@@ -73,12 +68,15 @@ public class ServersReadinessChecker {
     /**
      * Asynchronously starts checking readiness of servers of a machine.
      *
+     * @param serverReadinessHandler
+     *         consumer which will be called with server reference as the argument when server become available
      * @throws InternalInfrastructureException
      *         if check of a server failed due to an unexpected error
      * @throws InfrastructureException
      *         if check of a server failed due to an error
      */
-    public void startAsync() throws InfrastructureException {
+    public void startAsync(Consumer<String> serverReadinessHandler) throws InfrastructureException {
+        timer = new Timer("ServerReadinessChecker", true);
         List<ServerChecker> serverCheckers = getServerCheckers();
         // should be completed with an exception if a server considered unavailable
         CompletableFuture<Void> firstNonAvailable = new CompletableFuture<>();
@@ -100,6 +98,16 @@ public class ServersReadinessChecker {
         result = CompletableFuture.anyOf(allAvailable, firstNonAvailable);
         for (ServerChecker serverChecker : serverCheckers) {
             serverChecker.start();
+        }
+    }
+
+    /**
+     * Synchronously checks whether servers are available,
+     * throws {@link InfrastructureException} if any is not.
+     */
+    public void checkOnce() throws InfrastructureException {
+        for (ServerChecker checker : getServerCheckers()) {
+            checker.checkOnce();
         }
     }
 

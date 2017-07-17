@@ -16,7 +16,6 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -27,9 +26,8 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentPa
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
-import javax.inject.Named;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Implementation of {@link RuntimeInfrastructure} that
@@ -38,14 +36,13 @@ import java.util.Map;
  * @author Alexander Garagatyi
  */
 public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
-    private final EnvironmentValidator      dockerEnvironmentValidator;
-    private final EnvironmentParser         dockerEnvironmentParser;
-    private final ContainersStartStrategy   startStrategy;
-    private final InfrastructureProvisioner infrastructureProvisioner;
-    private final EnvironmentNormalizer     environmentNormalizer;
-    private final DockerRuntimeFactory      runtimeFactory;
-    private final InstallerRegistry         installerRegistry;
-    private final String                    websocketEndpointBase;
+    private final EnvironmentValidator        dockerEnvironmentValidator;
+    private final EnvironmentParser           dockerEnvironmentParser;
+    private final ContainersStartStrategy     startStrategy;
+    private final InfrastructureProvisioner   infrastructureProvisioner;
+    private final EnvironmentNormalizer       environmentNormalizer;
+    private final DockerRuntimeContextFactory contextFactory;
+    private final DockerContainers            containers;
 
     @Inject
     public DockerRuntimeInfrastructure(EnvironmentParser dockerEnvironmentParser,
@@ -54,19 +51,17 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        InfrastructureProvisioner infrastructureProvisioner,
                                        EnvironmentNormalizer environmentNormalizer,
                                        Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
-                                       DockerRuntimeFactory runtimeFactory,
-                                       InstallerRegistry installerRegistry,
                                        EventService eventService,
-                                       @Named("che.websocket.endpoint.base") String websocketEndpointBase) {
+                                       DockerRuntimeContextFactory contextFactory,
+                                       DockerContainers containers) {
         super("docker", environmentParsers.keySet(), eventService);
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
         this.dockerEnvironmentParser = dockerEnvironmentParser;
         this.startStrategy = startStrategy;
         this.infrastructureProvisioner = infrastructureProvisioner;
         this.environmentNormalizer = environmentNormalizer;
-        this.runtimeFactory = runtimeFactory;
-        this.installerRegistry = installerRegistry;
-        this.websocketEndpointBase = websocketEndpointBase;
+        this.contextFactory = contextFactory;
+        this.containers = containers;
     }
 
     @Override
@@ -92,21 +87,17 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         EnvironmentImpl environment = new EnvironmentImpl(originEnv);
         DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
         dockerEnvironmentValidator.validate(environment, dockerEnvironment);
-        // check that containers start order can be resolved
-        List<String> orderedContainers = startStrategy.order(dockerEnvironment);
 
         // modify environment with everything needed to use docker machines on particular (cloud) infrastructure
         infrastructureProvisioner.provision(environment, dockerEnvironment, identity);
         // normalize env to provide environment description with absolutely everything expected in
         environmentNormalizer.normalize(environment, dockerEnvironment, identity);
 
-        return new DockerRuntimeContext(this,
-                                        identity,
-                                        environment,
-                                        dockerEnvironment,
-                                        orderedContainers,
-                                        installerRegistry,
-                                        runtimeFactory,
-                                        websocketEndpointBase);
+        return contextFactory.create(this, identity, environment, dockerEnvironment);
+    }
+
+    @Override
+    public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
+        return containers.findIdentities();
     }
 }

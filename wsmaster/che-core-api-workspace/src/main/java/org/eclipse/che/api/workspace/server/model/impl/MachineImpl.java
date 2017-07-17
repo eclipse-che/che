@@ -16,6 +16,9 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Data object for {@link Machine}.
@@ -27,10 +30,6 @@ public class MachineImpl implements Machine {
     private Map<String, String>     properties;
     private Map<String, ServerImpl> servers;
 
-    public static MachineRuntimeInfoImplBuilder builder() {
-        return new MachineRuntimeInfoImplBuilder();
-    }
-
     public MachineImpl(Machine machineRuntime) {
         this(machineRuntime.getProperties(), machineRuntime.getServers());
     }
@@ -38,16 +37,17 @@ public class MachineImpl implements Machine {
     public MachineImpl(Map<String, String> properties,
                        Map<String, ? extends Server> servers) {
 //        this.envVariables = new HashMap<>(envVariables);
+        this(servers);
         this.properties = new HashMap<>(properties);
+    }
+
+    public MachineImpl(Map<String, ? extends Server> servers) {
         if (servers != null) {
             this.servers = servers.entrySet()
                                   .stream()
-                                  .collect(HashMap::new,
-                                           (map, entry) -> map.put(entry.getKey(), new ServerImpl(entry.getValue())),
-                                           HashMap::putAll);
+                                  .collect(toMap(Map.Entry::getKey, entry -> new ServerImpl(entry.getValue().getUrl())));
         }
     }
-
 
 //    public Map<String, String> getEnvVariables() {
 //        if (envVariables == null) {
@@ -78,45 +78,12 @@ public class MachineImpl implements Machine {
         if (!(o instanceof MachineImpl)) return false;
         MachineImpl that = (MachineImpl)o;
         return //Objects.equals(getEnvVariables(), that.getEnvVariables()) &&
-               Objects.equals(getProperties(), that.getProperties()) &&
-               Objects.equals(getServers(), that.getServers());
+                Objects.equals(getProperties(), that.getProperties()) &&
+                Objects.equals(getServers(), that.getServers());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(/*getEnvVariables(),*/ getProperties(), getServers());
-    }
-
-    public static class MachineRuntimeInfoImplBuilder {
-        private Map<String, ? extends Server> servers;
-        private Map<String, String>           properties;
-//        private Map<String, String>           envVariables;
-
-        public MachineImpl build() {
-            return new MachineImpl(properties, servers);
-        }
-
-        public MachineRuntimeInfoImplBuilder setServers(Map<String, ? extends Server> servers) {
-            this.servers = servers;
-            return this;
-        }
-
-        public MachineRuntimeInfoImplBuilder setProperties(Map<String, String> properties) {
-            this.properties = properties;
-            return this;
-        }
-
-//        public MachineRuntimeInfoImplBuilder setEnvVariables(Map<String, String> envVariables) {
-//            this.envVariables = envVariables;
-//            return this;
-//        }
-    }
-
-    @Override
-    public String toString() {
-        return "MachineImpl{" +
-               "properties=" + properties +
-               ", servers=" + servers +
-               '}';
     }
 }
