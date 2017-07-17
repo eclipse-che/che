@@ -2771,5 +2771,50 @@
     "name": "type-blank.svg",
     "mediaType": "image/svg+xml"
   }
- }
+  },
+  {
+    "id": "openshift",
+    "name": "openshift",
+    "description": "Openshift Workspace",
+    "scope": "general",
+    "tags": [
+      "Openshift"
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine/main": {
+              "installers": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: dev-machine\n    labels:\n        pod: dev-machine\n  spec:\n    containers:\n      -\n        image: rhche/spring-boot:latest\n        imagePullPolicy: Always\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP\n          -\n            containerPort: 4401\n            protocol: TCP\n          -\n            containerPort: 4403\n            protocol: TCP\n          -\n            containerPort: 4411\n            protocol: TCP\n        resources: {}\n-\n  apiVersion: v1\n  kind: Service\n  metadata:\n    name: dev-machine\n  spec:\n    ports:\n      -\n        name: wsagent\n        port: 4401\n        protocol: TCP\n        targetPort: 4401\n      -\n        name: terminal\n        port: 4411\n        protocol: TCP\n        targetPort: 4411\n    selector:\n      pod: dev-machine\n-\n  apiVersion: v1\n  kind: Route\n  metadata:\n    name: dev-machine-agent\n  spec:\n    port:\n      targetPort: wsagent\n    to:\n      kind: Service\n      name: dev-machine\n    wildcardPolicy: None\n-\n  apiVersion: v1\n  kind: Route\n  metadata:\n    name: dev-machine-terminal\n  spec:\n    port:\n      targetPort: terminal\n    to:\n      kind: Service\n      name: dev-machine\n    wildcardPolicy: None",
+            "contentType": "application/x-yaml",
+            "type": "openshift"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "build",
+          "type": "mvn",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
+        }
+      ]
+    }
+  }
 ]
