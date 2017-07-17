@@ -22,8 +22,11 @@ import org.junit.runner.notification.RunListener;
 public class JUnitExecutionListener extends RunListener {
     private CheJUnitTestListener delegate;
 
+    private String currentSuite;
+
     public JUnitExecutionListener(CheJUnitTestListener delegate) {
         this.delegate = delegate;
+        currentSuite = "";
     }
 
     @Override
@@ -33,11 +36,24 @@ public class JUnitExecutionListener extends RunListener {
 
     @Override
     public void testRunFinished(Result result) throws Exception {
+        if (!currentSuite.isEmpty()) {
+            delegate.testSuiteFinished(currentSuite);
+        }
+
         delegate.testRunFinished(result);
     }
 
     @Override
     public void testStarted(Description description) throws Exception {
+        if (currentSuite.isEmpty()) {
+            currentSuite = description.getClassName();
+            delegate.testSuiteStarted(description);
+        } else if (!currentSuite.equals(description.getClassName())) {
+            delegate.testSuiteFinished(currentSuite);
+            currentSuite = description.getClassName();
+            delegate.testSuiteStarted(description);
+        }
+
         delegate.testStarted(description);
     }
 

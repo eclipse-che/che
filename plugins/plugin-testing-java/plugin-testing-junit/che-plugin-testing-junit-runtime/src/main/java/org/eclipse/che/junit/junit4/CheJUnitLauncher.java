@@ -11,8 +11,6 @@
 package org.eclipse.che.junit.junit4;
 
 import org.eclipse.che.junit.TestingMessageHelper;
-import org.eclipse.che.junit.junit4.listeners.JUnitExecutionListener;
-import org.eclipse.che.junit.junit4.listeners.CheJUnitTestListener;
 
 /**
  * Main JUnit4 test runner.
@@ -26,8 +24,7 @@ public class CheJUnitLauncher {
      */
     public static void main(String[] args) {
         CheJUnitCoreRunner jUnitCore = new CheJUnitCoreRunner();
-        CheJUnitTestListener cheJUnitTestListener = new CheJUnitTestListener();
-        jUnitCore.addListener(new JUnitExecutionListener(cheJUnitTestListener));
+        jUnitCore.createListener();
         if (args.length == 0) {
             TestingMessageHelper.reporterAttached(System.out);
             System.err.print("No test found to run.");

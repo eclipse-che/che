@@ -37,7 +37,7 @@ public class CheJUnitTestListener {
      *         describes the tests to be run
      */
     public void testRunStarted(Description description) {
-        TestingMessageHelper.rootPresentation(out, description.getDisplayName(), description.getClassName());
+        TestingMessageHelper.rootPresentation(out, description);
     }
 
     /**
@@ -63,6 +63,26 @@ public class CheJUnitTestListener {
         long duration = System.currentTimeMillis() - myCurrentTestStart;
 
         TestingMessageHelper.testFinished(out, description, duration);
+    }
+
+    /**
+     * Called when test suite starts.
+     *
+     * @param description
+     *         the description of the test suite
+     */
+    public void testSuiteStarted(Description description) {
+        TestingMessageHelper.testSuiteStarted(out, description);
+    }
+
+    /**
+     * Called when test suite finished.
+     *
+     * @param currentSuite
+     *         name of test suite
+     */
+    public void testSuiteFinished(String currentSuite) {
+        TestingMessageHelper.testSuiteFinished(out, currentSuite);
     }
 
     /**
@@ -96,6 +116,43 @@ public class CheJUnitTestListener {
      */
     public void testIgnored(Description description) {
         TestingMessageHelper.testIgnored(out, description.getMethodName());
+    }
+
+
+    /**
+     * Parse test tree and send atomic test nodes.
+     *
+     * @param description
+     *         the description of the test tree
+     */
+    public void suiteSendTree(Description description) {
+        if (description.isTest()) {
+            TestingMessageHelper.treeNode(out, description);
+        } else {
+            for (Description child : description.getChildren()) {
+                suiteSendTree(child);
+            }
+        }
+    }
+
+    /**
+     * Called when build of test tree started.
+     *
+     * @param description
+     *         describes the test suite
+     */
+    public void suiteTreeStarted(Description description) {
+        TestingMessageHelper.suiteTreeNodeStarted(out, description);
+    }
+
+    /**
+     * Called when build of test tree finished.
+     *
+     * @param description
+     *         describes the test suite
+     */
+    public void suiteTreeEnded(Description description) {
+        TestingMessageHelper.suiteTreeNodeEnded(out, description);
     }
 
 }

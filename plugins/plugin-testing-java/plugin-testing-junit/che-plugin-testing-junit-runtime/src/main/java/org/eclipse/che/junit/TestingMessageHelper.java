@@ -44,13 +44,14 @@ public class TestingMessageHelper {
      *
      * @param out
      *         output stream
-     * @param name
-     *         name of root element
-     * @param fileName
-     *         name of the file
+     * @param description
+     *         information about test cass
      */
-    public static void rootPresentation(PrintStream out, String name, String fileName) {
-        out.println(create("rootName", new Pair("name", name), new Pair("location", "file://" + fileName)));
+    public static void rootPresentation(PrintStream out, Description description) {
+        String name = "Default Suite";
+        out.println(create("rootName",
+                           new Pair("name", name),
+                           new Pair("location", "file://" + description.getClassName())));
     }
 
     /**
@@ -62,8 +63,7 @@ public class TestingMessageHelper {
      *         output stream
      */
     public static void testStarted(PrintStream out, Description description) {
-        int count = description.testCount();
-        String location = description.getClassName() + "." + description.getMethodName() + (count >= 0 ? "[" + count + "]" : "");
+        String location = description.getClassName() + "." + description.getMethodName();
         out.println(create("testStarted",
                            new Pair("name", escape(description.getMethodName())),
                            new Pair("locationHint", "java:test://" + escape(location))));
@@ -95,6 +95,75 @@ public class TestingMessageHelper {
         out.println(create("testFinished",
                            new Pair("name", escape(description.getMethodName())),
                            new Pair("duration", String.valueOf(duration))));
+    }
+
+    /**
+     * Prints an information when an test node has added.
+     *
+     * @param description
+     *         information about test node
+     * @param out
+     *         output stream
+     */
+    public static void treeNode(PrintStream out, Description description) {
+        String location = description.getClassName() + "." + description.getMethodName();
+        out.println(create("suiteTreeNode",
+                           new Pair("name", escape(description.getMethodName())),
+                           new Pair("location", "java:test://" + escape(location))));
+    }
+
+    /**
+     * Prints an information when running of test suite started.
+     *
+     * @param currentSuite
+     *         name of test suite
+     * @param out
+     *         output stream
+     */
+    public static void testSuiteFinished(PrintStream out, String currentSuite) {
+        out.println(create("testSuiteFinished", new Pair("name", escape(currentSuite))));
+    }
+
+    /**
+     * Prints an information when running of test suite started.
+     *
+     * @param description
+     *         information about suite
+     * @param out
+     *         output stream
+     */
+    public static void testSuiteStarted(PrintStream out, Description description) {
+        out.println(create("testSuiteStarted",
+                           new Pair("name", escape(description.getClassName())),
+                           new Pair("location", escape(description.getClassName()))));
+    }
+
+    /**
+     * Prints an information when building of test tree started.
+     *
+     * @param description
+     *         information about suite
+     * @param out
+     *         output stream
+     */
+    public static void suiteTreeNodeStarted(PrintStream out, Description description) {
+        out.println(create("suiteTreeStarted",
+                           new Pair("name", escape(description.getClassName())),
+                           new Pair("location", "java:test://" + escape(description.getClassName()))));
+    }
+
+    /**
+     * Prints an information when building of test tree ended.
+     *
+     * @param description
+     *         information about suite
+     * @param out
+     *         output stream
+     */
+    public static void suiteTreeNodeEnded(PrintStream out, Description description) {
+        out.println(create("suiteTreeEnded",
+                           new Pair("name", escape(description.getClassName())),
+                           new Pair("location", "java:test://" + escape(description.getClassName()))));
     }
 
     /**
