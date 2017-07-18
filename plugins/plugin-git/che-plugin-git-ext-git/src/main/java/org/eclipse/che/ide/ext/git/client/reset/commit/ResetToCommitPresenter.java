@@ -25,7 +25,6 @@ import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
-import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
 
@@ -33,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.api.git.shared.Constants.DEFAULT_PAGE_SIZE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;

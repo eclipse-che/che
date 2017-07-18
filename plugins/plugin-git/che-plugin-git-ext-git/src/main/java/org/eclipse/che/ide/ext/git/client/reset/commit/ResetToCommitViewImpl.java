@@ -288,7 +288,9 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
 
     @UiHandler("revisionsPanel")
     public void onPanelScrolled(ScrollEvent ignored) {
-        if (revisionsPanel.getVerticalScrollPosition() == revisionsPanel.getMaximumVerticalScrollPosition()) {
+        // We cannot rely on exact equality of scroll positions because GWT sometimes round such values
+        // and it is possible that the actual max scroll position is a pixel less then declared.
+        if (revisionsPanel.getMaximumVerticalScrollPosition() - revisionsPanel.getVerticalScrollPosition() <= 1) {
             // to avoid autoscrolling to selected item
             revisionsPanel.getElement().focus();
 

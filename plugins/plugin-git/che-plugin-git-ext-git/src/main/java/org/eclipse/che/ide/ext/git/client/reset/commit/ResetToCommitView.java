@@ -85,28 +85,6 @@ public interface ResetToCommitView extends View<ResetToCommitView.ActionDelegate
      */
     void setHardMode(boolean isHard);
 
-//    /** @return <code>true</code> if keep mode is chosen, and <code>false</code> otherwise */
-//    boolean isKeepMode();
-//
-//    /**
-//     * Select keep mode.
-//     *
-//     * @param isKeep
-//     *         <code>true</code> to select keep mode, <code>false</code> not to select
-//     */
-//    void setKeepMode(boolean isKeep);
-//
-//    /** @return <code>true</code> if merge mode is chosen, and <code>false</code> otherwise */
-//    boolean isMergeMode();
-//
-//    /**
-//     * Select merge mode.
-//     *
-//     * @param isMerge
-//     *         <code>true</code> to select merge mode, <code>false</code> not to select
-//     */
-//    void setMergeMode(boolean isMerge);
-
     /**IDEUI-166 No cursor in terminal
 
 
