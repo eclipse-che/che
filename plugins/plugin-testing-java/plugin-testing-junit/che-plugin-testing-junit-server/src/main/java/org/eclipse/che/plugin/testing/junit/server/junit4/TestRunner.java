@@ -94,6 +94,7 @@ public class TestRunner extends AbstractJavaTestRunner {
         JavaParameters parameters = new JavaParameters();
         parameters.setJavaExecutable(JAVA_EXECUTABLE);
         parameters.setMainClassName(MAIN_CLASS_NAME);
+        parameters.setWorkingDirectory(PROJECTS_ROOT_FOLDER + javaProject.getPath());
 
         List<String> classPath = new ArrayList<>();
         Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);
