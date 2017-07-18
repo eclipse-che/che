@@ -37,6 +37,11 @@ public interface ResetToCommitView extends View<ResetToCommitView.ActionDelegate
          *         selected revision
          */
         void onRevisionSelected(@NotNull Revision revision);
+
+        /**
+         * Occurs when the last entry in the list has been displayed.
+         */
+        void onScrolledToBottom();
     }
 
     /**

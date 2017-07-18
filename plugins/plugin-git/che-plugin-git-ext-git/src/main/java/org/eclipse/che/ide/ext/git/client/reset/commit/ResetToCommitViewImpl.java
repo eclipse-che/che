@@ -22,10 +22,12 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.DOM;
@@ -59,12 +61,10 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
     RadioButton mixed;
     @UiField
     RadioButton hard;
-    //    @UiField
-//    RadioButton         keep;
-//    @UiField
-//    RadioButton         merge;
     Button btnReset;
     Button btnCancel;
+    @UiField
+    ScrollPanel revisionsPanel;
     @UiField(provided = true)
     CellTable<Revision> commits;
     @UiField(provided = true)
@@ -130,8 +130,6 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
         addDescription(soft, locale.resetSoftTypeDescription());
         addDescription(mixed, locale.resetMixedTypeDescription());
         addDescription(hard, locale.resetHardTypeDescription());
-//        addDescription(keep, locale.resetKeepTypeDescription());
-//        addDescription(merge, locale.resetMergeTypeDescription());
     }
 
     /**
@@ -258,30 +256,6 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
         hard.setValue(isHard);
     }
 
-//    /** {@inheritDoc} */
-//    @Override
-//    public boolean isKeepMode() {
-//        return keep.getValue();
-//    }
-//
-//    /** {@inheritDoc} */
-//    @Override
-//    public void setKeepMode(boolean isKeep) {
-//        keep.setValue(isKeep);
-//    }
-//
-//    /** {@inheritDoc} */
-//    @Override
-//    public boolean isMergeMode() {
-//        return merge.getValue();
-//    }
-//
-//    /** {@inheritDoc} */
-//    @Override
-//    public void setMergeMode(boolean isMerge) {
-//        merge.setValue(isMerge);
-//    }
-
     /** {@inheritDoc} */
     @Override
     public void setEnableResetButton(final boolean enabled) {
@@ -312,4 +286,13 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
         this.delegate = delegate;
     }
 
+    @UiHandler("revisionsPanel")
+    public void onPanelScrolled(ScrollEvent ignored) {
+        if (revisionsPanel.getVerticalScrollPosition() == revisionsPanel.getMaximumVerticalScrollPosition()) {
+            // to avoid autoscrolling to selected item
+            revisionsPanel.getElement().focus();
+
+            delegate.onScrolledToBottom();
+        }
+    }
 }
