@@ -75,6 +75,11 @@ export class CheDir {
    */
   dotCheFile: string;
 
+  /**
+   * Alternate path to the Chefile file with .chefile
+   */
+  dotCheFileLowercase: string;
+
   dotCheFolder : any;
   workspacesFolder : any;
   cliFolder : any;
@@ -107,6 +112,7 @@ export class CheDir {
     this.folderName = this.path.basename(this.currentFolder);
     this.cheFile = this.path.resolve(this.currentFolder, 'Chefile');
     this.dotCheFile = this.path.resolve(this.currentFolder, '.Chefile');
+    this.dotCheFileLowercase = this.path.resolve(this.currentFolder, '.chefile');
     this.dotCheFolder = this.path.resolve(this.currentFolder, '.che');
     this.dotCheIdFile = this.path.resolve(this.dotCheFolder, 'id');
     this.dotCheSshPrivateKeyFile = this.path.resolve(this.dotCheFolder, 'ssh-key.private');
@@ -204,37 +210,17 @@ export class CheDir {
 
   parse() {
 
-    let bothFileExists : boolean = false;
-    try {
-      this.fs.statSync(this.cheFile);
-      // we have a file
-      Log.getLogger().debug('Found Chefile at ', this.cheFile);
+    let cheFiles : Array<any> = this.findCheFiles();
 
-      try {
-        this.fs.statSync(this.dotCheFile);
-        // There is an error as we shouldn't have both .Chefile and Chefile
-        bothFileExists = true;
-      } catch (e) {
-        // this file is optional
-        Log.getLogger().debug('There is a Chefile but not .Chefile at ' + this.dotCheFile);
-      }
-    } catch (e) {
-
-      // if there is a .Chefile, use it, else return
-      try {
-        this.fs.statSync(this.dotCheFile);
-        Log.getLogger().debug('The alternate file .Chefile is present at ', this.dotCheFile);
-        this.cheFile = this.dotCheFile;
-      } catch (e) {
-        Log.getLogger().debug('No chefile defined, use default settings');
-        return;
-      }
+    if (cheFiles.length === 0) {
+      Log.getLogger().debug('No chefile defined, use default settings');
+      return;
+    } else if (cheFiles.length >= 2) {
+      throw new Error('Error while parsing the Chefile as it was found at ' + JSON.stringify(cheFiles) + '. Only one file at a time is allowed.');
+    } else {
+      this.cheFile = cheFiles[0];
+      Log.getLogger().debug('Parsing chefile with name ', this.cheFile);
     }
-
-    if (bothFileExists) {
-      throw new Error('Error while parsing the Chefile as there is ' + this.cheFile + ' and ' + this.dotCheFile + '. Only one file at a time is allowed.');
-    }
-
 
     // load the chefile script if defined
     var script_code : string = this.fs.readFileSync(this.cheFile).toString();
@@ -397,6 +383,52 @@ export class CheDir {
 
   }
 
+  /**
+   * Checks if the given file is existing or not
+   * @param filename the  path to check
+   * @returns {boolean} true if it exists
+   */
+  fileExistsCaseSensitive(filename) : boolean {
+    var dir = this.path.dirname(filename);
+    if (dir === '/' || dir === '.') {
+      return true;
+    }
+    var filenames = this.fs.readdirSync(dir);
+    if (filenames.indexOf(this.path.basename(filename)) === -1) {
+      return false;
+    }
+    return this.fileExistsCaseSensitive(dir);
+  }
+
+  /**
+   * Search all the chefiles with the corresponding pattern : Chefile, .Chefile, .chefile
+   * @returns {Array<any>} containing all references found
+   */
+  findCheFiles() : Array<any> {
+
+    let foundCheFiles : Array<any> = new Array<any>();
+
+    // Try with Chefile
+    if (this.fileExistsCaseSensitive(this.cheFile)) {
+      Log.getLogger().debug('Chefile is present at ', this.cheFile);
+      foundCheFiles.push(this.cheFile);
+    }
+
+    // Try with .Chefile
+    if (this.fileExistsCaseSensitive(this.dotCheFile)) {
+      Log.getLogger().debug('The alternate file .Chefile is present at ', this.dotCheFile);
+      foundCheFiles.push(this.dotCheFile);
+    }
+
+    // Try with .chefile
+    if (this.fileExistsCaseSensitive(this.dotCheFileLowercase)) {
+      this.fs.statSync(this.dotCheFileLowercase);
+      Log.getLogger().debug('The alternate file .chefile is present at ', this.dotCheFileLowercase);
+      foundCheFiles.push(this.dotCheFileLowercase);
+    }
+    return foundCheFiles;
+  }
+
 
   init() : Promise<any> {
     return this.isInitialized().then((isInitialized) => {
@@ -407,21 +439,13 @@ export class CheDir {
         Log.getLogger().info('Adding', this.dotCheFolder, 'directory');
         this.initCheFolders();
 
+        let cheFiles: Array<any> = this.findCheFiles();
+
         // write a default chefile if there is none
-        try {
-          this.fs.statSync(this.cheFile);
-          Log.getLogger().debug('Chefile is present at ', this.cheFile);
-        } catch (e) {
-
-          try {
-            this.fs.statSync(this.dotCheFile);
-            Log.getLogger().debug('The alternate file .Chefile is present at ', this.dotCheFile);
-          } catch (e) {
-            // write default
-            Log.getLogger().debug('Write a default Chefile at ', this.cheFile);
-            this.writeDefaultChefile();
-          }
-
+        if (cheFiles.length === 0) {
+          // write default
+          Log.getLogger().debug('Write a default Chefile at ', this.cheFile);
+          this.writeDefaultChefile();
         }
         return true;
       }
