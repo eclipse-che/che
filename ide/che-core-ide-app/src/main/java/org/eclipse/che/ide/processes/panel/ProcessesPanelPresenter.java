@@ -18,7 +18,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.workspace.Environment;
@@ -39,6 +38,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -89,6 +89,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -136,6 +137,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final CoreLocalizationConstant      localizationConstant;
     private final MachineResources              resources;
     private final WorkspaceAgent                workspaceAgent;
+    private final CommandManager                commandManager;
     private final SshServiceClient              sshServiceClient;
     private final AppContext                    appContext;
     private final NotificationManager           notificationManager;
@@ -167,6 +169,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    CommandConsoleFactory commandConsoleFactory,
                                    DialogFactory dialogFactory,
                                    ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory,
+                                   CommandManager commandManager,
                                    CommandTypeRegistry commandTypeRegistry,
                                    SshServiceClient sshServiceClient,
                                    ExecAgentCommandManager execAgentCommandManager,
@@ -176,6 +179,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.localizationConstant = localizationConstant;
         this.resources = resources;
         this.workspaceAgent = workspaceAgent;
+        this.commandManager = commandManager;
         this.sshServiceClient = sshServiceClient;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
@@ -1063,9 +1067,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                      */
                     if (commandTypeRegistry.getCommandTypeById(type).isPresent()) {
                         final String processName = process.getName();
-                        final CommandImpl commandByName = getWorkspaceCommandByName(processName);
+                        final Optional<CommandImpl> commandOptional = commandManager.getCommand(processName);
 
-                        if (commandByName == null) {
+                        if (!commandOptional.isPresent()) {
                             final String commandLine = process.getCommandLine();
                             final CommandImpl command = new CommandImpl(processName, commandLine, type);
                             final CommandOutputConsole console = commandConsoleFactory.create(command, machine);
@@ -1075,6 +1079,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
                             addCommandOutput(machine.getId(), console);
                         } else {
+                            final CommandImpl commandByName = commandOptional.get();
                             macroProcessor.expandMacros(commandByName.getCommandLine()).then(new Operation<String>() {
                                 @Override
                                 public void apply(String expandedCommandLine) throws OperationException {
@@ -1127,16 +1132,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             }
                                }).onFailure(
                 (endpointId, error) -> notificationManager.notify(localizationConstant.failedToGetProcesses(machine.getId())));
-    }
-
-    private CommandImpl getWorkspaceCommandByName(String name) {
-        for (Command command : appContext.getWorkspace().getConfig().getCommands()) {
-            if (command.getName().equals(name)) {
-                return new CommandImpl(command); // wrap model interface into implementation, workaround
-            }
-        }
-
-        return null;
     }
 
     @Override
