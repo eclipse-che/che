@@ -36,10 +36,9 @@ import static org.eclipse.che.ide.api.vcs.VcsStatus.NOT_MODIFIED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.UNTRACKED;
 
 /**
- * Receives git checkout notifications caught by server side VFS file watching system.
- * Support two type of notifications: git branch checkout and git revision checkout.
- * After a notification is received it is processed and passed to and instance of
- * {@link NotificationManager}.
+ * Receives and handel's git changes notifications caught by server side VFS file watching system.
+ *
+ * @author Igor Vinokur
  */
 @Singleton
 public class GitChangesHandler {
