@@ -1580,7 +1580,7 @@ public interface Theme {
     String notificationPopupProgressBackground();
 
     String notificationPopupWarningBackground();
-    
+
     String notificationPopupPanelShadow();
 
     String notificationPopupIconSuccessFill();
@@ -1590,7 +1590,7 @@ public interface Theme {
     String notificationPopupIconProgressFill();
 
     String notificationPopupIconWarningFill();
-    
+
     String notificationPopupIconSvgFill();
 
     String notificationPopupTextColor();
@@ -1655,6 +1655,12 @@ public interface Theme {
 
     String vcsConsoleChangesLineNumbersColor();
 
+    String vcsStatusAddedColor();
+
+    String vcsStatusModifiedColor();
+
+    String vcsStatusUntrackedColor();
+
     String editorPreferenceCategoryBackgroundColor();
 
     /********************************************************************************************
@@ -1676,6 +1682,7 @@ public interface Theme {
     String popupLoaderShadow();
 
     String popupLoaderTitleColor();
+
     String popupLoaderTextColor();
 
 }

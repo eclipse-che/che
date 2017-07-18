@@ -655,4 +655,16 @@ public class Style {
     public static String getVcsConsoleChangesLineNumbersColor() {
         return theme.vcsConsoleChangesLineNumbersColor();
     }
+
+    public static String getVcsStatusAddedColor() {
+        return theme.vcsStatusAddedColor();
+    }
+
+    public static String getVcsStatusModifiedColor() {
+        return theme.vcsStatusModifiedColor();
+    }
+
+    public static String getVcsStatusUntrackedColor() {
+        return theme.vcsStatusUntrackedColor();
+    }
 }

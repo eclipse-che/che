@@ -73,13 +73,6 @@
 
 .selected {
     background-color: projectExplorerSelectedRowBackground !important;
-    /* Set default text color to selected item */
-    color: projectExplorerJointContainerFill !important;
-}
-
-/* Set default text color to nested elements of selected item */
-.selected * {
-    color: projectExplorerJointContainerFill !important;
 }
 
 .hover {

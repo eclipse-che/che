@@ -17,16 +17,19 @@ import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.actions.EditorActions;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.Presentation;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
@@ -45,6 +48,8 @@ import org.eclipse.che.ide.part.widgets.panemenu.EditorPaneMenuItem;
 import org.eclipse.che.ide.part.widgets.panemenu.EditorPaneMenuItemFactory;
 import org.eclipse.che.ide.part.widgets.panemenu.PaneMenuActionItemWidget;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.impl.ResourceManager;
+import org.eclipse.che.ide.resources.impl.ResourceManager.ResourceManagerFactory;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,6 +89,10 @@ public class EditorPartStackPresenterTest {
     //constructor mocks
     @Mock
     private EditorPartStackView       view;
+    @Mock
+    private AppContext                appContext;
+    @Mock
+    private ResourceManagerFactory    resourceManagerFactory;
     @Mock
     private PartMenu                  partMenu;
     @Mock
@@ -197,7 +206,14 @@ public class EditorPartStackPresenterTest {
         when(editorPaneMenuItemFactory.createMenuItem((Action)anyObject())).thenReturn(editorPaneActionMenuItem);
         when(editorPaneMenuItemFactory.createMenuItem((TabItem)anyObject())).thenReturn(editorPaneTabMenuItem);
 
+        when(appContext.getDevMachine()).thenReturn(mock(DevMachine.class));
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        when(resourceManager.getFile(any(Path.class))).thenReturn(mock(Promise.class));
+        when(resourceManagerFactory.newResourceManager(any(DevMachine.class))).thenReturn(resourceManager);
+
         presenter = new EditorPartStackPresenter(view,
+                                                 appContext,
+                                                 resourceManagerFactory,
                                                  partMenu,
                                                  partsComparator,
                                                  editorPaneMenuItemFactory,

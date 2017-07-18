@@ -67,6 +67,8 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
         initializeJsonRpc();
         initializeTreeExplorerFileWatcher();
         initializeGitCheckoutWatcher();
+        initializeGitChangeWatcher();
+        initializeGitIndexWatcher();
     }
 
     private void initializeJsonRpc() {
@@ -134,6 +136,22 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
         requestTransmitter.newRequest()
                           .endpointId("ws-agent")
                           .methodName("track:git-checkout")
+                          .noParams()
+                          .sendAndSkipResult();
+    }
+
+    private void initializeGitChangeWatcher() {
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track:git-change")
+                          .noParams()
+                          .sendAndSkipResult();
+    }
+
+    private void initializeGitIndexWatcher() {
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track:git-index")
                           .noParams()
                           .sendAndSkipResult();
     }

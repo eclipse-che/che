@@ -53,6 +53,7 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
+import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
@@ -549,8 +550,9 @@ public final class ResourceManager {
         checkArgument(!source.getLocation().isRoot(), "Workspace root is not allowed to be copied");
 
         return findResource(destination, true).thenPromise(resource -> {
-            if (resource.isPresent() && !force){
-                return promises.reject(new IllegalStateException("Cannot create '" + destination.toString() + "'. Resource already exists."));
+            if (resource.isPresent() && !force) {
+                return promises
+                        .reject(new IllegalStateException("Cannot create '" + destination.toString() + "'. Resource already exists."));
             }
 
             return ps.copy(source.getLocation(), destination.parent(), destination.lastSegment(), force)
@@ -734,7 +736,7 @@ public final class ResourceManager {
         });
     }
 
-    protected Promise<Optional<File>> getFile(final Path absolutePath) {
+    public Promise<Optional<File>> getFile(final Path absolutePath) {
         final Optional<Resource> resourceOptional = store.getResource(absolutePath);
 
         if (resourceOptional.isPresent() && resourceOptional.get().isFile()) {
@@ -900,8 +902,12 @@ public final class ResourceManager {
         switch (reference.getType()) {
             case "file":
                 final Link link = reference.getLink(GET_CONTENT_REL);
-
-                return resourceFactory.newFileImpl(path, link.getHref(), this);
+                String vcsStatusAttribute = reference.getAttributes().get("vcs.status");
+                return resourceFactory.newFileImpl(path,
+                                                   link.getHref(),
+                                                   this,
+                                                   vcsStatusAttribute == null ? VcsStatus.NOT_MODIFIED
+                                                                              : VcsStatus.from(vcsStatusAttribute));
             case "folder":
                 return resourceFactory.newFolderImpl(path, this);
             case "project":
@@ -1192,7 +1198,7 @@ public final class ResourceManager {
 
         FolderImpl newFolderImpl(Path path, ResourceManager resourceManager);
 
-        FileImpl newFileImpl(Path path, String contentUrl, ResourceManager resourceManager);
+        FileImpl newFileImpl(Path path, String contentUrl, ResourceManager resourceManager, VcsStatus vcsStatus);
     }
 
     public interface ResourceManagerFactory {

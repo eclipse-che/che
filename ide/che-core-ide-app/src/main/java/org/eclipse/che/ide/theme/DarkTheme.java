@@ -1612,6 +1612,21 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String vcsStatusAddedColor() {
+        return "LightGreen";
+    }
+
+    @Override
+    public String vcsStatusModifiedColor() {
+        return "CornflowerBlue";
+    }
+
+    @Override
+    public String vcsStatusUntrackedColor() {
+        return "LightCoral";
+    }
+
+    @Override
     public String editorPreferenceCategoryBackgroundColor() {
         return "rgba(215, 215, 215, 0.10)";
     }
