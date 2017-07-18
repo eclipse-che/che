@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.server.core.reconcile;
 
-import com.google.gson.JsonObject;
 import com.google.inject.Provider;
-
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.server.EditorWorkingCopyManager;
 import org.eclipse.che.api.project.server.FolderEntry;
@@ -24,17 +22,14 @@ import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.BaseTest;
 import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
-import org.eclipse.che.plugin.maven.server.core.MavenCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenExecutorService;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
-import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 import org.eclipse.che.plugin.maven.server.rmi.MavenServerManagerTest;
-import org.eclipse.che.plugin.maven.shared.MessageType;
-import org.eclipse.che.plugin.maven.shared.dto.NotificationMessage;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.lsp4j.services.LanguageClient;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -42,7 +37,6 @@ import java.io.File;
 import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static java.lang.String.format;
 import static org.fest.assertions.Assertions.assertThat;
@@ -89,27 +83,17 @@ public class PomReconcilerTest extends BaseTest {
         ClasspathManager classpathManager =
                 new ClasspathManager(root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal, mavenNotifier);
 
-        mavenWorkspace = new MavenWorkspace(mavenProjectManager, mavenNotifier, new MavenExecutorService(), projectRegistryProvider,
-                                            new MavenCommunication() {
-                                                @Override
-                                                public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed) {
-
-                                                }
-
-                                                @Override
-                                                public void sendNotification(NotificationMessage message) {
-                                                    System.out.println(message.toString());
-                                                }
-
-                                                @Override
-                                                public void send(JsonObject object, MessageType type) {
-
-                                                }
-                                            }, classpathManager, eventService, new EclipseWorkspaceProvider());
+        mavenWorkspace = new MavenWorkspace(mavenProjectManager,
+                                            mavenNotifier,
+                                            new MavenExecutorService(),
+                                            projectRegistryProvider,
+                                            classpathManager,
+                                            eventService,
+                                            new EclipseWorkspaceProvider());
         EditorWorkingCopyManager editorWorkingCopyManager =
                 new EditorWorkingCopyManager(projectManagerProvider, eventService, requestTransmitter);
         pomReconciler =
-                new PomReconciler(projectManagerProvider, mavenProjectManager, editorWorkingCopyManager, eventService, requestTransmitter);
+                new PomReconciler(mavenProjectManager, editorWorkingCopyManager, eventService, mock(LanguageClient.class));
     }
 
     @Test
@@ -119,7 +103,7 @@ public class PomReconcilerTest extends BaseTest {
         String newContent = getPomContent("<ss");
         child.getVirtualFile().updateContent(newContent);
 
-        List<Problem> problems = pomReconciler.reconcile("/A/pom.xml");
+        List<Problem> problems = pomReconciler.reconcile("/A/pom.xml", "/A", newContent);
         assertThat(problems).isNotEmpty();
         Problem problem = problems.get(0);
 
@@ -133,7 +117,8 @@ public class PomReconcilerTest extends BaseTest {
         FolderEntry testProject = createTestProject(PROJECT_NAME, "");
         VirtualFileEntry pom = testProject.getChild("pom.xml");
 
-        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
+        String projectPath = format("/%s/pom.xml", PROJECT_NAME);
+        List<Problem> problems = pomReconciler.reconcile(projectPath+"/pom.xml", projectPath, pom.getVirtualFile().getContentAsString());
 
         assertThat(problems).isEmpty();
         assertThat(pom).isNotNull();
@@ -153,7 +138,8 @@ public class PomReconcilerTest extends BaseTest {
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
+        String projectPath = format("/%s/pom.xml", PROJECT_NAME);
+        List<Problem> problems = pomReconciler.reconcile(projectPath+"/pom.xml", projectPath, pom.getVirtualFile().getContentAsString());
 
         assertThat(problems).isEmpty();
         assertThat(pom).isNotNull();
@@ -173,7 +159,8 @@ public class PomReconcilerTest extends BaseTest {
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
+        String projectPath = "/"+PROJECT_NAME;
+        List<Problem> problems = pomReconciler.reconcile(projectPath+"/pom.xml", projectPath, pom.getVirtualFile().getContentAsString());
 
         assertThat(problems).hasSize(1);
         assertThat(problems.get(0).isError()).isTrue();
@@ -194,7 +181,8 @@ public class PomReconcilerTest extends BaseTest {
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
+        String projectPath = "/"+PROJECT_NAME;
+        List<Problem> problems = pomReconciler.reconcile(projectPath+"/pom.xml", projectPath, pom.getVirtualFile().getContentAsString());
 
         assertThat(problems).hasSize(1);
         assertThat(problems.get(0).isError()).isTrue();
@@ -215,7 +203,8 @@ public class PomReconcilerTest extends BaseTest {
         mavenWorkspace.update(Collections.singletonList(project));
         mavenWorkspace.waitForUpdate();
 
-        List<Problem> problems = pomReconciler.reconcile(format("/%s/pom.xml", PROJECT_NAME));
+        String projectPath = "/"+PROJECT_NAME;
+        List<Problem> problems = pomReconciler.reconcile(projectPath+"/pom.xml", projectPath, pom.getVirtualFile().getContentAsString());
 
         assertThat(problems).hasSize(1);
         assertThat(problems.get(0).isError()).isTrue();

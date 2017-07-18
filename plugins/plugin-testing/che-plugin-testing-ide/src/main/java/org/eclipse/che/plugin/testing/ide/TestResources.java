@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide;
 
-import org.vectomatic.dom.svg.ui.SVGResource;
-
 import com.google.gwt.resources.client.ClientBundle;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Resources for test extension.
@@ -24,6 +23,9 @@ public interface TestResources extends ClientBundle {
     @Source("org/eclipse/che/plugin/testing/ide/svg/test.svg")
     @Deprecated
     SVGResource testIcon();
+
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_all.svg")
+    SVGResource debugIcon();
 
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_results_pass.svg")
     @Deprecated

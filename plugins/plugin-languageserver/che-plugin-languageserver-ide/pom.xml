@@ -93,6 +93,10 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.xtext</groupId>
             <artifactId>org.eclipse.xtext.xbase.lib.gwt</artifactId>
         </dependency>
@@ -153,7 +157,7 @@
                 <version>${project.version}</version>
                 <executions>
                     <execution>
-                        <phase>process-sources</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>

@@ -51,11 +51,11 @@
            class="stack-item-actions">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
         <span class="che-list-actions">
-          <a tooltip="Delete Stack" ng-disabled="stackItemController.stack.creator !== stackItemController.userId"
+          <a uib-tooltip="Delete Stack" ng-disabled="stackItemController.stack.creator !== stackItemController.userId"
              ng-click="stackItemController.onDelete(stackItemController.stack);">
             <span class="fa fa-trash-o"></span>
           </a>
-          <a tooltip="Duplicate stack" ng-click="stackItemController.onDuplicate(stackItemController.stack);">
+          <a uib-tooltip="Duplicate stack" ng-click="stackItemController.onDuplicate(stackItemController.stack);">
             <span class="fa fa-copy"></span>
           </a>
         </span>

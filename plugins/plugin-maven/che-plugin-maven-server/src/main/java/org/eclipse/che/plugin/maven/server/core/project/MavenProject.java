@@ -99,6 +99,10 @@ public class MavenProject {
         return info.outputDirectory;
     }
 
+    public String getTestOutputDirectory(){
+        return info.testOutputDirectory;
+    }
+
     public String getName() {
         String name = info.name;
         if (name == null) {
@@ -212,6 +216,7 @@ public class MavenProject {
         newInfo.filters = model.getBuild().getFilters();
 
         newInfo.outputDirectory = model.getBuild().getOutputDirectory();
+        newInfo.testOutputDirectory = model.getBuild().getTestOutputDirectory();
 
         Set<MavenRemoteRepository> remoteRepositories = new HashSet<>();
         Set<MavenArtifact> extensions = new HashSet<>();
@@ -401,8 +406,6 @@ public class MavenProject {
         public List<MavenResource> resources;
         public List<MavenResource> testResources;
 
-        public String outputDirectory;
-
         public List<String> profilesIds;
         public List<String> activeProfiles;
         public List<String> inactiveProfiles;
@@ -418,6 +421,9 @@ public class MavenProject {
 
         public Set<MavenKey>             unresolvedArtifacts;
         public List<MavenProjectProblem> problemsCache;
+
+        public String testOutputDirectory;
+        public String outputDirectory;
 
         public Info clone() {
             try {

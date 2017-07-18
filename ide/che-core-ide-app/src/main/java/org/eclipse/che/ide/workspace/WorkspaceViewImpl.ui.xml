@@ -12,10 +12,8 @@
 -->
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:style>
-        @eval bgColor org.eclipse.che.ide.api.theme.Style.getMainMenuBkgColor();
-        @eval conColor org.eclipse.che.ide.api.theme.Style.theme.consolePanelColor();
-        @eval statusPanelColor org.eclipse.che.ide.api.theme.Style.getStatusPanelColor();
+
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
 
         .toolbarPanel {
             margin-top: 0;

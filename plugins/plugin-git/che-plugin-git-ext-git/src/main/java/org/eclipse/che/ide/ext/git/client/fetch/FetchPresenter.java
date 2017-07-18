@@ -16,10 +16,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -101,24 +97,20 @@ public class FetchPresenter implements FetchView.ActionDelegate {
      * local).
      */
     private void updateRemotes() {
-        service.remoteList(appContext.getDevMachine(), project.getLocation(), null, true).then(new Operation<List<Remote>>() {
-            @Override
-            public void apply(List<Remote> remotes) throws OperationException {
-                view.setRepositories(remotes);
-                updateBranches(LIST_REMOTE);
-                view.setEnableFetchButton(!remotes.isEmpty());
-                view.showDialog();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
-                console.printError(constant.remoteListFailed());
-                processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE);
-                view.setEnableFetchButton(false);
-            }
-        });
+        service.remoteList(project.getLocation(), null, true)
+               .then(remotes -> {
+                   view.setRepositories(remotes);
+                   updateBranches(LIST_REMOTE);
+                   view.setEnableFetchButton(!remotes.isEmpty());
+                   view.showDialog();
+               })
+               .catchError(error -> {
+                   GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
+                   console.printError(constant.remoteListFailed());
+                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE);
+                   view.setEnableFetchButton(false);
+               });
     }
 
     /**
@@ -128,33 +120,29 @@ public class FetchPresenter implements FetchView.ActionDelegate {
      *         is a remote mode
      */
     private void updateBranches(@NotNull final BranchListMode remoteMode) {
-        service.branchList(appContext.getDevMachine(), project.getLocation(), remoteMode).then(new Operation<List<Branch>>() {
-            @Override
-            public void apply(List<Branch> branches) throws OperationException {
-                if (LIST_REMOTE.equals(remoteMode)) {
-                    view.setRemoteBranches(branchSearcher.getRemoteBranchesToDisplay(view.getRepositoryName(), branches));
-                    updateBranches(LIST_LOCAL);
-                } else {
-                    view.setLocalBranches(branchSearcher.getLocalBranchesToDisplay(branches));
-                    for (Branch branch : branches) {
-                        if (branch.isActive()) {
-                            view.selectRemoteBranch(branch.getDisplayName());
-                            break;
-                        }
-                    }
-                }
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                final String errorMessage = error.getMessage() != null ? error.getMessage() : constant.branchesListFailed();
-                GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
-                console.printError(errorMessage);
-                processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
-                view.setEnableFetchButton(false);
-            }
-        });
+        service.branchList(project.getLocation(), remoteMode)
+               .then(branches -> {
+                   if (LIST_REMOTE.equals(remoteMode)) {
+                       view.setRemoteBranches(branchSearcher.getRemoteBranchesToDisplay(view.getRepositoryName(), branches));
+                       updateBranches(LIST_LOCAL);
+                   } else {
+                       view.setLocalBranches(branchSearcher.getLocalBranchesToDisplay(branches));
+                       for (Branch branch : branches) {
+                           if (branch.isActive()) {
+                               view.selectRemoteBranch(branch.getDisplayName());
+                               break;
+                           }
+                       }
+                   }
+               })
+               .catchError(error -> {
+                   final String errorMessage = error.getMessage() != null ? error.getMessage() : constant.branchesListFailed();
+                   GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
+                   console.printError(errorMessage);
+                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
+                   view.setEnableFetchButton(false);
+               });
     }
 
     /** {@inheritDoc} */
@@ -165,23 +153,17 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         final StatusNotification notification = notificationManager.notify(constant.fetchProcess(), PROGRESS, FLOAT_MODE);
         final GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
 
-        service.fetch(appContext.getDevMachine(), project.getLocation(), view.getRepositoryName(), getRefs(), view.isRemoveDeletedRefs())
-                .then(new Operation<Void>() {
-                    @Override
-                    public void apply(Void ignored) throws OperationException {
-                        console.print(constant.fetchSuccess(remoteUrl));
-                        processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                        notification.setStatus(SUCCESS);
-                        notification.setTitle(constant.fetchSuccess(remoteUrl));
-                    }
-                })
-                .catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError error) throws OperationException {
-                        handleError(error.getCause(), remoteUrl, notification, console);
-                        processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                    }
-                });
+        service.fetch(project.getLocation(), view.getRepositoryName(), getRefs(), view.isRemoveDeletedRefs())
+               .then(ignored -> {
+                   console.print(constant.fetchSuccess(remoteUrl));
+                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notification.setStatus(SUCCESS);
+                   notification.setTitle(constant.fetchSuccess(remoteUrl));
+               })
+               .catchError(error -> {
+                   handleError(error.getCause(), remoteUrl, notification, console);
+                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+               });
         view.close();
     }
 
@@ -231,13 +213,11 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onCancelClicked() {
         view.close();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onValueChanged() {
         boolean isFetchAll = view.isFetchAllBranches();
@@ -245,13 +225,11 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         view.setEnableRemoteBranchField(!isFetchAll);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onRemoteBranchChanged() {
         view.selectLocalBranch(view.getRemoteBranch());
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onRemoteRepositoryChanged() {
         updateBranches(LIST_REMOTE);

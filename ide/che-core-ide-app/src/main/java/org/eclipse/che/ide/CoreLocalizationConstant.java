@@ -50,6 +50,20 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("appearance.category")
     String appearanceCategory();
 
+    /* Add resources to File Watcher excludes */
+    @Key("action.fileWatcher.add.excludes.text")
+    String addToFileWatcherExludesName();
+
+    @Key("action.fileWatcher.add.excludes.description")
+    String addToFileWatcherExludesDescription();
+
+    /* Remove resources from File Watcher excludes */
+    @Key("action.fileWatcher.remove.excludes.text")
+    String removeFromFileWatcherExludesName();
+
+    @Key("action.fileWatcher.remove.excludes.description")
+    String removeFromFileWatcherExludesDescription();
+
     /* DeleteItem */
     @Key("action.delete.text")
     String deleteItemActionText();

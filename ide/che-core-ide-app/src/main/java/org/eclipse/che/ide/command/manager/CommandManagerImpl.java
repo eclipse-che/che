@@ -87,6 +87,7 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
         this.commandNameGenerator = commandNameGenerator;
 
         commands = new HashMap<>();
+        registerNative();
     }
 
     @Override
@@ -402,4 +403,17 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
     private void notifyCommandUpdated(CommandImpl prevCommand, CommandImpl command) {
         eventBus.fireEvent(new CommandUpdatedEvent(prevCommand, command));
     }
+
+    /* Expose Command Manager's internal API to the world, to allow selenium tests or clients that use IDE to refresh commands. */
+    private native void registerNative() /*-{
+        var that = this;
+
+        var CommandManager = {};
+
+        CommandManager.refresh = $entry(function () {
+            that.@org.eclipse.che.ide.command.manager.CommandManagerImpl::fetchCommands()();
+        });
+
+        $wnd.IDE.CommandManager = CommandManager;
+    }-*/;
 }

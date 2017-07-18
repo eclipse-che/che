@@ -12,19 +12,19 @@ package org.eclipse.che.plugin.python.languageserver;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.registry.DocumentFilter;
+import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.plugin.python.shared.ProjectAttributes;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 
 import javax.inject.Singleton;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-
-import static java.util.Arrays.asList;
 
 /**
  * Launches language server for Python
@@ -32,19 +32,14 @@ import static java.util.Arrays.asList;
 @Singleton
 public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate {
 
-    private static final String[] EXTENSIONS = new String[]{ProjectAttributes.PYTHON_EXT};
-    private static final String[] MIME_TYPES = new String[]{"text/x-python"};
-    private static final LanguageDescription description;
+
+    private static final LanguageServerDescription DESCRIPTION = createServerDescription();
+    private static final String REGEX = ".*\\.py";
 
     private final Path launchScript;
 
     public PythonLanguageSeverLauncher() {
         launchScript = Paths.get(System.getenv("HOME"), "che/ls-python/launch.sh");
-    }
-
-    @Override
-    public LanguageDescription getLanguageDescription() {
-        return description;
     }
 
     @Override
@@ -73,11 +68,15 @@ public class PythonLanguageSeverLauncher extends LanguageServerLauncherTemplate 
         launcher.startListening();
         return launcher.getRemoteProxy();
     }
-
-    static {
-        description = new LanguageDescription();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(ProjectAttributes.PYTHON_ID);
-        description.setMimeTypes(Arrays.asList(MIME_TYPES));
+    
+    @Override
+    public LanguageServerDescription getDescription() {
+        return DESCRIPTION;
     }
-}
+
+    private static LanguageServerDescription createServerDescription() {
+        LanguageServerDescription description = new LanguageServerDescription("org.eclipse.che.plugin.python.languageserver", null,
+                        Arrays.asList(new DocumentFilter(ProjectAttributes.PYTHON_ID, REGEX, null)));
+        return description;
+    }
+  }

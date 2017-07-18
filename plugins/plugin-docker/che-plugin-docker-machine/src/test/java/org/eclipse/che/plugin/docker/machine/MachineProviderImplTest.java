@@ -77,6 +77,7 @@ import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHI
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -163,7 +164,7 @@ public class MachineProviderImplTest {
     public void setUp() throws Exception {
         when(dockerConnectorConfiguration.getDockerHostIp()).thenReturn("123.123.123.123");
 
-        provider = spy(new MachineProviderBuilder().build());
+        provider = new MachineProviderBuilder().build();
 
         EnvironmentContext envCont = new EnvironmentContext();
         envCont.setSubject(new SubjectImpl(USER_NAME, "userId", USER_TOKEN, false));
@@ -208,8 +209,7 @@ public class MachineProviderImplTest {
         String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
         String tag = "latest";
         String registry = "localhost:1234";
-        provider = spy(new MachineProviderBuilder().setSnapshotUseRegistry(false)
-                                                   .build());
+        provider = new MachineProviderBuilder().setSnapshotUseRegistry(false).build();
 
         createInstanceFromSnapshot(repo, tag, registry);
 
@@ -218,8 +218,7 @@ public class MachineProviderImplTest {
 
     @Test
     public void shouldPullDockerImageIfAlwaysPullIsTrueEvenIfImageExistsLocally() throws Exception {
-        provider = spy(new MachineProviderBuilder().setDoForcePullImage(true)
-                                                   .build());
+        provider = new MachineProviderBuilder().setDoForcePullImage(true).build();
         doReturn(true).when(provider).isDockerImageExistLocally(anyString());
 
         createInstanceFromRecipe();
@@ -229,8 +228,7 @@ public class MachineProviderImplTest {
 
     @Test
     public void shouldPullDockerImageIfAlwaysPullIsFalseButImageDoesNotExist() throws Exception {
-        provider = spy(new MachineProviderBuilder().setDoForcePullImage(false)
-                                                   .build());
+        provider = new MachineProviderBuilder().setDoForcePullImage(false).build();
         doReturn(false).when(provider).isDockerImageExistLocally(anyString());
 
         createInstanceFromRecipe();
@@ -240,8 +238,7 @@ public class MachineProviderImplTest {
 
     @Test
     public void shouldNotPullDockerImageIfAlwaysPullIsFalseAndTheImageExistLocally() throws Exception {
-        provider = spy(new MachineProviderBuilder().setDoForcePullImage(false)
-                                                   .build());
+        provider = new MachineProviderBuilder().setDoForcePullImage(false).build();
         doReturn(true).when(provider).isDockerImageExistLocally(anyString());
 
         createInstanceFromRecipe();
@@ -253,8 +250,7 @@ public class MachineProviderImplTest {
     public void shouldUseLocalImageOnInstanceCreationFromSnapshot() throws Exception {
         final String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
         final String tag = "latest";
-        provider = spy(new MachineProviderBuilder().setSnapshotUseRegistry(false)
-                                                   .build());
+        provider = new MachineProviderBuilder().setSnapshotUseRegistry(false).build();
 
         CheServiceImpl machine = createService();
         machine.setImage(repo + ":" + tag);
@@ -276,8 +272,7 @@ public class MachineProviderImplTest {
     public void shouldNotRemoveImageAfterRestoreFromLocalSnapshot() throws Exception {
         String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
         String tag = "latest";
-        provider = spy(new MachineProviderBuilder().setSnapshotUseRegistry(false)
-                                                   .build());
+        provider = new MachineProviderBuilder().setSnapshotUseRegistry(false).build();
 
         createInstanceFromSnapshot(repo, tag, null);
 
@@ -288,8 +283,7 @@ public class MachineProviderImplTest {
     public void shouldNotRemoveImageWhenCreatingInstanceFromLocalImage() throws Exception {
         String repo = "repo1";
         String tag = "latest";
-        MachineProviderImpl provider = spy(new MachineProviderBuilder().setSnapshotUseRegistry(false)
-                                                                       .build());
+        MachineProviderImpl provider = new MachineProviderBuilder().setSnapshotUseRegistry(false).build();
 
         CheServiceImpl machine = createService();
         machine.setBuild(null);
@@ -385,8 +379,7 @@ public class MachineProviderImplTest {
 
     @Test
     public void shouldBeAbleToCreateContainerWithPrivilegeMode() throws Exception {
-        provider = spy(new MachineProviderBuilder().setPrivilegedMode(true)
-                                                   .build());
+        provider = new MachineProviderBuilder().setPrivilegedMode(true).build();
 
         createInstanceFromRecipe();
 
@@ -397,8 +390,7 @@ public class MachineProviderImplTest {
 
     @Test
     public void shouldBeAbleToCreateContainerWithCpuSet() throws Exception {
-        provider = spy(new MachineProviderBuilder().setCpuSet("0-3")
-                                                   .build());
+        provider = new MachineProviderBuilder().setCpuSet("0-3").build();
 
         createInstanceFromRecipe();
 
@@ -409,8 +401,7 @@ public class MachineProviderImplTest {
 
     @Test
     public void shouldBeAbleToCreateContainerWithCpuPeriod() throws Exception {
-        provider = spy(new MachineProviderBuilder().setCpuPeriod(200)
-                                                   .build());
+        provider = new MachineProviderBuilder().setCpuPeriod(200).build();
 
         createInstanceFromRecipe();
 
@@ -421,8 +412,7 @@ public class MachineProviderImplTest {
 
     @Test(dataProvider = "dnsResolverTestProvider")
     public void shouldSetDnsResolversOnContainerCreation(String[] dnsResolvers) throws Exception {
-        provider = spy(new MachineProviderBuilder().setDnsResolvers(dnsResolvers)
-                                                   .build());
+        provider = new MachineProviderBuilder().setDnsResolvers(dnsResolvers).build();
 
         createInstanceFromRecipe();
 
@@ -443,7 +433,7 @@ public class MachineProviderImplTest {
 
     @Test
     public void shouldSetNullDnsResolversOnContainerCreationByDefault() throws Exception {
-        provider = spy(new MachineProviderBuilder().build());
+        provider = new MachineProviderBuilder().build();
 
         createInstanceFromRecipe();
 
@@ -454,8 +444,7 @@ public class MachineProviderImplTest {
 
     @Test
     public void shouldBeAbleToCreateContainerWithCgroupParent() throws Exception {
-        provider = spy(new MachineProviderBuilder().setParentCgroup("some_parent")
-                                                   .build());
+        provider = new MachineProviderBuilder().setParentCgroup("some_parent").build();
 
         createInstanceFromRecipe();
 
@@ -466,8 +455,7 @@ public class MachineProviderImplTest {
 
     @Test
     public void shouldCreateContainerWithPidsLimit() throws Exception {
-        provider = spy(new MachineProviderBuilder().setPidsLimit(512)
-                                                   .build());
+        provider = new MachineProviderBuilder().setPidsLimit(512).build();
 
         createInstanceFromRecipe();
 
@@ -565,8 +553,7 @@ public class MachineProviderImplTest {
     public void shouldBeAbleToSetCorrectSwapSize(double swapMultiplier, int memoryMB, long expectedSwapSize)
             throws Exception {
         // given
-        provider = spy(new MachineProviderBuilder().setMemorySwapMultiplier(swapMultiplier)
-                                                   .build());
+        provider = new MachineProviderBuilder().setMemorySwapMultiplier(swapMultiplier).build();
 
         // when
         createInstanceFromRecipe(memoryMB);
@@ -1410,8 +1397,7 @@ public class MachineProviderImplTest {
     @Test
     public void shouldBeAbleToCreateContainerWithCpuQuota() throws Exception {
         // given
-        provider = spy(new MachineProviderBuilder().setCpuQuota(200)
-                                                   .build());
+        provider = new MachineProviderBuilder().setCpuQuota(200).build();
 
         // when
         createInstanceFromRecipe();
@@ -1792,33 +1778,37 @@ public class MachineProviderImplTest {
         }
 
         MachineProviderImpl build() throws IOException {
-            return new MachineProviderImpl(new MockConnectorProvider(),
-                                           credentialsReader,
-                                           dockerMachineFactory,
-                                           dockerInstanceStopDetector,
-                                           transmitter,
-                                           jsonRpcEndpointToMachineNameHolder,
-                                           devMachineServers,
-                                           allMachineServers,
-                                           devMachineVolumes,
-                                           allMachineVolumes,
-                                           doForcePullImage,
-                                           privilegedMode,
-                                           pidsLimit,
-                                           devMachineEnvVars,
-                                           allMachineEnvVars,
-                                           snapshotUseRegistry,
-                                           memorySwapMultiplier,
-                                           additionalNetworks,
-                                           networkDriver,
-                                           parentCgroup,
-                                           cpuSet,
-                                           cpuPeriod,
-                                           cpuQuota,
-                                           pathEscaper,
-                                           extraHosts,
-                                           dnsResolvers,
-                                           emptyMap());
+            MachineProviderImpl provider = spy(new MachineProviderImpl(new MockConnectorProvider(),
+                                                                          credentialsReader,
+                                                                          dockerMachineFactory,
+                                                                          dockerInstanceStopDetector,
+                                                                          transmitter,
+                                                                          jsonRpcEndpointToMachineNameHolder,
+                                                                          devMachineServers,
+                                                                          allMachineServers,
+                                                                          devMachineVolumes,
+                                                                          allMachineVolumes,
+                                                                          doForcePullImage,
+                                                                          privilegedMode,
+                                                                          pidsLimit,
+                                                                          devMachineEnvVars,
+                                                                          allMachineEnvVars,
+                                                                          snapshotUseRegistry,
+                                                                          memorySwapMultiplier,
+                                                                          additionalNetworks,
+                                                                          networkDriver,
+                                                                          parentCgroup,
+                                                                          cpuSet,
+                                                                          cpuPeriod,
+                                                                          cpuQuota,
+                                                                          pathEscaper,
+                                                                          extraHosts,
+                                                                          dnsResolvers,
+                                                                          emptyMap()));
+            doNothing().when(provider).readContainerLogsInSeparateThread(anyString(), anyString(),
+                                                                         anyString(), any(LineConsumer.class));
+
+            return provider;
         }
     }
 }

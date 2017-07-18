@@ -50,8 +50,10 @@ public class ClasspathHelper {
         }
     }
 
-    public ClasspathEntryHelper addSourceEntry(IPath path) {
+    public ClasspathEntryHelper addSourceEntry(IPath path, IPath outputLocation) {
         ClasspathEntryHelper helper = new ClasspathEntryHelper(path, IClasspathEntry.CPE_SOURCE);
+        helper.setOutputLocation(outputLocation);
+
         ClasspathEntryHelper oldHelper = defaultEntries.get(path);
         if (oldHelper != null) {
             oldHelper.getClasspathAttribute().forEach(helper::setClasspathAttribute);

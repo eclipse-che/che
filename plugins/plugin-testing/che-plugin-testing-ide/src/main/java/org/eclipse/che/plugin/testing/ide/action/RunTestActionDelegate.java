@@ -45,7 +45,7 @@ public class RunTestActionDelegate {
         TestServiceClient getService();
 
         TestResultPresenter getPresenter();
-        
+
         String getTestingFramework();
     }
 
@@ -76,7 +76,7 @@ public class RunTestActionDelegate {
             @Override
             public void apply(PromiseError exception) throws OperationException {
                 final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
-                    : "Failed to run test cases";
+                                                                             : "Failed to run test cases";
                 notification.setContent(errorMessage);
                 notification.setStatus(FAIL);
             }

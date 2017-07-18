@@ -12,10 +12,11 @@ package org.eclipse.che.plugin.php.languageserver;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.registry.DocumentFilter;
+import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
+import org.eclipse.che.plugin.php.inject.PhpModule;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -24,8 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static java.util.Arrays.asList;
+import java.util.Arrays;
 
 /**
  * @author Evgen Vidolob
@@ -34,20 +34,16 @@ import static java.util.Arrays.asList;
  */
 @Singleton
 public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
-    private static final String   LANGUAGE_ID = "php";
-    private static final String[] EXTENSIONS  = new String[]{"php"};
-    private static final String[] MIME_TYPES  = new String[]{"text/x-php"};
-    private static final LanguageDescription description;
+
+    private static final String REGEX = ".*\\.php";
+
     private final Path launchScript;
+
+    private static final LanguageServerDescription DESCRIPTION = createServerDescription();
 
     @Inject
     public PhpLanguageServerLauncher() {
         this.launchScript = Paths.get(System.getenv("HOME"), "che/ls-php/launch.sh");
-    }
-
-    @Override
-    public LanguageDescription getLanguageDescription() {
-        return description;
     }
 
     @Override
@@ -73,10 +69,14 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
         }
     }
 
-    static {
-        description = new LanguageDescription();
-        description.setFileExtensions(asList(EXTENSIONS));
-        description.setLanguageId(LANGUAGE_ID);
-        description.setMimeTypes(asList(MIME_TYPES));
+    @Override
+    public LanguageServerDescription getDescription() {
+        return DESCRIPTION;
+    }
+
+    private static LanguageServerDescription createServerDescription() {
+        LanguageServerDescription description = new LanguageServerDescription("org.eclipse.che.plugin.php.languageserver", null,
+                        Arrays.asList(new DocumentFilter(PhpModule.LANGUAGE_ID, REGEX, null)));
+        return description;
     }
 }

@@ -14,12 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
-import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
@@ -82,32 +78,28 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
     public void showDialog(final Project project) {
         this.project = project;
 
-        service.log(appContext.getDevMachine(), project.getLocation(), null, false).then(new Operation<LogResponse>() {
-            @Override
-            public void apply(LogResponse log) throws OperationException {
-                view.setRevisions(log.getCommits());
-                view.setMixMode(true);
-                view.setEnableResetButton(selectedRevision != null);
-                view.showDialog();
+        service.log(project.getLocation(), null, -1, -1, false)
+               .then(log -> {
+                   view.setRevisions(log.getCommits());
+                   view.setMixMode(true);
+                   view.setEnableResetButton(selectedRevision != null);
+                   view.showDialog();
 
-                project.synchronize();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
-                    dialogFactory.createMessageDialog(constant.resetCommitViewTitle(),
-                                                      constant.initCommitWasNotPerformed(),
-                                                      null).show();
-                    return;
-                }
-                String errorMessage = (error.getMessage() != null) ? error.getMessage() : constant.logFailed();
-                GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
-                console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.logFailed(), FAIL, FLOAT_MODE);
-            }
-        });
+                   project.synchronize();
+               })
+               .catchError(error -> {
+                   if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                       dialogFactory.createMessageDialog(constant.resetCommitViewTitle(),
+                                                         constant.initCommitWasNotPerformed(),
+                                                         null).show();
+                       return;
+                   }
+                   String errorMessage = (error.getMessage() != null) ? error.getMessage() : constant.logFailed();
+                   GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
+                   console.printError(errorMessage);
+                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notificationManager.notify(constant.logFailed(), FAIL, FLOAT_MODE);
+               });
     }
 
     /**
@@ -146,24 +138,20 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
 
         final GitOutputConsole console = gitOutputConsoleFactory.create(RESET_COMMAND_NAME);
 
-        service.reset(appContext.getDevMachine(), project.getLocation(), selectedRevision.getId(), type, null).then(new Operation<Void>() {
-            @Override
-            public void apply(Void ignored) throws OperationException {
-                console.print(constant.resetSuccessfully());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.resetSuccessfully());
+        service.reset(project.getLocation(), selectedRevision.getId(), type, null)
+               .then(ignored -> {
+                   console.print(constant.resetSuccessfully());
+                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notificationManager.notify(constant.resetSuccessfully());
 
-                project.synchronize();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                String errorMessage = (error.getMessage() != null) ? error.getMessage() : constant.resetFail();
-                console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.resetFail(), FAIL, FLOAT_MODE);
-            }
-        });
+                   project.synchronize();
+               })
+               .catchError(error -> {
+                   String errorMessage = (error.getMessage() != null) ? error.getMessage() : constant.resetFail();
+                   console.printError(errorMessage);
+                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notificationManager.notify(constant.resetFail(), FAIL, FLOAT_MODE);
+               });
     }
 }
 

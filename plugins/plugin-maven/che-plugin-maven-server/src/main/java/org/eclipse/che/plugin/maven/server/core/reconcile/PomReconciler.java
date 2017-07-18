@@ -1,3 +1,4 @@
+package org.eclipse.che.plugin.maven.server.core.reconcile;
 /*******************************************************************************
  * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
@@ -8,28 +9,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.server.core.reconcile;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.EditorWorkingCopy;
 import org.eclipse.che.api.project.server.EditorWorkingCopyManager;
 import org.eclipse.che.api.project.server.EditorWorkingCopyUpdatedEvent;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.project.shared.dto.EditorChangesDto;
-import org.eclipse.che.api.project.shared.dto.ServerError;
 import org.eclipse.che.commons.xml.XMLTreeException;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
-import org.eclipse.che.ide.ext.java.shared.dto.ReconcileResult;
 import org.eclipse.che.ide.maven.tools.Model;
 import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
@@ -39,16 +31,29 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.services.LanguageClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXParseException;
 
 import javax.annotation.PreDestroy;
-import javax.inject.Provider;
+
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -61,30 +66,23 @@ import static org.eclipse.che.maven.data.MavenConstants.POM_FILE_NAME;
  *
  * @author Roman Nikitenko
  */
-@Singleton
 public class PomReconciler {
-    private static final Logger LOG                            = LoggerFactory.getLogger(PomReconciler.class);
-    private static final String RECONCILE_ERROR_METHOD         = "event:pom-reconcile-error";
-    private static final String RECONCILE_STATE_CHANGED_METHOD = "event:pom-reconcile-state-changed";
+    private static final Logger LOG = LoggerFactory.getLogger(PomReconciler.class);
 
-    private Provider<ProjectManager>                       projectManagerProvider;
     private MavenProjectManager                            mavenProjectManager;
     private EditorWorkingCopyManager                       editorWorkingCopyManager;
     private EventService                                   eventService;
-    private RequestTransmitter                             transmitter;
     private EventSubscriber<EditorWorkingCopyUpdatedEvent> editorContentUpdateEventSubscriber;
+    private LanguageClient                                 client;
 
-    @Inject
-    public PomReconciler(Provider<ProjectManager> projectManagerProvider,
-                         MavenProjectManager mavenProjectManager,
+    public PomReconciler(MavenProjectManager mavenProjectManager,
                          EditorWorkingCopyManager editorWorkingCopyManager,
                          EventService eventService,
-                         RequestTransmitter transmitter) {
-        this.projectManagerProvider = projectManagerProvider;
+                         LanguageClient client) {
         this.mavenProjectManager = mavenProjectManager;
         this.editorWorkingCopyManager = editorWorkingCopyManager;
         this.eventService = eventService;
-        this.transmitter = transmitter;
+        this.client = client;
 
         editorContentUpdateEventSubscriber = new EventSubscriber<EditorWorkingCopyUpdatedEvent>() {
             @Override
@@ -100,33 +98,7 @@ public class PomReconciler {
         eventService.unsubscribe(editorContentUpdateEventSubscriber);
     }
 
-    /**
-     * Handles reconcile operations for pom.xml file by given path.
-     *
-     * @param pomPath
-     *         path to the pom file to reconcile
-     * @return result of reconcile operation as a list of {@link Problem}s
-     * @throws NotFoundException
-     *         if file is not found by given {@code pomPath}
-     * @throws ForbiddenException
-     *         if item is not a file
-     * @throws ServerException
-     *         if other error occurs
-     */
-    public List<Problem> reconcile(String pomPath) throws ServerException, ForbiddenException, NotFoundException {
-        VirtualFileEntry entry = projectManagerProvider.get().getProjectsRoot().getChild(pomPath);
-        if (entry == null) {
-            throw new NotFoundException(format("File '%s' doesn't exist", pomPath));
-        }
-
-        EditorWorkingCopy workingCopy = editorWorkingCopyManager.getWorkingCopy(pomPath);
-        String pomContent = workingCopy != null ? workingCopy.getContentAsString() : entry.getVirtualFile().getContentAsString();
-        String projectPath = entry.getPath().getParent().toString();
-
-        return reconcile(pomPath, projectPath, pomContent);
-    }
-
-    private List<Problem> reconcile(String pomPath, String projectPath, String pomContent) throws ServerException, NotFoundException {
+    List<Problem> reconcile(String pomPath, String projectPath, String pomContent) throws ServerException, NotFoundException {
         List<Problem> result = new ArrayList<>();
 
         if (isNullOrEmpty(pomContent)) {
@@ -147,18 +119,15 @@ public class PomReconciler {
             int start = pomContent.indexOf("<project ") + 1;
             int end = start + "<project ".length();
 
-            List<Problem> problemList = problems.stream().map(mavenProjectProblem -> DtoFactory.newDto(Problem.class)
-                                                                                               .withError(true)
-                                                                                               .withSourceStart(start)
-                                                                                               .withSourceEnd(end)
-                                                                                               .withMessage(mavenProjectProblem
-                                                                                                                    .getDescription()))
-                                                .collect(Collectors.toList());
+            List<Problem> problemList = problems.stream()
+                            .map(mavenProjectProblem -> DtoFactory.newDto(Problem.class).withError(true).withSourceStart(start)
+                                            .withSourceEnd(end).withMessage(mavenProjectProblem.getDescription()))
+                            .collect(Collectors.toList());
             result.addAll(problemList);
         } catch (XMLTreeException exception) {
             Throwable cause = exception.getCause();
             if (cause != null && cause instanceof SAXParseException) {
-                result.add(createProblem(pomContent, (SAXParseException)cause));
+                result.add(createProblem(pomContent, (SAXParseException) cause));
 
             } else {
                 String error = format("Couldn't reconcile pom file '%s', the reason is '%s'", pomPath, exception.getLocalizedMessage());
@@ -175,52 +144,36 @@ public class PomReconciler {
 
     private void onEditorContentUpdated(EditorWorkingCopyUpdatedEvent event) {
         EditorChangesDto editorChanges = event.getChanges();
-        String endpointId = event.getEndpointId();
         String fileLocation = editorChanges.getFileLocation();
+        String projectPath = editorChanges.getProjectPath();
+        reconcilePath(fileLocation, projectPath);
+    }
+
+    public void reconcilePath(String fileLocation, String projectPath) {
         String fileName = new Path(fileLocation).lastSegment();
         if (!POM_FILE_NAME.equals(fileName)) {
             return;
         }
 
-        try {
-            EditorWorkingCopy workingCopy = editorWorkingCopyManager.getWorkingCopy(fileLocation);
-            if (workingCopy == null) {
-                return;
-            }
-
-            String newPomContent = workingCopy.getContentAsString();
-            if (isNullOrEmpty(newPomContent)) {
-                return;
-            }
-
-            String projectPath = editorChanges.getProjectPath();
-            List<Problem> problemList = reconcile(fileLocation, projectPath, newPomContent);
-            DtoFactory dtoFactory = DtoFactory.getInstance();
-            ReconcileResult reconcileResult = dtoFactory.createDto(ReconcileResult.class)
-                                                        .withFileLocation(fileLocation)
-                                                        .withProblems(problemList);
-            transmitter.newRequest()
-                       .endpointId(endpointId)
-                       .methodName(RECONCILE_STATE_CHANGED_METHOD)
-                       .paramsAsDto(reconcileResult)
-                       .sendAndSkipResult();
-        } catch (Exception e) {
-            String error = e.getLocalizedMessage();
-            LOG.error(error, e);
-            transmitError(500, error, endpointId);
+        EditorWorkingCopy workingCopy = editorWorkingCopyManager.getWorkingCopy(fileLocation);
+        if (workingCopy == null) {
+            return;
         }
-    }
 
-    private void transmitError(int code, String errorMessage, String endpointId) {
-        DtoFactory dtoFactory = DtoFactory.getInstance();
-        ServerError reconcileError = dtoFactory.createDto(ServerError.class)
-                                               .withCode(code)
-                                               .withMessage(errorMessage);
-        transmitter.newRequest()
-                   .endpointId(endpointId)
-                   .methodName(RECONCILE_ERROR_METHOD)
-                   .paramsAsDto(reconcileError)
-                   .sendAndSkipResult();
+        String newPomContent = workingCopy.getContentAsString();
+        if (isNullOrEmpty(newPomContent)) {
+            return;
+        }
+
+        List<Problem> problems;
+        try {
+            problems = reconcile(fileLocation, projectPath, newPomContent);
+            List<Diagnostic> diagnostics = convertProblems(newPomContent, problems);
+            client.publishDiagnostics(new PublishDiagnosticsParams(LanguageServiceUtils.prefixURI(fileLocation), diagnostics));
+        } catch (ServerException | NotFoundException e) {
+            LOG.error(e.getMessage(), e);
+           client.showMessage(new MessageParams(MessageType.Error, "Error reconciling "+fileLocation));
+        }
     }
 
     private Problem createProblem(String pomContent, SAXParseException spe) {
@@ -242,4 +195,70 @@ public class PomReconciler {
         }
         return problem;
     }
+
+    public void reconcileUri(String uri, String text) {
+        try {
+            String pomPath = LanguageServiceUtils.removePrefixUri(uri);
+            List<Problem> problems = reconcile(pomPath, new File(pomPath).getParent(), text);
+            List<Diagnostic> diagnostics = convertProblems(text, problems);
+            client.publishDiagnostics(new PublishDiagnosticsParams(uri, diagnostics));
+        } catch (ServerException | NotFoundException e) {
+            LOG.error("Error reconciling content: " + uri, e);
+            client.showMessage(new MessageParams(MessageType.Error, "Error reconciling "+uri));
+        }
+    }
+
+    private static List<Diagnostic> convertProblems(String text, List<Problem> problems) {
+        Map<Integer, Position> positions = mapPositions(text, problems);
+        List<Diagnostic> diagnostics = problems.stream().map((Problem p) -> convertProblem(positions, p)).filter(o -> o != null)
+                        .collect(Collectors.toList());
+        return diagnostics;
+    }
+
+    private static Map<Integer, Position> mapPositions(String text, List<Problem> problems) {
+        SortedSet<Integer> offsets = new TreeSet<>();
+        for (Problem problem : problems) {
+            offsets.add(problem.getSourceStart());
+            offsets.add(problem.getSourceEnd());
+        }
+        Map<Integer, Position> result = new HashMap<>();
+        int line = 0;
+        int character = 0;
+        int pos = 0;
+        for (int offset : offsets) {
+            while (pos < offset && pos < text.length()) {
+                char ch = text.charAt(pos++);
+                if (ch == '\r') {
+                    if (text.charAt(pos) == '\n') {
+                        pos++;
+                    }
+                    line++;
+                    character = 0;
+                } else if (ch == '\n') {
+                    line++;
+                    character = 0;
+                } else {
+                    character++;
+                }
+            }
+            result.put(offset, new Position(line, character));
+        }
+        ;
+        return result;
+    }
+
+    private static Diagnostic convertProblem(Map<Integer, Position> positionMap, Problem problem) {
+        Diagnostic result = new Diagnostic();
+        Position start = positionMap.get(problem.getSourceStart());
+        Position end = positionMap.get(problem.getSourceEnd());
+        if (start == null || end == null) {
+            LOG.error("Could not map problem range: " + problem);
+            return null;
+        }
+        result.setRange(new Range(start, end));
+        result.setMessage(problem.getMessage());
+        result.setSeverity(problem.isError() ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning);
+        return result;
+    }
+
 }
