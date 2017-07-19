@@ -41,8 +41,8 @@ public class GitIndexChangedDetector {
 
     private static final String GIT_DIR         = ".git";
     private static final String INDEX_FILE      = "index";
-    private static final String INCOMING_METHOD = "track:git-index";
-    private static final String OUTGOING_METHOD = "event:git-index";
+    private static final String INCOMING_METHOD = "track/git-index";
+    private static final String OUTGOING_METHOD = "event/git-index";
 
     private final RequestTransmitter   transmitter;
     private final FileWatcherManager   manager;

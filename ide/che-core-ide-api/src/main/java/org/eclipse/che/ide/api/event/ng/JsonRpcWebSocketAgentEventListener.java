@@ -126,7 +126,7 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
 
         requestTransmitter.newRequest()
                           .endpointId("ws-agent")
-                          .methodName("track:project-tree")
+                          .methodName("track/project-tree")
                           .paramsAsDto(params)
                           .sendAndSkipResult();
 
@@ -135,7 +135,7 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     private void initializeGitCheckoutWatcher() {
         requestTransmitter.newRequest()
                           .endpointId("ws-agent")
-                          .methodName("track:git-checkout")
+                          .methodName("track/git-checkout")
                           .noParams()
                           .sendAndSkipResult();
     }
@@ -143,7 +143,7 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     private void initializeGitChangeWatcher() {
         requestTransmitter.newRequest()
                           .endpointId("ws-agent")
-                          .methodName("track:git-change")
+                          .methodName("track/git-change")
                           .noParams()
                           .sendAndSkipResult();
     }
@@ -151,7 +151,7 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     private void initializeGitIndexWatcher() {
         requestTransmitter.newRequest()
                           .endpointId("ws-agent")
-                          .methodName("track:git-index")
+                          .methodName("track/git-index")
                           .noParams()
                           .sendAndSkipResult();
     }

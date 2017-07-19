@@ -49,7 +49,7 @@ public class ProjectTreeStateNotificationOperation implements BiConsumer<String,
     @Inject
     public void configureHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                    .methodName("event:project-tree-state-changed")
+                    .methodName("event/project-tree-state-changed")
                     .paramsAsDto(ProjectTreeStateUpdateDto.class)
                     .noResult()
                     .withBiConsumer(this);

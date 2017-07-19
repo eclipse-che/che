@@ -42,8 +42,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class ProjectTreeTracker {
     private static final Logger LOG = getLogger(ProjectTreeTracker.class);
 
-    private static final String OUTGOING_METHOD = "event:project-tree-state-changed";
-    private static final String INCOMING_METHOD = "track:project-tree";
+    private static final String OUTGOING_METHOD = "event/project-tree-state-changed";
+    private static final String INCOMING_METHOD = "track/project-tree";
 
     private final Map<String, Integer> watchIdRegistry = new HashMap<>();
     private final Set<String>          timers          = newConcurrentHashSet();

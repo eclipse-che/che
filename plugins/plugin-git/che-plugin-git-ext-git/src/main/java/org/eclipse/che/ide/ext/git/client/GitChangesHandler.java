@@ -61,13 +61,13 @@ public class GitChangesHandler {
 
     private void configureHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                    .methodName("event:git-change")
+                    .methodName("event/git-change")
                     .paramsAsDto(GitChangeEventDto.class)
                     .noResult()
                     .withBiConsumer(this::apply);
 
         configurator.newConfiguration()
-                    .methodName("event:git-index")
+                    .methodName("event/git-index")
                     .paramsAsDto(Status.class)
                     .noResult()
                     .withBiConsumer(this::apply);

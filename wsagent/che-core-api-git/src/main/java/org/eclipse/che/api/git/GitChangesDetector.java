@@ -44,8 +44,8 @@ public class GitChangesDetector {
     private static final Logger LOG = getLogger(GitChangesDetector.class);
 
     private static final String GIT_DIR         = ".git";
-    private static final String INCOMING_METHOD = "track:git-change";
-    private static final String OUTGOING_METHOD = "event:git-change";
+    private static final String INCOMING_METHOD = "track/git-change";
+    private static final String OUTGOING_METHOD = "event/git-change";
 
     private final RequestTransmitter   transmitter;
     private final FileWatcherManager   manager;
