@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.testing.testng.server;
 
 import com.beust.jcommander.JCommander;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
@@ -51,11 +52,16 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     private static final String TESTNG_NAME         = "testng";
     private static final String TEST_ANNOTATION_FQN = Test.class.getName();
     private static final Logger LOG                 = LoggerFactory.getLogger(TestNGRunner.class);
+    private       String                   workspacePath;
     private final ProjectClasspathProvider classpathProvider;
     private final TestNGSuiteUtil          suiteUtil;
 
     @Inject
-    public TestNGRunner(ProjectClasspathProvider classpathProvider, TestNGSuiteUtil suiteUtil) {
+    public TestNGRunner(@Named("che.user.workspaces.storage") String workspacePath,
+                        ProjectClasspathProvider classpathProvider,
+                        TestNGSuiteUtil suiteUtil) {
+        super(workspacePath);
+        this.workspacePath = workspacePath;
         this.classpathProvider = classpathProvider;
         this.suiteUtil = suiteUtil;
     }
@@ -103,7 +109,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         parameters.setMainClassName("org.testng.CheTestNGLauncher");
         String outputDirectory = getOutputDirectory(javaProject);
         parameters.getParametersList().add("-d", outputDirectory);
-        parameters.setWorkingDirectory(PROJECTS_ROOT_FOLDER + javaProject.getPath());
+        parameters.setWorkingDirectory(workspacePath + javaProject.getPath());
         List<String> classPath = new ArrayList<>();
         Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);
         classPath.addAll(projectClassPath);

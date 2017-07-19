@@ -42,13 +42,17 @@ import java.util.Random;
  * Can recognize test methods, find java project and compilation unit by path.
  */
 public abstract class AbstractJavaTestRunner implements TestRunner {
-    private static final   Logger LOG                  = LoggerFactory.getLogger(AbstractJavaTestRunner.class);
-    private static final   String TEST_OUTPUT_FOLDER   = "/test-output";
+    private static final Logger LOG                = LoggerFactory.getLogger(AbstractJavaTestRunner.class);
+    private static final String TEST_OUTPUT_FOLDER = "/test-output";
 
-    protected static final String PROJECTS_ROOT_FOLDER = "/projects";
-    protected static final String JAVA_EXECUTABLE       = "java";
+    protected static final String JAVA_EXECUTABLE = "java";
 
     private int debugPort = -1;
+    private String workspacePath;
+
+    public AbstractJavaTestRunner(String workspacePath) {
+        this.workspacePath = workspacePath;
+    }
 
     @Override
     public List<TestPosition> detectTests(TestDetectionContext context) {
@@ -109,7 +113,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
     }
 
     protected String getOutputDirectory(IJavaProject javaProject) {
-        String path = PROJECTS_ROOT_FOLDER + javaProject.getPath() + TEST_OUTPUT_FOLDER;
+        String path = workspacePath + javaProject.getPath() + TEST_OUTPUT_FOLDER;
         try {
             IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(true);
             for (IClasspathEntry iClasspathEntry : resolvedClasspath) {
@@ -118,7 +122,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
                     if (outputLocation == null) {
                         continue;
                     }
-                    return PROJECTS_ROOT_FOLDER + outputLocation.removeLastSegments(1).append(TEST_OUTPUT_FOLDER);
+                    return workspacePath + outputLocation.removeLastSegments(1).append(TEST_OUTPUT_FOLDER);
                 }
             }
         } catch (JavaModelException e) {

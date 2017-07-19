@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.junit.server.junit4;
 
+import com.google.inject.name.Named;
+
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
@@ -43,17 +45,21 @@ import java.util.Set;
 /**
  * JUnit implementation for the test runner service.
  */
-public class TestRunner extends AbstractJavaTestRunner {
-    private static final Logger LOG = LoggerFactory.getLogger(TestRunner.class);
+public class JUnit4TestRunner extends AbstractJavaTestRunner {
+    private static final Logger LOG = LoggerFactory.getLogger(JUnit4TestRunner.class);
 
     private static final String JUNIT_TEST_ANNOTATION = "org.junit.Test";
     private static final String JUNIT_TEST_NAME       = "junit";
     private static final String MAIN_CLASS_NAME       = "org.eclipse.che.junit.junit4.CheJUnitLauncher";
 
+    private String                   workspacePath;
     private ProjectClasspathProvider classpathProvider;
 
     @Inject
-    public TestRunner(ProjectClasspathProvider classpathProvider) {
+    public JUnit4TestRunner(@Named("che.user.workspaces.storage") String workspacePath,
+                            ProjectClasspathProvider classpathProvider) {
+        super(workspacePath);
+        this.workspacePath = workspacePath;
         this.classpathProvider = classpathProvider;
     }
 
@@ -94,7 +100,7 @@ public class TestRunner extends AbstractJavaTestRunner {
         JavaParameters parameters = new JavaParameters();
         parameters.setJavaExecutable(JAVA_EXECUTABLE);
         parameters.setMainClassName(MAIN_CLASS_NAME);
-        parameters.setWorkingDirectory(PROJECTS_ROOT_FOLDER + javaProject.getPath());
+        parameters.setWorkingDirectory(workspacePath + javaProject.getPath());
 
         List<String> classPath = new ArrayList<>();
         Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);

@@ -27,7 +27,23 @@ import java.util.StringJoiner;
  * Class annalise an output information from test runner and redirect it to the special stream.
  */
 public class TestingMessageHelper {
-    private static final char ESCAPE_SEPARATOR = '!';
+    private static final char   ESCAPE_SEPARATOR       = '!';
+    private static final String TEST_REPORTER_ATTACHED = "testReporterAttached";
+    private static final String ROOT_NAME              = "rootName";
+    private static final String NAME                   = "name";
+    private static final String LOCATION               = "location";
+    private static final String TEST_STARTED           = "testStarted";
+    private static final String TEST_IGNORED           = "testIgnored";
+    private static final String TEST_FINISHED          = "testFinished";
+    private static final String DURATION               = "duration";
+    private static final String SUITE_TREE_NODE        = "suiteTreeNode";
+    private static final String TEST_SUITE_FINISHED    = "testSuiteFinished";
+    private static final String TEST_SUITE_STARTED     = "testSuiteStarted";
+    private static final String SUITE_TREE_STARTED     = "suiteTreeStarted";
+    private static final String SUITE_TREE_ENDED       = "suiteTreeEnded";
+    private static final String MESSAGE                = "message";
+    private static final String DETAILS                = "details";
+    private static final String TEST_FAILED            = "testFailed";
 
     /**
      * Prints a message when the test reported was attached.
@@ -36,7 +52,7 @@ public class TestingMessageHelper {
      *         output stream
      */
     public static void reporterAttached(PrintStream out) {
-        out.println(create("testReporterAttached", (List<Pair>)null));
+        out.println(create(TEST_REPORTER_ATTACHED, (List<Pair>)null));
     }
 
     /**
@@ -48,10 +64,9 @@ public class TestingMessageHelper {
      *         information about test cass
      */
     public static void rootPresentation(PrintStream out, Description description) {
-        String name = "Default Suite";
-        out.println(create("rootName",
-                           new Pair("name", name),
-                           new Pair("location", "file://" + description.getClassName())));
+        out.println(create(ROOT_NAME,
+                           new Pair(NAME, "Default Suite"),
+                           new Pair(LOCATION, "file://" + description.getClassName())));
     }
 
     /**
@@ -64,9 +79,9 @@ public class TestingMessageHelper {
      */
     public static void testStarted(PrintStream out, Description description) {
         String location = description.getClassName() + "." + description.getMethodName();
-        out.println(create("testStarted",
-                           new Pair("name", escape(description.getMethodName())),
-                           new Pair("locationHint", "java:test://" + escape(location))));
+        out.println(create(TEST_STARTED,
+                           new Pair(NAME, escape(description.getMethodName())),
+                           new Pair(LOCATION, "java:test://" + escape(location))));
     }
 
     /**
@@ -78,7 +93,7 @@ public class TestingMessageHelper {
      *         output stream
      */
     public static void testIgnored(PrintStream out, String name) {
-        out.println(create("testIgnored", new Pair("name", escape(name))));
+        out.println(create(TEST_IGNORED, new Pair(NAME, escape(name))));
     }
 
     /**
@@ -92,9 +107,9 @@ public class TestingMessageHelper {
      *         time of test running
      */
     public static void testFinished(PrintStream out, Description description, long duration) {
-        out.println(create("testFinished",
-                           new Pair("name", escape(description.getMethodName())),
-                           new Pair("duration", String.valueOf(duration))));
+        out.println(create(TEST_FINISHED,
+                           new Pair(NAME, escape(description.getMethodName())),
+                           new Pair(DURATION, String.valueOf(duration))));
     }
 
     /**
@@ -107,9 +122,9 @@ public class TestingMessageHelper {
      */
     public static void treeNode(PrintStream out, Description description) {
         String location = description.getClassName() + "." + description.getMethodName();
-        out.println(create("suiteTreeNode",
-                           new Pair("name", escape(description.getMethodName())),
-                           new Pair("location", "java:test://" + escape(location))));
+        out.println(create(SUITE_TREE_NODE,
+                           new Pair(NAME, escape(description.getMethodName())),
+                           new Pair(LOCATION, "java:test://" + escape(location))));
     }
 
     /**
@@ -121,7 +136,7 @@ public class TestingMessageHelper {
      *         output stream
      */
     public static void testSuiteFinished(PrintStream out, String currentSuite) {
-        out.println(create("testSuiteFinished", new Pair("name", escape(currentSuite))));
+        out.println(create(TEST_SUITE_FINISHED, new Pair(NAME, escape(currentSuite))));
     }
 
     /**
@@ -133,9 +148,9 @@ public class TestingMessageHelper {
      *         output stream
      */
     public static void testSuiteStarted(PrintStream out, Description description) {
-        out.println(create("testSuiteStarted",
-                           new Pair("name", escape(description.getClassName())),
-                           new Pair("location", escape(description.getClassName()))));
+        out.println(create(TEST_SUITE_STARTED,
+                           new Pair(NAME, escape(description.getClassName())),
+                           new Pair(LOCATION, escape(description.getClassName()))));
     }
 
     /**
@@ -147,9 +162,9 @@ public class TestingMessageHelper {
      *         output stream
      */
     public static void suiteTreeNodeStarted(PrintStream out, Description description) {
-        out.println(create("suiteTreeStarted",
-                           new Pair("name", escape(description.getClassName())),
-                           new Pair("location", "java:test://" + escape(description.getClassName()))));
+        out.println(create(SUITE_TREE_STARTED,
+                           new Pair(NAME, escape(description.getClassName())),
+                           new Pair(LOCATION, "java:test://" + escape(description.getClassName()))));
     }
 
     /**
@@ -161,9 +176,9 @@ public class TestingMessageHelper {
      *         output stream
      */
     public static void suiteTreeNodeEnded(PrintStream out, Description description) {
-        out.println(create("suiteTreeEnded",
-                           new Pair("name", escape(description.getClassName())),
-                           new Pair("location", "java:test://" + escape(description.getClassName()))));
+        out.println(create(SUITE_TREE_ENDED,
+                           new Pair(NAME, escape(description.getClassName())),
+                           new Pair(LOCATION, "java:test://" + escape(description.getClassName()))));
     }
 
     /**
@@ -178,7 +193,7 @@ public class TestingMessageHelper {
      */
     public static void testFailed(PrintStream out, Failure failure, long duration) {
         List<Pair> attributes = new ArrayList<>();
-        attributes.add(new Pair("name", escape(failure.getDescription().getMethodName())));
+        attributes.add(new Pair(NAME, escape(failure.getDescription().getMethodName())));
         Throwable exception = failure.getException();
         if (exception != null) {
             String failMessage = failure.getMessage();
@@ -186,14 +201,14 @@ public class TestingMessageHelper {
             PrintWriter printWriter = new PrintWriter(writer);
             exception.printStackTrace(printWriter);
             String stackTrace = writer.getBuffer().toString();
-            attributes.add(new Pair("message", escape(failMessage)));
-            attributes.add(new Pair("details", escape(stackTrace)));
+            attributes.add(new Pair(MESSAGE, escape(failMessage)));
+            attributes.add(new Pair(DETAILS, escape(stackTrace)));
         } else {
-            attributes.add(new Pair("message", ""));
+            attributes.add(new Pair(MESSAGE, ""));
         }
-        attributes.add(new Pair("duration", String.valueOf(duration)));
+        attributes.add(new Pair(DURATION, String.valueOf(duration)));
 
-        out.println(create("testFailed", attributes));
+        out.println(create(TEST_FAILED, attributes));
     }
 
     /**
