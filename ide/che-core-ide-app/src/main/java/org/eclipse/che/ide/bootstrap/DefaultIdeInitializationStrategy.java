@@ -39,7 +39,6 @@ import org.eclipse.che.ide.core.StandardComponentInitializer;
 import org.eclipse.che.ide.preferences.StyleInjector;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.theme.ThemeAgentImpl;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
@@ -133,9 +132,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     protected Promise<Void> initAppContext() {
         return getWorkspaceToStart()
                 .then((Function<WorkspaceImpl, Void>)workspace -> {
-
-                    Log.info(DefaultIdeInitializationStrategy.class, "Workspace -> " + workspace);
-
                     ((AppContextImpl)appContext).setWorkspace(workspace);
                     ((AppContextImpl)appContext).setStartAppActions(StartUpActionsParser.getStartUpActions());
                     browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
