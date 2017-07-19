@@ -10,22 +10,13 @@
  */
 'use strict';
 
-interface IPopoverAttrs extends ng.IAttributes {
-  buttonTitle: string;
-  buttonFontIcon: string;
-  buttonOnChange: string;
-  buttonState?: string;
-  buttonValue?: boolean;
-  chePopoverTitle?: string;
-  chePopoverPlacement?: string;
-}
-
 interface IPopoverScope extends ng.IScope {
   onChange: Function;
   isOpenPopover: boolean;
   buttonInitState?: boolean;
   buttonOnChange?: Function;
   buttonOnReset?: Function;
+  chePopoverTriggerOutsideClick?: boolean;
 }
 
 /**
@@ -45,6 +36,7 @@ interface IPopoverScope extends ng.IScope {
  * @param {boolean} button-value button's state
  * @param {string=} che-popover-title popover's title
  * @param {string=} che-popover-placement popover's placement
+ * @param {expression=} che-popover-close-outside-click if <code>true</close> then click outside of popover will close the it
  * @usage
  *   <toggle-button-popover button-title="Filter"
  *                          button-state="ctrl.filterInitState"
@@ -62,7 +54,8 @@ export class CheToggleButtonPopover implements ng.IDirective {
     buttonInitState: '=?buttonState',
     buttonValue: '=?',
     chePopoverTitle: '@?',
-    chePopoverPlacement: '@?'
+    chePopoverPlacement: '@?',
+    chePopoverTriggerOutsideClick: '=?'
   };
 
   private $timeout: ng.ITimeoutService;
@@ -88,10 +81,11 @@ export class CheToggleButtonPopover implements ng.IDirective {
                                   popover-title="{{chePopoverTitle ? chePopoverTitle : ''}}"
                                   popover-placement="{{chePopoverPlacement ? chePopoverPlacement : 'bottom'}}"
                                   popover-is-open="isOpenPopover"
+                                  popover-trigger="{{chePopoverTriggerOutsideClick ? 'outsideClick' : 'none'}}" 
                                   uib-popover-html="'<div class=\\'che-transclude\\'></div>'"></toggle-single-button>`;
   }
 
-  link($scope: IPopoverScope, $element: ng.IAugmentedJQuery, $attrs: IPopoverAttrs, ctrl: any, $transclude: ng.ITranscludeFunction): void {
+  link($scope: IPopoverScope, $element: ng.IAugmentedJQuery, $attrs: ng.IAttributes, ctrl: any, $transclude: ng.ITranscludeFunction): void {
 
     $scope.onChange = (state: boolean) => {
       this.$timeout(() => {
@@ -125,5 +119,16 @@ export class CheToggleButtonPopover implements ng.IDirective {
       }
     });
 
+    if ($scope.chePopoverTriggerOutsideClick) {
+      // update toggle single button state after popover is closed by outside click
+      const watcher = $scope.$watch(() => { return $scope.isOpenPopover; }, (newVal: boolean) => {
+        $scope.buttonInitState = newVal;
+      });
+      $scope.$on('$destroy', () => {
+        watcher();
+      });
+    }
+
   }
+
 }

@@ -63,6 +63,10 @@ describe('CheToggleButtonPopover >', () => {
 
   }));
 
+  afterEach(() => {
+    $timeout.verifyNoPendingTasks();
+  });
+
   function getCompiledElement() {
     const element = $compile(angular.element(
       `<div><toggle-button-popover button-title="model.popoverButtonTitle"
@@ -87,10 +91,16 @@ describe('CheToggleButtonPopover >', () => {
     });
 
     it('should have content hidden', () => {
+      // timeout should be flashed
+      $timeout.flush();
+
       expect(compiledDirective.html()).not.toContain($rootScope.model.popoverContent);
     });
 
     it('should have button disabled', () => {
+      // timeout should be flashed
+      $timeout.flush();
+
       expect(toggleSingleButton.get(0)).toBeTruthy();
       expect(toggleSingleButton.hasClass('toggle-single-button-disabled')).toBeTruthy();
     });
@@ -193,14 +203,16 @@ describe('CheToggleButtonPopover >', () => {
       });
 
       it('should make content hidden', () => {
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
+        $timeout.flush();
         $timeout.flush();
 
         expect(compiledDirective.html()).not.toContain($rootScope.model.popoverContent);
       });
 
       it('should disable button', () => {
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
+        $timeout.flush();
         $timeout.flush();
 
         expect(toggleSingleButton.hasClass('toggle-single-button-disabled')).toBeTruthy();
@@ -209,7 +221,8 @@ describe('CheToggleButtonPopover >', () => {
       it('should call the callback', () => {
         spyOn($rootScope.model, 'onChange');
 
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
+        $timeout.flush();
         $timeout.flush();
 
         expect($rootScope.model.onChange).toHaveBeenCalledWith(false);
@@ -225,7 +238,7 @@ describe('CheToggleButtonPopover >', () => {
       });
 
       it('should make content hidden', () => {
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
         $timeout.flush();
         $timeout.flush();
 
@@ -233,7 +246,8 @@ describe('CheToggleButtonPopover >', () => {
       });
 
       it('should disable button', () => {
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
+        $timeout.flush();
         $timeout.flush();
 
         expect(toggleSingleButton.hasClass('toggle-single-button-disabled')).toBeTruthy();
@@ -242,7 +256,8 @@ describe('CheToggleButtonPopover >', () => {
       it('should call the callback', () => {
         spyOn($rootScope.model, 'onChange');
 
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
+        $timeout.flush();
         $timeout.flush();
 
         expect($rootScope.model.onChange).toHaveBeenCalledWith(false);
