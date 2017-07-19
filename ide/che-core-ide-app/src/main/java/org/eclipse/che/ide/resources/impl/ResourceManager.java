@@ -549,8 +549,9 @@ public final class ResourceManager {
         checkArgument(!source.getLocation().isRoot(), "Workspace root is not allowed to be copied");
 
         return findResource(destination, true).thenPromise(resource -> {
-            if (resource.isPresent() && !force){
-                return promises.reject(new IllegalStateException("Cannot create '" + destination.toString() + "'. Resource already exists."));
+            if (resource.isPresent() && !force) {
+                return promises
+                        .reject(new IllegalStateException("Cannot create '" + destination.toString() + "'. Resource already exists."));
             }
 
             return ps.copy(source.getLocation(), destination.parent(), destination.lastSegment(), force)
@@ -617,10 +618,6 @@ public final class ResourceManager {
     Promise<Resource[]> getRemoteResources(final Container container, final int depth, boolean includeFiles) {
         checkArgument(depth > -2, "Invalid depth");
 
-        if (depth == DEPTH_ZERO) {
-            return promises.resolve(NO_RESOURCES);
-        }
-
         int depthToReload = depth;
         final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
@@ -648,10 +645,6 @@ public final class ResourceManager {
 
                     @Override
                     public void visit(Resource resource) {
-                        if (resource.isProject()) {
-                            inspectProject(resource.asProject());
-                        }
-
                         if (size > resources.length - 1) { //check load factor and increase resource array
                             resources = copyOf(resources, resources.length + incStep);
                         }
@@ -662,11 +655,22 @@ public final class ResourceManager {
                 }
 
                 final Visitor visitor = new Visitor();
+
+                ItemReference parentReference = tree.getNode();
+                if (!parentReference.getPath().equals("/")) {
+                    Resource resource = newResourceFrom(parentReference);
+                    store.register(resource);
+                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource, UPDATED)));
+                }
+
                 traverse(tree, visitor);
 
-                return copyOf(visitor.resources, visitor.size);
+                return visitor.resources.length == 0 ? NO_RESOURCES : copyOf(visitor.resources, visitor.size);
             }
         }).then((Function<Resource[], Resource[]>)reloaded -> {
+            if (reloaded.length == 0) {
+                return reloaded;
+            }
 
             Resource[] result = new Resource[0];
 
@@ -802,10 +806,6 @@ public final class ResourceManager {
             store.dispose(absolutePath, false);
             store.register(resource);
 
-            if (resource.isProject()) {
-                inspectProject(resource.asProject());
-            }
-
             return promises.resolve(fromNullable(resource));
         }).catchErrorPromise(arg -> {
 
@@ -842,10 +842,6 @@ public final class ResourceManager {
             for (TreeElement element : treeElement.getChildren()) {
                 final Resource resource = newResourceFrom(element.getNode());
 
-                if (resource.isProject()) {
-                    inspectProject(resource.asProject());
-                }
-
                 store.register(resource);
             }
 
@@ -853,16 +849,23 @@ public final class ResourceManager {
         });
     }
 
-    private void inspectProject(Project project) {
-        final Optional<ProjectConfigDto> optionalConfig = findProjectConfigDto(project.getLocation());
+    protected ProblemProjectMarker calculateProblemMarker(Project project) {
 
-        if (optionalConfig.isPresent()) {
-            final Optional<ProblemProjectMarker> optionalMarker = getProblemMarker(optionalConfig.get());
+        final ProjectConfig config = getProjectConfig(project.getLocation());
 
-            if (optionalMarker.isPresent()) {
-                project.addMarker(optionalMarker.get());
+        if (config == null) {
+            return null;
+        }
+
+        if (config instanceof ProjectConfigDto) {
+            Optional<ProblemProjectMarker> problemMarker = getProblemMarker(((ProjectConfigDto)config));
+
+            if (problemMarker.isPresent()) {
+                return problemMarker.get();
             }
         }
+
+        return null;
     }
 
     private boolean isResourceOpened(final Resource resource) {
@@ -944,8 +947,7 @@ public final class ResourceManager {
     protected Promise<Resource[]> synchronize(final Container container) {
         return ps.getProjects().thenPromise(updatedConfiguration -> {
             cachedConfigs = updatedConfiguration.toArray(new ProjectConfigDto[updatedConfiguration.size()]);
-
-            int maxDepth = 1;
+            int maxDepth = 0;
 
             final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
@@ -1181,6 +1183,20 @@ public final class ResourceManager {
 
     public Promise<List<SourceEstimation>> resolve(Project project) {
         return ps.resolveSources(project.getLocation());
+    }
+
+    protected ProjectConfig getProjectConfig(Path path) {
+        String rawPath = path.toString();
+
+        final java.util.Optional<ProjectConfigDto> optConfig = java.util.Arrays.stream(cachedConfigs)
+                                                                               .filter(dto -> dto.getPath().equals(rawPath))
+                                                                               .findFirst();
+
+        if (optConfig.isPresent()) {
+            return optConfig.get();
+        }
+
+        return null;
     }
 
     interface ResourceVisitor {

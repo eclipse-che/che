@@ -12,7 +12,6 @@ package org.eclipse.che.ide.resources.impl;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -22,7 +21,6 @@ import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;
@@ -44,15 +42,11 @@ class ProjectImpl extends ContainerImpl implements Project {
 
     private static final int FOLDER_NOT_EXISTS_ON_FS = 10;
 
-    private final ProjectConfig reference;
-
     @Inject
     protected ProjectImpl(@Assisted ProjectConfig reference,
                           @Assisted ResourceManager resourceManager,
                           PromiseProvider promiseProvider) {
         super(Path.valueOf(reference.getPath()), resourceManager, promiseProvider);
-
-        this.reference = reference;
     }
 
     /** {@inheritDoc} */
@@ -70,31 +64,31 @@ class ProjectImpl extends ContainerImpl implements Project {
     /** {@inheritDoc} */
     @Override
     public String getDescription() {
-        return reference.getDescription();
+        return getProjectConfig().getDescription();
     }
 
     /** {@inheritDoc} */
     @Override
     public String getType() {
-        return reference.getType();
+        return getProjectConfig().getType();
     }
 
     /** {@inheritDoc} */
     @Override
     public List<String> getMixins() {
-        return unmodifiableList(reference.getMixins());
+        return unmodifiableList(getProjectConfig().getMixins());
     }
 
     /** {@inheritDoc} */
     @Override
     public Map<String, List<String>> getAttributes() {
-        return unmodifiableMap(reference.getAttributes());
+        return unmodifiableMap(getProjectConfig().getAttributes());
     }
 
     /** {@inheritDoc} */
     @Override
     public SourceStorage getSource() {
-        return reference.getSource();
+        return getProjectConfig().getSource();
     }
 
     /** {@inheritDoc} */
@@ -127,15 +121,15 @@ class ProjectImpl extends ContainerImpl implements Project {
     /** {@inheritDoc} */
     @Override
     public boolean isProblem() {
-        return getMarker(ProblemProjectMarker.PROBLEM_PROJECT).isPresent();
+        return resourceManager.calculateProblemMarker(this) != null;
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean exists() {
-        final Optional<Marker> problemMarker = getMarker(ProblemProjectMarker.PROBLEM_PROJECT);
+        final ProblemProjectMarker problemProjectMarker = resourceManager.calculateProblemMarker(this);
 
-        return !problemMarker.isPresent() || !((ProblemProjectMarker)problemMarker.get()).getProblems().containsKey(FOLDER_NOT_EXISTS_ON_FS);
+        return problemProjectMarker == null || !problemProjectMarker.getProblems().containsKey(FOLDER_NOT_EXISTS_ON_FS);
     }
 
     /** {@inheritDoc} */
@@ -182,10 +176,14 @@ class ProjectImpl extends ContainerImpl implements Project {
         return MoreObjects.toStringHelper(this)
                           .add("path", getLocation())
                           .add("resource", getResourceType())
-                          .add("type", reference.getType())
-                          .add("description", reference.getDescription())
-                          .add("mixins", reference.getMixins())
-                          .add("attributes", reference.getAttributes())
+                          .add("type", getProjectConfig().getType())
+                          .add("description", getProjectConfig().getDescription())
+                          .add("mixins", getProjectConfig().getMixins())
+                          .add("attributes", getProjectConfig().getAttributes())
                           .toString();
+    }
+
+    private ProjectConfig getProjectConfig() {
+        return resourceManager.getProjectConfig(path);
     }
 }
