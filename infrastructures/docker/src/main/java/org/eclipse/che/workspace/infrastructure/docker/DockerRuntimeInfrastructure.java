@@ -45,7 +45,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     private final EnvironmentNormalizer     environmentNormalizer;
     private final DockerRuntimeFactory      runtimeFactory;
     private final InstallerRegistry         installerRegistry;
-    private final String                    apiEndpoint;
+    private final String                    websocketEndpointBase;
 
     @Inject
     public DockerRuntimeInfrastructure(EnvironmentParser dockerEnvironmentParser,
@@ -57,7 +57,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                        DockerRuntimeFactory runtimeFactory,
                                        InstallerRegistry installerRegistry,
                                        EventService eventService,
-                                       @Named("che.api") String apiEndpoint) {
+                                       @Named("che.websocket.endpoint.base") String websocketEndpointBase) {
         super("docker", environmentParsers.keySet(), eventService);
         this.dockerEnvironmentValidator = dockerEnvironmentValidator;
         this.dockerEnvironmentParser = dockerEnvironmentParser;
@@ -66,7 +66,7 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
         this.environmentNormalizer = environmentNormalizer;
         this.runtimeFactory = runtimeFactory;
         this.installerRegistry = installerRegistry;
-        this.apiEndpoint = apiEndpoint;
+        this.websocketEndpointBase = websocketEndpointBase;
     }
 
     @Override
@@ -107,6 +107,6 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
                                         orderedContainers,
                                         installerRegistry,
                                         runtimeFactory,
-                                        apiEndpoint);
+                                        websocketEndpointBase);
     }
 }
