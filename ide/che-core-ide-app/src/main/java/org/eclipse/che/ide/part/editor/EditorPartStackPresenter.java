@@ -51,7 +51,6 @@ import org.eclipse.che.ide.part.widgets.panemenu.EditorPaneMenu;
 import org.eclipse.che.ide.part.widgets.panemenu.EditorPaneMenuItem;
 import org.eclipse.che.ide.part.widgets.panemenu.EditorPaneMenuItemFactory;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.resources.impl.ResourceManager.ResourceManagerFactory;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 
 import javax.validation.constraints.NotNull;
@@ -89,7 +88,6 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
                                                                             ResourceChangedHandler {
     private final PresentationFactory              presentationFactory;
     private final AppContext                       appContext;
-    private final ResourceManagerFactory           resourceManagerFactory;
     private final EditorPaneMenuItemFactory        editorPaneMenuItemFactory;
     private final EventBus                         eventBus;
     private final EditorPaneMenu                   editorPaneMenu;
@@ -114,7 +112,6 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
     @Inject
     public EditorPartStackPresenter(EditorPartStackView view,
                                     AppContext appContext,
-                                    ResourceManagerFactory resourceManagerFactory,
                                     PartMenu partMenu,
                                     PartsComparator partsComparator,
                                     EditorPaneMenuItemFactory editorPaneMenuItemFactory,
@@ -129,7 +126,6 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
                                     EditorAgent editorAgent) {
         super(eventBus, partMenu, partStackEventHandler, tabItemFactory, partsComparator, view, null);
         this.appContext = appContext;
-        this.resourceManagerFactory = resourceManagerFactory;
         this.editorPaneMenuItemFactory = editorPaneMenuItemFactory;
         this.eventBus = eventBus;
         this.presentationFactory = presentationFactory;
@@ -219,13 +215,13 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
 
         final EditorTab editorTab = tabItemFactory.createEditorPartButton(editorPart, this);
 
-        resourceManagerFactory.newResourceManager(appContext.getDevMachine())
-                              .getFile(file.getLocation())
-                              .then(optional -> {
-                                  if (optional.isPresent()) {
-                                      editorTab.setTitleColor(optional.get().getVcsStatus().getColor());
-                                  }
-                              });
+        appContext.getWorkspaceRoot()
+                  .getFile(file.getLocation())
+                  .then(optional -> {
+                      if (optional.isPresent()) {
+                          editorTab.setTitleColor(optional.get().getVcsStatus().getColor());
+                      }
+                  });
 
         editorPart.addPropertyListener(new PropertyListener() {
             @Override

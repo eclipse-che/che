@@ -36,7 +36,7 @@ import org.eclipse.che.ide.util.TextUtils;
 class FileImpl extends ResourceImpl implements File {
 
     private final String    contentUrl;
-    private final VcsStatus vcsStatus;
+    private       VcsStatus vcsStatus;
 
     private String modificationStamp;
 

@@ -736,7 +736,7 @@ public final class ResourceManager {
         });
     }
 
-    public Promise<Optional<File>> getFile(final Path absolutePath) {
+    protected Promise<Optional<File>> getFile(final Path absolutePath) {
         final Optional<Resource> resourceOptional = store.getResource(absolutePath);
 
         if (resourceOptional.isPresent() && resourceOptional.get().isFile()) {

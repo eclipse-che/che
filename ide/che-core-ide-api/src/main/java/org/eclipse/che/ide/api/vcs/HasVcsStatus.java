@@ -11,19 +11,19 @@
 package org.eclipse.che.ide.api.vcs;
 
 /**
- * Indicates that specified node has VCS status attribute.
+ * Indicates that specified resource has VCS status attribute.
  *
  * @author Igor Vinokur
  */
 public interface HasVcsStatus {
 
     /**
-     * Returns VCS status attribute of the node.
+     * Returns VCS status attribute of the resource.
      */
     VcsStatus getVcsStatus();
 
     /**
-     * Set VCS status attribute to the node.
+     * Set VCS status attribute to the resource.
      *
      * @param vcsStatus
      *         VCS status to set
