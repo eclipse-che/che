@@ -23,7 +23,7 @@
  * @param {string} che-title button's title
  * @param {expression=} che-multiline-title allows multi line title if attr exists
  * @param {string=} che-font-icon button's icon CSS class
- * @param {expression=} che-state expression which defines initial state of button.
+ * @param {expression=} che-state expression which defines state of button.
  * @param {Function} che-on-change callback on model change
  * @usage
  *   <toggle-single-button che-title="Filter"
@@ -33,10 +33,15 @@
  * @author Oleksii Kurinnyi
  */
 
+interface IToggleSingleButtonAttrs extends ng.IAttributes {
+  cheMultilineTitle?: boolean;
+}
+
 interface IToggleSingleButtonScope extends ng.IScope {
   init?: boolean;
   state?: boolean;
   onChange: (data: {state: boolean}) => void;
+  multilineTitle?: string;
 }
 
 /**
@@ -69,23 +74,29 @@ export class ToggleSingleButton {
 
   }
 
-  link($scope: IToggleSingleButtonScope, $element: ng.IAugmentedJQuery, $attrs: ng.IAttributes): void {
+  link($scope: IToggleSingleButtonScope, $element: ng.IAugmentedJQuery, $attrs: IToggleSingleButtonAttrs): void {
     if (angular.isDefined($attrs.cheMultilineTitle)) {
       $scope.multilineTitle = 'true';
     }
 
-    if ($scope.init) {
-      $scope.state = $scope.init;
-      $scope.onChange({state: true});
-    }
-    const watcher = $scope.$watch(() => { return $scope.state; }, (newValue: boolean, oldValue: boolean) => {
+    const watcher1 = $scope.$watch(() => { return $scope.init; }, () => {
+      if ($scope.init === null) {
+        return;
+      }
+      $scope.state = !!$scope.init;
+      $scope.init = null;
+    });
+
+    const watcher2 = $scope.$watch(() => { return $scope.state; }, (newValue: boolean, oldValue: boolean) => {
       if (newValue === oldValue) {
         return;
       }
       $scope.onChange({state: newValue});
     });
+
     $scope.$on('$destroy', () => {
-      watcher();
+      watcher1();
+      watcher2();
     });
   }
 

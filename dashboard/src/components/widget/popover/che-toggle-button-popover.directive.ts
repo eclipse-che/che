@@ -40,7 +40,7 @@ interface IPopoverScope extends ng.IScope {
  *
  * @param {string} button-title button's title
  * @param {string} button-font-icon button's icon CSS class
- * @param {expression=} button-state expression which defines initial state of button.
+ * @param {expression=} button-state expression which defines state of button.
  * @param {Function} button-on-change callback on model change
  * @param {boolean} button-value button's state
  * @param {string=} che-popover-title popover's title
@@ -83,7 +83,7 @@ export class CheToggleButtonPopover implements ng.IDirective {
     return `<toggle-single-button che-title="{{buttonTitle}}"
                                   che-font-icon="{{buttonFontIcon}}"
                                   che-on-change="onChange(state)"
-                                  che-state="buttonInitState ? buttonInitState : false"
+                                  che-state="buttonInitState"
                                   che-value="buttonValue"
                                   popover-title="{{chePopoverTitle ? chePopoverTitle : ''}}"
                                   popover-placement="{{chePopoverPlacement ? chePopoverPlacement : 'bottom'}}"
@@ -108,6 +108,22 @@ export class CheToggleButtonPopover implements ng.IDirective {
         }
       });
     };
+
+    if (!$scope.buttonInitState) {
+      $scope.buttonInitState = false;
+    }
+    $scope.onChange($scope.buttonInitState);
+
+    // close popover on Esc is pressed
+    $element.attr('tabindex', 0);
+    $element.on('keypress keydown', (event: any) => {
+      if (event.which === 27) {
+        // on press 'esc'
+        $scope.$apply(() => {
+          $scope.buttonInitState = false;
+        });
+      }
+    });
 
   }
 }
