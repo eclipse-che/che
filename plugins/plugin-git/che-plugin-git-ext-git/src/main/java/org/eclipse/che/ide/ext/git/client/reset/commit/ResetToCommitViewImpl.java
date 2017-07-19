@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.reset.commit;
 
+import com.google.gwt.view.client.SelectionModel;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.ext.git.client.GitResources;
@@ -212,12 +213,15 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
     @Override
     public void setRevisions(@NotNull List<Revision> revisions) {
         // Wraps Array in java.util.List
-        List<Revision> list = new ArrayList<Revision>();
-        for (int i = 0; i < revisions.size(); i++) {
-            list.add(revisions.get(i));
-        }
+        List<Revision> list = new ArrayList<>();
+        list.addAll(revisions);
 
         this.commits.setRowData(list);
+    }
+
+    @Override
+    public void resetRevisionSelection() {
+        ((SingleSelectionModel) commits.getSelectionModel()).clear();
     }
 
     /** {@inheritDoc} */

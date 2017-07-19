@@ -52,6 +52,11 @@ public interface ResetToCommitView extends View<ResetToCommitView.ActionDelegate
      */
     void setRevisions(@NotNull List<Revision> revisions);
 
+    /**
+     * Deselect active revision in the table of available revisions.
+     */
+    void resetRevisionSelection();
+
     /** @return <code>true</code> if soft mode is chosen, and <code>false</code> otherwise */
     boolean isSoftMode();
 

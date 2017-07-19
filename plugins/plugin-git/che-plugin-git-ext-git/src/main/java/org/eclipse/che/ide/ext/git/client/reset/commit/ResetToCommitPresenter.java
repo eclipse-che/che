@@ -85,6 +85,8 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
         this.project = project;
         this.skip = 0;
         this.revisions = new ArrayList<>();
+        this.selectedRevision = null;
+        this.view.resetRevisionSelection();
 
         fetchAndAddNextRevisions();
     }
