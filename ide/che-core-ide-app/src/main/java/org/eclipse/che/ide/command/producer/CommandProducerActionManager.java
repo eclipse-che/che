@@ -21,8 +21,7 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.command.CommandProducer;
 import org.eclipse.che.ide.api.constraints.Constraints;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +38,7 @@ import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
  * @see CommandProducer
  */
 @Singleton
-public class CommandProducerActionManager implements WsAgentStateHandler {
+public class CommandProducerActionManager {
 
     private final ActionManager                actionManager;
     private final CommandProducerActionFactory commandProducerActionFactory;
@@ -51,7 +50,8 @@ public class CommandProducerActionManager implements WsAgentStateHandler {
     private DefaultActionGroup commandActionsPopUpGroup;
 
     @Inject
-    public CommandProducerActionManager(EventBus eventBus,
+    public CommandProducerActionManager(Set<CommandProducer> commandProducers,
+                                        EventBus eventBus,
                                         ActionManager actionManager,
                                         CommandProducerActionFactory commandProducerActionFactory,
                                         Resources resources,
@@ -61,15 +61,16 @@ public class CommandProducerActionManager implements WsAgentStateHandler {
         this.resources = resources;
         this.messages = messages;
 
-        commandProducers = new HashSet<>();
+        this.commandProducers = new HashSet<>();
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+        if (commandProducers != null) {
+            this.commandProducers.addAll(commandProducers);
+        }
+
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> init());
     }
 
-    @Inject(optional = true)
-    private void start(Set<CommandProducer> commandProducers) {
-        this.commandProducers.addAll(commandProducers);
-
+    private void init() {
         commandActionsPopUpGroup = new DefaultActionGroup(messages.actionCommandsTitle(), true, actionManager);
         actionManager.registerAction("commandActionsPopUpGroup", commandActionsPopUpGroup);
         commandActionsPopUpGroup.getTemplatePresentation().setSVGResource(resources.compile());
@@ -86,15 +87,8 @@ public class CommandProducerActionManager implements WsAgentStateHandler {
         commandActionsToolbarGroup.add(commandActionsPopUpGroup);
         DefaultActionGroup mainToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_TOOLBAR);
         mainToolbarGroup.add(commandActionsToolbarGroup, new Constraints(AFTER, "changeResourceGroup"));
-    }
 
-    @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
         commandProducers.forEach(this::createActionsForProducer);
-    }
-
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 
     /** Creates actions for the given {@link CommandProducer}. */

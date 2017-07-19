@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.plugin.languageserver.ide.editor.ShowMessageProcessor;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
 
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
 
 /**
  * Subscribes and receives JSON-RPC messages related to 'window/showMessage' events
@@ -38,7 +38,7 @@ public class ShowMessageJsonRpcReceiver {
     @Inject
     private void subscribe(RequestTransmitter transmitter) {
         transmitter.newRequest()
-                   .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
+                   .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
                    .methodName("window/showMessage/subscribe")
                    .noParams()
                    .sendAndSkipResult();

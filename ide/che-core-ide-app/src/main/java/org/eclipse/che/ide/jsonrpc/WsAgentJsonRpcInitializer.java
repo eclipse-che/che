@@ -29,7 +29,7 @@ import java.util.Optional;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
 
 /** Initializes JSON-RPC connection to the ws-agent server. */
 @Singleton
@@ -44,7 +44,7 @@ public class WsAgentJsonRpcInitializer {
         this.initializer = initializer;
 
         eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> initializeJsonRpcService());
-        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, event -> initializer.terminate(WORKSAPCE_AGENT_ENDPOINT_ID));
+        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, event -> initializer.terminate(WORKSPACE_AGENT_ENDPOINT_ID));
 
         // in case ws-agent is already running
         eventBus.addHandler(BasicIDEInitializedEvent.TYPE, event -> {
@@ -87,7 +87,7 @@ public class WsAgentJsonRpcInitializer {
                 final String wsAgentWebSocketUrl = wsAgentBaseUrl.replaceFirst("http", "ws") + "/ws"; // TODO (spi ide): remove path when it comes with URL
                 final String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + appContext.getAppId());
 
-                initializer.initialize(WORKSAPCE_AGENT_ENDPOINT_ID, singletonMap("url", wsAgentUrl));
+                initializer.initialize(WORKSPACE_AGENT_ENDPOINT_ID, singletonMap("url", wsAgentUrl));
             });
         });
     }

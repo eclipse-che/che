@@ -40,7 +40,7 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
+import org.eclipse.che.ide.command.toolbar.processes.ActivateProcessOutputEvent;
 import org.eclipse.che.ide.api.machine.events.ExecAgentServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.MachineRunningEvent;
 import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;

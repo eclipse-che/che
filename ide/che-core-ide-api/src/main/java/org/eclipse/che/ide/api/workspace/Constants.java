@@ -12,9 +12,9 @@ package org.eclipse.che.ide.api.workspace;
 
 public final class Constants {
 
-    public static final String WORKSAPCE_STATUSES_ENDPOINT_ID = "workspace/statuses";
-    public static final String WORKSAPCE_OUTPUT_ENDPOINT_ID   = "workspace/output";
-    public static final String WORKSAPCE_AGENT_ENDPOINT_ID    = "workspace/agent";
+    public static final String WORKSPACE_STATUSES_ENDPOINT_ID = "workspace/statuses";
+    public static final String WORKSPACE_OUTPUT_ENDPOINT_ID   = "workspace/output";
+    public static final String WORKSPACE_AGENT_ENDPOINT_ID    = "workspace/agent";
 
     private Constants() {
     }

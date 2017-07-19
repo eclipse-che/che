@@ -15,12 +15,12 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
 
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_SUBSCRIBE;
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
 
 /**
  * Subscriber that register and deregister a listener for import project progress.
@@ -32,19 +32,15 @@ public class ProjectImportNotificationSubscriber {
 
     @Inject
     public ProjectImportNotificationSubscriber(EventBus eventBus, RequestTransmitter transmitter) {
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                transmitter.newRequest().endpointId(WORKSAPCE_AGENT_ENDPOINT_ID).methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE).noParams()
-                           .sendAndSkipResult();
-            }
+        eventBus.addHandler(WsAgentServerRunningEvent.TYPE, e -> transmitter.newRequest()
+                                                                            .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                                                                            .methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE).noParams()
+                                                                            .sendAndSkipResult());
 
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-                transmitter.newRequest().endpointId(WORKSAPCE_AGENT_ENDPOINT_ID).methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE).noParams()
-                           .sendAndSkipResult();
-            }
-        });
+        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> transmitter.newRequest()
+                                                                            .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                                                                            .methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE).noParams()
+                                                                            .sendAndSkipResult());
     }
 
 }

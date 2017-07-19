@@ -23,7 +23,7 @@ import org.eclipse.lsp4j.ServerCapabilities;
 
 import java.util.concurrent.TimeoutException;
 
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
 
 @Singleton
 public class LanguageServerRegistryJsonRpcClient {
@@ -36,7 +36,7 @@ public class LanguageServerRegistryJsonRpcClient {
     }
 
     public Promise<ServerCapabilities> initializeServer(String path) {
-        return Promises.create((resolve, reject) -> requestTransmitter.newRequest().endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
+        return Promises.create((resolve, reject) -> requestTransmitter.newRequest().endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
                         .methodName("languageServer/initialize").paramsAsString(path)
                         .sendAndReceiveResultAsDto(ServerCapabilities.class, 30000).onSuccess(resolve::apply)
                         .onFailure(error -> reject.apply(getPromiseError(error)))

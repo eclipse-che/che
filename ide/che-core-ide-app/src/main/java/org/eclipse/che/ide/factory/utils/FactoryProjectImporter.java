@@ -63,7 +63,7 @@ import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
 import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
@@ -303,7 +303,7 @@ public class FactoryProjectImporter extends AbstractImporter {
 
         checkoutContextRegistry.put(key, new CheckoutContext(projectName, repository, branch, startPoint));
         requestTransmitter.newRequest()
-                          .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
+                          .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
                           .methodName("git/checkoutOutput/subscribe")
                           .paramsAsString(key)
                           .sendAndSkipResult();
@@ -314,7 +314,7 @@ public class FactoryProjectImporter extends AbstractImporter {
 
         checkoutContextRegistry.remove(key);
         requestTransmitter.newRequest()
-                          .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
+                          .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
                           .methodName("git/checkoutOutput/unsubscribe")
                           .paramsAsString(key)
                           .sendAndSkipResult();

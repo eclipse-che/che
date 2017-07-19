@@ -18,16 +18,15 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.events.ActivateProcessOutputEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.machine.execagent.dto.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.mvp.Presenter;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.command.toolbar.CommandCreationGuide;
 
 import javax.inject.Inject;
@@ -50,10 +49,10 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
     private final Map<Integer, Process> runningProcesses;
 
     @Inject
-    public ProcessesListPresenter(final ProcessesListView view,
+    public ProcessesListPresenter(ProcessesListView view,
                                   EventBus eventBus,
-                                  final ExecAgentCommandManager execAgentClient,
-                                  final AppContext appContext,
+                                  ExecAgentCommandManager execAgentClient,
+                                  AppContext appContext,
                                   CommandManager commandManager,
                                   Provider<CommandExecutor> commandExecutorProvider,
                                   CommandCreationGuide commandCreationGuide) {
@@ -69,24 +68,21 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
 
         runningProcesses = new HashMap<>();
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                updateView();
-            }
+        addEventHandlers();
+    }
 
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-                runningProcesses.clear();
-                view.clearList();
-            }
+    private void addEventHandlers() {
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> updateView());
+
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> {
+            runningProcesses.clear();
+            view.clearList();
         });
 
-        eventBus.addHandler(ProcessStartedEvent.TYPE, event -> addProcessToList(event.getProcessID(),
-                                                                                event.getMachineName()));
+        eventBus.addHandler(ProcessStartedEvent.TYPE, event -> addProcessToList(event.getProcessID(), event.getMachineName()));
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, event -> {
-            final Process process = runningProcesses.get(event.getProcessID());
+            Process process = runningProcesses.get(event.getProcessID());
 
             if (process != null) {
                 view.processStopped(process);
@@ -94,7 +90,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
         });
 
         eventBus.addHandler(ProcessOutputClosedEvent.TYPE, event -> {
-            final Process process = runningProcesses.get(event.getPid());
+            Process process = runningProcesses.get(event.getPid());
 
             if (process != null) {
                 view.removeProcess(process);
@@ -135,7 +131,7 @@ public class ProcessesListPresenter implements Presenter, ProcessesListView.Acti
      *
      * @param pid
      *         PID of the process to add to the view
-     * @param machine
+     * @param machineName
      *         machine where process were run or currently running
      */
     private void addProcessToList(int pid, String machineName) {
