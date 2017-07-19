@@ -120,6 +120,7 @@ public class LanguageServerQuickAssistProcessor implements QuickAssistProcessor 
     QueryAnnotationsEvent.QueryCallback annotationCallback =
         new QueryAnnotationsEvent.QueryCallback() {
 
+          @SuppressWarnings("ReturnValueIgnored")
           @Override
           public void respond(
               Map<Annotation, org.eclipse.che.ide.api.editor.text.Position> annotations) {

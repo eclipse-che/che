@@ -24,6 +24,24 @@ public interface LanguageServerLocalization extends Messages {
   @Key("go.to.symbol.symbols")
   String goToSymbolSymbols(int num);
 
+  @Key("apply.workspace.edit.action.notification.title")
+  String applyWorkspaceActionNotificationTitle();
+
+  @Key("apply.workspace.edit.action.notification.done")
+  String applyWorkspaceActionNotificationDone();
+
+  @Key("apply.workspace.edit.action.notification.undoing")
+  String applyWorkspaceActionNotificationUndoing();
+
+  @Key("apply.workspace.edit.action.notification.undone")
+  String applyWorkspaceActionNotificationUndone();
+
+  @Key("apply.workspace.edit.action.notification.undo.failed")
+  String applyWorkspaceActionNotificationUndoFailed();
+
+  @Key("apply.workspace.edit.action.notification.modifying")
+  String applyWorkspaceActionNotificationModifying(String uri);
+
   @Key("modules.type")
   String modulesType(int p0);
 
