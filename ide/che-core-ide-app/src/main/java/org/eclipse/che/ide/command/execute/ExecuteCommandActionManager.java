@@ -78,6 +78,10 @@ public class ExecuteCommandActionManager {
         eventBus.addHandler(CommandsLoadedEvent.getType(), event -> commandManagerProvider.get().getCommands().forEach(this::addAction));
         eventBus.addHandler(CommandAddedEvent.getType(), e -> addAction(e.getCommand()));
         eventBus.addHandler(CommandRemovedEvent.getType(), e -> removeAction(e.getCommand()));
+        eventBus.addHandler(CommandsLoadedEvent.getType(), e -> {
+            commandManagerProvider.get().getCommands().forEach(this::removeAction);
+            commandManagerProvider.get().getCommands().forEach(this::addAction);
+        });
         eventBus.addHandler(CommandUpdatedEvent.getType(), e -> {
             removeAction(e.getInitialCommand());
             addAction(e.getUpdatedCommand());

@@ -35,6 +35,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -130,6 +131,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final CoreLocalizationConstant      localizationConstant;
     private final MachineResources              resources;
     private final Provider<WorkspaceAgent>      workspaceAgentProvider;
+    private final CommandManager                commandManager;
     private final SshServiceClient              sshServiceClient;
     private final AppContext                    appContext;
     private final NotificationManager           notificationManager;
@@ -158,6 +160,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    CommandConsoleFactory commandConsoleFactory,
                                    DialogFactory dialogFactory,
                                    ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory,
+                                   CommandManager commandManager,
                                    CommandTypeRegistry commandTypeRegistry,
                                    SshServiceClient sshServiceClient,
                                    ExecAgentCommandManager execAgentCommandManager,
@@ -165,6 +168,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.view = view;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
+        this.commandManager = commandManager;
         this.workspaceAgentProvider = workspaceAgentProvider;
         this.sshServiceClient = sshServiceClient;
         this.appContext = appContext;
@@ -1050,30 +1054,28 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     /*
                      * Hide the processes which are launched by command of unknown type
                      */
-                                           if (commandTypeRegistry.getCommandTypeById(type).isPresent()) {
-                                               final String processName = process.getName();
-                                               final CommandImpl commandByName = getWorkspaceCommandByName(processName);
+                    if (commandTypeRegistry.getCommandTypeById(type).isPresent()) {
+                        final String processName = process.getName();
+                        final Optional<CommandImpl> commandOptional = commandManager.getCommand(processName);
 
-                                               if (commandByName == null) {
-                                                   final String commandLine = process.getCommandLine();
-                                                   final CommandImpl command = new CommandImpl(processName, commandLine, type);
-                                                   final CommandOutputConsole console = commandConsoleFactory.create(command, machineName);
+                        if (!commandOptional.isPresent()) {
+                            final String commandLine = process.getCommandLine();
+                            final CommandImpl command = new CommandImpl(processName, commandLine, type);
+                            final CommandOutputConsole console = commandConsoleFactory.create(command, machineName);
 
                                                    getAndPrintProcessLogs(console, pid);
                                                    subscribeToProcess(console, pid);
 
-                                                   addCommandOutput(machineName, console);
-                                               } else {
-                                                   macroProcessorProvider.get().expandMacros(commandByName.getCommandLine())
-                                                                         .then(new Operation<String>() {
-                                                                             @Override
-                                                                             public void apply(String expandedCommandLine)
-                                                                                     throws OperationException {
-                                                                                 final CommandImpl command =
-                                                                                         new CommandImpl(commandByName.getName(),
-                                                                                                         expandedCommandLine,
-                                                                                                         commandByName.getType(),
-                                                                                                         commandByName.getAttributes());
+                            addCommandOutput(machineName, console);
+                        } else {
+                            final CommandImpl commandByName = commandOptional.get();
+                            macroProcessorProvider.get().expandMacros(commandByName.getCommandLine()).then(new Operation<String>() {
+                                @Override
+                                public void apply(String expandedCommandLine) throws OperationException {
+                                    final CommandImpl command = new CommandImpl(commandByName.getName(),
+                                                                                expandedCommandLine,
+                                                                                commandByName.getType(),
+                                                                                commandByName.getAttributes());
 
                                                                                  final CommandOutputConsole console =
                                                                                          commandConsoleFactory.create(command, machineName);
