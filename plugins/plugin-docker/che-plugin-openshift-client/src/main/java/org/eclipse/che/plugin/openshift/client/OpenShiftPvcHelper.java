@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import static org.eclipse.che.plugin.openshift.client.OpenShiftConnector.WORKSPACE_LOGS_FOLDER_SUFFIX;
 
 /**
  * Helper class for executing simple commands in a Persistent Volume on Openshift.
@@ -104,12 +107,21 @@ public class OpenShiftPvcHelper {
             return true;
         }
 
+        List<String> logsDirs = Arrays.asList(workspaceDirs);
+        logsDirs = logsDirs.stream().map(dir ->  dir + WORKSPACE_LOGS_FOLDER_SUFFIX).collect(Collectors.toList());
+
+        List<String> allDirs = new ArrayList<>();
+        allDirs.addAll(Arrays.asList(workspaceDirs));
+        allDirs.addAll(logsDirs);
+        String[] allDirsArray = allDirs.toArray(new String[allDirs.size()]);
+
+
         if (Command.MAKE.equals(command)) {
-            String[] dirsToCreate = filterDirsToCreate(workspaceDirs);
+            String[] dirsToCreate = filterDirsToCreate(allDirsArray);
             if (dirsToCreate.length == 0) {
                 return true;
             }
-            workspaceDirs = dirsToCreate;
+            allDirsArray = dirsToCreate;
         }
 
         VolumeMount vm = new VolumeMountBuilder()
@@ -126,8 +138,8 @@ public class OpenShiftPvcHelper {
                 .withName(workspacesPvcName)
                 .build();
 
-        String[] jobCommand = getCommand(command, "/projects/", workspaceDirs);
-        LOG.info("Executing command {} in PVC {} for {} dirs", jobCommand[0], workspacesPvcName, workspaceDirs.length);
+        String[] jobCommand = getCommand(command, "/projects/", allDirsArray);
+        LOG.info("Executing command {} in PVC {} for {} dirs", jobCommand[0], workspacesPvcName, allDirs.size());
 
         Map<String, Quantity> limit = Collections.singletonMap("memory", new Quantity(jobMemoryLimit));
 
@@ -169,7 +181,7 @@ public class OpenShiftPvcHelper {
                         LOG.info("Pod command {} failed", Arrays.toString(jobCommand));
                     case POD_PHASE_SUCCEEDED:
                         openShiftClient.resource(pod).delete();
-                        updateCreatedDirs(command, phase, workspaceDirs);
+                        updateCreatedDirs(command, phase, allDirsArray);
                         return POD_PHASE_SUCCEEDED.equals(phase);
                     default:
                         Thread.sleep(1000);
