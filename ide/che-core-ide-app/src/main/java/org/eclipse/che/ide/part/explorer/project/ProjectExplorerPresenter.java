@@ -265,6 +265,17 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                     }
                 } else if (getNode(resource.getLocation()) == null) {
                     tree.getNodeStorage().add(nodeFactory.newContainerNode((Container)resource, nodeSettings));
+                } else if (getNode(resource.getLocation()) != null) {
+                    for (Node node : tree.getRootNodes()) {
+                        if (node instanceof ResourceNode &&
+                            ((ResourceNode)node).getData().getLocation().equals(delta.getResource().getLocation())) {
+                            final String oldId = tree.getNodeStorage().getKeyProvider().getKey(node);
+                            ((ResourceNode)node).setData(delta.getResource());
+                            tree.getNodeStorage().reIndexNode(oldId, node);
+                            tree.refresh(node);
+                            updateTask.submit(delta.getResource().getLocation());
+                        }
+                    }
                 }
             } else if (delta.getKind() == REMOVED) {
                 Node node = getNode(resource.getLocation());
