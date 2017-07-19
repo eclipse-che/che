@@ -26,13 +26,15 @@ import java.util.Map;
  */
 @Singleton
 public class WebSocketConnectionManager {
-    private final WebSocketFactory webSocketFactory;
+    private final WebSocketFactory       webSocketFactory;
+    private final WebSocketActionManager actionManager;
 
     private final Map<String, WebSocketConnection> connectionsRegistry = new HashMap<>();
 
     @Inject
-    public WebSocketConnectionManager(WebSocketFactory webSocketFactory) {
+    public WebSocketConnectionManager(WebSocketFactory webSocketFactory, WebSocketActionManager actionManager) {
         this.webSocketFactory = webSocketFactory;
+        this.actionManager = actionManager;
     }
 
     /**
@@ -62,6 +64,7 @@ public class WebSocketConnectionManager {
         }
 
         webSocketConnection.open();
+        actionManager.getOnEstablishActions(url).forEach(Runnable::run);
 
         Log.debug(getClass(), "Opening connection. Url: " + url);
     }
@@ -82,6 +85,8 @@ public class WebSocketConnectionManager {
         }
 
         webSocketConnection.close();
+        actionManager.getOnCloseActions(url).forEach(Runnable::run);
+
         Log.debug(WebSocketConnectionManager.class, "Closing connection.");
     }
 
@@ -111,7 +116,6 @@ public class WebSocketConnectionManager {
      *
      * @param url
      *         url of a web socket connection to be checked
-     *
      * @return connection status: true if opened, false if else
      */
     public boolean isConnectionOpen(String url) {
