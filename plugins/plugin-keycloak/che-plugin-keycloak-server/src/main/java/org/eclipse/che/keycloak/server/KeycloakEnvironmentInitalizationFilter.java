@@ -86,7 +86,7 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
         if (context == null) {
             try {
                 tokenString =  httpRequest.getHeader("Authorization");
-?                String userId = machineTokenRegistry.getUserId(tokenString);
+                String userId = machineTokenRegistry.getUserId(tokenString);
                 user = userManager.getById(userId);
             } catch (NotFoundException | ServerException e) {
                 throw new ServletException("Cannot detect or instantiate user");
