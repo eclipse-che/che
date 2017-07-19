@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.command.CommandAddedEvent;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
@@ -84,6 +85,10 @@ public class ExecuteCommandActionManager implements WsAgentComponent {
 
         eventBus.addHandler(CommandAddedEvent.getType(), e -> addAction(e.getCommand()));
         eventBus.addHandler(CommandRemovedEvent.getType(), e -> removeAction(e.getCommand()));
+        eventBus.addHandler(CommandsLoadedEvent.getType(), e -> {
+            commandManager.getCommands().forEach(this::removeAction);
+            commandManager.getCommands().forEach(this::addAction);
+        });
         eventBus.addHandler(CommandUpdatedEvent.getType(), e -> {
             removeAction(e.getInitialCommand());
             addAction(e.getUpdatedCommand());

@@ -49,8 +49,7 @@ export class ImportGitProjectService {
    */
   getProjectProps(): che.IProjectTemplate {
     const props = {} as che.IProjectTemplate;
-
-    const [ , name] = /\/([^\/]+)\.git$/i.exec(this._location);
+    const [ , name] = /.*\/([^.]+)(\.git?|$)/i.exec(this._location);
     const path = '/' +  name.replace(/[^\w-_]/g, '_');
     props.name = name;
     props.displayName = name;

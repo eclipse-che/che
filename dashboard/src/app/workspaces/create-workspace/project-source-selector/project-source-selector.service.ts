@@ -109,6 +109,8 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
       case ProjectSource.GIT: {
         const projectProps = this.importGitProjectService.getProjectProps();
         const projectTemplate = this.buildProjectTemplate(projectProps);
+        delete projectTemplate.type;
+        delete projectTemplate.projectType;
         this.addProjectTemplate(source, projectTemplate);
       }
         break;
@@ -116,6 +118,8 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
         const repositoriesProps = this.importGithubProjectService.getRepositoriesProps();
         repositoriesProps.forEach((repositoryProps: che.IProjectTemplate) => {
           const projectTemplate = this.buildProjectTemplate(repositoryProps);
+          delete projectTemplate.type;
+          delete projectTemplate.projectType;
           this.addProjectTemplate(source, projectTemplate);
         });
       }
@@ -123,6 +127,8 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
       case ProjectSource.ZIP: {
         const projectProps = this.importZipProjectService.getProjectProps();
         const projectTemplate = this.buildProjectTemplate(projectProps);
+        delete projectTemplate.type;
+        delete projectTemplate.projectType;
         this.addProjectTemplate(source, projectTemplate);
       }
         break;
@@ -146,6 +152,10 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
       projectTemplate.name = newName;
       projectTemplate.displayName = newName;
       projectTemplate.path = '/' +  newName.replace(/[^\w-_]/g, '_');
+    }
+
+    if (!projectTemplate.type && projectTemplate.projectType) {
+      projectTemplate.type = projectTemplate.projectType;
     }
 
     this.projectTemplates.push(projectTemplate);
