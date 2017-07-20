@@ -1,22 +1,18 @@
-<!--
-
-    Copyright (c) 2015 Codenvy, S.A.
-    All rights reserved. This program and the accompanying materials
-    are made available under the terms of the Eclipse Public License v1.0
-    which accompanies this distribution, and is available at
-    http://www.eclipse.org/legal/epl-v10.html
-
-    Contributors:
-      Codenvy, S.A. - initial API and implementation
-
--->
-<div class="che-workspace-button" ng-init="isDropDown = false">
-  <che-button-default ng-disabled="isDisabled" class="run-btton"
-                      che-button-title="{{isStopButton ? 'Stop' : 'Run'}}" name="runButton"
+<div class="che-workspace-button" class="btn-group" uib-dropdown>
+  <che-button-default id="split-button"
+                      ng-disabled="isDisabled"
+                      class="run-button"
+                      che-button-title="{{isStopButton ? 'Stop' : 'Run'}}"
+                      name="runButton"
                       ng-click="changeWorkspaceStatus()"></che-button-default>
-  <che-button-default ng-disabled="isDisabled" class="drop-down"
+  <che-button-default uib-dropdown-toggle
+                      ng-disabled="!isStopButton || isDisabled || isStarting"
+                      class="drop-down"
                       che-button-title="" name="dropDown"
-                      che-button-icon="fa fa-caret-down"
-                      ng-click="isDropDown = !isDropDown"></che-button-default>
-  <div class="area-drop-down" ng-if="isDropDown"></div>
+                      che-button-icon="fa fa-caret-down"></che-button-default>
+  <ul class="area-drop-down" uib-dropdown-menu role="menu" aria-labelledby="split-button">
+    <li role="menuitem" ng-repeat="dropDownItem in dropDownItems track by $index"
+        ng-class="{'selected-item' : dropDownSelectPos  === $index}"
+        ng-mousedown="onSelect($index)"><span>{{dropDownItem}}</span></li>
+  </ul>
 </div>

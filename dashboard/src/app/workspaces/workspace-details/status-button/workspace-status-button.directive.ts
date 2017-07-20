@@ -9,22 +9,28 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
 
 interface IWorkspaceStatusButtonScope extends ng.IScope {
   isDisabled: boolean;
+  isStarting: boolean;
   isStopButton: boolean;
-  isCreationFlow: boolean;
   isAutoSnapshot: boolean;
   workspaceStatus: string;
+  dropDownSelectPos: number;
+  dropDownItems: Array<string>;
   runWorkspace: Function;
-  stopWorkspace: Function;
   changeWorkspaceStatus: Function;
+  onSelect: (dropDownItem: number) => void;
+  stopWorkspace: (data: { isCreateSnapshot: boolean }) => void;
 }
 
 const STARTING = 'STARTING';
 const RUNNING = 'RUNNING';
 const STOPPING = 'STOPPING';
 const SNAPSHOTTING = 'SNAPSHOTTING';
+const STOP_WITH_SNAPSHOT = 'Stop with snapshot';
+const STOP_WITHOUT_SNAPSHOT = 'Stop without snapshot';
 
 /**
  * @ngdoc directive
@@ -37,8 +43,6 @@ const SNAPSHOTTING = 'SNAPSHOTTING';
  * `<workspace-status-button>` defines a status-button component
  *
  * @param {string=} workspaceStatus
- * @param {boolean=} isCreationFlow
- * @param {boolean=} isAutoSnapshot
  * @param {Function=} runWorkspace
  * @param {Function=} stopWorkspace
  *
@@ -52,18 +56,30 @@ export class CheWorkspaceStatusButton {
 
   // scope values
   scope = {
-    isCreationFlow: '=',
-    isAutoSnapshot: '=',
     workspaceStatus: '=',
     runWorkspace: '&',
     stopWorkspace: '&'
   };
+
+  private cheWorkspace: CheWorkspace;
+
+  /**
+   * Default constructor that is using resource
+   * @ngInject for Dependency injection
+   */
+  constructor(cheWorkspace: CheWorkspace) {
+    this.cheWorkspace = cheWorkspace;
+  }
 
   /**
    * Keep reference to the model controller
    */
   link($scope: IWorkspaceStatusButtonScope) {
     const runStatuses = [STARTING, RUNNING, STOPPING, SNAPSHOTTING];
+    $scope.dropDownItems = [STOP_WITH_SNAPSHOT, STOP_WITHOUT_SNAPSHOT];
+
+    const preselectItem = $scope.dropDownItems.indexOf(this.cheWorkspace.getAutoSnapshotSettings() ? STOP_WITH_SNAPSHOT : STOP_WITHOUT_SNAPSHOT);
+    $scope.dropDownSelectPos = preselectItem > 0 ? preselectItem : 0;
 
     const updateButton = (workspaceStatus: string) => {
       if (!workspaceStatus) {
@@ -71,22 +87,31 @@ export class CheWorkspaceStatusButton {
       } else {
         $scope.isStopButton = runStatuses.indexOf(workspaceStatus) !== -1;
       }
-      $scope.isDisabled = $scope.isCreationFlow || workspaceStatus === STOPPING || workspaceStatus === SNAPSHOTTING;
+      $scope.isDisabled = [STOPPING, SNAPSHOTTING].indexOf(workspaceStatus) !== -1;
+      $scope.isStarting = workspaceStatus === STARTING;
     };
-
     updateButton($scope.workspaceStatus);
 
-    $scope.$watch('workspaceStatus',
-      (workspaceStatus: string) => {
-        updateButton(workspaceStatus);
-      });
+    $scope.onSelect = (dropDownItem: number) => {
+      $scope.dropDownSelectPos = dropDownItem;
+    };
 
     $scope.changeWorkspaceStatus = () => {
       if ($scope.isStopButton) {
-        $scope.stopWorkspace();
+        const isCreateSnapshot = !$scope.isStarting ? $scope.dropDownItems.indexOf(STOP_WITH_SNAPSHOT) === $scope.dropDownSelectPos : false;
+        $scope.stopWorkspace({isCreateSnapshot: isCreateSnapshot});
       } else {
         $scope.runWorkspace();
       }
     };
+
+    const watcher = $scope.$watch(() => {
+      return $scope.workspaceStatus;
+    }, (workspaceStatus: string) => {
+      updateButton(workspaceStatus);
+    });
+    $scope.$on('$destroy', () => {
+      watcher();
+    });
   }
 }

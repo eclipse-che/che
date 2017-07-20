@@ -52,7 +52,7 @@ export class PageObjectMock {
     this.pageLabels = RemotePageLabels.getValues();
     this.countPages = Math.ceil(countObjects / maxItems);
 
-    this.createPageLabelsData()
+    this.createPageLabelsData();
   }
 
   /**
@@ -62,24 +62,24 @@ export class PageObjectMock {
    */
   getPageNumberByLabel(pageKey: string): number {
     let currentPage = this.pageObjectResource.getPagesInfo().currentPageNumber;
-      switch (pageKey) {
-        case RemotePageLabels.FIRST:
-          currentPage = 1;
-          break;
-        case RemotePageLabels.NEXT:
-          currentPage = currentPage < this.countPages ? currentPage + 1 : this.countPages;
-          break;
-        case RemotePageLabels.PREVIOUS:
-          currentPage = currentPage > 1 ? currentPage - 1: 1;
-          break;
-        case RemotePageLabels.LAST:
-          currentPage = this.countPages;
-          break;
-        default:
-          currentPage = 1;
-      }
+    switch (pageKey) {
+      case RemotePageLabels.FIRST:
+        currentPage = 1;
+        break;
+      case RemotePageLabels.NEXT:
+        currentPage = currentPage < this.countPages ? currentPage + 1 : this.countPages;
+        break;
+      case RemotePageLabels.PREVIOUS:
+        currentPage = currentPage > 1 ? currentPage - 1 : 1;
+        break;
+      case RemotePageLabels.LAST:
+        currentPage = this.countPages;
+        break;
+      default:
+        currentPage = 1;
+    }
 
-      return currentPage;
+    return currentPage;
   }
 
   /**
@@ -93,7 +93,7 @@ export class PageObjectMock {
       currentPage = this.getPageNumberByLabel(key);
       let testSkipCount = (currentPage - 1) * this.maxItems;
 
-      let currentPageLength = this.countObjects - ((currentPage -1) * this.maxItems);
+      let currentPageLength = this.countObjects - ((currentPage - 1) * this.maxItems);
       currentPageLength = currentPageLength < this.maxItems ? currentPageLength : this.maxItems;
       currentPageLength = currentPageLength > 0 ? currentPageLength : 0;
 
@@ -118,7 +118,7 @@ export class PageObjectMock {
         urlRegExp: this.getUrlRegExp(),
         headerData: {link: headerLink},
         objects: objects
-      })
+      });
     });
   }
 
