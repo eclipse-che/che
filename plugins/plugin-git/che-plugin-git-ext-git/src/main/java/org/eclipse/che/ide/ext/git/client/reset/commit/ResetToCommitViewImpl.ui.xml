@@ -47,18 +47,10 @@
                     <g:RadioButton ui:field="hard" name="type" addStyleNames="{res.gitCSS.textFont}" text="{locale.resetHardTypeTitle}"
                                    debugId="git-reset-hard"/>
                 </g:north>
-                <!--<g:north size="20">-->
-                    <!--<g:RadioButton ui:field="keep" name="type" visible="false" addStyleNames="{res.gitCSS.textFont}"-->
-                                   <!--text="{locale.resetKeepTypeTitle}" debugId="git-reset-keep"/>-->
-                <!--</g:north>-->
-                <!--<g:north size="20">-->
-                    <!--<g:RadioButton ui:field="merge" name="type" visible="false" addStyleNames="{res.gitCSS.textFont}"-->
-                                   <!--text="{locale.resetMergeTypeTitle}" debugId="git-reset-merge"/>-->
-                <!--</g:north>-->
             </g:DockLayoutPanel>
         </g:south>
         <g:center>
-            <g:ScrollPanel addStyleNames="{style.commits}">
+            <g:ScrollPanel ui:field="revisionsPanel" addStyleNames="{style.commits}">
                 <p1:CellTable width="100%" ui:field="commits" focus="false"/>
             </g:ScrollPanel>
         </g:center>
