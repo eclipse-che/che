@@ -84,6 +84,15 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
+            <unpack>true</unpack>
+            <outputDirectory>lib/linux_amd64</outputDirectory>
+            <outputFileNameMapping>bootstrapper-linux_amd64</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che:bootstrapper:tar.gz:linux_amd64</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>lib/linux_amd64/exec</outputDirectory>
             <outputFileNameMapping>exec-agent-linux_amd64.tar.gz</outputFileNameMapping>

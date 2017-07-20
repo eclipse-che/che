@@ -23,13 +23,12 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.shared.Utils;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
-import javax.inject.Inject;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
 import java.net.URI;
 import java.util.List;
 
-import static org.eclipse.che.workspace.infrastructure.docker.output.OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE;
+import static org.eclipse.che.api.workspace.server.OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE;
 
 /**
  * Docker specific implementation of {@link RuntimeContext}.
@@ -41,9 +40,8 @@ public class DockerRuntimeContext extends RuntimeContext {
     private final DockerRuntimeFactory dockerRuntimeFactory;
     private final List<String>         orderedContainers;
     private final String               devMachineName;
-    private final String               apiEndpoint;
+    private final String               websocketEndpointBase;
 
-    @Inject
     public DockerRuntimeContext(@Assisted DockerRuntimeInfrastructure infrastructure,
                                 @Assisted RuntimeIdentity identity,
                                 @Assisted Environment environment,
@@ -51,23 +49,20 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 @Assisted List<String> orderedContainers,
                                 InstallerRegistry installerRegistry,
                                 DockerRuntimeFactory dockerRuntimeFactory,
-                                String apiEndpoint)
+                                String websocketEndpointBase)
             throws ValidationException, InfrastructureException {
         super(environment, identity, infrastructure, installerRegistry);
         this.devMachineName = Utils.getDevMachineName(environment);
         this.orderedContainers = orderedContainers;
         this.dockerEnvironment = dockerEnvironment;
         this.dockerRuntimeFactory = dockerRuntimeFactory;
-        this.apiEndpoint = apiEndpoint;
+        this.websocketEndpointBase = websocketEndpointBase;
     }
 
     @Override
     public URI getOutputChannel() throws InfrastructureException {
         try {
-            final URI apiURI = URI.create(apiEndpoint);
-            return UriBuilder.fromUri(apiURI)
-                             .scheme("https".equals(apiURI.getScheme()) ? "wss" : "ws")
-                             .replacePath(apiURI.getPath().replace("/api", ""))
+            return UriBuilder.fromUri(websocketEndpointBase)
                              .path(OUTPUT_WEBSOCKET_ENDPOINT_BASE)
                              .build();
         } catch (UriBuilderException | IllegalArgumentException ex) {

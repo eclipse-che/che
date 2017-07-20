@@ -10,9 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.installer.server;
 
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.installer.shared.dto.InstallerDto;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
 
+import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -27,7 +32,19 @@ public class DtoConverter {
                                          .withDescription(installer.getDescription())
                                          .withProperties(installer.getProperties())
                                          .withScript(installer.getScript())
-                                         .withDependencies(installer.getDependencies());
+                                         .withDependencies(installer.getDependencies())
+                                         .withServers(installer.getServers()
+                                                               .entrySet()
+                                                               .stream()
+                                                               .collect(toMap(Map.Entry::getKey,
+                                                                              entry -> asDto(entry.getValue()))));
+    }
+
+    /** Converts {@link ServerConfig} to {@link ServerConfigDto}. */
+    public static ServerConfigDto asDto(ServerConfig serverConf) {
+        return newDto(ServerConfigDto.class).withPort(serverConf.getPort())
+                                            .withProtocol(serverConf.getProtocol())
+                                            .withPath(serverConf.getPath());
     }
 
     private DtoConverter() {}

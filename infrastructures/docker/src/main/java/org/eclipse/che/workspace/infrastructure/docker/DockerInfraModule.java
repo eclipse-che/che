@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver;
 import org.eclipse.che.plugin.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl;
+import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.docker.config.DockerExtraHostsFromPropertyProvider;
 import org.eclipse.che.workspace.infrastructure.docker.config.dns.DnsResolversModule;
 import org.eclipse.che.workspace.infrastructure.docker.config.env.ApiEndpointEnvVariableProvider;
@@ -28,10 +29,8 @@ import org.eclipse.che.workspace.infrastructure.docker.config.env.ProjectsRootEn
 import org.eclipse.che.workspace.infrastructure.docker.config.proxy.DockerProxyModule;
 import org.eclipse.che.workspace.infrastructure.docker.config.volume.ExtraVolumeModule;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentTypeModule;
-import org.eclipse.che.workspace.infrastructure.docker.output.OutputService;
 import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactory;
 import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactoryImpl;
-import org.eclipse.che.workspace.infrastructure.docker.service.InstallerService;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyModule;
 
 import java.util.Set;
@@ -95,9 +94,6 @@ public class DockerInfraModule extends AbstractModule {
         devMachineEnvVars.addBinding().toProvider(JavaOptsEnvVariableProvider.class);
         allMachinesEnvVars.addBinding().toProvider(ApiEndpointEnvVariableProvider.class);
 
-        bind(OutputService.class);
-        bind(InstallerService.class);
-
         install(new DnsResolversModule());
         install(new DockerProxyModule());
         install(new ExtraVolumeModule());
@@ -109,13 +105,9 @@ public class DockerInfraModule extends AbstractModule {
 
         bind(DockerRegistryDynamicAuthResolver.class).to(NoOpDockerRegistryDynamicAuthResolverImpl.class);
 
-        install(new FactoryModuleBuilder()
-                        .implement(DockerInternalRuntime.class, DockerInternalRuntime.class)
-                        .build(DockerRuntimeFactory.class));
+        install(new FactoryModuleBuilder().build(DockerRuntimeFactory.class));
 
-        install(new FactoryModuleBuilder()
-                        .implement(Bootstrapper.class, Bootstrapper.class)
-                        .build(BootstrapperFactory.class));
+        install(new FactoryModuleBuilder().build(DockerBootstrapperFactory.class));
 
         bind(ServerCheckerFactory.class).to(ServerCheckerFactoryImpl.class);
     }

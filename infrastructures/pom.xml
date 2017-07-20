@@ -25,5 +25,6 @@
     <name>Che Infrastructures Parent</name>
     <modules>
         <module>docker</module>
+        <module>openshift</module>
     </modules>
 </project>

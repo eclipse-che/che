@@ -138,7 +138,7 @@ public abstract class RuntimeContext {
         }
     }
 
-    private class InternalRecipe {
+    protected class InternalRecipe {
 
         private final String content;
         private final String type;
