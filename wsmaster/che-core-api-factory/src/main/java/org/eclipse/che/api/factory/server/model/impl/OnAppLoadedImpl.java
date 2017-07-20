@@ -25,14 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.stream.Collectors.toList;
+import static javax.persistence.CascadeType.ALL;
+
 /**
  * Data object for {@link OnAppLoaded}.
  *
  * @author Anton Korneta
  */
-import static java.util.stream.Collectors.toList;
-import static javax.persistence.CascadeType.ALL;
-
 @Entity(name = "OnAppLoaded")
 @Table(name = "che_factory_on_app_loaded_action")
 public class OnAppLoadedImpl implements OnAppLoaded {

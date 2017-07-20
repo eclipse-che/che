@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.junit.server.inject;
 
-import static com.google.inject.multibindings.Multibinder.newSetBinder;
-
-import org.eclipse.che.api.testing.server.framework.TestRunner;
-import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.testing.junit.server.JUnitTestRunner;
-
 import com.google.inject.AbstractModule;
+
+import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.testing.junit.server.junit4.JUnit4TestRunner;
+
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 /**
  * @author Mirage Abeysekara
@@ -25,6 +24,6 @@ import com.google.inject.AbstractModule;
 public class JunitGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
-        newSetBinder(binder(), TestRunner.class).addBinding().to(JUnitTestRunner.class);
+        newSetBinder(binder(), org.eclipse.che.api.testing.server.framework.TestRunner.class).addBinding().to(JUnit4TestRunner.class);
     }
 }
