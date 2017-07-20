@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.ide.editor;
+package org.eclipse.che.plugin.languageserver.ide.window;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

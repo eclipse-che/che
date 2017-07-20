@@ -45,16 +45,17 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class RequestHandlerManager {
     private final static Logger LOGGER = getLogger(RequestHandlerManager.class);
 
-    private final Map<String, Category>          methodToCategory   = new ConcurrentHashMap<>();
-    private final Map<String, OneToOneHandler>   oneToOneHandlers   = new ConcurrentHashMap<>();
-    private final Map<String, OneToManyHandler>  oneToManyHandlers  = new ConcurrentHashMap<>();
-    private final Map<String, OneToNoneHandler>  oneToNoneHandlers  = new ConcurrentHashMap<>();
-    private final Map<String, ManyToOneHandler>  manyToOneHandlers  = new ConcurrentHashMap<>();
-    private final Map<String, ManyToManyHandler> manyToManyHandlers = new ConcurrentHashMap<>();
-    private final Map<String, ManyToNoneHandler> manyToNoneHandlers = new ConcurrentHashMap<>();
-    private final Map<String, NoneToOneHandler>  noneToOneHandlers  = new ConcurrentHashMap<>();
-    private final Map<String, NoneToManyHandler> noneToManyHandlers = new ConcurrentHashMap<>();
-    private final Map<String, NoneToNoneHandler> noneToNoneHandlers = new ConcurrentHashMap<>();
+    private final Map<String, Category>               methodToCategory        = new ConcurrentHashMap<>();
+    private final Map<String, OneToOneHandler>        oneToOneHandlers        = new ConcurrentHashMap<>();
+    private final Map<String, OneToPromiseOneHandler> oneToPromiseOneHandlers = new ConcurrentHashMap<>();
+    private final Map<String, OneToManyHandler>       oneToManyHandlers       = new ConcurrentHashMap<>();
+    private final Map<String, OneToNoneHandler>       oneToNoneHandlers       = new ConcurrentHashMap<>();
+    private final Map<String, ManyToOneHandler>       manyToOneHandlers       = new ConcurrentHashMap<>();
+    private final Map<String, ManyToManyHandler>      manyToManyHandlers      = new ConcurrentHashMap<>();
+    private final Map<String, ManyToNoneHandler>      manyToNoneHandlers      = new ConcurrentHashMap<>();
+    private final Map<String, NoneToOneHandler>       noneToOneHandlers       = new ConcurrentHashMap<>();
+    private final Map<String, NoneToManyHandler>      noneToManyHandlers      = new ConcurrentHashMap<>();
+    private final Map<String, NoneToNoneHandler>      noneToNoneHandlers      = new ConcurrentHashMap<>();
 
     private final WebSocketMessageTransmitter transmitter;
     private final JsonRpcComposer             dtoComposer;
@@ -74,7 +75,15 @@ public class RequestHandlerManager {
         oneToOneHandlers.put(method, new OneToOneHandler<>(pClass, rClass, biFunction));
     }
 
-    public synchronized <P, R> void registerOneToMany(String method, Class<P> pClass, Class<R> rClass, BiFunction<String, P, List<R>> biFunction) {
+    public synchronized <P, R> void registerOneToPromiseOne(String method, Class<P> pClass, Class<R> rClass,
+                                               BiFunction<String, P, JsonRpcPromise<R>> function) {
+        mustNotBeRegistered(method);
+        methodToCategory.put(method, Category.ONE_TO_PROMISE_ONE);
+        oneToPromiseOneHandlers.put(method, new OneToPromiseOneHandler<>(pClass, rClass, function));
+    }
+
+    public synchronized <P, R> void registerOneToMany(String method, Class<P> pClass, Class<R> rClass,
+                                                      BiFunction<String, P, List<R>> biFunction) {
         mustNotBeRegistered(method);
 
         methodToCategory.put(method, Category.ONE_TO_MANY);
@@ -168,6 +177,9 @@ public class RequestHandlerManager {
                 break;
             case NONE_TO_NONE:
                 noneToNoneHandlers.remove(method);
+                break;
+            case ONE_TO_PROMISE_ONE:
+                oneToPromiseOneHandlers.remove(method);
         }
 
         return true;
@@ -200,6 +212,10 @@ public class RequestHandlerManager {
             case NONE_TO_MANY:
                 NoneToManyHandler noneToManyHandler = noneToManyHandlers.get(method);
                 transmitMany(endpointId, requestId, noneToManyHandler.handle(endpointId));
+                break;
+            case ONE_TO_PROMISE_ONE:
+                OneToPromiseOneHandler promiseOneHandler = oneToPromiseOneHandlers.get(method);
+                transmitPromiseOne(endpointId, requestId, promiseOneHandler.handle(endpointId, params));
                 break;
             default:
                 LOGGER.error("Something went wrong trying to find out handler category");
@@ -247,6 +263,15 @@ public class RequestHandlerManager {
         transmitter.transmit(endpointId, message);
     }
 
+    private void transmitPromiseOne(String endpointId, String requestId, JsonRpcPromise<Object> promise) {
+        promise.onSuccess(result -> transmitOne(endpointId, requestId, result));
+        promise.onFailure(jsonRpcError -> {
+            JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(requestId, null, jsonRpcError);
+            String message = marshaller.marshall(jsonRpcResponse);
+            transmitter.transmit(endpointId, message);
+        });
+    }
+
     private void transmitMany(String endpointId, String id, List<?> result) {
         JsonRpcResult jsonRpcResult = new JsonRpcResult(result);
         JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(id, jsonRpcResult, null);
@@ -263,7 +288,8 @@ public class RequestHandlerManager {
         MANY_TO_NONE,
         NONE_TO_ONE,
         NONE_TO_MANY,
-        NONE_TO_NONE
+        NONE_TO_NONE,
+        ONE_TO_PROMISE_ONE
     }
 
     private class OneToOneHandler<P, R> {
@@ -280,6 +306,23 @@ public class RequestHandlerManager {
         private R handle(String endpointId, JsonRpcParams params) {
             P dto = dtoComposer.composeOne(params, pClass);
             return biFunction.apply(endpointId, dto);
+        }
+    }
+
+    private class OneToPromiseOneHandler<P, R> {
+        final private Class<P>                                 pClass;
+        final private Class<R>                                 rClass;
+        private BiFunction<String, P, JsonRpcPromise<R>> function;
+
+        private OneToPromiseOneHandler(Class<P> pClass, Class<R> rClass, BiFunction<String, P, JsonRpcPromise<R>> function) {
+            this.pClass = pClass;
+            this.rClass = rClass;
+            this.function = function;
+        }
+
+        private JsonRpcPromise<R> handle(String endpointId, JsonRpcParams params) {
+            P dto = dtoComposer.composeOne(params, pClass);
+            return function.apply(endpointId, dto);
         }
     }
 

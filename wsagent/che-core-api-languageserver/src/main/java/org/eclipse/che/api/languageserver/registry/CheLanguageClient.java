@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
+import com.google.inject.assistedinject.Assisted;
+
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
@@ -20,22 +23,25 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * A LSP language client implementation for Che
- * 
- * @author Thomas Mäder
  *
+ * @author Thomas Mäder
  */
 public class CheLanguageClient implements LanguageClient {
     private final static Logger LOG = LoggerFactory.getLogger(CheLanguageClient.class);
 
-    private EventService eventService;
-    private String       serverId;
+    private EventService                  eventService;
+    private ShowMessageJsonRpcTransmitter transmitter;
+    private String                        serverId;
 
-    public CheLanguageClient(EventService eventService, String serverId) {
+    @Inject
+    public CheLanguageClient(EventService eventService, ShowMessageJsonRpcTransmitter transmitter, @Assisted String serverId) {
         this.eventService = eventService;
+        this.transmitter = transmitter;
         this.serverId = serverId;
     }
 
@@ -46,7 +52,7 @@ public class CheLanguageClient implements LanguageClient {
 
     @Override
     public CompletableFuture<MessageActionItem> showMessageRequest(ShowMessageRequestParams requestParams) {
-        return CompletableFuture.completedFuture(null);
+        return transmitter.sendShowMessageRequest(requestParams);
     }
 
     @Override
@@ -62,18 +68,18 @@ public class CheLanguageClient implements LanguageClient {
     @Override
     public void logMessage(MessageParams message) {
         switch (message.getType()) {
-        case Error:
-            LOG.error(message.getMessage());
-            break;
-        case Warning:
-            LOG.warn(message.getMessage());
-            break;
-        case Info:
-            LOG.info(message.getMessage());
-            break;
-        case Log:
-            LOG.debug(message.getMessage());
-            break;
+            case Error:
+                LOG.error(message.getMessage());
+                break;
+            case Warning:
+                LOG.warn(message.getMessage());
+                break;
+            case Info:
+                LOG.info(message.getMessage());
+                break;
+            case Log:
+                LOG.debug(message.getMessage());
+                break;
         }
     }
 }
