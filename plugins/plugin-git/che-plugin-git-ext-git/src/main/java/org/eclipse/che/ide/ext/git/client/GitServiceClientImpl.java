@@ -430,6 +430,6 @@ public class GitServiceClientImpl implements GitServiceClient {
     }
 
     private String getWsAgentBaseUrl() {
-        return appContext.getDevMachine().getWsAgentBaseUrl();
+        return appContext.getDevAgentEndpoint();
     }
 }

@@ -14,8 +14,6 @@ import com.google.common.annotations.Beta;
 
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.api.factory.model.FactoryImpl;
-import org.eclipse.che.ide.api.machine.ActiveRuntime;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -118,17 +116,6 @@ public interface AppContext {
     String getWorkspaceName();
 
     /**
-     * Returns instance  of the developer machine (where workspace is bound).
-     *
-     * @return the object which describes developer machine
-     * @see DevMachine
-     * @since 4.2.0
-     * @deprecated use {@link org.eclipse.che.ide.api.workspace.model.RuntimeImpl#getDevMachine()}
-     */
-    @Deprecated
-    DevMachine getDevMachine();
-
-    /**
      * Returns the path where projects are stored on file system.
      *
      * @return the path to projects root.
@@ -187,12 +174,15 @@ public interface AppContext {
     /** Returns the current workspace. */
     WorkspaceImpl getWorkspace();
 
-    /** @deprecated use {@link #getWorkspace()} and {@link WorkspaceImpl#getRuntime()} */
-    @Deprecated
-    ActiveRuntime getActiveRuntime();
-
+    /** Returns URL of Che Master API endpoint. */
     String getMasterEndpoint();
 
+    /**
+     * Returns URL of ws-agent server API endpoint.
+     *
+     * @throws RuntimeException
+     *         if ws-agent server doesn't exist. Normally it may happen when workspace is stopped.
+     */
     String getDevAgentEndpoint();
 
     /**
