@@ -15,6 +15,9 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.extension.Extension;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.plugin.testing.ide.action.DebugTestAction;
 import org.eclipse.che.plugin.testing.ide.action.RunTestAction;
 
@@ -31,11 +34,14 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
 @Singleton
 @Extension(title = "Testing Extension", version = "1.0.0")
 public class TestingExtension {
+    public static final String RUN_TEST = "RunTest";
+    public static final String DEBUG_TEST = "DebugTest";
 
     @Inject
     public TestingExtension(ActionManager actionManager,
                             TestLocalizationConstant localization,
                             Set<TestAction> testActions,
+                            KeyBindingAgent keyBinding,
                             DebugTestAction debugTestAction,
                             RunTestAction runTestAction) {
 
@@ -48,8 +54,17 @@ public class TestingExtension {
             testAction.addMainMenuItems(testMainMenu);
             testMainMenu.addSeparator();
         }
-        actionManager.registerAction("RunTest", runTestAction);
-        actionManager.registerAction("DebugTest", debugTestAction);
+        actionManager.registerAction(RUN_TEST, runTestAction);
+        actionManager.registerAction(DEBUG_TEST, debugTestAction);
+
+        if (UserAgent.isMac()) {
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().alt().charCode('x').build(), DEBUG_TEST);
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().alt().charCode('z').build(), RUN_TEST);
+        } else {
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('x').build(), DEBUG_TEST);
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('z').build(), RUN_TEST);
+        }
+
         testMainMenu.add(runTestAction);
         testMainMenu.add(debugTestAction);
         runMenu.addSeparator();

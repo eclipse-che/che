@@ -17,7 +17,7 @@ import com.google.gwt.event.dom.client.HasFocusHandlers;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RequiresResize;
 
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.editor.codeassist.AdditionalInfoCallback;
@@ -56,7 +56,7 @@ public interface EditorWidget extends IsWidget,
 
     /**
      * Sets the content of the editor.<br>
-     * The operation <em>must</em> send a {@link DocumentChangeEvent} on the document private event bus.
+     * The operation <em>must</em> send a {@link DocumentChangedEvent} on the document private event bus.
      *
      * @param newValue
      *         the new contents
