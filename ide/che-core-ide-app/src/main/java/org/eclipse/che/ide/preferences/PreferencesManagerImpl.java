@@ -45,7 +45,7 @@ public class PreferencesManagerImpl implements PreferencesManager {
         this.persistedPreferences = new HashMap<>();
         this.changedPreferences = new HashMap<>();
 
-        PREFERENCES_SERVICE_ENDPOINT = appContext.getMasterEndpoint() + "/preferences";
+        PREFERENCES_SERVICE_ENDPOINT = appContext.getMasterApiEndpoint() + "/preferences";
     }
 
     @Override

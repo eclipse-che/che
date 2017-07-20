@@ -20,7 +20,6 @@ import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.CloneRequest;
 import org.eclipse.che.api.git.shared.CommitRequest;
-import org.eclipse.che.api.git.shared.Commiters;
 import org.eclipse.che.api.git.shared.DiffType;
 import org.eclipse.che.api.git.shared.FetchRequest;
 import org.eclipse.che.api.git.shared.LogResponse;
@@ -430,6 +429,6 @@ public class GitServiceClientImpl implements GitServiceClient {
     }
 
     private String getWsAgentBaseUrl() {
-        return appContext.getDevAgentEndpoint();
+        return appContext.getWsAgentServerApiEndpoint();
     }
 }

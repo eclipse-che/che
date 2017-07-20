@@ -75,7 +75,7 @@ public class JavaReconcileClient {
     /** @deprecated in favor of {@link #reconcile(String, String)} */
     @Deprecated
     public void reconcile(String projectPath, String fqn, final ReconcileCallback callback) {
-        String url = appContext.getDevAgentEndpoint() + "/java/reconcile/?projectpath=" + projectPath + "&fqn=" + fqn;
+        String url = appContext.getWsAgentServerApiEndpoint() + "/java/reconcile/?projectpath=" + projectPath + "&fqn=" + fqn;
         asyncRequestFactory.createGetRequest(url)
                            .send(new AsyncRequestCallback<ReconcileResult>(dtoUnmarshallerFactory.newUnmarshaller(ReconcileResult.class)) {
                                @Override

@@ -38,12 +38,9 @@ import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
-import static com.google.gwt.http.client.RequestBuilder.POST;
 import static com.google.gwt.http.client.RequestBuilder.PUT;
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENTTYPE;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 /**
@@ -501,7 +498,7 @@ public class ProjectServiceClient {
      * @since 4.4.0
      */
     private String getBaseUrl() {
-        return appContext.getDevAgentEndpoint() + PROJECT;
+        return appContext.getWsAgentServerApiEndpoint() + PROJECT;
     }
 
     /**

@@ -84,7 +84,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
                                        AppContext appContext,
                                        GitHubLocalizationConstant locale) {
         this.view = view;
-        this.baseUrl = appContext.getMasterEndpoint();
+        this.baseUrl = appContext.getMasterApiEndpoint();
         this.appContext = appContext;
         this.gitHubAuthenticator = gitHubAuthenticatorRegistry.getAuthenticator("github");
         this.gitHubClientService = gitHubClientService;

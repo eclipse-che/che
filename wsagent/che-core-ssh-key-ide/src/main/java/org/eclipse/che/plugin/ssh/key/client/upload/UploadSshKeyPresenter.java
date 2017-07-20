@@ -46,7 +46,7 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
         this.view = view;
         this.view.setDelegate(this);
         this.constant = constant;
-        this.restContext = appContext.getMasterEndpoint();
+        this.restContext = appContext.getMasterApiEndpoint();
         this.notificationManager = notificationManager;
         this.appContext = appContext;
     }

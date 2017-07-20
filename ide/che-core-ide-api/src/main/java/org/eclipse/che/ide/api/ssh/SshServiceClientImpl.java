@@ -45,7 +45,7 @@ public class SshServiceClientImpl implements SshServiceClient {
         this.dtoFactory = dtoFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.unmarshallerFactory = unmarshallerFactory;
-        this.sshApi = appContext.getMasterEndpoint() + "/ssh";
+        this.sshApi = appContext.getMasterApiEndpoint() + "/ssh";
     }
 
     /**

@@ -1168,7 +1168,7 @@ public final class ResourceManager {
     protected String getUrl(Resource resource) {
         checkArgument(!resource.getLocation().isRoot(), "Workspace root doesn't have export URL");
 
-        final String baseUrl = appContext.getDevAgentEndpoint() + "/project/export";
+        final String baseUrl = appContext.getWsAgentServerApiEndpoint() + "/project/export";
 
         if (resource.getResourceType() == FILE) {
             return baseUrl + "/file" + resource.getLocation();

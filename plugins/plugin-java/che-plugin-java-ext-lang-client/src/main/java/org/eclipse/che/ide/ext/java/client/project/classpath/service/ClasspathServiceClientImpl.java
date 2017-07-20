@@ -52,7 +52,7 @@ public class ClasspathServiceClientImpl implements ClasspathServiceClient {
 
     @Override
     public Promise<List<ClasspathEntryDto>> getClasspath(String projectPath) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "?projectpath=" + projectPath;
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "?projectpath=" + projectPath;
 
         return asyncRequestFactory.createGetRequest(url)
                                   .loader(loader)
