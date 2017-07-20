@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandGoalRegistry;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandProducer;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.filetypes.FileType;
@@ -98,6 +99,7 @@ public class CommandApiModule extends AbstractGinModule {
         bind(CommandManager.class).asEagerSingleton();
         bind(ExecuteCommandActionManager.class).asEagerSingleton();
 
+        GinMultibinder<CommandProducer> commandProducerBinder = GinMultibinder.newSetBinder(binder(), CommandProducer.class);
         bind(CommandProducerActionManager.class).asEagerSingleton();
 
         install(new GinFactoryModuleBuilder().build(ExecuteCommandActionFactory.class));

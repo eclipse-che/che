@@ -14,9 +14,9 @@ import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
@@ -51,15 +51,15 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -75,9 +75,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
 
 /**
  * The common debugger.
@@ -123,6 +124,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                             DebuggerManager debuggerManager,
                             NotificationManager notificationManager,
                             BreakpointManager breakpointManager,
+                            AppContext appContext,
                             String type,
                             RequestHandlerManager requestHandlerManager) {
         this.service = service;
@@ -140,50 +142,45 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         this.requestHandlerManager = requestHandlerManager;
 
         restoreDebuggerState();
-        addHandlers();
+
+        eventBus.addHandler(WorkspaceRunningEvent.TYPE, e -> initialize());
+
+        if (appContext.getWorkspace().getStatus() == RUNNING) {
+            initialize();
+        }
     }
 
+    private void initialize() {
+        subscribeToDebuggerEvents();
 
-    private void addHandlers() {
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(WsAgentStateEvent event) {
-                subscribeToDebuggerEvents();
+        if (!isConnected()) {
+            return;
+        }
+        Promise<DebugSessionDto> promise = service.getSessionInfo(debugSessionDto.getId());
+        promise.then(debugSessionDto -> {
+            debuggerManager.setActiveDebugger(AbstractDebugger.this);
+            setDebugSession(debugSessionDto);
 
-                if (!isConnected()) {
-                    return;
-                }
-                Promise<DebugSessionDto> promise = service.getSessionInfo(debugSessionDto.getId());
-                promise.then(debugSessionDto -> {
-                    debuggerManager.setActiveDebugger(AbstractDebugger.this);
-                    setDebugSession(debugSessionDto);
+            DebuggerInfo debuggerInfo = debugSessionDto.getDebuggerInfo();
+            String info = debuggerInfo.getName() + " " + debuggerInfo.getVersion();
+            String address = debuggerInfo.getHost() + ":" + debuggerInfo.getPort();
+            DebuggerDescriptor debuggerDescriptor = new DebuggerDescriptor(info, address);
 
-                    DebuggerInfo debuggerInfo = debugSessionDto.getDebuggerInfo();
-                    String info = debuggerInfo.getName() + " " + debuggerInfo.getVersion();
-                    String address = debuggerInfo.getHost() + ":" + debuggerInfo.getPort();
-                    DebuggerDescriptor debuggerDescriptor = new DebuggerDescriptor(info, address);
-
-                    for (DebuggerObserver observer : observers) {
-                        observer.onDebuggerAttached(debuggerDescriptor, Promises.resolve(null));
-                    }
-
-                    for (BreakpointDto breakpoint : debugSessionDto.getBreakpoints()) {
-                        onBreakpointActivated(breakpoint.getLocation());
-                    }
-
-                    if (currentLocation != null) {
-                        openCurrentFile();
-                    }
-
-                    startCheckingEvents();
-                }).catchError(error -> {
-                    disconnect();
-                });
+            for (DebuggerObserver observer : observers) {
+                observer.onDebuggerAttached(debuggerDescriptor, Promises.resolve(null));
             }
 
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
+            for (BreakpointDto breakpoint : debugSessionDto.getBreakpoints()) {
+                onBreakpointActivated(breakpoint.getLocation());
             }
+
+            if (currentLocation != null) {
+                openCurrentFile();
+            }
+
+            startCheckingEvents();
+        }).catchError(error -> {
+            disconnect();
         });
     }
 
@@ -288,7 +285,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     private void subscribeToDebuggerEvents() {
         transmitter.newRequest()
-                   .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
+                   .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
                    .methodName(EVENT_DEBUGGER_SUBSCRIBE)
                    .noParams()
                    .sendAndSkipResult();
@@ -296,7 +293,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     private void unsubscribeFromDebuggerEvents() {
         transmitter.newRequest()
-                   .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
+                   .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
                    .methodName(EVENT_DEBUGGER_UN_SUBSCRIBE)
                    .noParams()
                    .sendAndSkipResult();

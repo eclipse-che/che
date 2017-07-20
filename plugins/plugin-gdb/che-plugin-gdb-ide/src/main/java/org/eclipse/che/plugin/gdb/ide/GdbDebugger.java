@@ -79,6 +79,7 @@ public class GdbDebugger extends AbstractDebugger {
               debuggerManager,
               notificationManager,
               breakpointManager,
+              appContext,
               ID,
               requestHandlerManager);
         this.locale = locale;

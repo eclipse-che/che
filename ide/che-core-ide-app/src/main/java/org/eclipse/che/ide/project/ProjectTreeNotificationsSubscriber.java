@@ -23,7 +23,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
 
 /** Subscribes on receiving notifications about any changes in the project tree. */
 @Singleton
@@ -56,7 +56,7 @@ public class ProjectTreeNotificationsSubscriber {
                                                            .withType(START);
 
         requestTransmitter.newRequest()
-                          .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
+                          .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
                           .methodName("track:project-tree")
                           .paramsAsDto(params)
                           .sendAndSkipResult();

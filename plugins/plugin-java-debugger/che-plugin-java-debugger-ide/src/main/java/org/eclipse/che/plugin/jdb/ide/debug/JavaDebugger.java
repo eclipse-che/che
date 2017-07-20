@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -62,6 +63,7 @@ public class JavaDebugger extends AbstractDebugger {
                         NotificationManager notificationManager,
                         FileTypeRegistry fileTypeRegistry,
                         BreakpointManager breakpointManager,
+                        AppContext appContext,
                         RequestHandlerManager requestHandlerManager) {
         super(service,
               transmitter,
@@ -73,6 +75,7 @@ public class JavaDebugger extends AbstractDebugger {
               debuggerManager,
               notificationManager,
               breakpointManager,
+              appContext,
               ID,
               requestHandlerManager);
         this.fqnResolverFactory = fqnResolverFactory;

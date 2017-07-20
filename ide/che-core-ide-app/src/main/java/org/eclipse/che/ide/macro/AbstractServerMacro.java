@@ -14,17 +14,19 @@ import com.google.common.annotations.Beta;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
  * Base macro which belongs to the current server configuration. Provides easy access to the developer machine
@@ -38,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @since 4.7.0
  */
 @Beta
-public abstract class AbstractServerMacro implements WsAgentStateHandler {
+public abstract class AbstractServerMacro {
 
     private final MacroRegistry macroRegistry;
     private final AppContext    appContext;
@@ -49,7 +51,14 @@ public abstract class AbstractServerMacro implements WsAgentStateHandler {
         this.macroRegistry = macroRegistry;
         this.appContext = appContext;
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> {
+            if (appContext.getWorkspace().getStatus() == RUNNING) {
+                registerMacros();
+            }
+        });
+
+        eventBus.addHandler(WorkspaceRunningEvent.TYPE, e -> registerMacros());
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> unregisterMacros());
     }
 
     /**
@@ -105,16 +114,4 @@ public abstract class AbstractServerMacro implements WsAgentStateHandler {
      * @since 4.7.0
      */
     public abstract Set<Macro> getMacros(MachineImpl devMachine);
-
-    /** {@inheritDoc} */
-    @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-        registerMacros();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
-        unregisterMacros();
-    }
 }

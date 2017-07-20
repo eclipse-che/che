@@ -24,7 +24,7 @@ import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
 
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSAPCE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
 
 /**
  * @author Evgen Vidolob
@@ -66,7 +66,7 @@ public class JavaReconcileClient {
                                                 .withFQN(fqn)
                                                 .withProjectPath(projectPath);
         return requestTransmitter.newRequest()
-                                 .endpointId(WORKSAPCE_AGENT_ENDPOINT_ID)
+                                 .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
                                  .methodName(OUTCOMING_METHOD)
                                  .paramsAsDto(javaClassInfo)
                                  .sendAndReceiveResultAsDto(ReconcileResult.class);

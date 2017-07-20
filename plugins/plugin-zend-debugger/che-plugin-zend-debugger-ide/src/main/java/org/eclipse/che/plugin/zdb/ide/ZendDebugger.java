@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -52,6 +53,7 @@ public class ZendDebugger extends AbstractDebugger {
                         NotificationManager notificationManager,
                         DebuggerManager debuggerManager,
                         BreakpointManager breakpointManager,
+                        AppContext appContext,
                         RequestHandlerManager requestHandlerManager) {
         super(service,
               transmitter,
@@ -63,6 +65,7 @@ public class ZendDebugger extends AbstractDebugger {
               debuggerManager,
               notificationManager,
               breakpointManager,
+              appContext,
               ID,
               requestHandlerManager);
     }

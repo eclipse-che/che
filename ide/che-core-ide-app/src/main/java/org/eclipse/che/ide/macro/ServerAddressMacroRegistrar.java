@@ -12,23 +12,27 @@ package org.eclipse.che.ide.macro;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
  * For every server in WsAgent's machine registers a {@link Macro} that
@@ -37,25 +41,34 @@ import java.util.Set;
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class ServerAddressMacroRegistrar implements WsAgentStateHandler {
+public class ServerAddressMacroRegistrar {
 
     public static final String MACRO_NAME_TEMPLATE = "${server.port.%}";
 
-    private final MacroRegistry macroRegistry;
-    private final AppContext    appContext;
+    private final Provider<MacroRegistry> macroRegistryProvider;
+    private final AppContext              appContext;
 
     private Set<Macro> macros;
 
     @Inject
     public ServerAddressMacroRegistrar(EventBus eventBus,
-                                       MacroRegistry macroRegistry,
+                                       Provider<MacroRegistry> macroRegistryProvider,
                                        AppContext appContext) {
-        this.macroRegistry = macroRegistry;
+        this.macroRegistryProvider = macroRegistryProvider;
         this.appContext = appContext;
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> {
+            if (appContext.getWorkspace().getStatus() == RUNNING) {
+                registerMacros();
+            }
+        });
 
-        registerMacros();
+        eventBus.addHandler(WorkspaceRunningEvent.TYPE, e -> registerMacros());
+
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> {
+            macros.forEach(macro -> macroRegistryProvider.get().unregister(macro));
+            macros.clear();
+        });
     }
 
     private void registerMacros() {
@@ -64,7 +77,7 @@ public class ServerAddressMacroRegistrar implements WsAgentStateHandler {
 
         if (devMachine.isPresent()) {
             macros = getMacros(devMachine.get());
-            macroRegistry.register(macros);
+            macroRegistryProvider.get().register(macros);
         }
     }
 
@@ -81,20 +94,6 @@ public class ServerAddressMacroRegistrar implements WsAgentStateHandler {
         }
 
         return macros;
-    }
-
-    @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-        registerMacros();
-    }
-
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
-        for (Macro provider : macros) {
-            macroRegistry.unregister(provider);
-        }
-
-        macros.clear();
     }
 
     private class ServerAddressMacro extends BaseMacro {
