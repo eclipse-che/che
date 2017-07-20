@@ -67,7 +67,12 @@ public class RuntimeImpl implements Runtime {
         return machines;
     }
 
-    /** Returns development machine or an empty {@code Optional} if none. */
+    /**
+     * Returns a dev-machine or an empty {@code Optional} if none.
+     * Dev-machine is a machine where ws-agent server is running.
+     *
+     * @see #getWsAgentServer()
+     */
     public Optional<MachineImpl> getDevMachine() {
         return getMachines().values()
                             .stream()

@@ -108,7 +108,10 @@ public class WorkspaceImpl implements Workspace {
 
     /**
      * Shorthand for {@link RuntimeImpl#getDevMachine()}.
+     * Allows to avoid checking whether runtime is exists or not.
      * Returns an empty {@code Optional} if workspace doesn't have a runtime.
+     *
+     * @see RuntimeImpl#getDevMachine()
      */
     public Optional<MachineImpl> getDevMachine() {
         return getRuntime() != null ? getRuntime().getDevMachine() : Optional.empty();

@@ -18,17 +18,14 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
-import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
-import java.util.Optional;
 
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
 
 /** Initializes JSON-RPC connection to the ws-agent server. */
@@ -79,16 +76,12 @@ public class WsAgentJsonRpcInitializer {
             return; // workspace is stopped
         }
 
-        runtime.getDevMachine().ifPresent(devMachine -> {
-            Optional<ServerImpl> wsAgentServer = devMachine.getServerByName(WSAGENT_REFERENCE);
+        runtime.getWsAgentServer().ifPresent(server -> {
+            final String wsAgentBaseUrl = server.getUrl() + "/api"; // TODO (spi ide): remove path when it comes with URL
+            final String wsAgentWebSocketUrl = wsAgentBaseUrl.replaceFirst("http", "ws") + "/ws"; // TODO (spi ide): remove path when it comes with URL
+            final String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + appContext.getAppId());
 
-            wsAgentServer.ifPresent(server -> {
-                final String wsAgentBaseUrl = server.getUrl() + "/api"; // TODO (spi ide): remove path when it comes with URL
-                final String wsAgentWebSocketUrl = wsAgentBaseUrl.replaceFirst("http", "ws") + "/ws"; // TODO (spi ide): remove path when it comes with URL
-                final String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + appContext.getAppId());
-
-                initializer.initialize(WORKSPACE_AGENT_ENDPOINT_ID, singletonMap("url", wsAgentUrl));
-            });
+            initializer.initialize(WORKSPACE_AGENT_ENDPOINT_ID, singletonMap("url", wsAgentUrl));
         });
     }
 }
