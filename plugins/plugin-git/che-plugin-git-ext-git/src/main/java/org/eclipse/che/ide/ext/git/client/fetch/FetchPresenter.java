@@ -107,7 +107,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                .catchError(error -> {
                    GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
                    console.printError(constant.remoteListFailed());
-                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   processesPanelPresenter.addCommandOutput(console);
                    notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE);
                    view.setEnableFetchButton(false);
                });
@@ -139,7 +139,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                    final String errorMessage = error.getMessage() != null ? error.getMessage() : constant.branchesListFailed();
                    GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
                    console.printError(errorMessage);
-                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   processesPanelPresenter.addCommandOutput(console);
                    notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
                    view.setEnableFetchButton(false);
                });
@@ -156,13 +156,13 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         service.fetch(project.getLocation(), view.getRepositoryName(), getRefs(), view.isRemoveDeletedRefs())
                .then(ignored -> {
                    console.print(constant.fetchSuccess(remoteUrl));
-                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   processesPanelPresenter.addCommandOutput(console);
                    notification.setStatus(SUCCESS);
                    notification.setTitle(constant.fetchSuccess(remoteUrl));
                })
                .catchError(error -> {
                    handleError(error.getCause(), remoteUrl, notification, console);
-                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   processesPanelPresenter.addCommandOutput(console);
                });
         view.close();
     }
