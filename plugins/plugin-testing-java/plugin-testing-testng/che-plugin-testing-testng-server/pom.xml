@@ -84,10 +84,6 @@
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>org-eclipse-jdt-core-repack</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>org-eclipse-jdt-core-repack</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>org.eclipse.jdt.core</artifactId>
