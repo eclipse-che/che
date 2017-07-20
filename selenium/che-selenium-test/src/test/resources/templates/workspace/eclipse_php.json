@@ -1,0 +1,69 @@
+{
+  "environments": {
+    "replaced_name": {
+      "machines": {
+        "dev-machine": {
+          "attributes": {
+            "memoryLimitBytes": "2147483648"
+          },
+          "servers": {},
+          "agents": [
+            "org.eclipse.che.terminal",
+            "org.eclipse.che.ws-agent",
+            "org.eclipse.che.ssh",
+            "org.eclipse.che.ls.php",
+            "org.eclipse.che.ls.json"
+          ]
+        }
+      },
+      "recipe": {
+        "location": "eclipse/php",
+        "type": "dockerimage"
+      }
+    }
+  },
+  "defaultEnv": "replaced_name",
+  "name": "replaced_name",
+  "commands": [
+    {
+      "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || php ${editor.current.file.path}",
+      "name": "run php script",
+      "attributes": {
+        "previewUrl": ""
+      },
+      "type": "custom"
+    },
+    {
+      "commandLine": "[ -z ${editor.current.file.path} ] && echo \"Open a PHP file in the editor before executing this command.\" || QUERY_STRING=\"start_debug=1&debug_host=localhost&debug_port=10137\" php ${editor.current.file.path}",
+      "name": "debug php script",
+      "attributes": {
+        "previewUrl": ""
+      },
+      "type": "custom"
+    },
+    {
+      "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
+      "name": "start apache",
+      "attributes": {
+        "previewUrl": "http://${server.port.80}/${current.project.relpath}"
+      },
+      "type": "custom"
+    },
+    {
+      "commandLine": "sudo service apache2 stop",
+      "name": "stop apache",
+      "attributes": {
+        "previewUrl": ""
+      },
+      "type": "custom"
+    },
+    {
+      "commandLine": "sudo service apache2 restart",
+      "name": "restart apache",
+      "attributes": {
+        "previewUrl": "http://${server.port.80}/${current.project.relpath}"
+      },
+      "type": "custom"
+    }
+  ]
+}
