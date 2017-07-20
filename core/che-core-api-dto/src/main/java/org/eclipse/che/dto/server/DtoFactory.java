@@ -386,8 +386,13 @@ public final class DtoFactory {
     private <T> DtoProvider<T> getDtoProvider(Class<T> dtoInterface) {
         DtoProvider<?> dtoProvider = dtoInterface2Providers.get(dtoInterface);
         if (dtoProvider == null) {
-            throw new IllegalArgumentException("Unknown DTO type " + dtoInterface);
+            if (dtoInterface.isAnnotationPresent(DTO.class)) {
+                throw new IllegalArgumentException("Implementation for DTO type " + dtoInterface + " isn't found.");
+            } else {
+                throw new IllegalArgumentException("Is not a DTO type " + dtoInterface);
+            }
         }
+
         return (DtoProvider<T>)dtoProvider;
     }
 

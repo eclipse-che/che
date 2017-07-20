@@ -19,11 +19,11 @@ import com.google.gson.JsonPrimitive;
 
 import org.eclipse.che.dto.definitions.ComplicatedDto;
 import org.eclipse.che.dto.definitions.DTOHierarchy;
+import org.eclipse.che.dto.definitions.DTOHierarchy.GrandchildDto;
 import org.eclipse.che.dto.definitions.DtoWithAny;
 import org.eclipse.che.dto.definitions.DtoWithDelegate;
 import org.eclipse.che.dto.definitions.DtoWithFieldNames;
 import org.eclipse.che.dto.definitions.SimpleDto;
-import org.eclipse.che.dto.definitions.DTOHierarchy.GrandchildDto;
 import org.eclipse.che.dto.definitions.model.Model;
 import org.eclipse.che.dto.definitions.model.ModelComponentDto;
 import org.eclipse.che.dto.definitions.model.ModelDto;
@@ -108,7 +108,7 @@ public class ServerDtoTest {
     }
 
     @Test
-    public void testDeerializerWithFieldNames() throws Exception {
+    public void testDeserializerWithFieldNames() throws Exception {
         final String fooString = "Something";
         final String _default = "test_default_keyword";
 
@@ -379,5 +379,10 @@ public class ServerDtoTest {
         assertEquals(childDto.getDtoField(), "dto-field");
         assertEquals(childDto.getChildField(), "child-field");
         assertEquals(childDto.getParentField(), "parent-field");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Is not a DTO type class java.lang.String")
+    public void shouldThrowExceptionWhenInterfaceIsNotAnnotatedAsDto() {
+        DtoFactory.newDto(String.class);
     }
 }
