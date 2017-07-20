@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.editor.orion.client;
 
 import com.google.web.bindery.event.shared.HandlerRegistration;
+
 import org.eclipse.che.ide.api.editor.document.AbstractDocument;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.CursorActivityHandler;
@@ -60,7 +61,7 @@ public class OrionDocument extends AbstractDocument {
                 fireDocumentChangeEvent(parameter);
             }
         }, true);
-        
+
         this.editorOverlay.getModel().addEventListener("Changing", new EventHandler<ModelChangedEventOverlay>() {
             @Override
             public void onEvent(ModelChangedEventOverlay parameter) {
@@ -79,14 +80,14 @@ public class OrionDocument extends AbstractDocument {
         String text = editorOverlay.getModel().getText(startOffset, startOffset + addedCharCount);
 
         final DocumentChangedEvent event = new DocumentChangedEvent(this,
-                                                                  startOffset,
-                                                                  addedCharCount,
-                                                                  text,
-                                                                  removedCharCount);
+                                                                    startOffset,
+                                                                    addedCharCount,
+                                                                    text,
+                                                                    removedCharCount);
         // according to https://github.com/codenvy/che-core/pull/122
         getDocEventBus().fireEvent(event);
     }
-    
+
     private void fireDocumentChangingEvent(final ModelChangedEventOverlay param) {
         int startOffset = param.start();
         int addedCharCount = param.addedCharCount();
@@ -96,10 +97,10 @@ public class OrionDocument extends AbstractDocument {
         String text = editorOverlay.getModel().getText(startOffset, startOffset + addedCharCount);
 
         final DocumentChangingEvent event = new DocumentChangingEvent(this,
-                                                                  startOffset,
-                                                                  addedCharCount,
-                                                                  text,
-                                                                  removedCharCount);
+                                                                      startOffset,
+                                                                      addedCharCount,
+                                                                      text,
+                                                                      removedCharCount);
         // according to https://github.com/codenvy/che-core/pull/122
         getDocEventBus().fireEvent(event);
     }
@@ -139,12 +140,6 @@ public class OrionDocument extends AbstractDocument {
     }
 
     @Override
-    public void setCursorPosition(final TextPosition position) {
-        this.editorOverlay.setCaretOffset(getIndexFromPosition(position));
-
-    }
-
-    @Override
     public int getLineAtOffset(int offset) {
         return this.editorOverlay.getTextView().getLineAtOffset(offset);
     }
@@ -158,6 +153,12 @@ public class OrionDocument extends AbstractDocument {
     public TextPosition getCursorPosition() {
         final int offset = this.editorOverlay.getCaretOffset();
         return getPositionFromIndex(offset);
+    }
+
+    @Override
+    public void setCursorPosition(final TextPosition position) {
+        this.editorOverlay.setCaretOffset(getIndexFromPosition(position));
+
     }
 
     public int getCursorOffset() {
@@ -195,34 +196,6 @@ public class OrionDocument extends AbstractDocument {
         return this.positionConverter;
     }
 
-    private class OrionPositionConverter implements PositionConverter {
-
-        @Override
-        public PixelCoordinates textToPixel(TextPosition textPosition) {
-            final int textOffset = getIndexFromPosition(textPosition);
-            return offsetToPixel(textOffset);
-        }
-
-        @Override
-        public PixelCoordinates offsetToPixel(int textOffset) {
-            OrionPixelPositionOverlay location = textViewOverlay.getLocationAtOffset(textOffset);
-            location.setY(location.getY() + textViewOverlay.getLineHeight());
-            location = textViewOverlay.convert(location, "document", "page");
-            return new PixelCoordinates(location.getX(), location.getY());
-        }
-
-        @Override
-        public TextPosition pixelToText(PixelCoordinates coordinates) {
-            final int offset = pixelToOffset(coordinates);
-            return getPositionFromIndex(offset);
-        }
-
-        @Override
-        public int pixelToOffset(PixelCoordinates coordinates) {
-            return textViewOverlay.getOffsetAtLocation(coordinates.getX(), coordinates.getY());
-        }
-    }
-
     public void replace(int offset, int length, String text) {
         this.editorOverlay.getModel().setText(text, offset, offset + length);
         updateModificationTimeStamp();
@@ -239,7 +212,7 @@ public class OrionDocument extends AbstractDocument {
 
     private void updateModificationTimeStamp() {
         VirtualFile file = this.getFile();
-        if (file  instanceof File) {
+        if (file instanceof File) {
             ((File)file).updateModificationStamp(editorOverlay.getText());
         }
     }
@@ -312,5 +285,33 @@ public class OrionDocument extends AbstractDocument {
         LinearRange linearRange =
                 LinearRange.createWithStart(lineStart + range.getFrom().getCharacter()).andEnd(lineEnd + range.getTo().getCharacter());
         setSelectedRange(linearRange, show);
+    }
+
+    private class OrionPositionConverter implements PositionConverter {
+
+        @Override
+        public PixelCoordinates textToPixel(TextPosition textPosition) {
+            final int textOffset = getIndexFromPosition(textPosition);
+            return offsetToPixel(textOffset);
+        }
+
+        @Override
+        public PixelCoordinates offsetToPixel(int textOffset) {
+            OrionPixelPositionOverlay location = textViewOverlay.getLocationAtOffset(textOffset);
+            location.setY(location.getY() + textViewOverlay.getLineHeight());
+            location = textViewOverlay.convert(location, "document", "page");
+            return new PixelCoordinates(location.getX(), location.getY());
+        }
+
+        @Override
+        public TextPosition pixelToText(PixelCoordinates coordinates) {
+            final int offset = pixelToOffset(coordinates);
+            return getPositionFromIndex(offset);
+        }
+
+        @Override
+        public int pixelToOffset(PixelCoordinates coordinates) {
+            return textViewOverlay.getOffsetAtLocation(coordinates.getX(), coordinates.getY());
+        }
     }
 }

@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
@@ -46,7 +47,7 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
 
         Either<TextDocumentSyncKind, TextDocumentSyncOptions> sync = serverCapabilities.getTextDocumentSync();
         TextDocumentSyncKind documentSync;
-        if(sync.isLeft()){
+        if (sync.isLeft()) {
             documentSync = sync.getLeft();
         } else {
             documentSync = sync.getRight().getChange();
@@ -66,8 +67,8 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
         document.getDocumentHandle().getDocEventBus().addHandler(DocumentChangingEvent.TYPE, new DocumentChangingHandler() {
             @Override
             public void onDocumentChanging(DocumentChangingEvent event) {
-                lastEventStart= event.getDocument().getDocument().getPositionFromIndex(event.getOffset());
-                lastEventEnd= event.getDocument().getDocument().getPositionFromIndex(event.getOffset()+event.getRemoveCharCount());
+                lastEventStart = event.getDocument().getDocument().getPositionFromIndex(event.getOffset());
+                lastEventEnd = event.getDocument().getDocument().getPositionFromIndex(event.getOffset() + event.getRemoveCharCount());
             }
         });
 
