@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.editor.synchronization;
 
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
 
@@ -19,7 +19,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 /**
- * Contains list of opened files with the same {@link Path} and listens to {@link DocumentChangeEvent} and {@link FileContentUpdateEvent}
+ * Contains list of opened files with the same {@link Path} and listens to {@link DocumentChangedEvent} and {@link FileContentUpdateEvent}
  * to provide the synchronization of the content for them.
  *
  * @author Roman Nikitenko

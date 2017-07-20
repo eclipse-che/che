@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -50,6 +51,8 @@ import com.google.gson.internal.LinkedTreeMap;
  * @author Bartlomiej Laczkowski
  */
 public class PHPUnitTestEngine {
+
+    private java.nio.file.Path projectsRoot;
 
     private final class PrinterListener implements Runnable {
 
@@ -132,15 +135,14 @@ public class PHPUnitTestEngine {
     private static final String        PHPUNIT_COMPOSER  = "/vendor/bin/phpunit";
     private static final int           PRINTER_PORT      = 7478;
 
-    private final ProjectManager       projectManager;
     private final CountDownLatch       latchReady        = new CountDownLatch(1);
     private final CountDownLatch       latchDone         = new CountDownLatch(1);
 
     private PHPUnitTestRoot            phpTestsRoot;
     private PHPUnitTestResultsProvider testResultsProvider;
 
-    public PHPUnitTestEngine(ProjectManager projectManager) {
-        this.projectManager = projectManager;
+    public PHPUnitTestEngine(File projectsRoot) {
+        this.projectsRoot = projectsRoot.toPath().normalize().toAbsolutePath();
     }
 
     /**
@@ -260,16 +262,12 @@ public class PHPUnitTestEngine {
 
     @SuppressWarnings("unchecked")
     private boolean hasComposerRunner(String projectPath) {
-        VirtualFileEntry composerJson;
-        try {
-            composerJson = projectManager.getProjectsRoot().getChild(projectPath + "/composer.json");
-            if (composerJson == null)
-                return false;
-        } catch (ServerException e) {
-            return false;
+        if (!Files.exists(projectsRoot.resolve(projectPath + "/composer.json"))) {
+           return false;
         }
-        try (InputStream inputStream = composerJson.getVirtualFile().getContent();
-             InputStreamReader reader = new InputStreamReader(inputStream);) {
+
+        try (InputStream inputStream = Files.newInputStream(projectsRoot.resolve(projectPath + "/composer.json"));
+             InputStreamReader reader = new InputStreamReader(inputStream)) {
             Gson gson = new GsonBuilder().create();
             Map<String, ?> composerJsonMap = gson.fromJson(reader, LinkedTreeMap.class);
             Map<String, String> requireDev = (Map<String, String>) composerJsonMap.get("require-dev");

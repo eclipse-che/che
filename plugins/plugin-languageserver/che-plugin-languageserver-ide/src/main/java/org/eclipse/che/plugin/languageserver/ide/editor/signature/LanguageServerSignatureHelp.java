@@ -20,8 +20,8 @@ import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesTextOperations;
@@ -87,9 +87,9 @@ public class LanguageServerSignatureHelp implements SignatureHelpProvider {
         if (capabilities.getSignatureHelpProvider() != null && capabilities.getSignatureHelpProvider().getTriggerCharacters() != null) {
             final List<String> triggerCharacters = capabilities.getSignatureHelpProvider().getTriggerCharacters();
             handlerRegistration = editor.getDocument().getDocumentHandle().getDocEventBus()
-                                        .addHandler(DocumentChangeEvent.TYPE, new DocumentChangeHandler() {
+                                        .addHandler(DocumentChangedEvent.TYPE, new DocumentChangedHandler() {
                                             @Override
-                                            public void onDocumentChange(DocumentChangeEvent event) {
+                                            public void onDocumentChanged(DocumentChangedEvent event) {
                                                 if (triggerCharacters.contains(event.getText())) {
                                                     ((HandlesTextOperations)editor)
                                                             .doOperation(TextEditorOperations.SIGNATURE_HELP);

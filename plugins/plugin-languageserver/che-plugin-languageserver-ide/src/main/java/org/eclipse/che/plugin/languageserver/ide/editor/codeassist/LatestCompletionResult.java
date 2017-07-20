@@ -23,7 +23,7 @@ public class LatestCompletionResult {
     private TextDocumentIdentifier documentId;
     private int                    offset;
     private String                 word;
-    private ExtendedCompletionList completionList;
+    private ExtendedCompletionList         completionList;
 
     /**
      * Returns the identifier of document used to compute the latest completion

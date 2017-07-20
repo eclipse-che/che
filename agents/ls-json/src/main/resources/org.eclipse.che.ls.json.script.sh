@@ -159,9 +159,9 @@ else
 fi
 
 
-#####################
-### Install C# LS ###
-#####################
+#######################
+### Install Json LS ###
+#######################
 
 curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 

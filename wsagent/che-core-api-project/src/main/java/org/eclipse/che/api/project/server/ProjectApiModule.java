@@ -38,6 +38,7 @@ import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.vfs.watcher.FileTreeWalker;
 import org.eclipse.che.api.vfs.watcher.FileWatcherByPathMatcher;
+import org.eclipse.che.api.vfs.watcher.FileWatcherIgnoreFileTracker;
 import org.eclipse.che.api.vfs.watcher.IndexedFileCreateConsumer;
 import org.eclipse.che.api.vfs.watcher.IndexedFileDeleteConsumer;
 import org.eclipse.che.api.vfs.watcher.IndexedFileUpdateConsumer;
@@ -97,6 +98,7 @@ public class ProjectApiModule extends AbstractModule {
 
         bind(EditorChangesTracker.class).asEagerSingleton();
         bind(EditorWorkingCopyManager.class).asEagerSingleton();
+        bind(FileWatcherIgnoreFileTracker.class).asEagerSingleton();
 
         configureVfsFilters(excludeMatcher);
         configureVfsFilters(fileWatcherExcludes);

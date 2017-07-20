@@ -20,8 +20,8 @@ import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.document.DocumentStorage;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
@@ -37,10 +37,11 @@ import java.util.Objects;
 import java.util.Set;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
-public class EditorGroupSynchronizationImpl implements EditorGroupSynchronization, DocumentChangeHandler, FileContentUpdateHandler {
+public class EditorGroupSynchronizationImpl implements EditorGroupSynchronization, DocumentChangedHandler, FileContentUpdateHandler {
     private final DocumentStorage     documentStorage;
     private final NotificationManager notificationManager;
     private final HandlerRegistration fileContentUpdateHandlerRegistration;
@@ -65,7 +66,7 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
         }
 
         if (synchronizedEditors.isEmpty()) {
-            HandlerRegistration handlerRegistration = documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, this);
+            HandlerRegistration handlerRegistration = documentHandle.getDocEventBus().addHandler(DocumentChangedEvent.TYPE, this);
             synchronizedEditors.put(editor, handlerRegistration);
             return;
         }
@@ -82,7 +83,7 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
             editorDocument.replace(0, oldContent.length(), groupMemberContent);
         }
 
-        HandlerRegistration handlerRegistration = documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, this);
+        HandlerRegistration handlerRegistration = documentHandle.getDocEventBus().addHandler(DocumentChangedEvent.TYPE, this);
         synchronizedEditors.put(editor, handlerRegistration);
     }
 
@@ -120,7 +121,7 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
     }
 
     @Override
-    public void onDocumentChange(DocumentChangeEvent event) {
+    public void onDocumentChanged(DocumentChangedEvent event) {
         DocumentHandle activeEditorDocumentHandle = getDocumentHandleFor(groupLeaderEditor);
         if (activeEditorDocumentHandle == null || !event.getDocument().isSameAs(activeEditorDocumentHandle)) {
             return;
@@ -194,7 +195,7 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
         if (!Objects.equals(eventModificationStamp, currentStamp)) {
             replaceContent(document, newContent, oldContent, cursorPosition);
 
-            notificationManager.notify("External operation", "File '" + file.getName() + "' is updated", SUCCESS, EMERGE_MODE);
+            notificationManager.notify("External operation", "File '" + file.getName() + "' is updated", SUCCESS, NOT_EMERGE_MODE);
         }
     }
 

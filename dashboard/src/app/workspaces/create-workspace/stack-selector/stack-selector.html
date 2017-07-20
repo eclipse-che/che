@@ -36,7 +36,7 @@
       <che-button-default che-button-title="Add Stack"
                           che-button-icon="material-design icon-ic_add_24px"
                           name="addStack"
-                          ng-href="#/stack/create"></che-button-default>
+                          ng-click="stackSelectorController.onAddStack()"></che-button-default>
       <search-input search-placeholder="Search"
                     search-on-change="stackSelectorController.searchChanged(search)"></search-input>
     </div>

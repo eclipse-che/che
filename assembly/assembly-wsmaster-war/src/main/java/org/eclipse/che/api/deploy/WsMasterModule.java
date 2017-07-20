@@ -171,7 +171,8 @@ public class WsMasterModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named("machine.terminal_agent.run_command"))
                       .to("$HOME/che/terminal/che-websocket-terminal " +
                           "-addr :4411 " +
-                          "-cmd ${SHELL_INTERPRETER}");
+                          "-cmd ${SHELL_INTERPRETER} " +
+                          "-enable-activity-tracking");
         bindConstant().annotatedWith(Names.named("machine.exec_agent.run_command"))
                       .to("$HOME/che/exec-agent/che-exec-agent " +
                           "-addr :4412 " +
@@ -183,6 +184,8 @@ public class WsMasterModule extends AbstractModule {
         Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
         machineImageProviderMultibinder.addBinding().to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
+
+        install(new org.eclipse.che.api.workspace.server.activity.inject.WorkspaceActivityModule());
 
         bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
                 .to(org.eclipse.che.plugin.docker.machine.MachineProviderImpl.class);

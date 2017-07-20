@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.api.editor.reconciler;
 
 import org.eclipse.che.ide.api.editor.document.UseDocumentHandle;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
 /**
@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
  * 
  * @author Evgen Vidolob
  */
-public interface Reconciler extends UseDocumentHandle, DocumentChangeHandler {
+public interface Reconciler extends UseDocumentHandle, DocumentChangedHandler {
 
     /**
      * Installs the reconciler on the given text view. After this method has been finished, the reconciler is operational, i.e., it works

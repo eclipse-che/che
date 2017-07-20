@@ -17,6 +17,7 @@ import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventServiceImpl;
 import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationOperation;
 import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
+import org.eclipse.che.ide.api.event.ng.FileWatcherExcludesOperation;
 import org.eclipse.che.ide.api.event.ng.ProjectTreeStateNotificationOperation;
 
 /**
@@ -41,5 +42,6 @@ public class ClientServerEventModule extends AbstractGinModule {
     private void notificationOperations() {
         bind(EditorFileStatusNotificationOperation.class).asEagerSingleton();
         bind(ProjectTreeStateNotificationOperation.class).asEagerSingleton();
+        bind(FileWatcherExcludesOperation.class).asEagerSingleton();
     }
 }
