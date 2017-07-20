@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.editor.events;
 
 import com.google.gwt.event.shared.EventHandler;
 
-public interface DocumentChangeHandler extends EventHandler {
+public interface DocumentChangedHandler extends EventHandler {
 
-    void onDocumentChange(DocumentChangeEvent event);
+    void onDocumentChanged(DocumentChangedEvent event);
 }

@@ -11,7 +11,16 @@
 package org.eclipse.che.ide.editor.orion.client;
 
 import com.google.web.bindery.event.shared.HandlerRegistration;
-
+import org.eclipse.che.ide.api.editor.document.AbstractDocument;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.events.CursorActivityHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangingEvent;
+import org.eclipse.che.ide.api.editor.events.HasCursorActivityHandlers;
+import org.eclipse.che.ide.api.editor.position.PositionConverter;
+import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
+import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.editor.orion.client.jso.ModelChangedEventOverlay;
@@ -21,15 +30,6 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay.EventHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
-import org.eclipse.che.ide.api.editor.document.AbstractDocument;
-import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.events.CursorActivityHandler;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
-import org.eclipse.che.ide.api.editor.events.HasCursorActivityHandlers;
-import org.eclipse.che.ide.api.editor.position.PositionConverter;
-import org.eclipse.che.ide.api.editor.text.LinearRange;
-import org.eclipse.che.ide.api.editor.text.TextPosition;
-import org.eclipse.che.ide.api.editor.text.TextRange;
 
 /**
  * The implementation of {@link Document} for Orion.
@@ -60,6 +60,14 @@ public class OrionDocument extends AbstractDocument {
                 fireDocumentChangeEvent(parameter);
             }
         }, true);
+        
+        this.editorOverlay.getModel().addEventListener("Changing", new EventHandler<ModelChangedEventOverlay>() {
+            @Override
+            public void onEvent(ModelChangedEventOverlay parameter) {
+                fireDocumentChangingEvent(parameter);
+            }
+        }, true);
+
     }
 
     private void fireDocumentChangeEvent(final ModelChangedEventOverlay param) {
@@ -70,7 +78,7 @@ public class OrionDocument extends AbstractDocument {
 
         String text = editorOverlay.getModel().getText(startOffset, startOffset + addedCharCount);
 
-        final DocumentChangeEvent event = new DocumentChangeEvent(this,
+        final DocumentChangedEvent event = new DocumentChangedEvent(this,
                                                                   startOffset,
                                                                   addedCharCount,
                                                                   text,
@@ -78,6 +86,24 @@ public class OrionDocument extends AbstractDocument {
         // according to https://github.com/codenvy/che-core/pull/122
         getDocEventBus().fireEvent(event);
     }
+    
+    private void fireDocumentChangingEvent(final ModelChangedEventOverlay param) {
+        int startOffset = param.start();
+        int addedCharCount = param.addedCharCount();
+        int removedCharCount = param.removedCharCount();
+
+
+        String text = editorOverlay.getModel().getText(startOffset, startOffset + addedCharCount);
+
+        final DocumentChangingEvent event = new DocumentChangingEvent(this,
+                                                                  startOffset,
+                                                                  addedCharCount,
+                                                                  text,
+                                                                  removedCharCount);
+        // according to https://github.com/codenvy/che-core/pull/122
+        getDocEventBus().fireEvent(event);
+    }
+
 
     @Override
     public TextPosition getPositionFromIndex(final int index) {

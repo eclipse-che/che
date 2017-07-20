@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
 import org.eclipse.che.ide.api.editor.document.UseDocumentHandle;
 
 /**
@@ -33,7 +33,7 @@ import org.eclipse.che.ide.api.editor.document.UseDocumentHandle;
  * using the callback.</li>
  * </ul>
  */
-public interface AnnotationModel extends UseDocumentHandle, DocumentChangeHandler, QueryAnnotationsHandler {
+public interface AnnotationModel extends UseDocumentHandle, DocumentChangedHandler, QueryAnnotationsHandler {
 
 
     /**

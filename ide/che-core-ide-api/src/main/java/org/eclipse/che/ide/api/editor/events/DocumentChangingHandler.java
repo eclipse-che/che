@@ -8,16 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.ide.editor.sync;
+package org.eclipse.che.ide.api.editor.events;
 
-import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.text.TextPosition;
+import com.google.gwt.event.shared.EventHandler;
 
-/**
- * Handle TextDocument synchronization
- *
- * @author Evgen Vidolob
- */
-public interface TextDocumentSynchronize {
-    void syncTextDocument(Document document, TextPosition start, TextPosition end, String insertedText, int version);
+public interface DocumentChangingHandler extends EventHandler {
+
+    void onDocumentChanging(DocumentChangingEvent event);
 }
