@@ -76,7 +76,6 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
-import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.imageviewer.PreviewImageAction;
 import org.eclipse.che.ide.machine.MachineResources;
@@ -479,8 +478,6 @@ public class StandardComponentInitializer {
     @Inject
     @Named("CommandFileType")
     private FileType              commandFileType;
-    @Inject
-    private WsConnectionListener  wsConnectionListener;
 
     @Inject
     private ProjectConfigSynchronized projectConfigSynchronized;
