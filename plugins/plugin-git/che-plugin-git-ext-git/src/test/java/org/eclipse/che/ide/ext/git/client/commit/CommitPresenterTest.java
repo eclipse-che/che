@@ -20,7 +20,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
@@ -91,7 +90,6 @@ public class CommitPresenterTest extends BaseTest {
         when(appContext.getResources()).thenReturn(new Resource[]{});
         when(appContext.getResource()).thenReturn(resource);
         when(resource.getLocation()).thenReturn(Path.valueOf("test/location"));
-        when(appContext.getDevMachine()).thenReturn(mock(DevMachine.class));
         when(appContext.getRootProject()).thenReturn(mock(Project.class));
 
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);

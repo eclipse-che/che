@@ -305,7 +305,7 @@ public class TestServiceClient {
                 sb.append(URL.encode(e.getKey())).append('=').append(URL.encode(e.getValue()));
             }
         }
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/che/testing/runtests/?testFramework=" + testFramework
+        String url = appContext.getDevAgentEndpoint() + "/che/testing/runtests/?testFramework=" + testFramework
                 + "&projectPath=" + projectPath + "&" + sb.toString();
         return asyncRequestFactory.createGetRequest(url).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                 .send(dtoUnmarshallerFactory.newUnmarshaller(TestResultRootDto.class));
@@ -317,7 +317,7 @@ public class TestServiceClient {
             params.append("&path" + i + '=');
             params.append(testResultsPath.get(i));
         }
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/che/testing/gettestresults/?testFramework="
+        String url = appContext.getDevAgentEndpoint() + "/che/testing/gettestresults/?testFramework="
                 + testFramework + params.toString();
         return asyncRequestFactory.createGetRequest(url).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                 .send(dtoUnmarshallerFactory.newListUnmarshaller(TestResultDto.class));

@@ -26,8 +26,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.factory.model.FactoryImpl;
-import org.eclipse.che.ide.api.machine.ActiveRuntime;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.project.type.ProjectTypesLoadedEvent;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
@@ -40,6 +38,8 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
@@ -95,7 +96,6 @@ public class AppContextImpl implements AppContext,
     private       WorkspaceImpl       workspace;
     private       FactoryImpl         factory;
     private       Path                projectsRoot;
-    private       ActiveRuntime       runtime;
     private       ResourceManager     resourceManager;
     private       Map<String, String> properties;
 
@@ -121,7 +121,7 @@ public class AppContextImpl implements AppContext,
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
-    private static native String masterFromIDEConfig() /*-{
+    private static native String getMasterApiPathFromIDEConfig() /*-{
         if ($wnd.IDE && $wnd.IDE.config) {
             return $wnd.IDE.config.restContext;
         } else {
@@ -137,14 +137,6 @@ public class AppContextImpl implements AppContext,
     /** Sets the current workspace. */
     public void setWorkspace(Workspace workspace) {
         this.workspace = new WorkspaceImpl(workspace);
-
-        if (workspace != null) {
-            if (workspace.getRuntime() != null) {
-                runtime = new ActiveRuntime(workspace);
-            }
-        } else {
-            runtime = null;
-        }
     }
 
     @Override
@@ -199,12 +191,6 @@ public class AppContextImpl implements AppContext,
 
     public void setFactory(Factory factory) {
         this.factory = new FactoryImpl(factory);
-    }
-
-    @Deprecated
-    @Override
-    public DevMachine getDevMachine() {
-        return runtime.getDevMachine();
     }
 
     private void initResourceManager() {
@@ -413,35 +399,24 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public String getMasterEndpoint() {
-        final String fromUrl = queryParameters.getByName("master");
-
-        if (fromUrl == null || fromUrl.isEmpty()) {
-            return masterFromIDEConfig();
-        } else {
-            return fromUrl;
-        }
+        return getMasterApiPathFromIDEConfig();
     }
 
     @Override
     public String getDevAgentEndpoint() {
-        final String fromUrl = queryParameters.getByName("agent");
+        RuntimeImpl runtime = getWorkspace().getRuntime();
+        Optional<ServerImpl> wsAgentServer = runtime.getWsAgentServer();
 
-        if (fromUrl == null || fromUrl.isEmpty()) {
-            return getDevMachine().getWsAgentBaseUrl();
-        } else {
-            return fromUrl;
+        if (wsAgentServer.isPresent()) {
+            return wsAgentServer.get().getUrl() + "/api"; // TODO (spi ide): remove path when it comes with server's URL
         }
+
+        throw new RuntimeException("ws-agent server doesn't exist");
     }
 
     @Override
     public String getAppId() {
         return APP_ID;
-    }
-
-    @Deprecated
-    @Override
-    public ActiveRuntime getActiveRuntime() {
-        return runtime;
     }
 
     @Override
