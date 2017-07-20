@@ -114,8 +114,9 @@ public class ProjectStateAfterRefreshTest {
         projectExplorer.waitItem(PROJECT_NAME);
         editor.waitTabIsPresent("qa-spring-sample");
         projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
-        projectExplorer.waitItem(PROJECT_NAME + "/my-lib");
-        projectExplorer.waitItem(PROJECT_NAME + "/my-webapp");
+        projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
+        projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");
+
     }
 
     private void checkFilesAreOpened() {

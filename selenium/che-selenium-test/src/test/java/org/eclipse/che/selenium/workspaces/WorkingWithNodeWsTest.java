@@ -44,7 +44,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 public class WorkingWithNodeWsTest {
     private static final String NODE_JS_PROJECT_NAME       = "web-nodejs-simple";
     private static final String ASK_DIALOG_MSG_ANGULAR_APP =
-            "The process web-nodejs-simple: run will be terminated after closing console. Do you want to continue?";
+            "The process web-nodejs-simple:run will be terminated after closing console. Do you want to continue?";
 
     private static final String WORKSPACE = NameGenerator.generate("WorkingWithNode", 4);
 

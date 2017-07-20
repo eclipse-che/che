@@ -19,8 +19,8 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
@@ -44,23 +44,21 @@ public class EditFilesWithTabsTest {
     @InjectPageObject(driverId = 1)
     private Ide                     ide1;
     @InjectPageObject(driverId = 1)
-    private CodenvyEditor           editor1;
+    private CodenvyEditor            editor1;
     @InjectPageObject(driverId = 1)
-    private ProjectExplorer         projectExplorer1;
-    @InjectPageObject(driverId = 1)
-    private NotificationsPopupPanel notifications1;
-
+    private ProjectExplorer          projectExplorer1;
     @InjectPageObject(driverId = 2)
     private Ide                      ide2;
     @InjectPageObject(driverId = 2)
     private CodenvyEditor            editor2;
     @InjectPageObject(driverId = 2)
     private ProjectExplorer          projectExplorer2;
-    @InjectPageObject(driverId = 2)
-    private NotificationsPopupPanel  notifications2;
     @Inject
     private TestProjectServiceClient testProjectServiceClient;
-
+    @InjectPageObject(driverId = 1)
+    private Events                   eventsTab1;
+    @InjectPageObject(driverId = 2)
+    private Events                   eventsTab2;
     private String projectName = NameGenerator.generate("project", 6);
 
     @BeforeClass
@@ -90,7 +88,7 @@ public class EditFilesWithTabsTest {
         editor1.typeTextIntoEditor(textForValidation);
         editor1.typeTextIntoEditor(Keys.ENTER.toString());
 
-        notifications2.waitExpectedMessageOnProgressPanelAndClosed(expectedNotificationMess1, 10);
+        eventsTab2.waitExpectedMessage(expectedNotificationMess1);
         editor2.waitTextIntoEditor(textForValidation);
         projectExplorer1.openItemByPath(projectName + "/" + nameReadmeFile);
         projectExplorer1.openItemByPath(projectName + "/" + nameFiletxt1);
@@ -98,13 +96,14 @@ public class EditFilesWithTabsTest {
         projectExplorer2.openItemByPath(projectName + "/" + nameFiletxt1);
         editor2.typeTextIntoEditor(textForValidationTxt1);
 
-        notifications1.waitExpectedMessageOnProgressPanelAndClosed(expectedNotificationMess2, 11);
+        eventsTab1.waitExpectedMessage(expectedNotificationMess2);
+        eventsTab1.clearAllMessages();
 
         editor1.closeFileByNameWithSaving(nameFiletxt1);
         editor2.typeTextIntoEditor(Keys.BACK_SPACE.toString());
         editor2.typeTextIntoEditor(Keys.BACK_SPACE.toString());
 
-        checkThatNotificationIsNotAppear(8, 500, notifications1);
+        checkThatNotificationIsNotAppear(8, 500, expectedNotificationMess1);
     }
 
     /**
@@ -113,6 +112,8 @@ public class EditFilesWithTabsTest {
     private void prepareFiles() {
         expandFoldersToClass(projectExplorer1, editor1);
         expandFoldersToClass(projectExplorer2, editor2);
+        eventsTab1.clickProjectEventsTab();
+        eventsTab2.clickProjectEventsTab();
     }
 
     /**
@@ -131,12 +132,11 @@ public class EditFilesWithTabsTest {
     /**
      * Performs checking that notifications do not appear for inactive tabs
      */
-    private void checkThatNotificationIsNotAppear(int amountOfRequests, int delayBetweenRequsts, NotificationsPopupPanel notifications) {
+    private void checkThatNotificationIsNotAppear(int amountOfRequests, int delayBetweenRequsts, String expMess) {
         for (int i = 0; i < amountOfRequests; i++) {
             sleepQuietly(delayBetweenRequsts, TimeUnit.MILLISECONDS);
-            notifications.waitPopUpPanelsIsClosed();
+            editor1.waitTextNotPresentIntoEditor(expMess);
         }
     }
 
 }
-//projects.spring-project-for-file-watcher-tabs.src.main.java.

@@ -93,6 +93,7 @@ public class FileStructureBaseOperationTest {
     @Test
     public void checkFileStructureBaseOperations() {
         projectExplorer.waitProjectExplorer();
+        projectExplorer.waitItem(PROJECT_NAME);
         projectExplorer.quickExpandWithJavaScript();
 
         // Check the opening and closing the 'file structure' form

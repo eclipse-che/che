@@ -71,6 +71,7 @@ public class CheckSwiftStackTest {
 
         dashboardWorkspace.clickOnNewWorkspaceBtn();
         createWorkspace.waitToolbar();
+        createWorkspace.clickAllStacksTab();
         createWorkspace.selectStack(TestStacksConstants.BITNAMI_SWIFT.getId());
         createWorkspace.typeWorkspaceName(WS_NAME);
 

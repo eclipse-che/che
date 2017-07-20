@@ -71,6 +71,7 @@ public class CheckLaravelStackTest {
 
         dashboardWorkspace.clickOnNewWorkspaceBtn();
         createWorkspace.waitToolbar();
+        createWorkspace.clickAllStacksTab();
         createWorkspace.selectStack(TestStacksConstants.BITNAMI_LARAVEL.getId());
         createWorkspace.typeWorkspaceName(WS_NAME);
         projectSourcePage.selectSample(PROJECT_NAME);

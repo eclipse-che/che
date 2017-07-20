@@ -20,6 +20,7 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.IdeMainDockPanel;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -53,7 +54,7 @@ public class RemoveFilesWithActiveTabs {
     private ProjectExplorer projectExplorer1;
 
     @InjectPageObject(driverId = 1)
-    private CodenvyEditor editor1;
+    private Events events1;
 
     @InjectPageObject(driverId = 1)
     private NotificationsPopupPanel notifications1;
@@ -63,6 +64,9 @@ public class RemoveFilesWithActiveTabs {
 
     @InjectPageObject(driverId = 1)
     private Loader loader1;
+
+    @InjectPageObject(driverId = 1)
+    private CodenvyEditor editor1;
 
     @InjectPageObject(driverId = 1)
     private IdeMainDockPanel ideMainDockPanel1;
@@ -78,7 +82,7 @@ public class RemoveFilesWithActiveTabs {
     private CodenvyEditor editor2;
 
     @InjectPageObject(driverId = 2)
-    private NotificationsPopupPanel notifications2;
+    private Events events2;
 
     @InjectPageObject(driverId = 2)
     private ProjectExplorer projectExplorer2;
@@ -116,7 +120,7 @@ public class RemoveFilesWithActiveTabs {
 
         confirmDeletion();
 
-        notifications2.waitExpectedMessageOnProgressPanelAndClosed(expectedMessage, 10);
+        events2.waitExpectedMessage(expectedMessage, 10);
         editor2.waitTabIsNotPresent(deletedClass.replace(".java", ""));
         projectExplorer2.waitItemIsNotPresentVisibleArea(deletedClass);
     }
@@ -137,8 +141,8 @@ public class RemoveFilesWithActiveTabs {
 
         confirmDeletion();
 
-        notifications2.waitExpectedMessageOnProgressPanelAndClosed(expectedMessage1, 10);
-        notifications2.waitExpectedMessageOnProgressPanelAndClosed(expectedMessage2, 10);
+        events2.waitExpectedMessage(expectedMessage1, 10);
+        events2.waitExpectedMessage(expectedMessage2, 10);
         projectExplorer1.waitItemIsNotPresentVisibleArea(nameReadmeFile);
         projectExplorer1.waitItemIsNotPresentVisibleArea(nameFiletxt1);
         projectExplorer2.waitItemIsNotPresentVisibleArea(nameReadmeFile);
@@ -156,7 +160,7 @@ public class RemoveFilesWithActiveTabs {
 
         testProjectServiceClient.deleteResource(ws.getId(), user.getAuthToken(), PROJECT_NAME + "/" + nameFiletxt2);
 
-        notifications1.waitExpectedMessageOnProgressPanelAndClosed(expectedMessage1, 10);
+        events1.waitExpectedMessage(expectedMessage1, 10);
         editor1.waitTabIsNotPresent(nameFiletxt2);
         projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
         editor2.waitTabIsPresent(nameFiletxt3);
@@ -164,7 +168,7 @@ public class RemoveFilesWithActiveTabs {
         testProjectServiceClient.deleteResource(ws.getId(), user.getAuthToken(), PROJECT_NAME + "/" + nameFiletxt3);
 
         editor2.waitTabIsNotPresent(nameFiletxt2);
-        notifications2.waitExpectedMessageOnProgressPanelAndClosed(expectedMessage2, 10);
+        events2.waitExpectedMessage(expectedMessage2, 10);
     }
 
 
@@ -187,6 +191,9 @@ public class RemoveFilesWithActiveTabs {
 
         projectExplorer2.waitItem(PROJECT_NAME);
         projectExplorer2.quickExpandWithJavaScript();
+
+        events1.clickProjectEventsTab();
+        events2.clickProjectEventsTab();
     }
 
 }

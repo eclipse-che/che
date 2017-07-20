@@ -39,7 +39,7 @@ public class Events {
 
     public static final String EVENTS_AREA        = "gwt-debug-notificationManager-mainPanel";
     public static final String PROJECT_EVENTS_TAB = "gwt-debug-partButton-Events";
-    public static final String CLOSE_EVENT_ICON   = "gwt-debug-notificationItem-close";
+    public static final String CLOSE_EVENT_ICON   = "//*[local-name()='svg' and contains(@id,'gwt-debug-close-icongwt')]";
     public static final String MINIMIZE_BUTTON    = "gwt-debug-notification-minimizeBut";
 
     private final SeleniumWebDriver       seleniumWebDriver;
@@ -109,14 +109,9 @@ public class Events {
      *         timeout wor waiting
      */
     public void waitExpectedMessage(final String message, final int userTimeout) {
-        new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC).until(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                return getAllMessagesFromOutput().contains(message);
-            }
-        });
+        new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC)
+                .until((ExpectedCondition<Boolean>)input -> getAllMessagesFromOutput().contains(message));
     }
-
 
     /**
      * wait expected message into events panel
@@ -125,12 +120,8 @@ public class Events {
      *         the expected message;
      */
     public void waitExpectedMessage(final String message) {
-        new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC).until(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                return getAllMessagesFromOutput().contains(message);
-            }
-        });
+        new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+                .until((ExpectedCondition<Boolean>)input -> getAllMessagesFromOutput().contains(message));
     }
 
 
@@ -166,7 +157,7 @@ public class Events {
      * Clear opened and closed panel
      */
     public void clearAllMessages() {
-        List<WebElement> messageCloseIcons = seleniumWebDriver.findElements(By.id(CLOSE_EVENT_ICON));
+        List<WebElement> messageCloseIcons = seleniumWebDriver.findElements(By.xpath(CLOSE_EVENT_ICON));
         for (WebElement messageCloseIcon : messageCloseIcons) {
             new WebDriverWait(seleniumWebDriver, 5).until(ExpectedConditions.visibilityOf(messageCloseIcon));
             messageCloseIcon.click();

@@ -51,6 +51,6 @@ public class CheckBitnamiCodeIgniterFactory {
         testFactory.authenticateAndOpen(ide.driver());
         ide.switchFromDashboard();
         notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(RUNNING_WORKSPACE_MESS, UPDATING_PROJECT_TIMEOUT_SEC);
-        consoles.waitExpectedTextIntoConsole("codeign INFO  The Codeigniter project codeigniter was created succesfully!");
+        consoles.waitExpectedTextIntoConsole("Welcome to the che-codeigniter image");
     }
 }

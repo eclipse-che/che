@@ -20,9 +20,9 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
@@ -58,7 +58,7 @@ public class RefactoringFeatureTest {
     private CodenvyEditor editor1;
 
     @InjectPageObject(driverId = 1)
-    private NotificationsPopupPanel notifications1;
+    private Events events1;
 
     @InjectPageObject(driverId = 1)
     private Menu menu1;
@@ -70,7 +70,7 @@ public class RefactoringFeatureTest {
     private CodenvyEditor editor2;
 
     @InjectPageObject(driverId = 2)
-    private NotificationsPopupPanel notifications2;
+    private Events events2;
 
     @InjectPageObject(driverId = 2)
     private ProjectExplorer projectExplorer2;
@@ -92,6 +92,8 @@ public class RefactoringFeatureTest {
         );
         ide1.open(ws);
         ide2.open(ws);
+        events1.clickProjectEventsTab();
+        events2.clickProjectEventsTab();
     }
 
     @Test
@@ -99,15 +101,15 @@ public class RefactoringFeatureTest {
         String expectedMessAfterRename = "File '" + originClassName + "' is removed";
         String expectedMessAfterMove = "File '" + renamedClassName + "' is removed";
         projectExplorer1.waitItem(PROJECT_NAME);
-        prepareFiles(menu1, editor1, projectExplorer1);
-        prepareFiles(menu2, editor2, projectExplorer2);
+        prepareFiles(editor1, projectExplorer1);
+        prepareFiles(editor2, projectExplorer2);
         editor1.setCursorToDefinedLineAndChar(21, 14);
         doRenameRefactor();
         checkWatching(expectedMessAfterRename);
         editor2.waitTabIsNotPresent(renamedClassName);
         doMoveRefactor();
         projectExplorer1.openItemByVisibleNameInExplorer(renamedClassName);
-        notifications1.waitExpectedMessageOnProgressPanelAndClosed(expectedMessAfterMove);
+        events1.waitExpectedMessage(expectedMessAfterMove);
         menu1.runCommand(TestMenuCommandsConstants.Assistant.ASSISTANT, TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
         projectExplorer1.expandToFileWithRevealResource(renamedClassName, PATH_TO_GREETING_FILE.replace(originClassName, renamedClassName));
         editor1.waitTabIsPresent(renamedClassName.replace(".java", ""));
@@ -115,12 +117,12 @@ public class RefactoringFeatureTest {
     }
 
     private void checkWatching(String expectedMessAfterRename) {
-        notifications2.waitExpectedMessageOnProgressPanelAndClosed(expectedMessAfterRename);
+        events2.waitExpectedMessage(expectedMessAfterRename);
         projectExplorer2.waitItemIsNotPresentVisibleArea(originClassName);
         editor2.waitTabIsNotPresent(originClassName);
     }
 
-    private void prepareFiles(Menu menu, CodenvyEditor editor, ProjectExplorer projectExplorer) {
+    private void prepareFiles(CodenvyEditor editor, ProjectExplorer projectExplorer) {
         projectExplorer.quickExpandWithJavaScript();
         projectExplorer.openItemByPath(PATH_TO_GREETING_FILE);
         editor.waitTabIsPresent(originClassName.replace(".java", ""));

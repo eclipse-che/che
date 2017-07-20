@@ -52,7 +52,6 @@ public class CheckBitnamiSwiftFactory {
         testSwiftFactory.authenticateAndOpen(ide.driver());
         ide.switchFromDashboard();
         notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(RUNNING_WORKSPACE_MESS, UPDATING_PROJECT_TIMEOUT_SEC);
-        consoles.waitExpectedTextIntoConsole("Welcome to the Bitnami");
-        consoles.waitExpectedTextIntoConsole("Project built successfully");
+        consoles.waitExpectedTextIntoConsole("Welcome to the Bitnami che-swift container");
     }
 }

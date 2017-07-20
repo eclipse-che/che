@@ -50,11 +50,11 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 public class WorkingWithJavaMySqlStackTest {
     private static final String WORKSPACE    = NameGenerator.generate("java-mysql", 4);
     private static final String PROJECT_NAME = "web-java-petclinic";
-    private static final String PROCESS_NAME = PROJECT_NAME + ": build and deploy";
+    private static final String PROCESS_NAME = PROJECT_NAME + ":build and deploy";
 
     private static final List<String> infoDataBases     = Arrays.asList("Database", "information_schema", "petclinic", "mysql");
     private static final String       MSG_CLOSE_PROCESS =
-            "The process " + PROJECT_NAME + ": build and deploy will be terminated after closing console. Do you want to continue?";
+            "The process " + PROJECT_NAME + ":build and deploy will be terminated after closing console. Do you want to continue?";
 
     private String currentWindow;
 

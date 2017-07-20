@@ -71,6 +71,7 @@ public class CheckExpressStackTest {
 
         dashboardWorkspace.clickOnNewWorkspaceBtn();
         createWorkspace.waitToolbar();
+        createWorkspace.clickAllStacksTab();
         createWorkspace.selectStack(TestStacksConstants.BITNAMI_EXPRESS.getId());
         createWorkspace.typeWorkspaceName(WS_NAME);
         projectSourcePage.selectSample(PROJECT_NAME);

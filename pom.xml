@@ -16,7 +16,7 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.15.0-SNAPSHOT</version>
+        <version>5.16.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
@@ -1145,6 +1145,16 @@
             <dependency>
                 <groupId>org.eclipse.che.sample</groupId>
                 <artifactId>che-sample-plugin-wizard-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.selenium</groupId>
+                <artifactId>che-selenium-core</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.selenium</groupId>
+                <artifactId>che-selenium-test</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
