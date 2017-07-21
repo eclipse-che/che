@@ -10,32 +10,32 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.plainjava;
 
-import org.eclipse.che.selenium.pageobject.Ide;
+import com.google.inject.Inject;
+
+import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.ConfigureClasspath;
 import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
-import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import com.google.inject.Inject;
-
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 
 /**
  * @author Aleksandr Shmaraev
@@ -46,7 +46,7 @@ public class RunPlainJavaProjectTest {
     private static final String CLONE_URI    = "https://github.com/idexmai1/plainJavaProject.git";
     private static final String NAME_COMMAND = "startApp";
     private static final String COMMAND      =
-            "${current.class.fqn}cd ${current.project.path}\n" +
+            "${current.class.fqn}\ncd ${current.project.path}\n" +
             "javac -classpath ${project.java.classpath} -sourcepath ${project.java.sourcepath} -d ${project.java.output.dir} src/com/company/nba/MainClass.java\n" +
             "java -classpath ${project.java.classpath}${project.java.output.dir} com.company.nba.MainClass";
     private static final String CONSOLE_MESS = "javac: directory not found: /projects/" + PROJECT_NAME + "/bin";
