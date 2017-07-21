@@ -24,12 +24,11 @@
  * @param {expression=} che-multiline-title allows multi line title if attr exists
  * @param {string=} che-font-icon button's icon CSS class
  * @param {expression=} che-state expression which defines state of button.
- * @param {expression=} che-value expression which defines value of button
  * @param {Function} che-on-change callback on model change
  * @usage
  *   <toggle-single-button che-title="Filter"
  *                         che-state="ctrl.filterInitState"
- *                         che-on-change="ctrl.filterStateOnChange(state, value)"></toggle-single-button>
+ *                         che-on-change="ctrl.filterStateOnChange(state)"></toggle-single-button>
  *
  * @author Oleksii Kurinnyi
  */
