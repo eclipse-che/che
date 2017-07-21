@@ -18,7 +18,7 @@ public enum DatabaseType {
     GOOGLECLOUDSQL("googleCloudSql", 3306, "root", "");
 
     private String connectorId;
-    private int    defaultPort;
+    private int defaultPort;
     private String defaultUsername;
     private String defaultPassword;
 

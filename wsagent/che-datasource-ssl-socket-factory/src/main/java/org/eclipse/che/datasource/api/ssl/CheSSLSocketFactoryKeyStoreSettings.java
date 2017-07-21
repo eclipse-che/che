@@ -10,9 +10,9 @@ public class CheSSLSocketFactoryKeyStoreSettings {
     protected String tsPassword;
 
     public CheSSLSocketFactoryKeyStoreSettings(byte[] sslKeyStoreContent,
-                                                   String keyStorePassword,
-                                                   byte[] sslTrustStoreContent,
-                                                   String trustStorePassword) {
+                                               String keyStorePassword,
+                                               byte[] sslTrustStoreContent,
+                                               String trustStorePassword) {
         ksContent = sslKeyStoreContent;
         ksPassword = keyStorePassword;
         tsContent = sslTrustStoreContent;
@@ -26,16 +26,32 @@ public class CheSSLSocketFactoryKeyStoreSettings {
         return ksPassword;
     }
 
+    public void setKeyStorePassword(String keyStorePassword) {
+        ksPassword = keyStorePassword;
+    }
+
     public byte[] getKeyStoreContent() {
         return ksContent;
+    }
+
+    public void setKeyStoreContent(byte[] sslKeyStoreContent) {
+        ksContent = sslKeyStoreContent;
     }
 
     public byte[] getTrustStoreContent() {
         return tsContent;
     }
 
+    public void setTrustStoreContent(byte[] sslTrustStoreContent) {
+        tsContent = sslTrustStoreContent;
+    }
+
     public String getTrustStorePassword() {
         return tsPassword;
+    }
+
+    public void setTrustStorePassword(String trustStorePassword) {
+        tsPassword = trustStorePassword;
     }
 
     public CheSSLSocketFactoryKeyStoreSettings withKeyStorePassword(String keyStorePassword) {
@@ -56,21 +72,5 @@ public class CheSSLSocketFactoryKeyStoreSettings {
     public CheSSLSocketFactoryKeyStoreSettings withTrustStorePassword(String trustStorePassword) {
         tsPassword = trustStorePassword;
         return this;
-    }
-
-    public void setKeyStorePassword(String keyStorePassword) {
-        ksPassword = keyStorePassword;
-    }
-
-    public void setKeyStoreContent(byte[] sslKeyStoreContent) {
-        ksContent = sslKeyStoreContent;
-    }
-
-    public void setTrustStoreContent(byte[] sslTrustStoreContent) {
-        tsContent = sslTrustStoreContent;
-    }
-
-    public void setTrustStorePassword(String trustStorePassword) {
-        tsPassword = trustStorePassword;
     }
 }

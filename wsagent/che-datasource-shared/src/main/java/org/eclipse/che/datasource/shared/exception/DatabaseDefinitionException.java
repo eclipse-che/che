@@ -3,8 +3,10 @@ package org.eclipse.che.datasource.shared.exception;
 /**
  * Created by test on 7/15/17.
  */
-public class DatabaseDefinitionException extends Exception{
-    /** Serialization UID. */
+public class DatabaseDefinitionException extends Exception {
+    /**
+     * Serialization UID.
+     */
     private static final long serialVersionUID = 1L;
 
     public DatabaseDefinitionException() {

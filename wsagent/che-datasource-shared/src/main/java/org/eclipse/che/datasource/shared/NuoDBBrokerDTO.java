@@ -10,13 +10,13 @@ public interface NuoDBBrokerDTO {
 
     String getHostName();
 
-    NuoDBBrokerDTO withHostName(String hostname);
-
     void setHostName(String hostname);
+
+    NuoDBBrokerDTO withHostName(String hostname);
 
     int getPort();
 
-    NuoDBBrokerDTO withPort(int port);
-
     void setPort(int port);
+
+    NuoDBBrokerDTO withPort(int port);
 }

@@ -1,11 +1,11 @@
 package org.eclipse.che.datasource.api;
 
-import org.eclipse.che.datasource.shared.ServicePaths;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.apache.commons.codec.binary.Base64;
+import org.eclipse.che.datasource.shared.ServicePaths;
+import org.eclipse.che.datasource.shared.TextDto;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.eclipse.che.datasource.shared.TextDto;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -23,11 +23,13 @@ import javax.ws.rs.core.MediaType;
 @Path(ServicePaths.ENCRYPT_TEXT_PATH)
 public class EncryptTextService {
     private static final byte[] SALT = {
-            (byte)0xde, (byte)0x33, (byte)0x10, (byte)0x12,
-            (byte)0xde, (byte)0x33, (byte)0x10, (byte)0x12,
+            (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
+            (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12,
     };
-    /** The logger. */
-    private static final Logger LOG  = LoggerFactory.getLogger(EncryptTextService.class);
+    /**
+     * The logger.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(EncryptTextService.class);
 
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})

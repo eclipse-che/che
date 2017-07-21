@@ -9,14 +9,14 @@ import org.eclipse.che.dto.shared.DTO;
 public interface SslKeyStoreEntry {
     String getAlias();
 
+    void setAlias(String alias);
+
     String getType();
+
+    void setType(String type);
 
     SslKeyStoreEntry withAlias(String alias);
 
     SslKeyStoreEntry withType(String type);
-
-    void setAlias(String alias);
-
-    void setType(String type);
 
 }

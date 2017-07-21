@@ -15,9 +15,9 @@ public interface ConnectionTestResultDTO {
      */
     Status getTestResult();
 
-    String getFailureMessage();
-
     void setTestResult(Status result);
+
+    String getFailureMessage();
 
     void setFailureMessage(String message);
 

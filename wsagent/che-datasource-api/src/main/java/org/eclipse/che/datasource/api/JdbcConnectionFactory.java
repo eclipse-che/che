@@ -2,7 +2,6 @@ package org.eclipse.che.datasource.api;
 
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonHelper;
@@ -34,22 +33,34 @@ import java.util.Properties;
  */
 public class JdbcConnectionFactory {
 
-    /** The logger. */
+    /**
+     * The logger.
+     */
     private static final Logger LOG = LoggerFactory.getLogger(JdbcConnectionFactory.class);
 
-    /** URL pattern for PostgreSQL databases. */
+    /**
+     * URL pattern for PostgreSQL databases.
+     */
     private static final String URL_TEMPLATE_POSTGRES = "jdbc:postgresql://{0}:{1}/{2}";
 
-    /** URL pattern for MySQL databases. */
+    /**
+     * URL pattern for MySQL databases.
+     */
     private static final String URL_TEMPLATE_MYSQL = "jdbc:mysql://{0}:{1}/{2}";
 
-    /** URL pattern for Oracle databases. */
+    /**
+     * URL pattern for Oracle databases.
+     */
     private static final String URL_TEMPLATE_ORACLE = "jdbc:oracle:thin:@{0}:{1}:{2}";
 
-    /** URL pattern for SQLServer databases. */
+    /**
+     * URL pattern for SQLServer databases.
+     */
     private static final String URL_TEMPLATE_JTDS = "jdbc:jtds:sqlserver://{0}:{1}/{2}";
 
-    /** URL pattern for NuoDB databases. */
+    /**
+     * URL pattern for NuoDB databases.
+     */
     private static final String URL_TEMPLATE_NUODB = "jdbc:com.nuodb://{0}/{1}";
 
     protected String profileApiUrl;
@@ -57,9 +68,9 @@ public class JdbcConnectionFactory {
     protected EncryptTextService encryptTextService;
 
     @Inject
-    public JdbcConnectionFactory( EncryptTextService encryptTextService) {
+    public JdbcConnectionFactory(EncryptTextService encryptTextService) {
         this.encryptTextService = encryptTextService;
-        profileApiUrl ="http://192.168.1.35:8080" + "/profile";
+        profileApiUrl = "http://192.168.1.35:8080" + "/profile";
         //TODO:Have to replace API URL
     }
 
@@ -68,7 +79,7 @@ public class JdbcConnectionFactory {
      *
      * @param configuration the datasource configuration
      * @return a connection
-     * @throws SQLException if the creation of the connection failed
+     * @throws SQLException                if the creation of the connection failed
      * @throws DatabaseDefinitionException if the configuration is incorrect
      */
     public Connection getDatabaseConnection(final DatabaseConfigurationDTO configuration) throws SQLException, DatabaseDefinitionException {
@@ -120,7 +131,9 @@ public class JdbcConnectionFactory {
         } catch (Exception e) {
             LOG.error("An error occured while getting keystore from Codenvy Preferences, JDBC connection will be performed without SSL", e);
         }
-        final Connection connection = DriverManager.getConnection(getJdbcUrl(configuration), info);
+        String jdbcUrl = getJdbcUrl(configuration);
+        LOG.error("This is JDBC URL : " + jdbcUrl);
+        final Connection connection = DriverManager.getConnection(jdbcUrl, info);
 
         return connection;
     }

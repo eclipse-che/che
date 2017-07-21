@@ -8,7 +8,7 @@ import javax.ws.rs.Path;
  * Created by test on 7/15/17.
  */
 public class SslKeyStoreService {
-    protected KeyStoreObject   keyStoreObject;
+    protected KeyStoreObject keyStoreObject;
     protected TrustStoreObject trustStoreObject;
 
     // userProfileDao, injected with ...
@@ -17,17 +17,6 @@ public class SslKeyStoreService {
         this.keyStoreObject = keyStoreObject;
         this.trustStoreObject = trustStoreObject;
     }
-
-    @Path("keystore")
-    public KeyStoreObject getClientKeyStore() throws Exception {
-        return keyStoreObject;
-    }
-
-    @Path("truststore")
-    public TrustStoreObject getTrustStore() throws Exception {
-        return trustStoreObject;
-    }
-
 
     public static String getDefaultTrustorePassword() {
         if (System.getProperty("com.codenvy.security.masterpwd") == null) {
@@ -41,5 +30,15 @@ public class SslKeyStoreService {
             System.setProperty("com.codenvy.security.masterpwd", "changeMe");
         }
         return System.getProperty("com.codenvy.security.masterpwd");
+    }
+
+    @Path("keystore")
+    public KeyStoreObject getClientKeyStore() throws Exception {
+        return keyStoreObject;
+    }
+
+    @Path("truststore")
+    public TrustStoreObject getTrustStore() throws Exception {
+        return trustStoreObject;
     }
 }

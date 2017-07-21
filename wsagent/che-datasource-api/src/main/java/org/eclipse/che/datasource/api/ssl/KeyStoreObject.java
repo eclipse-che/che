@@ -1,13 +1,10 @@
 package org.eclipse.che.datasource.api.ssl;
 
 import com.google.gson.reflect.TypeToken;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.fileupload.FileItem;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonHelper;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.datasource.shared.ssl.SslKeyStoreEntry;
@@ -42,7 +39,7 @@ public class KeyStoreObject {
 
     private static final Logger LOG = LoggerFactory.getLogger(KeyStoreObject.class);
 
-    protected String   keyStorePassword;
+    protected String keyStorePassword;
     protected KeyStore keystore;
 
     protected String profileApiUrl;

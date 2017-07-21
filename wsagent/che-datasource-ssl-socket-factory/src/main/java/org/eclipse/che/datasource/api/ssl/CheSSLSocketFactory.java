@@ -1,5 +1,8 @@
 package org.eclipse.che.datasource.api.ssl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.net.ssl.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -12,22 +15,21 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Created by test on 7/15/17.
  */
 public class CheSSLSocketFactory extends SSLSocketFactory {
-    private static final Logger LOG                  =
+    private static final Logger LOG =
             LoggerFactory.getLogger(CheSSLSocketFactory.class);
 
-    public static ThreadLocal<CheSSLSocketFactoryKeyStoreSettings> keystore             =
+    public static ThreadLocal<CheSSLSocketFactoryKeyStoreSettings> keystore =
             new ThreadLocal<CheSSLSocketFactoryKeyStoreSettings>();
+    public static SSLSocketFactory defaultSocketFactory;
+    protected ThreadLocal<SSLSocketFactory> wrappedSocketFactory = new ThreadLocal<SSLSocketFactory>();
 
-    protected ThreadLocal<SSLSocketFactory>                            wrappedSocketFactory = new ThreadLocal<SSLSocketFactory>();
-
-    public static SSLSocketFactory                                     defaultSocketFactory;
+    public static boolean isNullOrEmpty(byte[] byteArray) {
+        return byteArray == null || byteArray.length <= 0;
+    }
 
     protected void reloadIfNeeded() {
         if (keystore.get() != null) {
@@ -120,7 +122,7 @@ public class CheSSLSocketFactory extends SSLSocketFactory {
             return sslContext.getSocketFactory();
         } catch (Exception e) {
             LOG.error("An error occured while setting up custom SSL Socket factory. Falling back the the default one", e);
-            return (javax.net.ssl.SSLSocketFactory)javax.net.ssl.SSLSocketFactory
+            return (javax.net.ssl.SSLSocketFactory) javax.net.ssl.SSLSocketFactory
                     .getDefault();
         }
     }
@@ -171,10 +173,6 @@ public class CheSSLSocketFactory extends SSLSocketFactory {
     public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
         reloadIfNeeded();
         return wrappedSocketFactory.get().createSocket(address, port, localAddress, localPort);
-    }
-
-    public static boolean isNullOrEmpty(byte[] byteArray) {
-        return byteArray == null || byteArray.length <= 0;
     }
 
 }

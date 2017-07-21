@@ -9,8 +9,8 @@ import org.eclipse.che.dto.shared.DTO;
 public interface TextDto {
     String getValue();
 
-    TextDto withValue(String text);
-
     void setValue(String text);
+
+    TextDto withValue(String text);
 }
 

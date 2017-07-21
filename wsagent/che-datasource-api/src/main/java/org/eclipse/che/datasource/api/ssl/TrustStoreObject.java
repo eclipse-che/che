@@ -1,7 +1,5 @@
 package org.eclipse.che.datasource.api.ssl;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.apache.commons.fileupload.FileItem;
 
 import javax.ws.rs.QueryParam;
@@ -15,7 +13,7 @@ import java.util.Iterator;
 /**
  * Created by test on 7/15/17.
  */
-public class TrustStoreObject extends KeyStoreObject{
+public class TrustStoreObject extends KeyStoreObject {
 
     public TrustStoreObject() throws Exception {
         super("http://192.168.1.35:8080");

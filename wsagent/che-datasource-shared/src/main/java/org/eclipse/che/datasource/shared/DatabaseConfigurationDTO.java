@@ -40,10 +40,9 @@ public interface DatabaseConfigurationDTO {
 
     String getUsername();
 
-    DatabaseConfigurationDTO withUsername(String username);
-
     void setUsername(String username);
 
+    DatabaseConfigurationDTO withUsername(String username);
 
     String getPassword();
 
@@ -55,10 +54,9 @@ public interface DatabaseConfigurationDTO {
     /* should be in child classes */
     String getHostName();
 
-    int getPort();
-
-
     void setHostName(String hostname);
+
+    int getPort();
 
     void setPort(int port);
 
@@ -70,20 +68,19 @@ public interface DatabaseConfigurationDTO {
 
     boolean getUseSSL();
 
-    DatabaseConfigurationDTO withUseSSL(boolean useSSL);
-
     void setUseSSL(boolean useSSL);
 
+    DatabaseConfigurationDTO withUseSSL(boolean useSSL);
 
     boolean getVerifyServerCertificate();
 
-    DatabaseConfigurationDTO withVerifyServerCertificate(boolean verifyServerCertificate);
-
     void setVerifyServerCertificate(boolean verifyServerCertificate);
 
-    void setRunnerProcessId(Long processId);
+    DatabaseConfigurationDTO withVerifyServerCertificate(boolean verifyServerCertificate);
 
     Long getRunnerProcessId();
+
+    void setRunnerProcessId(Long processId);
 
     DatabaseConfigurationDTO withRunnerProcessId(Long runnerProcessId);
 }

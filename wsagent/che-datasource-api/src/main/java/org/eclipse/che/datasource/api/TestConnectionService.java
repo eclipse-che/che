@@ -25,10 +25,14 @@ import java.sql.SQLException;
  */
 @Path(ServicePaths.TEST_DATABASE_CONNECTIVITY_PATH)
 public class TestConnectionService {
-    /** The logger. */
+    /**
+     * The logger.
+     */
     private static final Logger LOG = LoggerFactory.getLogger(TestConnectionService.class);
 
-    /** the provider for JDBC connections. */
+    /**
+     * the provider for JDBC connections.
+     */
     private final JdbcConnectionFactory jdbcConnectionFactory;
 
     @Inject
