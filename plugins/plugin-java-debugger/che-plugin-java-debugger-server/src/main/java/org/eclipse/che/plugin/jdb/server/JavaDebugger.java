@@ -596,7 +596,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
         setCurrentThread(event.thread());
         com.sun.jdi.Location jdiLocation = event.location();
 
-        Location location = debuggerUtil.getLocation(jdiLocation);
+        Location location;
+        try {
+            location = debuggerUtil.getLocation(jdiLocation);
+        } catch (DebuggerException de) {
+            location = new LocationImpl(jdiLocation.declaringType().name(), jdiLocation.lineNumber());
+        }
         debuggerCallback.onEvent(new SuspendEventImpl(location));
         return false;
     }

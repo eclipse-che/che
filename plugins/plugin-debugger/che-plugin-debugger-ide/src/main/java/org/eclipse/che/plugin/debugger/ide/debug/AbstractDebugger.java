@@ -215,6 +215,16 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     private void openCurrentFile() {
+        if (currentLocation.getResourcePath() == null) {
+            for (DebuggerObserver observer : observers) {
+                observer.onBreakpointStopped(currentLocation.getTarget(),
+                                             currentLocation.getTarget(),
+                                             currentLocation.getLineNumber());
+            }
+
+            return;
+        }
+
         //todo we need add possibility to handle few files
         activeFileHandler.openFile(currentLocation,
                                    new AsyncCallback<VirtualFile>() {
