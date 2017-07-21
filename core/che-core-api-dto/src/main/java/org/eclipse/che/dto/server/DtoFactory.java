@@ -404,6 +404,7 @@ public final class DtoFactory {
 
     /**
      * Checks if dtoInterface or its parent have DTO annotation.
+     *
      * @param dtoInterface
      *          DTO interface
      * @return true if only dtoInterface or one of its parent have DTO annotation.

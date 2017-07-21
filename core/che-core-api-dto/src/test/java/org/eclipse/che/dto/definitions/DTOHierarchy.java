@@ -62,6 +62,10 @@ public final class DTOHierarchy {
         void setShadowedField(GrandchildDto v);
     }
 
-    public interface GrandchildWithoutDto extends Child, Closeable {
+    public interface Child2 extends Parent {
+        String getChild2Field();
+    }
+
+    public interface GrandchildWithoutDto extends Child, Child2 {
     }
 }
