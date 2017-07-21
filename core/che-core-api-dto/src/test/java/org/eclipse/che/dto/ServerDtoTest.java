@@ -381,8 +381,15 @@ public class ServerDtoTest {
         assertEquals(childDto.getParentField(), "parent-field");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Is not a DTO type class java.lang.String")
-    public void shouldThrowExceptionWhenInterfaceIsNotAnnotatedAsDto() {
+    @Test(expectedExceptions = IllegalArgumentException.class,
+          expectedExceptionsMessageRegExp = "Only interfaces can be DTO, but class java.lang.String is not")
+    public void shouldThrowExceptionWhenThereIsClassType() {
         DtoFactory.newDto(String.class);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+          expectedExceptionsMessageRegExp = "interface org.eclipse.che.dto.definitions.DTOHierarchy\\$GrandchildWithoutDto is not a DTO type")
+    public void shouldThrowExceptionWhenInterfaceIsNotAnnotatedAsDto() {
+        DtoFactory.newDto(DTOHierarchy.GrandchildWithoutDto.class);
     }
 }

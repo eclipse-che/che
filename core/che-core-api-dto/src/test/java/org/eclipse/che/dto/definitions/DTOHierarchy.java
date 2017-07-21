@@ -60,4 +60,6 @@ public final class DTOHierarchy {
         void setShadowedField(GrandchildDto v);
     }
 
+    public interface GrandchildWithoutDto extends Child {
+    }
 }
