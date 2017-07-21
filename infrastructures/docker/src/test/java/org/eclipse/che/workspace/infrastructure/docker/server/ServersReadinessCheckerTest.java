@@ -28,6 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -140,9 +141,9 @@ public class ServersReadinessCheckerTest {
 
     @Test(expectedExceptions = InfrastructureException.class, expectedExceptionsMessageRegExp = "oops!")
     public void throwsExceptionIfAnyServerIsNotAvailable() throws InfrastructureException {
-        doThrow(new InfrastructureException("oops!")).when(connectionChecker).checkOnce();
+        doThrow(new InfrastructureException("oops!")).when(connectionChecker).checkOnce(anyObject());
 
-        checker.checkOnce();
+        checker.checkOnce(ref -> {});
     }
 
     Map<String, ServerImpl> getDefaultServers() {

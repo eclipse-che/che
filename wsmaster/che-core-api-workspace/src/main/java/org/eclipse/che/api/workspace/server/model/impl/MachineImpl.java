@@ -45,7 +45,7 @@ public class MachineImpl implements Machine {
         if (servers != null) {
             this.servers = servers.entrySet()
                                   .stream()
-                                  .collect(toMap(Map.Entry::getKey, entry -> new ServerImpl(entry.getValue().getUrl())));
+                                  .collect(toMap(Map.Entry::getKey, entry -> new ServerImpl(entry.getValue())));
         }
     }
 

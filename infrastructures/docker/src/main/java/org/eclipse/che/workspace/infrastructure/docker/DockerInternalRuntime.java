@@ -261,7 +261,10 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     /** Checks servers availability on all the machines. */
     void checkServers() throws InfrastructureException {
         for (Map.Entry<String, ? extends DockerMachine> entry : startSynchronizer.getMachines().entrySet()) {
-            new ServersReadinessChecker(entry.getKey(), entry.getValue().getServers(), serverCheckerFactory).checkOnce();
+            String name = entry.getKey();
+            DockerMachine machine = entry.getValue();
+            ServersReadinessChecker checker = new ServersReadinessChecker(name, machine.getServers(), serverCheckerFactory);
+            checker.checkOnce(new ServerReadinessHandler(name));
         }
     }
 

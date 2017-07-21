@@ -105,9 +105,9 @@ public class ServersReadinessChecker {
      * Synchronously checks whether servers are available,
      * throws {@link InfrastructureException} if any is not.
      */
-    public void checkOnce() throws InfrastructureException {
+    public void checkOnce(Consumer<String> readyHandler) throws InfrastructureException {
         for (ServerChecker checker : getServerCheckers()) {
-            checker.checkOnce();
+            checker.checkOnce(readyHandler);
         }
     }
 
