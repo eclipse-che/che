@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.action;
 
+import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
@@ -23,9 +24,14 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.editor.JavaReconsilerEvent;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
@@ -35,11 +41,13 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.TestType.CURSOR_POSITION;
+import static org.eclipse.che.api.testing.shared.TestExecutionContext.TestType.PROJECT;
+import static org.eclipse.che.ide.api.resources.Resource.FILE;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaFile;
 
 /** Abstract action that analyzes active editor and makes run/debug test actions active if some test methods are exist. */
 public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveAction {
-    TextEditor currentEditor;
-
+    private TextEditor                    currentEditor;
     private TestExecutionContext.TestType testType;
     private List<TestPosition>            testPosition;
     private boolean                       hasTests;
@@ -47,6 +55,8 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
     private DtoFactory                    dtoFactory;
     private AppContext                    appContext;
     private NotificationManager           notificationManager;
+    private String                        selectedNodePath;
+    private boolean                       isEditorInFocus;
 
     RunDebugTestAbstractAction(EventBus eventBus,
                                TestServiceClient client,
@@ -67,21 +77,63 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
 
         eventBus.addHandler(JavaReconsilerEvent.TYPE, event -> detectTests(event.getEditor()));
         eventBus.addHandler(ActivePartChangedEvent.TYPE, event -> {
-            if (event.getActivePart() instanceof TextEditor) {
+            PartPresenter activePart = event.getActivePart();
+            if (activePart instanceof TextEditor) {
+                isEditorInFocus = true;
                 testType = CURSOR_POSITION;
-                TextEditor activeEditor = (TextEditor)event.getActivePart();
+                TextEditor activeEditor = (TextEditor)activePart;
                 if (activeEditor.getEditorInput().getFile().getName().endsWith(".java")) {
                     detectTests(activeEditor);
                 } else {
                     hasTests = false;
                 }
+            } else {
+                isEditorInFocus = false;
             }
         });
+    }
+
+    private void analyzeProjectTreeSelection(AppContext appContext) {
+        Resource[] resources = appContext.getResources();
+        if (resources == null || resources.length > 1) {
+            hasTests = false;
+            return;
+        }
+
+        Resource resource = resources[0];
+        if (resource.isProject() && JavaUtil.isJavaProject((Project)resource)) {
+            testType = PROJECT;
+            hasTests = true;
+            return;
+        }
+
+        Project project = resource.getProject();
+        if (!JavaUtil.isJavaProject(project)) {
+            hasTests = false;
+            return;
+        }
+
+        Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
+        if (!srcFolder.isPresent() || resource.getLocation().equals(srcFolder.get().getLocation())) {
+            hasTests = false;
+            return;
+        }
+
+        if (resource.getResourceType() == FILE && isJavaFile(resource)) {
+            testType = TestExecutionContext.TestType.FILE;
+        } else if (resource instanceof Container) {
+            testType = TestExecutionContext.TestType.FOLDER;
+        }
+        selectedNodePath = resource.getLocation().toString();
+        hasTests = true;
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
         Presentation presentation = event.getPresentation();
+        if (!isEditorInFocus) {
+            analyzeProjectTreeSelection(appContext);
+        }
         presentation.setEnabled(hasTests);
     }
 
@@ -117,8 +169,12 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
 
         context.setProjectPath(project.getPath());
         context.setTestType(testType);
-        context.setFilePath(currentEditor.getEditorInput().getFile().getLocation().toString());
-        context.setCursorOffset(currentEditor.getCursorOffset());
+        if (testType == CURSOR_POSITION) {
+            context.setFilePath(currentEditor.getEditorInput().getFile().getLocation().toString());
+            context.setCursorOffset(currentEditor.getCursorOffset());
+        } else {
+            context.setFilePath(selectedNodePath);
+        }
         context.setFrameworkName(frameworkAndTestName.first);
 
         return context;
@@ -130,13 +186,18 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
      * otherwise the second parameter is null.
      */
     protected Pair<String, String> getTestingFrameworkAndTestName() {
-        int cursorOffset = currentEditor.getCursorOffset();
-        for (TestPosition position : testPosition) {
-            int testNameStartOffset = position.getTestNameStartOffset();
-            if (testNameStartOffset <= cursorOffset && testNameStartOffset + position.getTestBodyLength() >= cursorOffset) {
-                return Pair.of(position.getFrameworkName(), position.getTestName());
+        if (testType == CURSOR_POSITION) {
+            int cursorOffset = currentEditor.getCursorOffset();
+            for (TestPosition position : testPosition) {
+                int testNameStartOffset = position.getTestNameStartOffset();
+                if (testNameStartOffset <= cursorOffset && testNameStartOffset + position.getTestBodyLength() >= cursorOffset) {
+                    return Pair.of(position.getFrameworkName(), position.getTestName());
+                }
             }
+            return Pair.of(testPosition.iterator().next().getFrameworkName(), null);
+        } else {
+            //TODO need to recognize test framework here
+            return Pair.of("junit", null);
         }
-        return Pair.of(testPosition.iterator().next().getFrameworkName(), null);
     }
 }

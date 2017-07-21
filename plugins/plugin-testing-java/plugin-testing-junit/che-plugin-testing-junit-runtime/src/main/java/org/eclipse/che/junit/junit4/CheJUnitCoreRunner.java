@@ -36,7 +36,6 @@ public class CheJUnitCoreRunner extends JUnitCore {
         Request request = TestRunnerUtil.buildRequest(suites);
         if (request == null) {
             TestingMessageHelper.reporterAttached(System.out);
-            System.err.print("No test found to run.");
         } else {
             Runner runner = request.getRunner();
             Description description = runner.getDescription();
