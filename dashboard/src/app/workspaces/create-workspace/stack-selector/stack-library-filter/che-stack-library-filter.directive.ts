@@ -48,7 +48,7 @@ export class CheStackLibraryFilter implements ng.IDirective {
     };
 
     // select suggestion by keys
-    $element.bind('keypress keydown', (event: any) => {
+    $element.on('keypress keydown', (event: any) => {
       if (event.which === 38) {
         // on press 'up'
         // select prev suggestion
@@ -70,6 +70,16 @@ export class CheStackLibraryFilter implements ng.IDirective {
         }
         ctrl.selectSuggestion(ctrl.selectedIndex);
       }
+    });
+
+    // select suggestion by mouse click
+    $element.on('click', 'md-chip', (event: any) => {
+      const suggestions = ctrl.suggestions.map((suggestion: string) => {
+        return suggestion.toLowerCase();
+      });
+      const suggestionText = angular.element(event.currentTarget).find('.stack-library-filter-suggestion-text').text().toLowerCase();
+      ctrl.selectedIndex = suggestions.indexOf(suggestionText);
+      ctrl.selectSuggestion(ctrl.selectedIndex);
     });
   }
 }

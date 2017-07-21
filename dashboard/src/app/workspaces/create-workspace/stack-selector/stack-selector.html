@@ -27,7 +27,9 @@
          layout="row"
          layout-align="start center" layout-align-gt-md="end center">
       <toggle-button-popover button-title="Filters"
-                             button-font-icon="fa fa-sliders">
+                             button-font-icon="fa fa-sliders"
+                             che-popover-trigger-outside-click="true"
+                             ng-class="{'stack-selector-active-tags-filter': stackSelectorController.selectedTags.length}">
         <che-stack-library-filter stack-tags="stackSelectorController.allStackTags"
                                   selected-tags="stackSelectorController.selectedTags"
                                   on-tags-changes="stackSelectorController.onTagsChanges(tags)">
