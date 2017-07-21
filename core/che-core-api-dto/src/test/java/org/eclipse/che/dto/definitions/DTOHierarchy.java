@@ -13,6 +13,8 @@ package org.eclipse.che.dto.definitions;
 
 import org.eclipse.che.dto.shared.DTO;
 
+import java.io.Closeable;
+
 /**
  * Keeps DTO interfaces for hierarchy test
  *
@@ -60,6 +62,6 @@ public final class DTOHierarchy {
         void setShadowedField(GrandchildDto v);
     }
 
-    public interface GrandchildWithoutDto extends Child {
+    public interface GrandchildWithoutDto extends Child, Closeable {
     }
 }

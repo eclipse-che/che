@@ -392,7 +392,7 @@ public final class DtoFactory {
                 throw new IllegalArgumentException(format("Only interfaces can be DTO, but %s is not", dtoInterface));
             }
 
-            if (checkOnDtoAnnotation(dtoInterface)) {
+            if (hasDtoAnnotation(dtoInterface)) {
                 throw new IllegalArgumentException(format("Provider of implementation for DTO type %s isn't found", dtoInterface));
             } else {
                 throw new IllegalArgumentException(dtoInterface + " is not a DTO type");
@@ -406,16 +406,20 @@ public final class DtoFactory {
      * Checks if dtoInterface or its parent have DTO annotation.
      * @param dtoInterface
      *          DTO interface
-     * @return true if onle dtoInterface or one of its parent have DTO annotation.
+     * @return true if only dtoInterface or one of its parent have DTO annotation.
      */
-    private boolean checkOnDtoAnnotation(Class dtoInterface) {
+    private boolean hasDtoAnnotation(Class dtoInterface) {
+        if (dtoInterface.isAnnotationPresent(DTO.class)) {
+            return true;
+        }
+
         for (Class parent: dtoInterface.getInterfaces()) {
-            if (checkOnDtoAnnotation(parent)) {
+            if (hasDtoAnnotation(parent)) {
                 return true;
             }
         }
 
-        return dtoInterface.isAnnotationPresent(DTO.class);
+        return false;
     }
 
     /**
