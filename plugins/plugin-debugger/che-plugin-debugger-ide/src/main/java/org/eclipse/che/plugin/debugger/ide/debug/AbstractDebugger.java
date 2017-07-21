@@ -215,6 +215,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     private void openCurrentFile() {
+        // Handle the situation when resource isn't found in the workspace
+        // It means that it is impossible to open it.
         if (currentLocation.getResourcePath() == null) {
             for (DebuggerObserver observer : observers) {
                 observer.onBreakpointStopped(currentLocation.getTarget(),
