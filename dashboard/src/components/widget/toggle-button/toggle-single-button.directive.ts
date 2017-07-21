@@ -24,11 +24,12 @@
  * @param {expression=} che-multiline-title allows multi line title if attr exists
  * @param {string=} che-font-icon button's icon CSS class
  * @param {expression=} che-state expression which defines state of button.
+ * @param {expression=} che-value expression which defines value of button
  * @param {Function} che-on-change callback on model change
  * @usage
  *   <toggle-single-button che-title="Filter"
  *                         che-state="ctrl.filterInitState"
- *                         che-on-change="ctrl.filterStateOnChange(state)"></toggle-single-button>
+ *                         che-on-change="ctrl.filterStateOnChange(state, value)"></toggle-single-button>
  *
  * @author Oleksii Kurinnyi
  */
@@ -38,8 +39,8 @@ interface IToggleSingleButtonAttrs extends ng.IAttributes {
 }
 
 interface IToggleSingleButtonScope extends ng.IScope {
-  init?: boolean;
-  state?: boolean;
+  state: boolean;
+  changeState: () => void;
   onChange: (data: {state: boolean}) => void;
   multilineTitle?: string;
 }
@@ -64,39 +65,30 @@ export class ToggleSingleButton {
   constructor() {
     // scope values
     this.scope = {
-      init: '=?cheState',
-      state: '=?cheValue',
+      state: '=?cheState',
       title: '@cheTitle',
       multilineTitle: '=?cheMultilineTitle',
       fontIcon: '@?cheFontIcon',
-      onChange: '&cheOnChange'
+      onChange: '&?cheOnChange'
     };
 
   }
 
   link($scope: IToggleSingleButtonScope, $element: ng.IAugmentedJQuery, $attrs: IToggleSingleButtonAttrs): void {
+
     if (angular.isDefined($attrs.cheMultilineTitle)) {
       $scope.multilineTitle = 'true';
     }
 
-    const watcher1 = $scope.$watch(() => { return $scope.init; }, () => {
-      if ($scope.init === null) {
-        return;
-      }
-      $scope.state = !!$scope.init;
-      $scope.init = null;
-    });
-
-    const watcher2 = $scope.$watch(() => { return $scope.state; }, (newValue: boolean, oldValue: boolean) => {
+    const watcher = $scope.$watch(() => { return $scope.state; }, (newValue: boolean, oldValue: boolean) => {
       if (newValue === oldValue) {
         return;
       }
-      $scope.onChange({state: newValue});
+      $scope.onChange({state: $scope.state});
     });
 
     $scope.$on('$destroy', () => {
-      watcher1();
-      watcher2();
+      watcher();
     });
   }
 

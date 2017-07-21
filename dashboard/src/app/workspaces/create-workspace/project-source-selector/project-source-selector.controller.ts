@@ -43,9 +43,9 @@ export class ProjectSourceSelectorController {
    */
   private selectedSource: ProjectSource;
   /**
-   * button's values by Id.
+   * State of a button.
    */
-  private buttonValues: { [butonId: string]: boolean } = {};
+  private buttonState: { [buttonId: string]: boolean } = {};
   /**
    * Selected button's type.
    */
@@ -142,13 +142,13 @@ export class ProjectSourceSelectorController {
    */
   updateData({buttonState, buttonType, template = null}: { buttonState: boolean, buttonType: ButtonType, template?: che.IProjectTemplate }): void {
 
-    const buttonValue = template
+    const buttonId = template
       ? template.name
       : ButtonType[ButtonType.ADD_PROJECT];
 
     // leave only one selected button
-    this.buttonValues = {
-      [buttonValue]: true
+    this.buttonState = {
+      [buttonId]: true
     };
 
     if (!buttonState) {

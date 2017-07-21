@@ -13,7 +13,7 @@
 interface IPopoverScope extends ng.IScope {
   onChange: Function;
   isOpenPopover: boolean;
-  buttonInitState?: boolean;
+  buttonState?: boolean;
   buttonOnChange?: Function;
   buttonOnReset?: Function;
   chePopoverTriggerOutsideClick?: boolean;
@@ -33,13 +33,12 @@ interface IPopoverScope extends ng.IScope {
  * @param {string} button-font-icon button's icon CSS class
  * @param {expression=} button-state expression which defines state of button.
  * @param {Function} button-on-change callback on model change
- * @param {boolean} button-value button's state
  * @param {string=} che-popover-title popover's title
  * @param {string=} che-popover-placement popover's placement
  * @param {expression=} che-popover-close-outside-click if <code>true</close> then click outside of popover will close the it
  * @usage
  *   <toggle-button-popover button-title="Filter"
- *                          button-state="ctrl.filterInitState"
+ *                          button-state="ctrl.filterState"
  *                          button-on-change="ctrl.filterStateOnChange(state)"><div>My popover</div></toggle-button-popover>
  *
  * @author Oleksii Orel
@@ -51,8 +50,7 @@ export class CheToggleButtonPopover implements ng.IDirective {
     buttonTitle: '@',
     buttonFontIcon: '@',
     buttonOnChange: '&?buttonOnChange',
-    buttonInitState: '=?buttonState',
-    buttonValue: '=?',
+    buttonState: '=?buttonState',
     chePopoverTitle: '@?',
     chePopoverPlacement: '@?',
     chePopoverTriggerOutsideClick: '=?'
@@ -76,8 +74,7 @@ export class CheToggleButtonPopover implements ng.IDirective {
     return `<toggle-single-button che-title="{{buttonTitle}}"
                                   che-font-icon="{{buttonFontIcon}}"
                                   che-on-change="onChange(state)"
-                                  che-state="buttonInitState"
-                                  che-value="buttonValue"
+                                  che-state="buttonState"
                                   popover-title="{{chePopoverTitle ? chePopoverTitle : ''}}"
                                   popover-placement="{{chePopoverPlacement ? chePopoverPlacement : 'bottom'}}"
                                   popover-is-open="isOpenPopover"
@@ -103,10 +100,10 @@ export class CheToggleButtonPopover implements ng.IDirective {
       });
     };
 
-    if (!$scope.buttonInitState) {
-      $scope.buttonInitState = false;
+    if (!$scope.buttonState) {
+      $scope.buttonState = false;
     }
-    $scope.onChange($scope.buttonInitState);
+    $scope.onChange($scope.buttonState);
 
     // close popover on Esc is pressed
     $element.attr('tabindex', 0);
@@ -114,7 +111,7 @@ export class CheToggleButtonPopover implements ng.IDirective {
       if (event.which === 27) {
         // on press 'esc'
         $scope.$apply(() => {
-          $scope.buttonInitState = false;
+          $scope.buttonState = false;
         });
       }
     });
@@ -122,7 +119,7 @@ export class CheToggleButtonPopover implements ng.IDirective {
     if ($scope.chePopoverTriggerOutsideClick) {
       // update toggle single button state after popover is closed by outside click
       const watcher = $scope.$watch(() => { return $scope.isOpenPopover; }, (newVal: boolean) => {
-        $scope.buttonInitState = newVal;
+        $scope.buttonState = newVal;
       });
       $scope.$on('$destroy', () => {
         watcher();
