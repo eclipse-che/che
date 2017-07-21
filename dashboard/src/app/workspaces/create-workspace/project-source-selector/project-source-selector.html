@@ -8,14 +8,13 @@
                           che-font-icon="material-design icon-ic_add_24px"
                           che-on-change="projectSourceSelectorController.updateData({buttonState: state, buttonType: projectSourceSelectorController.buttonType.ADD_PROJECT})"
                           ng-init="projectSourceSelectorController.selectedButtonType = projectSourceSelectorController.buttonType.ADD_PROJECT"
-                          che-value="projectSourceSelectorController.buttonValues['ADD_PROJECT']"></toggle-single-button>
+                          che-state="projectSourceSelectorController.buttonState['ADD_PROJECT']"></toggle-single-button>
     <toggle-single-button class="project-metadata"
                           ng-repeat="projectTemplate in projectSourceSelectorController.projectTemplates"
                           che-title="{{projectTemplate.name}}"
-                          che-state="false"
                           che-font-icon="chefont cheico-project"
                           che-on-change="projectSourceSelectorController.updateData({buttonState: state, buttonType: projectSourceSelectorController.buttonType.PROJECT_TEMPLATE, template: projectTemplate})"
-                          che-value="projectSourceSelectorController.buttonValues[projectTemplate.name]"
+                          che-state="projectSourceSelectorController.buttonState[projectTemplate.name]"
                           uib-tooltip="{{projectTemplate.name}}"></toggle-single-button>
   </div>
 
