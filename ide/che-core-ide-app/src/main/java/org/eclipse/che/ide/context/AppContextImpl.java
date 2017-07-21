@@ -408,7 +408,7 @@ public class AppContextImpl implements AppContext,
         Optional<ServerImpl> wsAgentServer = runtime.getWsAgentServer();
 
         if (wsAgentServer.isPresent()) {
-            return wsAgentServer.get().getUrl() + "/api"; // TODO (spi ide): remove path when it comes with server's URL
+            return wsAgentServer.get().getUrl();
         }
 
         throw new RuntimeException("ws-agent server doesn't exist");
