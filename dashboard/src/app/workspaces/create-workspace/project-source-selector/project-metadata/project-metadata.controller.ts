@@ -40,9 +40,18 @@ export class ProjectMetadataController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(projectMetadataService: ProjectMetadataService, projectSourceSelectorService: ProjectSourceSelectorService) {
+  constructor($scope, projectMetadataService: ProjectMetadataService, projectSourceSelectorService: ProjectSourceSelectorService) {
     this.projectMetadataService = projectMetadataService;
     this.projectSourceSelectorService = projectSourceSelectorService;
+
+    const watcher = $scope.$watch(() => {
+      return this.template;
+    }, (newTemplate: che.IProjectTemplate, oldTemplate: che.IProjectTemplate) => {
+      this.projectMetadataService.onMetadataChanged(this.template);
+    });
+    $scope.$on('$destroy', () => {
+      watcher();
+    });
   }
 
   /**

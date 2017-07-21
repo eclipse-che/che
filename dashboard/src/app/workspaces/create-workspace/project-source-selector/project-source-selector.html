@@ -3,13 +3,14 @@
   <!-- Toggle buttons -->
   <div class="che-template-checker">
     <toggle-single-button class="add-project"
+                          id="{{projectSourceSelectorController.buttonType[projectSourceSelectorController.buttonType.ADD_PROJECT]}}"
                           che-title="Add or Import Project"
                           che-multiline-title
                           che-font-icon="material-design icon-ic_add_24px"
                           che-on-change="projectSourceSelectorController.updateData({buttonState: state, buttonType: projectSourceSelectorController.buttonType.ADD_PROJECT})"
-                          ng-init="projectSourceSelectorController.selectedButtonType = projectSourceSelectorController.buttonType.ADD_PROJECT"
                           che-state="projectSourceSelectorController.buttonState['ADD_PROJECT']"></toggle-single-button>
     <toggle-single-button class="project-metadata"
+                          id="{{projectTemplate.name}}"
                           ng-repeat="projectTemplate in projectSourceSelectorController.projectTemplates"
                           che-title="{{projectTemplate.name}}"
                           che-font-icon="chefont cheico-project"
@@ -19,7 +20,8 @@
   </div>
 
   <!-- Popover content -->
-  <div class="project-source-selector-popover popover right">
+  <div class="project-source-selector-popover popover right"
+       ng-show="projectSourceSelectorController.selectedButtonType">
     <div class="arrow"></div>
 
     <div ng-if="projectSourceSelectorController.selectedButtonType === projectSourceSelectorController.buttonType.ADD_PROJECT">

@@ -91,19 +91,24 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
    * Adds project from source.
    *
    * @param {ProjectSource} source the project's source
+   * @returns {che.IProjectTemplate}
    */
-  addProjectTemplateFromSource(source: ProjectSource): void {
+  addProjectTemplateFromSource(source: ProjectSource): che.IProjectTemplate {
+    let lastProjectTemplate: che.IProjectTemplate = null;
+
     switch (source) {
       case ProjectSource.SAMPLES:
         const projectTemplates = this.templateSelectorSvc.getTemplates();
         projectTemplates.forEach((projectTemplate: che.IProjectTemplate) => {
           this.addProjectTemplate(source, projectTemplate);
+          lastProjectTemplate = projectTemplate;
         });
         break;
       case ProjectSource.BLANK: {
         const projectProps = this.importBlankProjectService.getProjectProps();
         const projectTemplate = this.buildProjectTemplate(projectProps);
         this.addProjectTemplate(source, projectTemplate);
+        lastProjectTemplate = projectTemplate;
       }
         break;
       case ProjectSource.GIT: {
@@ -112,6 +117,7 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
         delete projectTemplate.type;
         delete projectTemplate.projectType;
         this.addProjectTemplate(source, projectTemplate);
+        lastProjectTemplate = projectTemplate;
       }
         break;
       case ProjectSource.GITHUB: {
@@ -121,6 +127,7 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
           delete projectTemplate.type;
           delete projectTemplate.projectType;
           this.addProjectTemplate(source, projectTemplate);
+          lastProjectTemplate = projectTemplate;
         });
       }
         break;
@@ -130,11 +137,14 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
         delete projectTemplate.type;
         delete projectTemplate.projectType;
         this.addProjectTemplate(source, projectTemplate);
+        lastProjectTemplate = projectTemplate;
       }
         break;
     }
 
     this.publish(source);
+
+    return lastProjectTemplate;
   }
 
   /**
