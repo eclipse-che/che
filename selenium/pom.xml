@@ -26,11 +26,4 @@
         <module>che-selenium-core</module>
         <module>che-selenium-test</module>
     </modules>
-    <properties>
-        <!--
-            This test-ng version suits well to run tests in parallel.
-            It is needed to be 100% sure while replacing to another one.
-        -->
-        <org.testng.version>6.8.21</org.testng.version>
-    </properties>
 </project>
