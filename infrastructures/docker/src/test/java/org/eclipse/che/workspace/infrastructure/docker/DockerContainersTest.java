@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
+import com.google.common.collect.Sets;
+
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -18,7 +20,10 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
+import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
+import org.eclipse.persistence.internal.queries.ListContainerPolicy;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -26,13 +31,17 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -52,56 +61,52 @@ public class DockerContainersTest {
         RuntimeIdentity id2 = new RuntimeIdentityImpl("workspace234", "default", "test");
 
         List<ContainerListEntry> entries = asList(mockContainer(id1, "container1"), mockContainer(id2, "container2"));
-        when(docker.listContainers(ListContainersParams.create().withAll(false))).thenReturn(entries);
+        when(docker.listContainers(anyObject())).thenReturn(entries);
 
         assertEquals(containers.findIdentities(), newHashSet(id1, id2));
+
+        ArgumentCaptor<ListContainersParams> paramsCaptor = ArgumentCaptor.forClass(ListContainersParams.class);
+        verify(docker).listContainers(paramsCaptor.capture());
+        ListContainersParams params = paramsCaptor.getValue();
+        assertEquals(new HashSet<>(params.getFilters().getFilter("label")),
+                     Sets.newHashSet(Labels.LABEL_WORKSPACE_ID, Labels.LABEL_WORKSPACE_ENV, Labels.LABEL_WORKSPACE_OWNER));
     }
 
     @Test(expectedExceptions = InfrastructureException.class, expectedExceptionsMessageRegExp = "oops")
     public void findsIdentitiesRethrowsIOExceptionThrownWhileListingContainersAsInternalInfraException() throws Exception {
-        when(docker.listContainers(ListContainersParams.create().withAll(false))).thenThrow(new IOException("oops"));
+        when(docker.listContainers(anyObject())).thenThrow(new IOException("oops"));
 
         containers.findIdentities();
     }
 
     @Test
     public void findContainers() throws Exception {
-        RuntimeIdentity id1 = new RuntimeIdentityImpl("workspace123", "default", "test");
-        ContainerListEntry entry1 = mockContainer(id1, "container1");
-        ContainerListEntry entry2 = mockContainer(id1, "container2");
+        RuntimeIdentity id = new RuntimeIdentityImpl("workspace123", "default", "test");
+        ContainerListEntry entry1 = mockContainer(id, "container1");
+        ContainerListEntry entry2 = mockContainer(id, "container2");
 
-        RuntimeIdentity id2 = new RuntimeIdentityImpl("workspace234", "default", "test");
-        ContainerListEntry entry3 = mockContainer(id2, "container3");
+        when(docker.listContainers(anyObject())).thenReturn(Arrays.asList(entry1, entry2));
 
-        List<ContainerListEntry> entries = asList(entry1, entry2, entry3);
-        when(docker.listContainers(ListContainersParams.create().withAll(false))).thenReturn(entries);
+        assertEquals(containers.find(id), Arrays.asList(entry1, entry2));
 
-        assertEquals(containers.find(id1)
-                               .stream()
-                               .map(ContainerListEntry::getId)
-                               .collect(Collectors.toSet()), newHashSet(entry1.getId(), entry2.getId()));
-        assertEquals(containers.find(id2)
-                               .stream()
-                               .map(ContainerListEntry::getId)
-                               .collect(Collectors.toSet()), newHashSet(entry3.getId()));
+        ArgumentCaptor<ListContainersParams> paramsCaptor = ArgumentCaptor.forClass(ListContainersParams.class);
+        verify(docker).listContainers(paramsCaptor.capture());
+        ListContainersParams params = paramsCaptor.getValue();
+        assertEquals(params.getFilters().getFilter("label"),
+                     Labels.newSerializer()
+                           .runtimeId(id)
+                           .labels()
+                           .entrySet()
+                           .stream()
+                           .map(entry -> entry.getKey() + '=' + entry.getValue())
+                           .collect(Collectors.toList()));
     }
 
     @Test(expectedExceptions = InternalInfrastructureException.class, expectedExceptionsMessageRegExp = "oops")
     public void findContainersRethrowsIOExceptionThrownWhileListingContainersAsInternalInfraException() throws Exception {
-        when(docker.listContainers(ListContainersParams.create().withAll(false))).thenThrow(new IOException("oops"));
+        when(docker.listContainers(anyObject())).thenThrow(new IOException("oops"));
 
         containers.find(new RuntimeIdentityImpl("workspace123", "default", "test"));
-    }
-
-    @Test(expectedExceptions = InternalInfrastructureException.class, expectedExceptionsMessageRegExp = "oops")
-    public void findContainersRethrowsIOExceptionThrownWhileInspectingContainersAsInternalInfraException() throws Exception {
-        RuntimeIdentity id = new RuntimeIdentityImpl("workspace123", "default", "test");
-        List<ContainerListEntry> entries = Collections.singletonList(mockContainer(id, "container"));
-        when(docker.listContainers(ListContainersParams.create().withAll(false))).thenReturn(entries);
-
-        when(docker.inspectContainer(anyString())).thenThrow(new IOException("oops"));
-
-        containers.find(id);
     }
 
     private ContainerListEntry mockContainer(RuntimeIdentity runtimeId, String containerId) throws IOException {

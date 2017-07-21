@@ -62,7 +62,7 @@ public class DockerContainers {
      *         when any error occurs during lookup
      */
     public Set<RuntimeIdentity> findIdentities() throws InternalInfrastructureException {
-        return listNonStoppedContainers(Labels.LABEL_WORKSPACE_ID, Labels.LABEL_WORKSPACE_ID, Labels.LABEL_WORKSPACE_OWNER)
+        return listNonStoppedContainers(Labels.LABEL_WORKSPACE_ID, Labels.LABEL_WORKSPACE_ENV, Labels.LABEL_WORKSPACE_OWNER)
                 .stream()
                 .map(e -> Labels.newDeserializer(e.getLabels()).runtimeId())
                 .collect(Collectors.toSet());
