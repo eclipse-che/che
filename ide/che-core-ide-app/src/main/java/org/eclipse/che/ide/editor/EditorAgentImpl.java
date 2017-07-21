@@ -286,7 +286,9 @@ public class EditorAgentImpl implements EditorAgent,
         editor.addCloseHandler(this);
 
         workspaceAgent.openPart(editor, EDITING, constraints);
-        finalizeInit(file, callback, editor, editorProvider);
+        finalizeInit(file, callback, editor, editorProvider).then(arg -> {
+            workspaceAgent.setActivePart(editor);
+        });
     }
 
     private Promise<Void> finalizeInit(final VirtualFile file,
@@ -297,7 +299,6 @@ public class EditorAgentImpl implements EditorAgent,
             openedEditors.add(editor);
             openedEditorsToProviders.put(editor, editorProvider.getId());
 
-            workspaceAgent.setActivePart(editor);
             editor.addPropertyListener((source, propId) -> {
                 if (propId == EditorPartPresenter.PROP_INPUT) {
                     promiseCallback.onSuccess(null);

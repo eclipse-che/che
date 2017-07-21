@@ -12,9 +12,7 @@ package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
@@ -44,16 +42,7 @@ class IncrementalTextDocumentSynchronize implements TextDocumentSynchronize {
     }
 
     @Override
-    public void syncTextDocument(DocumentChangeEvent event, int version) {
-        Document document = event.getDocument().getDocument();
-        TextPosition startPosition = document.getPositionFromIndex(event.getOffset());
-        TextPosition endPosition;
-        if (event.getRemoveCharCount() != 0) {
-            endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter() + event.getRemoveCharCount());
-        } else {
-            endPosition = new TextPosition(startPosition.getLine(), startPosition.getCharacter());
-        }
-
+    public void syncTextDocument(Document document, TextPosition startPosition, TextPosition endPosition, String insertedText, int version) {
         DidChangeTextDocumentParams changeDTO = dtoFactory.createDto(DidChangeTextDocumentParams.class);
         String uri = document.getFile().getLocation().toString();
         changeDTO.setUri(uri);
@@ -74,7 +63,7 @@ class IncrementalTextDocumentSynchronize implements TextDocumentSynchronize {
 
         TextDocumentContentChangeEvent actualChange = dtoFactory.createDto(TextDocumentContentChangeEvent.class);
         actualChange.setRange(range);
-        actualChange.setText(event.getText());
+        actualChange.setText(insertedText);
 
         changeDTO.setContentChanges(Collections.singletonList(actualChange));
         textDocumentService.didChange(changeDTO);

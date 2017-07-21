@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentEventBus;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.document.DocumentStorage;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.junit.Before;
@@ -64,7 +64,7 @@ public class EditorGroupSynchronizationImplTest {
     @Mock
     private HandlerRegistration handlerRegistration;
     @Mock
-    private DocumentChangeEvent documentChangeEvent;
+    private DocumentChangedEvent documentChangeEvent;
 
     private EditorPartPresenter            activeEditor;
     private EditorPartPresenter            openedEditor1;
@@ -102,7 +102,7 @@ public class EditorGroupSynchronizationImplTest {
 
         editorGroupSynchronization.addEditor(activeEditor);
 
-        verify(documentEventBus).addHandler(Matchers.<DocumentChangeEvent.Type>anyObject(), eq(editorGroupSynchronization));
+        verify(documentEventBus).addHandler(Matchers.<DocumentChangedEvent.Type>anyObject(), eq(editorGroupSynchronization));
     }
 
     @Test
@@ -118,7 +118,7 @@ public class EditorGroupSynchronizationImplTest {
         verify((EditorWithAutoSave)openedEditor1).isAutoSaveEnabled();
         verify(document, times(2)).getContents();
         verify(document).replace(anyInt(), anyInt(), anyString());
-        verify(documentEventBus).addHandler(Matchers.<DocumentChangeEvent.Type>anyObject(), eq(editorGroupSynchronization));
+        verify(documentEventBus).addHandler(Matchers.<DocumentChangedEvent.Type>anyObject(), eq(editorGroupSynchronization));
     }
 
     @Test
@@ -145,7 +145,7 @@ public class EditorGroupSynchronizationImplTest {
         when(documentChangeEvent.getDocument()).thenReturn(documentHandle1);
         when(documentHandle1.isSameAs(documentHandle)).thenReturn(false);
 
-        editorGroupSynchronization.onDocumentChange(documentChangeEvent);
+        editorGroupSynchronization.onDocumentChanged(documentChangeEvent);
 
         verify(document, never()).replace(anyInt(), anyInt(), anyString());
     }
@@ -163,7 +163,7 @@ public class EditorGroupSynchronizationImplTest {
         when(documentHandle1.isSameAs(documentHandle)).thenReturn(true);
 
         addEditorsToGroup();
-        editorGroupSynchronization.onDocumentChange(documentChangeEvent);
+        editorGroupSynchronization.onDocumentChanged(documentChangeEvent);
 
         verify(document, times(2)).replace(eq(offset), eq(removeCharCount), eq(text));
     }
