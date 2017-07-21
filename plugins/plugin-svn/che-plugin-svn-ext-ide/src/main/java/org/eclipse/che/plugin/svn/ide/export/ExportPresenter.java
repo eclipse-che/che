@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.export;
 
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -166,7 +165,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
             return;
         }
 
-        final StringBuilder url = new StringBuilder(appContext.getDevAgentEndpoint() + "/svn/"
+        final StringBuilder url = new StringBuilder(appContext.getWsAgentServerApiEndpoint() + "/svn/"
                                                     + devMachine.get().getName() + "/export" + project.toString());
         char separator = '?';
         if (!".".equals(exportPath.toString())) {

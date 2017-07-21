@@ -83,7 +83,7 @@ public class GitHubHostingService implements VcsHostingService {
         this.dtoFactory = dtoFactory;
         this.gitHubClientService = gitHubClientService;
         this.templates = templates;
-        this.baseUrl = appContext.getMasterEndpoint();
+        this.baseUrl = appContext.getMasterApiEndpoint();
     }
 
     @Override

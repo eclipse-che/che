@@ -104,7 +104,7 @@ public class FactoryProjectImporter extends AbstractImporter {
         this.notificationManager = notificationManager;
         this.askCredentialsDialog = askCredentialsDialog;
         this.locale = locale;
-        this.restContext = appContext.getMasterEndpoint();
+        this.restContext = appContext.getMasterApiEndpoint();
         this.dialogFactory = dialogFactory;
         this.oAuth2AuthenticatorRegistry = oAuth2AuthenticatorRegistry;
         this.requestTransmitter = requestTransmitter;

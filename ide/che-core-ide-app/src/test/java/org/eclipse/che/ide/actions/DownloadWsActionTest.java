@@ -65,7 +65,7 @@ public class DownloadWsActionTest {
     public void actionShouldBePerformed() throws Exception {
         String baseUrl = "baseUrl";
 
-        when(appContext.getDevAgentEndpoint()).thenReturn(baseUrl);
+        when(appContext.getWsAgentServerApiEndpoint()).thenReturn(baseUrl);
         when(wsAgentURLModifier.modify(anyString())).thenReturn(baseUrl);
 
         action.actionPerformed(actionEvent);

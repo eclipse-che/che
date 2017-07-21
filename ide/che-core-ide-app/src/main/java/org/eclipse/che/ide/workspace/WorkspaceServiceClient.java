@@ -54,7 +54,7 @@ public class WorkspaceServiceClient {
         this.dtoFactory = dtoFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.loaderFactory = loaderFactory;
-        this.baseHttpUrl = appContext.getMasterEndpoint() + "/workspace";
+        this.baseHttpUrl = appContext.getMasterApiEndpoint() + "/workspace";
     }
 
     /**

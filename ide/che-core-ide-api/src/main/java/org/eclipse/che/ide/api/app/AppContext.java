@@ -175,7 +175,7 @@ public interface AppContext {
     WorkspaceImpl getWorkspace();
 
     /** Returns URL of Che Master API endpoint. */
-    String getMasterEndpoint();
+    String getMasterApiEndpoint();
 
     /**
      * Returns URL of ws-agent server API endpoint.
@@ -183,7 +183,7 @@ public interface AppContext {
      * @throws RuntimeException
      *         if ws-agent server doesn't exist. Normally it may happen when workspace is stopped.
      */
-    String getDevAgentEndpoint();
+    String getWsAgentServerApiEndpoint();
 
     /**
      * Returns web application identifier. Most obvious use - to distinguish web applications

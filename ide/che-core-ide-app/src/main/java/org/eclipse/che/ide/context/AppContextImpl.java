@@ -398,12 +398,12 @@ public class AppContextImpl implements AppContext,
     }
 
     @Override
-    public String getMasterEndpoint() {
+    public String getMasterApiEndpoint() {
         return getMasterApiPathFromIDEConfig();
     }
 
     @Override
-    public String getDevAgentEndpoint() {
+    public String getWsAgentServerApiEndpoint() {
         RuntimeImpl runtime = getWorkspace().getRuntime();
         Optional<ServerImpl> wsAgentServer = runtime.getWsAgentServer();
 
