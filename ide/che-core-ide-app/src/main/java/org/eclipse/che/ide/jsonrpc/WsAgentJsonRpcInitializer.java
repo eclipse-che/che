@@ -77,8 +77,7 @@ public class WsAgentJsonRpcInitializer {
         }
 
         runtime.getWsAgentServer().ifPresent(server -> {
-            final String wsAgentBaseUrl = server.getUrl() + "/api"; // TODO (spi ide): remove path when it comes with URL
-            final String wsAgentWebSocketUrl = wsAgentBaseUrl.replaceFirst("http", "ws") + "/ws"; // TODO (spi ide): remove path when it comes with URL
+            final String wsAgentWebSocketUrl = server.getUrl().replaceFirst("http", "ws") + "/ws"; // TODO (spi ide): remove path when it comes with URL
             final String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + appContext.getAppId());
 
             initializer.initialize(WORKSPACE_AGENT_ENDPOINT_ID, singletonMap("url", wsAgentUrl));
