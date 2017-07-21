@@ -174,6 +174,8 @@ public class OpenShiftConnector extends DockerConnector {
     private static final int OPENSHIFT_WAIT_POD_DELAY                    = 1000;
     private static final int OPENSHIFT_IMAGESTREAM_WAIT_DELAY            = 2000;
     private static final int OPENSHIFT_IMAGESTREAM_MAX_WAIT_COUNT        = 30;
+    private static final long OPENSHIFT_POD_TERMINATION_GRACE_PERIOD     = 0;
+
     private static final String OPENSHIFT_POD_STATUS_RUNNING             = "Running";
     private static final String OPENSHIFT_VOLUME_STORAGE_CLASS           = "volume.beta.kubernetes.io/storage-class";
     private static final String OPENSHIFT_VOLUME_STORAGE_CLASS_NAME      = "che-workspace";
@@ -1160,6 +1162,7 @@ public class OpenShiftConnector extends DockerConnector {
         PodSpec podSpec = new PodSpecBuilder()
                                  .withContainers(container)
                                  .withVolumes(getVolumesFrom(volumes))
+                                 .withTerminationGracePeriodSeconds(OPENSHIFT_POD_TERMINATION_GRACE_PERIOD)
                                  .build();
 
         Deployment deployment = new DeploymentBuilder()
