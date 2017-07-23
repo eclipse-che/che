@@ -67,10 +67,7 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
     public void onTestSuiteStarted(TestSuiteStartedEvent event) {
         String name = event.getName();
         String location = event.getLocation();
-        TestState currentSuite = getCurrentSuite();
-        if (currentSuite.getName().equals(name) && treeBuildBeforeStart) {
-            return;
-        }
+        TestState currentSuite = treeBuildBeforeStart ? testRootState : getCurrentSuite();
         TestState newState;
         if (location == null) {
             newState = findChildByName(currentSuite, name, true);
@@ -92,7 +89,11 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
         }
 
         gettingChildren = true;
-        testSuiteStack.push(newState);
+        if (treeBuildBeforeStart) {
+            testSuiteStack.add(newState);
+        } else {
+            testSuiteStack.push(newState);
+        }
         callSuiteStarted(newState);
     }
 
@@ -244,15 +245,14 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
     @Override
     public void onSuiteTreeStarted(String suiteName, String location) {
         treeBuildBeforeStart = true;
-        TestState currentSuite = getCurrentSuite();
         TestState newSuite = new TestState(suiteName, true, location);
         if (testLocator != null) {
             newSuite.setTestLocator(testLocator);
         }
 
-        currentSuite.addChild(newSuite);
+        testRootState.addChild(newSuite);
 
-        testSuiteStack.push(newSuite);
+        testSuiteStack.add(newSuite);
         callSuiteTreeStarted(newSuite);
     }
 
@@ -272,7 +272,7 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
 
     @Override
     public void onSuiteTreeEnded(String suiteName) {
-        buildTreeEvents.add(() -> testSuiteStack.pop(suiteName));
+        testSuiteStack.pop(suiteName);
     }
 
     @Override
@@ -284,7 +284,7 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
             newState.setTestLocator(testLocator);
         }
 
-        TestState currentSuite = getCurrentSuite();
+        TestState currentSuite = testSuiteStack.peekLast();
         currentSuite.setTreeBuildBeforeStart();
         currentSuite.addChild(newState);
 

@@ -41,6 +41,7 @@ import org.eclipse.che.plugin.testing.ide.view2.navigation.nodes.TestStateNode;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Implementation for TestResult view. Uses tree for presenting test results.
@@ -60,9 +61,9 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     @UiField(provided = true)
     SplitLayoutPanel splitLayoutPanel;
     @UiField
-    FlowPanel navigationPanel;
+    FlowPanel        navigationPanel;
     private Tree resultTree;
-    private int lastWentLine = 0;
+    private int     lastWentLine     = 0;
     private boolean showFailuresOnly = false;
 
     private TestRootState testRootState;
@@ -98,7 +99,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         resultTree.getSelectionModel().addSelectionHandler(event -> {
             Node methodNode = event.getSelectedItem();
             if (methodNode instanceof TestStateNode) {
-                outputConsole.testSelected(((TestStateNode) methodNode).getTestState());
+                outputConsole.testSelected(((TestStateNode)methodNode).getTestState());
             }
         });
 
@@ -134,9 +135,11 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
         TestStateNode parentStateNode = findNodeByState(parent);
         if (parentStateNode != null) {
             Node parentStateNodeParent = parentStateNode.getParent();
+            resultTree.refresh(parentStateNode);
+            int parentIndex = resultTree.getNodeStorage().indexOf(parentStateNode);
             resultTree.getNodeStorage().remove(parentStateNode);
             if (parentStateNodeParent != null) {
-                resultTree.getNodeStorage().add(parentStateNodeParent, parentStateNode);
+                resultTree.getNodeStorage().insert(parentStateNodeParent, parentIndex, parentStateNode);
             } else {
                 resultTree.getNodeStorage().add(parentStateNode);
             }
@@ -153,7 +156,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     private TestStateNode findNodeByState(TestState parent) {
         for (Node node : resultTree.getNodeStorage().getAll()) {
             if (node instanceof TestStateNode) {
-                TestStateNode stateNode = (TestStateNode) node;
+                TestStateNode stateNode = (TestStateNode)node;
                 if (stateNode.getTestState().equals(parent)) {
                     return stateNode;
                 }

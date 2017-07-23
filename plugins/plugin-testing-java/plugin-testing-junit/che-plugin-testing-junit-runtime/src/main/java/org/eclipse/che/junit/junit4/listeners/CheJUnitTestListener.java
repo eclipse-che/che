@@ -32,12 +32,9 @@ public class CheJUnitTestListener {
 
     /**
      * Called before any tests have been run.
-     *
-     * @param description
-     *         describes the tests to be run
      */
-    public void testRunStarted(Description description) {
-        TestingMessageHelper.rootPresentation(out, description);
+    public void testRunStarted() {
+        TestingMessageHelper.rootPresentation(out);
     }
 
     /**
