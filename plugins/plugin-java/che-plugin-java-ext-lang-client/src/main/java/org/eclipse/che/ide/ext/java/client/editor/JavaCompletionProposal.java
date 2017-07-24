@@ -121,7 +121,7 @@ public class JavaCompletionProposal implements CompletionProposal, CompletionPro
 
                 if (file instanceof Resource) {
                     final ChangeInfo changeInfo = result.getChangeInfo();
-                    if (changeInfo != null) {
+                    if (changeInfo != null && changeInfo.getName() != null) {
                         refactoringUpdater.updateAfterRefactoring(singletonList(changeInfo));
                     }
                 }
