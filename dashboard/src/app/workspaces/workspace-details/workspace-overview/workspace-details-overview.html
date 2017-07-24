@@ -1,4 +1,5 @@
-<div class="workspace-overview-tab-content">
+<md-progress-linear ng-show="workspaceDetailsOverviewController.isLoading" md-mode="indeterminate"></md-progress-linear>
+<div class="workspace-overview-tab-content" ng-hide="workspaceDetailsOverviewController.isLoading">
   <!-- Name -->
   <che-label-container che-label-name="Workspace name">
     <che-input-box
@@ -53,6 +54,6 @@
                        che-label-description="This is irreversible. Deleting your workspace will also delete its projects.">
     <che-button-danger che-button-title="Delete"
                        ng-disabled="['RUNNING', 'STOPPED','ERROR'].indexOf(workspaceDetailsOverviewController.getWorkspaceStatus()) === -1"
-                       ng-click="workspaceDetailsOverviewController.deleteWorkspace($event)"></che-button-danger>
+                       ng-click="workspaceDetailsOverviewController.deleteWorkspace()"></che-button-danger>
   </che-label-container>
 </div>

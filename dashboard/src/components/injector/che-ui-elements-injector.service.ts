@@ -60,23 +60,23 @@ export class CheUIElementsInjectorService {
    */
   injectAll(): void {
     this.$timeout(() => {
-      for (let parentElementId in this.elementsToInject) {
+      angular.forEach(this.elementsToInject, (parentElementId: string) => {
         let oneParentElements = this.elementsToInject[parentElementId];
         let parentElement = this.$document.find('#' + parentElementId);
         if (!parentElement) {
-          continue;
+          return;
         }
 
-        for (let additionalElementId in oneParentElements) {
+        angular.forEach(oneParentElements, (additionalElementId: string) => {
           let jqAdditionalElement = angular.element(oneParentElements[additionalElementId]);
           if (!jqAdditionalElement) {
-            continue;
+            return;
           }
           // set an id into the additional element
           jqAdditionalElement.attr('id', additionalElementId);
           this.injectAdditionalElement(parentElement, jqAdditionalElement);
-        }
-      }
+        });
+      });
     });
   }
 

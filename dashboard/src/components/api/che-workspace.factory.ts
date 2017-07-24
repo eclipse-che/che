@@ -549,7 +549,8 @@ export class CheWorkspace {
    */
   fetchStatusChange(workspaceId: string, status: string): ng.IPromise<any> {
     let defer = this.$q.defer();
-    if (status === this.getWorkspaceById(workspaceId).status) {
+    const workspace = this.getWorkspaceById(workspaceId);
+    if (workspace && workspace.status === status) {
       defer.resolve();
     } else {
       if (!this.statusDefers[workspaceId]) {

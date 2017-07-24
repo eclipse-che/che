@@ -635,7 +635,7 @@ export class WorkspaceDetailsController {
       return this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceName);
     }, (error: any) => {
       this.loading = false;
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update workspace failed.');
+      this.cheNotification.showError('Update workspace failed.', error);
       this.$log.error(error);
     });
 
@@ -686,8 +686,7 @@ export class WorkspaceDetailsController {
         this.$location.search({page: this.tab[this.selectedTabIndex]});
       });
     }, (error: any) => {
-      let errorMessage = error.data.message ? error.data.message : 'Error during workspace creation.';
-      this.cheNotification.showError(errorMessage);
+      this.cheNotification.showError('Error during workspace creation.', error);
     });
   }
 
@@ -721,7 +720,7 @@ export class WorkspaceDetailsController {
     promise.then(() => {
       this.$location.path('/workspaces');
     }, (error: any) => {
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Delete workspace failed.');
+      this.cheNotification.showError('Delete workspace failed.', error);
       this.$log.error(error);
     });
 
@@ -769,7 +768,7 @@ export class WorkspaceDetailsController {
     let promise = this.cheWorkspace.stopWorkspace(this.workspaceId, isCreateSnapshot);
 
     promise.catch((error: any) => {
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');
+      this.cheNotification.showError('Stop workspace failed.', error);
       this.$log.error(error);
     });
   }
