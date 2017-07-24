@@ -483,6 +483,16 @@ public interface Resource extends Comparable<Resource> {
     Project getProject();
 
     /**
+     * Returns the {@link Container} which is root project to this resource or {@code null}.
+     * Returns itself for projects without submodules.
+     *
+     * @return the bound instance of {@link Project} or null
+     * @since 5.16.0
+     */
+    @Nullable
+    Container getRootProject();
+
+    /**
      * Returns the type of this resource.
      * Th returned value will be on of {@code FILE}, {@code FOLDER}, {@code PROJECT}.
      * <p/>
