@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -223,13 +224,15 @@ public class TestProjectServiceClient {
     }
 
     private String getWsAgentUrl(String workspaceId, String authToken) throws Exception {
-        return workspaceServiceClient.getById(workspaceId, authToken)
-                                     .getRuntime()
-                                     .getMachines()
-                                     .get(0)
-                                     .getRuntime()
-                                     .getServers()
-                                     .get(String.valueOf(WS_AGENT_PORT) + "/tcp")
-                                     .getUrl() + "/project";
+        Workspace workspace = workspaceServiceClient.getById(workspaceId, authToken);
+        workspaceServiceClient.ensureRunningStatus(workspace);
+
+        return workspace.getRuntime()
+                        .getMachines()
+                        .get(0)
+                        .getRuntime()
+                        .getServers()
+                        .get(String.valueOf(WS_AGENT_PORT) + "/tcp")
+                        .getUrl() + "/project";
     }
 }

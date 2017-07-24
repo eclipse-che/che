@@ -30,7 +30,7 @@ public interface TestWorkspaceProvider {
      *      the workspace template
      *      {@link WorkspaceTemplate}
      */
-    TestWorkspace createWorkspace(TestUser owner, int memoryGB, String template);
+    TestWorkspace createWorkspace(TestUser owner, int memoryGB, String template) throws Exception;
 
     /**
      * Release all allocated resources.

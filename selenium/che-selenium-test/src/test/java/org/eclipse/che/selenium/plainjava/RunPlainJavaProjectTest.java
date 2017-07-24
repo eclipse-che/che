@@ -16,7 +16,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -34,6 +33,8 @@ import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import javax.inject.Named;
+
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 
@@ -43,7 +44,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERRO
 public class RunPlainJavaProjectTest {
     private static final String PROJECT_NAME = NameGenerator.generate("RunningPlainJavaProject", 4);
     private static final String NEW_PACKAGE  = "base.test";
-    private static final String CLONE_URI    = "https://github.com/idexmai1/plainJavaProject.git";
     private static final String NAME_COMMAND = "startApp";
     private static final String COMMAND      =
             "${current.class.fqn}\ncd ${current.project.path}\n" +
@@ -55,8 +55,6 @@ public class RunPlainJavaProjectTest {
     private TestWorkspace             ws;
     @Inject
     private Ide                       ide;
-    @Inject
-    private DefaultTestUser           productUser;
     @Inject
     private ProjectExplorer           projectExplorer;
     @Inject
@@ -79,6 +77,9 @@ public class RunPlainJavaProjectTest {
     private Loader                    loader;
     @Inject
     private Menu                      menu;
+    @Inject
+    @Named("github.username")
+    private String                    gitHubUsername;
 
     @BeforeClass
     public void prepare() throws Exception {
@@ -89,7 +90,7 @@ public class RunPlainJavaProjectTest {
     public void checkRunPlainJavaProject() {
         // import the project and configure
         projectExplorer.waitProjectExplorer();
-        importPlainJavaApp(CLONE_URI, PROJECT_NAME, Wizard.TypeProject.PLAIN_JAVA);
+        importPlainJavaApp("https://github.com/" + gitHubUsername + "/plainJavaProject.git", PROJECT_NAME, Wizard.TypeProject.PLAIN_JAVA);
         loader.waitOnClosed();
 
         // check library into configure classpath form

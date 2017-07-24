@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 
 /**
  * Tests lifecycle handler.
@@ -195,6 +196,9 @@ public abstract class SeleniumTestHandler implements ITestListener, ISuiteListen
      */
     private void onTestFinish(ITestResult result) {
         if (result.getStatus() == ITestResult.FAILURE) {
+            ofNullable(result.getThrowable())
+                    .ifPresent(e -> LOG.error("" + e.getMessage(), e));
+
             captureScreenshot(result);
         }
     }

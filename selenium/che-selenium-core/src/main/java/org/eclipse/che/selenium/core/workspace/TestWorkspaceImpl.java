@@ -24,7 +24,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.selenium.core.workspace.MemoryMeasure.GB;
 
 /**
@@ -57,8 +56,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
 
             try {
                 final Workspace ws = workspaceServiceClient.createWorkspace(name, memoryInGB, GB, resource.getPath(), owner.getAuthToken());
-                workspaceServiceClient.start(id.updateAndGet((s) -> ws.getId()), name, owner.getAuthToken());
-                workspaceServiceClient.waitStatus(name, owner.getName(), owner.getAuthToken(), RUNNING);
+                workspaceServiceClient.start(id.updateAndGet((s) -> ws.getId()), name, owner);
 
                 LOG.info("Workspace name='{}' id='{}' has been created.", name, ws.getId());
 

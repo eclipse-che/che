@@ -53,7 +53,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 
 import javax.inject.Named;
-import java.util.concurrent.ExecutionException;
 
 import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
 
@@ -90,8 +89,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     @Provides
     public TestWorkspace getWorkspace(TestWorkspaceProvider testWorkspaceProvider,
                                       Provider<DefaultTestUser> defaultUserProvider,
-                                      @Named("workspace.default_memory_gb") int defaultMemoryGb)
-            throws ExecutionException, InterruptedException {
+                                      @Named("workspace.default_memory_gb") int defaultMemoryGb) throws Exception {
 
         TestWorkspace workspace = testWorkspaceProvider.createWorkspace(defaultUserProvider.get(),
                                                                         defaultMemoryGb,

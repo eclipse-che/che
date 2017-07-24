@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -69,7 +70,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
     }
 
     @Override
-    public TestWorkspace createWorkspace(TestUser owner, int memoryGB, String template) {
+    public TestWorkspace createWorkspace(TestUser owner, int memoryGB, String template) throws Exception {
         if (hasDefaultValues(owner, memoryGB, template)) {
             return doGetWorkspaceFromPool();
         }
@@ -83,9 +84,22 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
                && testUser.getEmail().equals(defaultUser.getEmail());
     }
 
-    private TestWorkspace doGetWorkspaceFromPool() {
+    private TestWorkspace doGetWorkspaceFromPool() throws Exception {
         try {
-            return testWorkspaceQueue.take();
+            // insure workspace is running
+            TestWorkspace testWorkspace = testWorkspaceQueue.take();
+            WorkspaceStatus testWorkspaceStatus =
+                    workspaceServiceClient.getById(testWorkspace.getId(),
+                                                   testWorkspace.getOwner().getAuthToken())
+                                          .getStatus();
+
+            if (testWorkspaceStatus != WorkspaceStatus.RUNNING) {
+                workspaceServiceClient.start(testWorkspace.getId(),
+                                             testWorkspace.getName(),
+                                             testWorkspace.getOwner());
+            }
+
+            return testWorkspace;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Retrieving a new workspace has been interrupted.", e);

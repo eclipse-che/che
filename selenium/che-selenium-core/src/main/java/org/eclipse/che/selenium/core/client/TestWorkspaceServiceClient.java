@@ -23,6 +23,7 @@ import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.MemoryMeasure;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.dto.server.DtoFactory.getInstance;
 
@@ -70,12 +72,12 @@ public class TestWorkspaceServiceClient {
     }
 
     /**
-     * Stops workspace.
+     * Sends stop workspace request.
      */
-    public void stop(String workspaceName,
-                     String userName,
-                     String authToken,
-                     boolean createSnapshot) throws Exception {
+    private void sendStopRequest(String workspaceName,
+                                 String userName,
+                                 String authToken,
+                                 boolean createSnapshot) throws Exception {
         if (!exists(workspaceName, userName, authToken)) {
             return;
         }
@@ -87,6 +89,18 @@ public class TestWorkspaceServiceClient {
                       .setAuthorizationHeader(authToken)
                       .useDeleteMethod()
                       .request();
+    }
+
+
+    /**
+     * Stops workspace.
+     */
+    public void stop(String workspaceName,
+                     String userName,
+                     String authToken,
+                     boolean createSnapshot) throws Exception {
+        sendStopRequest(workspaceName, userName, authToken, createSnapshot);
+        waitStatus(workspaceName, userName, authToken, STOPPED);
     }
 
     /**
@@ -125,7 +139,6 @@ public class TestWorkspaceServiceClient {
         Workspace workspace = getByName(workspaceName, userName, authToken);
         if (workspace.getStatus() != STOPPED) {
             stop(workspaceName, userName, authToken, false);
-            waitStatus(workspaceName, userName, authToken, STOPPED);
         }
 
         requestFactory.fromUrl(getIdBasedUrl(workspace.getId()))
@@ -183,14 +196,22 @@ public class TestWorkspaceServiceClient {
     }
 
     /**
-     * Starts workspace.
+     * Sends start workspace request.
      */
-    public void start(String workspaceId, String workspaceName, String authToken) throws Exception {
+    public void sendStartRequest(String workspaceId, String workspaceName, String authToken) throws Exception {
         requestFactory.fromUrl(getIdBasedUrl(workspaceId) + "/runtime")
                       .addQueryParam("environment", workspaceName)
                       .setAuthorizationHeader(authToken)
                       .usePostMethod()
                       .request();
+    }
+
+    /**
+     * Starts workspace.
+     */
+    public void start(String workspaceId, String workspaceName, TestUser workspaceOwner) throws Exception {
+        sendStartRequest(workspaceId, workspaceName, workspaceOwner.getAuthToken());
+        waitStatus(workspaceName, workspaceOwner.getName(), workspaceOwner.getAuthToken(), RUNNING);
     }
 
     /**
@@ -208,7 +229,9 @@ public class TestWorkspaceServiceClient {
      */
     public String getServerAddressByPort(String workspaceId, String authToken, int port) throws Exception {
         Workspace workspace = getById(workspaceId, authToken);
-        return workspace.getRuntime()
+        ensureRunningStatus(workspace);
+
+        return getById(workspaceId, authToken).getRuntime()
                         .getMachines()
                         .get(0)
                         .getRuntime()
@@ -234,11 +257,30 @@ public class TestWorkspaceServiceClient {
                                             .request()
                                             .asDto(WorkspaceDto.class);
 
+        ensureRunningStatus(workspace);
+
         return workspace.getRuntime()
                         .getDevMachine()
                         .getRuntime()
                         .getServers()
                         .get(exposedPort);
+    }
+
+    /**
+     * Ensure workspace has running status, or throw IllegalStateException.
+     *
+     * @param workspace
+     *          workspace description to get status and id.
+     *
+     * @throws IllegalStateException if workspace with certain workspaceId doesn't have RUNNING status.
+     */
+    public void ensureRunningStatus(Workspace workspace) throws IllegalStateException {
+        if (workspace.getStatus() != WorkspaceStatus.RUNNING) {
+            throw new IllegalStateException(format("Workspace with id='%s' should has '%s' status, but its actual state='%s'",
+                                                   workspace.getId(),
+                                                   WorkspaceStatus.RUNNING,
+                                                   workspace.getStatus()));
+        }
     }
 
     private String getNameBasedUrl(String workspaceName, String username) {
