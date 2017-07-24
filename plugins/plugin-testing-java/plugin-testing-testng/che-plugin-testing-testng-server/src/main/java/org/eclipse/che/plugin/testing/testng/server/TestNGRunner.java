@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.testing.testng.server;
 
 import com.beust.jcommander.JCommander;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
@@ -24,9 +25,7 @@ import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IAnnotation;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -40,33 +39,29 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 /**
  * TestNG implementation for the test runner service.
- *
- * @author Mirage Abeysekara
  */
 public class TestNGRunner extends AbstractJavaTestRunner {
-    private static final String PROJECTS_ROOT_FOLDER = "/projects";
-    private static final String TEST_OUTPUT_FOLDER   = "/test-output";
-    private static final String TESTNG_NAME          = "testng";
-    private static final String TEST_ANNOTATION_FQN  = Test.class.getName();
-    private static final Logger LOG                  = LoggerFactory.getLogger(TestNGRunner.class);
+    private static final String TESTNG_NAME         = "testng";
+    private static final String TEST_ANNOTATION_FQN = Test.class.getName();
+    private static final Logger LOG                 = LoggerFactory.getLogger(TestNGRunner.class);
+    private       String                   workspacePath;
     private final ProjectClasspathProvider classpathProvider;
     private final TestNGSuiteUtil          suiteUtil;
 
-    private int debugPort;
-
     @Inject
-    public TestNGRunner(ProjectClasspathProvider classpathProvider, TestNGSuiteUtil suiteUtil) {
+    public TestNGRunner(@Named("che.user.workspaces.storage") String workspacePath,
+                        ProjectClasspathProvider classpathProvider,
+                        TestNGSuiteUtil suiteUtil) {
+        super(workspacePath);
+        this.workspacePath = workspacePath;
         this.classpathProvider = classpathProvider;
         this.suiteUtil = suiteUtil;
     }
@@ -103,11 +98,6 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         return null;
     }
 
-    @Override
-    public int getDebugPort() {
-        return debugPort;
-    }
-
     private ProcessHandler startTestProcess(IJavaProject javaProject, TestExecutionContext context) {
         File suiteFile = createSuite(context, javaProject);
         if (suiteFile == null) {
@@ -115,11 +105,11 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         }
 
         JavaParameters parameters = new JavaParameters();
-        parameters.setJavaExecutable("java");
+        parameters.setJavaExecutable(JAVA_EXECUTABLE);
         parameters.setMainClassName("org.testng.CheTestNGLauncher");
         String outputDirectory = getOutputDirectory(javaProject);
         parameters.getParametersList().add("-d", outputDirectory);
-        parameters.setWorkingDirectory(PROJECTS_ROOT_FOLDER + javaProject.getPath());
+        parameters.setWorkingDirectory(workspacePath + javaProject.getPath());
         List<String> classPath = new ArrayList<>();
         Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);
         classPath.addAll(projectClassPath);
@@ -129,9 +119,9 @@ public class TestNGRunner extends AbstractJavaTestRunner {
 
         parameters.getParametersList().add("-suiteFile", suiteFile.getAbsolutePath());
         if (context.isDebugModeEnable()) {
-            debugPort = generateDebuggerPort();
+            generateDebuggerPort();
             parameters.getVmParameters().add("-Xdebug");
-            parameters.getVmParameters().add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + debugPort);
+            parameters.getVmParameters().add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + getDebugPort());
         }
         CommandLine command = parameters.createCommand();
         try {
@@ -141,39 +131,6 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         }
 
         return null;
-    }
-
-    private String getOutputDirectory(IJavaProject javaProject) {
-        String path = PROJECTS_ROOT_FOLDER + javaProject.getPath() + TEST_OUTPUT_FOLDER;
-        try {
-            IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(true);
-            for (IClasspathEntry iClasspathEntry : resolvedClasspath) {
-                if (iClasspathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-                    IPath outputLocation = iClasspathEntry.getOutputLocation();
-                    if (outputLocation == null) {
-                        continue;
-                    }
-                    return PROJECTS_ROOT_FOLDER + outputLocation.removeLastSegments(1).append(TEST_OUTPUT_FOLDER);
-                }
-            }
-        } catch (JavaModelException e) {
-            return path;
-        }
-        return path;
-    }
-
-    private int generateDebuggerPort() {
-        Random random = new Random();
-        int port = random.nextInt(65535);
-        return isPortAvailable(port) ? port : generateDebuggerPort();
-    }
-
-    private static boolean isPortAvailable(int port) {
-        try (Socket ignored = new Socket("localhost", port)) {
-            return false;
-        } catch (IOException ignored) {
-            return true;
-        }
     }
 
     private File createSuite(TestExecutionContext context, IJavaProject javaProject) {

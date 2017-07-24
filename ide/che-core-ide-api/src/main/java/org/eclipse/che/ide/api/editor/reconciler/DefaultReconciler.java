@@ -15,7 +15,7 @@ import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
@@ -72,7 +72,7 @@ public class DefaultReconciler implements Reconciler {
     }
 
     @Override
-    public void onDocumentChange(final DocumentChangeEvent event) {
+    public void onDocumentChanged(final DocumentChangedEvent event) {
     }
 
     @Override

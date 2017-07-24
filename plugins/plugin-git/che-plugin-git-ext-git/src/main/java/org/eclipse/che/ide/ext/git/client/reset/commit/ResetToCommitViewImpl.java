@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.reset.commit;
 
+import com.google.gwt.view.client.SelectionModel;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.ext.git.client.GitResources;
@@ -22,10 +23,12 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.DOM;
@@ -59,12 +62,10 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
     RadioButton mixed;
     @UiField
     RadioButton hard;
-    //    @UiField
-//    RadioButton         keep;
-//    @UiField
-//    RadioButton         merge;
     Button btnReset;
     Button btnCancel;
+    @UiField
+    ScrollPanel revisionsPanel;
     @UiField(provided = true)
     CellTable<Revision> commits;
     @UiField(provided = true)
@@ -130,8 +131,6 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
         addDescription(soft, locale.resetSoftTypeDescription());
         addDescription(mixed, locale.resetMixedTypeDescription());
         addDescription(hard, locale.resetHardTypeDescription());
-//        addDescription(keep, locale.resetKeepTypeDescription());
-//        addDescription(merge, locale.resetMergeTypeDescription());
     }
 
     /**
@@ -214,12 +213,15 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
     @Override
     public void setRevisions(@NotNull List<Revision> revisions) {
         // Wraps Array in java.util.List
-        List<Revision> list = new ArrayList<Revision>();
-        for (int i = 0; i < revisions.size(); i++) {
-            list.add(revisions.get(i));
-        }
+        List<Revision> list = new ArrayList<>();
+        list.addAll(revisions);
 
         this.commits.setRowData(list);
+    }
+
+    @Override
+    public void resetRevisionSelection() {
+        ((SingleSelectionModel) commits.getSelectionModel()).clear();
     }
 
     /** {@inheritDoc} */
@@ -258,30 +260,6 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
         hard.setValue(isHard);
     }
 
-//    /** {@inheritDoc} */
-//    @Override
-//    public boolean isKeepMode() {
-//        return keep.getValue();
-//    }
-//
-//    /** {@inheritDoc} */
-//    @Override
-//    public void setKeepMode(boolean isKeep) {
-//        keep.setValue(isKeep);
-//    }
-//
-//    /** {@inheritDoc} */
-//    @Override
-//    public boolean isMergeMode() {
-//        return merge.getValue();
-//    }
-//
-//    /** {@inheritDoc} */
-//    @Override
-//    public void setMergeMode(boolean isMerge) {
-//        merge.setValue(isMerge);
-//    }
-
     /** {@inheritDoc} */
     @Override
     public void setEnableResetButton(final boolean enabled) {
@@ -312,4 +290,15 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
         this.delegate = delegate;
     }
 
+    @UiHandler("revisionsPanel")
+    public void onPanelScrolled(ScrollEvent ignored) {
+        // We cannot rely on exact equality of scroll positions because GWT sometimes round such values
+        // and it is possible that the actual max scroll position is a pixel less then declared.
+        if (revisionsPanel.getMaximumVerticalScrollPosition() - revisionsPanel.getVerticalScrollPosition() <= 1) {
+            // to avoid autoscrolling to selected item
+            revisionsPanel.getElement().focus();
+
+            delegate.onScrolledToBottom();
+        }
+    }
 }

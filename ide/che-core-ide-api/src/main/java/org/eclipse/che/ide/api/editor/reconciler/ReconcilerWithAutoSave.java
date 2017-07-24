@@ -18,7 +18,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.api.editor.text.RegionImpl;
@@ -177,7 +177,7 @@ public class ReconcilerWithAutoSave implements Reconciler {
      *
      * @param event the document event for which to create a dirty region
      */
-    private void createDirtyRegion(final DocumentChangeEvent event) {
+    private void createDirtyRegion(final DocumentChangedEvent event) {
         if (event.getLength() == 0 && event.getText() != null) {
             // Insert
             dirtyRegionQueue.addDirtyRegion(new DirtyRegion(event.getOffset(),
@@ -221,7 +221,7 @@ public class ReconcilerWithAutoSave implements Reconciler {
     }
 
     @Override
-    public void onDocumentChange(final DocumentChangeEvent event) {
+    public void onDocumentChanged(final DocumentChangedEvent event) {
         if (documentHandle == null || !documentHandle.isSameAs(event.getDocument())) {
             return;
         }

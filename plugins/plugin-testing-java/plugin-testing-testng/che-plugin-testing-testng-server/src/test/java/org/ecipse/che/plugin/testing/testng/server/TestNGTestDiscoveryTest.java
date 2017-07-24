@@ -31,7 +31,7 @@ import static org.fest.assertions.Assertions.assertThat;
 
 public class TestNGTestDiscoveryTest extends BaseTest {
 
-    private IJavaProject javaProject;
+    private IJavaProject     javaProject;
     private IPackageFragment packageFragment;
 
 
@@ -65,9 +65,10 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         ICompilationUnit compilationUnit = packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
         compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-        TestNGRunner runner = new TestNGRunner(null, null);
+        TestNGRunner runner = new TestNGRunner("", null, null);
 
-        List<TestPosition> testPositions = runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
+        List<TestPosition> testPositions =
+                runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
 
         assertThat(testPositions).isNotNull().isNotEmpty().hasSize(1);
         TestPosition testPosition = testPositions.iterator().next();
@@ -93,9 +94,10 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         ICompilationUnit compilationUnit = packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
         compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-        TestNGRunner runner = new TestNGRunner(null, null);
+        TestNGRunner runner = new TestNGRunner("", null, null);
 
-        List<TestPosition> testPositions = runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
+        List<TestPosition> testPositions =
+                runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
 
         assertThat(testPositions).isNotNull().isNotEmpty().hasSize(1);
         TestPosition testPosition = testPositions.iterator().next();
@@ -116,9 +118,10 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         ICompilationUnit compilationUnit = packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
         compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-        TestNGRunner runner = new TestNGRunner(null, null);
+        TestNGRunner runner = new TestNGRunner("", null, null);
 
-        List<TestPosition> testPositions = runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
+        List<TestPosition> testPositions =
+                runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
 
         assertThat(testPositions).isNotNull().isNotEmpty().hasSize(1);
         TestPosition testPosition = testPositions.iterator().next();
@@ -140,9 +143,10 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         ICompilationUnit compilationUnit = packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
         compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-        TestNGRunner runner = new TestNGRunner(null, null);
+        TestNGRunner runner = new TestNGRunner("", null, null);
 
-        List<TestPosition> testPositions = runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
+        List<TestPosition> testPositions =
+                runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
 
         assertThat(testPositions).isNotNull().isNotEmpty().hasSize(1);
         TestPosition testPosition = testPositions.iterator().next();
@@ -163,9 +167,10 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         ICompilationUnit compilationUnit = packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
         compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-        TestNGRunner runner = new TestNGRunner(null, null);
+        TestNGRunner runner = new TestNGRunner("", null, null);
 
-        List<TestPosition> testPositions = runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
+        List<TestPosition> testPositions =
+                runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
 
         assertThat(testPositions).isNotNull().isEmpty();
     }
@@ -174,7 +179,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
 
         private String projectPath;
         private String filePath;
-        private int offset;
+        private int    offset;
 
         public MockTestDetectionContext(String projectPath, String filePath, int offset) {
             this.projectPath = projectPath;
