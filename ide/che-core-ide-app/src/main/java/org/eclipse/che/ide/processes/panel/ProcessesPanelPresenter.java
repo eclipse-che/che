@@ -831,10 +831,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machineName, null, children);
-        // TODO (spi ide)
-        newMachineNode.setRunning(/*RUNNING == machine.getStatus()*/true);
-        newMachineNode.setHasTerminalAgent(isServerRunning(machineName, TERMINAL_REFERENCE));
-        newMachineNode.setHasSSHAgent(isServerRunning(machineName, "ssh"));
+        newMachineNode.setTerminalServerRunning(isServerRunning(machineName, TERMINAL_REFERENCE));
+        newMachineNode.setSshServerRunning(isServerRunning(machineName, "ssh"));
         for (ProcessTreeNode child : children) {
             child.setParent(newMachineNode);
         }
@@ -917,7 +915,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         for (MachineImpl machine : machines.values()) {
-            if (/*RUNNING.equals(machine.getStatus()) && */!wsMachines.contains(machine)) {
+            if (!wsMachines.contains(machine)) {
                 provideMachineNode(machine.getName(), true);
             }
         }
@@ -928,8 +926,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         try {
             for (ProcessTreeNode node : rootNode.getChildren()) {
                 if (MACHINE_NODE == node.getType()) {
-                    node.setRunning(false);
-
                     ArrayList<ProcessTreeNode> children = new ArrayList<>();
                     children.addAll(node.getChildren());
 

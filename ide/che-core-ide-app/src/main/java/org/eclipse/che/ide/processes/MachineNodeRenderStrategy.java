@@ -72,7 +72,7 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
 
         SpanElement root = Elements.createSpanElement();
 
-        if (node.hasTerminalAgent()) {
+        if (node.isTerminalServerRunning()) {
             SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
             newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
             root.appendChild(newTerminalButton);
@@ -99,7 +99,7 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
             newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
         }
 
-        if (node.isRunning() && node.hasSSHAgent()) {
+        if (node.isSshServerRunning()) {
             SpanElement sshButton = Elements.createSpanElement(resources.getCss().sshButton());
             sshButton.setTextContent("SSH");
             root.appendChild(sshButton);
