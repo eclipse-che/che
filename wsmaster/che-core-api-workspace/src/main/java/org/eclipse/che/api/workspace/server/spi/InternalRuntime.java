@@ -23,10 +23,10 @@ import org.slf4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
@@ -42,7 +42,7 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
     private static final Logger LOG = getLogger(InternalRuntime.class);
     private final T                    context;
     private final URLRewriter          urlRewriter;
-    private final List<Warning>        warnings = new ArrayList<>();
+    private final List<Warning>        warnings = new CopyOnWriteArrayList<>();
     private       WorkspaceStatus      status;
 
     public InternalRuntime(T context, URLRewriter urlRewriter, boolean running) {
