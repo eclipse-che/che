@@ -2364,7 +2364,7 @@
           "goal": "Build"
         }
       }, {
-        "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
+        "commandLine": "scl enable rh-maven33 'mvn vertx:run -f ${current.project.path}'",
         "name": "run",
         "type": "custom",
         "attributes": {
