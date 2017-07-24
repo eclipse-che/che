@@ -66,13 +66,13 @@ class WorkspaceStatusEventHandler {
             ((AppContextImpl)appContext).setWorkspace(workspace);
 
             if (event.getStatus() == STARTING) {
-                eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
+                eventBus.fireEvent(new WorkspaceStartingEvent());
             } else if (event.getStatus() == RUNNING) {
                 eventBus.fireEvent(new WorkspaceRunningEvent());
             } else if (event.getStatus() == STOPPING) {
                 eventBus.fireEvent(new WorkspaceStoppingEvent());
             } else if (event.getStatus() == STOPPED) {
-                eventBus.fireEvent(new WorkspaceStoppedEvent(workspace, event.getError() != null, nullToEmpty(event.getError())));
+                eventBus.fireEvent(new WorkspaceStoppedEvent(event.getError() != null, nullToEmpty(event.getError())));
             }
         });
     }
