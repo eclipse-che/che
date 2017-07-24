@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker.model;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,50 +40,52 @@ public class DockerContainerConfig {
     private Long                memLimit;
     private DockerBuildContext  build;
     private List<String>        networks;
+    private String              pidMode;
 
     public DockerContainerConfig() {}
 
-    public DockerContainerConfig(DockerContainerConfig service) {
-        id = service.getId();
-        image = service.getImage();
-        if (service.getBuild() != null) {
-            build = new DockerBuildContext(service.getBuild());
+    public DockerContainerConfig(DockerContainerConfig container) {
+        id = container.getId();
+        image = container.getImage();
+        if (container.getBuild() != null) {
+            build = new DockerBuildContext(container.getBuild());
         }
-        if (service.getEntrypoint() != null) {
-            entrypoint = new ArrayList<>(service.getEntrypoint());
+        if (container.getEntrypoint() != null) {
+            entrypoint = new ArrayList<>(container.getEntrypoint());
         }
-        if (service.getCommand() != null) {
-            command = new ArrayList<>(service.getCommand());
+        if (container.getCommand() != null) {
+            command = new ArrayList<>(container.getCommand());
         }
-        if (service.getEnvironment() != null) {
-            environment = new HashMap<>(service.getEnvironment());
+        if (container.getEnvironment() != null) {
+            environment = new HashMap<>(container.getEnvironment());
         }
-        if (service.getDependsOn() != null) {
-            dependsOn = new ArrayList<>(service.getDependsOn());
+        if (container.getDependsOn() != null) {
+            dependsOn = new ArrayList<>(container.getDependsOn());
         }
-        containerName = service.getContainerName();
-        if (service.getLinks() != null) {
-            links = new ArrayList<>(service.getLinks());
+        containerName = container.getContainerName();
+        if (container.getLinks() != null) {
+            links = new ArrayList<>(container.getLinks());
         }
-        if (service.getLabels() != null) {
-            labels = new HashMap<>(service.getLabels());
+        if (container.getLabels() != null) {
+            labels = new HashMap<>(container.getLabels());
         }
-        if (service.getExpose() != null) {
-            expose = new ArrayList<>(service.getExpose());
+        if (container.getExpose() != null) {
+            expose = new ArrayList<>(container.getExpose());
         }
-        if (service.getPorts() != null) {
-            ports = new ArrayList<>(service.getPorts());
+        if (container.getPorts() != null) {
+            ports = new ArrayList<>(container.getPorts());
         }
-        if (service.getVolumesFrom() != null) {
-            volumesFrom = new ArrayList<>(service.getVolumesFrom());
+        if (container.getVolumesFrom() != null) {
+            volumesFrom = new ArrayList<>(container.getVolumesFrom());
         }
-        if (service.getVolumes() != null) {
-            volumes = new ArrayList<>(service.getVolumes());
+        if (container.getVolumes() != null) {
+            volumes = new ArrayList<>(container.getVolumes());
         }
-        memLimit = service.getMemLimit();
-        if (service.getNetworks() != null) {
-            networks = new ArrayList<>(service.getNetworks());
+        memLimit = container.getMemLimit();
+        if (container.getNetworks() != null) {
+            networks = new ArrayList<>(container.getNetworks());
         }
+        pidMode = container.getPidMode();
     }
 
     /**
@@ -135,6 +139,7 @@ public class DockerContainerConfig {
     /**
      * Override the default entrypoint.
      */
+    @Nullable
     public List<String> getEntrypoint() {
         return entrypoint;
     }
@@ -151,6 +156,7 @@ public class DockerContainerConfig {
     /**
      * Override the default command.
      */
+    @Nullable
     public List<String> getCommand() {
         return command;
     }
@@ -184,9 +190,9 @@ public class DockerContainerConfig {
     }
 
     /**
-     * Express dependency between services.
+     * Express dependency between containers.
      *
-     * <p/> Environment engine implementation should start services in dependency order.
+     * <p/> Environment engine implementation should start containers in dependency order.
      */
     public List<String> getDependsOn() {
         if (dependsOn == null) {
@@ -222,9 +228,9 @@ public class DockerContainerConfig {
     }
 
     /**
-     * Link to containers in another service.
+     * Link to other containers.
      *
-     * <p/> Either specify both the service name and a link alias (SERVICE:ALIAS), or just the service name.
+     * <p/> Either specify both the container name and a link alias (CONTAINER:ALIAS), or just the container name.
      * <br/> Examples:
      * <ul>
      * <li>db</li>
@@ -267,7 +273,7 @@ public class DockerContainerConfig {
     }
 
     /**
-     * Expose ports without publishing them to the host machine - they’ll only be accessible to linked services.
+     * Expose ports without publishing them to the host machine - they’ll only be accessible to linked containers.
      *
      * <p/> Only the internal port can be specified.
      * <br/> Examples:
@@ -349,15 +355,15 @@ public class DockerContainerConfig {
     }
 
     /**
-     * Mount all of the volumes from another service.
+     * Mount all of the volumes from another container.
      *
      * <p/> Optionally access level can be specified: read-only access (ro) or read-write (rw).
      * If no access level is specified, then read-write will be used.
      * <p/> Examples:
      * <ul>
-     * <li>service_name</li>
-     * <li>service_name:ro</li>
-     * <li>service_name:rw</li>
+     * <li>container_name</li>
+     * <li>container_name:ro</li>
+     * <li>container_name:rw</li>
      * </ul>
      */
     public List<String> getVolumesFrom() {
@@ -377,7 +383,7 @@ public class DockerContainerConfig {
     }
 
     /**
-     * Memory limit for the container of service, specified in bytes.
+     * Memory limit for the container, specified in bytes.
      */
     public Long getMemLimit() {
         return memLimit;
@@ -393,7 +399,7 @@ public class DockerContainerConfig {
     }
 
     /**
-     * List of networks that should be connected to service.
+     * List of networks that should be connected to container.
      */
     public List<String> getNetworks() {
         if (networks == null) {
@@ -411,52 +417,53 @@ public class DockerContainerConfig {
         return this;
     }
 
+    public String getPidMode() {
+        return pidMode;
+    }
+
+    public void setPidMode(String pidMode) {
+        this.pidMode = pidMode;
+    }
+
+    public DockerContainerConfig withPidMode(String pidMode) {
+        this.pidMode = pidMode;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DockerContainerConfig)) return false;
-        DockerContainerConfig service = (DockerContainerConfig)o;
-        return Objects.equals(getId(), service.getId()) &&
-               Objects.equals(getContainerName(), service.getContainerName()) &&
-               Objects.equals(getCommand(), service.getCommand()) &&
-               Objects.equals(getEntrypoint(), service.getEntrypoint()) &&
-               Objects.equals(getImage(), service.getImage()) &&
-               Objects.equals(getDependsOn(), service.getDependsOn()) &&
-               Objects.equals(getEnvironment(), service.getEnvironment()) &&
-               Objects.equals(getExpose(), service.getExpose()) &&
-               Objects.equals(getPorts(), service.getPorts()) &&
-               Objects.equals(getLabels(), service.getLabels()) &&
-               Objects.equals(getLinks(), service.getLinks()) &&
-               Objects.equals(getVolumes(), service.getVolumes()) &&
-               Objects.equals(getVolumesFrom(), service.getVolumesFrom()) &&
-               Objects.equals(getMemLimit(), service.getMemLimit()) &&
-               Objects.equals(getBuild(), service.getBuild()) &&
-               Objects.equals(getNetworks(), service.getNetworks());
+        DockerContainerConfig that = (DockerContainerConfig)o;
+        return Objects.equals(getId(), that.getId()) &&
+               Objects.equals(getContainerName(), that.getContainerName()) &&
+               Objects.equals(getCommand(), that.getCommand()) &&
+               Objects.equals(getEntrypoint(), that.getEntrypoint()) &&
+               Objects.equals(getImage(), that.getImage()) &&
+               Objects.equals(getDependsOn(), that.getDependsOn()) &&
+               Objects.equals(getEnvironment(), that.getEnvironment()) &&
+               Objects.equals(getExpose(), that.getExpose()) &&
+               Objects.equals(getPorts(), that.getPorts()) &&
+               Objects.equals(getLabels(), that.getLabels()) &&
+               Objects.equals(getLinks(), that.getLinks()) &&
+               Objects.equals(getVolumes(), that.getVolumes()) &&
+               Objects.equals(getVolumesFrom(), that.getVolumesFrom()) &&
+               Objects.equals(getMemLimit(), that.getMemLimit()) &&
+               Objects.equals(getBuild(), that.getBuild()) &&
+               Objects.equals(getNetworks(), that.getNetworks()) &&
+               Objects.equals(getPidMode(), that.getPidMode());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(),
-                            getContainerName(),
-                            getCommand(),
-                            getEntrypoint(),
-                            getImage(),
-                            getDependsOn(),
-                            getEnvironment(),
-                            getExpose(),
-                            getPorts(),
-                            getLabels(),
-                            getLinks(),
-                            getVolumes(),
-                            getVolumesFrom(),
-                            getMemLimit(),
-                            getBuild(),
-                            getNetworks());
+        return Objects.hash(getId(), getContainerName(), getCommand(), getEntrypoint(), getImage(), getDependsOn(),
+                            getEnvironment(), getExpose(), getPorts(), getLabels(), getLinks(), getVolumes(),
+                            getVolumesFrom(), getMemLimit(), getBuild(), getNetworks(), getPidMode());
     }
 
     @Override
     public String toString() {
-        return "CheServiceImpl{" +
+        return "DockerContainerConfig{" +
                "id='" + id + '\'' +
                ", containerName='" + containerName + '\'' +
                ", command=" + command +
@@ -473,6 +480,7 @@ public class DockerContainerConfig {
                ", memLimit=" + memLimit +
                ", build=" + build +
                ", networks=" + networks +
+               ", pidMode='" + pidMode + '\'' +
                '}';
     }
 }
