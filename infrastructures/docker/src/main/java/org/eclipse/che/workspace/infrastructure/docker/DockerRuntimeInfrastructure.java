@@ -26,6 +26,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentPa
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -90,10 +91,15 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
         // modify environment with everything needed to use docker machines on particular (cloud) infrastructure
         infrastructureProvisioner.provision(environment, dockerEnvironment, identity);
+        // check that containers start order can be resolved
+        // NOTE: it should be performed before environmentNormalizer.normalize because normalization
+        // changes links, volumes from which will fail order evaluation
+        // It can be changed after reimplementing strategy to respect normalization
+        List<String> containersOrder = startStrategy.order(dockerEnvironment);
         // normalize env to provide environment description with absolutely everything expected in
         environmentNormalizer.normalize(environment, dockerEnvironment, identity);
 
-        return contextFactory.create(this, identity, environment, dockerEnvironment);
+        return contextFactory.create(this, identity, environment, dockerEnvironment, containersOrder);
     }
 
     @Override

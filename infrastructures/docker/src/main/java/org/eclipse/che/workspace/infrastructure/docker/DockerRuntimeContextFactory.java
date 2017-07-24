@@ -16,10 +16,13 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
+import java.util.List;
+
 /** Helps to create {@link DockerRuntimeContext} instances. */
 public interface DockerRuntimeContextFactory {
     DockerRuntimeContext create(DockerRuntimeInfrastructure infra,
                                 RuntimeIdentity identity,
                                 Environment environment,
-                                DockerEnvironment dockerEnv) throws InfrastructureException, ValidationException;
+                                DockerEnvironment dockerEnv,
+                                List<String> containersOrder) throws InfrastructureException, ValidationException;
 }
