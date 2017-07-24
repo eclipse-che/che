@@ -77,7 +77,7 @@ public class RunTestAction extends RunDebugTestAbstractAction {
         notificationManager.notify(notification);
 
         Pair<String, String> frameworkAndTestName = getTestingFrameworkAndTestName();
-        TestExecutionContext context = createTestExecutionContext(frameworkAndTestName);
+        TestExecutionContext context = createTestExecutionContext(frameworkAndTestName, TestExecutionContext.TestType.CURSOR_POSITION, "");
         context.withDebugModeEnable(FALSE);
 
         GeneralTestingEventsProcessor eventsProcessor = new GeneralTestingEventsProcessor(frameworkAndTestName.first,

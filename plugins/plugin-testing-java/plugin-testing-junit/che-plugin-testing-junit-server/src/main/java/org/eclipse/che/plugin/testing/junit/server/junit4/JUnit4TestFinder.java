@@ -46,7 +46,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 /**
- * Class which finds test classes and test methods.
+ * Class which finds test classes and test methods for JUnit framework.
  */
 @Singleton
 public class JUnit4TestFinder {
@@ -120,6 +120,8 @@ public class JUnit4TestFinder {
     }
 
     /**
+     * Check if a method is test method.
+     *
      * @param method
      *         method which should be checked
      * @param compilationUnit

@@ -93,7 +93,7 @@ public class DebugTestAction extends RunDebugTestAbstractAction {
         notificationManager.notify(notification);
 
         frameworkAndTestName = getTestingFrameworkAndTestName();
-        TestExecutionContext context = createTestExecutionContext(frameworkAndTestName);
+        TestExecutionContext context = createTestExecutionContext(frameworkAndTestName, TestExecutionContext.TestType.CURSOR_POSITION, "");
 
         context.withDebugModeEnable(TRUE);
 

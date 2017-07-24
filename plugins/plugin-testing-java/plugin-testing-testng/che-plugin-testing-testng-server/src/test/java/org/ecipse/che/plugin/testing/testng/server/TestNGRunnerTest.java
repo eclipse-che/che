@@ -25,6 +25,7 @@ import org.eclipse.che.plugin.java.testing.ClasspathUtil;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.che.plugin.testing.testng.server.TestNGRunner;
 import org.eclipse.che.plugin.testing.testng.server.TestNGSuiteUtil;
+import org.eclipse.che.plugin.testing.testng.server.TestNGTestFinder;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -43,6 +44,7 @@ public class TestNGRunnerTest extends BaseTest {
     private MethodNameConfigurator  startMethodNameConfigurator;
     private ParamsConfigurator      startParamsConfigurator;
     private SendConfiguratorFromOne startSendConfiguratorFromOne;
+    private TestNGTestFinder        testNGTestFinder;
     private RequestTransmitter      transmitter;
 
     private TestNGRunner runner;
@@ -50,12 +52,13 @@ public class TestNGRunnerTest extends BaseTest {
     @BeforeMethod
     public void setUp() throws Exception {
         startEndpointIdConfigurator = mock(EndpointIdConfigurator.class);
+        testNGTestFinder = mock(TestNGTestFinder.class);
         startMethodNameConfigurator = mock(MethodNameConfigurator.class);
         startParamsConfigurator = mock(ParamsConfigurator.class);
         startSendConfiguratorFromOne = mock(SendConfiguratorFromOne.class);
         transmitter = mock(RequestTransmitter.class);
 
-        runner = new TestNGRunner("", new ProjectClasspathProvider(""), new TestNGSuiteUtil());
+        runner = new TestNGRunner("", testNGTestFinder, new ProjectClasspathProvider(""), new TestNGSuiteUtil());
     }
 
     @Test()

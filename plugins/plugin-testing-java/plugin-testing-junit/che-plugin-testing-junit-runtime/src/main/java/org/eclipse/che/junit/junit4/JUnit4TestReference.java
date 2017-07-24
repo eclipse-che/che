@@ -65,7 +65,6 @@ public class JUnit4TestReference {
         return description.toString();
     }
 
-
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof JUnit4TestReference))
@@ -91,5 +90,4 @@ public class JUnit4TestReference {
             return result;
         }
     }
-
 }
