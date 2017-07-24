@@ -27,3 +27,5 @@ Post a comment with CI command to trigger build / test.
 `ci-build` - build PR.
 
 `ci-test` - runs integration tests against PR.
+
+NOTE: currently only https://github.com/codenvy org members are authorized to trigger CI commands due to security policies.
