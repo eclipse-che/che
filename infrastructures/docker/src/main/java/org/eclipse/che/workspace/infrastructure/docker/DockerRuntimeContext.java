@@ -23,7 +23,6 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.shared.Utils;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
-import org.eclipse.che.workspace.infrastructure.docker.environment.ContainersStartStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,17 +60,19 @@ public class DockerRuntimeContext extends RuntimeContext {
                                 @Assisted RuntimeIdentity identity,
                                 @Assisted Environment environment,
                                 @Assisted DockerEnvironment dockerEnv,
+                                @Assisted List<String> containersOrder,
                                 InstallerRegistry installerRegistry,
-                                ContainersStartStrategy startStrategy,
                                 DockerRuntimeFactory runtimeFactory,
                                 DockerContainers containers,
                                 DockerSharedPool sharedPool,
                                 RuntimeConsistencyChecker consistencyChecker,
-                                @Named("che.websocket.endpoint.base") String websocketEndpointBase) throws InfrastructureException, ValidationException {
+                                @Named("che.websocket.endpoint.base") String websocketEndpointBase)
+            throws InfrastructureException, ValidationException {
+
         super(environment, identity, infrastructure, installerRegistry);
         this.devMachineName = Utils.getDevMachineName(environment);
         this.dockerEnvironment = dockerEnv;
-        this.orderedContainers = ImmutableList.copyOf(startStrategy.order(dockerEnvironment));
+        this.orderedContainers = ImmutableList.copyOf(containersOrder);
         this.websocketEndpointBase = websocketEndpointBase;
         this.runtimeFactory = runtimeFactory;
         this.containers = containers;
