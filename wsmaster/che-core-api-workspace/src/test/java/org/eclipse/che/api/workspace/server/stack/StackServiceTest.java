@@ -149,6 +149,7 @@ public class StackServiceTest {
         stackSourceImpl = new StackSourceImpl(SOURCE_TYPE, SOURCE_ORIGIN);
         CommandImpl command = new CommandImpl(COMMAND_NAME, COMMAND_LINE, COMMAND_TYPE);
         EnvironmentImpl environment = new EnvironmentImpl(null,
+                                                          null,
                                                           null);
 
         WorkspaceConfigImpl workspaceConfig = WorkspaceConfigImpl.builder()

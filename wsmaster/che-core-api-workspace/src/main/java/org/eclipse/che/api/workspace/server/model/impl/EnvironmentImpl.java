@@ -12,8 +12,8 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -57,12 +57,13 @@ public class EnvironmentImpl implements Environment {
     private Map<String, MachineConfigImpl> machines;
 
     @Transient
-    private List<Warning> warnings;
+    private List<WarningImpl> warnings;
 
     public EnvironmentImpl() {}
 
     public EnvironmentImpl(Recipe recipe,
-                           Map<String, ? extends MachineConfig> machines) {
+                           Map<String, ? extends MachineConfig> machines,
+                           List<? extends Warning> warnings) {
         if (recipe != null) {
             this.recipe = new RecipeImpl(recipe);
         }
@@ -72,19 +73,13 @@ public class EnvironmentImpl implements Environment {
                                     .collect(Collectors.toMap(Map.Entry::getKey,
                                                               entry -> new MachineConfigImpl(entry.getValue())));
         }
+        if (warnings != null) {
+            this.warnings = warnings.stream().map(WarningImpl::new).collect(Collectors.toList());
+        }
     }
 
     public EnvironmentImpl(Environment environment) {
-        if (environment.getRecipe() != null) {
-            this.recipe = new RecipeImpl(environment.getRecipe());
-        }
-        if (environment.getMachines() != null) {
-            this.machines = environment.getMachines()
-                                       .entrySet()
-                                       .stream()
-                                       .collect(Collectors.toMap(Map.Entry::getKey,
-                                                                 entry -> new MachineConfigImpl(entry.getValue())));
-        }
+        this(environment.getRecipe(), environment.getMachines(), environment.getWarnings());
     }
 
     public RecipeImpl getRecipe() {
@@ -116,26 +111,19 @@ public class EnvironmentImpl implements Environment {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof EnvironmentImpl)) {
-            return false;
-        }
-        final EnvironmentImpl that = (EnvironmentImpl)obj;
-        return Objects.equals(id, that.id)
-               && Objects.equals(recipe, that.recipe)
-               && getMachines().equals(that.getMachines());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EnvironmentImpl)) return false;
+        EnvironmentImpl that = (EnvironmentImpl)o;
+        return Objects.equals(id, that.id) &&
+               Objects.equals(getRecipe(), that.getRecipe()) &&
+               Objects.equals(getMachines(), that.getMachines()) &&
+               Objects.equals(getWarnings(), that.getWarnings());
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(id);
-        hash = 31 * hash + Objects.hashCode(recipe);
-        hash = 31 * hash + getMachines().hashCode();
-        return hash;
+        return Objects.hash(id, getRecipe(), getMachines(), getWarnings());
     }
 
     @Override
@@ -144,6 +132,7 @@ public class EnvironmentImpl implements Environment {
                "id=" + id +
                ", recipe=" + recipe +
                ", machines=" + machines +
+               ", warnings=" + warnings +
                '}';
     }
 }
