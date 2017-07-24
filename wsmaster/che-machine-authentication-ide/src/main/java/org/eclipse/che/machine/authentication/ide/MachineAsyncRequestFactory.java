@@ -107,7 +107,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
      * @param url
      * @return
      */
-    private boolean isWsAgentRequest(String url) {
+    protected boolean isWsAgentRequest(String url) {
         if (appContext.getWorkspace() == null || !RUNNING.equals(appContext.getWorkspace().getStatus())) {
             return false; //ws-agent not started
         }

@@ -33,7 +33,27 @@
         <original-project-name>assembly-ide-war</original-project-name>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <dependencies />
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-machine-authentication-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-keycloak-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>assembly-ide-war</artifactId>
+            <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <artifactId>che-plugin-svn-ext-ide</artifactId>
+                    <groupId>org.eclipse.che.plugin</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>
@@ -279,134 +299,4 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>withKeycloak</id>
-            <activation>
-                <property>
-                    <name>withoutKeycloak</name>
-                    <value>!true</value>
-                </property>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.eclipse.che.plugin</groupId>
-                    <artifactId>che-plugin-keycloak-ide</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>withoutKeycloak</id>
-            <activation>
-                <property>
-                    <name>withoutKeycloak</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>Remove Keycloak Patches</id>
-                                <phase>process-sources</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target name="copy all original Che files">
-                                        <delete verbose="true">
-                                            <fileset dir="${project.build.directory}/prepared-patches">
-                                                <include name="src.main.webapp.IDE.jsp.patch" />
-                                                <include name="src.main.webapp.META-INF.context.xml.patch" />
-                                                <include name="src.main.webapp.WEB-INF.web.xml.patch" />
-                                            </fileset>
-                                        </delete>
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>withDashboard</id>
-            <activation>
-                <property>
-                    <name>withoutDashboard</name>
-                    <value>!true</value>
-                </property>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.eclipse.che</groupId>
-                    <artifactId>assembly-ide-war</artifactId>
-                    <type>pom</type>
-                    <exclusions>
-                        <exclusion>
-                            <artifactId>che-plugin-svn-ext-ide</artifactId>
-                            <groupId>org.eclipse.che.plugin</groupId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>withoutDashboard</id>
-            <activation>
-                <property>
-                    <name>withoutDashboard</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-src-without-dashboard</id>
-                                <phase>process-sources</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <overwrite>true</overwrite>
-                                    <outputDirectory>${project.build.directory}/patched/src</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>src-without-dashboard/main</directory>
-                                        </resource>
-                                        <resource>
-                                            <directory>src-without-dashboard/test</directory>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>org.eclipse.che</groupId>
-                    <artifactId>assembly-ide-war</artifactId>
-                    <type>pom</type>
-                    <exclusions>
-                        <exclusion>
-                            <artifactId>che-plugin-ext-dashboard-client</artifactId>
-                            <groupId>org.eclipse.che.plugin</groupId>
-                        </exclusion>
-                        <exclusion>
-                            <artifactId>che-plugin-svn-ext-ide</artifactId>
-                            <groupId>org.eclipse.che.plugin</groupId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 </project>

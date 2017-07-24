@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.machine.CheWsAgentLinksModifier;
-import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.machine.authentication.ide.CheAuthMachineLinksModifier;
 import org.eclipse.che.machine.authentication.ide.MachineTokenServiceClient;
 
@@ -28,7 +27,7 @@ public class MachineAuthGinModule extends AbstractGinModule {
 
     @Override
     protected void configure() {
-        bind(AsyncRequestFactory.class).to(org.eclipse.che.machine.authentication.ide.MachineAsyncRequestFactory.class);
+        //bind(AsyncRequestFactory.class).to(org.eclipse.che.machine.authentication.ide.MachineAsyncRequestFactory.class);
         bind(MachineTokenServiceClient.class).to(org.eclipse.che.machine.authentication.ide.MachineTokenServiceClientImpl.class)
                                              .in(Singleton.class);
         bind(CheWsAgentLinksModifier.class).to(CheAuthMachineLinksModifier.class);
