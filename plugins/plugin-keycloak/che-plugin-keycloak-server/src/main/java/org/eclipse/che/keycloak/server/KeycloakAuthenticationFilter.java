@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
 
 public class KeycloakAuthenticationFilter extends org.keycloak.adapters.servlet.KeycloakOIDCFilter {
@@ -25,7 +26,7 @@ public class KeycloakAuthenticationFilter extends org.keycloak.adapters.servlet.
         // TODO: use KeycloakOIDCFilter skip setting
         if (request.getRequestURI().endsWith("/ws") || request.getRequestURI().endsWith("/eventbus")
             || request.getScheme().equals("ws") || req.getScheme().equals("wss") || request.getRequestURI().contains("/websocket/") ||
-            (request.getHeader("Authorization") != null && request.getHeader("Authorization").startsWith("machine"))) {
+            (getToken(request) != null && getToken(request).startsWith("machine"))) {
             System.out.println("Skipping " + request.getRequestURI());
             chain.doFilter(req, res);
         } else {
@@ -33,4 +34,12 @@ public class KeycloakAuthenticationFilter extends org.keycloak.adapters.servlet.
         }
     }
 
+
+    private String getToken(HttpServletRequest req) {
+        if (req.getHeader(HttpHeaders.AUTHORIZATION) == null) {
+            return null;
+        }
+        return req.getHeader(HttpHeaders.AUTHORIZATION).startsWith("bearer") ? req.getHeader(HttpHeaders.AUTHORIZATION).split(" ")[1]
+                                                                             : req.getHeader(HttpHeaders.AUTHORIZATION);
+    }
 }

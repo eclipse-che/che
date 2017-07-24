@@ -46,5 +46,6 @@
         <module>che-core-api-system-shared</module>
         <module>che-machine-authentication-shared</module>
         <module>che-machine-authentication</module>
+        <module>che-machine-authentication-ide</module>
     </modules>
 </project>
