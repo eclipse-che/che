@@ -10,6 +10,7 @@
                    che-width="auto"
                    che-on-change="importGitProjectController.onChanged($value)"
                    ng-model="importGitProjectController.location"
+                   ng-model-options="{allowInvalid: true}"
                    git-url
                    required>
       <div ng-message="gitUrl" ng-if="importGitProjectForm.$touched">Invalid Git URL</div>

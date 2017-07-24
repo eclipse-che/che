@@ -15,6 +15,7 @@ import {StackSelectorSvc} from '../../stack-selector/stack-selector.service';
 import {ProjectSourceSelectorService} from '../project-source-selector.service';
 import {IProjectSourceSelectorServiceObserver} from '../project-source-selector-service.observer';
 import {ProjectSource} from '../project-source.enum';
+import {ActionType} from '../project-source-selector-action-type.enum';
 
 /**
  * This class is handling the controller for template selector.
@@ -58,10 +59,6 @@ export class TemplateSelectorController implements IProjectSourceSelectorService
    * List of selected templates.
    */
   private selectedTemplates: Array<che.IProjectTemplate>;
-  /**
-   * Number of templates selected to be added to the list of ready-to-import projects.
-   */
-  private newTemplatesNumber: number;
 
   /**
    * Default constructor that is using resource injection
@@ -104,24 +101,22 @@ export class TemplateSelectorController implements IProjectSourceSelectorService
     this.stackTags = stack ? stack.tags : [];
 
     this.filterAndSortTemplates();
-    this.updateNumberOfSelectedTemplates();
   }
 
   /**
    * Callback which is called when project template is added to the list of ready-to-import projects.
    * Make samples not checked.
    *
+   * @param {ActionType} action the type of action
    * @param {ProjectSource} source the project's source
    */
-  onProjectSourceSelectorServicePublish(source: ProjectSource): void {
-    if (source !== ProjectSource.SAMPLES) {
+  onProjectSourceSelectorServicePublish(action: ActionType, source: ProjectSource): void {
+    if (action !== ActionType.ADD_PROJECT || source !== ProjectSource.SAMPLES) {
       return;
     }
 
     this.cheListHelper.deselectAllItems();
     this.selectedTemplates = [];
-
-    this.updateNumberOfSelectedTemplates();
 
     this.templateSelectorSvc.onTemplateSelected(this.selectedTemplates);
   }
@@ -151,24 +146,6 @@ export class TemplateSelectorController implements IProjectSourceSelectorService
   onTemplateChanged(): void {
     this.selectedTemplates = this.cheListHelper.getSelectedItems() as Array<che.IProjectTemplate>;
     this.templateSelectorSvc.onTemplateSelected(this.selectedTemplates);
-
-    this.updateNumberOfSelectedTemplates();
-  }
-
-  /**
-   * Returns <code>true</code> if current template is not already added to the list of ready-to-import projects.
-   *
-   * @return {boolean}
-   */
-  isTemplateSelected(newTemplatesNumber: number): boolean {
-    return newTemplatesNumber > 0;
-  }
-
-  /**
-   * Update number of project's templates which will be added to ready-to-import projects.
-   */
-  updateNumberOfSelectedTemplates(): void {
-    this.newTemplatesNumber = this.cheListHelper.getSelectedItems().length;
   }
 
 }

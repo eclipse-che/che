@@ -18,6 +18,8 @@ import {ProjectSourceSelectorServiceObservable} from './project-source-selector-
 import {ProjectMetadataService} from './project-metadata/project-metadata.service';
 import {RandomSvc} from '../../../../components/utils/random.service';
 import {ImportGithubProjectService} from './import-github-project/import-github-project.service';
+import {ActionType} from './project-source-selector-action-type.enum';
+import {editingProgress} from './project-source-selector-editing-progress';
 
 /**
  * This class is handling the service for the project selector.
@@ -57,6 +59,14 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
    * Project templates to import.
    */
   private projectTemplates: Array<che.IProjectTemplate>;
+  /**
+   * Action type.
+   */
+  private activeActionType: ActionType;
+  /**
+   * Project source.
+   */
+  private activeProjectSource: ProjectSource;
 
   /**
    * Default constructor that is using resource injection
@@ -74,6 +84,49 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
     this.randomSvc = randomSvc;
 
     this.projectTemplates = [];
+  }
+
+  /**
+   * Checks if any project's template is adding or editing.
+   *
+   * @return {editingProgress}
+   */
+  getEditingProgress(): editingProgress {
+    if (this.activeActionType === ActionType.EDIT_PROJECT) {
+      return this.projectMetadataService.checkEditingProgress();
+    } else if (this.activeActionType === ActionType.ADD_PROJECT) {
+      switch (this.activeProjectSource) {
+        case ProjectSource.SAMPLES:
+          return this.templateSelectorSvc.checkEditingProgress();
+        case ProjectSource.BLANK:
+          return this.importBlankProjectService.checkEditingProgress();
+        case ProjectSource.GIT:
+          return this.importGitProjectService.checkEditingProgress();
+        case ProjectSource.GITHUB:
+          return this.importGithubProjectService.checkEditingProgress();
+        case ProjectSource.ZIP:
+          return this.importZipProjectService.checkEditingProgress();
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Set active action type.
+   *
+   * @param {ActionType} actionType
+   */
+  setActionType(actionType: ActionType): void {
+    this.activeActionType = actionType;
+  }
+
+  /**
+   * Set active project source.
+   *
+   * @param {ProjectSource} projectSource
+   */
+  setProjectSource(projectSource: ProjectSource): void {
+    this.activeProjectSource = projectSource;
   }
 
   /**
@@ -142,7 +195,7 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
         break;
     }
 
-    this.publish(source);
+    this.publish(this.activeActionType, source);
 
     return lastProjectTemplate;
   }
@@ -274,7 +327,7 @@ export class ProjectSourceSelectorService extends ProjectSourceSelectorServiceOb
    * @param {ProjectSource} source the project's source
    */
   clearSource(source: ProjectSource): void {
-    this.publish(source);
+    this.publish(this.activeActionType, source);
   }
 
 }
