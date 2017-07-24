@@ -17,16 +17,17 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-
 import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.ui.Tooltip;
+
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.LEFT;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -36,7 +37,7 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
  * @author Oleksii Orel
  */
 public class RedirectToDashboardAction extends Action implements CustomComponentAction,
-        WorkspaceStartedEvent.Handler, WorkspaceStoppedEvent.Handler {
+                                                                 WorkspaceRunningEvent.Handler, WorkspaceStoppedEvent.Handler {
 
     private final DashboardLocalizationConstant constant;
     private final DashboardResources            resources;
@@ -54,7 +55,7 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
         this.resources = resources;
         this.appContext = appContext;
 
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
@@ -110,9 +111,9 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
     }
 
     @Override
-    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+    public void onWorkspaceRunning(WorkspaceRunningEvent event) {
         if (arrow != null) {
-            arrow.setAttribute("href", constant.openDashboardUrlWorkspace(event.getWorkspace().getConfig().getName()));
+            arrow.setAttribute("href", constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
         }
     }
 

@@ -18,9 +18,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
@@ -62,9 +60,6 @@ class WorkspaceStatusEventHandler {
     }
 
     private void processStatus(WorkspaceStatusEvent event) {
-        // fire deprecated WorkspaceStatusChangedEvent for backward compatibility with IDE 5.x
-        eventBus.fireEvent(new WorkspaceStatusChangedEvent(event));
-
         workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
             // Update workspace model in AppContext before firing an event.
             // Because AppContext always must return an actual workspace model.
@@ -74,9 +69,6 @@ class WorkspaceStatusEventHandler {
                 eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
             } else if (event.getStatus() == RUNNING) {
                 eventBus.fireEvent(new WorkspaceRunningEvent());
-
-                // fire deprecated WorkspaceStatusChangedEvent for backward compatibility with IDE 5.x
-                eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
             } else if (event.getStatus() == STOPPING) {
                 eventBus.fireEvent(new WorkspaceStoppingEvent());
             } else if (event.getStatus() == STOPPED) {
