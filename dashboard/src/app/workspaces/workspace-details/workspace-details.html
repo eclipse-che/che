@@ -29,12 +29,11 @@
       </md-tab-label>
       <md-tab-body>
         <ng-form name="workspaceOverviewForm">
-          <div flex layout="column" ng-if="workspaceDetailsController.workspaceDetails"
-               ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Overview, workspaceOverviewForm)">
-            <workspace-details-overview overview-form="workspaceOverviewForm"
-                                        on-change="workspaceDetailsController.switchEditMode()"
-                                        workspace-details="workspaceDetailsController.workspaceDetails"></workspace-details-overview>
-          </div>
+          <workspace-details-overview ng-if="workspaceDetailsController.workspaceDetails"
+                                      ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Overview, workspaceOverviewForm)"
+                                      overview-form="workspaceOverviewForm"
+                                      on-change="workspaceDetailsController.switchEditMode()"
+                                      workspace-details="workspaceDetailsController.workspaceDetails"></workspace-details-overview>
         </ng-form>
       </md-tab-body>
     </md-tab>
@@ -74,23 +73,25 @@
             <div layout="column" class="workspace-details-input">
               <ng-form flex layout="column"
                        name="workspaceNameForm">
-                <che-input ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Settings, workspaceNameForm)"
-                           che-form="workspaceNameForm"
-                           che-name="name"
-                           che-place-holder="Name of the workspace"
-                           aria-label="Name of the workspace"
-                           ng-model="workspaceDetailsController.newName"
-                           ng-change="workspaceNameForm.$valid && workspaceDetailsController.updateName()"
-                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: true }"
-                           required
-                           custom-validator="workspaceDetailsController.isNameUnique($value)"
-                           ng-minlength="3"
-                           ng-maxlength="20"
-                           ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+                <che-input
+                  ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Settings, workspaceNameForm)"
+                  che-form="workspaceNameForm"
+                  che-name="name"
+                  che-place-holder="Name of the workspace"
+                  aria-label="Name of the workspace"
+                  ng-model="workspaceDetailsController.newName"
+                  ng-change="workspaceNameForm.$valid && workspaceDetailsController.updateName()"
+                  ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: true }"
+                  required
+                  custom-validator="workspaceDetailsController.isNameUnique($value)"
+                  ng-minlength="3"
+                  ng-maxlength="20"
+                  ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
                   <che-error-messages che-message-scope="workspace-details-settings"
                                       che-message-name="Workspace name">
                     <div ng-message="required">A name is required.</div>
-                    <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
+                    <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.
+                    </div>
                     <div ng-message="minlength">The name has to be more than 3 characters long.</div>
                     <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
                     <div ng-message="customValidator">This workspace name is already used.</div>
@@ -103,8 +104,9 @@
           <che-label-container che-label-name="{{workspaceDetailsController.getNamespaceCaption()}}"
                                ng-if="workspaceDetailsController.getNamespaces().length > 0 || workspaceDetailsController.getNamespaceEmptyMessage()">
 
-            <div ng-if="workspaceDetailsController.isCreationFlow && workspaceDetailsController.getNamespaces().length > 0"
-                 layout="row" layout-align="start center">
+            <div
+              ng-if="workspaceDetailsController.isCreationFlow && workspaceDetailsController.getNamespaces().length > 0"
+              layout="row" layout-align="start center">
               <che-filter-selector che-values="workspaceDetailsController.namespaceLabels"
                                    ng-model="workspaceDetailsController.namespaceLabel"
                                    che-width="200px"
@@ -113,15 +115,18 @@
                 {{workspaceDetailsController.namespaceInfo}}
               </span>
             </div>
-            <div ng-if="workspaceDetailsController.getNamespaces().length === 0 && workspaceDetailsController.getNamespaceEmptyMessage()" class="empty-namespace-label">
+            <div
+              ng-if="workspaceDetailsController.getNamespaces().length === 0 && workspaceDetailsController.getNamespaceEmptyMessage()"
+              class="empty-namespace-label">
               <i class="fa-exclamation-triangle fa fa-2x"></i>
               {{workspaceDetailsController.getNamespaceEmptyMessage()}}
             </div>
-            <che-button-default ng-if="!workspaceDetailsController.isCreationFlow && workspaceDetailsController.getNamespaces().length > 0"
-                                che-button-title="{{workspaceDetailsController.getNamespaceLabel(workspaceDetailsController.namespaceId)}}"
-                                ng-disabled="!workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId) || !workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId).location"
-                                ng-click="workspaceDetailsController.namespaceOnClick(workspaceDetailsController.namespaceId)"
-                                class="namespace-button"></che-button-default>
+            <che-button-default
+              ng-if="!workspaceDetailsController.isCreationFlow && workspaceDetailsController.getNamespaces().length > 0"
+              che-button-title="{{workspaceDetailsController.getNamespaceLabel(workspaceDetailsController.namespaceId)}}"
+              ng-disabled="!workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId) || !workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId).location"
+              ng-click="workspaceDetailsController.namespaceOnClick(workspaceDetailsController.namespaceId)"
+              class="namespace-button"></che-button-default>
           </che-label-container>
 
           <!-- Status -->
@@ -155,7 +160,7 @@
                                che-label-description="This is irreversible. Deleting your workspace will also delete its projects.">
             <che-button-danger che-button-title="Delete"
                                ng-disabled="workspaceDetailsController.isCreationFlow || (workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsController.getWorkspaceStatus() !== 'STOPPED' && workspaceDetailsController.getWorkspaceStatus() !== 'ERROR')"
-                               ng-click="workspaceDetailsController.deleteWorkspace($event)"></che-button-danger>
+                               ng-click="workspaceDetailsController.deleteWorkspace()"></che-button-danger>
           </che-label-container>
 
         </div>
@@ -205,7 +210,7 @@
     <md-tab ng-if="workspaceDetailsController.isCreationFlow === false"
             ng-init="workspaceDetailsController.addTab(section.title);"
             md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab[section.title]);"
-            ng-repeat="section in workspaceDetailsController.getPages()" >
+            ng-repeat="section in workspaceDetailsController.getPages()">
       <md-tab-label>
         <span class="che-tab-label-title">{{section.title}}</span>
       </md-tab-label>
@@ -223,4 +228,5 @@
                              workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"
                              workspace-edit-mode-on-cancel="workspaceDetailsController.cancelConfigChanges()"></workspace-edit-mode-overlay>
 
-<md-content ng-show="workspaceDetailsController.invalidWorkspace">{{workspaceDetailsController.invalidWorkspace}}</md-content>
+<md-content ng-show="workspaceDetailsController.invalidWorkspace">{{workspaceDetailsController.invalidWorkspace}}
+</md-content>

@@ -49,7 +49,7 @@ export class WorkspaceStatusController {
       this.isLoading = false;
     }, (error: any) => {
       this.isLoading = false;
-      this.cheNotification.showError(error.data.message ? error.data.message : 'Run workspace error.');
+      this.cheNotification.showError('Run workspace error.', error);
     });
   }
 
@@ -60,13 +60,13 @@ export class WorkspaceStatusController {
     }
 
     this.isLoading = true;
-    let promise = this.cheWorkspace.stopWorkspace(this.workspace.id);
+    let promise = this.cheWorkspace.stopWorkspace(this.workspace.id, false);
 
     promise.then(() => {
       this.isLoading = false;
     }, (error: any) => {
       this.isLoading = false;
-      this.cheNotification.showError(error.data.message ? error.data.message : 'Stop workspace error.');
+      this.cheNotification.showError('Stop workspace error.', error);
     });
   }
 

@@ -9,12 +9,16 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
 import {CheUser} from '../../../../components/api/che-user.factory';
+import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 import {NamespaceSelectorSvc} from '../../create-workspace/namespace-selector/namespace-selector.service';
 import {WorkspaceDetailsService} from '../workspace-details.service';
+
+const STARTING = 'STARTING';
+const RUNNING = 'RUNNING';
+const STOPPED = 'STOPPED';
 
 /**
  * @ngdoc controller
@@ -28,11 +32,9 @@ export class WorkspaceDetailsOverviewController {
   private $q: ng.IQService;
   private $route: ng.route.IRouteService;
   private $location: ng.ILocationService;
-  private cheUser: CheUser;
   private cheWorkspace: CheWorkspace;
   private cheNotification: CheNotification;
   private confirmDialogService: ConfirmDialogService;
-  private lodash: any;
   private overviewForm: ng.IFormController;
   private workspaceDetails: che.IWorkspace;
   private namespaceSelectorSvc: NamespaceSelectorSvc;
@@ -41,17 +43,16 @@ export class WorkspaceDetailsOverviewController {
   private workspaceName: string;
   private usedNamesList: Array<string>;
   private inputmodel: ng.INgModelController;
+  private isLoading: boolean;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $route: ng.route.IRouteService, $location: ng.ILocationService, lodash: any, cheUser: CheUser, cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
+  constructor($q: ng.IQService, $route: ng.route.IRouteService, $location: ng.ILocationService, cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
     this.$q = $q;
     this.$route = $route;
     this.$location = $location;
-    this.lodash = lodash;
-    this.cheUser = cheUser;
     this.cheWorkspace = cheWorkspace;
     this.cheNotification = cheNotification;
     this.confirmDialogService = confirmDialogService;
@@ -61,11 +62,6 @@ export class WorkspaceDetailsOverviewController {
     const routeParams = $route.current.params;
     this.namespaceId = routeParams.namespace;
     this.workspaceName = routeParams.workspaceName;
-
-    const inputName = 'name';
-    if (this.overviewForm && this.overviewForm[inputName]) {
-      this.inputmodel = this.overviewForm[inputName] as ng.INgModelController;
-    }
 
     this.fillInListOfUsedNames();
   }
@@ -106,6 +102,7 @@ export class WorkspaceDetailsOverviewController {
    * and triggers validation of entered workspace's name
    */
   fillInListOfUsedNames(): void {
+    this.isLoading = true;
     const defer = this.$q.defer();
     this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
     if (this.namespaceId) {
@@ -125,6 +122,7 @@ export class WorkspaceDetailsOverviewController {
     }).then((workspaces: Array<che.IWorkspace>) => {
       this.usedNamesList = this.buildInListOfUsedNames(workspaces);
       this.reValidateName();
+      this.isLoading = false;
     });
   }
 
@@ -133,7 +131,12 @@ export class WorkspaceDetailsOverviewController {
    * Triggers form validation.
    */
   reValidateName(): void {
-    if (!this.inputmodel) {
+    if (!this.overviewForm) {
+      return;
+    }
+    const inputName = 'name';
+    this.inputmodel = this.overviewForm[inputName] as ng.INgModelController;
+    if (!this.inputmodel || !angular.isFunction(this.inputmodel.$validate)) {
       return;
     }
     this.inputmodel.$validate();
@@ -225,14 +228,14 @@ export class WorkspaceDetailsOverviewController {
   deleteWorkspace(): void {
     const content = 'Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?';
     this.confirmDialogService.showConfirmDialog('Delete workspace', content, 'Delete').then(() => {
-      if (this.getWorkspaceStatus() === 'RUNNING') {
+      if ([RUNNING, STARTING].indexOf(this.getWorkspaceStatus()) !== -1) {
         this.cheWorkspace.stopWorkspace(this.workspaceDetails.id, false);
       }
-      this.cheWorkspace.fetchStatusChange(this.workspaceDetails.id, 'STOPPED').then(() => {
+      this.cheWorkspace.fetchStatusChange(this.workspaceDetails.id, STOPPED).then(() => {
         this.cheWorkspace.deleteWorkspaceConfig(this.workspaceDetails.id).then(() => {
           this.$location.path('/workspaces').search({});
         }, (error: any) => {
-          this.cheNotification.showError(error && error.data && angular.isString(error.data.message) ? error.data.message : 'Delete workspace failed.');
+          this.cheNotification.showError('Delete workspace failed.', error);
         });
       });
     });
