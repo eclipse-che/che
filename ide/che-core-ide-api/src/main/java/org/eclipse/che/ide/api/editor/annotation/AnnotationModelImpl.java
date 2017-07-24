@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.editor.annotation;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.text.BadLocationException;
 import org.eclipse.che.ide.api.editor.text.BadPositionCategoryException;
@@ -261,7 +261,7 @@ public class AnnotationModelImpl implements AnnotationModel {
     }
 
     @Override
-    public void onDocumentChange(final DocumentChangeEvent event) {
+    public void onDocumentChanged(final DocumentChangedEvent event) {
         this.documentChanged = true;
     }
 

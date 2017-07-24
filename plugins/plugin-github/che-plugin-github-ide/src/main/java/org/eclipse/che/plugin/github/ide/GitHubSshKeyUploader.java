@@ -58,7 +58,7 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
                                 DialogFactory dialogFactory,
                                 AppContext appContext) {
         this.gitHubService = gitHubService;
-        this.baseUrl = appContext.getMasterEndpoint();
+        this.baseUrl = appContext.getMasterApiEndpoint();
         this.constant = constant;
         this.notificationManager = notificationManager;
         this.productInfoDataProvider = productInfoDataProvider;

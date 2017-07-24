@@ -59,7 +59,7 @@ public class ProjectServiceClientTest {
                                                         dtoFactory,
                                                         dtoUnmarshallerFactory,
                                                         appContext);
-        when(appContext.getDevAgentEndpoint()).thenReturn("");
+        when(appContext.getWsAgentServerApiEndpoint()).thenReturn("");
     }
 
     @Test

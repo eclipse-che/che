@@ -71,7 +71,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<String> createMoveRefactoring(final CreateMoveRefactoring moveRefactoring) {
-        return asyncRequestFactory.createPostRequest(appContext.getDevAgentEndpoint() + pathToService + "move/create", moveRefactoring)
+        return asyncRequestFactory.createPostRequest(appContext.getWsAgentServerApiEndpoint() + pathToService + "move/create", moveRefactoring)
                                   .header(ACCEPT, TEXT_PLAIN)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
                                   .loader(loader)
@@ -81,7 +81,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RenameRefactoringSession> createRenameRefactoring(final CreateRenameRefactoring settings) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "rename/create";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "rename/create";
         return asyncRequestFactory.createPostRequest(url, settings)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -92,7 +92,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RefactoringResult> applyLinkedModeRename(final LinkedRenameRefactoringApply refactoringApply) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "rename/linked/apply";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "rename/linked/apply";
         return asyncRequestFactory.createPostRequest(url, refactoringApply)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -103,7 +103,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RefactoringStatus> setDestination(final ReorgDestination destination) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "set/destination";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "set/destination";
 
         return asyncRequestFactory.createPostRequest(url, destination)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -115,7 +115,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<Void> setMoveSettings(final MoveSettings settings) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "set/move/setting";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "set/move/setting";
 
         return asyncRequestFactory.createPostRequest(url, settings)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -127,7 +127,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<ChangeCreationResult> createChange(final RefactoringSession session) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "create/change";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "create/change";
 
         return asyncRequestFactory.createPostRequest(url, session)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -139,7 +139,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RefactoringPreview> getRefactoringPreview(final RefactoringSession session) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "get/preview";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "get/preview";
 
         return asyncRequestFactory.createPostRequest(url, session)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -151,7 +151,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RefactoringResult> applyRefactoring(final RefactoringSession session) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "apply";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "apply";
 
         return asyncRequestFactory.createPostRequest(url, session)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -163,7 +163,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<Void> changeChangeEnabledState(final ChangeEnabledState state) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "change/enabled";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "change/enabled";
 
         return asyncRequestFactory.createPostRequest(url, state)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -175,7 +175,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<ChangePreview> getChangePreview(final RefactoringChange change) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "change/preview";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "change/preview";
 
         return asyncRequestFactory.createPostRequest(url, change)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -187,7 +187,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RefactoringStatus> validateNewName(final ValidateNewName newName) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "rename/validate/name";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "rename/validate/name";
 
         return asyncRequestFactory.createPostRequest(url, newName)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -199,7 +199,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<Void> setRenameSettings(final RenameSettings settings) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "set/rename/settings";
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "set/rename/settings";
 
         return asyncRequestFactory.createPostRequest(url, settings)
                                   .header(ACCEPT, APPLICATION_JSON)
@@ -210,7 +210,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
 
     @Override
     public Promise<Void> reindexProject(String projectPath) {
-        final String url = appContext.getDevAgentEndpoint() + pathToService + "reindex?projectpath=" + projectPath;
+        final String url = appContext.getWsAgentServerApiEndpoint() + pathToService + "reindex?projectpath=" + projectPath;
 
         return asyncRequestFactory.createGetRequest(url)
                                   .loader(loader)

@@ -163,6 +163,8 @@ public class OpenShiftConnector extends DockerConnector {
     private static final Logger LOG                                      = LoggerFactory.getLogger(OpenShiftConnector.class);
     public static final String CHE_OPENSHIFT_RESOURCES_PREFIX           = "che-ws-";
     public static final String OPENSHIFT_DEPLOYMENT_LABEL               = "deployment";
+    public static final String CHE_MOUNTED_WORKSPACE_FOLDER             = "/workspace-logs";
+    public static final String WORKSPACE_LOGS_FOLDER_SUFFIX             = "-logs";
 
     private static final String CHE_CONTAINER_IDENTIFIER_LABEL_KEY       = "cheContainerIdentifier";
     private static final String CHE_DEFAULT_EXTERNAL_ADDRESS             = "172.17.0.1";
@@ -1489,7 +1491,16 @@ public class OpenShiftConnector extends DockerConnector {
                     .withName(workspacesPersistentVolumeClaim)
                     .withSubPath(subPath)
                     .build();
+
+                // add a mount from PVC for the logs
+                VolumeMount logsVm = new VolumeMountBuilder()
+                        .withMountPath(CHE_MOUNTED_WORKSPACE_FOLDER)
+                        .withName(workspacesPersistentVolumeClaim)
+                        .withSubPath(subPath + WORKSPACE_LOGS_FOLDER_SUFFIX)
+                        .build();
+
                 vms.add(vm);
+                vms.add(logsVm);
             }
         }
         return vms;

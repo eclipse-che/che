@@ -44,9 +44,29 @@ public interface TestStateEventsListener {
      */
     void onSuiteFinished(TestState testState);
 
+    /**
+     * Called when test node added
+     *
+     * @param testState
+     *         describes test node
+     */
     void onSuiteTreeNodeAdded(TestState testState);
 
+    /**
+     * Called when building of test tree started
+     *
+     * @param testState
+     *         describes test suite
+     */
     void onSuiteTreeStarted(TestState testState);
+
+    /**
+     * Called when building of test tree finished
+     *
+     * @param suite
+     *         describes test suite
+     */
+    void onSuiteTreeNodeFinished(TestState suite);
 
     /**
      * @param count

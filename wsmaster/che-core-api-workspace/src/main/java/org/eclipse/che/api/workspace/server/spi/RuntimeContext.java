@@ -60,8 +60,10 @@ public abstract class RuntimeContext {
      * Context must return the Runtime object whatever its status is (STOPPED status including)
      *
      * @return Runtime object
+     * @throws InfrastructureException
+     *         when any error during runtime retrieving/creation
      */
-    public abstract InternalRuntime getRuntime();
+    public abstract InternalRuntime getRuntime() throws InfrastructureException;
 
     /**
      * Infrastructure should assign channel (usual WebSocket) to push long lived processes messages
@@ -138,7 +140,7 @@ public abstract class RuntimeContext {
         }
     }
 
-    private class InternalRecipe {
+    protected class InternalRecipe {
 
         private final String content;
         private final String type;

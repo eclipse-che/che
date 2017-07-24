@@ -84,9 +84,9 @@ public class InstallerConfigApplierTest {
 
         Map<String, String> labels = service.getLabels();
         assertEquals(labels.size(), 3);
-        assertEquals(labels.get("che:server:1111/udp:ref"), "a");
-        assertEquals(labels.get("che:server:1111/udp:protocol"), "http");
-        assertEquals(labels.get("che:server:1111/udp:path"), "b");
+        assertEquals(labels.get("org.eclipse.che.server.a.port"), "1111/udp");
+        assertEquals(labels.get("org.eclipse.che.server.a.protocol"), "http");
+        assertEquals(labels.get("org.eclipse.che.server.a.path"), "b");
     }
 
     @Test

@@ -50,7 +50,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
 
     @Override
     public Promise<String> getEffectivePom(String projectPath) {
-        final String url = appContext.getDevAgentEndpoint() + servicePath + "effective/pom?projectpath=" + projectPath;
+        final String url = appContext.getWsAgentServerApiEndpoint() + servicePath + "effective/pom?projectpath=" + projectPath;
 
         return asyncRequestFactory.createGetRequest(url)
                                   .loader(loaderFactory.newLoader("Generating effective pom..."))
@@ -59,8 +59,8 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
 
     @Override
     public Promise<Boolean> downloadSources(String projectPath, String fqn) {
-        final String url = appContext.getDevAgentEndpoint() + servicePath +
-                           "download/sources?projectpath=" + projectPath +"&fqn=" + fqn;
+        final String url = appContext.getWsAgentServerApiEndpoint() + servicePath +
+                           "download/sources?projectpath=" + projectPath + "&fqn=" + fqn;
         return asyncRequestFactory.createGetRequest(url)
                                   .loader(loaderFactory.newLoader("Generating effective pom..."))
                                   .send(new Unmarshallable<Boolean>() {
@@ -83,7 +83,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
         for (String path : projectsPaths) {
             queryParameters.append("&projectPath=").append(path);
         }
-        final String url = appContext.getDevAgentEndpoint() + servicePath + "reimport" +
+        final String url = appContext.getWsAgentServerApiEndpoint() + servicePath + "reimport" +
                            queryParameters.toString().replaceFirst("&", "?");
 
         return asyncRequestFactory.createPostRequest(url, null).send();
@@ -91,7 +91,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
 
     @Override
     public Promise<Void> reconcilePom(String pomPath) {
-        final String url = appContext.getDevAgentEndpoint() + servicePath + "pom/reconcile?pompath=" + pomPath;
+        final String url = appContext.getWsAgentServerApiEndpoint() + servicePath + "pom/reconcile?pompath=" + pomPath;
         return asyncRequestFactory.createGetRequest(url).send();
     }
 }

@@ -75,6 +75,17 @@ public abstract class ServerChecker {
     }
 
     /**
+     * Checks server availability, throws {@link InfrastructureException}
+     * if the server is not available.
+     */
+    public void checkOnce(Consumer<String> readinessHandler) throws InfrastructureException {
+        if (!isAvailable()) {
+            throw new InfrastructureException(String.format("Server '%s' in machine '%s' not available.", serverRef, machineName));
+        }
+        readinessHandler.accept(serverRef);
+    }
+
+    /**
      * Shows whether the server is treated as available.
      *
      * @return true if server is available, false otherwise

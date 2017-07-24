@@ -17,7 +17,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
@@ -34,7 +33,6 @@ import java.util.Set;
  *
  * @author Vlad Zhukovskyi
  * @see AbstractServerMacro
- * @see DevMachine
  * @since 4.7.0
  */
 @Beta

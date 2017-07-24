@@ -54,7 +54,7 @@ public class MyServiceClient {
      * @return a Promise containing the server response
      */
     public Promise<String> getHello(String name) {
-        return asyncRequestFactory.createGetRequest(appContext.getDevAgentEndpoint() + "/hello/" + name)
+        return asyncRequestFactory.createGetRequest(appContext.getWsAgentServerApiEndpoint() + "/hello/" + name)
                                   .loader(loaderFactory.newLoader("Waiting for hello..."))
                                   .send(new StringUnmarshaller());
     }

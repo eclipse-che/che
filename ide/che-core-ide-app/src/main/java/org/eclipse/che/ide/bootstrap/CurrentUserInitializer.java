@@ -92,7 +92,7 @@ class CurrentUserInitializer {
     }
 
     private Promise<ProfileDto> getUserProfile() {
-        return asyncRequestFactory.createGetRequest(appContext.getMasterEndpoint() + "/profile/")
+        return asyncRequestFactory.createGetRequest(appContext.getMasterApiEndpoint() + "/profile/")
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(ProfileDto.class));
     }

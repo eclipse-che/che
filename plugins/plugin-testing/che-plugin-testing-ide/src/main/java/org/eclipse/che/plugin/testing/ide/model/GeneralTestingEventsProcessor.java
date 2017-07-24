@@ -35,7 +35,7 @@ import java.util.function.Function;
 import static org.eclipse.che.plugin.testing.ide.model.Printer.OutputType;
 
 /**
- * Event processor converts events form runner to internal form.
+ * Event processor converts events from runner to internal form.
  */
 public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcessor {
     private final TestRootState testRootState;
@@ -68,6 +68,9 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
         String name = event.getName();
         String location = event.getLocation();
         TestState currentSuite = getCurrentSuite();
+        if (currentSuite.getName().equals(name) && treeBuildBeforeStart) {
+            return;
+        }
         TestState newState;
         if (location == null) {
             newState = findChildByName(currentSuite, name, true);
@@ -241,18 +244,16 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
     @Override
     public void onSuiteTreeStarted(String suiteName, String location) {
         treeBuildBeforeStart = true;
-        buildTreeEvents.add(() -> {
-            TestState currentSuite = getCurrentSuite();
-            TestState newSuite = new TestState(suiteName, true, location);
-            if (testLocator != null) {
-                newSuite.setTestLocator(testLocator);
-            }
+        TestState currentSuite = getCurrentSuite();
+        TestState newSuite = new TestState(suiteName, true, location);
+        if (testLocator != null) {
+            newSuite.setTestLocator(testLocator);
+        }
 
-            currentSuite.addChild(newSuite);
+        currentSuite.addChild(newSuite);
 
-            testSuiteStack.push(newSuite);
-            callSuiteTreeStarted(newSuite);
-        });
+        testSuiteStack.push(newSuite);
+        callSuiteTreeStarted(newSuite);
     }
 
     private void callSuiteTreeStarted(TestState newSuite) {
@@ -277,19 +278,17 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
     @Override
     public void onSuiteTreeNodeAdded(String suiteName, String location) {
         treeBuildBeforeStart = true;
-        buildTreeEvents.add(() -> {
-            TestState newState = new TestState(suiteName, false, location);
-            newState.setTreeBuildBeforeStart();
-            if (testLocator != null) {
-                newState.setTestLocator(testLocator);
-            }
+        TestState newState = new TestState(suiteName, false, location);
+        newState.setTreeBuildBeforeStart();
+        if (testLocator != null) {
+            newState.setTestLocator(testLocator);
+        }
 
-            TestState currentSuite = getCurrentSuite();
-            currentSuite.setTreeBuildBeforeStart();
-            currentSuite.addChild(newState);
+        TestState currentSuite = getCurrentSuite();
+        currentSuite.setTreeBuildBeforeStart();
+        currentSuite.addChild(newState);
 
-            callSuiteTreeNodeAdded(newState);
-        });
+        callSuiteTreeNodeAdded(newState);
     }
 
     private void callSuiteTreeNodeAdded(TestState newState) {

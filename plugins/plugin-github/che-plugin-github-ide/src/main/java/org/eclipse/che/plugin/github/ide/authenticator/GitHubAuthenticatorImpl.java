@@ -73,7 +73,7 @@ public class GitHubAuthenticatorImpl implements OAuth2Authenticator, OAuthCallba
         this.view = view;
         this.view.setDelegate(this);
         this.locale = locale;
-        this.baseUrl = appContext.getMasterEndpoint();
+        this.baseUrl = appContext.getMasterApiEndpoint();
         this.dialogFactory = dialogFactory;
         this.notificationManager = notificationManager;
         this.appContext = appContext;

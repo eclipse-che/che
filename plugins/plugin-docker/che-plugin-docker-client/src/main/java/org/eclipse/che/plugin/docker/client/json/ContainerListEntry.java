@@ -30,6 +30,7 @@ public class ContainerListEntry {
     private Map<String, String> labels;
     private int                 sizeRw;
     private int                 sizeRootFs;
+    private NetworkSettings     networkSettings;
 
     /**
      * Returns unique container identifier
@@ -144,7 +145,7 @@ public class ContainerListEntry {
     }
 
     /**
-     *  Returns the virtual size of the container
+     * Returns the virtual size of the container
      */
     public int getSizeRootFs() {
         return sizeRootFs;
@@ -152,6 +153,14 @@ public class ContainerListEntry {
 
     public void setSizeRootFs(int sizeRootFs) {
         this.sizeRootFs = sizeRootFs;
+    }
+
+    public NetworkSettings getNetworkSettings() {
+        return networkSettings;
+    }
+
+    public void setNetworkSettings(NetworkSettings networkSettings) {
+        this.networkSettings = networkSettings;
     }
 
     @Override
@@ -168,6 +177,7 @@ public class ContainerListEntry {
                ", labels=" + labels +
                ", sizeRw=" + sizeRw +
                ", sizeRootFs=" + sizeRootFs +
+               ", networkSettings=" + networkSettings +
                '}';
     }
 }

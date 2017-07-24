@@ -200,7 +200,7 @@ public class ProjectImporter extends AbstractImporter {
                     authenticator = oAuth2AuthenticatorRegistry.getAuthenticator("default");
                 }
 
-                authenticator.authenticate(OAuth2AuthenticatorUrlProvider.get(appContext.getMasterEndpoint(), authenticateUrl),
+                authenticator.authenticate(OAuth2AuthenticatorUrlProvider.get(appContext.getMasterApiEndpoint(), authenticateUrl),
                                            new AsyncCallback<OAuthStatus>() {
                                                @Override
                                                public void onFailure(Throwable caught) {

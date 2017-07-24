@@ -69,7 +69,7 @@ public class ProjectTemplateRegistryImpl implements ProjectTemplateRegistry {
     }
 
     private Promise<List<ProjectTemplateDescriptor>> fetchTemplates() {
-        final String baseUrl = appContext.getMasterEndpoint() + "/project-template/all";
+        final String baseUrl = appContext.getMasterApiEndpoint() + "/project-template/all";
 
         return asyncRequestFactory.createGetRequest(baseUrl)
                                   .header(ACCEPT, APPLICATION_JSON)

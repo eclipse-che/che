@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -22,6 +21,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter.DirtyStateListener;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
 import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
@@ -102,7 +102,7 @@ public class JavaCompilerPreferencePresenterTest {
     @Mock
     private PropertyWidget               widget;
     @Mock
-    private WsAgentStateEvent            wsAgentStateEvent;
+    private WorkspaceRunningEvent        workspaceRunningEvent;
 
     @Captor
     private ArgumentCaptor<Map<String, String>>            mapCaptor;
@@ -141,7 +141,7 @@ public class JavaCompilerPreferencePresenterTest {
         when(widget.getSelectedValue()).thenReturn(VALUE_2);
         when(preferencesManager.getValue(anyString())).thenReturn(VALUE_1);
 
-        presenter.onWsAgentStarted(wsAgentStateEvent);
+        presenter.onWorkspaceRunning(workspaceRunningEvent);
         presenter.go(container);
 
         verify(mapPromise).then(operationCaptor.capture());
@@ -164,7 +164,7 @@ public class JavaCompilerPreferencePresenterTest {
         when(widget.getSelectedValue()).thenReturn(VALUE_2);
         when(preferencesManager.getValue(anyString())).thenReturn(VALUE_1);
 
-        presenter.onWsAgentStarted(wsAgentStateEvent);
+        presenter.onWorkspaceRunning(workspaceRunningEvent);
         presenter.go(container);
 
         verify(mapPromise).then(operationCaptor.capture());
@@ -221,7 +221,7 @@ public class JavaCompilerPreferencePresenterTest {
 
     @Test
     public void propertiesShouldBeDisplayed() throws Exception {
-        presenter.onWsAgentStarted(wsAgentStateEvent);
+        presenter.onWorkspaceRunning(workspaceRunningEvent);
         presenter.go(container);
 
         verify(mapPromise).then(operationCaptor.capture());
@@ -240,7 +240,7 @@ public class JavaCompilerPreferencePresenterTest {
 
         when(notificationManagerProvider.get()).thenReturn(notificationManager);
 
-        presenter.onWsAgentStarted(wsAgentStateEvent);
+        presenter.onWorkspaceRunning(workspaceRunningEvent);
         presenter.go(container);
 
         verify(mapPromise).catchError(errorOperationCaptor.capture());

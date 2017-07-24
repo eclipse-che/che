@@ -66,14 +66,14 @@ public class JavaCodeAssistClient {
     }
 
     public void computeProposals(String projectPath, String fqn, int offset, String contents, AsyncRequestCallback<Proposals> callback) {
-        String url = appContext.getDevAgentEndpoint() + CODE_ASSIST_URL_PREFIX + "/compute/completion" + "/?projectpath=" +
+        String url = appContext.getWsAgentServerApiEndpoint() + CODE_ASSIST_URL_PREFIX + "/compute/completion" + "/?projectpath=" +
                      projectPath + "&fqn=" + fqn + "&offset=" + offset;
         asyncRequestFactory.createPostRequest(url, null).data(contents).send(callback);
     }
 
     public void computeAssistProposals(String projectPath, String fqn, int offset, List<Problem> problems,
                                        AsyncRequestCallback<Proposals> callback) {
-        String url = appContext.getDevAgentEndpoint() + CODE_ASSIST_URL_PREFIX + "/compute/assist" + "/?projectpath=" +
+        String url = appContext.getWsAgentServerApiEndpoint() + CODE_ASSIST_URL_PREFIX + "/compute/assist" + "/?projectpath=" +
                      projectPath + "&fqn=" + fqn + "&offset=" + offset;
         List<Problem> prob = new ArrayList<>();
         prob.addAll(problems);
@@ -82,7 +82,7 @@ public class JavaCodeAssistClient {
 
 
     public void applyProposal(String sessionId, int index, boolean insert, final AsyncCallback<ProposalApplyResult> callback) {
-        String url = appContext.getDevAgentEndpoint() + CODE_ASSIST_URL_PREFIX + "/apply/completion/?sessionid=" +
+        String url = appContext.getWsAgentServerApiEndpoint() + CODE_ASSIST_URL_PREFIX + "/apply/completion/?sessionid=" +
                      sessionId + "&index=" + index + "&insert=" + insert;
         Unmarshallable<ProposalApplyResult> unmarshaller = unmarshallerFactory.newUnmarshaller(ProposalApplyResult.class);
         asyncRequestFactory.createGetRequest(url).send(new AsyncRequestCallback<ProposalApplyResult>(unmarshaller) {
@@ -99,7 +99,7 @@ public class JavaCodeAssistClient {
     }
 
     public String getProposalDocUrl(int id, String sessionId) {
-        return urlDecorator.modify(appContext.getDevAgentEndpoint() +
+        return urlDecorator.modify(appContext.getWsAgentServerApiEndpoint() +
                                    CODE_ASSIST_URL_PREFIX + "/compute/info?sessionid=" + sessionId +
                                    "&index=" + id);
     }
@@ -126,7 +126,7 @@ public class JavaCodeAssistClient {
     }
 
     private Promise<List<Change>> getFormatChanges(final int offset, final int length, final String content) {
-        final String baseUrl = appContext.getDevAgentEndpoint();
+        final String baseUrl = appContext.getWsAgentServerApiEndpoint();
         final String url = baseUrl + CODE_ASSIST_URL_PREFIX + "/format?offset=" + offset + "&length=" + length;
         return asyncRequestFactory.createPostRequest(url, null)
                                   .header(CONTENT_TYPE, MimeType.TEXT_PLAIN)
@@ -145,7 +145,7 @@ public class JavaCodeAssistClient {
      */
     public Promise<OrganizeImportResult> organizeImports(String projectPath, String fqn) {
         String url =
-                appContext.getDevAgentEndpoint() + CODE_ASSIST_URL_PREFIX + "/organize-imports?projectpath=" + projectPath +
+                appContext.getWsAgentServerApiEndpoint() + CODE_ASSIST_URL_PREFIX + "/organize-imports?projectpath=" + projectPath +
                 "&fqn=" + fqn;
         return asyncRequestFactory.createPostRequest(url, null)
                                   .loader(loader)
@@ -161,7 +161,7 @@ public class JavaCodeAssistClient {
      *         fully qualified name of the java file
      */
     public Promise<List<Change>> applyChosenImports(String projectPath, String fqn, ConflictImportDTO chosen) {
-        String url = appContext.getDevAgentEndpoint() + CODE_ASSIST_URL_PREFIX + "/apply-imports?projectpath=" + projectPath +
+        String url = appContext.getWsAgentServerApiEndpoint() + CODE_ASSIST_URL_PREFIX + "/apply-imports?projectpath=" + projectPath +
                      "&fqn=" + fqn;
         return asyncRequestFactory.createPostRequest(url, chosen)
                                   .loader(loader)

@@ -14,9 +14,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.editor.preferences.EditorPreferenceSection;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPreferenceSectionFactory;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPropertiesSection;
@@ -29,7 +28,7 @@ import java.util.Set;
  *
  * @author Roman Nikitenko
  */
-public class EditorPropertiesPresenter implements EditorPreferenceSection, WsAgentStateHandler {
+public class EditorPropertiesPresenter implements EditorPreferenceSection {
     /** The preference page presenter. */
     private ParentPresenter parentPresenter;
     private Set<EditorPreferenceSection> sectionsSet = new HashSet<>();
@@ -49,7 +48,17 @@ public class EditorPropertiesPresenter implements EditorPreferenceSection, WsAge
         this.editorPreferenceSectionFactory = editorPreferenceSectionFactory;
         this.eventBus = eventBus;
 
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> init());
+    }
+
+    private void init() {
+        for (EditorPropertiesSection section : sections) {
+            EditorPreferenceSection editorPreferenceSection = editorPreferenceSectionFactory.create(section.getSectionTitle(),
+                                                                                                    section.getProperties());
+            editorPreferenceSection.go(view.getEditorSectionsContainer());
+            editorPreferenceSection.setParent(parentPresenter);
+            sectionsSet.add(editorPreferenceSection);
+        }
     }
 
     @Override
@@ -89,20 +98,5 @@ public class EditorPropertiesPresenter implements EditorPreferenceSection, WsAge
     @Override
     public void setParent(final EditorPreferenceSection.ParentPresenter parent) {
         this.parentPresenter = parent;
-    }
-
-    @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-        for (EditorPropertiesSection section : sections) {
-            EditorPreferenceSection editorPreferenceSection =
-                    editorPreferenceSectionFactory.create(section.getSectionTitle(), section.getProperties());
-            editorPreferenceSection.go(view.getEditorSectionsContainer());
-            editorPreferenceSection.setParent(parentPresenter);
-            sectionsSet.add(editorPreferenceSection);
-        }
-    }
-
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 }

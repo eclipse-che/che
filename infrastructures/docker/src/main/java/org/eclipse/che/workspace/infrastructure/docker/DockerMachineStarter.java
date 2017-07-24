@@ -58,7 +58,6 @@ import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundE
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyProvider;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -91,6 +90,40 @@ import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.LATE
 import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.USER_TOKEN;
 import static org.slf4j.LoggerFactory.getLogger;
 
+/*
+ TODO:
+
+ 1. Decompose this component on:
+  - DockerNetworks(NetworkLifecycle <-) - deals with docker networks.
+  - DockerImages - deals with docker images.
+  - DockerContainers - deals with docker containers.
+ Then DockerRuntimeContext may use these components to run consistent
+ and clear flow of calls to achieve its needs, e.g.:
+
+ DockerNetworks networks;
+ DockerImages images;
+ DockerContainer containers;
+
+ start runtime {
+   networks.create(environment.getNetwork())
+   for (config: environment.getConfigs()) {
+     String image
+     if (isBuildable(config)) {
+       image = images.build(config)
+     } else {
+       image = images.pull(config)
+     }
+     String id = containers.create(image)
+     Container container = containers.start(id);
+     DockerMachine machine = machineCreator.create(container);
+     ...
+   }
+ }
+
+ 2. Move the logic related to containers configuration modification to
+ InfrastructureProvisioner implementation.
+*/
+
 /**
  * @author Alexander Garagatyi
  */
@@ -115,7 +148,7 @@ public class DockerMachineStarter {
                                                                      singletonList("sh"),
                                                                      Arrays.asList("/bin/sh", "-c", "/bin/sh"),
                                                                      Arrays.asList("/bin/sh", "-c",
-                                                                                            "/bin/bash"),
+                                                                                   "/bin/bash"),
                                                                      Arrays.asList("/bin/sh", "-c", "bash"),
                                                                      Arrays.asList("/bin/sh", "-c", "sh"));
 
@@ -146,15 +179,13 @@ public class DockerMachineStarter {
     private final Set<String>                                   additionalNetworks;
     private final String                                        parentCgroup;
     private final String                                        cpusetCpus;
-    private final String                                        registry;
-    private final String                                        registryNamespace;
     private final long                                          cpuPeriod;
     private final long                                          cpuQuota;
     private final WindowsPathEscaper                            windowsPathEscaper;
     private final String[]                                      dnsResolvers;
-    private       ServerEvaluationStrategyProvider              serverEvaluationStrategyProvider;
     private final Map<String, String>                           buildArgs;
     private final MachineLoggersFactory                         machineLoggerFactory;
+    private final DockerMachineCreator                          machineCreator;
 
     @Inject
     public DockerMachineStarter(DockerConnector docker,
@@ -167,8 +198,6 @@ public class DockerMachineStarter {
                                 @Named("che.docker.always_pull_image") boolean doForcePullImage,
                                 @Named("che.docker.privileged") boolean privilegedMode,
                                 @Named("che.docker.pids_limit") int pidsLimit,
-                                @Named("che.docker.registry") String registry,
-                                @Named("che.docker.namespace") @Nullable String registryNamespace,
                                 @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                 @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
                                 @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
@@ -181,9 +210,10 @@ public class DockerMachineStarter {
                                 WindowsPathEscaper windowsPathEscaper,
                                 @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
                                 @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
-                                ServerEvaluationStrategyProvider serverEvaluationStrategyProvider,
                                 @Named("che.docker.build_args") Map<String, String> buildArgs,
-                                MachineLoggersFactory machineLogger) {
+                                MachineLoggersFactory machineLogger,
+                                DockerMachineCreator machineCreator) {
+        this.machineCreator = machineCreator;
         // TODO spi should we move all configuration stuff into infrastructure provisioner and left logic of container start here only
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
@@ -205,12 +235,9 @@ public class DockerMachineStarter {
         this.cpuPeriod = cpuPeriod;
         this.cpuQuota = cpuQuota;
         this.windowsPathEscaper = windowsPathEscaper;
-        this.registryNamespace = registryNamespace;
-        this.registry = registry;
         this.pidsLimit = pidsLimit;
         this.dnsResolvers = dnsResolvers;
         this.buildArgs = buildArgs;
-        this.serverEvaluationStrategyProvider = serverEvaluationStrategyProvider;
         this.machineLoggerFactory = machineLogger;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
@@ -327,7 +354,7 @@ public class DockerMachineStarter {
 
             docker.startContainer(StartContainerParams.create(container));
 
-            checkContainerIsRunning(container);
+            ContainerInfo runningContainer = getRunningContainer(container);
 
             readContainerLogsInSeparateThread(container,
                                               workspaceId,
@@ -336,15 +363,7 @@ public class DockerMachineStarter {
 
             dockerInstanceStopDetector.startDetection(container, machineName, abnormalMachineStopHandler);
 
-            return new DockerMachine(docker,
-                                     registry,
-                                     registryNamespace,
-                                     snapshotUseRegistry,
-                                     container,
-                                     image,
-                                     serverEvaluationStrategyProvider,
-                                     dockerInstanceStopDetector,
-                                     progressMonitor);
+            return machineCreator.create(runningContainer);
         } catch (RuntimeException | IOException | InfrastructureException e) {
             cleanUpContainer(container);
             if (e instanceof InfrastructureException) {
@@ -650,11 +669,12 @@ public class DockerMachineStarter {
 
     // Inspect container right after start to check if it is running,
     // otherwise throw error that command should not exit right after container start
-    protected void checkContainerIsRunning(String container) throws IOException, InfrastructureException {
+    protected ContainerInfo getRunningContainer(String container) throws IOException, InfrastructureException {
         ContainerInfo containerInfo = docker.inspectContainer(container);
         if ("exited".equals(containerInfo.getState().getStatus())) {
             throw new InfrastructureException(CONTAINER_EXITED_ERROR);
         }
+        return containerInfo;
     }
 
     @VisibleForTesting

@@ -113,7 +113,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                    String errorMessage = error.getMessage() != null ? error.getMessage() : constant.remoteListFailed();
                    GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
                    console.printError(errorMessage);
-                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   processesPanelPresenter.addCommandOutput(console);
                    notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE);
                    view.setEnablePushButton(false);
                });
@@ -146,7 +146,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                 String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.localBranchesListFailed();
                 GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
                 console.printError(errorMessage);
-                processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                processesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.localBranchesListFailed(), FAIL, FLOAT_MODE);
                 view.setEnablePushButton(false);
             }
@@ -196,7 +196,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                     public void onFailure(Throwable caught) {
                         GitOutputConsole console = gitOutputConsoleFactory.create(CONFIG_COMMAND_NAME);
                         console.printError(constant.failedGettingConfig());
-                        processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                        processesPanelPresenter.addCommandOutput(console);
                         notificationManager.notify(constant.failedGettingConfig(), FAIL, FLOAT_MODE);
                     }
                 });
@@ -207,7 +207,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                 String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.remoteBranchesListFailed();
                 GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
                 console.printError(errorMessage);
-                processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                processesPanelPresenter.addCommandOutput(console);
                 notificationManager.notify(constant.remoteBranchesListFailed(), FAIL, FLOAT_MODE);
                 view.setEnablePushButton(false);
             }
@@ -270,7 +270,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
         service.push(project.getLocation(), getRefs(), repository, view.isForcePushSelected())
                .then(response -> {
                    console.print(response.getCommandOutput());
-                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   processesPanelPresenter.addCommandOutput(console);
                    notification.setStatus(SUCCESS);
                    if (response.getCommandOutput().contains("Everything up-to-date")) {
                        notification.setTitle(constant.pushUpToDate());
@@ -280,7 +280,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                })
                .catchError(error -> {
                    handleError(error.getCause(), notification, console);
-                   processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   processesPanelPresenter.addCommandOutput(console);
                });
         view.close();
     }

@@ -187,7 +187,7 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     }
 
     private String getBaseUrl(String id) {
-        final String url = appContext.getDevAgentEndpoint() + "/debugger";
+        final String url = appContext.getWsAgentServerApiEndpoint() + "/debugger";
         if (id != null) {
             return url + "/" + id;
         }

@@ -15,6 +15,7 @@ import IdeSvc from '../../ide/ide.service';
 import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
 import {StackSelectorSvc} from './stack-selector/stack-selector.service';
 import {ProjectSourceSelectorService} from './project-source-selector/project-source-selector.service';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
 
 /**
  * This class is handling the service for workspace creation.
@@ -60,12 +61,16 @@ export class CreateWorkspaceSvc {
   private workspacesByNamespace: {
     [namespaceId: string]: Array<che.IWorkspace>
   };
+  /**
+   * Notification factory.
+   */
+  private cheNotification: CheNotification;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService, cheNotification: CheNotification) {
     this.$location = $location;
     this.$log = $log;
     this.$q = $q;
@@ -74,6 +79,7 @@ export class CreateWorkspaceSvc {
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.stackSelectorSvc = stackSelectorSvc;
     this.projectSourceSelectorService = projectSourceSelectorService;
+    this.cheNotification = cheNotification;
 
     this.workspacesByNamespace = {};
   }
@@ -154,7 +160,7 @@ export class CreateWorkspaceSvc {
 
     return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
 
-      this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv).then(() => {
+      return this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv).then(() => {
         this.redirectToIde(namespaceId, workspace);
         this.projectSourceSelectorService.clearAllSources();
 
@@ -173,6 +179,14 @@ export class CreateWorkspaceSvc {
         IDE.ProjectExplorer.refresh();
         IDE.CommandManager.refresh();
       });
+    }, (error: any) => {
+      let errorMessage = 'Creation workspace failed.';
+      if (error && error.data && error.data.message) {
+        errorMessage = error.data.message;
+      }
+      this.cheNotification.showError(errorMessage);
+
+      return this.$q.reject(error);
     });
   }
 

@@ -17,11 +17,9 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.MachineEntityImpl;
 import org.eclipse.che.ide.api.machine.events.MachineFailedEvent;
 import org.eclipse.che.ide.api.machine.events.MachineRunningEvent;
 import org.eclipse.che.ide.api.machine.events.MachineStartingEvent;
-import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.MachineStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
@@ -34,9 +32,6 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
-import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.CREATING;
-import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.DESTROYED;
-import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.RUNNING;
 
 /**
  * Receives notifications about changing machines' statuses.
@@ -73,36 +68,16 @@ class MachineStatusEventHandler {
 
                 switch (event.getEventType()) {
                     case STARTING:
-                        getMachineByName(machineName).ifPresent(m -> {
-                            eventBus.fireEvent(new MachineStartingEvent(m));
-
-                            // fire deprecated MachineStateEvent for backward compatibility with IDE 5.x
-                            eventBus.fireEvent(new MachineStateEvent(new MachineEntityImpl(machineName, m), CREATING));
-                        });
+                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineStartingEvent(m)));
                         break;
                     case RUNNING:
-                        getMachineByName(machineName).ifPresent(m -> {
-                            eventBus.fireEvent(new MachineRunningEvent(m));
-
-                            // fire deprecated MachineStateEvent for backward compatibility with IDE 5.x
-                            eventBus.fireEvent(new MachineStateEvent(new MachineEntityImpl(machineName, m), RUNNING));
-                        });
+                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineRunningEvent(m)));
                         break;
                     case STOPPED:
-                        getMachineByName(machineName).ifPresent(m -> {
-                            eventBus.fireEvent(new MachineStoppedEvent(m));
-
-                            // fire deprecated MachineStateEvent for backward compatibility with IDE 5.x
-                            eventBus.fireEvent(new MachineStateEvent(new MachineEntityImpl(machineName, m), DESTROYED));
-                        });
+                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineStoppedEvent(m)));
                         break;
                     case FAILED:
-                        getMachineByName(machineName).ifPresent(m -> {
-                            eventBus.fireEvent(new MachineFailedEvent(m, event.getError()));
-
-                            // fire deprecated MachineStateEvent for backward compatibility with IDE 5.x
-                            eventBus.fireEvent(new MachineStateEvent(new MachineEntityImpl(machineName, m), DESTROYED));
-                        });
+                        getMachineByName(machineName).ifPresent(m -> eventBus.fireEvent(new MachineFailedEvent(m, event.getError())));
                         break;
                 }
             });

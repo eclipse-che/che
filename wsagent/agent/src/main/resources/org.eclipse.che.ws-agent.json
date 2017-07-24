@@ -11,9 +11,7 @@
     "wsagent": {
       "port": "4401/tcp",
       "protocol": "http",
-      "properties": {
-        "path": "/api"
-      }
+      "path" : "/api"
     }
   }
 }

@@ -45,9 +45,12 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
     private final List<Warning>        warnings = new ArrayList<>();
     private       WorkspaceStatus      status;
 
-    public InternalRuntime(T context, URLRewriter urlRewriter) {
+    public InternalRuntime(T context, URLRewriter urlRewriter, boolean running) {
         this.context = context;
         this.urlRewriter = urlRewriter != null ? urlRewriter : new URLRewriter.NoOpURLRewriter();
+        if (running) {
+            status = WorkspaceStatus.RUNNING;
+        }
     }
 
     @Override
@@ -155,7 +158,7 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
     /**
      * @return the Context
      */
-    public final RuntimeContext getContext() {
+    public final T getContext() {
         return context;
     }
 

@@ -43,16 +43,17 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObserver;
@@ -76,6 +77,7 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -124,6 +126,8 @@ public class DebuggerTest extends BaseTest {
     private NotificationManager        notificationManager;
     @Mock
     private BreakpointManager          breakpointManager;
+    @Mock
+    private AppContext                 appContext;
     @Mock(answer = RETURNS_DEEP_STUBS)
     private RequestTransmitter         transmitter;
     @Mock
@@ -150,9 +154,11 @@ public class DebuggerTest extends BaseTest {
     private BreakpointDto     breakpointDto;
     @Mock
     private Optional<Project> optional;
+    @Mock
+    private WorkspaceImpl     workspace;
 
     @Captor
-    private ArgumentCaptor<WsAgentStateHandler>             extServerStateHandlerCaptor;
+    private ArgumentCaptor<WorkspaceRunningEvent.Handler>   workspaceRunningHandlerCaptor;
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>         operationPromiseErrorCaptor;
     @Captor
@@ -178,6 +184,9 @@ public class DebuggerTest extends BaseTest {
 
         debuggerDescriptor = new DebuggerDescriptor(NAME + " " + VERSION, HOST + ":" + PORT);
 
+        doReturn(STOPPED).when(workspace).getStatus();
+        doReturn(workspace).when(appContext).getWorkspace();
+
         doReturn(locationDto).when(dtoFactory).createDto(LocationDto.class);
         doReturn(breakpointDto).when(dtoFactory).createDto(BreakpointDto.class);
         doReturn(locationDto).when(breakpointDto).getLocation();
@@ -193,8 +202,8 @@ public class DebuggerTest extends BaseTest {
         doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
         doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
-        verify(eventBus).addHandler(eq(WsAgentStateEvent.TYPE), extServerStateHandlerCaptor.capture());
-        extServerStateHandlerCaptor.getValue().onWsAgentStarted(WsAgentStateEvent.createWsAgentStartedEvent());
+        verify(eventBus).addHandler(eq(WorkspaceRunningEvent.TYPE), workspaceRunningHandlerCaptor.capture());
+        workspaceRunningHandlerCaptor.getValue().onWorkspaceRunning(new WorkspaceRunningEvent());
 
         debugger.addObserver(observer);
 
@@ -618,6 +627,7 @@ public class DebuggerTest extends BaseTest {
                   debuggerManager,
                   notificationManager,
                   breakpointManager,
+                  appContext,
                   id,
                   requestHandlerManager);
         }

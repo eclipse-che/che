@@ -53,7 +53,7 @@ public class EnvironmentNormalizer {
 
     public void normalize(Environment environment, DockerEnvironment dockerEnvironment, RuntimeIdentity identity)
             throws InfrastructureException {
-        String networkId = NameGenerator.generate(identity.getWorkspaceId() + "_", 16);
+        String networkId = identity.getWorkspaceId() + "_" + identity.getEnvName();
         dockerEnvironment.setNetwork(networkId);
 
         Map<String, DockerContainerConfig> containers = dockerEnvironment.getContainers();
