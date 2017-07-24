@@ -286,7 +286,10 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             destroyMachineQuietly(name, machine);
             throw e;
         }
-        bootstrapperFactory.create(name, getContext().getIdentity(), machineCfg.getInstallers(), machine).bootstrap();
+        if (!machineCfg.getInstallers().isEmpty()) {
+            bootstrapperFactory.create(name, getContext().getIdentity(), machineCfg.getInstallers(), machine)
+                               .bootstrap();
+        }
 
         ServersReadinessChecker readinessChecker = new ServersReadinessChecker(name,
                                                                                machine.getServers(),
