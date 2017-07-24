@@ -57,7 +57,7 @@ import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
@@ -108,7 +108,7 @@ import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.TERM
 public class ProcessesPanelPresenter extends BasePresenter implements ProcessesPanelView.ActionDelegate,
                                                                       ProcessFinishedEvent.Handler,
                                                                       OutputConsole.ActionDelegate,
-                                                                      WorkspaceStartedEvent.Handler,
+                                                                      WorkspaceRunningEvent.Handler,
                                                                       WorkspaceStoppedEvent.Handler,
                                                                       MachineStartingEvent.Handler,
                                                                       MachineRunningEvent.Handler,
@@ -192,7 +192,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         view.setDelegate(this);
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStartingEvent.TYPE, this);
         eventBus.addHandler(MachineRunningEvent.TYPE, this);
@@ -920,7 +920,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     @Override
-    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+    public void onWorkspaceRunning(WorkspaceRunningEvent event) {
         List<MachineImpl> wsMachines = getMachines();
         if (wsMachines.isEmpty()) {
             return;
