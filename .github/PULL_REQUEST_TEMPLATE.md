@@ -19,3 +19,13 @@ Pull Request Policy: https://github.com/eclipse/che/wiki/Development-Workflow#pu
 #### Docs PR
 <!-- Please add a matching PR to [the docs repo](https://github.com/eclipse/che-docs) and link that PR to this issue.
 Both will be merged at the same time. -->
+
+
+#### CI Integration
+Post a comment with CI command to trigger build / test.
+
+`ci-build` - build PR.
+
+`ci-test` - runs integration tests against PR.
+
+NOTE: currently only https://github.com/codenvy org members are authorized to trigger CI commands due to security policies.
