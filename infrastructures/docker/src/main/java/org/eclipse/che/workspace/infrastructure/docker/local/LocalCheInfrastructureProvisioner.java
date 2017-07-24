@@ -12,15 +12,19 @@ package org.eclipse.che.workspace.infrastructure.docker.local;
 
 import com.google.common.base.Strings;
 
-import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.util.SystemInfo;
+import org.eclipse.che.api.installer.server.exception.InstallerException;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.inject.CheBootstrap;
-import org.eclipse.che.workspace.infrastructure.docker.DefaultInfrastructureProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.InstallerConfigApplier;
+import org.eclipse.che.workspace.infrastructure.docker.Labels;
 import org.eclipse.che.workspace.infrastructure.docker.local.providers.DockerExtConfBindingProvider;
 import org.eclipse.che.workspace.infrastructure.docker.local.providers.ExecAgentVolumeProvider;
 import org.eclipse.che.workspace.infrastructure.docker.local.providers.TerminalVolumeProvider;
@@ -31,12 +35,13 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
 
 /**
@@ -44,8 +49,10 @@ import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
  *
  * @author Alexander Garagatyi
  */
-public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProvisioner {
-    private static final List<String> SNAPSHOT_EXCLUDED_DIRECTORIES = Arrays.asList("/tmp");
+// TODO should add default RAM settings, hosts, and all other stuff from MachineStarter
+@Singleton
+public class LocalCheInfrastructureProvisioner implements InfrastructureProvisioner {
+    private static final List<String> SNAPSHOT_EXCLUDED_DIRECTORIES = Collections.singletonList("/tmp");
 
     private final WorkspaceFolderPathProvider  workspaceFolderPathProvider;
     private final WindowsPathEscaper           pathEscaper;
@@ -55,6 +62,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     private final TerminalVolumeProvider       terminalVolumeProvider;
     private final ExecAgentVolumeProvider      execVolumeProvider;
     private final String                       projectsVolumeOptions;
+    private final InstallerConfigApplier       installerConfigApplier;
 
     @Inject
     public LocalCheInfrastructureProvisioner(InstallerConfigApplier installerConfigApplier,
@@ -66,7 +74,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
                                              DockerExtConfBindingProvider dockerExtConfBindingProvider,
                                              TerminalVolumeProvider terminalVolumeProvider,
                                              ExecAgentVolumeProvider execAgentVolumeProvider) {
-        super(installerConfigApplier);
+        this.installerConfigApplier = installerConfigApplier;
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.pathEscaper = pathEscaper;
         this.projectFolderPath = projectFolderPath;
@@ -82,7 +90,7 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
     }
 
     @Override
-    public void provision(Environment envConfig,
+    public void provision(EnvironmentImpl envConfig,
                           DockerEnvironment internalEnv,
                           RuntimeIdentity identity)
             throws InfrastructureException {
@@ -90,48 +98,80 @@ public class LocalCheInfrastructureProvisioner extends DefaultInfrastructureProv
         if (devMachineName == null) {
             throw new InfrastructureException("ws-machine is not found on installers applying");
         }
+        excludeDirsFromSnapshot(internalEnv);
+        addProjects(internalEnv, identity.getWorkspaceId(), devMachineName);
+        addInstallers(envConfig, internalEnv);
+        addLabels(envConfig, internalEnv, identity);
+    }
 
-        DockerContainerConfig devMachine = internalEnv.getContainers().get(devMachineName);
+    private void addInstallers(EnvironmentImpl envConfig, DockerEnvironment internalEnv)
+            throws InfrastructureException {
 
-        for (DockerContainerConfig machine : internalEnv.getContainers().values()) {
-            ArrayList<String> volumes = new ArrayList<>(machine.getVolumes());
-            volumes.add(terminalVolumeProvider.get());
-            volumes.add(execVolumeProvider.get());
-            machine.setVolumes(volumes);
+        for (Map.Entry<String, MachineConfigImpl> machineConfigEntry : envConfig.getMachines().entrySet()) {
+            String machineName = machineConfigEntry.getKey();
+            MachineConfigImpl machineConfig = machineConfigEntry.getValue();
+            DockerContainerConfig containerConfig = internalEnv.getContainers().get(machineName);
+
+            List<String> installers = machineConfig.getInstallers();
+            if (installers.contains("org.eclipse.che.terminal")) {
+                containerConfig.getVolumes().add(terminalVolumeProvider.get());
+            }
+            if (installers.contains("org.eclipse.che.exec")) {
+                containerConfig.getVolumes().add(execVolumeProvider.get());
+            }
+            if (installers.contains("org.eclipse.che.ws-agent")) {
+                containerConfig.getVolumes().add(wsAgentVolumeProvider.get());
+                String extConfVolume = dockerExtConfBindingProvider.get();
+                if (extConfVolume != null) {
+                    containerConfig.getVolumes().add(extConfVolume);
+                }
+                containerConfig.getEnvironment().put(CheBootstrap.CHE_LOCAL_CONF_DIR,
+                                                     DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);
+            }
         }
-
-        // add bind-mount volume for projects in a workspace
-        String projectFolderVolume;
         try {
-            projectFolderVolume = String.format("%s:%s%s",
-                                                workspaceFolderPathProvider.getPath(identity.getWorkspaceId()),
-                                                projectFolderPath, projectsVolumeOptions);
-        } catch (IOException e) {
-            throw new InfrastructureException("Error occurred on resolving path to files of workspace " +
-                                              identity.getWorkspaceId());
+            installerConfigApplier.apply(envConfig, internalEnv);
+        } catch (InstallerException e) {
+            throw new InfrastructureException(e.getLocalizedMessage(), e);
         }
-        List<String> devMachineVolumes = devMachine.getVolumes();
-        devMachineVolumes.add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
-                                                     : projectFolderVolume);
-        // add volume with ws-agent archive
-        devMachineVolumes.add(wsAgentVolumeProvider.get());
-        // add volume and variable to setup ws-agent configuration
-        String dockerExtConfVolume = dockerExtConfBindingProvider.get();
-        if (dockerExtConfVolume != null) {
-            devMachineVolumes.add(dockerExtConfVolume);
-        }
-        // create volume for each directory to exclude from a snapshot
-        List<String> volumes;
-        for (DockerContainerConfig container : internalEnv.getContainers().values()) {
-            volumes = new ArrayList<>(container.getVolumes());
-            volumes.addAll(SNAPSHOT_EXCLUDED_DIRECTORIES);
-            container.setVolumes(volumes);
-        }
-        HashMap<String, String> environmentVars = new HashMap<>(devMachine.getEnvironment());
-        environmentVars.put(CheBootstrap.CHE_LOCAL_CONF_DIR, DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);
-        devMachine.setEnvironment(environmentVars);
+    }
 
-        // apply basic infra (e.g. agents)
-        super.provision(envConfig, internalEnv, identity);
+    private void addProjects(DockerEnvironment internalEnv, String workspaceId, String devMachineName)
+            throws InfrastructureException {
+
+        DockerContainerConfig containerConfig = internalEnv.getContainers().get(devMachineName);
+        containerConfig.getVolumes().add(getProjectsVolumeSpec(workspaceId));
+    }
+
+    // create volume for each directory to exclude from a snapshot
+    private void excludeDirsFromSnapshot(DockerEnvironment internalEnv) {
+        // create volume for each directory to exclude from a snapshot
+        internalEnv.getContainers()
+                   .values()
+                   .forEach(container -> container.getVolumes().addAll(SNAPSHOT_EXCLUDED_DIRECTORIES));
+    }
+
+    private void addLabels(EnvironmentImpl envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity) {
+        for (Map.Entry<String, ? extends MachineConfig> entry : envConfig.getMachines().entrySet()) {
+            String name = entry.getKey();
+            DockerContainerConfig container = internalEnv.getContainers().get(name);
+            container.getLabels().putAll(Labels.newSerializer()
+                                               .machineName(name)
+                                               .runtimeId(identity)
+                                               .servers(entry.getValue().getServers())
+                                               .labels());
+        }
+    }
+
+    // bind-mount volume for projects in a wsagent container
+    private String getProjectsVolumeSpec(String workspaceId) throws InfrastructureException {
+        String projectsHostPath;
+        try {
+            projectsHostPath = workspaceFolderPathProvider.getPath(workspaceId);
+        } catch (IOException e) {
+            throw new InfrastructureException("Error occurred on resolving path to files of workspace " + workspaceId);
+        }
+        String volumeSpec = format("%s:%s%s", projectsHostPath, projectFolderPath, projectsVolumeOptions);
+        return SystemInfo.isWindows() ? pathEscaper.escapePath(volumeSpec) : volumeSpec;
     }
 }
