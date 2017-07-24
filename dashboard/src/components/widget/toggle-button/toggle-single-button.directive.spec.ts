@@ -16,10 +16,10 @@ interface ITestScope extends ng.IRootScopeService {
 }
 
 /**
- * Test of the CheToggleButtonPopover directive.
+ * Test of the ToggleSingleButton directive.
  * @author Oleksii Kurinnyi
  */
-describe('CheToggleButtonPopover >', () => {
+describe('ToggleSingleButton >', () => {
 
   let $rootScope: ITestScope,
       $timeout: ng.ITimeoutService,
@@ -50,9 +50,8 @@ describe('CheToggleButtonPopover >', () => {
     httpBackend.when('OPTIONS', '/api/').respond({});
 
     $rootScope.model = {
-      title: 'Popover Button Title',
+      title: 'Toggle Single Button Title',
       state: false,
-      content: 'Simple popover content',
       onChange: (state: boolean) => {
         /* tslint:disable */
         const newState = state;
@@ -68,12 +67,10 @@ describe('CheToggleButtonPopover >', () => {
 
   function getCompiledElement() {
     const element = $compile(angular.element(
-      `<div><toggle-button-popover button-title="model.title"
-                                   button-state="model.state"
-                                   button-on-change="model.onChange(state)"
-                                   che-popover-placement="right-top">
-        <div>{{model.content}}</div>
-      </toggle-button-popover></div>`
+      `<div><toggle-single-button che-title="{{model.title}}"
+                                  che-state="model.state"
+                                  che-on-change="model.onChange(state)">
+      </toggle-single-button></div>`
     ))($rootScope);
     $rootScope.$digest();
     return element;
@@ -88,13 +85,6 @@ describe('CheToggleButtonPopover >', () => {
       toggleSingleButton = compiledDirective.find('button');
     });
 
-    it('should have content hidden', () => {
-      // timeout should be flashed
-      $timeout.flush();
-
-      expect(compiledDirective.html()).not.toContain($rootScope.model.content);
-    });
-
     it('should have button disabled', () => {
       // timeout should be flashed
       $timeout.flush();
@@ -105,19 +95,10 @@ describe('CheToggleButtonPopover >', () => {
 
     describe('click on button >', () => {
 
-      beforeEach(() => {
+      it('should enable button', () => {
         toggleSingleButton.click();
         $rootScope.$digest();
-      });
 
-      it('should make content visible', () => {
-        // timeout should be flashed to get callback called and content visible
-        $timeout.flush();
-
-        expect(compiledDirective.html()).toContain($rootScope.model.content);
-      });
-
-      it('should enable button', () => {
         // timeout should be flashed to get callback called and content visible
         $timeout.flush();
 
@@ -126,6 +107,9 @@ describe('CheToggleButtonPopover >', () => {
 
       it('should call the callback', () => {
         spyOn($rootScope.model, 'onChange');
+
+        toggleSingleButton.click();
+        $rootScope.$digest();
 
         // timeout should be flashed to get callback called and content visible
         $timeout.flush();
@@ -137,20 +121,9 @@ describe('CheToggleButtonPopover >', () => {
 
     describe(`change state of toggle button from outside of directive >`, () => {
 
-      beforeEach(() => {
+      it('should enable button', () => {
         $rootScope.model.state = true;
         $rootScope.$digest();
-      });
-
-      it('should make content visible', () => {
-        // timeout should be flashed to get callback called and content visible
-        $timeout.flush();
-
-        expect(compiledDirective.html()).toContain($rootScope.model.content);
-      });
-
-      it('should enable button', () => {
-        const toggleSingleButton = compiledDirective.find('button');
 
         // timeout should be flashed to get callback called and content visible
         $timeout.flush();
@@ -160,6 +133,9 @@ describe('CheToggleButtonPopover >', () => {
 
       it('should call the callback', () => {
         spyOn($rootScope.model, 'onChange');
+
+        $rootScope.model.state = true;
+        $rootScope.$digest();
 
         // timeout should be flashed to get callback called and content visible
         $timeout.flush();
@@ -183,10 +159,6 @@ describe('CheToggleButtonPopover >', () => {
       $timeout.flush();
     });
 
-    it('should have content visible', () => {
-      expect(compiledDirective.html()).toContain($rootScope.model.content);
-    });
-
     it('should have button enabled', () => {
       expect(toggleSingleButton.get(0)).toBeTruthy();
       expect(toggleSingleButton.hasClass('toggle-single-button-disabled')).toBeFalsy();
@@ -194,23 +166,9 @@ describe('CheToggleButtonPopover >', () => {
 
     describe('click on button >', () => {
 
-      beforeEach(() => {
+      it('should disable button', () => {
         toggleSingleButton.click();
         $rootScope.$digest();
-      });
-
-      it('should make content hidden', () => {
-        // timeout should be flashed to get callback called and content hidden
-        $timeout.flush();
-        $timeout.flush();
-
-        expect(compiledDirective.html()).not.toContain($rootScope.model.content);
-      });
-
-      it('should disable button', () => {
-        // timeout should be flashed to get callback called and content hidden
-        $timeout.flush();
-        $timeout.flush();
 
         expect(toggleSingleButton.hasClass('toggle-single-button-disabled')).toBeTruthy();
       });
@@ -218,9 +176,8 @@ describe('CheToggleButtonPopover >', () => {
       it('should call the callback', () => {
         spyOn($rootScope.model, 'onChange');
 
-        // timeout should be flashed to get callback called and content hidden
-        $timeout.flush();
-        $timeout.flush();
+        toggleSingleButton.click();
+        $rootScope.$digest();
 
         expect($rootScope.model.onChange).toHaveBeenCalledWith(false);
       });
@@ -229,23 +186,9 @@ describe('CheToggleButtonPopover >', () => {
 
     describe(`change state of toggle button from outside of directive >`, () => {
 
-      beforeEach(() => {
+      it('should disable button', () => {
         $rootScope.model.state = false;
         $rootScope.$digest();
-      });
-
-      it('should make content hidden', () => {
-        // timeout should be flashed to get callback called and content hidden
-        $timeout.flush();
-        $timeout.flush();
-
-        expect(compiledDirective.html()).not.toContain($rootScope.model.content);
-      });
-
-      it('should disable button', () => {
-        // timeout should be flashed to get callback called and content hidden
-        $timeout.flush();
-        $timeout.flush();
 
         expect(toggleSingleButton.hasClass('toggle-single-button-disabled')).toBeTruthy();
       });
@@ -253,9 +196,8 @@ describe('CheToggleButtonPopover >', () => {
       it('should call the callback', () => {
         spyOn($rootScope.model, 'onChange');
 
-        // timeout should be flashed to get callback called and content hidden
-        $timeout.flush();
-        $timeout.flush();
+        $rootScope.model.state = false;
+        $rootScope.$digest();
 
         expect($rootScope.model.onChange).toHaveBeenCalledWith(false);
       });
