@@ -13,9 +13,9 @@ package org.eclipse.che.wsagent.server;
 import com.google.inject.AbstractModule;
 
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.commons.auth.token.HeaderRequestTokenExtractor;
+import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.machine.authentication.agent.token.HeaderRequestTokenExtractor;
-import org.eclipse.che.machine.authentication.agent.token.RequestTokenExtractor;
 
 /**
  *

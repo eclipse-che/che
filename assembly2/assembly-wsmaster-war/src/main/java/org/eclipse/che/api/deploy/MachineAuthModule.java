@@ -14,6 +14,8 @@ import com.google.inject.AbstractModule;
 
 import org.eclipse.che.api.environment.server.MachineLinksInjector;
 import org.eclipse.che.api.workspace.server.WorkspaceServiceLinksInjector;
+import org.eclipse.che.commons.auth.token.HeaderRequestTokenExtractor;
+import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.machine.authentication.server.MachineAuthLinksInjector;
 import org.eclipse.che.machine.authentication.server.interceptor.InterceptorModule;
@@ -31,6 +33,7 @@ public class MachineAuthModule extends AbstractModule {
                 .to(org.eclipse.che.machine.authentication.server.AuthWsAgentHealthChecker.class);
         bind(org.eclipse.che.machine.authentication.server.MachineTokenService.class);
         bind(org.eclipse.che.machine.authentication.server.MachineTokenRegistry.class);
+        bind(RequestTokenExtractor.class).to(HeaderRequestTokenExtractor.class);
         bind(WorkspaceServiceLinksInjector.class).to(org.eclipse.che.machine.authentication.server.WorkspaceServiceAuthLinksInjector.class);
     }
 }
