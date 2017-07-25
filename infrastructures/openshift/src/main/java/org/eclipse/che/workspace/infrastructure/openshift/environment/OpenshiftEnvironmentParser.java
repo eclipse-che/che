@@ -28,6 +28,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenshiftClientFactory
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Sergii Leshchenko
@@ -73,23 +75,29 @@ public class OpenshiftEnvironmentParser {
             list = client.lists().load(new ByteArrayInputStream(content.getBytes())).get();
         }
 
-        OpenshiftEnvironment openshiftEnvironment = new OpenshiftEnvironment();
+        Map<String, Pod> pods = new HashMap<>();
+        Map<String, Service> services = new HashMap<>();
+        Map<String, Route> routes = new HashMap<>();
         for (HasMetadata object : list.getItems()) {
             if (object instanceof DeploymentConfig) {
-//                environment.addDeploymentConfig((DeploymentConfig)object);
                 throw new ValidationException("Supporting of deployment configs is not implemented yet.");
             } else if (object instanceof Pod) {
-                openshiftEnvironment.addPod((Pod)object);
+                Pod pod = (Pod)object;
+                pods.put(pod.getMetadata().getName(), pod);
             } else if (object instanceof Service) {
-                openshiftEnvironment.addService((Service)object);
+                Service service = (Service)object;
+                services.put(service.getMetadata().getName(), service);
             } else if (object instanceof Route) {
-                openshiftEnvironment.addRoute((Route)object);
+                Route route = (Route)object;
+                routes.put(route.getMetadata().getName(), route);
             } else {
                 throw new ValidationException(String.format("Found unknown object type '%s'", object.getMetadata()));
             }
         }
 
-        return openshiftEnvironment;
+        return new OpenshiftEnvironment().withPods(pods)
+                                         .withServices(services)
+                                         .withRoutes(routes);
     }
 
     private String getContentOfRecipe(Recipe environmentRecipe) throws InfrastructureException {
