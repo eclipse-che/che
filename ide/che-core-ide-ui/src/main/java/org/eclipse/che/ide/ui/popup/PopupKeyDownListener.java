@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.popup;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.util.dom.Elements;
+
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -81,6 +83,7 @@ public class PopupKeyDownListener implements EventListener {
         if (current.getParentElement().isEqualNode(listElement)) {
             final Element next = current.getNextElementSibling();
             if (next != null) {
+                select(next);
                 next.focus();
             } else {
                 focusFirst();
@@ -100,6 +103,7 @@ public class PopupKeyDownListener implements EventListener {
         if (current.getParentElement().isEqualNode(listElement)) {
             final Element prev = current.getPreviousElementSibling();
             if (prev != null) {
+                select(prev);
                 prev.focus();
             } else {
                 focusLast();
@@ -114,8 +118,10 @@ public class PopupKeyDownListener implements EventListener {
      * Focus the first item in the list (if any).
      */
     private void focusFirst() {
-        if (this.listElement.hasChildNodes()) {
-            this.listElement.getFirstElementChild().focus();
+        if (listElement.hasChildNodes()) {
+            Element firstElement = listElement.getFirstElementChild();
+            select(firstElement);
+            firstElement.focus();
         }
     }
 
@@ -123,8 +129,10 @@ public class PopupKeyDownListener implements EventListener {
      * Focus the last item in the list (if any).
      */
     private void focusLast() {
-        if (this.listElement.hasChildNodes()) {
-            this.listElement.getLastElementChild().focus();
+        if (listElement.hasChildNodes()) {
+            Element lastElement = listElement.getLastElementChild();
+            select(lastElement);
+            lastElement.focus();
         }
     }
 
@@ -136,5 +144,35 @@ public class PopupKeyDownListener implements EventListener {
         if (current.getParentElement().isEqualNode(listElement)) {
             this.popupWidget.validateItem(current);
         }
+    }
+
+    private void select(Element elementToSelect) {
+        if (elementToSelect == null) {
+            return;
+        }
+
+        Element currentSelectedElement = getSelectedElement();
+        if (currentSelectedElement == null) {
+            elementToSelect.setAttribute("selected", "true");
+            return;
+        }
+
+        if (currentSelectedElement.isEqualNode(elementToSelect)) {
+            return;
+        }
+
+        currentSelectedElement.removeAttribute("selected");
+        elementToSelect.setAttribute("selected", "true");
+    }
+
+    /**
+     * Returns current selected element when we have an item in focus or {@code null} otherwise
+     *
+     * @return current selected element or {@code null} when we have no any items in focus
+     */
+    @Nullable
+    private Element getSelectedElement() {
+        Element selectedElement = Elements.getDocument().getActiveElement();
+        return selectedElement.getParentElement().isEqualNode(listElement) ? selectedElement : null;
     }
 }
