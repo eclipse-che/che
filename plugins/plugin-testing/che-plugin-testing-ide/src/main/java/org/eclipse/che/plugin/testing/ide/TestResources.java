@@ -61,4 +61,7 @@ public interface TestResources extends ClientBundle {
     
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_result_trace_frame.svg")
     SVGResource testResultTraceFrameIcon();
+
+    @Source("org/eclipse/che/plugin/testing/ide/svg/test_in_progress.svg")
+    SVGResource testInProgressIcon();
 }

@@ -169,17 +169,20 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
     @Override
     public void onSuiteFinished(TestState testState) {
-
     }
 
     @Override
     public void onSuiteTreeNodeAdded(TestState testState) {
-
+        addSuiteOrTest(testState);
     }
 
     @Override
     public void onSuiteTreeStarted(TestState testState) {
+        addSuiteOrTest(testState);
+    }
 
+    @Override
+    public void onSuiteTreeNodeFinished(TestState suite) {
     }
 
     @Override

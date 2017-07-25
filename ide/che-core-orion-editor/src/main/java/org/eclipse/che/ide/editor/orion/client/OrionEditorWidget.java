@@ -13,7 +13,6 @@ package org.eclipse.che.ide.editor.orion.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -90,7 +89,6 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionInputChangedEventOverlay
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyBindingsRelationOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyModeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyStrokeOverlay;
-import org.eclipse.che.ide.editor.orion.client.jso.OrionProblemOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionRulerClickEventOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
@@ -732,7 +730,9 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     }
 
     public void clearErrors() {
-        editorOverlay.showProblems(JavaScriptObject.createArray().<JsArray<OrionProblemOverlay>>cast());
+        OrionAnnotationModelOverlay annotationModelOverlay = editorOverlay.getAnnotationModel();
+        problems.forEach(annotationModelOverlay::removeAnnotation);
+        problems.clear();
     }
 
     public OrionTextViewOverlay getTextView() {

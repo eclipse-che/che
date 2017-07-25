@@ -32,7 +32,7 @@ public class TestFailedInfo extends AbstractTestStateInfo {
     public static String createErrMessage(String message, String stackTrace) {
         StringBuilder builder = new StringBuilder();
 
-        if (!StringUtils.isNullOrWhitespace(message)) {
+        if (!StringUtils.isNullOrWhitespace(message) && !"null".equals(message)) {
             builder.append(message).append('\n');
         }
 

@@ -15,6 +15,7 @@ import {EnvironmentManager} from '../../../../components/api/environment/environ
 import {StackSelectorScope} from './stack-selector-scope.enum';
 import {StackSelectorSvc} from './stack-selector.service';
 import {CheBranding} from '../../../../components/branding/che-branding.factory';
+import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * @ngdoc controller
@@ -28,6 +29,14 @@ export class StackSelectorController {
    */
   $filter: ng.IFilterService;
   /**
+   * Location service.
+   */
+  $location: ng.ILocationService;
+  /**
+   * Dialog service.
+   */
+  $mdDialog: ng.material.IDialogService;
+  /**
    * Lodash library.
    */
   lodash: _.LoDashStatic;
@@ -39,6 +48,10 @@ export class StackSelectorController {
    * Environments manager.
    */
   cheEnvironmentRegistry: CheEnvironmentRegistry;
+  /**
+   * Confirm dialog service.
+   */
+  confirmDialogService: ConfirmDialogService;
   /**
    * Stack selector service.
    */
@@ -124,13 +137,17 @@ export class StackSelectorController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($filter: ng.IFilterService, lodash: _.LoDashStatic, cheStack: CheStack, cheBranding: CheBranding,
+  constructor($filter: ng.IFilterService, $mdDialog: ng.material.IDialogService, lodash: _.LoDashStatic, cheStack: CheStack,
+              confirmDialogService: ConfirmDialogService, $location: ng.ILocationService, cheBranding: CheBranding,
               cheEnvironmentRegistry: CheEnvironmentRegistry, stackSelectorSvc: StackSelectorSvc) {
     this.$filter = $filter;
+    this.$location = $location;
+    this.$mdDialog = $mdDialog;
     this.lodash = lodash;
     this.cheStack = cheStack;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.stackSelectorSvc = stackSelectorSvc;
+    this.confirmDialogService = confirmDialogService;
 
     this.priorityStacks = cheBranding.getWorkspace().priorityStacks;
     this.defaultStack = cheBranding.getWorkspace().defaultStack;
@@ -283,6 +300,26 @@ export class StackSelectorController {
       let stackId = (this.defaultStack && ids.indexOf(this.defaultStack) >= 0) ? this.defaultStack : this.stacksFiltered[0].id;
       this.selectStack(stackId);
     }
+  }
+
+  /**
+   * Handles the adding stack options.
+   */
+  onAddStack(): void {
+    this.confirmDialogService.showConfirmDialog('Create stack', 'Would you like to create a stack from a recipe?', 'Yes', 'No').then(() => {
+      this.$mdDialog.show({
+        controller: 'ImportStackController',
+        controllerAs: 'importStackController',
+        bindToController: true,
+        clickOutsideToClose: true,
+        locals: {
+          callbackController: this
+        },
+        templateUrl: 'app/stacks/list-stacks/import-stack/import-stack.html'
+      });
+    }, () => {
+      this.$location.path('/stack/create');
+    });
   }
 
   /**

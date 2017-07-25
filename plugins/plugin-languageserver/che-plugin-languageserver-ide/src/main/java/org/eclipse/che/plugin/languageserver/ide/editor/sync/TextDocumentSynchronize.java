@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 
 /**
  * Handle TextDocument synchronization
@@ -18,5 +19,5 @@ import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
  * @author Evgen Vidolob
  */
 public interface TextDocumentSynchronize {
-    void syncTextDocument(DocumentChangeEvent event, int version);
+    void syncTextDocument(Document document, TextPosition start, TextPosition end, String insertedText, int version);
 }

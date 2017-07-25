@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.text.BadLocationException;
 import org.eclipse.che.ide.api.editor.text.BadPositionCategoryException;
 import org.eclipse.che.ide.api.editor.text.Position;
@@ -87,7 +87,7 @@ public class DefaultPartitioner implements DocumentPartitioner {
     }
 
     @Override
-    public void onDocumentChange(final DocumentChangeEvent event) {
+    public void onDocumentChanged(final DocumentChangedEvent event) {
         this.scanner.setScannedString(event.getDocument().getDocument().getContents());
         updatePositions();
     }

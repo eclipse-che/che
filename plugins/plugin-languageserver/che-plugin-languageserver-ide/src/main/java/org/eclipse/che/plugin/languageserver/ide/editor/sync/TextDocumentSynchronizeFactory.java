@@ -12,8 +12,8 @@ package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 
 /**
@@ -56,8 +56,8 @@ public class TextDocumentSynchronizeFactory {
 
     private static class NoneSynchronize implements TextDocumentSynchronize {
         @Override
-        public void syncTextDocument(DocumentChangeEvent event, int version) {
-            //no implementation
+        public void syncTextDocument(Document document, TextPosition start, TextPosition end, String insertedText, int version) {
+            // no-op implementation
         }
     }
 }

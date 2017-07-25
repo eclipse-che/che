@@ -14,9 +14,13 @@ import {ImportStackService} from '../../stack-details/import-stack.service';
 import {CheStack} from '../../../../components/api/che-stack.factory';
 import {StackValidationService} from '../../stack-details/stack-validation.service';
 import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
+import {CheBranding} from '../../../../components/branding/che-branding.factory';
+import {ComposeParser} from '../../../../components/api/environment/compose-parser';
+import {DockerfileParser} from '../../../../components/api/environment/docker-file-parser';
 
 const DEFAULT_WORKSPACE_RAM: number = 2 * Math.pow(1024, 3);
-
+const DOCKERFILE = 'dockerfile';
+const COMPOSE = 'compose';
 /**
  * @ngdoc controller
  * @name stacks.list-stacks.import-stack.controller:ImportStackController
@@ -24,29 +28,40 @@ const DEFAULT_WORKSPACE_RAM: number = 2 * Math.pow(1024, 3);
  * @author Oleksii Orel
  */
 export class ImportStackController {
+  private $timeout: ng.ITimeoutService;
   private $mdDialog: ng.material.IDialogService;
   private $location: ng.ILocationService;
   private cheStack: CheStack;
   private importStackService: ImportStackService;
   private stackValidationService: StackValidationService;
   private cheEnvironmentRegistry: CheEnvironmentRegistry;
+  private recipeValidation: che.IValidation;
+
+  private composeParser: ComposeParser;
+  private dockerfileParser: DockerfileParser;
+  private recipeValidationError: string;
+
+  private editingTimeoutPromise: ng.IPromise<any>;
   private recipeScript: string;
   private recipeFormat: string;
-  private COMPOSE: string = 'compose';
-  private DOCKERFILE: string = 'dockerfile';
-  private recipeValidation: che.IValidation;
-  private editorOptions: che.IEditorOptions = {
-    lineNumbers: true,
-    lineWrapping: true,
-    matchBrackets: true,
-    mode: 'text/x-dockerfile'
+  private stackDocsUrl: string;
+
+  private editorOptions: {
+    lineWrapping: boolean,
+    lineNumbers: boolean,
+    matchBrackets: boolean,
+    mode: string,
+    onLoad: Function
   };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog: ng.material.IDialogService, $location: ng.ILocationService, stackValidationService: StackValidationService, cheStack: CheStack, importStackService: ImportStackService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+  constructor($mdDialog: ng.material.IDialogService, $location: ng.ILocationService, stackValidationService: StackValidationService,
+              cheStack: CheStack, importStackService: ImportStackService, cheEnvironmentRegistry: CheEnvironmentRegistry,
+              $timeout: ng.ITimeoutService, cheBranding: CheBranding) {
+    this.$timeout = $timeout;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
     this.cheStack = cheStack;
@@ -54,10 +69,22 @@ export class ImportStackController {
     this.stackValidationService = stackValidationService;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
-    // set default values
-    this.recipeValidation = {isValid: false, errors: []};
-    this.recipeFormat = this.DOCKERFILE;
-    this.updateType();
+    this.composeParser = new ComposeParser();
+    this.dockerfileParser = new DockerfileParser();
+    this.stackDocsUrl = cheBranding.getDocs().stack;
+
+    this.editorOptions = {
+      lineWrapping: true,
+      lineNumbers: true,
+      matchBrackets: true,
+      mode: undefined,
+      onLoad: (editor: any) => {
+        this.setEditor(editor);
+        editor.focus();
+      }
+    };
+
+    this.onRecipeChange();
   }
 
   /**
@@ -72,21 +99,80 @@ export class ImportStackController {
    * It will hide the dialog box and redirect to '/stack/import'.
    */
   onImport(): void {
+    this.updateImportedStack();
     this.$mdDialog.hide();
     this.$location.path('/stack/import');
   }
 
-  /**
-   * Update editor options for needed recipe type.
-   */
-  updateType(): void {
-    if (this.DOCKERFILE === this.recipeFormat) {
-      this.editorOptions.mode = 'text/x-dockerfile';
-    } else if (this.COMPOSE === this.recipeFormat) {
+  setEditor(editor: any): void {
+    editor.on('paste', () => {
+      let content = editor.getValue();
+      this.detectFormat(content);
+    });
+    editor.on('change', () => {
+      let content = editor.getValue();
+      this.trackChangesInProgress(content);
+    });
+  }
+
+  trackChangesInProgress(content: string): void {
+    if (this.editingTimeoutPromise) {
+      this.$timeout.cancel(this.editingTimeoutPromise);
+    }
+
+    this.editingTimeoutPromise = this.$timeout(() => {
+      this.detectFormat(content);
+      this.validateRecipe(content);
+    }, 100);
+  }
+
+  detectFormat(content: string): void {
+    if (!content || content.trim().length === 0) {
+      return;
+    }
+    // compose format detection:
+    if (content.match(/^services:\n/m)) {
+      this.recipeFormat = COMPOSE;
       this.editorOptions.mode = 'text/x-yaml';
     }
-    this.recipeScript = '';
-    this.updateImportedStack();
+
+    // docker file format detection
+    if (content.match(/^FROM\s+\w+/m)) {
+      this.recipeFormat = DOCKERFILE;
+      this.editorOptions.mode = 'text/x-dockerfile';
+    }
+  }
+
+  validateRecipe(content: string): void {
+    this.recipeValidationError = '';
+
+    if (!content) {
+      return;
+    }
+
+    try {
+      if (this.recipeFormat === DOCKERFILE) {
+        this.dockerfileParser.parse(content);
+      } else if (this.recipeFormat === COMPOSE) {
+        this.composeParser.parse(content);
+      }
+    } catch (e) {
+      this.recipeValidationError = e.message;
+    }
+  }
+
+  /**
+   * Returns validation state of the recipe.
+   * @returns {boolean}
+   */
+  isRecipeValid(): boolean {
+    return angular.isUndefined(this.recipeValidationError) || this.recipeValidationError.length === 0;
+  }
+
+  onRecipeChange(): void {
+    this.$timeout(() => {
+      this.detectFormat(this.recipeScript);
+    }, 10);
   }
 
   /**
@@ -98,12 +184,12 @@ export class ImportStackController {
     let defaultEnv = angular.copy(environments[stack.workspaceConfig.defaultEnv]);
     defaultEnv.recipe = {
       content: this.recipeScript,
-      contentType: this.COMPOSE === this.recipeFormat ? 'application/x-yaml' : 'text/x-dockerfile',
+      contentType: COMPOSE === this.recipeFormat ? 'application/x-yaml' : 'text/x-dockerfile',
       type: this.recipeFormat
     };
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(defaultEnv.recipe.type);
     // add ws-agent to default dev-machine for dockerfile recipe format
-    defaultEnv.machines = this.DOCKERFILE === this.recipeFormat ? {
+    defaultEnv.machines = DOCKERFILE === this.recipeFormat ? {
       'dev-machine': {
         'agents': [],
         'attributes': {
