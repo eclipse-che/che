@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitUtil;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
@@ -93,7 +94,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             return;
         }
 
-        final Container rootProject = file.getRootProject();
+        final Container rootProject = GitUtil.getRootProject(file);
 
         if (rootProject == null) {
             return;
