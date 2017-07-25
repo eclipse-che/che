@@ -35,14 +35,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-machine-authentication-ide</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-keycloak-ide</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-ide-war</artifactId>
             <type>pom</type>
@@ -52,6 +44,14 @@
                     <groupId>org.eclipse.che.plugin</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-machine-authentication-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-keycloak-ide</artifactId>
         </dependency>
     </dependencies>
     <build>
