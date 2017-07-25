@@ -42,6 +42,7 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
@@ -257,7 +258,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     @Override
-    protected void initializeEditor(final EditorAgent.OpenEditorCallback callback) {
+    protected void initializeEditor(final OpenEditorCallback callback) {
         QuickAssistProcessor processor = configuration.getQuickAssistProcessor();
         if (quickAssistantFactory != null && processor != null) {
             quickAssistant = quickAssistantFactory.createQuickAssistant(this);
@@ -285,7 +286,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         }).then(new Operation<String>() {
             @Override
             public void apply(String content) throws OperationException {
-                createEditor(content);
+                createEditor(content, callback);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -297,9 +298,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     }
 
-    private void createEditor(final String content) {
+    private void createEditor(final String content, OpenEditorCallback openEditorCallback) {
         this.fileTypes = detectFileType(getEditorInput().getFile());
-        editorWidgetFactory.createEditorWidget(fileTypes, new EditorWidgetInitializedCallback(content));
+        editorWidgetFactory.createEditorWidget(fileTypes, new EditorWidgetInitializedCallback(content, openEditorCallback));
     }
 
     private void setupEventHandlers() {
@@ -999,12 +1000,13 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     private class EditorWidgetInitializedCallback implements EditorWidget.WidgetInitializedCallback {
-        private final String content;
+        private final String             content;
+        private       boolean            isInitialized;
+        private       OpenEditorCallback openEditorCallback;
 
-        private boolean isInitialized;
-
-        private EditorWidgetInitializedCallback(String content) {
+        private EditorWidgetInitializedCallback(String content, OpenEditorCallback openEditorCallback) {
             this.content = content;
+            this.openEditorCallback = openEditorCallback;
         }
 
         @Override
@@ -1057,6 +1059,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                     setupFileContentUpdateHandler();
 
                     isInitialized = true;
+                    openEditorCallback.onEditorOpened(OrionEditorPresenter.this);
                 }
             });
 
