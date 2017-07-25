@@ -71,7 +71,7 @@ public class WorkspaceMasterJsonRpcInitializer {
         String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
         String host = getHost();
         String context = getWebsocketContext();
-        String workspaceMasterUrl = protocol + host + context.replace("websocket", "");
+        String workspaceMasterUrl = protocol + host + context;
 
         initializer.initialize("ws-master", singletonMap("url", workspaceMasterUrl), singleton(this::processWsId));
     }
