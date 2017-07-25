@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.auth;
+package org.eclipse.che.commons.auth;
 
 import org.eclipse.che.dto.server.DtoFactory;
 

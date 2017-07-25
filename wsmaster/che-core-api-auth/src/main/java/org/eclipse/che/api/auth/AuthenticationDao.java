@@ -11,6 +11,7 @@
 package org.eclipse.che.api.auth;
 
 import org.eclipse.che.api.auth.shared.dto.Credentials;
+import org.eclipse.che.commons.auth.AuthenticationException;
 
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;

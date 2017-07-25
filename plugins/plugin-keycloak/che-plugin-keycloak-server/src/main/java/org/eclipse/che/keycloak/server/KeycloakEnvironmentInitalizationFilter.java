@@ -23,7 +23,6 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.eclipse.che.machine.authentication.server.MachineTokenRegistry;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.OidcKeycloakAccount;
 import org.keycloak.adapters.spi.KeycloakAccount;
@@ -54,10 +53,7 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
     private UserManager userManager;
 
     @Inject
-    private AccountManager accountManager;
-
-    @Inject
-    private MachineTokenRegistry machineTokenRegistry;
+    private AccountManager        accountManager;
 
     @Inject
     private RequestTokenExtractor tokenExtractor;
@@ -72,8 +68,10 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
 
         final HttpServletRequest httpRequest = (HttpServletRequest)request;
         if (httpRequest.getRequestURI().endsWith("/ws") || httpRequest.getRequestURI().endsWith("/eventbus")
-            || request.getScheme().equals("ws") || httpRequest.getScheme().equals("wss") || httpRequest.getRequestURI().contains("/websocket/")) {
+            || request.getScheme().equals("ws") || httpRequest.getScheme().equals("wss") || httpRequest.getRequestURI().contains("/websocket/") ||
+            (tokenExtractor.getToken(httpRequest) != null && tokenExtractor.getToken(httpRequest).startsWith("machine"))) {
             filterChain.doFilter(request, response);
+            return;
         }
 
         KeycloakSecurityContext  context = (KeycloakSecurityContext)httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
@@ -84,22 +82,13 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
                 context = keycloakAccount.getKeycloakSecurityContext();
             }
         }
-        String tokenString;
-        User user;
         if (context == null) {
-            try {
-                tokenString =  tokenExtractor.getToken(httpRequest);
-                String userId = machineTokenRegistry.getUserId(tokenString);
-                user = userManager.getById(userId);
-            } catch (NotFoundException | ServerException e) {
-                throw new ServletException("Cannot detect or instantiate user");
-            }
-        } else {
-            final IDToken token = context.getIdToken() != null ? context.getIdToken() : context.getToken();
-            tokenString = context.getTokenString();
-            user = getOrCreateUser(token.getSubject(), token.getEmail(), token.getPreferredUsername());
-            getOrCreateAccount(token.getPreferredUsername(), token.getPreferredUsername());
+            throw new ServletException("Cannot detect or instantiate user");
         }
+        final IDToken token = context.getIdToken() != null ? context.getIdToken() : context.getToken();
+        String tokenString = context.getTokenString();
+        User user = getOrCreateUser(token.getSubject(), token.getEmail(), token.getPreferredUsername());
+        getOrCreateAccount(token.getPreferredUsername(), token.getPreferredUsername());
 
         final Subject subject =
                 new SubjectImpl(user.getName(), user.getId(), tokenString, false);
