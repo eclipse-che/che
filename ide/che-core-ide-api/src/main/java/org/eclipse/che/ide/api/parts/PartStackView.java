@@ -23,10 +23,6 @@ import java.util.List;
 /** PartStack View interface */
 public interface PartStackView extends View<PartStackView.ActionDelegate> {
 
-    enum TabPosition {
-        BELOW, LEFT, RIGHT
-    }
-
     /** Tab which can be clicked and closed */
     interface TabItem extends ClickHandler, DoubleClickHandler {
 
@@ -59,15 +55,6 @@ public interface PartStackView extends View<PartStackView.ActionDelegate> {
          * Removes selection for the button.
          */
         void unSelect();
-
-        /**
-         * Determines position of the tab.
-         *
-         * @param tabPosition
-         *         orientation of the Tab (e.g. LEFT or RIGHT)
-         */
-        void setTabPosition(@NotNull TabPosition tabPosition);
-
     }
 
     /** Add Tab */
@@ -91,8 +78,19 @@ public interface PartStackView extends View<PartStackView.ActionDelegate> {
 
     /** Handles Focus Request Event. It is generated, when user clicks a stack anywhere */
     interface ActionDelegate {
+
         /** PartStack is being clicked and requests Focus */
         void onRequestFocus();
+
+        /** Toggle maximize Part Stack */
+        void onToggleMaximize();
+
+        /** Hide Part Stack  */
+        void onHide();
+
+        /** Display Part Stack menu */
+        void onPartStackMenu(int mouseX, int mouseY);
+
     }
 
 }

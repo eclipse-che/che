@@ -13,31 +13,50 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import com.google.web.bindery.event.shared.EventBus;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.action.ProjectAction;
+import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
+ * Action to collapse all opened nodes in Project Explorer.
+ *
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class CollapseAllAction extends ProjectAction {
+public class CollapseAllAction extends Action implements ActivePartChangedHandler {
 
     private ProjectExplorerPresenter projectExplorer;
 
+    private PartPresenter activePart;
+
     @Inject
-    public CollapseAllAction(ProjectExplorerPresenter projectExplorer) {
-        super("Collapse All");
+    public CollapseAllAction(ProjectExplorerPresenter projectExplorer,
+                             EventBus eventBus,
+                             CoreLocalizationConstant localizationConstant) {
+        super(localizationConstant.collapseAllActionTitle(), localizationConstant.collapseAllActionDescription());
         this.projectExplorer = projectExplorer;
+
+        eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     }
 
     @Override
-    protected void updateProjectAction(ActionEvent e) {
-        //stub
+    public void update(ActionEvent e) {
+        e.getPresentation().setEnabledAndVisible(activePart instanceof ProjectExplorerPresenter);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         projectExplorer.collapseAll();
     }
+
+    @Override
+    public void onActivePartChanged(ActivePartChangedEvent event) {
+        activePart = event.getActivePart();
+    }
+
 }

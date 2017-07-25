@@ -293,6 +293,21 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String toolbarControllerBackground() {
+        return "#cacacc";
+    }
+
+    @Override
+    public String toolbarControllerLeftColor() {
+        return "#8E8E8E";
+    }
+
+    @Override
+    public String toolbarControllerTopColor() {
+        return "#8E8E8E";
+    }
+
+    @Override
     public String getButtonBackground() {
         return "#5A5A5A";
     }

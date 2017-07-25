@@ -202,7 +202,7 @@ public class PartStackPresenterTest {
         presenter.addPart(partPresenter);
         presenter.setActivePart(partPresenter);
 
-        presenter.minimize();
+        presenter.hide();
 
         verify(workBenchPartController).getSize();
         verify(workBenchPartController).setSize(0);
