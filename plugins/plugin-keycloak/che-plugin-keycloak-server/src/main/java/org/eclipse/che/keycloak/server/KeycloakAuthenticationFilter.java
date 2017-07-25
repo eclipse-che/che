@@ -10,34 +10,30 @@
  *******************************************************************************/
 package org.eclipse.che.keycloak.server;
 
+import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
+
+import javax.inject.Inject;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
 
 public class KeycloakAuthenticationFilter extends org.keycloak.adapters.servlet.KeycloakOIDCFilter {
+
+    @Inject
+    private RequestTokenExtractor tokenExtractor;
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
         if (request.getRequestURI().endsWith("/ws") || request.getRequestURI().endsWith("/eventbus")
             || request.getScheme().equals("ws") || req.getScheme().equals("wss") || request.getRequestURI().contains("/websocket/") ||
-            (getToken(request) != null && getToken(request).startsWith("machine"))) {
+            (tokenExtractor.getToken(request) != null && tokenExtractor.getToken(request).startsWith("machine"))) {
             chain.doFilter(req, res);
         } else {
             super.doFilter(req, res, chain);
         }
-    }
-
-
-    private String getToken(HttpServletRequest req) {
-        if (req.getHeader(HttpHeaders.AUTHORIZATION) == null) {
-            return null;
-        }
-        return req.getHeader(HttpHeaders.AUTHORIZATION).startsWith("bearer") ? req.getHeader(HttpHeaders.AUTHORIZATION).split(" ")[1]
-                                                                             : req.getHeader(HttpHeaders.AUTHORIZATION);
     }
 }

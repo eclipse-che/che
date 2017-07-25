@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -38,7 +39,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
 import java.security.Principal;
 
@@ -58,6 +58,9 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
 
     @Inject
     private MachineTokenRegistry machineTokenRegistry;
+
+    @Inject
+    private RequestTokenExtractor tokenExtractor;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -85,7 +88,7 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
         User user;
         if (context == null) {
             try {
-                tokenString =  getToken(httpRequest);
+                tokenString =  tokenExtractor.getToken(httpRequest);
                 String userId = machineTokenRegistry.getUserId(tokenString);
                 user = userManager.getById(userId);
             } catch (NotFoundException | ServerException e) {
@@ -163,13 +166,5 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
 
     @Override
     public void destroy() {
-    }
-
-    private String getToken(HttpServletRequest req) {
-        if (req.getHeader(HttpHeaders.AUTHORIZATION) == null) {
-            return null;
-        }
-        return req.getHeader(HttpHeaders.AUTHORIZATION).startsWith("bearer") ? req.getHeader(HttpHeaders.AUTHORIZATION).split(" ")[1]
-                                                                             : req.getHeader(HttpHeaders.AUTHORIZATION);
     }
 }

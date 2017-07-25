@@ -8,11 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.machine.authentication.agent.token;
+package org.eclipse.che.commons.auth.token;
 
 import javax.servlet.http.HttpServletRequest;
 
-/** Allow extract sso token from request. */
+/** Allows to extract sso token from request. */
 public interface RequestTokenExtractor {
     /**
      * Extract token from request.

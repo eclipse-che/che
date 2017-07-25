@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.machine.authentication.agent.token;
+package org.eclipse.che.commons.auth.token;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
@@ -16,6 +16,7 @@ import javax.ws.rs.core.HttpHeaders;
 /** Extract sso token from request headers. */
 public class HeaderRequestTokenExtractor implements RequestTokenExtractor {
     @Override
+
     public String getToken(HttpServletRequest req) {
         if (req.getHeader(HttpHeaders.AUTHORIZATION) == null) {
             return null;

@@ -24,6 +24,7 @@
     <name>Che Core :: Commons :: Parent</name>
     <modules>
         <module>che-core-commons-annotations</module>
+        <module>che-core-commons-auth</module>
         <module>che-core-commons-lang</module>
         <module>che-core-commons-inject</module>
         <module>che-core-commons-json</module>
