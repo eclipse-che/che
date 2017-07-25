@@ -14,7 +14,6 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,6 @@ import org.mockito.Mock;
 import java.util.Collection;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 
 /** @author Artem Zatsarynnyi */
 @RunWith(GwtMockitoTestRunner.class)
@@ -35,8 +33,6 @@ public class MavenCommandTypeTest {
     @Mock
     private MavenCommandPagePresenter mavenCommandPagePresenter;
     @Mock
-    private CurrentProjectPathMacro   currentProjectPathMacro;
-    @Mock
     private IconRegistry              iconRegistry;
 
     @InjectMocks
@@ -44,15 +40,8 @@ public class MavenCommandTypeTest {
 
     @Test
     public void shouldReturnPages() throws Exception {
-        final Collection<CommandPage> pages = mavenCommandType.getPages();
+        Collection<CommandPage> pages = mavenCommandType.getPages();
 
         assertTrue(pages.contains(mavenCommandPagePresenter));
-    }
-
-    @Test
-    public void testGettingCommandTemplate() throws Exception {
-        mavenCommandType.getCommandLineTemplate();
-
-        verify(currentProjectPathMacro).getName();
     }
 }

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.macro;
 
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -28,6 +27,7 @@ import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -35,15 +35,16 @@ import java.util.Set;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
- * For every server in WsAgent's machine registers a {@link Macro} that
- * returns server's external address in form <b>hostname:port</b>.
+ * For every server in dev-machine registers a {@link Macro} that returns server's URL.
+ * <p>
+ * Macro name: <code>${server.server_reference}</code>.
  *
  * @author Vlad Zhukovskiy
  */
 @Singleton
 public class ServerAddressMacroRegistrar {
 
-    public static final String MACRO_NAME_TEMPLATE = "${server.port.%}";
+    private static final String MACRO_NAME_TEMPLATE = "${server.%}";
 
     private final Provider<MacroRegistry> macroRegistryProvider;
     private final AppContext              appContext;
@@ -82,25 +83,20 @@ public class ServerAddressMacroRegistrar {
     }
 
     private Set<Macro> getMacros(Machine machine) {
-        Set<Macro> macros = Sets.newHashSet();
-        for (Map.Entry<String, ? extends Server> entry : machine.getServers().entrySet()) {
-            macros.add(new ServerAddressMacro(entry.getKey(),
-                                              entry.getValue().getUrl()));
+        Set<Macro> macros = new HashSet<>();
 
-            if (entry.getKey().endsWith("/tcp")) {
-                macros.add(new ServerAddressMacro(entry.getKey().substring(0, entry.getKey().length() - 4),
-                                                  entry.getValue().getUrl()));
-            }
+        for (Map.Entry<String, ? extends Server> entry : machine.getServers().entrySet()) {
+            macros.add(new ServerAddressMacro(entry.getKey(), entry.getValue().getUrl()));
         }
 
         return macros;
     }
 
     private class ServerAddressMacro extends BaseMacro {
-        ServerAddressMacro(String internalPort, String externalAddress) {
-            super(MACRO_NAME_TEMPLATE.replaceAll("%", internalPort),
-                  externalAddress,
-                  "Returns external address of the server running on port " + internalPort);
+        ServerAddressMacro(String reference, String url) {
+            super(MACRO_NAME_TEMPLATE.replaceAll("%", reference),
+                  url,
+                  "Returns address of the " + reference + " server");
         }
     }
 }
