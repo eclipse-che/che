@@ -23,11 +23,9 @@ public class KeycloakAuthenticationFilter extends org.keycloak.adapters.servlet.
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
-        // TODO: use KeycloakOIDCFilter skip setting
         if (request.getRequestURI().endsWith("/ws") || request.getRequestURI().endsWith("/eventbus")
             || request.getScheme().equals("ws") || req.getScheme().equals("wss") || request.getRequestURI().contains("/websocket/") ||
             (getToken(request) != null && getToken(request).startsWith("machine"))) {
-            System.out.println("Skipping " + request.getRequestURI());
             chain.doFilter(req, res);
         } else {
             super.doFilter(req, res, chain);
