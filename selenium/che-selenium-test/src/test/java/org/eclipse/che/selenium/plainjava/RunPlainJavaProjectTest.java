@@ -13,9 +13,9 @@ package org.eclipse.che.selenium.plainjava;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -33,9 +33,16 @@ import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.inject.Named;
-
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.JAVA_CLASS;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.PACKAGE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 
 /**
@@ -44,9 +51,10 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERRO
 public class RunPlainJavaProjectTest {
     private static final String PROJECT_NAME = NameGenerator.generate("RunningPlainJavaProject", 4);
     private static final String NEW_PACKAGE  = "base.test";
+    private static final String CLONE_URI    = "https://github.com/iedexmain1/plainJavaProject.git";
     private static final String NAME_COMMAND = "startApp";
     private static final String COMMAND      =
-            "${current.class.fqn}\ncd ${current.project.path}\n" +
+            "cd ${current.project.path}\n" +
             "javac -classpath ${project.java.classpath} -sourcepath ${project.java.sourcepath} -d ${project.java.output.dir} src/com/company/nba/MainClass.java\n" +
             "java -classpath ${project.java.classpath}${project.java.output.dir} com.company.nba.MainClass";
     private static final String CONSOLE_MESS = "javac: directory not found: /projects/" + PROJECT_NAME + "/bin";
@@ -55,6 +63,8 @@ public class RunPlainJavaProjectTest {
     private TestWorkspace             ws;
     @Inject
     private Ide                       ide;
+    @Inject
+    private DefaultTestUser           productUser;
     @Inject
     private ProjectExplorer           projectExplorer;
     @Inject
@@ -77,9 +87,6 @@ public class RunPlainJavaProjectTest {
     private Loader                    loader;
     @Inject
     private Menu                      menu;
-    @Inject
-    @Named("github.username")
-    private String                    gitHubUsername;
 
     @BeforeClass
     public void prepare() throws Exception {
@@ -90,14 +97,14 @@ public class RunPlainJavaProjectTest {
     public void checkRunPlainJavaProject() {
         // import the project and configure
         projectExplorer.waitProjectExplorer();
-        importPlainJavaApp("https://github.com/" + gitHubUsername + "/plainJavaProject.git", PROJECT_NAME, Wizard.TypeProject.PLAIN_JAVA);
+        importPlainJavaApp(CLONE_URI, PROJECT_NAME, Wizard.TypeProject.PLAIN_JAVA);
         loader.waitOnClosed();
 
         // check library into configure classpath form
         projectExplorer.quickExpandWithJavaScript();
         loader.waitOnClosed();
         projectExplorer.selectItem(PROJECT_NAME);
-        menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH);
+        menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
         configureClasspath.waitConfigureClasspathFormIsOpen();
         configureClasspath.waitExpectedTextJarsAndFolderArea("mockito-all-1.10.19.jar - /projects/" + PROJECT_NAME + "/store");
         configureClasspath.closeConfigureClasspathFormByIcon();
@@ -116,14 +123,14 @@ public class RunPlainJavaProjectTest {
 
         // Create new java class into new package
         projectExplorer.selectItem(PROJECT_NAME + "/src");
-        menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, NEW, TestMenuCommandsConstants.Project.New.PACKAGE);
+        menu.runCommand(PROJECT, NEW, PACKAGE);
         askForValueDialog.waitFormToOpen();
         askForValueDialog.typeAndWaitText(NEW_PACKAGE);
         askForValueDialog.clickOkBtn();
         askForValueDialog.waitFormToClose();
         projectExplorer.waitItemInVisibleArea(NEW_PACKAGE);
         projectExplorer.selectItem(PROJECT_NAME + "/src/base/test");
-        menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, NEW, TestMenuCommandsConstants.Project.New.JAVA_CLASS);
+        menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, NEW, JAVA_CLASS);
         loader.waitOnClosed();
         askForValueDialog.waitNewJavaClassOpen();
         askForValueDialog.typeTextInFieldName("A");
@@ -147,18 +154,18 @@ public class RunPlainJavaProjectTest {
         loader.waitOnClosed();
         commandsExplorer.openCommandsExplorer();
         commandsExplorer.waitCommandExplorerIsOpened();
-        commandsExplorer.clickAddCommandButton(TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL);
+        commandsExplorer.clickAddCommandButton(RUN_GOAL);
         loader.waitOnClosed();
-        commandsExplorer.chooseCommandTypeInContextMenu(TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE);
+        commandsExplorer.chooseCommandTypeInContextMenu(JAVA_TYPE);
         loader.waitOnClosed();
-        commandsExplorer.waitCommandInExplorerByName(TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME);
+        commandsExplorer.waitCommandInExplorerByName(JAVA_NAME);
         commandsEditor.waitActiveEditor();
-        commandsEditor.waitTabFileWithSavedStatus(TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME);
+        commandsEditor.waitTabFileWithSavedStatus(JAVA_NAME);
 
         // edit the name and the content of the java command into editor
         commandsEditor.typeTextIntoNameCommandField(NAME_COMMAND);
         commandsEditor.waitTextIntoNameCommandField(NAME_COMMAND);
-        commandsEditor.waitTabCommandWithUnsavedStatus(TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME);
+        commandsEditor.waitTabCommandWithUnsavedStatus(JAVA_NAME);
         commandsEditor.setCursorToLine(1);
         commandsEditor.deleteAllContent();
         commandsEditor.typeTextIntoEditor(COMMAND);
@@ -197,9 +204,9 @@ public class RunPlainJavaProjectTest {
         projectExplorer.waitItem(PROJECT_NAME + "/bin/base/test/A.class");
     }
 
-    public void importPlainJavaApp(String url, String nameApp, String typeProject) {
+    private void importPlainJavaApp(String url, String nameApp, String typeProject) {
         loader.waitOnClosed();
-        menu.runCommand(TestMenuCommandsConstants.Workspace.WORKSPACE, TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+        menu.runCommand(WORKSPACE, IMPORT_PROJECT);
         importFromLocation.waitAndTypeImporterAsGitInfo(url, nameApp);
         projectWizard.waitCreateProjectWizardForm();
         projectWizard.selectTypeProject(typeProject);

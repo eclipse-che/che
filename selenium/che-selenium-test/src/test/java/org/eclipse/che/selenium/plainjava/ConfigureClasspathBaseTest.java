@@ -10,23 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.plainjava;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.ConfigureClasspath;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.net.URL;
 import java.nio.file.Paths;
+
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 
 /**
  * @author Aleksandr Shmaraev
@@ -66,13 +68,13 @@ public class ConfigureClasspathBaseTest {
         projectExplorer.waitItem(PROJECT_NAME + "/my-webapp");
 
         // check opening main form and closing it by icon
-        menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH);
+        menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
         configureClasspath.waitConfigureClasspathFormIsOpen();
         configureClasspath.closeConfigureClasspathFormByIcon();
 
         // check the 'Java Build Path' header
         projectExplorer.selectItem(PROJECT_NAME);
-        menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH);
+        menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
         configureClasspath.waitConfigureClasspathFormIsOpen();
         configureClasspath.waitExpectedTextJavaBuildPathArea("Libraries");
         configureClasspath.waitExpectedTextJavaBuildPathArea("Source");
@@ -86,7 +88,7 @@ public class ConfigureClasspathBaseTest {
 
         // check the 'JARs and folders' area for 'my-lib' module
         projectExplorer.selectItem(PROJECT_NAME + "/my-lib");
-        menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH);
+        menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
         configureClasspath.waitConfigureClasspathFormIsOpen();
         configureClasspath.selectSourceCategory();
         configureClasspath.waitExpectedTextJarsAndFolderArea("/" + PROJECT_NAME + "/my-lib/src/main/java");
@@ -98,7 +100,7 @@ public class ConfigureClasspathBaseTest {
 
         // check the 'JARs and folders' area for 'my-webapp' module
         projectExplorer.selectItem(PROJECT_NAME + "/my-webapp");
-        menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH);
+        menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
         configureClasspath.waitConfigureClasspathFormIsOpen();
         configureClasspath.selectSourceCategory();
         configureClasspath.waitExpectedTextJarsAndFolderArea("/" + PROJECT_NAME + "/my-webapp/src/main/java");

@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.plainjava;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -23,8 +24,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.openqa.selenium.Keys;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -35,9 +34,13 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.BUILD_PATH;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuBuildPath.CONFIGURE_CLASSPATH;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuBuildPath.UNMARK_AS_SOURCE_FOLDER;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+
 
 /**
  * @author Aleksandr Shmaraev
@@ -104,30 +107,26 @@ public class PlainJavaProjectConfigureClasspathTest {
         projectExplorer.selectItem(PROJECT_NAME + "/test/java");
         projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test/java");
         projectExplorer.clickOnItemInContextMenu(BUILD_PATH);
-        projectExplorer.clickOnItemInContextMenu(
-                TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER);
+        projectExplorer.clickOnItemInContextMenu(USE_AS_SOURCE_FOLDER);
         projectExplorer.waitItem(PROJECT_NAME + "/test/java/com/company");
         projectExplorer.selectItem(PROJECT_NAME + "/test/java");
         projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test/java");
         projectExplorer.clickOnItemInContextMenu(BUILD_PATH);
         loader.waitOnClosed();
-        projectExplorer.clickOnItemInContextMenu(
-                TestProjectExplorerContextMenuConstants.SubMenuBuildPath.UNMARK_AS_SOURCE_FOLDER);
+        projectExplorer.clickOnItemInContextMenu(UNMARK_AS_SOURCE_FOLDER);
         projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/test/java/com/company");
 
         // check build path to the folder 'test' from context menu
         projectExplorer.selectItem(PROJECT_NAME + "/test");
         projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test");
         projectExplorer.clickOnItemInContextMenu(BUILD_PATH);
-        projectExplorer.clickOnItemInContextMenu(
-                TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER);
+        projectExplorer.clickOnItemInContextMenu(USE_AS_SOURCE_FOLDER);
         projectExplorer.waitItem(PROJECT_NAME + "/test/java/com/company");
         projectExplorer.selectItem(PROJECT_NAME + "/test");
         projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test");
         projectExplorer.clickOnItemInContextMenu(BUILD_PATH);
         loader.waitOnClosed();
-        projectExplorer.clickOnItemInContextMenu(
-                TestProjectExplorerContextMenuConstants.SubMenuBuildPath.UNMARK_AS_SOURCE_FOLDER);
+        projectExplorer.clickOnItemInContextMenu(UNMARK_AS_SOURCE_FOLDER);
         projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/test/java/com/company");
 
         // check the 'Cancel' button of the 'Select Path' form
@@ -166,7 +165,7 @@ public class PlainJavaProjectConfigureClasspathTest {
 
         // check the library container
         projectExplorer.selectItem(PROJECT_NAME);
-        menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH);
+        menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
         configureClasspath.waitConfigureClasspathFormIsOpen();
         configureClasspath.clickLibraryContainer("org.eclipse.jdt.launching.JRE_CONTAINER");
         for (String jarName : listJar) {

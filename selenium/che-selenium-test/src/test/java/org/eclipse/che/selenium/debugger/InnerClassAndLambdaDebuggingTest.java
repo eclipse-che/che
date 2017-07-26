@@ -29,24 +29,22 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.net.URL;
 import java.nio.file.Paths;
 
 /**
  * @author Dmytro Nochevnov
  */
 public class InnerClassAndLambdaDebuggingTest {
-    private static final String PROJECT          = "java-inner-lambda";
-    private static final String PATH_TO_CLASS    = PROJECT + "/src/main/java/test/App.java";
+    private static final String PROJECT       = "java-inner-lambda";
+    private static final String PATH_TO_CLASS = PROJECT + "/src/main/java/test/App.java";
 
-    private static final String BUILD_AND_DEBUG_CONSOLE_APPLICATION_COMMAND =
-            "mvn -f ${current.project.path} clean install && java -jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y ${current.project.path}/target/*.jar";
-    private static final String BUILD_AND_DEBUG_COMMAND_NAME                = "build-and-debug";
+    private static final String BUILD_AND_DEBUG_COMMAND_NAME = "build-and-debug";
 
     @Inject
     private TestWorkspace   ws;
@@ -75,16 +73,25 @@ public class InnerClassAndLambdaDebuggingTest {
     private TestCommandServiceClient testCommandServiceClient;
     @Inject
     private TestProjectServiceClient testProjectServiceClient;
+    @Inject
+    private CommandsPalette          commandsPalette;
 
     @BeforeClass
     public void setup() throws Exception {
-        URL resource = getClass().getResource("/projects/plugins/DebuggerPlugin/java-inner-lambda");
-        testProjectServiceClient
-                .importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()), PROJECT, ProjectTemplates.CONSOLE_JAVA_SIMPLE
-                );
+        testProjectServiceClient.importProject(ws.getId(),
+                                               user.getAuthToken(),
+                                               Paths.get(getClass().getResource("/projects/plugins/DebuggerPlugin/java-inner-lambda")
+                                                                   .toURI()),
+                                               PROJECT,
+                                               ProjectTemplates.CONSOLE_JAVA_SIMPLE);
 
-        testCommandServiceClient.createCommand(BUILD_AND_DEBUG_CONSOLE_APPLICATION_COMMAND, BUILD_AND_DEBUG_COMMAND_NAME,
-                                               TestCommandsConstants.MAVEN, ws.getId(), user.getAuthToken());
+        testCommandServiceClient.createCommand("mvn -f ${current.project.path} clean install && " +
+                                               "java -jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y " +
+                                               "${current.project.path}/target/*.jar",
+                                               BUILD_AND_DEBUG_COMMAND_NAME,
+                                               TestCommandsConstants.MAVEN,
+                                               ws.getId(),
+                                               user.getAuthToken());
 
         // open IDE
         ide.open(ws);
@@ -104,7 +111,8 @@ public class InnerClassAndLambdaDebuggingTest {
     @BeforeMethod
     public void startDebug() {
         // start application in debug mode
-        projectExplorer.invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT, BUILD_AND_DEBUG_COMMAND_NAME);
+        commandsPalette.openCommandPalette();
+        commandsPalette.startCommandByDoubleClick(BUILD_AND_DEBUG_COMMAND_NAME);
         consoles.waitExpectedTextIntoConsole(TestBuildConstants.LISTENING_AT_ADDRESS_8000);
         // set breakpoints
         editor.waitActiveEditor();

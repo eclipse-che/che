@@ -85,7 +85,7 @@ public class ImplementationBaseOperationsTest {
         editor.clickOnSelectedElementInEditor(JAVA_FILE_NAME);
         menu.runCommand(TestMenuCommandsConstants.Assistant.ASSISTANT, TestMenuCommandsConstants.Assistant.IMPLEMENTATION_S);
         editor.waitImplementationFormIsOpen(JAVA_FILE_NAME);
-        editor.closeImplementationFormByEscape();
+        editor.cancelFormInEditorByEscape();
         editor.waitImplementationFormIsClosed(JAVA_FILE_NAME);
         editor.setCursorToLine(20);
         editor.clickOnSelectedElementInEditor(JAVA_FILE_NAME);

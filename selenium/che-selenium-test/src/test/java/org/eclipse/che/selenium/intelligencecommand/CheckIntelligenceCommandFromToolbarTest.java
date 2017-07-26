@@ -94,9 +94,9 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
     private void checkTestAppAndReturnToIde(String currentWindow, String expectedTextOnTestAppPage) {
         seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
-        new WebDriverWait(ide.driver(), MULTIPLE)
+        new WebDriverWait(seleniumWebDriver, MULTIPLE)
                 .until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), expectedTextOnTestAppPage));
-        ide.driver().close();
-        ide.driver().switchTo().window(currentWindow);
+        seleniumWebDriver.close();
+        seleniumWebDriver.switchTo().window(currentWindow);
     }
 }

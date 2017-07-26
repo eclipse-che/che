@@ -80,7 +80,7 @@ public class AutocompleteCommandsEditorTest {
         projectExplorer.waitItem(PROJ_NAME);
         projectExplorer.quickExpandWithJavaScript();
         projectExplorer.waitItem(PATH_TO_JAVA_FILE);
-        projectExplorer.selectItem(PATH_TO_JAVA_FILE);
+        projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
         createMavenCommand();
         commandsEditor.setFocusIntoTypeCommandsEditor(COMMAND_LINE_EDITOR);
         commandsEditor.setCursorToLine(1);
@@ -146,7 +146,7 @@ public class AutocompleteCommandsEditorTest {
         consoles.waitExpectedTextIntoPreviewUrl("tomcat8 http");
     }
 
-    @Test(priority = 3) // TODO test method is failed, because there is https://github.com/eclipse/che/issues/4644
+    @Test(priority = 3)
     public void checkAutocompleteAfterSave() {
         commandsEditor.waitTabCommandWithUnsavedStatus(MAVEN_NAME);
         commandsEditor.clickOnSaveButtonInTheEditCommand();

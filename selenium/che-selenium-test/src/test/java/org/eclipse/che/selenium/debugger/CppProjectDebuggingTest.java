@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.debug.CppDebugConfig;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -41,9 +42,9 @@ import java.nio.file.Paths;
  */
 public class CppProjectDebuggingTest {
 
-    private static final String PROJECT          = "cpp-tests";
-    private static final String PATH_TO_PROGRAM  = PROJECT + "/hello.cc";
-    private static final int    DEBUG_PORT       = 8001;
+    private static final String PROJECT         = "cpp-tests";
+    private static final String PATH_TO_PROGRAM = PROJECT + "/hello.cc";
+    private static final int    DEBUG_PORT      = 8001;
 
     private static final String MAKE_AND_DEBUG_COMMAND_NAME = "make and debug";
 
@@ -73,6 +74,8 @@ public class CppProjectDebuggingTest {
     private Consoles                 consoles;
     @Inject
     private TestProjectServiceClient testProjectServiceClient;
+    @Inject
+    private CommandsPalette          commandsPalette;
 
     @BeforeClass
     public void setup() throws Exception {
@@ -114,7 +117,8 @@ public class CppProjectDebuggingTest {
         projectExplorer.openItemByPath(PATH_TO_PROGRAM);
         editor.setBreakPointAndWaitInactiveState(12);
         editor.closeAllTabs();
-        projectExplorer.invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT, MAKE_AND_DEBUG_COMMAND_NAME);
+        commandsPalette.openCommandPalette();
+        commandsPalette.startCommandByDoubleClick(MAKE_AND_DEBUG_COMMAND_NAME);
         consoles.waitExpectedTextIntoConsole("Listening on port 8001");
 
         menu.runCommandByXpath(TestMenuCommandsConstants.Run.RUN_MENU,

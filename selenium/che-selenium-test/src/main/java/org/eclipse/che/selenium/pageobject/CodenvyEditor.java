@@ -1238,9 +1238,9 @@ public class CodenvyEditor {
     }
 
     /**
-     * close the 'Implementation(s)' form by 'Escape'
+     * close the forms in the editor by 'Escape'
      */
-    public void closeImplementationFormByEscape() {
+    public void cancelFormInEditorByEscape() {
         typeTextIntoEditor(Keys.ESCAPE.toString());
     }
 

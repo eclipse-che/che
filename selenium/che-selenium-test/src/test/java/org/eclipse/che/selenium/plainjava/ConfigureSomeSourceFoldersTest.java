@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.plainjava;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -23,10 +24,8 @@ import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
-import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -34,10 +33,13 @@ import org.testng.annotations.Test;
 import java.net.URL;
 import java.nio.file.Paths;
 
-import static org.eclipse.che.selenium.pageobject.AskForValueDialog.JavaFiles.CLASS;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.NEW;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS;
+import static org.eclipse.che.selenium.pageobject.AskForValueDialog.JavaFiles.CLASS;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 
 /**
  * @author Musienko Maxim
@@ -48,7 +50,7 @@ public class ConfigureSomeSourceFoldersTest {
     private              String newJavaClassName = "NewClass";
 
     @Inject
-    private TestWorkspace        ws;
+    private TestWorkspace            ws;
     @Inject
     private Ide                      ide;
     @Inject
@@ -122,12 +124,10 @@ public class ConfigureSomeSourceFoldersTest {
     private void launchMainClassFromCommandWidget() {
         commandsExplorer.openCommandsExplorer();
         commandsExplorer.waitCommandExplorerIsOpened();
-        commandsExplorer.clickAddCommandButton(TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL);
-        commandsExplorer.chooseCommandTypeInContextMenu(TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE);
-        commandsExplorer.checkCommandIsPresentInGoal(TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL,
-                                                     TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME);
-        commandsEditor.waitTabFileWithSavedStatus(TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME);
+        commandsExplorer.clickAddCommandButton(RUN_GOAL);
+        commandsExplorer.chooseCommandTypeInContextMenu(JAVA_TYPE);
+        commandsExplorer.checkCommandIsPresentInGoal(RUN_GOAL, JAVA_NAME);
+        commandsEditor.waitTabFileWithSavedStatus(JAVA_NAME);
         commandsEditor.clickOnRunButton();
     }
-
 }

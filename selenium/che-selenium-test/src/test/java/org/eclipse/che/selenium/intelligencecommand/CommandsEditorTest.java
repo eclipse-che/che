@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -32,6 +31,12 @@ import org.testng.annotations.Test;
 import java.net.URL;
 import java.nio.file.Paths;
 
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.NEW_COMMAND_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
+
 /**
  * @author Aleksandr Shmaraiev
  */
@@ -39,7 +44,7 @@ public class CommandsEditorTest {
     private static final String PROJECT_NAME    = NameGenerator.generate("CommandsEditor", 4);
     private static final String NAME_COMMAND    = "runApp";
     private static final String COMMAND         =
-            "${current.class.fqn}cd ${current.project.path}\n" +
+            "cd ${current.project.path}\n" +
             "javac -classpath ${project.java.classpath} -sourcepath ${project.java.sourcepath} -d ${project.java.output.dir} src/com/company/nba/MainClass.java\n" +
             "java -classpath ${project.java.classpath}${project.java.output.dir} com.company.nba.MainClass";
 
@@ -81,29 +86,30 @@ public class CommandsEditorTest {
         projectExplorer.waitProjectExplorer();
         projectExplorer.waitItem(PROJECT_NAME);
         projectExplorer.quickExpandWithJavaScript();
+        projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/nba/MainClass.java");
         projectExplorer.selectItem(PROJECT_NAME);
 
         // open the 'Commands Explorer' and choose java command
         loader.waitOnClosed();
         commandsExplorer.openCommandsExplorer();
         commandsExplorer.waitCommandExplorerIsOpened();
-        commandsExplorer.clickAddCommandButton(TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL);
+        commandsExplorer.clickAddCommandButton(COMMON_GOAL);
         loader.waitOnClosed();
-        commandsExplorer.chooseCommandTypeInContextMenu(TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE);
+        commandsExplorer.chooseCommandTypeInContextMenu(JAVA_TYPE);
         loader.waitOnClosed();
-        commandsExplorer.waitCommandInExplorerByName(TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME);
+        commandsExplorer.waitCommandInExplorerByName(JAVA_NAME);
         commandsEditor.waitActiveEditor();
-        commandsEditor.waitTabFileWithSavedStatus(TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME);
+        commandsEditor.waitTabFileWithSavedStatus(JAVA_NAME);
         commandsEditor.clickOnCancelCommandEditorButton();
-        commandsEditor.waitTabIsNotPresent(TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME);
+        commandsEditor.waitTabIsNotPresent(JAVA_NAME);
 
         // edit name of the java command into editor
         commandsExplorer.waitCommandExplorerIsOpened();
-        commandsExplorer.selectCommandByName(TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME);
+        commandsExplorer.selectCommandByName(JAVA_NAME);
         commandsEditor.waitActiveEditor();
         commandsEditor.typeTextIntoNameCommandField(NAME_COMMAND);
         commandsEditor.waitTextIntoNameCommandField(NAME_COMMAND);
-        commandsEditor.waitTabCommandWithUnsavedStatus(TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME);
+        commandsEditor.waitTabCommandWithUnsavedStatus(JAVA_NAME);
 
         // edit a content of command in the command editor
         commandsEditor.setCursorToLine(1);
@@ -112,12 +118,12 @@ public class CommandsEditorTest {
         commandsEditor.waitTextIntoEditor(COMMAND);
 
         // change the goal of command into editor
-        commandsEditor.selectGoalNameIntoCommandEditor(TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL);
+        commandsEditor.selectGoalNameIntoCommandEditor(RUN_GOAL);
         commandsEditor.clickOnSaveButtonInTheEditCommand();
         editor.waitTabFileWithSavedStatus(NAME_COMMAND);
-        commandsExplorer.checkCommandIsPresentInGoal(TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL, NAME_COMMAND);
-        commandsExplorer.checkCommandIsNotPresentInGoal(TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL, NAME_COMMAND);
-        commandsEditor.selectGoalNameIntoCommandEditor(TestIntelligentCommandsConstants.CommandsGoals.NEW_COMMAND_GOAL);
+        commandsExplorer.checkCommandIsPresentInGoal(RUN_GOAL, NAME_COMMAND);
+        commandsExplorer.checkCommandIsNotPresentInGoal(COMMON_GOAL, NAME_COMMAND);
+        commandsEditor.selectGoalNameIntoCommandEditor(NEW_COMMAND_GOAL);
         askForValueDialog.waitFormToOpen();
         askForValueDialog.typeAndWaitText("Custom");
         askForValueDialog.clickOkBtn();
@@ -125,7 +131,7 @@ public class CommandsEditorTest {
         commandsEditor.waitTabCommandWithUnsavedStatus(NAME_COMMAND);
         commandsEditor.clickOnSaveButtonInTheEditCommand();
         editor.waitTabFileWithSavedStatus(NAME_COMMAND);
-        commandsExplorer.checkCommandIsNotPresentInGoal(TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL, NAME_COMMAND);
+        commandsExplorer.checkCommandIsNotPresentInGoal(RUN_GOAL, NAME_COMMAND);
         commandsExplorer.checkCommandIsPresentInGoal("Custom", NAME_COMMAND);
 
         // run application from commands editor

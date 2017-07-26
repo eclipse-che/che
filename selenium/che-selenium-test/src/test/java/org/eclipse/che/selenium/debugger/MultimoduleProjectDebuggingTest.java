@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.debugger;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
-import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestBuildConstants;
+import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -28,7 +29,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -79,6 +80,8 @@ public class MultimoduleProjectDebuggingTest {
     private TestCommandServiceClient testCommandServiceClient;
     @Inject
     private TestProjectServiceClient testProjectServiceClient;
+    @Inject
+    private CommandsPalette          commandsPalette;
 
     @BeforeClass
     public void setup() throws Exception {
@@ -114,7 +117,8 @@ public class MultimoduleProjectDebuggingTest {
         projectExplorer.selectItem(PROJECT);
 
         // start application in debug mode
-        projectExplorer.invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT, BUILD_AND_DEBUG_COMMAND_NAME);
+        commandsPalette.openCommandPalette();
+        commandsPalette.startCommandByDoubleClick(BUILD_AND_DEBUG_COMMAND_NAME);
         consoles.waitExpectedTextIntoConsole(TestBuildConstants.LISTENING_AT_ADDRESS_8000);
     }
 

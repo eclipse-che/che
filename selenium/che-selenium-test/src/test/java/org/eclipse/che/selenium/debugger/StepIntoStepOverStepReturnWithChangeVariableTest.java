@@ -10,15 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.debugger;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
-import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.TestBuildConstants;
+import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -27,11 +29,9 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
-import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -46,16 +46,10 @@ import static org.testng.Assert.assertTrue;
  * @author Musienko Maxim
  */
 public class StepIntoStepOverStepReturnWithChangeVariableTest {
-    private static final String PROJECT_NAME_STEP_INTO_STEP_OVER = NameGenerator
-            .generate(StepIntoStepOverStepReturnWithChangeVariableTest.class.getSimpleName(), 2);
-    private static final String START_DEBUG_COMMAND_NAME         = "startDebug";
-    private static final String CLEAN_TOMCAT_COMMAND_NAME        = "cleanTomcat";
-    private static final String commandLaunchingTomcatInJpda     =
-            "cp /projects/" + PROJECT_NAME_STEP_INTO_STEP_OVER +
-            "/target/qa-spring-sample-1.0-SNAPSHOT.war /home/user/tomcat8/webapps/ROOT.war" + " && " +
-            "/home/user/tomcat8/bin/catalina.sh jpda run";
-    private static final String BUILD_COMMAND_NAME               = "build";
-    private static final String mavenBuildCommand                = "mvn clean install -f /projects/" + PROJECT_NAME_STEP_INTO_STEP_OVER;
+    private static final String PROJECT      = NameGenerator.generate("project", 4);
+    private static final String START_DEBUG  = "startDebug";
+    private static final String CLEAN_TOMCAT = "cleanTomcat";
+    private static final String BUILD        = "build";
 
     private DebuggerUtils debugUtils = new DebuggerUtils();
 
@@ -75,10 +69,6 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     @Inject
     private Menu                       menu;
     @Inject
-    private CommandsToolbar            commandsToolbar;
-    @Inject
-    private ToastLoader                toastLoader;
-    @Inject
     private DebugPanel                 debugPanel;
     @Inject
     private JavaDebugConfig            debugConfig;
@@ -90,30 +80,35 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     private TestProjectServiceClient   testProjectServiceClient;
     @Inject
     private Loader                     loader;
+    @Inject
+    private CommandsPalette            commandsPalette;
+    @Inject
+    private SeleniumWebDriver          seleniumWebDriver;
 
     @BeforeClass
     public void prepare() throws Exception {
         testProjectServiceClient.importProject(ws.getId(),
                                                user.getAuthToken(),
-                                               Paths.get(getClass().getResource("/projects/debudStepInto").toURI()),
-                                               PROJECT_NAME_STEP_INTO_STEP_OVER,
+                                               Paths.get(getClass().getResource("/projects/debugStepInto").toURI()),
+                                               PROJECT,
                                                ProjectTemplates.MAVEN_SPRING);
 
-        testCommandServiceClient.createCommand(commandLaunchingTomcatInJpda,
-                                               START_DEBUG_COMMAND_NAME,
+        testCommandServiceClient.createCommand("cp /projects/" + PROJECT +
+                                               "/target/qa-spring-sample-1.0-SNAPSHOT.war /home/user/tomcat8/webapps/ROOT.war" + " && " +
+                                               "/home/user/tomcat8/bin/catalina.sh jpda run",
+                                               START_DEBUG,
                                                TestCommandsConstants.CUSTOM,
                                                ws.getId(),
                                                user.getAuthToken());
 
-        testCommandServiceClient.createCommand(mavenBuildCommand,
-                                               BUILD_COMMAND_NAME,
+        testCommandServiceClient.createCommand("mvn clean install -f /projects/" + PROJECT,
+                                               BUILD,
                                                TestCommandsConstants.CUSTOM,
                                                ws.getId(),
                                                user.getAuthToken());
 
-        String stopTomcatAndCleanWebAppDir = "/home/user/tomcat8/bin/shutdown.sh && rm -rf /home/user/tomcat8/webapps/*";
-        testCommandServiceClient.createCommand(stopTomcatAndCleanWebAppDir,
-                                               CLEAN_TOMCAT_COMMAND_NAME,
+        testCommandServiceClient.createCommand("/home/user/tomcat8/bin/shutdown.sh && rm -rf /home/user/tomcat8/webapps/*",
+                                               CLEAN_TOMCAT,
                                                TestCommandsConstants.CUSTOM,
                                                ws.getId(),
                                                user.getAuthToken());
@@ -124,24 +119,25 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     @AfterMethod
     public void shutDownTomCatAndCleanWebApp() {
         editor.closeAllTabs();
-        debugPanel.stopDebuggerWithUiAndCleanUpTomcat(CLEAN_TOMCAT_COMMAND_NAME);
+        debugPanel.stopDebuggerWithUiAndCleanUpTomcat(CLEAN_TOMCAT);
         projectExplorer.clickOnProjectExplorerTabInTheLeftPanel();
     }
 
     @Test
     public void changeVariableTest() throws Exception {
         buildProjectAndOpenMainClass();
-        projectExplorer.invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME_STEP_INTO_STEP_OVER,
-                                                     START_DEBUG_COMMAND_NAME);
+        commandsPalette.openCommandPalette();
+        commandsPalette.startCommandByDoubleClick(START_DEBUG);
         consoles.waitExpectedTextIntoConsole(" Server startup in");
         editor.setCursorToLine(34);
         editor.setBreakPointAndWaitInactiveState(34);
         menu.runCommand(TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
-        debugConfig.createConfig(PROJECT_NAME_STEP_INTO_STEP_OVER);
+        debugConfig.createConfig(PROJECT);
         menu.runCommand(TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.DEBUG,
-                        TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT_NAME_STEP_INTO_STEP_OVER);
+                        TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT);
         editor.waitBreakPointWithActiveState(34);
-        String appUrl = "http" + "://" + workspaceServiceClient.getServerAddressByPort(ws.getId(), user.getAuthToken(), 8080) + "/spring/guess";
+        String appUrl =
+                "http" + "://" + workspaceServiceClient.getServerAddressByPort(ws.getId(), user.getAuthToken(), 8080) + "/spring/guess";
         String requestMess = "6";
         CompletableFuture<String> instToRequestThread = debugUtils.gotoDebugAppAndSendRequest(appUrl, requestMess);
         editor.waitBreakPointWithActiveState(34);
@@ -166,23 +162,21 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     @Test(priority = 1)
     public void shouldOpenDebuggingFile() {
         buildProjectAndOpenMainClass();
-        projectExplorer.invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME_STEP_INTO_STEP_OVER,
-                                                     START_DEBUG_COMMAND_NAME);
+        commandsPalette.openCommandPalette();
+        commandsPalette.startCommandByDoubleClick(START_DEBUG);
         consoles.waitExpectedTextIntoConsole(" Server startup in");
         editor.setBreakPointAndWaitInactiveState(26);
-        editor.closeAllTabs();
-        //check invocation with hot keys
-        ide.driver().switchTo().activeElement().sendKeys(Keys.SHIFT.toString() + Keys.F9.toString());
+        seleniumWebDriver.switchTo().activeElement().sendKeys(Keys.SHIFT.toString() + Keys.F9.toString());
         editor.waitBreakPointWithActiveState(26);
     }
 
     private void buildProjectAndOpenMainClass() {
-        String absPathToClass = PROJECT_NAME_STEP_INTO_STEP_OVER + "/src/main/java/org/eclipse/qa/examples/AppController.java";
-        projectExplorer.waitItem(PROJECT_NAME_STEP_INTO_STEP_OVER);
+        String absPathToClass = PROJECT + "/src/main/java/org/eclipse/qa/examples/AppController.java";
+        projectExplorer.waitItem(PROJECT);
         loader.waitOnClosed();
-        projectExplorer.selectItem(PROJECT_NAME_STEP_INTO_STEP_OVER);
+        projectExplorer.selectItem(PROJECT);
         projectExplorer
-                .invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME_STEP_INTO_STEP_OVER, BUILD_COMMAND_NAME);
+                .invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT, BUILD);
         consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
         projectExplorer.quickRevealToItemWithJavaScript(absPathToClass);
         projectExplorer.openItemByPath(absPathToClass);

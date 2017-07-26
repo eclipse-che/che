@@ -91,12 +91,7 @@
                     <exclude name="checkExpressStack"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="changeVariableTest"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
             <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
             <class name="org.eclipse.che.selenium.debugger.CppProjectDebuggingTest">
                 <methods>
@@ -108,48 +103,23 @@
                 <methods>
                     <!-- https://github.com/eclipse/che/issues/4636 -->
                     <exclude name="shouldDebugJreClass"/>
-
-                    <!-- unstable -->
-                    <exclude name="shouldDebugMavenArtifactClassWithSources"/>
-
-                    <!-- unstable -->
-                    <exclude name="shouldHandleDebugOfMavenArtifactWithoutSources"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.InnerClassAndLambdaDebuggingTest">
                 <methods>
-                    <!-- unstable -->
-                    <exclude name="shouldDebugAnonymousClass"/>
-
                     <!-- https://github.com/eclipse/che/issues/4211 -->
                     <exclude name="shouldDebugInnerClass"/>
-
-                    <!-- unstable -->
-                    <exclude name="shouldDebugLambdaExpressions"/>
-
-                    <!-- https://github.com/eclipse/che/issues/4211 -->
                     <exclude name="shouldDebugMethodLocalInnerClass"/>
-
-                    <!-- https://github.com/eclipse/che/issues/4211 -->
                     <exclude name="shouldDebugStaticInnerClass"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.MultimoduleProjectDebuggingTest">
                 <methods>
-                    <!-- https://github.com/eclipse/che/issues/5116 -->
-                    <exclude name="shouldDebugInstanceMethod"/>
-
-                    <!-- https://github.com/eclipse/che/issues/5116 -->
-                    <exclude name="shouldDebugStaticDefaultMethod"/>
-
                     <!-- https://github.com/eclipse/che/issues/4268 -->
                     <exclude name="shouldDebugStaticMethod"/>
 
                     <!-- https://github.com/eclipse/che/issues/4286 -->
                     <exclude name="shouldGoIntoConstructor"/>
-
-                    <!-- https://github.com/eclipse/che/issues/5116 -->
-                    <exclude name="shouldStopInsideConstructor"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest">
@@ -167,15 +137,7 @@
                     <exclude name="shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="changeVariableTest"/>
-
-                    <!-- https://github.com/eclipse/che/issues/4292 -->
-                    <exclude name="shouldOpenDebuggingFile"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteFeaturesInEditorTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteJSFilesTest">
                 <methods>
@@ -397,6 +359,7 @@
             <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
             <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
             <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
+            <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest">
                 <methods>
                     <!-- unstable -->

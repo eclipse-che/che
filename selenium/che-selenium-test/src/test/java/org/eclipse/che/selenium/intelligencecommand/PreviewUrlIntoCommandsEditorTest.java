@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.intelligencecommand;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -27,7 +27,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
-import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -36,6 +35,11 @@ import org.testng.annotations.Test;
 
 import java.net.URL;
 import java.nio.file.Paths;
+
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.MAVEN_NAME;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.MAVEN_TYPE;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorType.PREVIEW_URL_EDITOR;
 
 /**
  * @author Aleksandr Shmaraev
@@ -82,21 +86,21 @@ public class PreviewUrlIntoCommandsEditorTest {
     public void checkSavePreviewUrlIntoCommand() throws InterruptedException {
         projectExplorer.waitProjectExplorer();
         projectExplorer.waitItem(PROJ_NAME);
-        String currentWindow = ide.driver().getWindowHandle();
+        String currentWindow = seleniumWebDriver.getWindowHandle();
 
         // create new preview url
         createMavenCommand();
         commandsExplorer.waitCommandExplorerIsOpened();
-        commandsExplorer.selectCommandByName(TestIntelligentCommandsConstants.CommandsDefaultNames.MAVEN_NAME);
+        commandsExplorer.selectCommandByName(MAVEN_NAME);
         commandsEditor.waitActiveEditor();
         commandsEditor.typeTextIntoNameCommandField(NAME_COMM);
         commandsEditor.waitTextIntoNameCommandField(NAME_COMM);
-        commandsEditor.setFocusIntoTypeCommandsEditor(CommandsEditor.CommandsEditorType.PREVIEW_URL_EDITOR);
+        commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
         commandsEditor.setCursorToLine(1);
         commandsEditor.deleteAllContent();
         commandsEditor.typeTextIntoEditor(PREVIEW_URL);
         commandsEditor.waitTextIntoEditor(PREVIEW_URL);
-        commandsEditor.waitTabCommandWithUnsavedStatus(TestIntelligentCommandsConstants.CommandsDefaultNames.MAVEN_NAME);
+        commandsEditor.waitTabCommandWithUnsavedStatus(MAVEN_NAME);
         commandsEditor.clickOnSaveButtonInTheEditCommand();
         editor.waitTabFileWithSavedStatus(NAME_COMM);
 
@@ -112,19 +116,19 @@ public class PreviewUrlIntoCommandsEditorTest {
     private void createMavenCommand() {
         commandsExplorer.openCommandsExplorer();
         commandsExplorer.waitCommandExplorerIsOpened();
-        commandsExplorer.clickAddCommandButton(TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL);
+        commandsExplorer.clickAddCommandButton(COMMON_GOAL);
         loader.waitOnClosed();
-        commandsExplorer.chooseCommandTypeInContextMenu(TestIntelligentCommandsConstants.CommandsTypes.MAVEN_TYPE);
+        commandsExplorer.chooseCommandTypeInContextMenu(MAVEN_TYPE);
         loader.waitOnClosed();
-        commandsExplorer.waitCommandInExplorerByName(TestIntelligentCommandsConstants.CommandsDefaultNames.MAVEN_NAME);
+        commandsExplorer.waitCommandInExplorerByName(MAVEN_NAME);
     }
 
     private void checkPageOpenedByPreviewUrl() {
-        new WebDriverWait(ide.driver(), TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC).until(
+        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC).until(
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//nav[@class='menu-desktop']//a[text()='Technology']")));
-        new WebDriverWait(ide.driver(), TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC).until(
+        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC).until(
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//nav[@class='menu-desktop']//a[text()='Docs']")));
-        new WebDriverWait(ide.driver(), TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC).until(
+        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC).until(
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//nav[@class='menu-desktop']//a[text()='Get Started']")));
     }
 

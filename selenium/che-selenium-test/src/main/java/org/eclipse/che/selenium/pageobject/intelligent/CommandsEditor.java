@@ -20,6 +20,7 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
@@ -32,6 +33,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_EDITOR_ENTRY_POINT;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 
 /**
  * @author Aleksandr Shmaraiev
@@ -43,11 +45,28 @@ public class CommandsEditor extends CodenvyEditor {
     private final WebDriverWait elemDriverWait;
 
     @Inject
-    public CommandsEditor(SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory, AskForValueDialog askForValueDialog) {
+    public CommandsEditor(SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory,
+                          AskForValueDialog askForValueDialog) {
         super(seleniumWebDriver, loader, actionsFactory, askForValueDialog);
         PageFactory.initElements(seleniumWebDriver, this);
         redrawWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
         elemDriverWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
+    }
+
+    public static final class CommandsEditorType {
+        public static final String COMMAND_LINE_EDITOR = "(" + Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH + ")[1]";
+        public static final String PREVIEW_URL_EDITOR  = "(" + Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH + ")[2]";
+
+        private CommandsEditorType() { }
+
+    }
+
+    public static final class CommandsMacrosLinkType {
+        public static final String EDITOR_MACROS_LINK  = "(" + ACTIVE_EDITOR_ENTRY_POINT + "//a[@id='gwt-debug-link-explore_macros'])[1]";
+        public static final String PREVIEW_MACROS_LINK = "(" + ACTIVE_EDITOR_ENTRY_POINT + "//a[@id='gwt-debug-link-explore_macros'])[2]";
+
+        private CommandsMacrosLinkType() { }
+
     }
 
     /**
@@ -78,8 +97,11 @@ public class CommandsEditor extends CodenvyEditor {
 
         static final String DESCRIPTION_MACROS = "//div[text()='%s']";
 
-        private CommandsLocators() {
-        }
+        static final String COMMAND_MACROS_FORM = "//div[@id='gwt-debug-macro_chooser']";
+
+        static final String COMMAND_MACROS_INPUT_FIELD = COMMAND_MACROS_FORM + "/descendant::input[1]";
+
+        private CommandsLocators() { }
     }
 
     @FindBy(xpath = CommandsLocators.RUN_BUTTON)
@@ -102,6 +124,12 @@ public class CommandsEditor extends CodenvyEditor {
 
     @FindBy(xpath = CommandsLocators.GOAL_DROP_DOWN)
     WebElement goalDropDown;
+
+    @FindBy(xpath = CommandsLocators.COMMAND_MACROS_FORM)
+    WebElement macrosContainer;
+
+    @FindBy(xpath = CommandsLocators.COMMAND_MACROS_INPUT_FIELD)
+    WebElement macrosInputField;
 
     public void clickOnRunButton() {
         redrawWait.until(visibilityOf(runButton)).click();
@@ -154,6 +182,61 @@ public class CommandsEditor extends CodenvyEditor {
         redrawWait.until(visibilityOfElementLocated(By.xpath(String.format(CommandsLocators.DESCRIPTION_MACROS, expText))));
     }
 
+    public void selectMacrosLinkInCommandsEditor(String macrosLinkType) {
+        redrawWait.until(visibilityOfElementLocated(By.xpath(macrosLinkType))).click();
+        waitCommandsMacrosIsOpen();
+    }
+
+    public void waitCommandsMacrosIsOpen() {
+        redrawWait.until(visibilityOfElementLocated(By.xpath(CommandsLocators.COMMAND_MACROS_FORM)));
+    }
+
+    public void waitCommandsMacrosIsClosed() {
+        redrawWait.until(invisibilityOfElementLocated(By.xpath(CommandsLocators.COMMAND_MACROS_FORM)));
+    }
+
+    public void typeTextIntoSearchMacroField(String text) {
+        redrawWait.until(visibilityOfElementLocated(By.xpath(CommandsLocators.COMMAND_MACROS_INPUT_FIELD))).click();
+        redrawWait.until(visibilityOfElementLocated(By.xpath(CommandsLocators.COMMAND_MACROS_INPUT_FIELD))).clear();
+        redrawWait.until(visibilityOfElementLocated(By.xpath(CommandsLocators.COMMAND_MACROS_INPUT_FIELD))).sendKeys(text);
+    }
+
+    public void waitTextIntoSearchMacroField(String expText) {
+        redrawWait.until((ExpectedCondition<Boolean>)webDriver -> macrosInputField.getAttribute("value").equals(expText));
+    }
+
+    public void waitTextIntoMacrosContainer(final String expText) {
+        redrawWait.until((ExpectedCondition<Boolean>)(WebDriver webDriver) -> getAllVisibleTextFromMacrosContainer().contains(expText));
+    }
+
+    public String getAllVisibleTextFromMacrosContainer() {
+        waitCommandsMacrosIsOpen();
+        return macrosContainer.getText();
+    }
+
+    public void enterMacroCommandByEnter(String item) {
+        selectMacroCommand(item);
+        actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER.toString()).perform();
+    }
+
+    public void enterMacroCommandByDoubleClick(String item) {
+        selectMacroCommand(item);
+        actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
+    }
+
+    public void selectMacroCommand(String item) {
+        String locator = String.format(CommandsLocators.COMMAND_MACROS_FORM + "//div[text()='%s']", item);
+        redrawWait.until(visibilityOfElementLocated(By.xpath(locator))).click();
+        WebElement highlightEItem = seleniumWebDriver.findElement(By.xpath(locator));
+        redrawWait.until(visibilityOf(highlightEItem)).getCssValue("background-color").contains("rgb(37, 108, 159)");
+    }
+
+    public void waitMacroCommandIsSelected(String item) {
+        String locator = String.format(CommandsLocators.COMMAND_MACROS_FORM + "//div[text()='%s']", item);
+        WebElement highlightEItem = seleniumWebDriver.findElement(By.xpath(locator));
+        redrawWait.until(visibilityOf(highlightEItem)).getCssValue("background-color").contains("rgb(37, 108, 159)");
+    }
+
     @Override
     public void deleteAllContent() {
         Actions action = actionsFactory.createAction(seleniumWebDriver);
@@ -174,12 +257,5 @@ public class CommandsEditor extends CodenvyEditor {
         askForValueDialog.clickOkBtn();
         askForValueDialog.waitFormToClose();
         waitActiveEditor();
-    }
-
-    public static final class CommandsEditorType {
-        public static final String COMMAND_LINE_EDITOR = "(" + Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH + ")[1]";
-        public static final String PREVIEW_URL_EDITOR  = "(" + Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH + ")[2]";
-
-        private CommandsEditorType() { }
     }
 }

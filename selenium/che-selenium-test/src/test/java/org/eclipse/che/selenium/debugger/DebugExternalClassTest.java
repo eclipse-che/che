@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -31,25 +30,20 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.net.URL;
 import java.nio.file.Paths;
 
 /**
  * @author Dmytro Nochevnov
  */
 public class DebugExternalClassTest {
-
-    private static final String PROJECT          = "java-with-external-libs";
-    private static final String PATH_TO_CLASS    = PROJECT + "/src/main/java/org/eclipse/che/examples/SimpleLogger.java";
-
-    private static final String BUILD_AND_DEBUG_COMMAND =
-            "mvn -f ${current.project.path} clean install && java -jar -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 " +
-            "${current.project.path}/target/java-with-external-libs-1.0-SNAPSHOT-jar-with-dependencies.jar";
+    private static final String PROJECT       = "java-with-external-libs";
+    private static final String PATH_TO_CLASS = PROJECT + "/src/main/java/org/eclipse/che/examples/SimpleLogger.java";
 
     private static final String BUILD_AND_DEBUG_COMMAND_NAME = "build-and-debug";
 
@@ -63,36 +57,39 @@ public class DebugExternalClassTest {
     @Inject
     private ProjectExplorer          projectExplorer;
     @Inject
-    private Loader                     loader;
+    private Loader                   loader;
     @Inject
-    private DebugPanel                 debugPanel;
+    private DebugPanel               debugPanel;
     @Inject
-    private JavaDebugConfig            debugConfig;
+    private JavaDebugConfig          debugConfig;
     @Inject
-    private NotificationsPopupPanel    notifications;
+    private NotificationsPopupPanel  notifications;
     @Inject
-    private Menu                       menu;
+    private Menu                     menu;
     @Inject
-    private CodenvyEditor              editor;
+    private CodenvyEditor            editor;
     @Inject
-    private Consoles                   consoles;
+    private Consoles                 consoles;
     @Inject
-    private TestCommandServiceClient   testCommandServiceClient;
+    private TestCommandServiceClient testCommandServiceClient;
     @Inject
-    private TestWorkspaceServiceClient workspaceServiceClient;
+    private TestProjectServiceClient testProjectServiceClient;
     @Inject
-    private TestProjectServiceClient   testProjectServiceClient;
+    private CommandsPalette          commandsPalette;
 
     @BeforeClass
     public void setup() throws Exception {
-        URL resource = DebugExternalClassTest.this.getClass().getResource("/projects/plugins/DebuggerPlugin/java-with-external-libs");
         testProjectServiceClient.importProject(ws.getId(),
                                                user.getAuthToken(),
-                                               Paths.get(resource.toURI()),
+                                               Paths.get(getClass().getResource("/projects/plugins/DebuggerPlugin/java-with-external-libs")
+                                                                   .toURI()),
                                                PROJECT,
                                                ProjectTemplates.CONSOLE_JAVA_SIMPLE);
 
-        testCommandServiceClient.createCommand(BUILD_AND_DEBUG_COMMAND,
+        testCommandServiceClient.createCommand("mvn -f ${current.project.path} clean install && java -jar " +
+                                               "-Xdebug -Xnoagent -Djava.compiler=NONE " +
+                                               "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 " +
+                                               "${current.project.path}/target/java-with-external-libs-1.0-SNAPSHOT-jar-with-dependencies.jar",
                                                BUILD_AND_DEBUG_COMMAND_NAME,
                                                TestCommandsConstants.CUSTOM,
                                                ws.getId(),
@@ -121,7 +118,8 @@ public class DebugExternalClassTest {
         projectExplorer.openItemByPath(PATH_TO_CLASS);
 
         // start application in debug mode
-        projectExplorer.invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT, BUILD_AND_DEBUG_COMMAND_NAME);
+        commandsPalette.openCommandPalette();
+        commandsPalette.startCommandByDoubleClick(BUILD_AND_DEBUG_COMMAND_NAME);
         consoles.waitExpectedTextIntoConsole(TestBuildConstants.LISTENING_AT_ADDRESS_8000);
 
         editor.waitActiveEditor();

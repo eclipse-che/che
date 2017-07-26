@@ -31,8 +31,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -49,7 +48,6 @@ import static org.testng.Assert.assertTrue;
  * @author Musienko Maxim
  */
 public class ChangeVariableWithEvaluatingTest {
-    private static final Logger LOG                          = LoggerFactory.getLogger(ChangeVariableWithEvaluatingTest.class);
     private static final String PROJECT_NAME_CHANGE_VARIABLE = NameGenerator
             .generate(ChangeVariableWithEvaluatingTest.class.getSimpleName(), 2);
 
@@ -93,6 +91,8 @@ public class ChangeVariableWithEvaluatingTest {
     private TestWorkspaceServiceClient workspaceServiceClient;
     @Inject
     private TestProjectServiceClient   testProjectServiceClient;
+    @Inject
+    private CommandsPalette            commandsPalette;
 
     @BeforeClass
     public void prepare() throws Exception {
@@ -135,7 +135,8 @@ public class ChangeVariableWithEvaluatingTest {
     @Test
     public void changeVariableTest() throws Exception {
         buildProjectAndOpenMainClass();
-        projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME_CHANGE_VARIABLE, START_DEBUG_COMMAND_NAME);
+        commandsPalette.openCommandPalette();
+        commandsPalette.startCommandByDoubleClick(START_DEBUG_COMMAND_NAME);
         consoles.waitExpectedTextIntoConsole(" Server startup in");
         editor.setCursorToLine(34);
         editor.setBreakPointAndWaitInactiveState(34);
@@ -144,7 +145,8 @@ public class ChangeVariableWithEvaluatingTest {
         menu.runCommand(TestMenuCommandsConstants.Run.RUN_MENU,
                         TestMenuCommandsConstants.Run.DEBUG,
                         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT_NAME_CHANGE_VARIABLE);
-        String appUrl = "http" + "://" + workspaceServiceClient.getServerAddressByPort(ws.getId(), user.getAuthToken(), 8080) + "/spring/guess";
+        String appUrl =
+                "http" + "://" + workspaceServiceClient.getServerAddressByPort(ws.getId(), user.getAuthToken(), 8080) + "/spring/guess";
         String requestMess = "11";
         editor.waitBreakPointWithActiveState(34);
         CompletableFuture<String> instToRequestThread = debuggerUtils.gotoDebugAppAndSendRequest(appUrl, requestMess);
@@ -171,7 +173,8 @@ public class ChangeVariableWithEvaluatingTest {
         projectExplorer.waitItem(PROJECT_NAME_CHANGE_VARIABLE);
         toastLoader.waitAppeareanceAndClosing();
         projectExplorer.quickExpandWithJavaScript();
-        projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME_CHANGE_VARIABLE, BUILD_COMMAND_NAME);
+        commandsPalette.openCommandPalette();
+        commandsPalette.startCommandByDoubleClick(BUILD_COMMAND_NAME);
         consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
         projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
         editor.waitActiveEditor();
