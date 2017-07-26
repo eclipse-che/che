@@ -53,10 +53,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.gwt.user.client.Random.nextInt;
 import static java.util.Collections.addAll;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
@@ -79,8 +79,6 @@ public class AppContextImpl implements AppContext,
                                        WorkspaceStartedEvent.Handler,
                                        WorkspaceStoppedEvent.Handler,
                                        ResourceManagerInitializer {
-    private static final String APP_ID =  String.valueOf(nextInt(Integer.MAX_VALUE));
-
     private final QueryParameters                        queryParameters;
     private final List<String>                           projectsInImport;
     private final EventBus                               eventBus;
@@ -90,6 +88,8 @@ public class AppContextImpl implements AppContext,
 
     private final List<Project>  rootProjects      = newArrayList();
     private final List<Resource> selectedResources = newArrayList();
+
+    private String applicationWebsocketId = null;
 
     private Workspace           userWorkspace;
     private CurrentUser         currentUser;
@@ -458,8 +458,13 @@ public class AppContextImpl implements AppContext,
     }
 
     @Override
-    public String getAppId() {
-        return APP_ID;
+    public Optional<String> getApplicationWebsocketId() {
+        return Optional.ofNullable(applicationWebsocketId);
+    }
+
+    @Override
+    public void setApplicationWebsocketId(String id) {
+        this.applicationWebsocketId = id;
     }
 
     @Override
