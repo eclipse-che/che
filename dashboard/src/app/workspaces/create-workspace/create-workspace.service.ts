@@ -172,7 +172,6 @@ export class CreateWorkspaceSvc {
       }).then(() => {
         return this.createProjects(workspace.id, projectTemplates);
       }).then(() => {
-        this.getIDE().ProjectExplorer.refresh();
         return this.importProjects(workspace.id, projectTemplates);
       }).then(() => {
         let IDE = this.getIDE();
