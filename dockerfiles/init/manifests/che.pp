@@ -38,7 +38,7 @@ node default {
   $che_single_port = getValue("CHE_SINGLE_PORT","false")
 
   ###############################
-  # Small group
+  # Che multiuser
   #
   $che_multiuser = getValue("CHE_MULTIUSER","false")
 
