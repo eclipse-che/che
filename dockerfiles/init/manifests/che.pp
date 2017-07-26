@@ -37,13 +37,10 @@ node default {
   #
   $che_single_port = getValue("CHE_SINGLE_PORT","false")
 
-
-
-    ###############################
-    # Small group
-    #
-  $che_for_small_groups = getValue("CHE_FOR_SMALL_GROUPS","true")
-
+  ###############################
+  # Small group
+  #
+  $che_multiuser = getValue("CHE_MULTIUSER","false")
 
   ################################
   # DNS resolver configuration

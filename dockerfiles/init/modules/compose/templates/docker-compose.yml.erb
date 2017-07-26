@@ -3,7 +3,7 @@
 # PLEASE DON'T MODIFY BY HAND
 # ###################################
 
-<% if scope.lookupvar('che::che_for_small_groups') == 'true' -%>
+<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
 version: '2.1'
 services:
 <% end -%>
@@ -12,7 +12,11 @@ services:
   # CHE
   ########################
   che:
+<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
+    image: <%= ENV["IMAGE_CHE_MULTIUSER"] %>
+<% else -%>
     image: <%= ENV["IMAGE_CHE"] %>
+<% end -%>
     env_file:
 <% if @compose_file_for_containers == true -%>
       - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/che/che.env'
@@ -81,7 +85,7 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/config/traefik/traefik.toml:/etc/traefik/traefik.toml'
 <% end -%>
 
-<% if scope.lookupvar('che::che_for_small_groups') == 'true' -%>
+<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
   ########################
   # POSTGRES
   ########################
