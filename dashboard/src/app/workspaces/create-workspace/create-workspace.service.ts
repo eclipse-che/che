@@ -210,7 +210,7 @@ export class CreateWorkspaceSvc {
     }
 
     const title = 'Warning',
-          content = `You have project editing, that is not completed. Would you like to proceed to workspace creation without this changes?`;
+          content = `You have project editing, that is not completed. Would you like to proceed to workspace creation without these changes?`;
     return this.confirmDialogService.showConfirmDialog(title, content, 'Continue');
   }
 
