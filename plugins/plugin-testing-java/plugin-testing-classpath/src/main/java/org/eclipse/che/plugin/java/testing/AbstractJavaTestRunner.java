@@ -68,7 +68,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
                 addAllTestsMethod(result, compilationUnit);
             } else {
                 IJavaElement element = compilationUnit.getElementAt(context.getOffset());
-                if ((element.getElementType() == IJavaElement.METHOD)) {
+                if (element != null && element.getElementType() == IJavaElement.METHOD) {
                     if (isTestMethod((IMethod)element, compilationUnit)) {
                         result.add(createTestPosition((IMethod)element));
                     }
