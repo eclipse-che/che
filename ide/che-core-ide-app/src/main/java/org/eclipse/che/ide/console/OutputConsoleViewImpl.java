@@ -394,7 +394,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         }
 
         // Follow output if scroll area is scrolled to the end
-        if (scrollPanel.getElement().getScrollTop() + scrollPanel.getElement().getOffsetHeight() >
+        if (scrollPanel.getElement().getScrollTop() + scrollPanel.getElement().getOffsetHeight() >=
             scrollPanel.getElement().getScrollHeight()) {
             followOutput = true;
         } else {
