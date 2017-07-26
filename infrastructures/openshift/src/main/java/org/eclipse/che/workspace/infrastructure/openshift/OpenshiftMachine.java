@@ -10,17 +10,27 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
+import io.fabric8.openshift.api.model.Route;
+import io.fabric8.openshift.api.model.RoutePort;
 import io.fabric8.openshift.client.OpenShiftClient;
 import okhttp3.Response;
 
+import com.google.common.collect.ArrayListMultimap;
+
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.slf4j.Logger;
@@ -29,12 +39,14 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 
@@ -47,17 +59,22 @@ public class OpenshiftMachine implements Machine {
     private static final String OPENSHIFT_POD_STATUS_RUNNING = "Running";
 
     private final OpenshiftClientFactory clientFactory;
-    private       Pod                    pod;
+    private final String                 projectName;
+    private final String                 podName;
     private final String                 containerName;
 
-    public OpenshiftMachine(OpenshiftClientFactory clientFactory, Pod pod, String containerName) {
+    public OpenshiftMachine(OpenshiftClientFactory clientFactory,
+                            String projectName,
+                            String podName,
+                            String containerName) {
         this.clientFactory = clientFactory;
-        this.pod = pod;
+        this.projectName = projectName;
+        this.podName = podName;
         this.containerName = containerName;
     }
 
     public String getName() {
-        return pod.getMetadata().getName() + "/" + containerName;
+        return podName + "/" + containerName;
     }
 
     @Override
@@ -67,17 +84,109 @@ public class OpenshiftMachine implements Machine {
 
     @Override
     public Map<String, ? extends Server> getServers() {
-        //TODO https://github.com/eclipse/che/issues/5687
-        return new HashMap<>();
+        //TODO https://github.com/eclipse/che/issues/5688
+        try (OpenShiftClient client = clientFactory.create()) {
+            //TODO Explore maybe it is possible to request required service by field selector
+            List<Service> matchedServices = client.services()
+                                                  .inNamespace(projectName)
+                                                  .list()
+                                                  .getItems()
+                                                  .stream()
+                                                  .filter(this::isMachineExposedByService)
+                                                  .collect(Collectors.toList());
+
+
+            //check matching by container
+            Container cointaner = getContainer();
+            ArrayListMultimap<String, ServicePort> matchedServicesPorts = ArrayListMultimap.create();
+            for (ContainerPort containerPort : cointaner.getPorts()) {
+                Integer port = containerPort.getContainerPort();
+
+                for (Service service : matchedServices) {
+                    for (ServicePort servicePort : service.getSpec().getPorts()) {
+                        if (port.equals(servicePort.getPort())) {
+                            // container is accessible via this service
+                            matchedServicesPorts.put(service.getMetadata().getName(), servicePort);
+                        }
+                    }
+                }
+            }
+
+            List<Route> routes = client.routes()
+                                       .inNamespace(projectName)
+                                       .list()
+                                       .getItems();
+            Map<String, ServerImpl> servers = new HashMap<>();
+            for (Route route : routes) {
+                String serviceName = route.getSpec().getTo().getName();
+                List<ServicePort> servicePorts = matchedServicesPorts.get(serviceName);
+                if (servicePorts != null) {
+                    RoutePort routePort = route.getSpec().getPort();
+                    for (ServicePort servicePort : servicePorts) {
+                        String portReference = routePort.getTargetPort().getStrVal();
+                        if (portReference != null) {
+                            if (portReference.equals(servicePort.getName())) {
+                                servers.put(portReference, new ServerImpl("http://" + route.getSpec().getHost(),
+                                                                          ServerStatus.UNKNOWN));
+                            }
+                            continue;
+                        }
+
+                        Integer portNumber = routePort.getTargetPort().getIntVal();
+                        if (portNumber != null) {
+                            if (portNumber.equals(servicePort.getPort())) {
+                                servers.put(Integer.toString(portNumber),
+                                            new ServerImpl("http://" + route.getSpec().getHost(),
+                                                           ServerStatus.UNKNOWN));
+                            }
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            return servers;
+        }
+    }
+
+    private Pod getPod() {
+        try (OpenShiftClient client = clientFactory.create()) {
+            return client.pods()
+                         .inNamespace(projectName)
+                         .withName(podName)
+                         .get();
+        }
+    }
+
+    private Container getContainer() {
+        //TODO https://github.com/eclipse/che/issues/5688
+        return getPod().getSpec()
+                       .getContainers()
+                       .stream()
+                       .filter(c -> containerName.equals(c.getName()))
+                       .findAny()
+                       .orElseThrow(() -> new IllegalStateException("Corresponding pod for openshift machine doesn't exit."));
+    }
+
+    private boolean isMachineExposedByService(Service service) {
+        Map<String, String> labels = getPod().getMetadata().getLabels();
+        Map<String, String> selectorLabels = service.getSpec().getSelector();
+        for (Map.Entry<String, String> selectorLabelEntry : selectorLabels.entrySet()) {
+            if (!selectorLabelEntry.getValue().equals(labels.get(selectorLabelEntry.getKey()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void exec(String... command) throws InfrastructureException {
         ExecWatchdog watchdog = new ExecWatchdog();
         try (OpenShiftClient client = clientFactory.create();
              ExecWatch watch = client.pods()
-                                     .inNamespace(pod.getMetadata().getNamespace())
-                                     .withName(pod.getMetadata().getName())
+                                     .inNamespace(projectName)
+                                     .withName(podName)
                                      .inContainer(containerName)
+                                     //TODO Investigate why redirection output and listener doesn't work together
                                      .usingListener(watchdog)
                                      .exec(encode(command))) {
             try {
@@ -95,26 +204,26 @@ public class OpenshiftMachine implements Machine {
     public void waitRunning(int timeoutMin) throws InfrastructureException {
         LOG.info("Waiting machine {}", getName());
 
-        CompletableFuture<Pod> future = new CompletableFuture<>();
+        CompletableFuture<Void> future = new CompletableFuture<>();
         Watch watch;
         try (OpenShiftClient client = clientFactory.create()) {
             Pod actualPod = client.pods()
-                                  .inNamespace(pod.getMetadata().getNamespace())
-                                  .withName(pod.getMetadata().getName())
+                                  .inNamespace(projectName)
+                                  .withName(podName)
                                   .get();
 
             if (actualPod == null) {
-                throw new InternalInfrastructureException("Can't find created pod " + pod.getMetadata().getName());
+                throw new InternalInfrastructureException("Can't find created pod " + podName);
             }
             String status = actualPod.getStatus().getPhase();
             LOG.info("Machine {} is {}", getName(), status);
             if (OPENSHIFT_POD_STATUS_RUNNING.equals(status)) {
-                future.complete(actualPod);
+                future.complete(null);
                 return;
             } else {
                 watch = client.pods()
-                              .inNamespace(pod.getMetadata().getNamespace())
-                              .withName(pod.getMetadata().getName())
+                              .inNamespace(projectName)
+                              .withName(podName)
                               .watch(new Watcher<Pod>() {
                                          @Override
                                          public void eventReceived(Action action, Pod pod) {
@@ -122,7 +231,7 @@ public class OpenshiftMachine implements Machine {
                                              String phase = pod.getStatus().getPhase();
                                              LOG.info("Machine {} is {}", getName(), status);
                                              if (OPENSHIFT_POD_STATUS_RUNNING.equals(phase)) {
-                                                 future.complete(pod);
+                                                 future.complete(null);
                                              }
                                          }
 
@@ -139,7 +248,7 @@ public class OpenshiftMachine implements Machine {
         }
 
         try {
-            this.pod = future.get(timeoutMin, TimeUnit.MINUTES);
+            future.get(timeoutMin, TimeUnit.MINUTES);
             watch.close();
         } catch (ExecutionException e) {
             throw new InfrastructureException(e.getCause().getMessage(), e);

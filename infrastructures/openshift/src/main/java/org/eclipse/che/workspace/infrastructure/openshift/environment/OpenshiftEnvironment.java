@@ -14,8 +14,6 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
 
-import com.google.common.collect.ImmutableMap;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,32 +26,53 @@ public class OpenshiftEnvironment {
     private Map<String, Route>   routes;
 
     public OpenshiftEnvironment() {
-        routes = new HashMap<>();
-        services = new HashMap<>();
-        pods = new HashMap<>();
     }
 
     public Map<String, Pod> getPods() {
-        return ImmutableMap.copyOf(pods);
+        if (pods == null) {
+            pods = new HashMap<>();
+        }
+        return pods;
     }
 
-    public void addPod(Pod pod) {
-        pods.put(pod.getMetadata().getName(), pod);
+    public void setPods(Map<String, Pod> pods) {
+        this.pods = pods;
+    }
+
+    public OpenshiftEnvironment withPods(Map<String, Pod> pods) {
+        this.pods = pods;
+        return this;
     }
 
     public Map<String, Service> getServices() {
+        if (services == null) {
+            services = new HashMap<>();
+        }
         return services;
     }
 
-    public void addService(Service service) {
-        services.put(service.getMetadata().getName(), service);
+    public void setServices(Map<String, Service> services) {
+        this.services = services;
+    }
+
+    public OpenshiftEnvironment withServices(Map<String, Service> services) {
+        this.services = services;
+        return this;
     }
 
     public Map<String, Route> getRoutes() {
+        if (routes == null) {
+            routes = new HashMap<>();
+        }
         return routes;
     }
 
-    public void addRoute(Route route) {
-        routes.put(route.getMetadata().getName(), route);
+    public void setRoutes(Map<String, Route> routes) {
+        this.routes = routes;
+    }
+
+    public OpenshiftEnvironment withRoutes(Map<String, Route> routes) {
+        this.routes = routes;
+        return this;
     }
 }

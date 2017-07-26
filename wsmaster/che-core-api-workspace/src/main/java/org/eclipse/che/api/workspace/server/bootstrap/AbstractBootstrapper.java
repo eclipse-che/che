@@ -90,12 +90,8 @@ public abstract class AbstractBootstrapper {
 
         eventService.subscribe(bootstrapperStatusListener, BootstrapperStatusEvent.class);
         try {
-            LOG.info("Launching bootstrapper");
-
             doBootstrapAsync(installerEndpoint + ENDPOINT_IDS.getAndIncrement(),
                              outputEndpoint + ENDPOINT_IDS.getAndIncrement());
-
-            LOG.info("Launched bootstrapper. Waiting for Done event");
 
             //waiting for DONE or FAILED bootstrapper status event
             BootstrapperStatusEvent resultEvent = finishEventFuture.get(bootstrappingTimeoutMinutes, TimeUnit.MINUTES);
