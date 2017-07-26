@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 /**
  * Injects fields annotated with {@link InjectPageObject}.
+ * All page objects with the same {@link InjectPageObject#driverId()} must share a common {@link SeleniumWebDriver} instance.
  *
  * @author Anatolii Bazko
  */
@@ -76,12 +77,13 @@ public class PageObjectsInjector {
 
         Optional<Constructor<?>> constructor = findConstructor(type);
         if (!constructor.isPresent()) {
-            // guice creates instance
+            // interface? get instance from a guice container
             obj = injector.get().getInstance(type);
 
         } else {
             Class<?>[] parameterTypes = constructor.get().getParameterTypes();
             Object[] params = new Object[parameterTypes.length];
+
             for (int i = 0; i < parameterTypes.length; i++) {
                 Object pt = container.get(parameterTypes[i]);
                 if (pt == null) {
@@ -105,6 +107,9 @@ public class PageObjectsInjector {
                      .findAny();
     }
 
+    /**
+     * Find class fields annotated with {@link InjectPageObject}.
+     */
     private Map<Integer, Set<Field>> collectFieldsToInject(Object testInstance) {
         Map<Integer, Set<Field>> toInject = new HashMap<>();
 
