@@ -47,6 +47,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 /**
@@ -386,7 +387,7 @@ public class WorkspaceManager {
 
         requireNonNull(workspaceId, "Required non-null workspace id");
         final WorkspaceImpl workspace = normalizeState(workspaceDao.get(workspaceId), true);
-        checkWorkspaceIsRunning(workspace, "stop");
+        checkWorkspaceIsRunningOrStarting(workspace, "stop");
         stopAsync(workspace, options);
     }
 
@@ -538,8 +539,8 @@ public class WorkspaceManager {
         });
     }
 
-    private void checkWorkspaceIsRunning(WorkspaceImpl workspace, String operation) throws ConflictException {
-        if (workspace.getStatus() != RUNNING) {
+    private void checkWorkspaceIsRunningOrStarting(WorkspaceImpl workspace, String operation) throws ConflictException {
+        if (workspace.getStatus() != RUNNING && workspace.getStatus() != STARTING) {
             throw new ConflictException(format("Could not %s the workspace '%s/%s' because its status is '%s'.",
                                                operation,
                                                workspace.getNamespace(),

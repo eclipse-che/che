@@ -26,6 +26,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
@@ -36,7 +37,6 @@ import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrap
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
-import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactory;
@@ -48,17 +48,17 @@ import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotExceptio
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.slf4j.Logger;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -175,57 +175,68 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     @Override
     protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
         startSynchronizer.setStartThread();
-
-        DockerEnvironment dockerEnvironment = getContext().getDockerEnvironment();
-        Queue<String> startQueue = new ArrayDeque<>(getContext().getOrderedContainers());
+        Map<String, DockerContainerConfig> machineName2config = getContext().getDockerEnvironment().getContainers();
         try {
             networks.createNetwork(getContext().getDockerEnvironment().getNetwork());
 
-            boolean restore = isRestoreEnabled(startOptions);
-
-            String machineName = startQueue.peek();
-            while (machineName != null) {
-                DockerContainerConfig container = dockerEnvironment.getContainers().get(machineName);
+            final boolean restore = isRestoreEnabled(startOptions);
+            for (String machineName : getContext().getOrderedContainers()) {
+                checkInterruption();
+                final DockerContainerConfig config = machineName2config.get(machineName);
                 sendStartingEvent(machineName);
                 try {
                     if (restore) {
-                        restoreMachine(machineName, container);
+                        restoreMachine(machineName, config);
                     } else {
-                        startMachine(machineName, container);
+                        startMachine(machineName, config);
                     }
                     sendRunningEvent(machineName);
                 } catch (InfrastructureException e) {
                     sendFailedEvent(machineName, e.getMessage());
                     throw e;
                 }
-                startQueue.poll();
-                machineName = startQueue.peek();
             }
+            startSynchronizer.complete();
         } catch (InfrastructureException | InterruptedException | RuntimeException e) {
-            boolean interrupted = e instanceof InterruptedException || Thread.interrupted();
-            boolean runtimeDestroyingNeeded = !startSynchronizer.isStopCalled();
-            if (runtimeDestroyingNeeded) {
-                try {
-                    destroyRuntime(null);
-                } catch (Exception destExc) {
-                    LOG.error(destExc.getLocalizedMessage(), destExc);
-                }
+            boolean interrupted = Thread.interrupted() || e instanceof InterruptedException;
+            try {
+                destroyRuntime(emptyMap());
+            } catch (InternalInfrastructureException destExc) {
+                LOG.error(destExc.getMessage(), destExc);
+            } catch (InfrastructureException ignore) {
             }
+
             if (interrupted) {
-                throw new InfrastructureException("Docker runtime start was interrupted");
+                final RuntimeStartInterruptedException ex =
+                        new RuntimeStartInterruptedException(getContext().getIdentity());
+                startSynchronizer.completeExceptionally(ex);
+                throw ex;
             }
-            if (e instanceof InfrastructureException) {
-                throw (InfrastructureException)e;
-            } else {
-                throw new InternalInfrastructureException(e.getLocalizedMessage(), e);
+            startSynchronizer.completeExceptionally(e);
+            try {
+                throw e;
+            } catch (InfrastructureException rethrow) {
+                throw rethrow;
+            } catch (Exception wrap) {
+                throw new InternalInfrastructureException(e.getMessage(), wrap);
             }
         }
     }
 
     @Override
     protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
-        startSynchronizer.interruptStartThread();
-        destroyRuntime(stopOptions);
+        if (startSynchronizer.interrupt()) {
+            try {
+                startSynchronizer.await();
+            } catch (RuntimeStartInterruptedException ex) {
+                // normal stop
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw new InfrastructureException("Interrupted while waiting for start task cancellation", ex);
+            }
+        } else {
+            destroyRuntime(stopOptions);
+        }
     }
 
     @Override
@@ -241,8 +252,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         return Collections.unmodifiableMap(properties);
     }
 
-    private void restoreMachine(String name, DockerContainerConfig originalConfig)
-            throws InfrastructureException, InterruptedException {
+    private void restoreMachine(String name, DockerContainerConfig originalConfig) throws InfrastructureException,
+                                                                                          InterruptedException {
         RuntimeIdentity identity = getContext().getIdentity();
         try {
             SnapshotImpl snapshot = snapshotDao.getSnapshot(identity.getWorkspaceId(), identity.getEnvName(), name);
@@ -268,8 +279,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
     }
 
-    private void startMachine(String name, DockerContainerConfig containerConfig)
-            throws InfrastructureException, InterruptedException {
+    private void startMachine(String name, DockerContainerConfig containerConfig) throws InfrastructureException,
+                                                                                         InterruptedException {
         InternalMachineConfig machineCfg = getContext().getMachineConfigs().get(name);
 
         DockerMachine machine = containerStarter.startContainer(getContext().getDockerEnvironment().getNetwork(),
@@ -291,11 +302,18 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                .bootstrap();
         }
 
+        checkInterruption();
         ServersReadinessChecker readinessChecker = new ServersReadinessChecker(name,
                                                                                machine.getServers(),
                                                                                serverCheckerFactory);
         readinessChecker.startAsync(new ServerReadinessHandler(name));
         readinessChecker.await();
+    }
+
+    private void checkInterruption() throws InterruptedException {
+        if (Thread.interrupted()) {
+            throw new InterruptedException();
+        }
     }
 
     // TODO support configuration properties as well
@@ -385,10 +403,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         }
         for (Map.Entry<String, DockerMachine> entry : machines.entrySet()) {
             destroyMachineQuietly(entry.getKey(), entry.getValue());
-            eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
-                                           .withEventType(MachineStatus.STOPPED)
-                                           .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
-                                           .withMachineName(entry.getKey()));
             sendStoppedEvent(entry.getKey());
         }
         // TODO what happens when context throws exception here
@@ -480,7 +494,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         @Override
         public void handle(String error) {
             try {
-                internalStop(Collections.emptyMap());
+                internalStop(emptyMap());
             } catch (InfrastructureException e) {
                 LOG.error(e.getLocalizedMessage(), e);
             } finally {
@@ -523,18 +537,58 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                        .withMachineName(machineName));
     }
 
+    /**
+     * Controls the runtime start flow and helps to cancel it.
+     *
+     * <p>The runtime start with cancellation
+     * using the Start Synchronizer might look like:
+     * <pre>
+     * ...
+     *     public void startRuntime() {
+     *          startSynchronizer.setStartThread();
+     *          try {
+     *               // .....
+     *               startSynchronizer.complete();
+     *          } catch (Exception ex) {
+     *               startSynchronizer.completeExceptionally(ex);
+     *               throw ex;
+     *          }
+     *     }
+     * ...
+     * </pre>
+     *
+     * <p>At the same time stopping might look like:
+     * <pre>
+     * ...
+     *     public void stopRuntime() {
+     *          if (startSynchronizer.interrupt()) {
+     *               try {
+     *                  startSynchronizer.await();
+     *               } catch (RuntimeStartInterruptedException ex) {
+     *                  // normal stop
+     *               } catch (InterruptedException ex) {
+     *                  Thread.currentThread().interrupt();
+     *                  ...
+     *               }
+     *          }
+     *     }
+     * ...
+     * </pre>
+     */
     static class StartSynchronizer {
+
+        private Exception                  exception;
         private Thread                     startThread;
-        private boolean                    stopCalled;
         private Map<String, DockerMachine> machines;
+        private CountDownLatch             completionLatch;
 
         public StartSynchronizer() {
-            this.stopCalled = false;
             this.machines = new HashMap<>();
+            this.completionLatch = new CountDownLatch(1);
         }
 
         public synchronized Map<String, ? extends DockerMachine> getMachines() {
-            return machines != null ? machines : Collections.emptyMap();
+            return machines != null ? machines : emptyMap();
         }
 
         public synchronized void addMachine(String name, DockerMachine machine) throws InternalInfrastructureException {
@@ -555,6 +609,12 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             throw new InfrastructureException("Runtime doesn't have machines to remove");
         }
 
+        /**
+         * Sets {@link Thread#currentThread()} as a {@link #startThread}.
+         *
+         * @throws InternalInfrastructureException
+         *         when {@link #startThread} already setted.
+         */
         public synchronized void setStartThread() throws InternalInfrastructureException {
             if (startThread != null) {
                 throw new InternalInfrastructureException("Docker infrastructure context of workspace already started");
@@ -562,19 +622,70 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             startThread = Thread.currentThread();
         }
 
-        public synchronized void interruptStartThread() throws InfrastructureException {
-            if (startThread == null) {
-                throw new InternalInfrastructureException("Stop of non started context not allowed");
+        /**
+         * Releases waiting task and reset the starting thread.
+         *
+         * @throws InterruptedException
+         *         when execution thread was interrupted just before this method call
+         */
+        public synchronized void complete() throws InterruptedException {
+            if (Thread.currentThread().isInterrupted()) {
+                throw new InterruptedException();
             }
-            if (stopCalled) {
-                throw new InternalInfrastructureException("Stop is called twice");
-            }
-            stopCalled = true;
-            startThread.interrupt();
+            startThread = null;
+            completionLatch.countDown();
         }
 
-        public synchronized boolean isStopCalled() {
-            return stopCalled;
+        /**
+         * Releases waiting task, reset the starting thread
+         * and sets an exception if it is not null.
+         *
+         * @param ex
+         *         completion exception might be null
+         */
+        public synchronized void completeExceptionally(Exception ex) {
+            exception = ex;
+            startThread = null;
+            completionLatch.countDown();
+        }
+
+        /**
+         * Interrupts the {@link #startThread} if its value different to null.
+         *
+         * @return true if {@link #startThread} interruption flag setted, otherwise false will be returned
+         */
+        public synchronized boolean interrupt() {
+            if (startThread != null) {
+                startThread.interrupt();
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Waits until {@link #complete} is called and rethrow the {@link #exception} if it present.
+         * This call is blocking and it should be used with {@link #interrupt} method.
+         *
+         * @throws InterruptedException
+         *         when this thread is interrupted while waiting for {@link #complete}
+         * @throws RuntimeStartInterruptedException
+         *         when {@link #startThread} successfully interrupted
+         * @throws InfrastructureException
+         *         when any error occurs while waiting for {@link #complete}
+         */
+        public void await() throws InterruptedException, InfrastructureException {
+            completionLatch.await();
+            synchronized (this) {
+                if (exception != null) {
+                    try {
+                        throw exception;
+                    } catch (InfrastructureException rethrow) {
+                        throw rethrow;
+                    } catch (Exception ex) {
+                        throw new InternalInfrastructureException(ex);
+                    }
+                }
+            }
         }
     }
 }
