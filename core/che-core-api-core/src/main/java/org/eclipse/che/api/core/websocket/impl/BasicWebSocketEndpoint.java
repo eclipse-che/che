@@ -20,63 +20,76 @@ import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
-import javax.websocket.server.PathParam;
 
 /**
  * Duplex WEB SOCKET endpoint, handles messages, errors, session open/close events.
  *
  * @author Dmitry Kuleshov
  */
-public class BasicWebSocketEndpoint {
+abstract public class BasicWebSocketEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(BasicWebSocketEndpoint.class);
 
     private final WebSocketSessionRegistry registry;
     private final MessagesReSender         reSender;
     private final WebSocketMessageReceiver receiver;
+    private final WebsocketIdService       identificationService;
 
 
     public BasicWebSocketEndpoint(WebSocketSessionRegistry registry,
                                   MessagesReSender reSender,
-                                  WebSocketMessageReceiver receiver) {
+                                  WebSocketMessageReceiver receiver,
+                                  WebsocketIdService identificationService) {
 
         this.registry = registry;
         this.reSender = reSender;
         this.receiver = receiver;
+        this.identificationService = identificationService;
     }
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("endpoint-id") String endpointId) {
+    public void onOpen(Session session) {
+        String combinedEndpointId = getCombinedEndpointId(session);
+
         LOG.debug("Web socket session opened");
-        LOG.debug("Endpoint: {}", endpointId);
+        LOG.debug("Endpoint: {}", combinedEndpointId);
 
         session.setMaxIdleTimeout(0);
 
-        registry.add(endpointId, session);
-        reSender.resend(endpointId);
+        registry.add(combinedEndpointId, session);
+        reSender.resend(combinedEndpointId);
     }
 
     @OnMessage
-    public void onMessage(String message, @PathParam("endpoint-id") String endpointId) {
+    public void onMessage(String message, Session session) {
+        String combinedEndpointId = getCombinedEndpointId(session);
+
         LOG.debug("Receiving a web socket message.");
-        LOG.debug("Endpoint: {}", endpointId);
+        LOG.debug("Endpoint: {}", combinedEndpointId);
         LOG.debug("Message: {}", message);
 
-        receiver.receive(endpointId, message);
+        receiver.receive(combinedEndpointId, message);
     }
 
     @OnClose
-    public void onClose(CloseReason closeReason, @PathParam("endpoint-id") String endpointId) {
+    public void onClose(CloseReason closeReason, Session session) {
+        String combinedEndpointId = getCombinedEndpointId(session);
+
         LOG.debug("Web socket session closed");
-        LOG.debug("Endpoint: {}", endpointId);
+        LOG.debug("Endpoint: {}", combinedEndpointId);
         LOG.debug("Close reason: {}:{}", closeReason.getReasonPhrase(), closeReason.getCloseCode());
 
-        registry.remove(endpointId);
+        registry.remove(combinedEndpointId);
     }
 
     @OnError
-    public void onError(Throwable t, @PathParam("endpoint-id") String endpointId) {
+    public void onError(Throwable t) {
         LOG.debug("Web socket session error");
-        LOG.debug("Endpoint: {}", endpointId);
         LOG.debug("Error: {}", t);
     }
+
+    private String getCombinedEndpointId(Session session) {
+        return registry.get(session).orElseGet(() -> identificationService.getCombinedId(getEndpointId()));
+    }
+
+    protected abstract String getEndpointId();
 }

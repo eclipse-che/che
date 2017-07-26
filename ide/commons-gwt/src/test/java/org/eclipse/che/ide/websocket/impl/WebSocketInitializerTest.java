@@ -34,6 +34,8 @@ public class WebSocketInitializerTest {
     private WebSocketPropertyManager   propertyManager;
     @Mock
     private UrlResolver                urlResolver;
+    @Mock
+    private WebSocketActionManager     webSocketActionManager;
     @InjectMocks
     private WebSocketInitializer       initializer;
 
