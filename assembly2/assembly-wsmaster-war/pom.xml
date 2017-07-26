@@ -78,8 +78,6 @@
                             <type>war</type>
                             <includes>
                                 <include>**/**</include>
-                                <include>META-INF/context.xml</include>
-                                <include>META-INF/web.xml</include>
                             </includes>
                         </overlay>
                     </overlays>
@@ -87,6 +85,13 @@
                         <resource>
                             <directory>${basedir}/src/main/webapp/WEB-INF</directory>
                             <targetPath>WEB-INF</targetPath>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </resource>
+                         <resource>
+                            <directory>${basedir}/src/main/webapp/META-INF</directory>
+                            <targetPath>META-INF</targetPath>
                             <includes>
                                 <include>**/*</include>
                             </includes>

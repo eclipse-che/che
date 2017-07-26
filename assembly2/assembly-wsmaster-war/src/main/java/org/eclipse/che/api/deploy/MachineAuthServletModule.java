@@ -8,21 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.auth;
+package org.eclipse.che.api.deploy;
 
-import org.eclipse.che.api.auth.shared.dto.Credentials;
-import org.eclipse.che.commons.auth.AuthenticationException;
+import com.google.inject.servlet.ServletModule;
 
-import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.machine.authentication.server.MachineLoginFilter;
 
 /**
- * @author gazarenkov
+ * @author Max Shaposhnik (mshaposhnik@codenvy.com).
  */
-public interface AuthenticationDao {
+@DynaModule
+public class MachineAuthServletModule extends ServletModule {
 
-    Response login(Credentials credentials, Cookie tokenAccessCookie, UriInfo uriInfo) throws AuthenticationException;
-
-    Response logout(String token, Cookie tokenAccessCookie, UriInfo uriInfo);
+    @Override
+    protected void configureServlets() {
+        filter("/*").through(MachineLoginFilter.class);
+    }
 }

@@ -32,6 +32,7 @@ public class KeycloakAuthenticationFilter extends org.keycloak.adapters.servlet.
             || request.getScheme().equals("ws") || req.getScheme().equals("wss") || request.getRequestURI().contains("/websocket/") ||
             (tokenExtractor.getToken(request) != null && tokenExtractor.getToken(request).startsWith("machine"))) {
             chain.doFilter(req, res);
+            return;
         } else {
             super.doFilter(req, res, chain);
         }
