@@ -48,10 +48,10 @@ public class MachineLoginFilter implements Filter {
         final HttpServletRequest httpRequest = (HttpServletRequest)servletRequest;
         if (httpRequest.getRequestURI().endsWith("/ws") || httpRequest.getRequestURI().endsWith("/eventbus")
             || httpRequest.getScheme().equals("ws") || httpRequest.getScheme().equals("wss") || httpRequest.getRequestURI().contains("/websocket/") ||
-            (tokenExtractor.getToken(httpRequest) != null && !tokenExtractor.getToken(httpRequest).startsWith("machine"))) {
+            tokenExtractor.getToken(httpRequest) == null || !tokenExtractor.getToken(httpRequest).startsWith("machine")) {
             filterChain.doFilter(servletRequest, servletResponse);
+            return;
         } else {
-
             String tokenString;
             User user;
             try {
@@ -64,7 +64,6 @@ public class MachineLoginFilter implements Filter {
 
             final Subject subject =
                     new SubjectImpl(user.getName(), user.getId(), tokenString, false);
-            httpRequest.getSession().setAttribute("codenvy_user", subject);
 
             try {
                 EnvironmentContext.getCurrent().setSubject(subject);

@@ -38,9 +38,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Principal;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.util.Collections.emptyList;
 
 /**
@@ -53,7 +55,7 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
     private UserManager userManager;
 
     @Inject
-    private AccountManager        accountManager;
+    private AccountManager accountManager;
 
     @Inject
     private RequestTokenExtractor tokenExtractor;
@@ -68,31 +70,35 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
 
         final HttpServletRequest httpRequest = (HttpServletRequest)request;
         if (httpRequest.getRequestURI().endsWith("/ws") || httpRequest.getRequestURI().endsWith("/eventbus")
-            || request.getScheme().equals("ws") || httpRequest.getScheme().equals("wss") || httpRequest.getRequestURI().contains("/websocket/") ||
+            || request.getScheme().equals("ws") || httpRequest.getScheme().equals("wss") ||
+            httpRequest.getRequestURI().contains("/websocket/") ||
             (tokenExtractor.getToken(httpRequest) != null && tokenExtractor.getToken(httpRequest).startsWith("machine"))) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        KeycloakSecurityContext  context = (KeycloakSecurityContext)httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
-        // In case of bearer token login, there is another object in session
-        if (context == null) {
-            OidcKeycloakAccount keycloakAccount = (OidcKeycloakAccount)httpRequest.getAttribute(KeycloakAccount.class.getName());
-            if (keycloakAccount != null) {
-                context = keycloakAccount.getKeycloakSecurityContext();
+        HttpSession session = httpRequest.getSession();
+        Subject subject = (Subject)session.getAttribute("che_subject");
+        if (subject == null) {
+            KeycloakSecurityContext context = (KeycloakSecurityContext)httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
+            // In case of bearer token login, there is another object in session
+            if (context == null) {
+                OidcKeycloakAccount keycloakAccount = (OidcKeycloakAccount)httpRequest.getAttribute(KeycloakAccount.class.getName());
+                if (keycloakAccount != null) {
+                    context = keycloakAccount.getKeycloakSecurityContext();
+                }
             }
-        }
-        if (context == null) {
-            throw new ServletException("Cannot detect or instantiate user");
-        }
-        final IDToken token = context.getIdToken() != null ? context.getIdToken() : context.getToken();
-        String tokenString = context.getTokenString();
-        User user = getOrCreateUser(token.getSubject(), token.getEmail(), token.getPreferredUsername());
-        getOrCreateAccount(token.getPreferredUsername(), token.getPreferredUsername());
+            if (context == null) {
+                throw new ServletException("Cannot detect or instantiate user.");
+            }
+            final IDToken token = firstNonNull(context.getIdToken(),context.getToken());
+            String tokenString = context.getTokenString();
+            User user = getOrCreateUser(token.getSubject(), token.getEmail(), token.getPreferredUsername());
+            getOrCreateAccount(token.getPreferredUsername(), token.getPreferredUsername());
 
-        final Subject subject =
-                new SubjectImpl(user.getName(), user.getId(), tokenString, false);
-        httpRequest.getSession().setAttribute("codenvy_user", subject);
+            subject = new SubjectImpl(user.getName(), user.getId(), tokenString, false);
+            session.setAttribute("che_subject", subject);
+        }
 
         try {
             EnvironmentContext.getCurrent().setSubject(subject);
@@ -102,10 +108,10 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
         }
     }
 
-    private User getOrCreateUser(String id, String email, String username) throws ServletException {
+    private synchronized User getOrCreateUser(String id, String email, String username) throws ServletException {
         try {
-            return  userManager.getById(id);
-        } catch (NotFoundException ex) {
+            return userManager.getById(id);
+        } catch (NotFoundException e) {
             try {
                 final UserImpl cheUser = new UserImpl(id,
                                                       email,
@@ -113,8 +119,8 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
                                                       "secret",
                                                       emptyList());
                 return userManager.create(cheUser, false);
-            } catch (ServerException | ConflictException e) {
-                throw new ServletException("Unable to create new user", e);
+            } catch (ServerException | ConflictException ex) {
+                throw new ServletException("Unable to create new user", ex);
             }
         } catch (ServerException e) {
             throw new ServletException("Unable to get user", e);
@@ -122,16 +128,16 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
 
     }
 
-    private Account getOrCreateAccount(String id, String namespace) throws ServletException {
+    private synchronized Account getOrCreateAccount(String id, String namespace) throws ServletException {
         try {
             return accountManager.getById(id);
         } catch (NotFoundException e) {
             try {
                 Account account = new AccountImpl(id, namespace, "personal");
                 accountManager.create(account);
-                return  account;
+                return account;
             } catch (ServerException | ConflictException ex) {
-                throw new ServletException("Unable to create new account", e);
+                throw new ServletException("Unable to create new account", ex);
             }
         } catch (ServerException e) {
             throw new ServletException("Unable to get account", e);
