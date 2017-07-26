@@ -31,21 +31,28 @@ const (
 )
 
 var (
-	installers       []Installer
-	runtimeID        RuntimeID
-	machineName      string
-	installerTimeout time.Duration
-	checkPeriod      time.Duration
+	installers                  []Installer
+	runtimeID                   RuntimeID
+	machineName                 string
+	installerTimeout            time.Duration
+	checkPeriod                 time.Duration
+	logsEndpointReconnectPeriod time.Duration
 
 	bus = event.NewBus()
 )
 
+// Connector encloses implementation specific jsonrpc connection establishment.
+type Connector interface {
+	Connect() (*jsonrpc.Tunnel, error)
+}
+
 // Init sets initializes bootstrapper configuration.
-func Init(id RuntimeID, mName string, instTimeoutSec int, checkPeriodSec int) {
+func Init(id RuntimeID, mName string, instTimeoutSec, checkPeriodSec, logsEndpointReconnectPeriodSec int) {
 	runtimeID = id
 	machineName = mName
 	installerTimeout = time.Second * time.Duration(instTimeoutSec)
 	checkPeriod = time.Second * time.Duration(checkPeriodSec)
+	logsEndpointReconnectPeriod = time.Second * time.Duration(logsEndpointReconnectPeriodSec)
 }
 
 // AddAll adds batch of installers to the installation sequence.
@@ -54,13 +61,20 @@ func AddAll(newInstallers []Installer) {
 }
 
 // PushLogs sets given tunnel as consumer of installer logs.
-func PushLogs(tun *jsonrpc.Tunnel) {
-	bus.Sub(&tunnelBroadcaster{tun}, InstallerLogEventType)
+// Connector is used to reconnect to jsonrpc endpoint if
+// established connection behind given tunnel was lost.
+func PushLogs(tun *jsonrpc.Tunnel, connector Connector) {
+	bus.Sub(&tunnelBroadcaster{
+		tunnel:          tun,
+		connector:       connector,
+		reconnectPeriod: logsEndpointReconnectPeriod,
+		reconnectOnce:   &sync.Once{},
+	}, InstallerLogEventType)
 }
 
 // PushStatuses sets given tunnel as consumer of installer/bootstrapper statuses.
 func PushStatuses(tun *jsonrpc.Tunnel) {
-	bus.SubAny(&tunnelBroadcaster{tun}, InstallerStatusChangedEventType, StatusChangedEventType)
+	bus.SubAny(&tunnelBroadcaster{tunnel: tun}, InstallerStatusChangedEventType, StatusChangedEventType)
 }
 
 // Start starts installation.
@@ -273,12 +287,19 @@ func aliveStartedProcesses() []process.MachineProcess {
 }
 
 type tunnelBroadcaster struct {
-	tunnel *jsonrpc.Tunnel
+	tunnel          *jsonrpc.Tunnel
+	connector       Connector
+	reconnectPeriod time.Duration
+	reconnectOnce   *sync.Once
 }
 
 func (tb *tunnelBroadcaster) Accept(e event.E) {
 	if err := tb.tunnel.Notify(e.Type(), e); err != nil {
 		log.Printf("Trying to send event of type '%s' to closed tunnel '%s'", e.Type(), tb.tunnel.ID())
+		if tb.connector != nil && tb.reconnectPeriod > 0 {
+			// if multiple accepts are on this point
+			tb.reconnectOnce.Do(func() { tb.goReconnect() })
+		}
 	}
 }
 
@@ -287,6 +308,20 @@ func (tb *tunnelBroadcaster) IsDone() bool {
 }
 
 func (tb *tunnelBroadcaster) Close() { tb.tunnel.Close() }
+
+func (tb *tunnelBroadcaster) goReconnect() {
+	go func() {
+		time.Sleep(tb.reconnectPeriod)
+
+		if tunnel, err := tb.connector.Connect(); err != nil {
+			log.Printf("Reconnect to logs endpoint failed, next attempt in %ds", logsEndpointReconnectPeriod/time.Second)
+			tb.goReconnect()
+		} else {
+			log.Printf("Successfully reconnected to logs endpoint")
+			PushLogs(tunnel, tb.connector)
+		}
+	}()
+}
 
 func printPlan() {
 	log.Print("Planning to install")
