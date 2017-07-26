@@ -36,6 +36,7 @@ import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
@@ -43,6 +44,7 @@ import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent.MarkerChangedHandler;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.vcs.ShowVcsBranchActionProvider;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
@@ -82,16 +84,17 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                                                        MarkerChangedHandler,
                                                                        SyntheticNodeUpdateEvent.SyntheticNodeUpdateHandler {
     private static final int PART_SIZE = 500;
-    private final ProjectExplorerView      view;
-    private final EventBus                 eventBus;
-    private final ResourceNode.NodeFactory nodeFactory;
-    private final SettingsProvider         settingsProvider;
-    private final CoreLocalizationConstant locale;
-    private final Resources                resources;
-    private final TreeExpander             treeExpander;
-    private final AppContext               appContext;
-    private final RequestTransmitter       requestTransmitter;
-    private final DtoFactory               dtoFactory;
+    private final ProjectExplorerView                        view;
+    private final EventBus                                   eventBus;
+    private final ResourceNode.NodeFactory                   nodeFactory;
+    private final SettingsProvider                           settingsProvider;
+    private final CoreLocalizationConstant                   locale;
+    private final Resources                                  resources;
+    private final TreeExpander                               treeExpander;
+    private final AppContext                                 appContext;
+    private final RequestTransmitter                         requestTransmitter;
+    private final Provider<Set<ShowVcsBranchActionProvider>> showVcsBranchActionProviders;
+    private final DtoFactory                                 dtoFactory;
     private UpdateTask updateTask  = new UpdateTask();
     private Set<Path>  expandQueue = new HashSet<>();
     private boolean hiddenFilesAreShown;
@@ -106,6 +109,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                     AppContext appContext,
                                     Provider<WorkspaceAgent> workspaceAgentProvider,
                                     RequestTransmitter requestTransmitter,
+                                    Provider<Set<ShowVcsBranchActionProvider>> showVcsBranchActionProviders,
                                     DtoFactory dtoFactory) {
         this.view = view;
         this.eventBus = eventBus;
@@ -115,6 +119,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         this.resources = resources;
         this.appContext = appContext;
         this.requestTransmitter = requestTransmitter;
+        this.showVcsBranchActionProviders = showVcsBranchActionProviders;
         this.dtoFactory = dtoFactory;
         this.view.setDelegate(this);
 
@@ -436,6 +441,15 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     @Deprecated
     public boolean isShowHiddenFiles() {
         return hiddenFilesAreShown;
+    }
+
+    @Override
+    public void onVcsBranchClicked(Project project) {
+        showVcsBranchActionProviders.get()
+                                    .stream()
+                                    .filter(provider -> provider.getVcsName().equals(project.getAttribute("vcs.provider.name")))
+                                    .findAny()
+                                    .ifPresent(provider -> provider.show(project));
     }
 
     private class UpdateTask extends DelayedTask {

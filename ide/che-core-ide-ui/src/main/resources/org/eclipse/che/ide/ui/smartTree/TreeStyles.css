@@ -62,6 +62,15 @@
     text-shadow: projectExplorerInfoTextShadow;
 }
 
+.vcsHeadLinkContainer {
+    vertical-align: middle;
+    display: inline-block;
+    margin-top: -9px;
+    margin-left: 5px;
+    padding-right: 10px;
+    text-shadow: projectExplorerPresentableTextShadow;
+}
+
 .nodeContainer {
     white-space: nowrap;
     height: 20px;
@@ -73,13 +82,6 @@
 
 .selected {
     background-color: projectExplorerSelectedRowBackground !important;
-    /* Set default text color to selected item */
-    color: projectExplorerJointContainerFill !important;
-}
-
-/* Set default text color to nested elements of selected item */
-.selected * {
-    color: projectExplorerJointContainerFill !important;
 }
 
 .hover {

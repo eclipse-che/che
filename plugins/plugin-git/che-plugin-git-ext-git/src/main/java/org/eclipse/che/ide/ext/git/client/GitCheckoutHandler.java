@@ -1,4 +1,4 @@
-    /*******************************************************************************
+/*******************************************************************************
  * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,9 @@ package org.eclipse.che.ide.ext.git.client;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
@@ -27,17 +29,24 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 /**
  * Receives git checkout notifications caught by server side VFS file watching system.
  * Support two type of notifications: git branch checkout and git revision checkout.
- * After a notification is received it is processed and passed to and instance of
- * {@link NotificationManager}.
+ * After a notification is received it is processed and passed to an instance of
+ * {@link NotificationManager}. Updates attributes of the project from server to load
+ * new HEAD value to project attributes that are held in {@link ResourceManager}.
  */
 @Singleton
-public class GitCheckoutStatusNotificationHandler {
-    private final Provider<NotificationManager> notificationManagerProvider;
+public class GitCheckoutHandler {
+    private final Provider<NotificationManager>          notificationManagerProvider;
+    private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
+    private final AppContext                             appContext;
 
     @Inject
-    public GitCheckoutStatusNotificationHandler(Provider<NotificationManager> notificationManagerProvider,
-                                                RequestHandlerConfigurator configurator) {
+    public GitCheckoutHandler(Provider<NotificationManager> notificationManagerProvider,
+                              RequestHandlerConfigurator configurator,
+                              ResourceManager.ResourceManagerFactory resourceManagerFactory,
+                              AppContext appContext) {
         this.notificationManagerProvider = notificationManagerProvider;
+        this.resourceManagerFactory = resourceManagerFactory;
+        this.appContext = appContext;
 
         configureHandler(configurator);
     }
@@ -76,5 +85,8 @@ public class GitCheckoutStatusNotificationHandler {
                 break;
             }
         }
+
+        //Update project attributes from server.
+        resourceManagerFactory.newResourceManager(appContext.getDevMachine()).getWorkspaceProjects();
     }
 }
