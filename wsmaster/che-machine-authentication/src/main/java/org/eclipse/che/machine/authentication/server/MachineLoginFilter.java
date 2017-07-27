@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
 import java.security.Principal;
 
+import static com.google.common.base.Strings.nullToEmpty;
+
 /**
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
@@ -46,9 +48,7 @@ public class MachineLoginFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
         final HttpServletRequest httpRequest = (HttpServletRequest)servletRequest;
-        if (httpRequest.getRequestURI().endsWith("/ws") || httpRequest.getRequestURI().endsWith("/eventbus")
-            || httpRequest.getScheme().equals("ws") || httpRequest.getScheme().equals("wss") || httpRequest.getRequestURI().contains("/websocket/") ||
-            tokenExtractor.getToken(httpRequest) == null || !tokenExtractor.getToken(httpRequest).startsWith("machine")) {
+        if (httpRequest.getScheme().startsWith("ws") || !nullToEmpty(tokenExtractor.getToken(httpRequest)).startsWith("machine")) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         } else {

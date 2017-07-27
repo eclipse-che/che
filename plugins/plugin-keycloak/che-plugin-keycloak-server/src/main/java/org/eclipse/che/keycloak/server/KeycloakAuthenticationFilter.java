@@ -28,9 +28,7 @@ public class KeycloakAuthenticationFilter extends org.keycloak.adapters.servlet.
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
-        if (request.getRequestURI().endsWith("/ws") || request.getRequestURI().endsWith("/eventbus")
-            || request.getScheme().equals("ws") || req.getScheme().equals("wss") || request.getRequestURI().contains("/websocket/") ||
-            (tokenExtractor.getToken(request) != null && tokenExtractor.getToken(request).startsWith("machine"))) {
+        if (request.getScheme().startsWith("ws") || tokenExtractor.getToken(request) == null || tokenExtractor.getToken(request).startsWith("machine")) {
             chain.doFilter(req, res);
             return;
         } else {
