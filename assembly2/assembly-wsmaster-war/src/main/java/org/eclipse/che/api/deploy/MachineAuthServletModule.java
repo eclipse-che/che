@@ -23,6 +23,7 @@ public class MachineAuthServletModule extends ServletModule {
 
     @Override
     protected void configureServlets() {
-        filter("/*").through(MachineLoginFilter.class);
+        // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
+        filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(MachineLoginFilter.class);
     }
 }
