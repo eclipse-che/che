@@ -21,10 +21,10 @@ import org.eclipse.che.inject.DynaModule;
  *
  */
 @DynaModule
-public class WsAgentKeycloakModule extends AbstractModule {
+public class WsAgentMachineAuthModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(HttpJsonRequestFactory.class).to(AgentKeycloakHttpJsonRequestFactory.class);
+        bind(HttpJsonRequestFactory.class).to(AgentHttpJsonRequestFactory.class);
         bind(RequestTokenExtractor.class).to(HeaderRequestTokenExtractor.class);
     }
 }

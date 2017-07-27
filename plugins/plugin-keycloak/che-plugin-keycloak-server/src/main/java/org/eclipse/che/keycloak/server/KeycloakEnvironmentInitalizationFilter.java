@@ -77,7 +77,7 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
             return;
         }
 
-        HttpSession session = httpRequest.getSession();
+        final HttpSession session = httpRequest.getSession();
         Subject subject = (Subject)session.getAttribute("che_subject");
         if (subject == null) {
             KeycloakSecurityContext context = (KeycloakSecurityContext)httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
@@ -92,7 +92,7 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
                 throw new ServletException("Cannot detect or instantiate user.");
             }
             final IDToken token = firstNonNull(context.getIdToken(),context.getToken());
-            String tokenString = context.getTokenString();
+            final String tokenString = context.getTokenString();
             User user = getOrCreateUser(token.getSubject(), token.getEmail(), token.getPreferredUsername());
             getOrCreateAccount(token.getPreferredUsername(), token.getPreferredUsername());
 

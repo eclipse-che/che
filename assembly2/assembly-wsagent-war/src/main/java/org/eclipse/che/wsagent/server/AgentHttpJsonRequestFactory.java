@@ -21,12 +21,12 @@ import javax.validation.constraints.NotNull;
 
 
 @Singleton
-public class AgentKeycloakHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
+public class AgentHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
 
     private final String TOKEN;
 
     @Inject
-    public AgentKeycloakHttpJsonRequestFactory(@Named("user.token") String token) {
+    public AgentHttpJsonRequestFactory(@Named("user.token") String token) {
         this.TOKEN = token;
     }
 
