@@ -318,7 +318,12 @@ init() {
   fi
 
   # A che property, which names the Docker network used for che + ws to communicate
-  export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=bridge"
+  if [ -z "$CHE_DOCKER_NETWORK" ]; then
+    NETWORK_NAME="bridge"
+  else
+    NETWORK_NAME=$CHE_DOCKER_NETWORK
+  fi
+  export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=$NETWORK_NAME"
 }
 
 get_che_data_from_host() {

@@ -35,6 +35,10 @@ services:
       - '/etc/group:/etc/group:ro'
       - '/etc/passwd:/etc/passwd:ro'
 <% end -%>
+<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
+    networks:
+      - che-network
+<% end -%>
     ports:
 <% if @che_jmx_enabled == 'true' -%>
       - '32001:32001'
@@ -136,4 +140,7 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak:/opt/jboss/keycloak/standalone/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/logs/keycloak:/opt/jboss/keycloak/standalone/log'
     restart: always
+
+networks:
+  che-network:
 <% end -%>
