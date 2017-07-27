@@ -12,6 +12,7 @@ package org.eclipse.che.ide.jsonrpc;
 
 import javax.inject.Singleton;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Performs all needed preparations to initialize and terminate the json rpc
@@ -25,10 +26,24 @@ public interface JsonRpcInitializer {
      *
      * @param endpointId
      *         high level endpoint identifier (e.g. "exec-agent")
-     * @param properties
+     * @param initProperties
      *         map of implementation dependent properties (e.g. URL, etc.)
      */
-    void initialize(String endpointId, Map<String, String> properties);
+    void initialize(String endpointId, Map<String, String> initProperties);
+
+    /**
+     * Initialize json rpc service for an endpoint defined by a high level
+     * identifier with implementation defined properties and actions.
+     *
+     * @param endpointId
+     *         high level endpoint identifier (e.g. "exec-agent")
+     * @param initProperties
+     *         map of implementation dependent properties (e.g. URL, etc.)
+     * @param initActions
+     *         actions to be performed each time the connection is initialized or
+     *         reinitialized.
+     */
+    void initialize(String endpointId, Map<String, String> initProperties, Set<Runnable> initActions);
 
     /**
      * Terminate json rpc service defined by high level identifier
@@ -37,4 +52,16 @@ public interface JsonRpcInitializer {
      *         high level endpoint identifier (e.g. "exec-agent")
      */
     void terminate(String endpointId);
+
+    /**
+     * Terminate json rpc service defined by high level identifier
+     *
+     * @param endpointId
+     *         high level endpoint identifier (e.g. "exec-agent")
+     * @param terminateProperties
+     *         pam of implementation specific properties for the termination process
+     * @param terminateActions
+     *         actions to be performed after connection is terminated
+     */
+    void terminate(String endpointId, Map<String, String> terminateProperties, Set<Runnable> terminateActions);
 }
