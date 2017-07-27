@@ -84,7 +84,7 @@ public class DebugJUnitTestAction extends JUnitAbstractAction {
         notificationManager.notify(notification);
 
         Pair<String, String> frameworkAndTestName = Pair.of(JUNIT_TEST_FRAMEWORK, null);
-        TestExecutionContext context = createTestExecutionContext(frameworkAndTestName, testType, selectedNodePath);
+        TestExecutionContext context = createTestExecutionContext(frameworkAndTestName, contextType, selectedNodePath);
         context.withDebugModeEnable(TRUE);
 
         GeneralTestingEventsProcessor eventsProcessor = new GeneralTestingEventsProcessor(JUNIT_TEST_FRAMEWORK,
@@ -94,7 +94,7 @@ public class DebugJUnitTestAction extends JUnitAbstractAction {
 
         JsonRpcPromise<TestLaunchResult> testResultPromise = client.runTests(context);
         testResultPromise.onSuccess(result -> onTestRanSuccessfully(result, eventsProcessor, notification))
-                         .onFailure(exception -> onTestRanUnsuccessfully(exception, notification));
+                         .onFailure(exception -> onTestRanFailed(exception, notification));
     }
 
     private void onTestRanSuccessfully(TestLaunchResult result,
@@ -121,7 +121,7 @@ public class DebugJUnitTestAction extends JUnitAbstractAction {
         debugConfigurationsManager.apply(debugger);
     }
 
-    private void onTestRanUnsuccessfully(JsonRpcError exception, StatusNotification notification) {
+    private void onTestRanFailed(JsonRpcError exception, StatusNotification notification) {
         final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
                                                                      : "Failed to run test cases";
         notification.setContent(errorMessage);

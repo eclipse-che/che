@@ -93,7 +93,7 @@ public class DebugTestAction extends RunDebugTestAbstractAction {
         notificationManager.notify(notification);
 
         frameworkAndTestName = getTestingFrameworkAndTestName();
-        TestExecutionContext context = createTestExecutionContext(frameworkAndTestName, TestExecutionContext.TestType.CURSOR_POSITION, "");
+        TestExecutionContext context = createTestExecutionContext(frameworkAndTestName, TestExecutionContext.ContextType.CURSOR_POSITION, "");
 
         context.withDebugModeEnable(TRUE);
 
@@ -104,7 +104,7 @@ public class DebugTestAction extends RunDebugTestAbstractAction {
 
         JsonRpcPromise<TestLaunchResult> testResultPromise = client.runTests(context);
         testResultPromise.onSuccess(result -> onTestRanSuccessfully(result, eventsProcessor, notification))
-                         .onFailure(exception -> onTestRanUnsuccessfully(exception, notification));
+                         .onFailure(exception -> onTestRanFailed(exception, notification));
     }
 
     private void onTestRanSuccessfully(TestLaunchResult result,
@@ -138,7 +138,7 @@ public class DebugTestAction extends RunDebugTestAbstractAction {
         debugConfigurationsManager.apply(debugger);
     }
 
-    private void onTestRanUnsuccessfully(JsonRpcError exception, StatusNotification notification) {
+    private void onTestRanFailed(JsonRpcError exception, StatusNotification notification) {
         final String errorMessage = (exception.getMessage() != null) ? exception.getMessage()
                                                                      : "Failed to run test cases";
         notification.setContent(errorMessage);

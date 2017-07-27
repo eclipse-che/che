@@ -134,7 +134,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     }
 
     private File createSuite(TestExecutionContext context, IJavaProject javaProject) {
-        switch (context.getTestType()) {
+        switch (context.getContextType()) {
             case FILE:
                 return createClassSuite(javaProject, context.getFilePath());
             case FOLDER:

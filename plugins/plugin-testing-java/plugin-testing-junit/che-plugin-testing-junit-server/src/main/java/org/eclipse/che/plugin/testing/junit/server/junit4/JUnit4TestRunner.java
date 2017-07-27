@@ -127,7 +127,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
     }
 
     private List<String> createTestSuite(TestExecutionContext context, IJavaProject javaProject) {
-        switch (context.getTestType()) {
+        switch (context.getContextType()) {
             case FILE:
                 return jUnit4TestFinder.findTestClassDeclaration(findCompilationUnitByPath(javaProject, context.getFilePath()));
             case FOLDER:

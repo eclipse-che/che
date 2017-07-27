@@ -88,7 +88,7 @@ public class TestNGRunnerTest extends BaseTest {
 
         DtoServerImpls.TestExecutionContextImpl context = new DtoServerImpls.TestExecutionContextImpl();
         context.setDebugModeEnable(false);
-        context.setTestType(TestExecutionContext.TestType.FILE);
+        context.setContextType(TestExecutionContext.ContextType.FILE);
         context.setProjectPath("/Test");
         context.setFilePath("/Test/src/tests/TestNGTest.java");
         assertEquals("testng", runner.getName());

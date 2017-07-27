@@ -35,7 +35,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-import static org.eclipse.che.api.testing.shared.TestExecutionContext.TestType.CURSOR_POSITION;
+import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.CURSOR_POSITION;
 
 /** Abstract action that analyzes active editor and makes run/debug test actions active if some test methods are exist. */
 public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveAction {
@@ -117,14 +117,14 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
      * @return test execution context
      */
     protected TestExecutionContext createTestExecutionContext(Pair<String, String> frameworkAndTestName,
-                                                              TestExecutionContext.TestType testType,
+                                                              TestExecutionContext.ContextType contextType,
                                                               String selectedNodePath) {
         final Project project = appContext.getRootProject();
         TestExecutionContext context = dtoFactory.createDto(TestExecutionContext.class);
 
         context.setProjectPath(project.getPath());
-        context.setTestType(testType);
-        if (testType == CURSOR_POSITION) {
+        context.setContextType(contextType);
+        if (contextType == CURSOR_POSITION) {
             context.setFilePath(currentEditor.getEditorInput().getFile().getLocation().toString());
             context.setCursorOffset(currentEditor.getCursorOffset());
         } else {

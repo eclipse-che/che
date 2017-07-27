@@ -31,7 +31,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-import static org.eclipse.che.api.testing.shared.TestExecutionContext.TestType.PROJECT;
+import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.PROJECT;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaFile;
 
@@ -44,8 +44,8 @@ public abstract class TestNGAbstractAction extends RunDebugTestAbstractAction {
     private AppContext appContext;
     private boolean    isEnable;
 
-    protected TestExecutionContext.TestType testType;
-    protected String                        selectedNodePath;
+    protected TestExecutionContext.ContextType contextType;
+    protected String                           selectedNodePath;
 
     public TestNGAbstractAction(EventBus eventBus,
                                 TestServiceClient client,
@@ -82,7 +82,7 @@ public abstract class TestNGAbstractAction extends RunDebugTestAbstractAction {
 
         Resource resource = resources[0];
         if (resource.isProject() && JavaUtil.isJavaProject((Project)resource)) {
-            testType = PROJECT;
+            contextType = PROJECT;
             isEnable = true;
             return;
         }
@@ -100,9 +100,9 @@ public abstract class TestNGAbstractAction extends RunDebugTestAbstractAction {
         }
 
         if (resource.getResourceType() == FILE && isJavaFile(resource)) {
-            testType = TestExecutionContext.TestType.FILE;
+            contextType = TestExecutionContext.ContextType.FILE;
         } else if (resource instanceof Container) {
-            testType = TestExecutionContext.TestType.FOLDER;
+            contextType = TestExecutionContext.ContextType.FOLDER;
         }
         selectedNodePath = resource.getLocation().toString();
         isEnable = true;
