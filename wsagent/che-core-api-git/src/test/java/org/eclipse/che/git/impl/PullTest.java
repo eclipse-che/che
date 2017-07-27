@@ -21,7 +21,9 @@ import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CloneParams;
 import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.params.PullParams;
+import org.eclipse.che.api.git.shared.Revision;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -29,6 +31,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
@@ -76,6 +79,32 @@ public class PullTest {
         assertTrue(new File(remoteRepo.getAbsolutePath(), "newfile1").exists());
     }
 
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
+    public void testPullWithRebase(GitConnectionFactory connectionFactory)
+            throws IOException, ServerException, URISyntaxException, UnauthorizedException {
+        //given
+        GitConnection remote = connectToInitializedGitRepository(connectionFactory, remoteRepo);
+        addFile(remote, "file", "file content");
+        remote.add(AddParams.create(singletonList(".")));
+        remote.commit(CommitParams.create("First commit common"));
+        GitConnection local = connectionFactory.getConnection(repository.getAbsolutePath());
+        local.clone(CloneParams.create(remote.getWorkingDir().getAbsolutePath()));
+        addFile(local, "local file", "file content");
+        local.add(AddParams.create(singletonList(".")));
+        local.commit(CommitParams.create("Second commit local"));
+        addFile(remote, "remote file", "file content");
+        remote.add(AddParams.create(singletonList(".")));
+        remote.commit(CommitParams.create("Second commit remote"));
+
+        //when
+        local.pull(PullParams.create("origin").withRebase(true));
+        List<Revision> commits = local.log(LogParams.create()).getCommits();
+
+        //then
+        assertTrue("Second commit local".equals(commits.get(0).getMessage()));
+        assertTrue("Second commit remote".equals(commits.get(1).getMessage()));
+        assertTrue("First commit common".equals(commits.get(2).getMessage()));
+    }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
     public void testPullWithRefSpec(GitConnectionFactory connectionFactory)
@@ -122,8 +151,9 @@ public class PullTest {
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class,
-            expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "No remote repository specified.  " +
-            "Please, specify either a URL or a remote name from which new revisions should be fetched in request.")
+          expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "No remote repository specified.  " +
+                                                                                     "Please, specify either a URL or a remote name from " +
+                                                                                     "which new revisions should be fetched in request.")
     public void testWhenThereAreNoAnyRemotes(GitConnectionFactory connectionFactory) throws Exception {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
@@ -133,8 +163,9 @@ public class PullTest {
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class,
-        expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "No remote repository specified.  " +
-                                                                                   "Please, specify either a URL or a remote name from which new revisions should be fetched in request.")
+          expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "No remote repository specified.  " +
+                                                                                     "Please, specify either a URL or a remote name from " +
+                                                                                     "which new revisions should be fetched in request.")
     public void testWhenThereAreNoAnyRemotesBehindTheProxy(GitConnectionFactory connectionFactory) throws Exception {
         //given
         System.setProperty("http.proxyUser", "user1");

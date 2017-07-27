@@ -21,23 +21,32 @@ import org.eclipse.che.dto.shared.DTO;
 public interface PullRequest {
     /** @return refspec to fetch */
     String getRefSpec();
-    
+
     void setRefSpec(String refSpec);
-    
+
     PullRequest withRefSpec(String refSpec);
 
     /** @return remote name. If <code>null</code> then 'origin' will be used */
     String getRemote();
-    
+
     void setRemote(String remote);
-    
+
     PullRequest withRemote(String remote);
+
+    /**
+     * Returns the value of 'Pull with rebase' flag.
+     */
+    boolean getRebase();
+
+    void setRebase(boolean rebase);
+
+    PullRequest withRebase(boolean rebase);
 
     /** @return time (in seconds) to wait without data transfer occurring before aborting fetching data from remote repository */
     int getTimeout();
-    
+
     void setTimeout(int timeout);
-    
+
     PullRequest withTimeout(int timeout);
 
     /** Returns user name for authentication */

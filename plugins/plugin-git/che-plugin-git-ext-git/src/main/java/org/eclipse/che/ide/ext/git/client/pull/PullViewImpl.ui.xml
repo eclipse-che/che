@@ -12,8 +12,7 @@
 -->
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:svg='urn:import:org.vectomatic.dom.svg.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
     <ui:with field='res' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
     <ui:style>
@@ -25,11 +24,11 @@
             margin: 6px;
         }
     </ui:style>
-    <g:DockLayoutPanel unit="PX" width="450px" height="90px" addStyleNames="{style.emptyBorder}" debugId="git-remotes-pull-mainForm">
-        <g:north size="26.0">
-            <g:FlowPanel>
-                <g:Label text="{locale.fetchRemoteFieldTitle}" addStyleNames="{res.gitCSS.textFont} {style.alignLeft}"/>
-                <g:ListBox width="290px" ui:field="repository" addStyleNames="{res.gitCSS.textFont} {style.alignLeft}"
+    <g:DockLayoutPanel unit="PX" width="450px" height="100px" addStyleNames="{style.emptyBorder}" debugId="git-remotes-pull-mainForm">
+        <g:north size="28">
+            <g:FlowPanel addStyleNames="{style.emptyBorder}">
+                <g:Label text="{locale.fetchRemoteFieldTitle}" width="145px" addStyleNames="{res.gitCSS.textFont} {style.alignLeft}"/>
+                <g:ListBox width="293px" ui:field="repository" addStyleNames="{res.gitCSS.textFont} {style.alignLeft}"
                            debugId="git-remotes-pull-repository"/>
             </g:FlowPanel>
         </g:north>
@@ -49,5 +48,11 @@
                 </g:west>
             </g:DockLayoutPanel>
         </g:center>
+        <g:south size="21">
+            <g:FlowPanel addStyleNames="{style.emptyBorder}">
+                <g:CheckBox ui:field="rebase" text="{locale.pullRebaseCheckbox}" addStyleNames="{res.gitCSS.textFont}"
+                            debugId="git-remotes-pull-rebase"/>
+            </g:FlowPanel>
+        </g:south>
     </g:DockLayoutPanel>
 </ui:UiBinder>

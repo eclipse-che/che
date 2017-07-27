@@ -137,6 +137,8 @@ public class CommandEditor extends AbstractEditorPresenter implements CommandEdi
             initializePages();
 
             pages.forEach(page -> view.addPage(page.getView(), page.getTitle()));
+
+            callback.onEditorOpened(this);
         } else {
             callback.onInitializationFailed();
         }
