@@ -16,9 +16,9 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.SelectionChangedEvent;
-import org.eclipse.che.ide.api.event.SelectionChangedHandler;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.selection.SelectionChangedEvent;
+import org.eclipse.che.ide.api.selection.SelectionChangedHandler;
 import org.eclipse.che.ide.api.parts.AbstractPartPresenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.selection.Selection;

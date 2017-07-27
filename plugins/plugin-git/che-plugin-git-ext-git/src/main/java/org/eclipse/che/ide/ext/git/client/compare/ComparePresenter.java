@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;

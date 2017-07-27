@@ -19,7 +19,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;

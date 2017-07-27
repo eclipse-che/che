@@ -18,7 +18,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
+import org.eclipse.che.ide.api.filewatcher.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;

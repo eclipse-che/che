@@ -19,8 +19,8 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;

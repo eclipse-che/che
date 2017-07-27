@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.selection;
 
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
-import org.eclipse.che.ide.api.event.SelectionChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.selection.SelectionChangedEvent;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.selection.Selection;

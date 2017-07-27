@@ -30,7 +30,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.HasNotificationPanel;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.VirtualFile;

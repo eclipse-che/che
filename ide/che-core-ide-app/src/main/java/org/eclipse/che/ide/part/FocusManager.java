@@ -16,7 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.Focusable;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;

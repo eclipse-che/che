@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent;
+import org.eclipse.che.ide.api.editor.events.EditorSettingsChangedEvent;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.editor.preferences.EditorPreferenceSection;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPreferenceSectionFactory;

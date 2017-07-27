@@ -16,7 +16,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.InstallerLogEvent;
-import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
+import org.eclipse.che.ide.processes.panel.EnvironmentOutputEvent;
 
 import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHOD;
 

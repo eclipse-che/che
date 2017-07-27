@@ -19,7 +19,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.EditorDirtyStateChangedEvent;
+import org.eclipse.che.ide.api.editor.events.EditorDirtyStateChangedEvent;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;

@@ -25,7 +25,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.importer.AbstractImporter;
+import org.eclipse.che.ide.projectimport.AbstractImporter;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;

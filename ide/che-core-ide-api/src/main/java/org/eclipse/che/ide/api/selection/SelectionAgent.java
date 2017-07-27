@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.selection;
 
-import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.extension.SDK;
 import com.google.web.bindery.event.shared.EventBus;
 

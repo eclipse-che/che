@@ -26,7 +26,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.factory.model.FactoryImpl;
-import org.eclipse.che.ide.api.importer.AbstractImporter;
+import org.eclipse.che.ide.projectimport.AbstractImporter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;

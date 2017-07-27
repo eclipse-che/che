@@ -56,7 +56,6 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
-import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;

@@ -13,11 +13,10 @@ package org.eclipse.che.ide.core;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
-import org.eclipse.che.ide.api.event.ng.ClientServerEventServiceImpl;
-import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationOperation;
-import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
-import org.eclipse.che.ide.api.event.ng.FileWatcherExcludesOperation;
+import org.eclipse.che.ide.api.filewatcher.ClientServerEventService;
+import org.eclipse.che.ide.editor.ClientServerEventServiceImpl;
+import org.eclipse.che.ide.editor.EditorFileStatusNotificationOperation;
+import org.eclipse.che.ide.api.filewatcher.FileWatcherExcludesOperation;
 
 /** GIN module for configuring client server events. */
 public class ClientServerEventModule extends AbstractGinModule {

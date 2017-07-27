@@ -15,7 +15,7 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.event.ng.ProjectTreeStateNotificationOperation;
+import org.eclipse.che.ide.resources.ProjectTreeStateNotificationOperation;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;

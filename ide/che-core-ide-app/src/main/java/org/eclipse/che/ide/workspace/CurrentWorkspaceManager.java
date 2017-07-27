@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
+import org.eclipse.che.ide.api.jsonrpc.SubscriptionManagerClient;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;

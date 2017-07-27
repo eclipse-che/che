@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
+import org.eclipse.che.ide.api.jsonrpc.SubscriptionManagerClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 
 import java.util.Map;
