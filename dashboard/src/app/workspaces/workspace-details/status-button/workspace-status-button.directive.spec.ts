@@ -79,6 +79,39 @@ describe('WorkspaceStatusButton >', () => {
     return element;
   }
 
+  describe('initially STOPPED > ', () => {
+    let jqstatusButton: JQuery;
+
+    beforeEach(() => {
+      const jqElement = getCompiledElement();
+      jqstatusButton = jqElement.find('#split-button button');
+    });
+
+    it('should have "Run" button enabled', () => {
+      // timeout should be flashed
+      $timeout.flush();
+
+      expect(jqstatusButton).toBeTruthy();
+      expect(jqstatusButton.attr('disabled')).toBeFalsy();
+      expect($rootScope.model.workspaceStatus).toEqual(STOPPED);
+      expect(jqstatusButton.html()).toContain('Run');
+    });
+
+    it('should call the runWorkspace callback', () => {
+      spyOn($rootScope.model, 'runWorkspace');
+
+      // click Run button
+      jqstatusButton.click();
+      $rootScope.$digest();
+
+      // timeout should be flashed to get callback called and content visible
+      $timeout.flush();
+
+      expect($rootScope.model.workspaceStatus).toEqual(STOPPED);
+      expect($rootScope.model.runWorkspace).toHaveBeenCalled();
+    });
+  });
+
   describe('initially STOPPING > ', () => {
     let jqstatusButton: JQuery;
 
@@ -87,7 +120,7 @@ describe('WorkspaceStatusButton >', () => {
       jqstatusButton = jqElement.find('#split-button button');
     });
 
-    it('should have \'Stop\' button disabled', () => {
+    it('should have "Stop" button disabled', () => {
       // timeout should be flashed
       $timeout.flush();
 
@@ -106,7 +139,7 @@ describe('WorkspaceStatusButton >', () => {
       jqstatusButton = jqElement.find('#split-button button');
     });
 
-    it('should have \'Stop\' button disabled', () => {
+    it('should have "Stop" button disabled', () => {
       // timeout should be flashed
       $timeout.flush();
 
@@ -125,7 +158,7 @@ describe('WorkspaceStatusButton >', () => {
       jqstatusButton = jqElement.find('#split-button button');
     });
 
-    it('should have \'Stop\' button enabled', () => {
+    it('should have "Stop" button enabled', () => {
       // timeout should be flashed
       $timeout.flush();
 
@@ -166,7 +199,7 @@ describe('WorkspaceStatusButton >', () => {
       $rootScope.$digest();
     });
 
-    it('should have \'Stop\' button enabled', () => {
+    it('should have "Stop" button enabled', () => {
       // timeout should be flashed
       $timeout.flush();
 
