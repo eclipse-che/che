@@ -10,11 +10,4 @@
  */
 'use strict';
 
-import {ProjectSource} from './project-source.enum';
-import {ActionType} from './project-source-selector-action-type.enum';
-
-export interface IProjectSourceSelectorServiceObserver {
-
-  onProjectSourceSelectorServicePublish(action: ActionType, source: ProjectSource): void;
-
-}
+export enum ActionType { ADD_PROJECT = 1, EDIT_PROJECT }

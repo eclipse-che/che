@@ -14,6 +14,7 @@ import {ProjectSourceSelectorService} from '../project-source-selector.service';
 import {ImportBlankProjectService} from './import-blank-project.service';
 import {IProjectSourceSelectorServiceObserver} from '../project-source-selector-service.observer';
 import {ProjectSource} from '../project-source.enum';
+import {ActionType} from '../project-source-selector-action-type.enum';
 
 /**
  * This class is handling the controller for the blank project import.
@@ -60,10 +61,11 @@ export class ImportBlankProjectController implements IProjectSourceSelectorServi
    * Callback which is called when project template is added to the list of ready-to-import projects.
    * Clears name and description.
    *
+   * @param {ActionType} action the type of action
    * @param {ProjectSource} source the project's source
    */
-  onProjectSourceSelectorServicePublish(source: ProjectSource): void {
-    if (source !== ProjectSource.BLANK) {
+  onProjectSourceSelectorServicePublish(action: ActionType, source: ProjectSource): void {
+    if (action !== ActionType.ADD_PROJECT || source !== ProjectSource.BLANK) {
       return;
     }
 
