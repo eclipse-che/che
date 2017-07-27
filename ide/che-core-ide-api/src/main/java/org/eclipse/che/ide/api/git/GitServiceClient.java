@@ -223,8 +223,10 @@ public interface GitServiceClient {
      *         </ul>
      * @param remote
      *         remote remote repository's name
+     * @param rebase
+     *         use rebase instead of merge
      */
-    Promise<PullResponse> pull(Path project, String refSpec, String remote);
+    Promise<PullResponse> pull(Path project, String refSpec, String remote, boolean rebase);
 
     /**
      * Push changes from local repository to remote one (sends request over WebSocket).
