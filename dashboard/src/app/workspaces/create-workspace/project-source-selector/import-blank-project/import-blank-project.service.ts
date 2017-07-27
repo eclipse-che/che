@@ -9,13 +9,14 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {editingProgress, IEditingProgress} from '../project-source-selector-editing-progress';
 
 /**
  * This class is handling the service for the blank project import.
  *
  * @author Oleksii Kurinnyi
  */
-export class ImportBlankProjectService {
+export class ImportBlankProjectService implements IEditingProgress {
   /**
    * Project's name.
    */
@@ -40,6 +41,22 @@ export class ImportBlankProjectService {
 
   get description(): string {
     return this._description;
+  }
+
+  /**
+   * Returns project's adding progress.
+   *
+   * @return {editingProgress}
+   */
+  checkEditingProgress(): editingProgress {
+    if (!this.name && !this.description) {
+      return null;
+    }
+
+    return {
+      message: 'Adding of a project from "Blank" template is not completed yet.',
+      number: 1
+    };
   }
 
   /**
