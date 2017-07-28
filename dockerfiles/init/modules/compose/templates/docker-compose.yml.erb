@@ -28,6 +28,7 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/data:/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/logs:/logs'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/che:/conf'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/che/server.xml:/home/user/eclipse-che-5.16.0-SNAPSHOT/tomcat/conf/server.xml'
 <% if scope.lookupvar('che::che_dev_env') == 'on' -%>
       - '<%= scope.lookupvar('che::che_assembly') -%>:/assembly'
 <% end -%>
@@ -36,6 +37,11 @@ services:
       - '/etc/passwd:/etc/passwd:ro'
 <% end -%>
 <% if scope.lookupvar('che::che_multiuser') == 'true' -%>
+    depends_on:
+      postgres:
+        condition: service_healthy
+    links:
+      - postgres:postgres
     networks:
       - che-network
 <% end -%>
@@ -76,7 +82,7 @@ services:
     image: <%= ENV["IMAGE_TRAEFIK"] %>
     command: --logLevel=DEBUG
     links:
-      - 'che:che'
+      - che:che
     labels:
       traefik.enable: "false"
     ports:
@@ -101,6 +107,7 @@ services:
       - POSTGRES_DB=keycloak
     volumes:
       - '<%= scope.lookupvar('che::che_instance') -%>/data/postgres:/var/lib/postgresql/data'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user.sh:/docker-entrypoint-initdb.d/init-che-user.sh'
     ports:
       - '5432:5432'
     restart: always

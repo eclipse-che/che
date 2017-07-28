@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+    CREATE USER che WITH PASSWORD 'che';
+    CREATE DATABASE che;
+    GRANT ALL PRIVILEGES ON DATABASE che TO che;
+EOSQL

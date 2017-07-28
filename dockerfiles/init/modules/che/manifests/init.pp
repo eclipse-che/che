@@ -8,6 +8,11 @@ class che {
     ensure  => "present",
     content => template("che/che.env.erb"),
     mode    => "644",
+  } ->
+  file { "/opt/che/config/che/server.xml":
+    ensure  => "present",
+    content => template("che/server.xml.erb"),
+    mode    => "644",
   }
 
   if $che_dev_env == "on" {
