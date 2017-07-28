@@ -151,35 +151,12 @@ public class ProjectServiceClient {
      * @see SourceStorageDto
      * @since 4.4.0
      */
-    public Promise<Void> importProject(final Path path,
-                                       final SourceStorageDto source) {
-        return createFromAsyncRequest(callback -> {
-            // TODO (spi ide): must be reworked with JSON-RPC
-//            final String url = encodeAllowEscapes(PROJECT + IMPORT + path(path.toString()));
-//            final Message message = new MessageBuilder(POST, url).data(dtoFactory.toJson(source))
-//                                                                 .header(CONTENTTYPE, APPLICATION_JSON)
-//                                                                 .build();
+    public Promise<Void> importProject(Path path, SourceStorageDto source) {
+        String url = encodeAllowEscapes(getBaseUrl() + IMPORT + path(path.toString()));
 
-//            wsAgentStateController.getMessageBus().then(messageBus -> {
-//                try {
-//                    messageBus.send(message, new RequestCallback<Void>() {
-//                        @Override
-//                        protected void onSuccess(Void result) {
-//                            callback.onSuccess(result);
-//                        }
-//
-//                        @Override
-//                        protected void onFailure(Throwable exception) {
-//                            callback.onFailure(exception);
-//                        }
-//                    });
-//                } catch (WebSocketException e) {
-//                    callback.onFailure(e);
-//                }
-//            }).catchError(error -> {
-//                callback.onFailure(error.getCause());
-//            });
-        });
+        return reqFactory.createPostRequest(url, source)
+                         .header(CONTENT_TYPE, APPLICATION_JSON)
+                         .send();
     }
 
     /**
