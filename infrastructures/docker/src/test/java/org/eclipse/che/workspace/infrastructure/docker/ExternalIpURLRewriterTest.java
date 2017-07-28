@@ -14,16 +14,12 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.docker.ExternalIpURLRewriter.EXTERNAL_IP_PROPERTY;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 /**
  * @author Alexander Garagatyi
  */
-public class URLRewriterImplTest {
+public class ExternalIpURLRewriterTest {
     @Test(dataProvider = "urlRewritingTestProvider")
     public void shouldRewriteURL(String externalIP, String incomeURL, String expectedURL) throws Exception {
         ExternalIpURLRewriter rewriter = new ExternalIpURLRewriter(externalIP);
@@ -64,24 +60,5 @@ public class URLRewriterImplTest {
         ExternalIpURLRewriter rewriter = new ExternalIpURLRewriter("localhost");
 
         rewriter.rewriteURL(null, null, toRewrite);
-    }
-
-    @Test(dataProvider = "badExternalIpProvider")
-    public void shouldThrowExceptionOnRewriterCreationIfURLCheckFails(String badExternalIp) throws Exception {
-        try {
-            new ExternalIpURLRewriter(badExternalIp);
-            fail("URL rewriter creation had to throw an exception, but no exception was thrown");
-        } catch (RuntimeException e) {
-            assertTrue(e.getMessage().startsWith(
-                    format("Illegal value '%s' of property '%s'. Error: ", badExternalIp, EXTERNAL_IP_PROPERTY)));
-        }
-    }
-
-    @DataProvider(name = "badExternalIpProvider")
-    public static Object[][] badExternalIpProvider() {
-        return new Object[][] {
-                {""},
-                {" "}
-        };
     }
 }

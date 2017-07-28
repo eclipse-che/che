@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
+import com.google.inject.Inject;
+
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
@@ -43,15 +44,7 @@ public class ExternalIpURLRewriter implements URLRewriter {
      * in case of moving from one network to another).
      */
     @Inject
-    public ExternalIpURLRewriter(@Named(EXTERNAL_IP_PROPERTY) String externalIpOfContainers) {
-        if (externalIpOfContainers != null) {
-            try {
-                UriBuilder.fromUri("http://" + externalIpOfContainers).build();
-            } catch (Exception e) {
-                throw new RuntimeException(format("Illegal value '%s' of property '%s'. Error: %s",
-                                                  externalIpOfContainers, EXTERNAL_IP_PROPERTY, e.getMessage()));
-            }
-        }
+    public ExternalIpURLRewriter(@Nullable @Named(EXTERNAL_IP_PROPERTY) String externalIpOfContainers) {
         this.externalIpOfContainers = externalIpOfContainers;
     }
 
