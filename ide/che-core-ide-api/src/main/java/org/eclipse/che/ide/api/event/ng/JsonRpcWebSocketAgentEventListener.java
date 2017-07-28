@@ -93,7 +93,8 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
         String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
         String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("api/ws", "wsagent");
         String execAgentUrl = devMachine.getExecAgentUrl();
-        String queryParams = appContext.getApplicationWebsocketId().map(clientId -> "?clientId=" + clientId).orElse("");
+        String separator = wsAgentUrl.contains("?") ? "&" : "?";
+        String queryParams = appContext.getApplicationWebsocketId().map(id -> separator + "clientId=" + id).orElse("");
         Set<Runnable> initActions = appContext.getApplicationWebsocketId().isPresent() ? emptySet() : singleton(this::processWsId);
 
         initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl + queryParams), initActions);

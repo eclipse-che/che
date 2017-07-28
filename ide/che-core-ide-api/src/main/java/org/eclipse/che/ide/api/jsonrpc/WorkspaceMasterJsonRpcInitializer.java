@@ -71,11 +71,12 @@ public class WorkspaceMasterJsonRpcInitializer {
         String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
         String host = getHost();
         String context = getWebsocketContext();
-        String queryParams = appContext.getApplicationWebsocketId().map(clientId -> "?clientId=" + clientId).orElse("");
-        String workspaceMasterUrl = protocol + host + context + queryParams;
+        String url = protocol + host + context;
+        String separator = url.contains("?") ? "&" : "?";
+        String queryParams = appContext.getApplicationWebsocketId().map(id -> separator + "clientId=" + id).orElse("");
         Set<Runnable> initActions = appContext.getApplicationWebsocketId().isPresent() ? emptySet() : singleton(this::processWsId);
 
-        initializer.initialize("ws-master", singletonMap("url", workspaceMasterUrl), initActions);
+        initializer.initialize("ws-master", singletonMap("url", url + queryParams), initActions);
     }
 
     private void processWsId() {
