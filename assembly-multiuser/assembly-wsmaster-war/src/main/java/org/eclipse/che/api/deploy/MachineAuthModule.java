@@ -21,7 +21,9 @@ import org.eclipse.che.machine.authentication.server.MachineAuthLinksInjector;
 import org.eclipse.che.machine.authentication.server.interceptor.InterceptorModule;
 
 /**
- * @author Max Shaposhnik (mshaposhnik@codenvy.com)
+ * Machine authentification bindings.
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com)
  */
 @DynaModule
 public class MachineAuthModule extends AbstractModule {

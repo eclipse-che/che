@@ -13,19 +13,18 @@ package org.eclipse.che.api.deploy;
 import com.google.inject.servlet.ServletModule;
 
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.machine.authentication.server.MachineLoginFilter;
 
 /**
- * Machine authentification bindings.
+ * Single-user version Che specific bindings
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
+ *
  */
 @DynaModule
-public class MachineAuthServletModule extends ServletModule {
+public class CheWsMasterServletModule extends ServletModule {
 
     @Override
     protected void configureServlets() {
-        // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
-        filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(MachineLoginFilter.class);
+        filter("/api/*").through(org.eclipse.che.api.local.filters.EnvironmentInitializationFilter.class);
     }
 }

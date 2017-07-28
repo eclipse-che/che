@@ -130,10 +130,6 @@ public class WsMasterModule extends AbstractModule {
                 new org.eclipse.che.api.machine.server.model.impl.ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http",
                                                                                  null));
 
-        //TODO: overridden in auth module
-//        bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
-//                .to(org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl.class);
-
         bind(org.eclipse.che.api.machine.server.recipe.RecipeLoader.class);
         Multibinder.newSetBinder(binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
                    .addBinding().toInstance("predefined-recipes.json");
@@ -184,9 +180,6 @@ public class WsMasterModule extends AbstractModule {
         machineImageProviderMultibinder.addBinding().to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
 
         install(new org.eclipse.che.api.workspace.server.activity.inject.WorkspaceActivityModule());
-
-        bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
-                .to(org.eclipse.che.plugin.docker.machine.MachineProviderImpl.class);
 
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());

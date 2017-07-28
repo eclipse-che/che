@@ -661,7 +661,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
             volumes = devMachineSystemVolumes;
 
             env = new HashMap<>(devMachineEnvVariables);
-            env.put(DockerInstanceRuntimeInfo.USER_TOKEN, getMachineToken(workspaceId));
+            env.put(DockerInstanceRuntimeInfo.USER_TOKEN, getUserToken(workspaceId));
         } else {
             portsToExpose = commonMachinePortsToExpose;
             env = new HashMap<>(commonMachineEnvVariables);
@@ -790,15 +790,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     // you need to know exactly which workspace and which user to apply the token.
     protected String getUserToken(String wsId) {
         return EnvironmentContext.getCurrent().getSubject().getToken();
-    }
-
-    protected String getMachineToken(String wsId) {
-        String userToken = null;
-        try {
-            userToken = machineTokenRegistry.getOrCreateToken(EnvironmentContext.getCurrent().getSubject().getUserId(), wsId);
-        } catch (NotFoundException ignore) {
-        }
-        return MoreObjects.firstNonNull(userToken, "");
     }
 
     /**

@@ -97,7 +97,9 @@
                             </includes>
                         </resource>
                     </webResources>
-                    <packagingExcludes>WEB-INF/lib/wsmaster-local*.jar,</packagingExcludes>
+                    <packagingExcludes>WEB-INF/lib/wsmaster-local*.jar,
+                        WEB-INF/classes/org/eclipse/che/api/deploy/CheWsMasterModule.class,
+                        WEB-INF/classes/org/eclipse/che/api/deploy/CheWsMasterServletModule.class</packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>
