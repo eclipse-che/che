@@ -19,10 +19,9 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.slf4j.Logger;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,12 +41,13 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
 
     private final T                    context;
     private final URLRewriter          urlRewriter;
-    private final List<Warning>        warnings = new CopyOnWriteArrayList<>();
+    private final List<Warning>        warnings;
     private       WorkspaceStatus      status;
 
     public InternalRuntime(T context, URLRewriter urlRewriter, boolean running) {
         this.context = context;
-        this.urlRewriter = urlRewriter != null ? urlRewriter : new URLRewriter.NoOpURLRewriter();
+        this.urlRewriter = urlRewriter;
+        this.warnings = new CopyOnWriteArrayList<>();
         if (running) {
             status = WorkspaceStatus.RUNNING;
         }
@@ -103,7 +103,7 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
      */
     public void start(Map<String, String> startOptions) throws InfrastructureException {
         if (this.status != null) {
-            throw new StateException("Context already used");
+            throw new StateException("Runtime already started");
         }
         status = WorkspaceStatus.STARTING;
         internalStart(startOptions);
@@ -197,22 +197,11 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
             String name = entry.getKey();
             Server incomingServer = entry.getValue();
             try {
-                URL url = new URL(incomingServer.getUrl());
-                ServerImpl server = new ServerImpl(urlRewriter.rewriteURL(identity, name, url).toString(),
+                ServerImpl server = new ServerImpl(urlRewriter.rewriteURL(identity, name, incomingServer.getUrl()),
                                                    incomingServer.getStatus());
                 outgoing.put(name, server);
-            } catch (MalformedURLException e) {
-                warnings.add(new Warning() {
-                    @Override
-                    public int getCode() {
-                        return 101;
-                    }
-
-                    @Override
-                    public String getMessage() {
-                        return "Malformed URL for " + name + " : " + e.getMessage();
-                    }
-                });
+            } catch (InfrastructureException e) {
+                warnings.add(new WarningImpl(101, "Malformed URL for " + name + " : " + e.getMessage()));
             }
         }
 

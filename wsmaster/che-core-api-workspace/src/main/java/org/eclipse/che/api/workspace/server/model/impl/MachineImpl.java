@@ -16,7 +16,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -36,7 +35,6 @@ public class MachineImpl implements Machine {
 
     public MachineImpl(Map<String, String> properties,
                        Map<String, ? extends Server> servers) {
-//        this.envVariables = new HashMap<>(envVariables);
         this(servers);
         this.properties = new HashMap<>(properties);
     }
@@ -48,13 +46,6 @@ public class MachineImpl implements Machine {
                                   .collect(toMap(Map.Entry::getKey, entry -> new ServerImpl(entry.getValue())));
         }
     }
-
-//    public Map<String, String> getEnvVariables() {
-//        if (envVariables == null) {
-//            envVariables = new HashMap<>();
-//        }
-//        return envVariables;
-//    }
 
     @Override
     public Map<String, String> getProperties() {
@@ -76,14 +67,21 @@ public class MachineImpl implements Machine {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MachineImpl)) return false;
-        MachineImpl that = (MachineImpl)o;
-        return //Objects.equals(getEnvVariables(), that.getEnvVariables()) &&
-                Objects.equals(getProperties(), that.getProperties()) &&
-                Objects.equals(getServers(), that.getServers());
+        MachineImpl machine = (MachineImpl)o;
+        return Objects.equals(getProperties(), machine.getProperties()) &&
+               Objects.equals(getServers(), machine.getServers());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(/*getEnvVariables(),*/ getProperties(), getServers());
+        return Objects.hash(getProperties(), getServers());
+    }
+
+    @Override
+    public String toString() {
+        return "MachineImpl{" +
+               "properties=" + properties +
+               ", servers=" + servers +
+               '}';
     }
 }

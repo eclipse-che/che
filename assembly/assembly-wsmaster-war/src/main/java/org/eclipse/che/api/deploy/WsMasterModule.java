@@ -43,7 +43,6 @@ import org.eclipse.che.api.recipe.RecipeLoader;
 import org.eclipse.che.api.recipe.RecipeService;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.workspace.server.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber;
-import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
@@ -229,6 +228,5 @@ public class WsMasterModule extends AbstractModule {
         install(new LocalDockerModule());
         install(new OpenshiftInfraModule());
         bind(RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class).asEagerSingleton();
-        bind(URLRewriter.class).to(URLRewriter.NoOpURLRewriter.class);
     }
 }
