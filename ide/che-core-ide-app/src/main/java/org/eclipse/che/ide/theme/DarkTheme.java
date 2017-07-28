@@ -85,7 +85,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String tabBorderColor() {
-        return "#33373b";
+        return "#1b1e2b";
     }
 
     @Override
@@ -183,12 +183,12 @@ public class DarkTheme implements Theme {
 
     @Override
     public String partBackground() {
-        return "#292C2F";
+        return "#1e2331";
     }
 
     @Override
     public String partToolbar() {
-        return "#33373B";
+        return "#242a3a";
     }
 
     @Override
@@ -213,7 +213,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getMainFontColor() {
-        return "#FFFFFF";
+        return "#a0a9b7";
     }
 
     @Override
@@ -223,17 +223,17 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getCommandsToolbarBackgroundColor() {
-        return "#000000";
+        return "#1e2331";
     }
 
     @Override
     public String getCommandsToolbarProcessesLabelBackground() {
-        return "linear-gradient(to bottom, #292929, #131313)";
+        return "#242a3a";
     }
 
     @Override
     public String getCommandsToolbarProcessesLabelBorder() {
-        return "solid 0.6px #454545";
+        return "solid 1px #2b3242";
     }
 
     @Override
@@ -268,22 +268,22 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getDropdownListBackground() {
-        return "linear-gradient(to bottom, #444444, #343434 98%)";
+        return "#242a3a";
     }
 
     @Override
     public String getHoveredDropdownListBackground() {
-        return "linear-gradient(to bottom, #3d3d3d, #1d1d1d 98%)";
+        return "#434b5d";
     }
 
     @Override
     public String getActiveDropdownListBackground() {
-        return "linear-gradient(to bottom, #3d3d3d, #1d1d1d)";
+        return "#565e72";
     }
 
     @Override
     public String getDropdownListBorder() {
-        return "solid 0.6px #454545";
+        return "solid 1px #2b3242";
     }
 
     @Override
@@ -293,22 +293,37 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getMenuButtonBackground() {
-        return "linear-gradient(to bottom, #444444, #343434 98%)";
+        return "#242a3a";
     }
 
     @Override
     public String getHoveredMenuButtonBackground() {
-        return "linear-gradient(to bottom, #3d3d3d, #1d1d1d 98%)";
+        return "#434b5d";
     }
 
     @Override
     public String getActiveMenuButtonBackground() {
-        return "linear-gradient(to bottom, #3d3d3d, #1d1d1d)";
+        return "#565e72";
     }
 
     @Override
     public String getMenuButtonBorder() {
-        return "solid 0.6px #454545";
+        return "solid 1px #2b3242";
+    }
+
+    @Override
+    public String toolbarControllerBackground() {
+        return "#25283b";
+    }
+
+    @Override
+    public String toolbarControllerLeftColor() {
+        return "#1a1b29";
+    }
+
+    @Override
+    public String toolbarControllerTopColor() {
+        return "#1f2132";
     }
 
     @Override
@@ -438,7 +453,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String editorPanelBackgroundColor() {
-        return "#21252b";
+        return "#191c28";
     }
 
     @Override
@@ -448,7 +463,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getEditorBackgroundColor() {
-        return "#272b33";
+        return "#191c28";
     }
 
     @Override
@@ -773,7 +788,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getToolbarBackgroundColor() {
-        return "#292c2f";
+        return "#1e2331";
     }
 
     @Override
@@ -783,12 +798,12 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getToolbarActionGroupBackgroundColor() {
-        return "#33373b";
+        return "#242a3a";
     }
 
     @Override
     public String getToolbarActionGroupBorderColor() {
-        return "#24272c";
+        return "#2b3242";
     }
 
     @Override
@@ -923,7 +938,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getEditorInfoBackgroundColor() {
-        return "#292C2F";
+        return "#1e2331";
     }
 
     @Override
@@ -948,7 +963,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String editorGutterLineNumberBackgroundColor() {
-        return "#31353E";
+        return "#191c28";
     }
 
     @Override
@@ -968,7 +983,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getSplitterSmallBorderColor() {
-        return "#21252b";
+        return "#1b1e2b";
     }
 
     @Override
@@ -993,12 +1008,12 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getPopupBkgColor() {
-        return "#292c2f";
+        return "#383f53";
     }
 
     @Override
     public String getPopupBorderColor() {
-        return "#121416";
+        return "#3b4d6c";
     }
 
     @Override
@@ -1058,7 +1073,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getMenuBackgroundColor() {
-        return "#292c2f";
+        return "#242a3a";
     }
 
     @Override
@@ -1368,7 +1383,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String projectExplorerSelectedRowBorder() {
-        return "#4eabff";
+        return "#3193d4";
     }
 
     @Override

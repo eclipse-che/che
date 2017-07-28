@@ -16,4 +16,5 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 public interface ToolbarButtonsFactory {
 
     OpenCommandsPaletteButton createOpenPaletteButton(SafeHtml content);
+
 }

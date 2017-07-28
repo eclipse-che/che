@@ -34,7 +34,6 @@ import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.impl.MutableVariableImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.ui.list.SimpleList;
@@ -85,14 +84,11 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
     private TreeNodeElement<MutableVariable> selectedVariable;
 
     @Inject
-    protected DebuggerViewImpl(PartStackUIResources partStackUIResources,
-                               DebuggerResources resources,
+    protected DebuggerViewImpl(DebuggerResources resources,
                                DebuggerLocalizationConstant locale,
                                Resources coreRes,
                                VariableTreeNodeRenderer.Resources rendererResources,
                                DebuggerViewImplUiBinder uiBinder) {
-        super(partStackUIResources);
-
         this.locale = locale;
         this.res = resources;
         this.coreRes = coreRes;
@@ -202,7 +198,6 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
         });
 
         this.variablesPanel.add(variables);
-        minimizeButton.ensureDebugId("debugger-minimizeBut");
     }
 
     /** {@inheritDoc} */

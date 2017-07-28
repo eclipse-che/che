@@ -13,6 +13,7 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
 import org.eclipse.che.ide.api.data.tree.Node;
@@ -30,16 +31,28 @@ import java.util.List;
 public class GoIntoAction extends ProjectAction {
 
     private final ProjectExplorerPresenter projectExplorer;
+    private final CoreLocalizationConstant localizationConstant;
 
     @Inject
-    public GoIntoAction(ProjectExplorerPresenter projectExplorer) {
-        super("Go into");
+    public GoIntoAction(ProjectExplorerPresenter projectExplorer,
+                        CoreLocalizationConstant localizationConstant) {
+        super(localizationConstant.goIntoActionText());
+
         this.projectExplorer = projectExplorer;
+        this.localizationConstant = localizationConstant;
     }
 
     /** {@inheritDoc} */
     @Override
     protected void updateProjectAction(ActionEvent e) {
+        if (projectExplorer.isGoIntoActivated()) {
+            e.getPresentation().setText(localizationConstant.goBackActionText());
+            e.getPresentation().setEnabledAndVisible(true);
+            return;
+        }
+
+        e.getPresentation().setText(localizationConstant.goIntoActionText());
+
         List<?> selection = projectExplorer.getSelection().getAllElements();
 
         e.getPresentation().setEnabledAndVisible(!projectExplorer.isGoIntoActivated()
@@ -50,6 +63,11 @@ public class GoIntoAction extends ProjectAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (projectExplorer.isGoIntoActivated()) {
+            projectExplorer.goBack();
+            return;
+        }
+
         List<?> selection = projectExplorer.getSelection().getAllElements();
 
         if (selection.isEmpty() || selection.size() > 1) {
@@ -66,4 +84,5 @@ public class GoIntoAction extends ProjectAction {
     private boolean isNodeSupportGoInto(Object node) {
         return node instanceof Node && ((Node)node).supportGoInto();
     }
+
 }

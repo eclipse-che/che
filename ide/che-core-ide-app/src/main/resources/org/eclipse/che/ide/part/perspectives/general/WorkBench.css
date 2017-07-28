@@ -54,33 +54,6 @@
     opacity: 1;
 }
 
-svg[name="workBenchIconMinimize"] {
-    width: 8px;
-    height: 8px;
-}
-
-svg[name="workBenchIconMinimize"],
-svg[name="workBenchIconMinimize"] g {
-    fill: toolButtonColor;
-
-    -webkit-transition: color 0.1s ease-in-out,
-                fill 0.1s ease-in-out,
-                stroke 0.1s ease-in-out;
-    transition: color 0.1s ease-in-out,
-                fill 0.1s ease-in-out,
-                stroke 0.1s ease-in-out;
-}
-
-svg[name="workBenchIconMinimize"]:HOVER,
-svg[name="workBenchIconMinimize"]:HOVER g {
-    fill: toolButtonHoverColor;
-}
-
-svg[name="workBenchIconMinimize"]:ACTIVE,
-svg[name="workBenchIconMinimize"]:ACTIVE g {
-    fill: toolButtonActiveColor;
-}
-
 .ide-work-bench-split-panel-left svg[name="workBenchIconMinimize"] {
 }
 

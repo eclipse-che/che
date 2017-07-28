@@ -143,13 +143,18 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
     }
 
     @Override
-    public void maximize() {
-        state = State.MAXIMIZED;
+    public void show() {
+        state = State.NORMAL;
     }
 
     @Override
-    public void collapse() {
-        state = State.COLLAPSED;
+    public void hide() {
+        state = State.HIDDEN;
+    }
+
+    @Override
+    public void maximize() {
+        state = State.MAXIMIZED;
     }
 
     @Override
@@ -165,10 +170,6 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
     @Override
     public State getPartStackState() {
         return state;
-    }
-
-    @Override
-    public void showPartMenu(int mouseX, int mouseY) {
     }
 
     /** {@inheritDoc} */
