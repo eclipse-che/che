@@ -13,7 +13,6 @@ package org.eclipse.che.ide.part;
 import com.google.gwt.user.client.ui.FlowPanel;
 
 import org.eclipse.che.ide.api.parts.PartStackView;
-import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
 
 import javax.validation.constraints.NotNull;
 
@@ -24,14 +23,14 @@ import javax.validation.constraints.NotNull;
  * @author Dmitry Shnurenko
  */
 public interface PartStackViewFactory {
+
     /**
      * Creates new instance of {@link PartStackView}. Each call of this method returns new object.
      *
-     * @param tabPosition
-     *         position in which part stack must be located
      * @param tabsPanel
      *         panel on which tab will be added
      * @return an instance of {@link PartStackView}
      */
-    PartStackView create(@NotNull TabPosition tabPosition, @NotNull FlowPanel tabsPanel);
+    PartStackView create(@NotNull FlowPanel tabsPanel);
+
 }

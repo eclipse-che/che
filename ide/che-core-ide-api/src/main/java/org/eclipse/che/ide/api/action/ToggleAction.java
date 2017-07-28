@@ -24,6 +24,7 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author Vitaliy Guliy
  */
 public abstract class ToggleAction extends Action implements Toggleable {
+
     public ToggleAction(@Nullable final String text) {
         super(text);
     }

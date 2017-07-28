@@ -117,6 +117,10 @@ public class ActionManagerImpl implements ActionManager {
         DefaultActionGroup partMenuGroup = new DefaultActionGroup(IdeActions.GROUP_PART_MENU, false, this);
         registerAction(IdeActions.GROUP_PART_MENU, partMenuGroup);
 
+        // register default action groups for toolbar controller menu
+        DefaultActionGroup toolbarControllerMenuGroup = new DefaultActionGroup(IdeActions.GROUP_TOOLBAR_CONTROLLER, false, this);
+        registerAction(IdeActions.GROUP_TOOLBAR_CONTROLLER, toolbarControllerMenuGroup);
+
         DefaultActionGroup leftMainMenu = new DefaultActionGroup(this);
         registerAction(IdeActions.GROUP_LEFT_MAIN_MENU, leftMainMenu);
 

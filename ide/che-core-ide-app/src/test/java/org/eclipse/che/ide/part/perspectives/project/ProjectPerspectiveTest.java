@@ -107,8 +107,7 @@ public class ProjectPerspectiveTest {
         when(controllerFactory.createController(Matchers.<SplitLayoutPanel>anyObject(),
                                                 Matchers.<SimplePanel>anyObject())).thenReturn(workBenchController);
 
-        when(partViewFactory.create(Matchers.<PartStackView.TabPosition>anyObject(),
-                                    Matchers.<FlowPanel>anyObject())).thenReturn(partStackView);
+        when(partViewFactory.create(Matchers.<FlowPanel>anyObject())).thenReturn(partStackView);
 
         when(stackPresenterFactory.create(Matchers.<PartStackView>anyObject(),
                                           Matchers.<WorkBenchPartController>anyObject())).thenReturn(partStackPresenter);

@@ -19,7 +19,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.data.tree.Node;
@@ -60,12 +59,9 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
     Tree tree;
 
     @Inject
-    public CommandsExplorerViewImpl(Resources coreResources,
-                                    ExplorerMessages messages,
+    public CommandsExplorerViewImpl(ExplorerMessages messages,
                                     CommandResources resources,
                                     NodeFactory nodeFactory) {
-        super(coreResources);
-
         this.nodeFactory = nodeFactory;
         commandNodes = new HashMap<>();
 
@@ -167,4 +163,5 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
     interface CommandsExplorerViewImplUiBinder extends UiBinder<Widget, CommandsExplorerViewImpl> {
     }
+
 }

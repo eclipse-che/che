@@ -383,8 +383,15 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
      *         node which should be activated in "Go Into" mode
      */
     @Deprecated
-    public void goInto(Node node) {
-        view.setGoIntoModeOn(node);
+    public boolean goInto(Node node) {
+        return view.setGoIntoModeOn(node);
+    }
+
+    /**
+     * Deactivate "Go Into" mode.
+     */
+    public void goBack() {
+        view.setGoIntoModeOff();
     }
 
     /**

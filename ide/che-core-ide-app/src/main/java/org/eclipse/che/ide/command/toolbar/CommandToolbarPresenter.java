@@ -16,8 +16,10 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.command.toolbar.commands.ExecuteCommandPresenter;
+import org.eclipse.che.ide.command.toolbar.controller.ToolbarControllerPresenter;
 import org.eclipse.che.ide.command.toolbar.previews.PreviewsPresenter;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListPresenter;
+import org.eclipse.che.ide.command.toolbar.selector.PanelSelectorPresenter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -26,23 +28,30 @@ import javax.inject.Singleton;
 @Singleton
 public class CommandToolbarPresenter implements Presenter, CommandToolbarView.ActionDelegate {
 
-    private final ProcessesListPresenter  processesListPresenter;
-    private final PreviewsPresenter       previewsPresenter;
-    private final ExecuteCommandPresenter executeCommandPresenter;
-    private final ToolbarButtonsFactory   toolbarButtonsFactory;
-    private final CommandToolbarView      view;
-    private       ToolbarButton           openCommandsPaletteButton;
+    private final ProcessesListPresenter        processesListPresenter;
+    private final PreviewsPresenter             previewsPresenter;
+    private final ExecuteCommandPresenter       executeCommandPresenter;
+    private final PanelSelectorPresenter        panelSelectorPresenter;
+    private final ToolbarControllerPresenter    toolbarControllerPresenter;
+    private final ToolbarButtonsFactory         toolbarButtonsFactory;
+    private final CommandToolbarView            view;
+
+    private       ToolbarButton                 openCommandsPaletteButton;
 
     @Inject
     public CommandToolbarPresenter(CommandToolbarView view,
                                    ProcessesListPresenter processesListPresenter,
                                    PreviewsPresenter previewsPresenter,
                                    ExecuteCommandPresenter executeCommandPresenter,
+                                   PanelSelectorPresenter panelSelectorPresenter,
+                                   ToolbarControllerPresenter toolbarControllerPresenter,
                                    ToolbarButtonsFactory toolbarButtonsFactory) {
         this.view = view;
         this.processesListPresenter = processesListPresenter;
         this.previewsPresenter = previewsPresenter;
         this.executeCommandPresenter = executeCommandPresenter;
+        this.panelSelectorPresenter = panelSelectorPresenter;
+        this.toolbarControllerPresenter = toolbarControllerPresenter;
         this.toolbarButtonsFactory = toolbarButtonsFactory;
 
         initButtons();
@@ -66,5 +75,10 @@ public class CommandToolbarPresenter implements Presenter, CommandToolbarView.Ac
         previewsPresenter.go(view.getPreviewUrlsListContainer());
 
         view.addButton(openCommandsPaletteButton);
+
+        panelSelectorPresenter.go(view.getPanelSelectorContainer());
+
+        toolbarControllerPresenter.go(view.getToolbarControllerContainer());
     }
+
 }

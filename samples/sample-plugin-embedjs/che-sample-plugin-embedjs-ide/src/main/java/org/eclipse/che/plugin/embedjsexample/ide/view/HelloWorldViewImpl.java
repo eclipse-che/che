@@ -15,8 +15,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.inject.Inject;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.plugin.embedjsexample.ide.view.client.jso.HelloWorldViewOverlay;
 
@@ -33,9 +31,7 @@ public class HelloWorldViewImpl extends BaseView<HelloWorldView.ActionDelegate> 
     @UiField
     FlowPanel helloWorldPanel;
 
-    @Inject
-    public HelloWorldViewImpl(PartStackUIResources resources) {
-        super(resources);
+    public HelloWorldViewImpl() {
         setContentWidget(UI_BINDER.createAndBindUi(this));
     }
 

@@ -123,9 +123,11 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
     FlowPanel traceOutputPanel;
 
     @Inject
-    public TestResultViewImpl(PartStackUIResources resources, JavaNavigationService javaNavigationService,
-            EditorAgent editorAgent, AppContext appContext, EventBus eventBus, TestResultNodeFactory nodeFactory) {
-        super(resources);
+    public TestResultViewImpl(JavaNavigationService javaNavigationService,
+                              EditorAgent editorAgent,
+                              AppContext appContext,
+                              EventBus eventBus,
+                              TestResultNodeFactory nodeFactory) {
         this.javaNavigationService = javaNavigationService;
         this.editorAgent = editorAgent;
         this.appContext = appContext;

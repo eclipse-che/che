@@ -31,7 +31,6 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.machine.MachineResources;
@@ -92,15 +91,13 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     private boolean navigationPanelVisible;
 
     @Inject
-    public ProcessesPanelViewImpl(PartStackUIResources partStackUIResources,
-                                  org.eclipse.che.ide.Resources resources,
+    public ProcessesPanelViewImpl(org.eclipse.che.ide.Resources resources,
                                   MachineResources machineResources,
                                   ProcessTreeRenderer renderer,
                                   ProcessDataAdapter adapter,
                                   ProcessesPartViewImplUiBinder uiBinder,
                                   SubPanelFactory subPanelFactory,
                                   CoreLocalizationConstant localizationConstants) {
-        super(partStackUIResources);
         setTitle(localizationConstants.viewProcessesTitle());
         this.machineResources = machineResources;
 
