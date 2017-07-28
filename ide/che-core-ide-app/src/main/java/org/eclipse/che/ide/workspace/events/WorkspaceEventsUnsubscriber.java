@@ -26,10 +26,9 @@ import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_OUTPUT_ENDPOINT_ID;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_STATUSES_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_MASTER_JSON_RPC_ENDPOINT_ID;
 
-/** Unsubscribes from receiving JSON-RPC notifications from WS-master when workspace is stopped. */
+/** Unsubscribes from receiving all JSON-RPC notifications from workspace master when workspace is stopped. */
 @Singleton
 class WorkspaceEventsUnsubscriber {
 
@@ -38,11 +37,11 @@ class WorkspaceEventsUnsubscriber {
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> {
             Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
 
-            subscriptionManagerClient.unSubscribe(WORKSPACE_STATUSES_ENDPOINT_ID, WORKSPACE_STATUS_CHANGED_METHOD, scope);
-            subscriptionManagerClient.unSubscribe(WORKSPACE_STATUSES_ENDPOINT_ID, MACHINE_STATUS_CHANGED_METHOD, scope);
-            subscriptionManagerClient.unSubscribe(WORKSPACE_STATUSES_ENDPOINT_ID, SERVER_STATUS_CHANGED_METHOD, scope);
-            subscriptionManagerClient.unSubscribe(WORKSPACE_OUTPUT_ENDPOINT_ID, MACHINE_LOG_METHOD, scope);
-            subscriptionManagerClient.unSubscribe(WORKSPACE_OUTPUT_ENDPOINT_ID, INSTALLER_LOG_METHOD, scope);
+            subscriptionManagerClient.unSubscribe(WS_MASTER_JSON_RPC_ENDPOINT_ID, WORKSPACE_STATUS_CHANGED_METHOD, scope);
+            subscriptionManagerClient.unSubscribe(WS_MASTER_JSON_RPC_ENDPOINT_ID, MACHINE_STATUS_CHANGED_METHOD, scope);
+            subscriptionManagerClient.unSubscribe(WS_MASTER_JSON_RPC_ENDPOINT_ID, SERVER_STATUS_CHANGED_METHOD, scope);
+            subscriptionManagerClient.unSubscribe(WS_MASTER_JSON_RPC_ENDPOINT_ID, MACHINE_LOG_METHOD, scope);
+            subscriptionManagerClient.unSubscribe(WS_MASTER_JSON_RPC_ENDPOINT_ID, INSTALLER_LOG_METHOD, scope);
         });
     }
 }

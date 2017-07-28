@@ -10,11 +10,11 @@
  */
 'use strict';
 
-import {ProjectSource} from './project-source.enum';
-import {ActionType} from './project-source-selector-action-type.enum';
+export type editingProgress = {
+  number: number;  // number of projects
+  message: string; // warning message
+}
 
-export interface IProjectSourceSelectorServiceObserver {
-
-  onProjectSourceSelectorServicePublish(action: ActionType, source: ProjectSource): void;
-
+export interface IEditingProgress {
+  checkEditingProgress(): editingProgress;
 }

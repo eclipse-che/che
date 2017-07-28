@@ -9,13 +9,14 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {editingProgress, IEditingProgress} from '../project-source-selector-editing-progress';
 
 /**
  * This class is handling the service for the Zip project import.
  *
  * @author Oleksii Kurinnyi
  */
-export class ImportZipProjectService {
+export class ImportZipProjectService implements IEditingProgress {
   /**
    * Zip project location.
    */
@@ -40,6 +41,22 @@ export class ImportZipProjectService {
 
   get skipFirstLevel(): boolean {
     return this._skipFirstLevel;
+  }
+
+  /**
+   * Returns resolved promise if there is no project to add. Otherwise returns rejected promise.
+   *
+   * @return {editingProgress}
+   */
+  checkEditingProgress(): editingProgress {
+    if (!this.location) {
+      return null;
+    }
+
+    return {
+      message: 'Adding of a project from ZIP archive is not completed yet.',
+      number: 1
+    };
   }
 
   /**

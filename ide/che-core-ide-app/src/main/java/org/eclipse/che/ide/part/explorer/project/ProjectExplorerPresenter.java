@@ -57,7 +57,7 @@ import java.util.Set;
 
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -157,7 +157,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             if (node instanceof ResourceNode) {
                 Resource data = ((ResourceNode)node).getData();
                 requestTransmitter.newRequest()
-                                  .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                                  .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                                   .methodName(method)
                                   .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
                                                          .withPath(data.getLocation().toString())
@@ -173,7 +173,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             if (node instanceof ResourceNode) {
                 Resource data = ((ResourceNode)node).getData();
                 requestTransmitter.newRequest()
-                                  .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                                  .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                                   .methodName(method)
                                   .paramsAsDto(dtoFactory.createDto(ProjectTreeTrackingOperationDto.class)
                                                          .withPath(data.getLocation().toString())

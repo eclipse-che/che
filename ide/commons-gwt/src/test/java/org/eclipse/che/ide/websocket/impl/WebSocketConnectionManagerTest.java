@@ -31,6 +31,8 @@ import static org.mockito.Mockito.when;
 public class WebSocketConnectionManagerTest {
     @Mock
     private WebSocketFactory           webSocketFactory;
+    @Mock
+    private  WebSocketActionManager webSocketActionManager;
     @InjectMocks
     private WebSocketConnectionManager connectionManager;
 

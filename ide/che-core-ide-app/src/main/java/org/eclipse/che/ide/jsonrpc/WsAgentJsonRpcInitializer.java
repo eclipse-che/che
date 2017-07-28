@@ -14,6 +14,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
@@ -23,10 +24,12 @@ import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /** Initializes JSON-RPC connection to the ws-agent server. */
 @Singleton
@@ -34,14 +37,19 @@ public class WsAgentJsonRpcInitializer {
 
     private final AppContext         appContext;
     private final JsonRpcInitializer initializer;
+    private final RequestTransmitter requestTransmitter;
 
     @Inject
-    public WsAgentJsonRpcInitializer(JsonRpcInitializer initializer, AppContext appContext, EventBus eventBus) {
+    public WsAgentJsonRpcInitializer(JsonRpcInitializer initializer,
+                                     AppContext appContext,
+                                     EventBus eventBus,
+                                     RequestTransmitter requestTransmitter) {
         this.appContext = appContext;
         this.initializer = initializer;
+        this.requestTransmitter = requestTransmitter;
 
         eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> initializeJsonRpcService());
-        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, event -> initializer.terminate(WORKSPACE_AGENT_ENDPOINT_ID));
+        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, event -> initializer.terminate(WS_AGENT_JSON_RPC_ENDPOINT_ID));
 
         // in case ws-agent is already running
         eventBus.addHandler(BasicIDEInitializedEvent.TYPE, event -> {
@@ -77,10 +85,29 @@ public class WsAgentJsonRpcInitializer {
         }
 
         runtime.getWsAgentServer().ifPresent(server -> {
-            final String wsAgentWebSocketUrl = server.getUrl().replaceFirst("http", "ws") + "/ws"; // TODO (spi ide): remove path when it comes with URL
-            final String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("(api)(/)(ws)", "websocket" + "$2" + appContext.getAppId());
+            String wsAgentWebSocketUrl =
+                    server.getUrl().replaceFirst("http", "ws") + "/ws"; // TODO (spi ide): remove path when it comes with URL
+            String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("api/ws", "wsagent");
 
-            initializer.initialize(WORKSPACE_AGENT_ENDPOINT_ID, singletonMap("url", wsAgentUrl));
+            initializer.initialize(WS_AGENT_JSON_RPC_ENDPOINT_ID, singletonMap("url", wsAgentUrl), singleton(this::processWsId));
         });
+    }
+
+    private void processWsId() {
+        Optional<String> applicationWebsocketId = appContext.getApplicationWebsocketId();
+        if (applicationWebsocketId.isPresent()) {
+            requestTransmitter.newRequest()
+                              .endpointId("ws-agent")
+                              .methodName("websocketIdService/setId")
+                              .paramsAsString(applicationWebsocketId.get())
+                              .sendAndSkipResult();
+        } else {
+            requestTransmitter.newRequest()
+                              .endpointId("ws-agent")
+                              .methodName("websocketIdService/getId")
+                              .noParams()
+                              .sendAndReceiveResultAsString()
+                              .onSuccess(appContext::setApplicationWebsocketId);
+        }
     }
 }

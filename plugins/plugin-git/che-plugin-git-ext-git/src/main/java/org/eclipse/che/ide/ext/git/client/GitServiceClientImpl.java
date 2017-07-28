@@ -334,8 +334,8 @@ public class GitServiceClientImpl implements GitServiceClient {
     }
 
     @Override
-    public Promise<PullResponse> pull(Path project, String refSpec, String remote) {
-        PullRequest pullRequest = dtoFactory.createDto(PullRequest.class).withRemote(remote).withRefSpec(refSpec);
+    public Promise<PullResponse> pull(Path project, String refSpec, String remote, boolean rebase) {
+        PullRequest pullRequest = dtoFactory.createDto(PullRequest.class).withRemote(remote).withRefSpec(refSpec).withRebase(rebase);
         String url = getWsAgentBaseUrl() + PULL + "?projectPath=" + project;
         return asyncRequestFactory.createPostRequest(url, pullRequest).send(dtoUnmarshallerFactory.newUnmarshaller(PullResponse.class));
     }

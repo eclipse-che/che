@@ -35,7 +35,7 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("button.close")
     String buttonClose();
-    
+
     @Key("button.refresh")
     String buttonRefresh();
 
@@ -129,7 +129,7 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("messages.committer_identity_info_empty")
     String committerIdentityInfoEmpty();
-    
+
     @Key("messages.init_commit_was_not_performed")
     String initCommitWasNotPerformed();
 
@@ -457,7 +457,7 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("view.compare.revision.full.description.title")
     String viewCompareRevisionFullDescriptionTitle();
-    
+
     @Key("view.compare.revision.full.description.empty.message")
     String viewCompareRevisionFullDescriptionEmptyMessage();
 
@@ -476,14 +476,19 @@ public interface GitLocalizationConstant extends Messages {
     // ChangeList
     @Key("view.change.list.title")
     String changeListTitle();
+
     @Key("view.change.list.group.by.directory.button.text")
     String changeListGroupByDirectoryButtonText();
+
     @Key("view.change.list.row.list.view.button.text")
     String changeListRowListViewButtonText();
+
     @Key("view.change.list.expand.all.button.title")
     String changeListExpandCollapseAllButtonTitle();
+
     @Key("view.change.list.collapse.all.button.title")
     String changeListCollapseAllButtonTitle();
+
     // Fetch
     @Key("view.fetch.title")
     String fetchTitle();
@@ -568,6 +573,9 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("view.pull.local.branches.title")
     String pullLocalBranches();
+
+    @Key("view.pull.rebase.checkbox.label")
+    String pullRebaseCheckbox();
 
     // Merge
     @Key("view.merge.title")

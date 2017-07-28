@@ -12,13 +12,14 @@
 
 import {Observable} from '../../../../components/utils/observable';
 import {ProjectSource} from './project-source.enum';
+import {ActionType} from './project-source-selector-action-type.enum';
 
 export abstract class ProjectSourceSelectorServiceObservable extends Observable {
   constructor() {
     super();
   }
 
-  publish(source: ProjectSource, name?: string): void {
-    super.publish(source, name);
+  publish(action: ActionType, source: ProjectSource): void {
+    super.publish(action, source);
   }
 }

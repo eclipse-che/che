@@ -11,8 +11,8 @@
 'use strict';
 import {ProjectSourceSelectorService} from './project-source-selector.service';
 import {ProjectSource} from './project-source.enum';
-
-enum ButtonType { ADD_PROJECT = 1, PROJECT_TEMPLATE }
+import {IProjectSourceSelectorScope} from './project-source-selector.directive';
+import {ActionType} from './project-source-selector-action-type.enum';
 
 /**
  * This class is handling the controller for the project selector.
@@ -22,14 +22,9 @@ enum ButtonType { ADD_PROJECT = 1, PROJECT_TEMPLATE }
  */
 export class ProjectSourceSelectorController {
   /**
-   * Updates widget function.
+   * Directive's scope.
    */
-  updateWidget: Function;
-
-  /**
-   * Scope.
-   */
-  private $scope: ng.IScope;
+  private $scope: IProjectSourceSelectorScope;
   /**
    * Project selector service.
    */
@@ -39,17 +34,17 @@ export class ProjectSourceSelectorController {
    */
   private projectSource: Object;
   /**
-   * Selected project's source.
+   * Active project's source.
    */
-  private selectedSource: ProjectSource;
+  private activeProjectSource: ProjectSource;
   /**
    * State of a button.
    */
   private buttonState: { [buttonId: string]: boolean } = {};
   /**
-   * Selected button's type.
+   * Selected action's type.
    */
-  private selectedButtonType: ButtonType;
+  private activeActionType: ActionType;
   /**
    * List of project templates which are ready to be imported.
    */
@@ -59,27 +54,27 @@ export class ProjectSourceSelectorController {
    */
   private projectTemplate: che.IProjectTemplate;
   /**
-   * The copy of selected template.
-   */
-  private projectTemplateCopy: che.IProjectTemplate;
-  /**
    * Defines which content should be shown in popover in project's section.
    */
-  private buttonType: Object;
+  private actionType: Object;
+  /**
+   * ID of active button.
+   */
+  private activeButtonId: string;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, projectSourceSelectorService: ProjectSourceSelectorService) {
+  constructor($scope: IProjectSourceSelectorScope, projectSourceSelectorService: ProjectSourceSelectorService) {
     this.$scope = $scope;
     this.projectSourceSelectorService = projectSourceSelectorService;
 
+    this.actionType = ActionType;
     this.projectSource = ProjectSource;
-    this.selectedSource = ProjectSource.SAMPLES;
 
-    this.buttonType = ButtonType;
-    this.selectedButtonType = ButtonType.ADD_PROJECT;
+    this.activeProjectSource = ProjectSource.SAMPLES;
+    this.sourceChanged();
 
     this.$scope.$on('$destroy', () => {
       this.projectSourceSelectorService.clearAllSources();
@@ -87,31 +82,39 @@ export class ProjectSourceSelectorController {
   }
 
   /**
+   * Set source of project which is going to be added.
+   */
+  sourceChanged(): void {
+    this.projectSourceSelectorService.setProjectSource(this.activeProjectSource);
+  }
+
+  /**
    * Add project template from selected source to the list.
    */
   addProjectTemplate(): void {
-    this.projectSourceSelectorService.addProjectTemplateFromSource(this.selectedSource);
+    const projectTemplate = this.projectSourceSelectorService.addProjectTemplateFromSource(this.activeProjectSource);
 
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
+
+    this.updateData({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: projectTemplate});
   }
 
   /**
    * Resets input fields and checkboxes for selected source.
    */
   cancelProjectTemplate(): void {
-    this.projectSourceSelectorService.clearSource(this.selectedSource);
+    this.projectSourceSelectorService.clearSource(this.activeProjectSource);
   }
 
   /**
    * Removes selected template from ready-to-import templates.
    */
   removeTemplate(): void {
-    const projectTemplateName = this.projectTemplate.name;
-    this.projectSourceSelectorService.removeProjectTemplate(projectTemplateName);
+    this.projectSourceSelectorService.removeProjectTemplate(this.projectTemplate.name);
 
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
-    this.updateData({buttonState: true, buttonType: ButtonType.ADD_PROJECT});
+    this.updateData({buttonState: true, actionType: ActionType.ADD_PROJECT});
   }
 
   /**
@@ -123,46 +126,54 @@ export class ProjectSourceSelectorController {
 
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
-    this.updateData({buttonState: true, buttonType: ButtonType.PROJECT_TEMPLATE, template: projectTemplate});
+    this.updateData({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: projectTemplate});
   }
 
   /**
-   * Restores selected template's metadata.
+   * Restores template's metadata.
    */
   restoreMetadata(): void {
-    this.projectTemplateCopy = angular.copy(this.projectTemplate);
+    this.projectSourceSelectorService.clearSource(null);
+  }
+
+  /**
+   * Returns <code>true</code> if "Save" button should be disabled.
+   *
+   * @return {boolean}
+   */
+  disableSaveAndCancelButtons(): boolean {
+    return !this.projectSourceSelectorService.getEditingProgress();
   }
 
   /**
    * Updates widget data.
    *
    * @param buttonState {boolean} toggle button state
-   * @param buttonType {ButtonType} toggle button type
+   * @param actionType {ActionType} current action type
    * @param template {che.IProjectTemplate} the project's template
    */
-  updateData({buttonState, buttonType, template = null}: { buttonState: boolean, buttonType: ButtonType, template?: che.IProjectTemplate }): void {
+  updateData({buttonState, actionType, template = null}: { buttonState: boolean, actionType: ActionType, template?: che.IProjectTemplate }): void {
 
     const buttonId = template
       ? template.name
-      : ButtonType[ButtonType.ADD_PROJECT];
+      : ActionType[ActionType.ADD_PROJECT];
+
+    if (!buttonState && this.activeButtonId && this.activeButtonId !== buttonId) {
+      return;
+    }
+
+    this.activeButtonId = buttonId;
+    this.projectSourceSelectorService.setActionType(actionType);
 
     // leave only one selected button
     this.buttonState = {
       [buttonId]: true
     };
 
-    if (!buttonState) {
-      return;
-    }
-
-    this.selectedButtonType = buttonType;
+    this.activeActionType = actionType;
     this.projectTemplate = angular.copy(template);
-    this.projectTemplateCopy = angular.copy(template);
 
-    if (angular.isFunction(this.updateWidget)) {
-      // update widget
-      this.updateWidget();
-    }
+    this.$scope.updateWidget(this.activeButtonId);
   }
 
 }

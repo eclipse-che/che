@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_OUTPUT;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_SUBSCRIBE;
@@ -66,13 +66,13 @@ public class MavenJsonRpcHandler {
         }
 
         requestTransmitter.newRequest()
-                          .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                           .methodName(MAVEN_OUTPUT_SUBSCRIBE)
                           .noParams()
                           .sendAndSkipResult();
 
         requestTransmitter.newRequest()
-                          .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                           .methodName(MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE)
                           .noParams()
                           .sendAndSkipResult();

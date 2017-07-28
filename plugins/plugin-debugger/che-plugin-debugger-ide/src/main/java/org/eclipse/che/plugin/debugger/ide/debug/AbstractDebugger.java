@@ -78,7 +78,7 @@ import java.util.Map;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /**
  * The common debugger.
@@ -297,7 +297,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     private void subscribeToDebuggerEvents() {
         transmitter.newRequest()
-                   .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                   .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                    .methodName(EVENT_DEBUGGER_SUBSCRIBE)
                    .noParams()
                    .sendAndSkipResult();
@@ -305,7 +305,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     private void unsubscribeFromDebuggerEvents() {
         transmitter.newRequest()
-                   .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                   .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                    .methodName(EVENT_DEBUGGER_UN_SUBSCRIBE)
                    .noParams()
                    .sendAndSkipResult();
