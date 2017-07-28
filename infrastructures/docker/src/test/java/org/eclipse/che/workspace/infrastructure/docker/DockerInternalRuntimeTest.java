@@ -117,7 +117,7 @@ public class DockerInternalRuntimeTest {
         when(runtimeContext.getMachineConfigs()).thenReturn(ImmutableMap.of(DEV_MACHINE, internalMachineCfg1,
                                                                             DB_MACHINE, internalMachineCfg2));
         dockerRuntime = new DockerInternalRuntime(runtimeContext,
-                                                  mock(URLRewriterImpl.class),
+                                                  mock(ExternalIpURLRewriter.class),
                                                   networks,
                                                   starter,
                                                   mock(SnapshotDao.class),

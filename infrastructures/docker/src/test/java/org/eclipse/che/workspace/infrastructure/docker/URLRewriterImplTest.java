@@ -15,7 +15,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.docker.URLRewriterImpl.EXTERNAL_IP_PROPERTY;
+import static org.eclipse.che.workspace.infrastructure.docker.ExternalIpURLRewriter.EXTERNAL_IP_PROPERTY;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -26,7 +26,7 @@ import static org.testng.Assert.fail;
 public class URLRewriterImplTest {
     @Test(dataProvider = "urlRewritingTestProvider")
     public void shouldRewriteURL(String externalIP, String incomeURL, String expectedURL) throws Exception {
-        URLRewriterImpl rewriter = new URLRewriterImpl(externalIP);
+        ExternalIpURLRewriter rewriter = new ExternalIpURLRewriter(externalIP);
 
         String rewrittenURL = rewriter.rewriteURL(null, null, incomeURL);
 
@@ -50,7 +50,7 @@ public class URLRewriterImplTest {
     @Test
     public void shouldNotRewriteURLIfExternalIpIsNoConfigured() throws Exception {
         String toRewrite = "https://google.com:8080/some/path?param=value";
-        URLRewriterImpl rewriter = new URLRewriterImpl(null);
+        ExternalIpURLRewriter rewriter = new ExternalIpURLRewriter(null);
 
         String rewrittenURL = rewriter.rewriteURL(null, null, toRewrite);
 
@@ -61,7 +61,7 @@ public class URLRewriterImplTest {
           expectedExceptionsMessageRegExp = "Rewriting of host 'localhost' in URL ':' failed. Error: .*")
     public void shouldThrowExceptionWhenRewritingFails() throws Exception {
         String toRewrite = ":";
-        URLRewriterImpl rewriter = new URLRewriterImpl("localhost");
+        ExternalIpURLRewriter rewriter = new ExternalIpURLRewriter("localhost");
 
         rewriter.rewriteURL(null, null, toRewrite);
     }
@@ -69,7 +69,7 @@ public class URLRewriterImplTest {
     @Test(dataProvider = "badExternalIpProvider")
     public void shouldThrowExceptionOnRewriterCreationIfURLCheckFails(String badExternalIp) throws Exception {
         try {
-            new URLRewriterImpl(badExternalIp);
+            new ExternalIpURLRewriter(badExternalIp);
             fail("URL rewriter creation had to throw an exception, but no exception was thrown");
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().startsWith(

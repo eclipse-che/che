@@ -31,7 +31,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Garagatyi
  */
-public class URLRewriterImpl implements URLRewriter {
+public class ExternalIpURLRewriter implements URLRewriter {
     static final String EXTERNAL_IP_PROPERTY = "che.docker.ip.external";
 
     private final String externalIpOfContainers;
@@ -43,7 +43,7 @@ public class URLRewriterImpl implements URLRewriter {
      * in case of moving from one network to another).
      */
     @Inject
-    public URLRewriterImpl(@Named(EXTERNAL_IP_PROPERTY) String externalIpOfContainers) {
+    public ExternalIpURLRewriter(@Named(EXTERNAL_IP_PROPERTY) String externalIpOfContainers) {
         if (externalIpOfContainers != null) {
             try {
                 UriBuilder.fromUri("http://" + externalIpOfContainers).build();
