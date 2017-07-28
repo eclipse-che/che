@@ -126,9 +126,11 @@ public class CheJUnitTestListener {
         if (description.isTest()) {
             TestingMessageHelper.treeNode(out, description);
         } else {
+            suiteTreeStarted(description);
             for (Description child : description.getChildren()) {
                 suiteSendTree(child);
             }
+            suiteTreeEnded(description);
         }
     }
 

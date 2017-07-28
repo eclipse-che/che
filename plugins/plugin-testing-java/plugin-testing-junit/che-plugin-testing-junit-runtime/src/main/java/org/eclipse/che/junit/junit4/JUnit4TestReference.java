@@ -55,6 +55,8 @@ public class JUnit4TestReference {
 
     /** Sends tree structure of the current test. */
     public void sendTree(CheJUnitTestListener listener) {
+        if(description.isTest())
+
         listener.suiteTreeStarted(description);
         listener.suiteSendTree(description);
         listener.suiteTreeEnded(description);

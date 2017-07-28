@@ -41,7 +41,6 @@ import org.eclipse.che.plugin.testing.ide.view2.navigation.nodes.TestStateNode;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Implementation for TestResult view. Uses tree for presenting test results.
@@ -176,7 +175,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
     @Override
     public void onSuiteTreeNodeAdded(TestState testState) {
-        addSuiteOrTest(testState);
+        //addSuiteOrTest(testState);
     }
 
     @Override
