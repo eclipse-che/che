@@ -36,22 +36,19 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class GitCheckoutHandler {
     private final Provider<NotificationManager>          notificationManagerProvider;
-    private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
     private final AppContext                             appContext;
 
     @Inject
     public GitCheckoutHandler(Provider<NotificationManager> notificationManagerProvider,
                               RequestHandlerConfigurator configurator,
-                              ResourceManager.ResourceManagerFactory resourceManagerFactory,
                               AppContext appContext) {
         this.notificationManagerProvider = notificationManagerProvider;
-        this.resourceManagerFactory = resourceManagerFactory;
         this.appContext = appContext;
 
         configureHandler(configurator);
     }
 
-    public void configureHandler(RequestHandlerConfigurator configurator) {
+    private void configureHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
                     .methodName("event:git-checkout")
                     .paramsAsDto(GitCheckoutEventDto.class)
@@ -87,6 +84,6 @@ public class GitCheckoutHandler {
         }
 
         //Update project attributes from server.
-        resourceManagerFactory.newResourceManager(appContext.getDevMachine()).getWorkspaceProjects();
+        appContext.getWorkspaceRoot().synchronize();
     }
 }
