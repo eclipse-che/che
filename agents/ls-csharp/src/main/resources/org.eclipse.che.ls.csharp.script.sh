@@ -9,11 +9,19 @@
 #   Codenvy, S.A. - initial API and implementation
 #
 
+is_current_user_root() {
+    test "$(id -u)" = 0 && return 0 || return 1
+}
+
+is_current_user_sudoer() {
+    sudo -n true >& /dev/null && return 0 || return 1
+}
+
 unset PACKAGES
 unset SUDO
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
-test "$(id -u)" = 0 || SUDO="sudo -E"
+if is_current_user_root && is_current_user_sudoer; then SUDO="sudo -E"; fi
 
 AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.csharp.binaries
 CHE_DIR=$HOME/che

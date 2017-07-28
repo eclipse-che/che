@@ -9,9 +9,17 @@
 #   Codenvy, S.A. - initial API and implementation
 #
 
+is_current_user_root() {
+    test "$(id -u)" = 0 && return 0 || return 1
+}
+
+is_current_user_sudoer() {
+    sudo -n true >& /dev/null && return 0 || return 1
+}
+
 unset SUDO
 unset PACKAGES
-test "$(id -u)" = 0 || SUDO="sudo -E"
+if is_current_user_root && is_current_user_sudoer; then SUDO="sudo -E"; fi
 
 if [ -f /etc/centos-release ]; then
     FILE="/etc/centos-release"

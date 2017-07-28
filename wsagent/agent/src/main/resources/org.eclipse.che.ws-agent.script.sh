@@ -9,6 +9,14 @@
 #   Codenvy, S.A. - initial API and implementation
 #
 
+is_current_user_root() {
+    test "$(id -u)" = 0 && return 0 || return 1
+}
+
+is_current_user_sudoer() {
+    sudo -n true >& /dev/null && return 0 || return 1
+}
+
 unset PACKAGES
 unset SUDO
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
@@ -23,7 +31,7 @@ if [ ${CURL_INSTALLED} = false ] && [ ${WGET_INSTALLED} = false ]; then
   CURL_INSTALLED=true
 fi
 
-test "$(id -u)" = 0 || SUDO="sudo -E"
+if is_current_user_root && is_current_user_sudoer; then SUDO="sudo -E"; fi
 
 LOCAL_AGENT_BINARIES_URI="/mnt/che/ws-agent.tar.gz"
 DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/ws-agent.tar.gz'
