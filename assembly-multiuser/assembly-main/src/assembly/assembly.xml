@@ -28,7 +28,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>ROOT.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.assembly2:assembly-ide-war</include>
+                <include>org.eclipse.che.assembly-multiuser:assembly-ide-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -37,7 +37,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>wsmaster.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.assembly2:assembly-wsmaster-war</include>
+                <include>org.eclipse.che.assembly-multiuser:assembly-wsmaster-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -46,7 +46,7 @@
             <outputDirectory>lib</outputDirectory>
             <outputFileNameMapping>ws-agent.tar.gz</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.assembly2:assembly-wsagent-server</include>
+                <include>org.eclipse.che.assembly-multiuser:assembly-wsagent-server</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -55,7 +55,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>dashboard.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.assembly2:che-dashboard-war</include>
+                <include>org.eclipse.che.assembly-multiuser:che-dashboard-war</include>
             </includes>
         </dependencySet>
     </dependencySets>

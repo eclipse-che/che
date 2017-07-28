@@ -33,13 +33,13 @@ build
 # Build che-multiuser
 # grab assembly
 DIR=$(cd "$(dirname "$0")"; pwd)
-if [ ! -d "${DIR}/../../assembly2/assembly-main/target" ]; then
-  echo "${ERROR}Have you built assembly2/assemby-main in ${DIR}/../assembly2/assembly-main 'mvn clean install'?"
+if [ ! -d "${DIR}/../../assembly-multiuser/assembly-main/target" ]; then
+  echo "${ERROR}Have you built assembly-multiuser/assemby-main in ${DIR}/../assembly-multiuser/assembly-main 'mvn clean install'?"
   exit 2
 fi
 
 # Use of folder
-BUILD_ASSEMBLY_MULTIUSER_ZIP=$(echo "${DIR}"/../../assembly2/assembly-main/target/eclipse-che-*.tar.gz)
+BUILD_ASSEMBLY_MULTIUSER_ZIP=$(echo "${DIR}"/../../assembly-multiuser/assembly-main/target/eclipse-che-*.tar.gz)
 LOCAL_ASSEMBLY_MULTIUSER_ZIP="${DIR}"/eclipse-che.tar.gz
 
 if [ -f "${LOCAL_ASSEMBLY_MULTIUSER_ZIP}" ]; then

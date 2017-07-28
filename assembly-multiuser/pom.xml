@@ -19,11 +19,11 @@
         <version>5.16.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>org.eclipse.che.assembly2</groupId>
+    <groupId>org.eclipse.che.assembly-multiuser</groupId>
     <artifactId>che-assembly-parent</artifactId>
     <version>5.16.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Che IDE Assembly2:: Parent</name>
+    <name>Che IDE Assembly Multiuser:: Parent</name>
     <modules>
         <module>assembly-wsagent-war</module>
         <module>assembly-wsagent-server</module>

@@ -25,7 +25,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>ROOT.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.assembly2:assembly-wsagent-war</include>
+                <include>org.eclipse.che.assembly-multiuser:assembly-wsagent-war</include>
             </includes>
         </dependencySet>
     </dependencySets>

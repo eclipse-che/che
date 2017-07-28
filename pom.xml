@@ -34,7 +34,7 @@
         <module>samples</module>
         <module>dashboard</module>
         <module>assembly</module>
-        <module>assembly2</module>
+        <module>assembly-multiuser</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
@@ -167,31 +167,31 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.assembly2</groupId>
+                <groupId>org.eclipse.che.assembly-multiuser</groupId>
                 <artifactId>assembly-ide-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.assembly2</groupId>
+                <groupId>org.eclipse.che.assembly-multiuser</groupId>
                 <artifactId>assembly-wsagent-server</artifactId>
                 <version>${che.version}</version>
                 <type>tar.gz</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.assembly2</groupId>
+                <groupId>org.eclipse.che.assembly-multiuser</groupId>
                 <artifactId>assembly-wsagent-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.assembly2</groupId>
+                <groupId>org.eclipse.che.assembly-multiuser</groupId>
                 <artifactId>assembly-wsmaster-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.assembly2</groupId>
+                <groupId>org.eclipse.che.assembly-multiuser</groupId>
                 <artifactId>che-dashboard-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
