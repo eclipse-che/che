@@ -25,7 +25,7 @@ load '/bats-support/load.bash'
 load '/bats-assert/load.bash'
 . /dockerfiles/cli/tests/test_base.sh
 
-CONTAINER_NAME="batssshscripttest"
+CONTAINER_NAME="test"
 
 script_host_path=${CHE_BASE_DIR}/${LAUNCHER_SCRIPT_TO_TEST}
 
@@ -33,18 +33,18 @@ root_msg="I am root"
 not_root_msg="I am a not root"
 sudoer_msg="I am a sudoer"
 not_sudoer_msg="I am a not a sudoer"
-test_snippet=". /launch.sh; is_current_user_root && echo -n '${root_msg} ' || echo -n '${not_root_msg} '; is_current_user_sudoer && echo '${sudoer_msg}' || echo '${not_sudoer_msg}'"
+test_snippet="source <(grep -iE -A3 'is_current_user_root\(\)|is_current_user_sudoer\(\)' /launch.sh | grep -v -- "^--$"); is_current_user_root && echo -n '${root_msg} ' || echo -n '${not_root_msg} '; is_current_user_sudoer && echo '${sudoer_msg}' || echo '${not_sudoer_msg}'"
 user="100000"
 
 # Kill running che server instance if there is any to be able to run tests
 setup() {
   kill_running_named_container ${CONTAINER_NAME}
   remove_named_container ${CONTAINER_NAME}
-  docker run --security-opt no-new-privileges --user=${user} --name=${CONTAINER_NAME} -d -v ${script_host_path}:/launch.sh "${DOCKER_IMAGE}"
+  docker run --security-opt no-new-privileges --user=${user} --name="${CONTAINER_NAME}" -d -v ${script_host_path}:/launch.sh "${DOCKER_IMAGE}"
 }
 
 teardown() {
-  kill_running_named_container ${CONTAINER_NAME}
+  kill_running_named_container "${CONTAINER_NAME}"
   remove_named_container ${CONTAINER_NAME}
 }
 
@@ -53,7 +53,7 @@ teardown() {
   expected_msg="${not_root_msg} ${not_sudoer_msg}"
 
   #WHEN
-  run docker exec --user=${user} ${CONTAINER_NAME} bash -c "${test_snippet}"
+  run docker exec --user=${user} "${CONTAINER_NAME}" bash -c "${test_snippet}"
 
   #THEN
   assert_success

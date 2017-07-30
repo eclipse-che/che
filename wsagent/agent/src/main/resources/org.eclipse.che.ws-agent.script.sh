@@ -10,11 +10,11 @@
 #
 
 is_current_user_root() {
-    test "$(id -u)" = 0 && return 0 || return 1
+    test "$(id -u)" = 0
 }
 
 is_current_user_sudoer() {
-    sudo -n true >& /dev/null && return 0 || return 1
+    sudo -n true > /dev/null 2>&1
 }
 
 unset PACKAGES
@@ -31,7 +31,7 @@ if [ ${CURL_INSTALLED} = false ] && [ ${WGET_INSTALLED} = false ]; then
   CURL_INSTALLED=true
 fi
 
-if is_current_user_root && is_current_user_sudoer; then SUDO="sudo -E"; fi
+is_current_user_root && is_current_user_sudoer || SUDO="sudo -E"
 
 LOCAL_AGENT_BINARIES_URI="/mnt/che/ws-agent.tar.gz"
 DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/ws-agent.tar.gz'

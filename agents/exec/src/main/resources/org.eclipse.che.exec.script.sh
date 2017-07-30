@@ -11,11 +11,11 @@
 
 
 is_current_user_root() {
-    test "$(id -u)" = 0 && return 0 || return 1
+    test "$(id -u)" = 0
 }
 
 is_current_user_sudoer() {
-    sudo -n true >& /dev/null && return 0 || return 1
+    sudo -n true > /dev/null 2>&1
 }
 
 unset PACKAGES
@@ -32,7 +32,7 @@ if [ ${CURL_INSTALLED} = false ] && [ ${WGET_INSTALLED} = false ]; then
   CURL_INSTALLED=true
 fi
 
-if is_current_user_root && is_current_user_sudoer; then SUDO="sudo -E"; fi
+is_current_user_root && is_current_user_sudoer || SUDO="sudo -E"
 
 CHE_DIR=$HOME/che
 LOCAL_AGENT_BINARIES_URI='/mnt/che/exec-agent/exec-agent-${PREFIX}.tar.gz'
