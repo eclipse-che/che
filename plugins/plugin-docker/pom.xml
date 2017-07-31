@@ -25,6 +25,7 @@
     <modules>
         <module>che-plugin-docker-client</module>
         <module>che-plugin-docker-machine</module>
+        <module>che-plugin-docker-machine-auth</module>
         <module>che-plugin-docker-compose</module>
         <module>che-plugin-openshift-client</module>
     </modules>
