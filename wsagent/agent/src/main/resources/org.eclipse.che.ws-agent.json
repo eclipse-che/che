@@ -8,10 +8,15 @@
   ],
   "properties": {},
   "servers": {
-    "wsagent": {
+    "wsagent/http": {
       "port": "4401/tcp",
       "protocol": "http",
       "path" : "/api"
+    },
+    "wsagent/ws": {
+      "port": "4401/tcp",
+      "protocol": "ws",
+      "path" : "/wsagent"
     }
   }
 }
