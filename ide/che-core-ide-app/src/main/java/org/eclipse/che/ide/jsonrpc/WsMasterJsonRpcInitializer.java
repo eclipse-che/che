@@ -16,10 +16,11 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.api.app.AppContext;
 
 import javax.inject.Singleton;
-import java.util.Optional;
+import java.util.Set;
 
 import static com.google.gwt.user.client.Window.Location.getHost;
 import static com.google.gwt.user.client.Window.Location.getProtocol;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.ide.api.workspace.Constants.WS_MASTER_JSON_RPC_ENDPOINT_ID;
@@ -44,35 +45,26 @@ public class WsMasterJsonRpcInitializer {
     }
 
     private void initialize() {
-        String workspaceMasterUrl = getWsMasterURL();
-
-        initializer.initialize(WS_MASTER_JSON_RPC_ENDPOINT_ID, singletonMap("url", workspaceMasterUrl), singleton(this::processWsId));
-    }
-
-    private String getWsMasterURL() {
         String protocol = "https:".equals(getProtocol()) ? "wss://" : "ws://";
         String host = getHost();
         String context = "/wsmaster/websocket";
+        String url = protocol + host + context;
+        String separator = url.contains("?") ? "&" : "?";
+        String queryParams = appContext.getApplicationWebsocketId().map(id -> separator + "clientId=" + id).orElse("");
+        String wsMasterEndpointURL = url + queryParams;
 
-        return protocol + host + context;
+        Set<Runnable> initActions = appContext.getApplicationWebsocketId().isPresent() ? emptySet() : singleton(this::processWsId);
+
+        initializer.initialize(WS_MASTER_JSON_RPC_ENDPOINT_ID, singletonMap("url", wsMasterEndpointURL), initActions);
     }
 
     private void processWsId() {
-        Optional<String> applicationWebsocketId = appContext.getApplicationWebsocketId();
-        if (applicationWebsocketId.isPresent()) {
-            requestTransmitter.newRequest()
-                              .endpointId("ws-master")
-                              .methodName("websocketIdService/setId")
-                              .paramsAsString(applicationWebsocketId.get())
-                              .sendAndSkipResult();
-        } else {
-            requestTransmitter.newRequest()
-                              .endpointId("ws-master")
-                              .methodName("websocketIdService/getId")
-                              .noParams()
-                              .sendAndReceiveResultAsString()
-                              .onSuccess(appContext::setApplicationWebsocketId);
-        }
+        requestTransmitter.newRequest()
+                          .endpointId(WS_MASTER_JSON_RPC_ENDPOINT_ID)
+                          .methodName("websocketIdService/getId")
+                          .noParams()
+                          .sendAndReceiveResultAsString()
+                          .onSuccess(appContext::setApplicationWebsocketId);
     }
 
     public void terminate() {

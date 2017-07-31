@@ -24,8 +24,9 @@ import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
-import java.util.Optional;
+import java.util.Set;
 
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
@@ -89,25 +90,20 @@ public class WsAgentJsonRpcInitializer {
                     server.getUrl().replaceFirst("http", "ws") + "/ws"; // TODO (spi ide): remove path when it comes with URL
             String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("api/ws", "wsagent");
 
-            initializer.initialize(WS_AGENT_JSON_RPC_ENDPOINT_ID, singletonMap("url", wsAgentUrl), singleton(this::processWsId));
+            String separator = wsAgentUrl.contains("?") ? "&" : "?";
+            String queryParams = appContext.getApplicationWebsocketId().map(id -> separator + "clientId=" + id).orElse("");
+            Set<Runnable> initActions = appContext.getApplicationWebsocketId().isPresent() ? emptySet() : singleton(this::processWsId);
+
+            initializer.initialize(WS_AGENT_JSON_RPC_ENDPOINT_ID, singletonMap("url", wsAgentUrl + queryParams), initActions);
         });
     }
 
     private void processWsId() {
-        Optional<String> applicationWebsocketId = appContext.getApplicationWebsocketId();
-        if (applicationWebsocketId.isPresent()) {
-            requestTransmitter.newRequest()
-                              .endpointId("ws-agent")
-                              .methodName("websocketIdService/setId")
-                              .paramsAsString(applicationWebsocketId.get())
-                              .sendAndSkipResult();
-        } else {
-            requestTransmitter.newRequest()
-                              .endpointId("ws-agent")
-                              .methodName("websocketIdService/getId")
-                              .noParams()
-                              .sendAndReceiveResultAsString()
-                              .onSuccess(appContext::setApplicationWebsocketId);
-        }
+        requestTransmitter.newRequest()
+                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                          .methodName("websocketIdService/getId")
+                          .noParams()
+                          .sendAndReceiveResultAsString()
+                          .onSuccess(appContext::setApplicationWebsocketId);
     }
 }
