@@ -142,8 +142,4 @@ abstract public class BasicWebSocketEndpoint {
 
         return queryParamsMap.isEmpty() ? emptyMap() : unmodifiableMap(queryParamsMap);
     }
-
-    private String getCombinedEndpointId(Session session) {
-        return registry.get(session).orElseGet(() -> identificationService.getCombinedId(getEndpointId()));
-    }
 }
