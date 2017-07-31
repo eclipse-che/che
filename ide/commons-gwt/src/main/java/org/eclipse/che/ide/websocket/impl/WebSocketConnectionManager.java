@@ -27,14 +27,12 @@ import java.util.Map;
 @Singleton
 public class WebSocketConnectionManager {
     private final WebSocketFactory       webSocketFactory;
-    private final WebSocketActionManager actionManager;
 
     private final Map<String, WebSocketConnection> connectionsRegistry = new HashMap<>();
 
     @Inject
-    public WebSocketConnectionManager(WebSocketFactory webSocketFactory, WebSocketActionManager actionManager) {
+    public WebSocketConnectionManager(WebSocketFactory webSocketFactory) {
         this.webSocketFactory = webSocketFactory;
-        this.actionManager = actionManager;
     }
 
     /**
@@ -85,7 +83,10 @@ public class WebSocketConnectionManager {
         }
 
         webSocketConnection.close();
+<<<<<<< HEAD
         actionManager.getOnCloseActions(url).forEach(Runnable::run);
+=======
+>>>>>>> master
 
         Log.debug(WebSocketConnectionManager.class, "Closing connection.");
     }

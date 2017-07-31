@@ -20,6 +20,13 @@ import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
+import static org.eclipse.che.api.core.websocket.impl.WebsocketIdService.randomClientId;
 
 /**
  * Duplex WEB SOCKET endpoint, handles messages, errors, session open/close events.
@@ -48,7 +55,7 @@ abstract public class BasicWebSocketEndpoint {
 
     @OnOpen
     public void onOpen(Session session) {
-        String combinedEndpointId = getCombinedEndpointId(session);
+        String combinedEndpointId = getOrGenerateCombinedEndpointId(session);
 
         LOG.debug("Web socket session opened");
         LOG.debug("Endpoint: {}", combinedEndpointId);
@@ -61,35 +68,82 @@ abstract public class BasicWebSocketEndpoint {
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        String combinedEndpointId = getCombinedEndpointId(session);
+        Optional<String> endpointIdOptional = registry.get(session);
 
-        LOG.debug("Receiving a web socket message.");
-        LOG.debug("Endpoint: {}", combinedEndpointId);
-        LOG.debug("Message: {}", message);
+        String combinedEndpointId;
+        if (endpointIdOptional.isPresent()) {
+            combinedEndpointId = endpointIdOptional.get();
 
+            LOG.debug("Receiving a web socket message.");
+            LOG.debug("Endpoint: {}", combinedEndpointId);
+            LOG.debug("Message: {}", message);
+
+        } else {
+            combinedEndpointId = getOrGenerateCombinedEndpointId(session);
+
+            LOG.warn("Processing messing within unidentified session");
+        }
         receiver.receive(combinedEndpointId, message);
     }
 
     @OnClose
     public void onClose(CloseReason closeReason, Session session) {
-        String combinedEndpointId = getCombinedEndpointId(session);
+        Optional<String> endpointIdOptional = registry.get(session);
 
-        LOG.debug("Web socket session closed");
-        LOG.debug("Endpoint: {}", combinedEndpointId);
-        LOG.debug("Close reason: {}:{}", closeReason.getReasonPhrase(), closeReason.getCloseCode());
+        String combinedEndpointId;
+        if (endpointIdOptional.isPresent()) {
+            combinedEndpointId = endpointIdOptional.get();
 
-        registry.remove(combinedEndpointId);
+            LOG.debug("Web socket session closed");
+            LOG.debug("Endpoint: {}", combinedEndpointId);
+            LOG.debug("Close reason: {}:{}", closeReason.getReasonPhrase(), closeReason.getCloseCode());
+
+            registry.remove(combinedEndpointId);
+        } else {
+            LOG.warn("Closing unidentified session");
+        }
     }
 
     @OnError
-    public void onError(Throwable t) {
-        LOG.debug("Web socket session error");
-        LOG.debug("Error: {}", t);
+    public void onError(Throwable t, Session session) {
+        Optional<String> endpointIdOptional = registry.get(session);
+
+        String combinedEndpointId;
+        if (endpointIdOptional.isPresent()) {
+            combinedEndpointId = endpointIdOptional.get();
+
+            LOG.debug("Web socket session error");
+            LOG.debug("Endpoint: {}", combinedEndpointId);
+            LOG.debug("Error: {}", t);
+        } else {
+            LOG.warn("Web socket session error");
+            LOG.debug("Unidentified session");
+            LOG.debug("Error: {}", t);
+        }
+    }
+
+    protected abstract String getEndpointId();
+
+    private String getOrGenerateCombinedEndpointId(Session session) {
+        Map<String, String> queryParamsMap = getQueryParamsMap(session.getQueryString());
+        String clientId = queryParamsMap.getOrDefault("clientId", randomClientId());
+        return registry.get(session).orElse(identificationService.getCombinedId(getEndpointId(), clientId));
+    }
+
+    private Map<String, String> getQueryParamsMap(String queryParamsString) {
+        Map<String, String> queryParamsMap = new HashMap<>();
+
+        for (String queryParamsPair : Optional.ofNullable(queryParamsString).orElse("").split("&")) {
+            String[] pair = queryParamsPair.split("=");
+            if (pair.length == 2) {
+                queryParamsMap.put(pair[0], pair[1]);
+            }
+        }
+
+        return queryParamsMap.isEmpty() ? emptyMap() : unmodifiableMap(queryParamsMap);
     }
 
     private String getCombinedEndpointId(Session session) {
         return registry.get(session).orElseGet(() -> identificationService.getCombinedId(getEndpointId()));
     }
-
-    protected abstract String getEndpointId();
 }
