@@ -29,10 +29,10 @@ import org.eclipse.che.ide.jsonrpc.JsonRpcInitializer;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Singleton;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
@@ -91,11 +91,13 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
         DevMachine devMachine = appContext.getDevMachine();
         String devMachineId = devMachine.getId();
         String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
-
         String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("api/ws", "wsagent");
         String execAgentUrl = devMachine.getExecAgentUrl();
+        String separator = wsAgentUrl.contains("?") ? "&" : "?";
+        String queryParams = appContext.getApplicationWebsocketId().map(id -> separator + "clientId=" + id).orElse("");
+        Set<Runnable> initActions = appContext.getApplicationWebsocketId().isPresent() ? emptySet() : singleton(this::processWsId);
 
-        initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl), singleton(this::processWsId));
+        initializer.initialize("ws-agent", singletonMap("url", wsAgentUrl + queryParams), initActions);
         initializer.initialize(devMachineId, singletonMap("url", execAgentUrl));
 
         for (MachineEntity machineEntity : appContext.getActiveRuntime().getMachines()) {
@@ -121,21 +123,12 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     }
 
     private void processWsId() {
-        Optional<String> applicationWebsocketId = appContext.getApplicationWebsocketId();
-        if (applicationWebsocketId.isPresent()) {
-            requestTransmitter.newRequest()
-                              .endpointId("ws-agent")
-                              .methodName("websocketIdService/setId")
-                              .paramsAsString(applicationWebsocketId.get())
-                              .sendAndSkipResult();
-        } else {
-            requestTransmitter.newRequest()
-                              .endpointId("ws-agent")
-                              .methodName("websocketIdService/getId")
-                              .noParams()
-                              .sendAndReceiveResultAsString()
-                              .onSuccess(appContext::setApplicationWebsocketId);
-        }
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("websocketIdService/getId")
+                          .noParams()
+                          .sendAndReceiveResultAsString()
+                          .onSuccess(appContext::setApplicationWebsocketId);
     }
 
     private void initializeTreeExplorerFileWatcher() {
