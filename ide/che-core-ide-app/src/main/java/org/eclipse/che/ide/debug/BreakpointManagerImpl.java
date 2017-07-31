@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -17,7 +18,6 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.Breakpoint;
-import org.eclipse.che.ide.api.debug.Breakpoint.Type;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointManagerObservable;
 import org.eclipse.che.ide.api.debug.BreakpointManagerObserver;
@@ -29,7 +29,10 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
@@ -231,6 +234,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
     private void setCurrentBreakpoint(String filePath, int lineNumber) {
         deleteCurrentBreakpoint();
+        currentBreakpoint = new Breakpoint(Breakpoint.Type.CURRENT, lineNumber, filePath, null, true);
 
         EditorPartPresenter editor = getEditorForFile(filePath);
         if (editor != null) {
@@ -241,8 +245,6 @@ public class BreakpointManagerImpl implements BreakpointManager,
     }
 
     private void doSetCurrentBreakpoint(VirtualFile activeFile, int lineNumber) {
-        currentBreakpoint = new Breakpoint(Type.CURRENT, lineNumber, activeFile.getLocation().toString(), activeFile, true);
-
         BreakpointRenderer breakpointRenderer = getBreakpointRendererForFile(activeFile.getLocation().toString());
         if (breakpointRenderer != null) {
             breakpointRenderer.setLineActive(lineNumber, true);
@@ -371,7 +373,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
         });
 
         eventBus.addHandler(EditorOpenedEvent.TYPE, event -> onOpenEditor(event.getFile().getLocation().toString(), event.getEditor()));
-
+        eventBus.addHandler(FileContentUpdateEvent.TYPE, this::onFileContentUpdate);
         eventBus.addHandler(DeleteProjectEvent.TYPE, event -> {
             if (breakpoints.isEmpty()) {
                 return;
@@ -401,6 +403,45 @@ public class BreakpointManagerImpl implements BreakpointManager,
                 }
             }
         });
+    }
+
+    /**
+     * When source is downloaded then {@link FileContentUpdateEvent} will be generated.
+     * After that we have to wait {@link DocumentChangedEvent} to know when {@link TextEditor} will be updated.
+     */
+    private void onFileContentUpdate(FileContentUpdateEvent event) {
+        String filePath = event.getFilePath();
+        if (currentBreakpoint != null && currentBreakpoint.getPath().equals(filePath)) {
+
+            EditorPartPresenter editor = getEditorForFile(filePath);
+            if (editor instanceof TextEditor) {
+
+                final TextEditor textEditor = (TextEditor)editor;
+                textEditor.getDocument()
+                          .getDocumentHandle()
+                          .getDocEventBus()
+                          .addHandler(DocumentChangedEvent.TYPE, docChangedEvent -> {
+
+                              String changedFilePath = docChangedEvent.getDocument().getDocument().getFile().getLocation().toString();
+                              if (currentBreakpoint == null || !currentBreakpoint.getPath().equals(changedFilePath)) {
+                                  return;
+                              }
+
+                              BreakpointRenderer breakpointRenderer = getBreakpointRendererForEditor(editor);
+                              if (breakpointRenderer != null) {
+                                  breakpointRenderer.setLineActive(currentBreakpoint.getLineNumber(), false);
+                                  breakpointRenderer.setLineActive(currentBreakpoint.getLineNumber(), true);
+
+                                  new Timer() {
+                                      @Override
+                                      public void run() {
+                                          textEditor.setCursorPosition(new TextPosition(currentBreakpoint.getLineNumber() + 1, 0));
+                                      }
+                                  }.schedule(300);
+                              }
+                          });
+            }
+        }
     }
 
     /**
