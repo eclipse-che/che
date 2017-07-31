@@ -62,7 +62,6 @@ public class WebSocketConnectionManager {
         }
 
         webSocketConnection.open();
-        actionManager.getOnEstablishActions(url).forEach(Runnable::run);
 
         Log.debug(getClass(), "Opening connection. Url: " + url);
     }
@@ -83,10 +82,6 @@ public class WebSocketConnectionManager {
         }
 
         webSocketConnection.close();
-<<<<<<< HEAD
-        actionManager.getOnCloseActions(url).forEach(Runnable::run);
-=======
->>>>>>> master
 
         Log.debug(WebSocketConnectionManager.class, "Closing connection.");
     }
