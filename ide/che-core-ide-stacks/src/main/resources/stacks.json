@@ -2364,7 +2364,7 @@
           "goal": "Build"
         }
       }, {
-        "commandLine": "scl enable rh-maven33 'mvn compile vertx:run -f ${current.project.path}'",
+        "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
         "name": "run",
         "type": "custom",
         "attributes": {
@@ -2440,7 +2440,7 @@
           "type": "mvn"
         },
         {
-          "commandLine": "scl enable rh-maven33 'mvn compile spring-boot:run -f ${current.project.path}'",
+          "commandLine": "java -jar ${current.project.path}/target/*.jar",
           "name": "run",
           "type": "custom",
           "attributes": {
@@ -2773,10 +2773,10 @@
   }
  },
   {
-    "description": "Ceylon stack with Java, Javascript and Dart backends on CentOS.",
-    "creator": "David Festal",
+    "description": "Ceylon stack with Java, JavaScript and Dart backends on CentOS.",
+    "creator": "ide",
     "scope": "advanced",
-    "name": "Ceylon with Java Javascript Dart on CentOS",
+    "name": "Ceylon with Java JavaScript Dart on CentOS",
     "id": "ceylon-java-javascript-dart-centos",
     "source": {
       "origin": "eclipse/centos_ceylon_nodejs_dart",
@@ -2788,11 +2788,11 @@
         "name": "CentOS"
       },
       {
-        "version": "1.8.0_45",
+        "version": "1.8.0_131",
         "name": "JDK"
       },
       {
-        "version": "3.2.2",
+        "version": "3.3.9",
         "name": "Maven"
       },
       {
@@ -2808,7 +2808,7 @@
         "name": "Dart SDK"
       },
       {
-        "version": "6.11.0",
+        "version": "6.11.1",
         "name": "NodeJS"
       }
     ],
