@@ -28,6 +28,10 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.command.toolbar.controller.ToolbarControllerView;
+import org.eclipse.che.ide.command.toolbar.controller.ToolbarControllerViewImpl;
+import org.eclipse.che.ide.command.toolbar.selector.PanelSelectorView;
+import org.eclipse.che.ide.command.toolbar.selector.PanelSelectorViewImpl;
 import org.eclipse.che.ide.command.type.custom.CustomCommandType;
 import org.eclipse.che.ide.command.editor.CommandEditorView;
 import org.eclipse.che.ide.command.editor.CommandEditorViewImpl;
@@ -132,6 +136,12 @@ public class CommandApiModule extends AbstractGinModule {
         bind(ExecuteCommandView.class).to(ExecuteCommandViewImpl.class).in(Singleton.class);
         bind(ProcessesListView.class).to(ProcessesListViewImpl.class).in(Singleton.class);
         bind(PreviewsView.class).to(PreviewsViewImpl.class).in(Singleton.class);
+
+        // Panel selector
+        bind(PanelSelectorView.class).to(PanelSelectorViewImpl.class).in(Singleton.class);
+
+        // Toolbar controller
+        bind(ToolbarControllerView.class).to(ToolbarControllerViewImpl.class).in(Singleton.class);
 
         install(new GinFactoryModuleBuilder().build(ToolbarButtonsFactory.class));
         install(new GinFactoryModuleBuilder().build(MenuItemsFactory.class));

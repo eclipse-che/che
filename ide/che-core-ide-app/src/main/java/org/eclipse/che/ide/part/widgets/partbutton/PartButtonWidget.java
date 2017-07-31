@@ -19,7 +19,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -27,15 +26,12 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartPresenter;
-import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
+import org.eclipse.che.ide.ui.Tooltip;
+import org.eclipse.che.ide.ui.menu.PositionController;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.LEFT;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
 
 /**
  * Widget that response for displaying part tab.
@@ -52,29 +48,19 @@ public class PartButtonWidget extends Composite implements PartButton {
     @UiField
     FlowPanel iconPanel;
 
-    @UiField
-    Label tabName;
-
-    private final Resources resources;
-
     private ActionDelegate delegate;
+
     private Widget         badgeWidget;
-    private TabPosition    tabPosition;
-    private boolean        tabSelected;
+
     private SVGResource    tabIcon;
 
     @Inject
-    public PartButtonWidget(Resources resources, @Assisted String title) {
-        this.resources = resources;
-
+    public PartButtonWidget(@Assisted String title) {
         initWidget(UI_BINDER.createAndBindUi(this));
-        setStyleName(resources.partStackCss().idePartStackTab());
         ensureDebugId("partButton-" + title);
 
         addDomHandler(this, DoubleClickEvent.getType());
         addDomHandler(this, ClickEvent.getType());
-
-        tabName.setText(title);
     }
 
     /** {@inheritDoc} */
@@ -89,10 +75,18 @@ public class PartButtonWidget extends Composite implements PartButton {
         return tabIcon != null ? new SVGImage(tabIcon) : null;
     }
 
+    private Tooltip tooltipHint;
+
     /** {@inheritDoc} */
     @NotNull
     public PartButton setTooltip(@Nullable String tooltip) {
-        setTitle(tooltip);
+        if (tooltipHint == null) {
+            tooltipHint = Tooltip.create((elemental.dom.Element) getElement(),
+                    PositionController.VerticalAlign.BOTTOM, PositionController.HorizontalAlign.MIDDLE, tooltip);
+        } else {
+            tooltipHint.setTitle(tooltip);
+        }
+
         return this;
     }
 
@@ -151,8 +145,8 @@ public class PartButtonWidget extends Composite implements PartButton {
 
         s.setProperty("color", org.eclipse.che.ide.api.theme.Style.getBadgeFontColor());
 
-        s.setProperty("left", "15px");
-        s.setProperty("top", "3px");
+        s.setProperty("left", "9px");
+        s.setProperty("top", "2px");
 
         s.setProperty("borderWidth", "1.5px");
         s.setProperty("borderStyle", "solid");
@@ -192,22 +186,14 @@ public class PartButtonWidget extends Composite implements PartButton {
     /** {@inheritDoc} */
     @Override
     public void select() {
-        tabSelected = true;
-
-        addStyleName(tabPosition == BELOW ? resources.partStackCss().selectedBottomTab()
-                : resources.partStackCss().selectedRightOrLeftTab());
-
+        getElement().setAttribute("selected", "true");
         updateBadge();
     }
 
     /** {@inheritDoc} */
     @Override
     public void unSelect() {
-        tabSelected = false;
-
-        removeStyleName(tabPosition == BELOW ? resources.partStackCss().selectedBottomTab()
-                                             : resources.partStackCss().selectedRightOrLeftTab());
-
+        getElement().removeAttribute("selected");
         updateBadge();
     }
 
@@ -219,21 +205,11 @@ public class PartButtonWidget extends Composite implements PartButton {
             return;
         }
 
-        if (tabSelected) {
+        if (getElement().hasAttribute("selected")) {
             badgeWidget.getElement().getStyle().setBorderColor(org.eclipse.che.ide.api.theme.Style.theme.activeTabBackground());
         } else {
             badgeWidget.getElement().getStyle().setBorderColor(org.eclipse.che.ide.api.theme.Style.theme.tabsPanelBackground());
         }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setTabPosition(@NotNull TabPosition tabPosition) {
-        this.tabPosition = tabPosition;
-
-        addStyleName(tabPosition == LEFT ? resources.partStackCss().leftTabs()
-                                         : tabPosition == RIGHT ? resources.partStackCss().rightTabs()
-                                                                : resources.partStackCss().bottomTabs());
     }
 
     /** {@inheritDoc} */

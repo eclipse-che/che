@@ -18,6 +18,7 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -56,6 +57,10 @@ public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<
 
     @UiField
     SimplePanel toolPanel;
+
+    @UiField
+    DockLayoutPanel layoutPanel;
+
     @UiField
     FlowPanel   rightPanelContainer;
     @UiField
@@ -89,8 +94,13 @@ public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<
         bottomPanel = new FlowPanel();
         bottomPanelContainer.add(bottomPanel);
         bottomPanel.addStyleName(resources.workBenchCss().ideWorkBenchToolPanelBottom());
+
          /* Makes splitters much better */
         tuneSplitters();
+
+        layoutPanel.setWidgetHidden(leftPanelContainer, true);
+        layoutPanel.setWidgetHidden(rightPanelContainer, true);
+        layoutPanel.setWidgetHidden(bottomPanelContainer, true);
     }
 
     /** {@inheritDoc} */
@@ -167,7 +177,7 @@ public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<
         el.getStyle().setProperty("boxSizing", "border-box");
         el.getStyle().setProperty("width", "5px");
         el.getStyle().setProperty("overflow", "hidden");
-        el.getStyle().setProperty("marginLeft", "-3px");
+        el.getStyle().setProperty("marginLeft", "-2px");
         el.getStyle().setProperty("backgroundColor", "transparent");
 
         /** Add small border */
@@ -175,7 +185,7 @@ public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<
         smallBorder.getStyle().setProperty("position", "absolute");
         smallBorder.getStyle().setProperty("width", "1px");
         smallBorder.getStyle().setProperty("height", "100%");
-        smallBorder.getStyle().setProperty("left", "3px");
+        smallBorder.getStyle().setProperty("left", "2px");
         smallBorder.getStyle().setProperty("top", "0px");
         smallBorder.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
         el.appendChild(smallBorder);
@@ -183,7 +193,7 @@ public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<
         /** Add large border */
         DivElement largeBorder = Document.get().createDivElement();
         largeBorder.getStyle().setProperty("position", "absolute");
-        largeBorder.getStyle().setProperty("width", "2px");
+        largeBorder.getStyle().setProperty("width", "1px");
         largeBorder.getStyle().setProperty("height", "100%");
         largeBorder.getStyle().setProperty("left", "1px");
         largeBorder.getStyle().setProperty("top", "0px");
@@ -207,7 +217,7 @@ public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<
         el.getStyle().setProperty("boxSizing", "border-box");
         el.getStyle().setProperty("width", "5px");
         el.getStyle().setProperty("overflow", "hidden");
-        el.getStyle().setProperty("marginLeft", "-1px");
+        el.getStyle().setProperty("marginLeft", "-2px");
         el.getStyle().setProperty("backgroundColor", "transparent");
 
         /** Add small border */
@@ -215,7 +225,7 @@ public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<
         smallBorder.getStyle().setProperty("position", "absolute");
         smallBorder.getStyle().setProperty("width", "1px");
         smallBorder.getStyle().setProperty("height", "100%");
-        smallBorder.getStyle().setProperty("left", "1px");
+        smallBorder.getStyle().setProperty("left", "2px");
         smallBorder.getStyle().setProperty("top", "0px");
         smallBorder.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
         el.appendChild(smallBorder);
@@ -223,9 +233,9 @@ public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<
         /** Add large border */
         DivElement largeBorder = Document.get().createDivElement();
         largeBorder.getStyle().setProperty("position", "absolute");
-        largeBorder.getStyle().setProperty("width", "2px");
+        largeBorder.getStyle().setProperty("width", "1px");
         largeBorder.getStyle().setProperty("height", "100%");
-        largeBorder.getStyle().setProperty("left", "2px");
+        largeBorder.getStyle().setProperty("left", "3px");
         largeBorder.getStyle().setProperty("top", "0px");
         largeBorder.getStyle().setProperty("opacity", "0.4");
         largeBorder.getStyle().setProperty("backgroundColor", Style.getSplitterLargeBorderColor());
@@ -243,7 +253,7 @@ public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<
         el.getParentElement().getStyle().setProperty("zIndex", "1000");
         el.getParentElement().getStyle().setProperty("overflow", "visible");
 
-        el.getStyle().setProperty("height", "3px");
+        el.getStyle().setProperty("height", "4px");
         el.getStyle().setProperty("marginTop", "-2px");
         el.getStyle().setProperty("backgroundColor", "transparent");
 
@@ -254,7 +264,7 @@ public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<
         delimiter.getStyle().setProperty("height", "1px");
         delimiter.getStyle().setProperty("left", "0px");
         delimiter.getStyle().setProperty("top", "2px");
-        delimiter.getStyle().setProperty("backgroundColor", Style.theme.tabsPanelBackground());
+        delimiter.getStyle().setProperty("backgroundColor", Style.theme.tabBorderColor());
         el.appendChild(delimiter);
     }
 

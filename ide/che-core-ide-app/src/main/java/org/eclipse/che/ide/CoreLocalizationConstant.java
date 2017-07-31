@@ -71,6 +71,12 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.delete.description")
     String deleteItemActionDescription();
 
+    @Key("action.goInto.text")
+    String goIntoActionText();
+
+    @Key("action.goBack.text")
+    String goBackActionText();
+
     /* Cut */
     @Key("action.cut.text")
     String cutItemsActionText();
@@ -128,6 +134,18 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("action.rename.description")
     String renameItemActionDescription();
+
+    @Key("action.collapseAll.title")
+    String collapseAllActionTitle();
+
+    @Key("action.collapseAll.description")
+    String collapseAllActionDescription();
+
+    @Key("action.refresh.title")
+    String refreshActionTitle();
+
+    @Key("action.refresh.description")
+    String refreshActionDescription();
 
     @Key("renameNodeDialogTitle")
     String renameNodeDialogTitle();
@@ -362,6 +380,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.link.with.editor")
     String actionLinkWithEditor();
 
+    @Key("action.show.toolbar")
+    String actionShowToolbar();
+
     @Key("action.projectConfiguration.description")
     String actionProjectConfigurationDescription();
 
@@ -398,11 +419,23 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.restorePart.description")
     String actionRestorePartDescription();
 
-    @Key("action.minimizePart.title")
-    String actionMinimizePartTitle();
+    @Key("action.hidePart.title")
+    String actionHidePartTitle();
 
-    @Key("action.minimizePart.description")
-    String actionMinimizePartDescription();
+    @Key("action.hidePart.description")
+    String actionHidePartDescription();
+
+    @Key("maximizePartStack.title")
+    String maximizePartStackTitle();
+
+    @Key("restorePartStack.title")
+    String restorePartStackTitle();
+
+    @Key("minimizePartStack.title")
+    String minimizePartStackTitle();
+
+    @Key("partStackOptions.title")
+    String partStackOptionsTitle();
 
     /* NewResource */
     @Key("newResource.title")

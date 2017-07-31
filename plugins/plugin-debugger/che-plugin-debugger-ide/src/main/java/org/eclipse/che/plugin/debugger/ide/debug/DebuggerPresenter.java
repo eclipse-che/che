@@ -178,7 +178,7 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     }
 
     public void hideDebuggerPanel() {
-        partStack.minimize();
+        partStack.hide();
     }
 
     public boolean isDebuggerPanelOpened() {

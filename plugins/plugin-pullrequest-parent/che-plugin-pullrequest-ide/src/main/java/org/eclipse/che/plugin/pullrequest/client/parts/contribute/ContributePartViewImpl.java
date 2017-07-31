@@ -34,7 +34,6 @@ import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.FontAwesome;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ui.buttonLoader.ButtonLoaderResources;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
@@ -120,13 +119,10 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
     private String contributeButtonText;
 
     @Inject
-    public ContributePartViewImpl(@NotNull final PartStackUIResources partStackUIResources,
-                                  @NotNull final ContributeMessages messages,
+    public ContributePartViewImpl(@NotNull final ContributeMessages messages,
                                   @NotNull final ContributeResources resources,
                                   @NotNull final ButtonLoaderResources buttonLoaderResources,
                                   @NotNull final ContributePartViewUiBinder uiBinder) {
-        super(partStackUIResources);
-
         this.messages = messages;
         this.resources = resources;
         this.statusSteps = new StatusSteps();

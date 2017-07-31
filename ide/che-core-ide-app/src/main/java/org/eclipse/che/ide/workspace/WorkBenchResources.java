@@ -18,6 +18,7 @@ import com.google.gwt.resources.client.CssResource;
  * @author Dmitry Shnurenko
  */
 public interface WorkBenchResources extends ClientBundle {
+
     interface WorkBenchCss extends CssResource {
 
         @ClassName("ide-work-bench-tool-panel-bottom")
@@ -44,4 +45,5 @@ public interface WorkBenchResources extends ClientBundle {
 
     @Source({"perspectives/general/WorkBench.css", "org/eclipse/che/ide/api/ui/style.css"})
     WorkBenchCss workBenchCss();
+
 }

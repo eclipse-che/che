@@ -48,14 +48,15 @@ import org.eclipse.che.ide.actions.ShowConsoleTreeAction;
 import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.actions.ShowPreferencesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
+import org.eclipse.che.ide.actions.ShowToolbarAction;
 import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.SoftWrapAction;
 import org.eclipse.che.ide.actions.StopWorkspaceAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
+import org.eclipse.che.ide.actions.common.HidePartAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
-import org.eclipse.che.ide.actions.common.MinimizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
 import org.eclipse.che.ide.actions.find.FindActionAction;
 import org.eclipse.che.ide.api.action.Action;
@@ -144,6 +145,7 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RECENT_FILES;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_TOOLBAR_CONTROLLER;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
@@ -241,9 +243,6 @@ public class StandardComponentInitializer {
 
     @Inject
     private RenameItemAction renameItemAction;
-
-    @Inject
-    private CollapseAllAction collapseAllAction;
 
     @Inject
     private SplitVerticallyAction splitVerticallyAction;
@@ -378,13 +377,16 @@ public class StandardComponentInitializer {
     private LinkWithEditorAction linkWithEditorAction;
 
     @Inject
+    private ShowToolbarAction showToolbarAction;
+
+    @Inject
     private SignatureHelpAction signatureHelpAction;
 
     @Inject
     private MaximizePartAction maximizePartAction;
 
     @Inject
-    private MinimizePartAction minimizePartAction;
+    private HidePartAction hidePartAction;
 
     @Inject
     private RestorePartAction restorePartAction;
@@ -421,6 +423,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private RemoveFromFileWatcherExcludesAction removeFromFileWatcherExcludesAction;
+
+    @Inject
+    private CollapseAllAction collapseAllAction;
 
     @Inject
     private PerspectiveManager perspectiveManager;
@@ -710,6 +715,8 @@ public class StandardComponentInitializer {
         actionManager.registerAction("resourceOperation", resourceOperation);
         actionManager.registerAction("refreshPathAction", refreshPathAction);
         actionManager.registerAction("linkWithEditor", linkWithEditorAction);
+        actionManager.registerAction("showToolbar", showToolbarAction);
+
         resourceOperation.addSeparator();
         resourceOperation.add(previewImageAction);
         resourceOperation.add(showReferenceAction);
@@ -741,9 +748,15 @@ public class StandardComponentInitializer {
 
         DefaultActionGroup partMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_PART_MENU);
         partMenuGroup.add(maximizePartAction);
-        partMenuGroup.add(minimizePartAction);
+        partMenuGroup.add(hidePartAction);
         partMenuGroup.add(restorePartAction);
         partMenuGroup.add(showConsoleTreeAction);
+        partMenuGroup.add(collapseAllAction);
+        partMenuGroup.add(refreshPathAction);
+        partMenuGroup.add(linkWithEditorAction);
+
+        DefaultActionGroup toolbarControllerGroup = (DefaultActionGroup)actionManager.getAction(GROUP_TOOLBAR_CONTROLLER);
+        toolbarControllerGroup.add(showToolbarAction);
 
         actionManager.registerAction("expandEditor", expandEditorAction);
         DefaultActionGroup rightMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_MAIN_MENU);

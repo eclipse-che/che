@@ -20,18 +20,18 @@ import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartStack;
 
 /**
- * Action to minimize active part and corresponding part stack.
+ * Action to hide active part and corresponding part stack.
  * 
  * @author Vitaliy Guliy
  */
-public class MinimizePartAction extends Action implements ActivePartChangedHandler {
+public class HidePartAction extends Action implements ActivePartChangedHandler {
 
     private PartStack activePartStack;
 
     @Inject
-    public MinimizePartAction(final EventBus eventBus,
-                              final CoreLocalizationConstant coreLocalizationConstant) {
-        super(coreLocalizationConstant.actionMinimizePartTitle(), coreLocalizationConstant.actionMinimizePartDescription());
+    public HidePartAction(final EventBus eventBus,
+                          final CoreLocalizationConstant coreLocalizationConstant) {
+        super(coreLocalizationConstant.actionHidePartTitle(), coreLocalizationConstant.actionHidePartDescription());
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     }
 
@@ -47,7 +47,7 @@ public class MinimizePartAction extends Action implements ActivePartChangedHandl
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        activePartStack.minimize();
+        activePartStack.hide();
     }
 
     @Override

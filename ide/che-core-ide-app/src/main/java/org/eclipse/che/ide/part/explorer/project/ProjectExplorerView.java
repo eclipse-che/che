@@ -35,6 +35,11 @@ public interface ProjectExplorerView extends View<ProjectExplorerView.ActionDele
     boolean setGoIntoModeOn(Node node);
 
     /**
+     * Deactivate "Go Into" mode.
+     */
+    void setGoIntoModeOff();
+
+    /**
      * Get "Go Into" state on current tree.
      *
      * @return true - if "Go Into" mode has been activated.
