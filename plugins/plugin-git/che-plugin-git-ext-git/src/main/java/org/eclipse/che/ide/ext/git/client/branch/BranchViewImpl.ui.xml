@@ -21,6 +21,9 @@
         }
     </ui:style>
     <g:DockLayoutPanel unit="PX" width="450px" height="600px" addStyleNames="{style.emptyBorder}" debugId="git-branches-mainForm">
+        <!--<g:north size="20">-->
+            <!--<g:ListBox size="20" />-->
+        <!--</g:north>-->
         <g:center>
             <g:ScrollPanel ui:field="branchesPanel" addStyleNames="{res.gitCSS.simpleListContainer}" debugId="git-branches-branchesPanel"/>
         </g:center>
