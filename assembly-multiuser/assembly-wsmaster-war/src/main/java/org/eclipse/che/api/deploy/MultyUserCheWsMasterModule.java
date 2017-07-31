@@ -12,30 +12,16 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
 
-import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.inject.DynaModule;
 
 import javax.sql.DataSource;
 
-/**
- *
- * Single-user version Che specific bindings
- *
- * @author Max Shaposhnik (mshaposh@redhat.com)
- */
+
 @DynaModule
-public class CheWsMasterModule extends AbstractModule {
+public class MultyUserCheWsMasterModule extends AbstractModule {
+
     @Override
     protected void configure() {
-
-        bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
-
-        bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
-                .to(org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl.class);
-
-        bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
-                .to(org.eclipse.che.plugin.docker.machine.MachineProviderImpl.class);
-
-        bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
+        bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
     }
 }

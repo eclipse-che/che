@@ -42,6 +42,14 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-db</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-db-vendor-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-machine-authentication</artifactId>
         </dependency>
         <dependency>
@@ -98,6 +106,7 @@
                         </resource>
                     </webResources>
                     <packagingExcludes>WEB-INF/lib/wsmaster-local*.jar,
+                        WEB-INF/lib/che-core-db-vendor-h2-*.jar,
                         WEB-INF/classes/org/eclipse/che/api/deploy/CheWsMasterModule.class,
                         WEB-INF/classes/org/eclipse/che/api/deploy/CheWsMasterServletModule.class</packagingExcludes>
                 </configuration>
