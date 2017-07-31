@@ -696,6 +696,13 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     @Override
+    public void setCursorPosition(TextPosition textPosition) {
+        if (document != null) {
+            document.setCursorPosition(textPosition);
+        }
+    }
+
+    @Override
     public int getCursorOffset() {
         final TextPosition textPosition = getDocument().getCursorPosition();
         return getDocument().getIndexFromPosition(textPosition);

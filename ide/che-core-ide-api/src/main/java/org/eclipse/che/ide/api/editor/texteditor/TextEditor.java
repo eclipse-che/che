@@ -115,6 +115,11 @@ public interface TextEditor extends EditorPartPresenter {
     TextPosition getCursorPosition();
 
     /**
+     * Sets the new cursor position.
+     */
+    void setCursorPosition(TextPosition textPosition);
+
+    /**
      * Returns the cursor model for the editor.
      * @return the cursor model
      */
