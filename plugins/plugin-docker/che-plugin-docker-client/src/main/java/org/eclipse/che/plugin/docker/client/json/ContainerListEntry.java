@@ -30,6 +30,7 @@ public class ContainerListEntry {
     private Map<String, String> labels;
     private int                 sizeRw;
     private int                 sizeRootFs;
+    // TODO this is not valid object, fix it
     private NetworkSettings     networkSettings;
 
     /**

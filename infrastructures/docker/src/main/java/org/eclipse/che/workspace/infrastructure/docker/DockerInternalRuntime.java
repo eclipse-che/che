@@ -86,7 +86,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
      */
     @AssistedInject
     public DockerInternalRuntime(@Assisted DockerRuntimeContext context,
-                                 URLRewriter urlRewriter,
+                                 ExternalIpURLRewriter urlRewriter,
                                  NetworkLifecycle networks,
                                  DockerMachineStarter machineStarter,
                                  SnapshotDao snapshotDao,
@@ -115,7 +115,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     @AssistedInject
     public DockerInternalRuntime(@Assisted DockerRuntimeContext context,
                                  @Assisted List<ContainerListEntry> containers,
-                                 URLRewriter urlRewriter,
+                                 ExternalIpURLRewriter urlRewriter,
                                  NetworkLifecycle networks,
                                  DockerMachineStarter machineStarter,
                                  SnapshotDao snapshotDao,
