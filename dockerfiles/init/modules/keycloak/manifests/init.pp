@@ -22,5 +22,11 @@ class keycloak {
     ensure  => "present",
     content => template("keycloak/master-users-0.json.erb"),
     mode    => "644",
+  } ->
+  file { 'keycloak theme custom login page':
+   path => '/opt/che/config/keycloak/login-page',
+   ensure  => "present",
+   source => 'puppet:///modules/keycloak/che/login',
+   recurse => true,
   }
 }
