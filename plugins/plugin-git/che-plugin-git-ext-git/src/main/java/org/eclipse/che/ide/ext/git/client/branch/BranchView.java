@@ -40,7 +40,7 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
         void onCreateClicked();
 
         /**
-         * Performs any action in response to the user having select branch.
+         * Performs any action in response to the user having selected branch.
          *
          * @param branch
          *         selected revision
@@ -49,6 +49,11 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
 
         /** Performs any action in response to the user do not have any selected branch. */
         void onBranchUnselected();
+
+        /**
+         * Performs any action in response to the user having selected branch filter.
+         */
+        void onFilterValueChanged();
     }
 
     /**
@@ -82,6 +87,11 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
      *         <code>true</code> to enable the button, <code>false</code> to disable it
      */
     void setEnableRenameButton(boolean enabled);
+
+    /**
+     * Returns selected branch filter.
+     */
+    String getBranchFilterValue();
 
     /** Close dialog. */
     void close();

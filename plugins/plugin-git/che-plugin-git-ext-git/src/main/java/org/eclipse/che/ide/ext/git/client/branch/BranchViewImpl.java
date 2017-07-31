@@ -26,12 +26,15 @@ import org.eclipse.che.ide.util.dom.Elements;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -60,6 +63,8 @@ public class BranchViewImpl extends Window implements BranchView {
     Button btnCheckout;
     @UiField
     ScrollPanel branchesPanel;
+    @UiField
+    ListBox     filter;
     @UiField(provided = true)
     final         GitResources            res;
     @UiField(provided = true)
@@ -128,7 +133,16 @@ public class BranchViewImpl extends Window implements BranchView {
                 .create((SimpleList.View)breakPointsElement, coreRes.defaultSimpleListCss(), listBranchesRenderer, listBranchesDelegate);
         this.branchesPanel.add(branches);
 
+        this.filter.addItem("All", "all");
+        this.filter.addItem("Local", "local");
+        this.filter.addItem("Remote", "remote");
+
         createButtons();
+    }
+
+    @UiHandler("filter")
+    public void onFilterChanged(ChangeEvent event) {
+        delegate.onFilterValueChanged();
     }
 
     private void createButtons() {
@@ -247,6 +261,11 @@ public class BranchViewImpl extends Window implements BranchView {
     @Override
     public void setEnableRenameButton(boolean enabled) {
         btnRename.setEnabled(enabled);
+    }
+
+    @Override
+    public String getBranchFilterValue() {
+        return filter.getSelectedValue();
     }
 
     /** {@inheritDoc} */

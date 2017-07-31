@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.git.client.branch;
 
 import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -55,24 +56,24 @@ import static org.mockito.Mockito.when;
 public class BranchPresenterTest extends BaseTest {
 
     @Captor
-    private ArgumentCaptor<InputCallback>                          inputCallbackCaptor;
+    private ArgumentCaptor<InputCallback>   inputCallbackCaptor;
     @Captor
-    private ArgumentCaptor<ConfirmCallback>                        confirmCallbackCaptor;
+    private ArgumentCaptor<ConfirmCallback> confirmCallbackCaptor;
 
     public static final String  BRANCH_NAME        = "branchName";
     public static final String  REMOTE_BRANCH_NAME = "origin/branchName";
     public static final boolean IS_REMOTE          = true;
     public static final boolean IS_ACTIVE          = true;
     @Mock
-    private BranchView                view;
+    private BranchView      view;
     @Mock
-    private Branch                    selectedBranch;
+    private Branch          selectedBranch;
     @Mock
-    private DialogFactory             dialogFactory;
+    private DialogFactory   dialogFactory;
     @Mock
-    private DtoFactory                dtoFactory;
+    private DtoFactory      dtoFactory;
     @Mock
-    private CheckoutRequest           checkoutRequest;
+    private CheckoutRequest checkoutRequest;
 
     private BranchPresenter presenter;
 
@@ -98,6 +99,7 @@ public class BranchPresenterTest extends BaseTest {
         when(service.branchList(anyObject(), anyObject())).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
+        when(view.getBranchFilterValue()).thenReturn("all");
     }
 
     @Test
@@ -113,6 +115,50 @@ public class BranchPresenterTest extends BaseTest {
         verify(branchListPromise).then(branchListCaptor.capture());
         branchListCaptor.getValue().apply(branches);
 
+        verify(view).showDialogIfClosed();
+        verify(view).setBranches(eq(branches));
+        verify(console, never()).printError(anyString());
+        verify(notificationManager, never()).notify(anyString(), any(ProjectConfigDto.class));
+        verify(constant, never()).branchesListFailed();
+    }
+
+    @Test
+    public void shouldShowLocalBranchesWheBranchesFilterIsSetToLocal() throws Exception {
+        //given
+        final List<Branch> branches = Collections.singletonList(selectedBranch);
+        when(service.branchList(anyObject(), eq(BranchListMode.LIST_LOCAL))).thenReturn(branchListPromise);
+        when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
+        when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
+        when(view.getBranchFilterValue()).thenReturn("local");
+
+        //when
+        presenter.showBranches(project);
+        verify(branchListPromise).then(branchListCaptor.capture());
+        branchListCaptor.getValue().apply(branches);
+
+        //then
+        verify(view).showDialogIfClosed();
+        verify(view).setBranches(eq(branches));
+        verify(console, never()).printError(anyString());
+        verify(notificationManager, never()).notify(anyString(), any(ProjectConfigDto.class));
+        verify(constant, never()).branchesListFailed();
+    }
+
+    @Test
+    public void shouldShowRemoteBranchesWheBranchesFilterIsSetToRemote() throws Exception {
+        //given
+        final List<Branch> branches = Collections.singletonList(selectedBranch);
+        when(service.branchList(anyObject(), eq(BranchListMode.LIST_LOCAL))).thenReturn(branchListPromise);
+        when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
+        when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
+        when(view.getBranchFilterValue()).thenReturn("remote");
+
+        //when
+        presenter.showBranches(project);
+        verify(branchListPromise).then(branchListCaptor.capture());
+        branchListCaptor.getValue().apply(branches);
+
+        //then
         verify(view).showDialogIfClosed();
         verify(view).setBranches(eq(branches));
         verify(console, never()).printError(anyString());
