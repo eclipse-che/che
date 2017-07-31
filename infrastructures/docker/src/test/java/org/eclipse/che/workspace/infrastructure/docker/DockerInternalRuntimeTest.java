@@ -18,7 +18,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
@@ -118,7 +117,7 @@ public class DockerInternalRuntimeTest {
         when(runtimeContext.getMachineConfigs()).thenReturn(ImmutableMap.of(DEV_MACHINE, internalMachineCfg1,
                                                                             DB_MACHINE, internalMachineCfg2));
         dockerRuntime = new DockerInternalRuntime(runtimeContext,
-                                                  mock(URLRewriter.class),
+                                                  mock(ExternalIpURLRewriter.class),
                                                   networks,
                                                   starter,
                                                   mock(SnapshotDao.class),

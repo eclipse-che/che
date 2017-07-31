@@ -61,7 +61,7 @@ public class DockerMachineCreator {
     /** Creates new docker machine instance from the full container description. */
     public DockerMachine create(ContainerInfo container) {
         NetworkSettings networkSettings = container.getNetworkSettings();
-        String hostname = networkSettings.getGateway();
+        String hostname = networkSettings.getIpAddress();
         Map<String, ServerConfig> configs = Labels.newDeserializer(container.getConfig().getLabels()).servers();
 
         return new DockerMachine(container.getId(),

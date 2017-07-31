@@ -59,7 +59,7 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
 
     @Inject
     public OpenshiftInternalRuntime(@Assisted OpenshiftRuntimeContext context,
-                                    URLRewriter urlRewriter,
+                                    URLRewriter.NoOpURLRewriter urlRewriter,
                                     OpenshiftClientFactory clientFactory,
                                     EventService eventService,
                                     OpenshiftBootstrapperFactory openshiftBootstrapperFactory,
