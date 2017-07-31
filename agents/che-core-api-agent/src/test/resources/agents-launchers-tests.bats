@@ -32,7 +32,8 @@ root_msg="I am root"
 not_root_msg="I am a not root"
 sudoer_msg="I am a sudoer"
 not_sudoer_msg="I am a not a sudoer"
-test_snippet="source <(grep -iE -A3 'is_current_user_root\(\)|is_current_user_sudoer\(\)' /launch.sh | grep -v -- "^--$"); is_current_user_root && echo -n '${root_msg} ' || echo -n '${not_root_msg} '; is_current_user_sudoer && echo '${sudoer_msg}' || echo '${not_sudoer_msg}'"
+#test_snippet="source <(grep -iE -A3 'is_current_user_root\(\)|is_current_user_sudoer\(\)' /launch.sh | grep -v -- "^--$"); is_current_user_root && echo -n '${root_msg} ' || echo -n '${not_root_msg} '; is_current_user_sudoer && echo '${sudoer_msg}' || echo '${not_sudoer_msg}'"
+test_snippet="source <(grep -iE -A3 'is_current_user_root\(\)|is_current_user_sudoer\(\)|set_sudo_command\(\)' /launch.sh | grep -v -- "^--$"); is_current_user_root && echo -n '${root_msg} ' || echo -n '${not_root_msg} '; is_current_user_sudoer && echo -n '${sudoer_msg} ' || echo '${not_sudoer_msg}'; set_sudo_command; echo SUDO=\${SUDO}"
 
 # Kill running che server instance if there is any to be able to run tests
 setup() {
@@ -49,25 +50,27 @@ teardown() {
 @test "should deduce that's root and sudoer when ${LAUNCHER_SCRIPT_TO_TEST} is run as root" {
   #GIVEN
   user="root"
-  expected_msg="${root_msg} ${sudoer_msg}"
+  expected_msg="${root_msg} ${sudoer_msg} SUDO="
 
   #WHEN
   run docker exec --user=${user} "${CONTAINER_NAME}" bash -c "${test_snippet}"
 
   #THEN
   assert_success
-  assert_output --partial ${expected_msg}
+#  assert_output --partial ${expected_msg}
+  assert_output ${expected_msg}
 }
 
 @test "should deduce that's not root but sudoer when ${LAUNCHER_SCRIPT_TO_TEST} is run as user with UID 1000" {
   #GIVEN
   user="1000"
-  expected_msg="${not_root_msg} ${sudoer_msg}"
+  expected_msg="${not_root_msg} ${sudoer_msg} SUDO=sudo -E"
 
   #WHEN
   run docker exec --user=${user} "${CONTAINER_NAME}" bash -c "${test_snippet}"
 
   #THEN
   assert_success
-  assert_output --partial ${expected_msg}
+#  assert_output --partial ${expected_msg}
+  assert_output ${expected_msg}
 }

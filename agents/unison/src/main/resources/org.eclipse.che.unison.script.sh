@@ -17,9 +17,11 @@ is_current_user_sudoer() {
     sudo -n true > /dev/null 2>&1
 }
 
-unset SUDO
+set_sudo_command() {
+    if is_current_user_sudoer && ! is_current_user_root; then SUDO="sudo -E"; else unset SUDO; fi
+}
+
 unset PACKAGES
-is_current_user_root && is_current_user_sudoer || SUDO="sudo -E"
 
 if [ -f /etc/centos-release ]; then
     FILE="/etc/centos-release"

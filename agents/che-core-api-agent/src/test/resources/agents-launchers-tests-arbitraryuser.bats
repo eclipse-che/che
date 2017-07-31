@@ -33,7 +33,7 @@ root_msg="I am root"
 not_root_msg="I am a not root"
 sudoer_msg="I am a sudoer"
 not_sudoer_msg="I am a not a sudoer"
-test_snippet="source <(grep -iE -A3 'is_current_user_root\(\)|is_current_user_sudoer\(\)' /launch.sh | grep -v -- "^--$"); is_current_user_root && echo -n '${root_msg} ' || echo -n '${not_root_msg} '; is_current_user_sudoer && echo '${sudoer_msg}' || echo '${not_sudoer_msg}'"
+test_snippet="source <(grep -iE -A3 'is_current_user_root\(\)|is_current_user_sudoer\(\)|set_sudo_command\(\)' /launch.sh | grep -v -- "^--$"); is_current_user_root && echo -n '${root_msg} ' || echo -n '${not_root_msg} '; is_current_user_sudoer && echo '${sudoer_msg}' || echo -n '${not_sudoer_msg} '; set_sudo_command; echo SUDO=\${SUDO}"
 user="100000"
 
 # Kill running che server instance if there is any to be able to run tests
@@ -50,13 +50,13 @@ teardown() {
 
 @test "should deduce that's not a sudoer nor root when ${LAUNCHER_SCRIPT_TO_TEST} is run as an arbitrary user" {
   #GIVEN
-  expected_msg="${not_root_msg} ${not_sudoer_msg}"
+  expected_msg="${not_root_msg} ${not_sudoer_msg} SUDO="
 
   #WHEN
   run docker exec --user=${user} "${CONTAINER_NAME}" bash -c "${test_snippet}"
 
   #THEN
   assert_success
-  assert_output --partial ${expected_msg}
+  assert_output ${expected_msg}
 }
 
