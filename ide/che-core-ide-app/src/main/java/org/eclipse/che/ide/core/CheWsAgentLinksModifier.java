@@ -12,7 +12,7 @@ package org.eclipse.che.ide.core;
 
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 /**

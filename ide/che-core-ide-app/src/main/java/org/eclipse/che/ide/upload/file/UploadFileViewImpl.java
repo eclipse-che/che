@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.upload.file;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.eclipse.che.ide.ui.window.Window;
 
 import com.google.gwt.event.dom.client.ChangeEvent;

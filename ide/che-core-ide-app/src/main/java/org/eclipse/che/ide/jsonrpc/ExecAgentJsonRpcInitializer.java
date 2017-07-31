@@ -15,8 +15,8 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.events.ExecAgentServerRunningEvent;
-import org.eclipse.che.ide.api.machine.events.ExecAgentServerStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.ExecAgentServerRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.ExecAgentServerStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;

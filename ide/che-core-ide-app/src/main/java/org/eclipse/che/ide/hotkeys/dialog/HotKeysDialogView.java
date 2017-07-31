@@ -12,7 +12,7 @@ package org.eclipse.che.ide.hotkeys.dialog;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
+import org.eclipse.che.ide.api.editor.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.keybinding.Scheme;
 import org.eclipse.che.ide.api.mvp.View;
 

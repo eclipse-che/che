@@ -38,7 +38,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
-import static org.eclipse.che.ide.api.workspace.Constants.WS_MASTER_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_MASTER_JSON_RPC_ENDPOINT_ID;
 
 /** Performs the routines required to start/stop the current workspace. */
 @Singleton

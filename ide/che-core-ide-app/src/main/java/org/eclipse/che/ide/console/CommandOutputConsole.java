@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.console;
 
-import org.eclipse.che.ide.api.machine.execagent.dto.ProcessSubscribeResponseDto;
-import org.eclipse.che.ide.api.machine.execagent.dto.event.ProcessDiedEventDto;
-import org.eclipse.che.ide.api.machine.execagent.dto.event.ProcessStartedEventDto;
-import org.eclipse.che.ide.api.machine.execagent.dto.event.ProcessStdErrEventDto;
-import org.eclipse.che.ide.api.machine.execagent.dto.event.ProcessStdOutEventDto;
+import org.eclipse.che.ide.api.command.exec.dto.ProcessSubscribeResponseDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessDiedEventDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStartedEventDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdErrEventDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 

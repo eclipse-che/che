@@ -18,8 +18,8 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.ide.api.event.WindowActionEvent;
-import org.eclipse.che.ide.api.event.WindowActionHandler;
+import org.eclipse.che.ide.api.WindowActionEvent;
+import org.eclipse.che.ide.api.WindowActionHandler;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

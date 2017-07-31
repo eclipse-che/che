@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 
 import java.util.HashMap;
 import java.util.Map;
