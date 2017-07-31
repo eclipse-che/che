@@ -110,7 +110,7 @@
                                         <!-- build user dashboard with docker -->
                                         <exec executable="bash">
                                             <arg value="-c" />
-                                            <arg value="docker run --rm eclipse-che-dashboard | tar -C target/ -zxf -" />
+                                            <arg value="docker run --rm eclipse-che-dashboard | tar -C target/ -xf -" />
                                         </exec>
                                     </target>
                                 </configuration>
