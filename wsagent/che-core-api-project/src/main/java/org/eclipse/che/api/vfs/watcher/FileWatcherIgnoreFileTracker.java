@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
@@ -205,22 +206,20 @@ public class FileWatcherIgnoreFileTracker {
     }
 
     private void fillUpExcludesFromIgnoreFile(String ignoreFileLocation) {
-        try {
-            if (isNullOrEmpty(ignoreFileLocation)) {
-                return;
-            }
+        if (isNullOrEmpty(ignoreFileLocation)) {
+            return;
+        }
 
-            Path ignoreFilePath = toNormalPath(root, ignoreFileLocation);
-            if (!exists(ignoreFilePath)) {
-                return;
-            }
+        Path ignoreFilePath = toNormalPath(root, ignoreFileLocation);
+        if (!exists(ignoreFilePath)) {
+            return;
+        }
 
-            Path projectPath = ignoreFilePath.getParent().getParent();
-            excludes.remove(projectPath);
+        Path projectPath = ignoreFilePath.getParent().getParent();
+        excludes.remove(projectPath);
 
-            List<String> lines = lines(ignoreFilePath).collect(toList());
-            Set<Path> projectExcludes = lines.stream()
-                                             .filter(line -> !isNullOrEmpty(line.trim()))
+        try (Stream<String> lines = lines(ignoreFilePath)) {
+            Set<Path> projectExcludes = lines.filter(line -> !isNullOrEmpty(line.trim()))
                                              .map(line -> projectPath.resolve(line.trim()))
                                              .filter(excludePath -> exists(excludePath))
                                              .collect(toSet());
@@ -277,19 +276,18 @@ public class FileWatcherIgnoreFileTracker {
     }
 
     private void removeExcludesFromIgnoreFile(Path ignoreFilePath, Set<String> pathsToExclude) {
-        try {
-            if (!exists(ignoreFilePath)) {
-                throw new JsonRpcException(400,
-                                           "Can not remove paths from File Watcher excludes: ignore file is not found by path " +
-                                           ignoreFilePath);
-            }
+        if (!exists(ignoreFilePath)) {
+            throw new JsonRpcException(400,
+                                       "Can not remove paths from File Watcher excludes: ignore file is not found by path " +
+                                       ignoreFilePath);
+        }
 
-            Set<String> projectExcludes = lines(ignoreFilePath)
-                    .filter(line -> {
-                        String location = line.trim();
-                        return !location.isEmpty() && !pathsToExclude.contains(location);
-                    })
-                    .collect(toSet());
+        try (Stream<String> lines = lines(ignoreFilePath)) {
+            Set<String> projectExcludes = lines.filter(line -> {
+                String location = line.trim();
+                return !location.isEmpty() && !pathsToExclude.contains(location);
+            })
+                                               .collect(toSet());
 
             write(ignoreFilePath, projectExcludes, UTF_8);
         } catch (IOException e) {

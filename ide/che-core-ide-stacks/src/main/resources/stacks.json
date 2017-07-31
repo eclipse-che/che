@@ -2364,7 +2364,7 @@
           "goal": "Build"
         }
       }, {
-        "commandLine": "scl enable rh-maven33 'mvn vertx:run -f ${current.project.path}'",
+        "commandLine": "scl enable rh-maven33 'mvn compile vertx:run -f ${current.project.path}'",
         "name": "run",
         "type": "custom",
         "attributes": {
@@ -2440,7 +2440,7 @@
           "type": "mvn"
         },
         {
-          "commandLine": "java -jar ${current.project.path}/target/*.jar",
+          "commandLine": "scl enable rh-maven33 'mvn compile spring-boot:run -f ${current.project.path}'",
           "name": "run",
           "type": "custom",
           "attributes": {

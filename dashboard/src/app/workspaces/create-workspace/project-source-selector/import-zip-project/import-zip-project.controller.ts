@@ -14,6 +14,7 @@ import {ImportZipProjectService} from './import-zip-project.service';
 import {ProjectSourceSelectorService} from '../project-source-selector.service';
 import {IProjectSourceSelectorServiceObserver} from '../project-source-selector-service.observer';
 import {ProjectSource} from '../project-source.enum';
+import {ActionType} from '../project-source-selector-action-type.enum';
 
 /**
  * This class is handling the controller for the Zip project import.
@@ -57,13 +58,13 @@ export class ImportZipProjectController implements IProjectSourceSelectorService
   }
 
   /**
-   * Callback which is called when project template is added to the list of ready-to-import projects.
-   * Clears project's location.
+   * Returns project's adding progress.
    *
+   * @param {ActionType} action the type of action
    * @param {ProjectSource} source the project's source
    */
-  onProjectSourceSelectorServicePublish(source: ProjectSource): void {
-    if (source !== ProjectSource.ZIP) {
+  onProjectSourceSelectorServicePublish(action: ActionType, source: ProjectSource): void {
+    if (action !== ActionType.ADD_PROJECT || source !== ProjectSource.ZIP) {
       return;
     }
 

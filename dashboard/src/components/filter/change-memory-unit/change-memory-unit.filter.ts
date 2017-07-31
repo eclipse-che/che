@@ -93,7 +93,7 @@ export class ChangeMemoryUnitFilter {
 
   castToBytes(number: number, unitFrom: string): number {
     const power = this.getPower(unitFrom);
-    number = this.castDown(number, power);
+    number = Math.round(this.castDown(number, power));
     return number;
   }
 

@@ -8,6 +8,7 @@
                    che-place-holder="Name of the project"
                    aria-label="Name of the project"
                    ng-model="projectMetadataController.template.name"
+                   ng-model-options="{allowInvalid: true}"
                    che-on-change="projectMetadataController.onNameChanged($value)"
                    required
                    custom-validator="projectMetadataController.isNameUnique($value)"
@@ -27,6 +28,7 @@
                    che-place-holder="Description of the project"
                    aria-label="Description of the project"
                    ng-model="projectMetadataController.template.description"
+                   ng-model-options="{allowInvalid: true}"
                    che-on-change="projectMetadataController.onDescriptionChanged($value)"
                    ng-maxlength="256">
       <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
@@ -42,6 +44,7 @@
                      aria-label="Url of the git repository"
                      che-width="auto"
                      ng-model="projectMetadataController.template.source.location"
+                     ng-model-options="{allowInvalid: true}"
                      che-on-change="projectMetadataController.onUrlChanged($value)"
                      git-url
                      required>
