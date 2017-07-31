@@ -8,22 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.junit.server.junit4;
+package org.eclipse.che.plugin.java.testing;
 
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 /**
- * Describes JUnit test annotations {@code org.junit.runner.RunWith} and {@code org.junit.Test}.
+ * Describes annotations for JUnit4x an TestNG.
  */
-public class Annotation {
-    public static final Annotation RUN_WITH = new Annotation("org.junit.runner.RunWith");
-    public static final Annotation TEST     = new Annotation("org.junit.Test");
+public class JavaTestAnnotations {
+    public static final JavaTestAnnotations TESTNG_TEST      = new JavaTestAnnotations("org.testng.annotations.Test");
+    public static final JavaTestAnnotations JUNIT4X_RUN_WITH = new JavaTestAnnotations("org.junit.runner.RunWith");
+    public static final JavaTestAnnotations JUNIT4X_TEST     = new JavaTestAnnotations("org.junit.Test");
 
     private final String fName;
 
-    private Annotation(String name) {
+    private JavaTestAnnotations(String name) {
         fName = name;
     }
 
@@ -58,7 +59,7 @@ public class Annotation {
             if (annotates(type.getAnnotations())) {
                 return true;
             }
-            type = type.getSuperclass();
+            type= type.getSuperclass();
         }
         return false;
     }
@@ -72,13 +73,14 @@ public class Annotation {
      */
     public boolean annotatesAtLeastOneMethod(ITypeBinding type) {
         while (type != null) {
-            IMethodBinding[] declaredMethods = type.getDeclaredMethods();
-            for (IMethodBinding declaredMethod : declaredMethods) {
-                if (annotates(declaredMethod.getAnnotations())) {
+            IMethodBinding[] declaredMethods= type.getDeclaredMethods();
+            for (int i= 0; i < declaredMethods.length; i++) {
+                IMethodBinding curr= declaredMethods[i];
+                if (annotates(curr.getAnnotations())) {
                     return true;
                 }
             }
-            type = type.getSuperclass();
+            type= type.getSuperclass();
         }
         return false;
     }

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.junit.server.junit4;
+package org.eclipse.che.plugin.java.testing;
 
 import com.google.inject.Singleton;
 
@@ -42,15 +42,16 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 /**
- * Class which finds test classes and test methods for JUnit framework.
+ * Class which finds test classes and test methods for java test frameworks.
  */
 @Singleton
-public class JUnit4TestFinder {
-    private static final Logger LOG = LoggerFactory.getLogger(JUnit4TestFinder.class);
+public class JavaTestFinder {
+    private static final Logger LOG = LoggerFactory.getLogger(JavaTestFinder.class);
 
     /**
      * Finds test method related to the cursor position.
@@ -96,16 +97,23 @@ public class JUnit4TestFinder {
      *         java project
      * @param packagePath
      *         package path
+     * @param testMethodAnnotation
+     *         java annotation which describes test method in the test framework
+     * @param testClassAnnotation
+     *         java annotation which describes test class in the test framework
      * @return list of test classes which should be ran.
      */
-    public List<String> findClassesInPackage(IJavaProject javaProject, String packagePath) {
+    public List<String> findClassesInPackage(IJavaProject javaProject,
+                                             String packagePath,
+                                             String testMethodAnnotation,
+                                             String testClassAnnotation) {
         IPackageFragment packageFragment = null;
         try {
             packageFragment = javaProject.findPackageFragment(new Path(packagePath));
         } catch (JavaModelException e) {
             LOG.info("Can't find package.", e);
         }
-        return packageFragment == null ? emptyList() : findClassesInContainer(packageFragment);
+        return packageFragment == null ? emptyList() : findClassesInContainer(packageFragment, testMethodAnnotation, testClassAnnotation);
     }
 
     /**
@@ -113,10 +121,14 @@ public class JUnit4TestFinder {
      *
      * @param project
      *         java project
+     * @param testMethodAnnotation
+     *         java annotation which describes test method in the test framework
+     * @param testClassAnnotation
+     *         java annotation which describes test class in the test framework
      * @return list of test classes which should be ran.
      */
-    public List<String> findClassesInProject(IJavaProject project) {
-        return findClassesInContainer(project);
+    public List<String> findClassesInProject(IJavaProject project, String testMethodAnnotation, String testClassAnnotation) {
+        return findClassesInContainer(project, testMethodAnnotation, testClassAnnotation);
     }
 
     /**
@@ -126,9 +138,11 @@ public class JUnit4TestFinder {
      *         method which should be checked
      * @param compilationUnit
      *         parent of the method
+     * @param testAnnotation
+     *         java annotation which describes test method in the test framework
      * @return {@code true} if the method is test method
      */
-    public boolean isTest(IMethod method, ICompilationUnit compilationUnit) {
+    public boolean isTest(IMethod method, ICompilationUnit compilationUnit, String testAnnotation) {
         try {
             IAnnotation[] annotations = method.getAnnotations();
             IAnnotation test = null;
@@ -138,27 +152,27 @@ public class JUnit4TestFinder {
                     test = annotation;
                     break;
                 }
-                if (Annotation.TEST.getName().equals(annotationElementName)) {
+                if (testAnnotation.equals(annotationElementName)) {
                     return true;
                 }
             }
-            return test != null && isImportOfTestAnnotationExist(compilationUnit);
+            return test != null && isImportOfTestAnnotationExist(compilationUnit, testAnnotation);
         } catch (JavaModelException e) {
             LOG.info("Can't read method's annotations.", e);
             return false;
         }
     }
 
-    private boolean isImportOfTestAnnotationExist(ICompilationUnit compilationUnit) {
+    private boolean isImportOfTestAnnotationExist(ICompilationUnit compilationUnit, String testAnnotation) {
         try {
             IImportDeclaration[] imports = compilationUnit.getImports();
             for (IImportDeclaration importDeclaration : imports) {
                 String elementName = importDeclaration.getElementName();
-                if (Annotation.TEST.getName().equals(elementName)) {
+                if (testAnnotation.equals(elementName)) {
                     return true;
                 }
                 if (importDeclaration.isOnDemand() &&
-                    Annotation.TEST.getName().startsWith(elementName.substring(0, elementName.length() - 3))) { //remove .*
+                    testAnnotation.startsWith(elementName.substring(0, elementName.length() - 3))) { //remove .*
                     return true;
                 }
             }
@@ -169,7 +183,7 @@ public class JUnit4TestFinder {
         return false;
     }
 
-    private List<String> findClassesInContainer(IJavaElement container) {
+    private List<String> findClassesInContainer(IJavaElement container, String testMethodAnnotation, String testClassAnnotation) {
         List<String> result = new LinkedList<>();
         IRegion region = getRegion(container);
         try {
@@ -183,16 +197,19 @@ public class JUnit4TestFinder {
             IJavaSearchScope scope = SearchEngine.createJavaSearchScope(allClasses, IJavaSearchScope.SOURCES);
             int matchRule = SearchPattern.R_CASE_SENSITIVE;
 
-            //TODO need to think about @RunWith(Suite.class)
-            SearchPattern runWithPattern = SearchPattern.createPattern(Annotation.RUN_WITH.getName(),
-                                                                       IJavaSearchConstants.ANNOTATION_TYPE,
-                                                                       IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-                                                                       matchRule);
-
-            SearchPattern testPattern = SearchPattern.createPattern(Annotation.TEST.getName(),
+            SearchPattern testPattern = SearchPattern.createPattern(testMethodAnnotation,
                                                                     IJavaSearchConstants.ANNOTATION_TYPE,
                                                                     IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
                                                                     matchRule);
+
+
+            SearchPattern runWithPattern = isNullOrEmpty(testClassAnnotation)
+                                           ? testPattern
+                                           : SearchPattern.createPattern(testClassAnnotation,
+                                                                         IJavaSearchConstants.ANNOTATION_TYPE,
+                                                                         IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+                                                                         matchRule);
+
 
             SearchPattern annotationsPattern = SearchPattern.createOrPattern(runWithPattern, testPattern);
             SearchParticipant[] searchParticipants = new SearchParticipant[]{SearchEngine.getDefaultSearchParticipant()};
@@ -204,7 +221,10 @@ public class JUnit4TestFinder {
                     result.add(candidate.getFullyQualifiedName());
                 }
             }
-        } catch (CoreException e) {
+        } catch (
+                CoreException e)
+
+        {
             LOG.info("Can't build project hierarchy.", e);
         }
 

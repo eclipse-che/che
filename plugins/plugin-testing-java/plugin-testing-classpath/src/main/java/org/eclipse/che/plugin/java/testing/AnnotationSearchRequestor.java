@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.testing.testng.server;
+package org.eclipse.che.plugin.java.testing;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import java.util.Collection;
 
 /**
- * Request for searching classes which are annotated as TestNG test.
+ * Request for searching test classes.
  */
 public class AnnotationSearchRequestor extends SearchRequestor {
 
@@ -38,7 +38,7 @@ public class AnnotationSearchRequestor extends SearchRequestor {
     public void acceptSearchMatch(SearchMatch match) throws CoreException {
         if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
             Object element = match.getElement();
-            if (element instanceof IMethod) {
+            if (element instanceof IType || element instanceof IMethod) {
                 IMember member = (IMember)element;
                 IType type = member.getElementType() == IJavaElement.TYPE ? (IType)member : member.getDeclaringType();
                 addTypeAndSubtypes(type);

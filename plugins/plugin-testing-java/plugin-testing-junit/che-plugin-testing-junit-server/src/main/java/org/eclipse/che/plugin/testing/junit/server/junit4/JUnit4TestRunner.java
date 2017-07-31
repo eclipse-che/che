@@ -23,6 +23,8 @@ import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.junit.junit4.CheJUnitCoreRunner;
 import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
+import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
+import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -38,8 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.Collections.emptyList;
-
 /**
  * JUnit implementation for the test runner service.
  */
@@ -50,16 +50,16 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
     private static final String MAIN_CLASS_NAME = "org.eclipse.che.junit.junit4.CheJUnitLauncher";
 
     private String                   workspacePath;
-    private JUnit4TestFinder         jUnit4TestFinder;
+    private JavaTestFinder           javaTestFinder;
     private ProjectClasspathProvider classpathProvider;
 
     @Inject
     public JUnit4TestRunner(@Named("che.user.workspaces.storage") String workspacePath,
-                            JUnit4TestFinder jUnit4TestFinder,
+                            JavaTestFinder javaTestFinder,
                             ProjectClasspathProvider classpathProvider) {
-        super(workspacePath);
+        super(workspacePath, javaTestFinder);
         this.workspacePath = workspacePath;
-        this.jUnit4TestFinder = jUnit4TestFinder;
+        this.javaTestFinder = javaTestFinder;
         this.classpathProvider = classpathProvider;
     }
 
@@ -88,7 +88,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
                      Flags.isAbstract(flags) ||
                      Flags.isStatic(flags) ||
                      !"V".equals(method.getReturnType()))
-                   && jUnit4TestFinder.isTest(method, compilationUnit);
+                   && javaTestFinder.isTest(method, compilationUnit, JavaTestAnnotations.JUNIT4X_TEST.getName());
 
         } catch (JavaModelException ignored) {
             return false;
@@ -107,7 +107,10 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
         classPath.add(ClasspathUtil.getJarPathForClass(CheJUnitCoreRunner.class));
         parameters.getClassPath().addAll(classPath);
 
-        List<String> suite = createTestSuite(context, javaProject);
+        List<String> suite = createTestSuite(context,
+                                             javaProject,
+                                             JavaTestAnnotations.JUNIT4X_TEST.getName(),
+                                             JavaTestAnnotations.JUNIT4X_RUN_WITH.getName());
         for (String element : suite) {
             parameters.getParametersList().add(element);
         }
@@ -124,22 +127,6 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
         }
 
         return null;
-    }
-
-    private List<String> createTestSuite(TestExecutionContext context, IJavaProject javaProject) {
-        switch (context.getContextType()) {
-            case FILE:
-                return jUnit4TestFinder.findTestClassDeclaration(findCompilationUnitByPath(javaProject, context.getFilePath()));
-            case FOLDER:
-                return jUnit4TestFinder.findClassesInPackage(javaProject, context.getFilePath());
-            case PROJECT:
-                return jUnit4TestFinder.findClassesInProject(javaProject);
-            case CURSOR_POSITION:
-                return jUnit4TestFinder.findTestMethodDeclaration(findCompilationUnitByPath(javaProject, context.getFilePath()),
-                                                                  context.getCursorOffset());
-        }
-
-        return emptyList();
     }
 
     @Override

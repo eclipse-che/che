@@ -22,10 +22,10 @@ import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
 import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
+import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.che.plugin.testing.testng.server.TestNGRunner;
 import org.eclipse.che.plugin.testing.testng.server.TestNGSuiteUtil;
-import org.eclipse.che.plugin.testing.testng.server.TestNGTestFinder;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -44,7 +44,7 @@ public class TestNGRunnerTest extends BaseTest {
     private MethodNameConfigurator  startMethodNameConfigurator;
     private ParamsConfigurator      startParamsConfigurator;
     private SendConfiguratorFromOne startSendConfiguratorFromOne;
-    private TestNGTestFinder        testNGTestFinder;
+    private JavaTestFinder          testNGTestFinder;
     private RequestTransmitter      transmitter;
 
     private TestNGRunner runner;
@@ -52,7 +52,7 @@ public class TestNGRunnerTest extends BaseTest {
     @BeforeMethod
     public void setUp() throws Exception {
         startEndpointIdConfigurator = mock(EndpointIdConfigurator.class);
-        testNGTestFinder = mock(TestNGTestFinder.class);
+        testNGTestFinder = mock(JavaTestFinder.class);
         startMethodNameConfigurator = mock(MethodNameConfigurator.class);
         startParamsConfigurator = mock(ParamsConfigurator.class);
         startSendConfiguratorFromOne = mock(SendConfiguratorFromOne.class);

@@ -12,8 +12,8 @@ package org.ecipse.che.plugin.testing.testng.server;
 
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestPosition;
+import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.testing.testng.server.TestNGRunner;
-import org.eclipse.che.plugin.testing.testng.server.TestNGTestFinder;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -33,14 +33,14 @@ import static org.fest.assertions.Assertions.assertThat;
 public class TestNGTestDiscoveryTest extends BaseTest {
 
     private IJavaProject     javaProject;
-    private TestNGTestFinder testNGTestFinder;
+    private JavaTestFinder   testNGTestFinder;
     private IPackageFragment packageFragment;
 
 
     @BeforeMethod
     public void setUp() throws Exception {
         javaProject = createJavaProject("testDiscovery", "bin");
-        testNGTestFinder = new TestNGTestFinder();
+        testNGTestFinder = new JavaTestFinder();
         IPackageFragmentRoot packageFragmentRoot = addSourceContainer(javaProject, "src", "bin");
         javaProject.setRawClasspath(getTestNgClassPath("/testDiscovery/src"), null);
 
