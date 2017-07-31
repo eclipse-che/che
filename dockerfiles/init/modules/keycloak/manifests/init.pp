@@ -24,9 +24,9 @@ class keycloak {
     mode    => "644",
   } ->
   file { 'keycloak theme custom login page':
-   path => '/opt/che/config/keycloak/login-page',
+   path => '/opt/che/config/keycloak/che',
    ensure  => "present",
-   source => 'puppet:///modules/keycloak/che/login',
+   source => 'puppet:///modules/keycloak/che',
    recurse => true,
   }
 }

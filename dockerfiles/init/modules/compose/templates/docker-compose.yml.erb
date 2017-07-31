@@ -146,7 +146,7 @@ services:
     links:
       - postgres:postgres
     volumes:
-      - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/login-page:/opt/jboss/keycloak/themes/che/login'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/che:/opt/jboss/keycloak/themes/che'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/:/export'
       - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak:/opt/jboss/keycloak/standalone/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/logs/keycloak:/opt/jboss/keycloak/standalone/log'
