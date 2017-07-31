@@ -16,14 +16,32 @@ import org.eclipse.che.ide.api.theme.Theme;
 import java.util.List;
 
 /**
+ * View of 'Appearance' preferences page.
+ *
  * @author Evgen Vidolob
+ * @author Igor Vinokur
  */
 public interface AppearanceView extends View<AppearanceView.ActionDelegate> {
 
     void setThemes(List<Theme> themes, String currentThemeId);
 
-    interface ActionDelegate {
+    /**
+     * Change the state of 'Show maven artifact id' checkbox.
+     *
+     * @param selected
+     *         {@code true} to make the checkbox selected, {@code false} to deselect the checkbox
+     */
+    void setSelectedShowMavenArtifactIdCheckBox(boolean selected);
 
+    interface ActionDelegate {
         void themeSelected(String themeId);
+
+        /**
+         * Called when the value of 'Show maven artifact id' checkbox is changed.
+         *
+         * @param value
+         *         new value
+         */
+        void showMavenArtifactIdCheckBoxValueChanged(boolean value);
     }
 }
