@@ -17,7 +17,7 @@ import {CheHttpBackend} from '../../api/test/che-http-backend';
  * @author Oleksii Kurinnyi
  */
 describe('ChangeMemoryUnitFilter', () => {
-  let $filter, unitFrom: string, unitTo: string;
+  let $filter, unitFrom: string;
 
   /**
    * Backend for handling http operations
@@ -105,6 +105,23 @@ describe('ChangeMemoryUnitFilter', () => {
 
       let result = $filter('changeMemoryUnit')(number, [unitFrom, unitTo]);
 
+      expect(result).toEqual(expectedResult);
+    });
+
+  });
+
+  describe(`bugfix https://github.com/eclipse/che/issues/5601 >`, () => {
+
+    it(`should round value in bytes >`, () => {
+      const number = 2.3,
+            unitFrom = 'GB',
+            unitTo = 'B',
+            notExpectedResult = 2469606195.2 + ' ' + unitTo,
+            expectedResult = 2469606195 + ' ' + unitTo;
+
+      const result = $filter('changeMemoryUnit')(number, [unitFrom, unitTo]);
+
+      expect(result).not.toEqual(notExpectedResult);
       expect(result).toEqual(expectedResult);
     });
 

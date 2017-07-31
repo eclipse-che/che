@@ -16,19 +16,17 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.ToggleAction;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
-
-import javax.validation.constraints.NotNull;
-
-import static java.lang.Boolean.parseBoolean;
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * The Project Explorer view has a Link with Editor feature.
@@ -37,39 +35,46 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
  * If Link wih Editor is enabled - the current file open in the Editor will be highlighted in Project Explorer.
  */
 @Singleton
-public class LinkWithEditorAction extends AbstractPerspectiveAction {
+public class LinkWithEditorAction extends ToggleAction implements ActivePartChangedHandler {
+
     public static final String LINK_WITH_EDITOR = "linkWithEditor";
 
     private final Provider<EditorAgent> editorAgentProvider;
     private final EventBus              eventBus;
     private final PreferencesManager    preferencesManager;
 
+    private PartPresenter activePart;
+
     @Inject
     public LinkWithEditorAction(CoreLocalizationConstant localizationConstant,
                                 Provider<EditorAgent> editorAgentProvider,
                                 EventBus eventBus,
                                 PreferencesManager preferencesManager) {
-        super(singletonList(PROJECT_PERSPECTIVE_ID),
-              localizationConstant.actionLinkWithEditor(),
-              localizationConstant.actionLinkWithEditor(),
-              null,
-              null);
+        super(localizationConstant.actionLinkWithEditor());
+
         this.editorAgentProvider = editorAgentProvider;
         this.eventBus = eventBus;
         this.preferencesManager = preferencesManager;
+
+        eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     }
 
     @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
+    public void update(ActionEvent e) {
+        e.getPresentation().setEnabledAndVisible(activePart instanceof ProjectExplorerPresenter);
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        final String linkWithEditorValue = preferencesManager.getValue(LINK_WITH_EDITOR);
-        boolean value = !parseBoolean(linkWithEditorValue);
-        preferencesManager.setValue(LINK_WITH_EDITOR, Boolean.toString(value));
+    public boolean isSelected(ActionEvent e) {
+        final String linkWithEditor = preferencesManager.getValue(LINK_WITH_EDITOR);
+        return Boolean.parseBoolean(linkWithEditor);
+    }
 
-        if (!value) {
+    @Override
+    public void setSelected(ActionEvent e, boolean state) {
+        preferencesManager.setValue(LINK_WITH_EDITOR, Boolean.toString(state));
+
+        if (!state) {
             return;
         }
 
@@ -83,4 +88,10 @@ public class LinkWithEditorAction extends AbstractPerspectiveAction {
         }
         eventBus.fireEvent(new RevealResourceEvent(editorInput.getFile().getLocation()));
     }
+
+    @Override
+    public void onActivePartChanged(ActivePartChangedEvent event) {
+        activePart = event.getActivePart();
+    }
+
 }

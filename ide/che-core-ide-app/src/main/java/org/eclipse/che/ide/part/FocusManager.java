@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 
-
 /**
  * FocusManager is responsible for granting a focus for a stack when requested.
  *

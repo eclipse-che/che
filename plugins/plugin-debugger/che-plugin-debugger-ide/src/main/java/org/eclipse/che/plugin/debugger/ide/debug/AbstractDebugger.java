@@ -78,7 +78,7 @@ import java.util.Map;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /**
  * The common debugger.
@@ -212,39 +212,35 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     private void openCurrentFile() {
-        // Handle the situation when resource isn't found in the workspace
-        // It means that it is impossible to open it.
-        if (currentLocation.getResourcePath() == null) {
+        //todo we need add possibility to handle few files
+        try {
+            activeFileHandler.openFile(currentLocation,
+                                       new AsyncCallback<VirtualFile>() {
+                                           @Override
+                                           public void onFailure(Throwable caught) {
+                                               for (DebuggerObserver observer : observers) {
+                                                   observer.onBreakpointStopped(currentLocation.getTarget(),
+                                                                                currentLocation.getTarget(),
+                                                                                currentLocation.getLineNumber());
+                                               }
+                                           }
+
+                                           @Override
+                                           public void onSuccess(VirtualFile result) {
+                                               for (DebuggerObserver observer : observers) {
+                                                   observer.onBreakpointStopped(result.getLocation().toString(),
+                                                                                currentLocation.getTarget(),
+                                                                                currentLocation.getLineNumber());
+                                               }
+                                           }
+                                       });
+        } catch (Exception e) {
             for (DebuggerObserver observer : observers) {
                 observer.onBreakpointStopped(currentLocation.getTarget(),
                                              currentLocation.getTarget(),
                                              currentLocation.getLineNumber());
             }
-
-            return;
         }
-
-        //todo we need add possibility to handle few files
-        activeFileHandler.openFile(currentLocation,
-                                   new AsyncCallback<VirtualFile>() {
-                                       @Override
-                                       public void onFailure(Throwable caught) {
-                                           for (DebuggerObserver observer : observers) {
-                                               observer.onBreakpointStopped(currentLocation.getTarget(),
-                                                                            currentLocation.getTarget(),
-                                                                            currentLocation.getLineNumber());
-                                           }
-                                       }
-
-                                       @Override
-                                       public void onSuccess(VirtualFile result) {
-                                           for (DebuggerObserver observer : observers) {
-                                               observer.onBreakpointStopped(result.getLocation().toString(),
-                                                                            currentLocation.getTarget(),
-                                                                            currentLocation.getLineNumber());
-                                           }
-                                       }
-                                   });
     }
 
     /**
@@ -297,7 +293,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     private void subscribeToDebuggerEvents() {
         transmitter.newRequest()
-                   .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                   .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                    .methodName(EVENT_DEBUGGER_SUBSCRIBE)
                    .noParams()
                    .sendAndSkipResult();
@@ -305,7 +301,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
     private void unsubscribeFromDebuggerEvents() {
         transmitter.newRequest()
-                   .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                   .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                    .methodName(EVENT_DEBUGGER_UN_SUBSCRIBE)
                    .noParams()
                    .sendAndSkipResult();

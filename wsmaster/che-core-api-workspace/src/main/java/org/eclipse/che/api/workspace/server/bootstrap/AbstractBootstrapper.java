@@ -81,8 +81,10 @@ public abstract class AbstractBootstrapper {
      *         when bootstrapping failed
      * @throws InfrastructureException
      *         when any other error occurs while bootstrapping
+     * @throws InterruptedException
+     *         when the bootstrapping process was interrupted
      */
-    public void bootstrap() throws InfrastructureException {
+    public void bootstrap() throws InfrastructureException, InterruptedException {
         if (finishEventFuture != null) {
             throw new IllegalStateException("Bootstrap method must be called only once.");
         }
@@ -90,8 +92,8 @@ public abstract class AbstractBootstrapper {
 
         eventService.subscribe(bootstrapperStatusListener, BootstrapperStatusEvent.class);
         try {
-            doBootstrapAsync(installerEndpoint + ENDPOINT_IDS.getAndIncrement(),
-                             outputEndpoint + ENDPOINT_IDS.getAndIncrement());
+            doBootstrapAsync(installerEndpoint,
+                             outputEndpoint);
 
             //waiting for DONE or FAILED bootstrapper status event
             BootstrapperStatusEvent resultEvent = finishEventFuture.get(bootstrappingTimeoutMinutes, TimeUnit.MINUTES);
@@ -102,9 +104,6 @@ public abstract class AbstractBootstrapper {
             throw new InfrastructureException(e.getCause().getMessage(), e);
         } catch (TimeoutException e) {
             throw new InfrastructureException("Bootstrapping of machine " + machineName + " reached timeout");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new InfrastructureException("Bootstrapping of machine " + machineName + " was interrupted");
         } finally {
             eventService.unsubscribe(bootstrapperStatusListener, BootstrapperStatusEvent.class);
         }

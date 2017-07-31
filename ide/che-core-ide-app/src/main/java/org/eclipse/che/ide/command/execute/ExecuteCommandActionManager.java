@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +46,7 @@ public class ExecuteCommandActionManager {
     private static final String COMMAND_ACTION_ID_PREFIX        = "command_";
     private static final String GOAL_ACTION_GROUP_ID_PREFIX     = "goal_";
 
+    private final Provider<CommandManager>    commandManagerProvider;
     private final ActionManager               actionManager;
     private final CommandsActionGroup         commandsActionGroup;
     private final GoalPopUpGroupFactory       goalPopUpGroupFactory;
@@ -64,6 +66,7 @@ public class ExecuteCommandActionManager {
                                        ExecuteCommandActionFactory commandActionFactory,
                                        CommandGoalRegistry goalRegistry,
                                        EventBus eventBus) {
+        this.commandManagerProvider = commandManagerProvider;
         this.actionManager = actionManager;
         this.commandsActionGroup = commandsActionGroup;
         this.goalPopUpGroupFactory = goalPopUpGroupFactory;
@@ -75,16 +78,18 @@ public class ExecuteCommandActionManager {
 
         initialize();
 
-        eventBus.addHandler(CommandsLoadedEvent.getType(), event -> commandManagerProvider.get().getCommands().forEach(this::addAction));
         eventBus.addHandler(CommandAddedEvent.getType(), e -> addAction(e.getCommand()));
         eventBus.addHandler(CommandRemovedEvent.getType(), e -> removeAction(e.getCommand()));
-        eventBus.addHandler(CommandsLoadedEvent.getType(), e -> {
-            commandManagerProvider.get().getCommands().forEach(this::removeAction);
-            commandManagerProvider.get().getCommands().forEach(this::addAction);
-        });
         eventBus.addHandler(CommandUpdatedEvent.getType(), e -> {
             removeAction(e.getInitialCommand());
             addAction(e.getUpdatedCommand());
+        });
+
+        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> disposeActions());
+
+        eventBus.addHandler(CommandsLoadedEvent.getType(), e -> {
+            disposeActions();
+            registerActions();
         });
     }
 
@@ -98,11 +103,31 @@ public class ExecuteCommandActionManager {
     }
 
     /**
+     * Fetch registered action from command manager and constructs actions which should be
+     * registered in action manager and context menus.
+     */
+    private void registerActions() {
+        commandManagerProvider.get().getCommands().forEach(ExecuteCommandActionManager.this::addAction);
+    }
+
+    /**
+     * Packet dispose of registered actions and remove all action groups.
+     * This action need to be called for example when workspace is stopped.
+     */
+    private void disposeActions() {
+        commandActions.values().forEach(ExecuteCommandActionManager.this::removeAction);
+        goalPopUpGroups.values().forEach(ExecuteCommandActionManager.this::removeAction);
+
+        commandActions.clear();
+        goalPopUpGroups.clear();
+    }
+
+    /**
      * Creates action for executing the given command and
      * adds created action to the appropriate action group.
      */
     private void addAction(CommandImpl command) {
-        final ExecuteCommandAction action = commandActionFactory.create(command);
+        ExecuteCommandAction action = commandActionFactory.create(command);
 
         actionManager.registerAction(COMMAND_ACTION_ID_PREFIX + command.getName(), action);
         commandActions.put(command.getName(), action);
@@ -116,7 +141,6 @@ public class ExecuteCommandActionManager {
      */
     private DefaultActionGroup getActionGroupForCommand(CommandImpl command) {
         String goalId = command.getGoal();
-
         if (isNullOrEmpty(goalId)) {
             goalId = goalRegistry.getDefaultGoal().getId();
         }
@@ -125,7 +149,6 @@ public class ExecuteCommandActionManager {
 
         if (commandGoalPopUpGroup == null) {
             commandGoalPopUpGroup = goalPopUpGroupFactory.create(goalId);
-
             actionManager.registerAction(GOAL_ACTION_GROUP_ID_PREFIX + goalId, commandGoalPopUpGroup);
             goalPopUpGroups.put(goalId, commandGoalPopUpGroup);
 
@@ -136,17 +159,29 @@ public class ExecuteCommandActionManager {
     }
 
     /**
+     * Removes actual action and dispose it from the action manager.
+     */
+    private void removeAction(Action commandAction) {
+        String commandActionId = actionManager.getId(commandAction);
+
+        if (commandActionId != null) {
+            if (actionManager.isGroup(commandActionId)) {
+                commandsActionGroup.remove(commandAction);
+            }
+
+            actionManager.unregisterAction(commandActionId);
+        }
+    }
+
+    /**
      * Removes action for executing the given command and
      * removes the appropriate action group in case it's empty.
      */
     private void removeAction(CommandImpl command) {
-        final Action commandAction = commandActions.remove(command.getName());
+        Action commandAction = commandActions.remove(command.getName());
 
         if (commandAction != null) {
-            final String commandActionId = actionManager.getId(commandAction);
-            if (commandActionId != null) {
-                actionManager.unregisterAction(commandActionId);
-            }
+            removeAction(commandAction);
 
             // remove action from it's action group
             String goalId = command.getGoal();
@@ -155,17 +190,13 @@ public class ExecuteCommandActionManager {
             }
 
             // remove action group if it's empty
-            final DefaultActionGroup goalPopUpGroup = goalPopUpGroups.remove(goalId);
+            DefaultActionGroup goalPopUpGroup = goalPopUpGroups.remove(goalId);
 
             if (goalPopUpGroup != null) {
                 goalPopUpGroup.remove(commandAction);
 
                 if (goalPopUpGroup.getChildrenCount() == 0) {
-                    final String goalActionId = actionManager.getId(goalPopUpGroup);
-                    if (goalActionId != null) {
-                        actionManager.unregisterAction(goalActionId);
-                    }
-                    commandsActionGroup.remove(goalPopUpGroup);
+                    removeAction(goalPopUpGroup);
                 }
             }
         }

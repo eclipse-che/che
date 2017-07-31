@@ -19,11 +19,12 @@ import org.eclipse.che.api.git.shared.PullRequest;
  */
 public class PullParams {
 
-    private String refSpec;
-    private String remote;
-    private String username;
-    private String password;
-    private int    timeout;
+    private String  refSpec;
+    private String  remote;
+    private String  username;
+    private String  password;
+    private int     timeout;
+    private boolean rebase;
 
     private PullParams() {
     }
@@ -90,6 +91,24 @@ public class PullParams {
     /** Returns {@link PullParams} with specified password for authentication. */
     public PullParams withPassword(String password) {
         this.password = password;
+        return this;
+    }
+
+    /**
+     * Returns the value of 'Pull with rebase' flag.
+     */
+    public boolean getRebase() {
+        return rebase;
+    }
+
+    /**
+     * Set value of 'Pull with rebase' flag.
+     *
+     * @param rebase
+     *         {@code true} if need to perform rebase instead of merge after fetch operation.
+     */
+    public PullParams withRebase(boolean rebase) {
+        this.rebase = rebase;
         return this;
     }
 }

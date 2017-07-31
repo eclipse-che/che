@@ -21,7 +21,6 @@ import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
@@ -38,7 +37,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
 import static com.google.gwt.http.client.RequestBuilder.PUT;
 import static com.google.gwt.safehtml.shared.UriUtils.encodeAllowEscapes;
-import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
@@ -93,7 +92,7 @@ public class ProjectServiceClient {
         final String url = getBaseUrl();
 
         return reqFactory.createGetRequest(url)
-                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .header(ACCEPT, APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Getting projects..."))
                          .send(unmarshaller.newListUnmarshaller(ProjectConfigDto.class));
     }
@@ -114,7 +113,7 @@ public class ProjectServiceClient {
         final String url = encodeAllowEscapes(getBaseUrl() + ESTIMATE + path(path.toString()) + "?type=" + pType);
 
         return reqFactory.createGetRequest(url)
-                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .header(ACCEPT, APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Estimating project..."))
                          .send(unmarshaller.newUnmarshaller(SourceEstimation.class));
     }
@@ -133,7 +132,7 @@ public class ProjectServiceClient {
         final String url = encodeAllowEscapes(getBaseUrl() + RESOLVE + path(path.toString()));
 
         return reqFactory.createGetRequest(url)
-                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .header(ACCEPT, APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Resolving sources..."))
                          .send(unmarshaller.newListUnmarshaller(SourceEstimation.class));
     }
@@ -150,35 +149,12 @@ public class ProjectServiceClient {
      * @see SourceStorageDto
      * @since 4.4.0
      */
-    public Promise<Void> importProject(final Path path,
-                                       final SourceStorageDto source) {
-        return createFromAsyncRequest(callback -> {
-            // TODO (spi ide): must be reworked with JSON-RPC
-//            final String url = encodeAllowEscapes(PROJECT + IMPORT + path(path.toString()));
-//            final Message message = new MessageBuilder(POST, url).data(dtoFactory.toJson(source))
-//                                                                 .header(CONTENTTYPE, APPLICATION_JSON)
-//                                                                 .build();
+    public Promise<Void> importProject(Path path, SourceStorageDto source) {
+        String url = encodeAllowEscapes(getBaseUrl() + IMPORT + path(path.toString()));
 
-//            wsAgentStateController.getMessageBus().then(messageBus -> {
-//                try {
-//                    messageBus.send(message, new RequestCallback<Void>() {
-//                        @Override
-//                        protected void onSuccess(Void result) {
-//                            callback.onSuccess(result);
-//                        }
-//
-//                        @Override
-//                        protected void onFailure(Throwable exception) {
-//                            callback.onFailure(exception);
-//                        }
-//                    });
-//                } catch (WebSocketException e) {
-//                    callback.onFailure(e);
-//                }
-//            }).catchError(error -> {
-//                callback.onFailure(error.getCause());
-//            });
-        });
+        return reqFactory.createPostRequest(url, source)
+                         .header(CONTENT_TYPE, APPLICATION_JSON)
+                         .send();
     }
 
     /**
@@ -210,7 +186,7 @@ public class ProjectServiceClient {
         }
 
         return reqFactory.createGetRequest(url + queryParameters.toString().replaceFirst("&", "?"))
-                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .header(ACCEPT, APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Searching..."))
                          .send(unmarshaller.newListUnmarshaller(ItemReference.class));
     }
@@ -232,7 +208,7 @@ public class ProjectServiceClient {
             urlBuilder.setParameter(key, options.get(key));
         }
         return reqFactory.createPostRequest(urlBuilder.buildString(), configuration)
-                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .header(ACCEPT, APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Creating project..."))
                          .send(unmarshaller.newUnmarshaller(ProjectConfigDto.class));
     }
@@ -257,7 +233,7 @@ public class ProjectServiceClient {
         final String url = encodeAllowEscapes(getBaseUrl() + BATCH_PROJECTS);
         final String loaderMessage = configurations.size() > 1 ? "Creating the batch of projects..." : "Creating project...";
         return reqFactory.createPostRequest(url, configurations)
-                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .header(ACCEPT, APPLICATION_JSON)
                          .loader(loaderFactory.newLoader(loaderMessage))
                          .send(unmarshaller.newListUnmarshaller(ProjectConfigDto.class));
     }
@@ -431,7 +407,7 @@ public class ProjectServiceClient {
         // later this loader should be added with the new mechanism of client-server synchronization
 
         return reqFactory.createGetRequest(url)
-                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .header(ACCEPT, APPLICATION_JSON)
                          .send(unmarshaller.newUnmarshaller(TreeElement.class));
     }
 
@@ -449,7 +425,7 @@ public class ProjectServiceClient {
         final String url = encodeAllowEscapes(getBaseUrl() + ITEM + path(path.toString()));
 
         return reqFactory.createGetRequest(url)
-                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .header(ACCEPT, APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Getting item..."))
                          .send(unmarshaller.newUnmarshaller(ItemReference.class));
     }
@@ -468,7 +444,7 @@ public class ProjectServiceClient {
         final String url = encodeAllowEscapes(getBaseUrl() + path(path.toString()));
 
         return reqFactory.createGetRequest(url)
-                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .header(ACCEPT, APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Getting project..."))
                          .send(unmarshaller.newUnmarshaller(ProjectConfigDto.class));
     }
@@ -486,8 +462,8 @@ public class ProjectServiceClient {
         final String url = encodeAllowEscapes(getBaseUrl() + path(configuration.getPath()));
 
         return reqFactory.createRequest(PUT, url, configuration, false)
-                         .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
-                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                         .header(CONTENT_TYPE, APPLICATION_JSON)
+                         .header(ACCEPT, APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Updating project..."))
                          .send(unmarshaller.newUnmarshaller(ProjectConfigDto.class));
     }

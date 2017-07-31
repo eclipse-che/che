@@ -14,15 +14,14 @@ import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
-import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.PartStackView.ActionDelegate;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
 import org.junit.Before;
@@ -32,17 +31,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import java.util.Arrays;
-
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.LEFT;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -52,12 +43,11 @@ import static org.mockito.Mockito.when;
 @RunWith(GwtMockitoTestRunner.class)
 public class PartStackViewImplTest {
 
-    private static final String SOME_TEXT = "someText";
-
     @Mock(answer = RETURNS_DEEP_STUBS)
     PartStackUIResources resources;
     @Mock
-    DeckLayoutPanel      contentPanel;
+    private CoreLocalizationConstant localizationConstant;
+
     @Mock
     FlowPanel            tabsPanel;
 
@@ -66,8 +56,10 @@ public class PartStackViewImplTest {
     private MouseDownEvent   event;
     @Mock
     private ContextMenuEvent contextMenuEvent;
+
     @Mock
     private ActionDelegate   delegate;
+
     @Mock
     private TabItem          tabItem;
     @Mock
@@ -96,52 +88,19 @@ public class PartStackViewImplTest {
         when(tabItem.getView()).thenReturn(widget);
         when(partPresenter.getView()).thenReturn(widget);
 
-        when(resources.partStackCss().idePartStackContent()).thenReturn(SOME_TEXT);
-
-        view = new PartStackViewImpl(resources, contentPanel, BELOW, tabsPanel);
+        view = new PartStackViewImpl(resources, localizationConstant);
         view.setDelegate(delegate);
-    }
-
-    @Test
-    public void constructorShouldBeVerifiedInPositionBelow() {
-        verify(contentPanel).setStyleName(SOME_TEXT);
-
-        verifyNoMoreInteractions(tabsPanel);
-    }
-
-    @Test
-    public void constructorShouldBeVerifiedInPositionLeft() {
-        when(resources.partStackCss().idePartStackContent()).thenReturn(SOME_TEXT);
-
-        reset(contentPanel);
-        reset(tabsPanel);
-        view = new PartStackViewImpl(resources, contentPanel, LEFT, tabsPanel);
-
-        verify(contentPanel).setStyleName(SOME_TEXT);
-    }
-
-    @Test
-    public void constructorShouldBeVerifiedInPositionRight() {
-        when(resources.partStackCss().idePartStackContent()).thenReturn(SOME_TEXT);
-
-        reset(contentPanel);
-        reset(tabsPanel);
-        view = new PartStackViewImpl(resources, contentPanel, RIGHT, tabsPanel);
-
-        verify(contentPanel).setStyleName(SOME_TEXT);
     }
 
     @Test
     public void onPartStackMouseShouldBeDown() {
         view.onMouseDown(event);
-
         verify(delegate).onRequestFocus();
     }
 
     @Test
     public void onPartStackContextMenuShouldBeClicked() {
         view.onContextMenu(contextMenuEvent);
-
         verify(delegate).onRequestFocus();
     }
 
@@ -149,91 +108,17 @@ public class PartStackViewImplTest {
     public void tabShouldBeAdded() {
         view.addTab(tabItem, partPresenter);
 
-        verify(tabItem).setTabPosition(BELOW);
-        verify(tabsPanel).add(widget);
-        verify(partPresenter).go(contentCaptor.capture());
-
-        contentCaptor.getValue().setWidget(widget);
-
-        verify(contentPanel).add(widget);
+        verify(tabItem).getView();
+        verify(partPresenter).go(any());
     }
 
     @Test
-    public void tabShouldBeRemoved() {
+    public void tabShouldBeSelected() {
         view.addTab(tabItem, partPresenter);
-
-        view.removeTab(partPresenter);
-
-        verify(tabsPanel).remove(widget);
-        verify(contentPanel).remove(widget);
-    }
-
-    @Test
-    public void tabPositionsShouldBeSet() {
-        view.addTab(tabItem, partPresenter);
-        view.addTab(tabItem2, partPresenter2);
-
-        when(partPresenter2.getView()).thenReturn(widget2);
-
-        view.setTabPositions(Arrays.asList(partPresenter, partPresenter2));
-
-        verify(tabsPanel).insert(widget, 0);
-    }
-
-    @Test
-    public void tabShouldBeSelectedWhenContentExist() {
-        view.addTab(tabItem, partPresenter);
-
         view.selectTab(partPresenter);
 
-        verify(contentPanel).getWidgetIndex(widget);
-        verify(contentPanel).showWidget(0);
-        verify(tabItem).select();
-        verify(delegate).onRequestFocus();
-        verify(tabItem).setTabPosition((PartStackView.TabPosition)any());
-    }
-
-    @Test
-    public void tabShouldBeSelectedWhenContentIsAbsent() {
-        view.addTab(tabItem, partPresenter);
-
-        view.selectTab(partPresenter);
-
-        verify(contentPanel).getWidgetIndex(widget);
-        verify(partPresenter).go(contentCaptor.capture());
-        verify(contentPanel).showWidget(0);
         verify(tabItem).select();
         verify(delegate).onRequestFocus();
     }
 
-    @Test
-    public void partShouldBeFocused() {
-        when(contentPanel.getVisibleWidget()).thenReturn(focusedWidget);
-
-        view.setFocus(true);
-
-        verify(contentPanel).getVisibleWidget();
-
-        verify(element).setAttribute("focused", "");
-    }
-
-    @Test
-    public void partShouldNotBeFocused() {
-        when(contentPanel.getVisibleWidget()).thenReturn(focusedWidget);
-
-        view.setFocus(false);
-
-        verify(contentPanel).getVisibleWidget();
-
-        verify(focusedWidget, never()).getElement();
-    }
-
-    @Test
-    public void tabItemShouldBeUpdated() {
-        view.addTab(tabItem, partPresenter);
-
-        view.updateTabItem(partPresenter);
-
-        verify(tabItem).update(partPresenter);
-    }
 }

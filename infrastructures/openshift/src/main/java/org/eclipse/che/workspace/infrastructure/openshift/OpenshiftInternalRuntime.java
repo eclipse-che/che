@@ -59,7 +59,7 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
 
     @Inject
     public OpenshiftInternalRuntime(@Assisted OpenshiftRuntimeContext context,
-                                    URLRewriter urlRewriter,
+                                    URLRewriter.NoOpURLRewriter urlRewriter,
                                     OpenshiftClientFactory clientFactory,
                                     EventService eventService,
                                     OpenshiftBootstrapperFactory openshiftBootstrapperFactory,
@@ -124,7 +124,7 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
 
                 sendRunningEvent(machine.getName());
             }
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | InterruptedException e) {
             LOG.error("Failed to start of openshift runtime. " + e.getMessage(), e);
             throw new InfrastructureException(e.getMessage(), e);
         }

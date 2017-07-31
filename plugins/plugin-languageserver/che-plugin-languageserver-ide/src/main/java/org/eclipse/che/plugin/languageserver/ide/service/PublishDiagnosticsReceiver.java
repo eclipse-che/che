@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProcessor;
 
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /**
  * Subscribes and receives JSON-RPC messages related to 'textDocument/publishDiagnostics' events
@@ -37,7 +37,7 @@ public class PublishDiagnosticsReceiver {
     @Inject
     private void subscribe(RequestTransmitter transmitter) {
         transmitter.newRequest()
-                   .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                   .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                    .methodName("textDocument/publishDiagnostics/subscribe")
                    .noParams()
                    .sendAndSkipResult();

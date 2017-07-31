@@ -25,7 +25,7 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import static org.eclipse.che.api.project.shared.dto.EditorChangesDto.Type.INSERT;
 import static org.eclipse.che.api.project.shared.dto.EditorChangesDto.Type.REMOVE;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /**
  * Default implementation of {@link EditorWorkingCopySynchronizer} which provides synchronization working copy on server side.
@@ -73,7 +73,7 @@ public class EditorWorkingCopySynchronizerImpl implements EditorWorkingCopySynch
         }
 
         return requestTransmitter.newRequest()
-                          .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                           .methodName(EDITOR_CONTENT_CHANGES_METHOD)
                           .paramsAsDto(changes)
                           .sendAndReceiveResultAsEmpty();

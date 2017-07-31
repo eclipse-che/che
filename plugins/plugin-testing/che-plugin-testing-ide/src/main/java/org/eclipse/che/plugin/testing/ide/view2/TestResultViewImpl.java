@@ -23,7 +23,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
@@ -70,13 +69,11 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
     @Inject
     public TestResultViewImpl(TestResources testResources,
-                              PartStackUIResources resources,
                               JavaNavigationService javaNavigationService,
                               EditorAgent editorAgent,
                               AppContext appContext,
                               TestResultNodeFactory nodeFactory,
                               PrinterOutputConsole outputConsole) {
-        super(resources);
         this.javaNavigationService = javaNavigationService;
         this.editorAgent = editorAgent;
         this.appContext = appContext;

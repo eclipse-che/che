@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.websocket.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
 import org.eclipse.che.api.core.websocket.impl.MessagesReSender;
 import org.eclipse.che.api.core.websocket.impl.WebSocketSessionRegistry;
+import org.eclipse.che.api.core.websocket.impl.WebsocketIdService;
 
 import javax.inject.Inject;
 import javax.websocket.server.ServerEndpoint;
@@ -25,16 +26,22 @@ import javax.websocket.server.ServerEndpoint;
  * @author Sergii Leshchenko
  * @author Anton Korneta
  */
-@ServerEndpoint(value = OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE + "{endpoint-id}",
+@ServerEndpoint(value = OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE,
                 configurator = GuiceInjectorEndpointConfigurator.class)
 public class OutputEndpoint extends BasicWebSocketEndpoint {
 
-    public static final String OUTPUT_WEBSOCKET_ENDPOINT_BASE = "/output/websocket/";
+    public static final String OUTPUT_WEBSOCKET_ENDPOINT_BASE = "/output/websocket";
 
     @Inject
     public OutputEndpoint(WebSocketSessionRegistry registry,
                           MessagesReSender reSender,
-                          WebSocketMessageReceiver receiver) {
-        super(registry, reSender, receiver);
+                          WebSocketMessageReceiver receiver,
+                          WebsocketIdService websocketIdService) {
+        super(registry, reSender, receiver, websocketIdService);
+    }
+
+    @Override
+    protected String getEndpointId() {
+        return "output-websocket-endpoint";
     }
 }
