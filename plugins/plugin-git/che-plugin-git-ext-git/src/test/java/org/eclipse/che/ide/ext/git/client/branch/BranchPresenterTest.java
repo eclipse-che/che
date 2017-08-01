@@ -99,7 +99,7 @@ public class BranchPresenterTest extends BaseTest {
         when(service.branchList(anyObject(), anyObject())).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
-        when(view.getBranchFilterValue()).thenReturn("all");
+        when(view.getFilterValue()).thenReturn("all");
     }
 
     @Test
@@ -129,7 +129,7 @@ public class BranchPresenterTest extends BaseTest {
         when(service.branchList(anyObject(), eq(BranchListMode.LIST_LOCAL))).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
-        when(view.getBranchFilterValue()).thenReturn("local");
+        when(view.getFilterValue()).thenReturn("local");
 
         //when
         presenter.showBranches(project);
@@ -151,7 +151,7 @@ public class BranchPresenterTest extends BaseTest {
         when(service.branchList(anyObject(), eq(BranchListMode.LIST_LOCAL))).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
-        when(view.getBranchFilterValue()).thenReturn("remote");
+        when(view.getFilterValue()).thenReturn("remote");
 
         //when
         presenter.showBranches(project);

@@ -170,7 +170,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
     /** Get the list of branches. */
     private void getBranches() {
-        service.branchList(project.getLocation(), BranchListMode.from(view.getBranchFilterValue()))
+        service.branchList(project.getLocation(), BranchListMode.from(view.getFilterValue()))
                .then(branches -> {
                    if (branches.isEmpty()) {
                        dialogFactory.createMessageDialog(constant.branchTitle(),

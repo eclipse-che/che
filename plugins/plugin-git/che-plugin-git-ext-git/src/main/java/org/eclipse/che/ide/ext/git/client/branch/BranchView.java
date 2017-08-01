@@ -91,7 +91,7 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
     /**
      * Returns selected branch filter.
      */
-    String getBranchFilterValue();
+    String getFilterValue();
 
     /** Close dialog. */
     void close();

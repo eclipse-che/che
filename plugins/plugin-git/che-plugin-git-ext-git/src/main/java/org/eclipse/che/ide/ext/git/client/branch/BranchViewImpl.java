@@ -264,7 +264,7 @@ public class BranchViewImpl extends Window implements BranchView {
     }
 
     @Override
-    public String getBranchFilterValue() {
+    public String getFilterValue() {
         return filter.getSelectedValue();
     }
 
