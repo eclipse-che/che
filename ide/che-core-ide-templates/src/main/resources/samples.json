@@ -906,11 +906,11 @@
     ]
   },
   {
-    "name": "aspnet-web-simple",
-    "displayName": "aspnet-web-simple",
-    "path": "/aspnet-web-simple",
-    "description": "A simple ASP.net web sample.",
-    "projectType": "blank",
+    "name": "dotnet-web-simple",
+    "displayName": "dotnet-web-simple",
+    "path": "/dotnet-web-simple",
+    "description": "A simple .NET 2.0 web sample.",
+    "projectType": "csharp",
     "mixins": [],
     "attributes": {
       "language": [
@@ -921,7 +921,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/che-samples/aspnet-web-simple.git",
+      "location": "https://github.com/che-samples/dotnet-web-simple.git",
       "parameters": {}
     },
     "commands": [

@@ -405,7 +405,7 @@
     "id": "dotnet-default",
     "creator": "ide",
     "name": ".NET",
-    "description": "Default .NET Stack with .NET Core SDK",
+    "description": "Default .NET 2.0 Stack with .NET Core SDK",
     "scope": "general",
     "tags": [
       "Ubuntu",
@@ -415,11 +415,11 @@
     "components": [
       {
         "name": "Ubuntu",
-        "version": "14.04"
+        "version": "16.04"
       },
       {
         "name": ".NET Core SDK",
-        "version": "1.0.0-preview1-002702"
+        "version": "2.0.0-preview2-006497"
       }
     ],
     "source": {
