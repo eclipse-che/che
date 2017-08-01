@@ -21,6 +21,7 @@ set_sudo_command() {
     if is_current_user_sudoer && ! is_current_user_root; then SUDO="sudo -E"; else unset SUDO; fi
 }
 
+set_sudo_command
 unset PACKAGES
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
