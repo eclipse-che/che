@@ -35,13 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Throwables.getCausalChain;
@@ -394,75 +391,6 @@ public class WorkspaceManager {
         stopAsync(workspace, options);
     }
 
-
-    /**
-     * Shuts down workspace service and waits for it to finish, so currently
-     * starting and running workspaces are stopped and it becomes unavailable to start new workspaces.
-     *
-     * @throws InterruptedException
-     *         if it's interrupted while waiting for running workspaces to stop
-     * @throws IllegalStateException
-     *         if component shutdown is already called
-     */
-    void shutdown() throws InterruptedException {
-        if (!runtimes.refuseWorkspacesStart()) {
-            throw new IllegalStateException("Workspace service shutdown has been already called");
-        }
-        stopRunningWorkspacesNormally();
-        sharedPool.shutdown();
-    }
-
-    /**
-     * Returns set of workspace ids that are not {@link WorkspaceStatus#STOPPED}.
-     */
-    Set<String> getRunningWorkspacesIds() {
-        return runtimes.getRuntimesIds();
-    }
-
-    /**
-     * Stops all the running and starting workspaces.
-     * Workspace stop operations executed asynchronously while the method waits
-     * for async task to finish.
-     */
-    private void stopRunningWorkspacesNormally() throws InterruptedException {
-        if (runtimes.isAnyRunning()) {
-
-            // getting all the running or starting workspaces
-            ArrayList<WorkspaceImpl> runningOrStarting = new ArrayList<>();
-            for (String workspaceId : runtimes.getRuntimesIds()) {
-                try {
-                    WorkspaceImpl workspace = workspaceDao.get(workspaceId);
-                    runtimes.injectStatus(workspace);
-                    if (workspace.getStatus() == RUNNING || workspace.getStatus() == STARTING) {
-                        runningOrStarting.add(workspace);
-                    }
-                } catch (NotFoundException | ServerException x) {
-                    if (runtimes.hasRuntime(workspaceId)) {
-                        LOG.error("Couldn't get the workspace '{}' while it's running, the occurred error: '{}'",
-                                  workspaceId,
-                                  x.getMessage());
-                    }
-                }
-            }
-
-            // stopping them asynchronously
-            CountDownLatch stopLatch = new CountDownLatch(runningOrStarting.size());
-            for (WorkspaceImpl workspace : runningOrStarting) {
-                try {
-                    stopAsync(workspace, null).whenComplete((res, ex) -> stopLatch.countDown());
-                } catch (Exception x) {
-                    stopLatch.countDown();
-                    if (runtimes.hasRuntime(workspace.getId())) {
-                        LOG.warn("Couldn't stop the workspace '{}' normally, due to error: {}", workspace.getId(), x.getMessage());
-                    }
-                }
-            }
-
-            // wait for stopping workspaces to complete
-            stopLatch.await();
-        }
-    }
-
     /** Asynchronously starts given workspace. */
     private CompletableFuture<Void> startAsync(WorkspaceImpl workspace,
                                                String envName,
@@ -569,7 +497,7 @@ public class WorkspaceManager {
         if (includeRuntimes) {
             runtimes.injectRuntime(workspace);
         } else {
-            runtimes.injectStatus(workspace);
+            workspace.setStatus(runtimes.getStatus(workspace.getId()));
         }
         return workspace;
     }
