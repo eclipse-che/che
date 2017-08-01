@@ -23,7 +23,7 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 
 /** Data object for {@link Runtime}. */
 public class RuntimeImpl implements Runtime {
@@ -70,24 +70,12 @@ public class RuntimeImpl implements Runtime {
     /**
      * Returns a dev-machine or an empty {@code Optional} if none.
      * Dev-machine is a machine where ws-agent server is running.
-     *
-     * @see #getWsAgentServer()
      */
     public Optional<MachineImpl> getDevMachine() {
         return getMachines().values()
                             .stream()
-                            .filter(m -> m.getServerByName(WSAGENT_REFERENCE).isPresent())
+                            .filter(m -> m.getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE).isPresent())
                             .findAny();
-    }
-
-    /** Returns ws-agent server. */
-    public Optional<ServerImpl> getWsAgentServer() {
-        return getMachines().values()
-                            .stream()
-                            .filter(m -> m.getServerByName(WSAGENT_REFERENCE).isPresent())
-                            .findAny()
-                            .map(devMachine -> devMachine.getServerByName(WSAGENT_REFERENCE))
-                            .orElse(null);
     }
 
     public Optional<MachineImpl> getMachineByName(String name) {

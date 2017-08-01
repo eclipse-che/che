@@ -72,12 +72,10 @@ public final class Constants {
     public static final String LINK_REL_ENVIRONMENT_STATUS_CHANNEL = "environment.status_channel";
     public static final String ENVIRONMENT_STATUS_CHANNEL_TEMPLATE = "workspace:%s:machines_statuses";
 
-    public static final String WSAGENT_REFERENCE                   = "wsagent/http";
-    public static final String WSAGENT_WEBSOCKET_REFERENCE         = "wsagent.websocket";
-    public static final String WSAGENT_DEBUG_REFERENCE             = "wsagent.debug";
-
-    public static final String TERMINAL_REFERENCE = "terminal";
-    public static final String EXEC_AGENT_REFERENCE = "exec-agent/ws";
+    public static final String SERVER_WS_AGENT_HTTP_REFERENCE        = "wsagent/http";
+    public static final String SERVER_WS_AGENT_WEBSOCKET_REFERENCE   = "wsagent/ws";
+    public static final String SERVER_TERMINAL_REFERENCE             = "terminal";
+    public static final String SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE = "exec-agent/ws";
 
     public static final String WS_AGENT_PORT = "4401/tcp";
 

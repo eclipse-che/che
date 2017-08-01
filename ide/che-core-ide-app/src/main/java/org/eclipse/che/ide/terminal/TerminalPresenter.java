@@ -20,7 +20,6 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.mvp.Presenter;
@@ -38,9 +37,8 @@ import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 import org.eclipse.che.requirejs.ModuleHolder;
 
 import javax.validation.constraints.NotNull;
-import java.util.Optional;
 
-import static org.eclipse.che.api.workspace.shared.Constants.TERMINAL_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -104,28 +102,17 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
         }
 
         if (!connected) {
-            terminalHolder.getInitializerPromise().then(new Operation<Void>() {
-                @Override
-                public void apply(Void arg) throws OperationException {
-                    final Optional<ServerImpl> terminalServer = machine.getServerByName(TERMINAL_REFERENCE);
-
-                    if (terminalServer.isPresent()) {
-                        final String terminalServerURL = terminalServer.get().getUrl();
-                        // TODO (spi ide): remove path when it comes with URL
-                        connectToTerminalWebSocket(terminalServerURL.replaceFirst("http", "ws") + "/pty");
-                    } else {
-                        throw new OperationException("Machine " + machine.getName() + " doesn't provide terminal server.");
-                    }
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError arg) throws OperationException {
-                    notificationManager.notify(locale.failedToConnectTheTerminal(),
-                                               locale.terminalCanNotLoadScript(),
-                                               FAIL,
-                                               NOT_EMERGE_MODE);
-                    reconnect();
-                }
+            terminalHolder.getInitializerPromise().then(aVoid -> {
+                ServerImpl terminalServer = machine.getServerByName(SERVER_TERMINAL_REFERENCE)
+                                                   .orElseThrow(() -> new OperationException("Machine " + machine.getName() +
+                                                                                             " doesn't provide terminal server."));
+                connectToTerminal(terminalServer.getUrl());
+            }).catchError(arg -> {
+                notificationManager.notify(locale.failedToConnectTheTerminal(),
+                                           locale.terminalCanNotLoadScript(),
+                                           FAIL,
+                                           NOT_EMERGE_MODE);
+                reconnect();
             });
         }
     }
@@ -144,7 +131,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
         }
     }
 
-    private void connectToTerminalWebSocket(@NotNull String wsUrl) {
+    private void connectToTerminal(@NotNull String wsUrl) {
         countRetry--;
 
         socket = WebSocket.create(wsUrl);

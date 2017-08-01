@@ -94,8 +94,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.workspace.shared.Constants.TERMINAL_REFERENCE;
-import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
@@ -221,7 +221,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         for (MachineImpl machine : machines) {
-            if (machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
+            if (machine.getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE).isPresent()) {
                 provideMachineNode(machine.getName(), true);
                 machines.remove(machine);
                 break;
@@ -828,7 +828,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         final MachineImpl machineEntity = machines.get(machineId);
-        return machineEntity != null && machineEntity.getServerByName(TERMINAL_REFERENCE).isPresent();
+        return machineEntity != null && machineEntity.getServerByName(SERVER_TERMINAL_REFERENCE).isPresent();
     }
 
     /**
@@ -928,7 +928,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         MachineImpl devMachine = null;
         for (MachineImpl machine : wsMachines) {
-            if (machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
+            if (machine.getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE).isPresent()) {
                 devMachine = machine;
                 break;
             }

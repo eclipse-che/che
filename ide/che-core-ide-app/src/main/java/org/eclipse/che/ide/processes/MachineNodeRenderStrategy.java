@@ -34,7 +34,7 @@ import org.eclipse.che.ide.util.dom.Elements;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
-import static org.eclipse.che.api.workspace.shared.Constants.TERMINAL_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -145,7 +145,7 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
             return false;
         }
 
-        Server terminalServer = machine.getServers().get(TERMINAL_REFERENCE);
+        Server terminalServer = machine.getServers().get(SERVER_TERMINAL_REFERENCE);
         if (terminalServer == null) {
             return false;
         }
