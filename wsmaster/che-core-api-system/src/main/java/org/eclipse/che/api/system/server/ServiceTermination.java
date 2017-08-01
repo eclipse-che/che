@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.system.server;
 
-import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
 import org.eclipse.che.api.system.shared.event.service.StoppingSystemServiceEvent;
+import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
 
 /**
@@ -20,7 +20,7 @@ import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent
  *
  * @author Yevhenii Voevodin
  */
-interface ServiceTermination {
+public interface ServiceTermination {
 
     /**
      * Terminates a certain service.

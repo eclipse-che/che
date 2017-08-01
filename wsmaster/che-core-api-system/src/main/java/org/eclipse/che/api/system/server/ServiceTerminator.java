@@ -17,10 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Terminates system services.
@@ -31,17 +28,13 @@ class ServiceTerminator {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServiceTerminator.class);
 
-    private final EventService             eventService;
-    private final List<ServiceTermination> terminations;
+    private final EventService            eventService;
+    private final Set<ServiceTermination> terminations;
 
     @Inject
-    ServiceTerminator(EventService eventService, WorkspaceServiceTermination workspaceTermination) {
-        this(eventService, Collections.singletonList(workspaceTermination));
-    }
-
-    ServiceTerminator(EventService eventService, Collection<? extends ServiceTermination> terminations) {
+    ServiceTerminator(EventService eventService, Set<ServiceTermination> terminations) {
         this.eventService = eventService;
-        this.terminations = new ArrayList<>(terminations);
+        this.terminations = terminations;
     }
 
     /**
