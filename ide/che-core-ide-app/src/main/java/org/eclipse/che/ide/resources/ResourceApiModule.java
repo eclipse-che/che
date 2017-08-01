@@ -15,9 +15,9 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
-import org.eclipse.che.ide.api.data.tree.settings.impl.DummySettingsProvider;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
+import org.eclipse.che.ide.ui.smartTree.data.settings.impl.DummySettingsProvider;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;

@@ -8,16 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.data.tree;
+package org.eclipse.che.ide.ui.smartTree.data.settings.impl;
+
+import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 
 /**
- * Indicates that specified node can perform actions when it has been activated e.g. by double click.
- *
  * @author Vlad Zhukovskiy
  */
-public interface HasAction {
-    /**
-     * Perform action.
-     */
-    void actionPerformed();
+public class DummySettingsProvider implements SettingsProvider {
+    @Override
+    public NodeSettings getSettings() {
+        return NodeSettings.DEFAULT_SETTINGS;
+    }
+
+    @Override
+    public void setSettings(NodeSettings settings) {
+        //stub
+    }
 }

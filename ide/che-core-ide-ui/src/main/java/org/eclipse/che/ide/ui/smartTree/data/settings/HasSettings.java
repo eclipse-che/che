@@ -8,16 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.dialogs;
+package org.eclipse.che.ide.ui.smartTree.data.settings;
 
 /**
- * Interface to the message/information dialog component.
- *
- * @author Mickaël Leduque
- * @author Artem Zatsarynnyi
+ * @author Vlad Zhukovskiy
  */
-public interface MessageDialog {
-
-    /** Operate the message dialog: show it and manage user actions. */
-    void show();
+public interface HasSettings {
+    NodeSettings getSettings();
 }

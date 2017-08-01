@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.FontAwesome;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;

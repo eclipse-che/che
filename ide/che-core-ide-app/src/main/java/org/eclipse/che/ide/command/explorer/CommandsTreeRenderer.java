@@ -14,7 +14,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Event;
 
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerView.ActionDelegate;
 import org.eclipse.che.ide.command.node.CommandFileNode;

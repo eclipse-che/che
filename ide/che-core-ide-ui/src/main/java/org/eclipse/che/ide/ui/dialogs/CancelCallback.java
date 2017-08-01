@@ -8,15 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.dialogs;
+package org.eclipse.che.ide.ui.dialogs;
 
 /**
- * Interface to the choice dialog component.
- * 
+ * Callback called when the user clicks on "Cancel" in the confirmation/input dialog.
+ *
  * @author Mickaël Leduque
+ * @author Artem Zatsarynnyi
  */
-public interface ChoiceDialog {
+public interface CancelCallback {
 
-    /** Operate the choice dialog: show it and manage user actions. */
-    void show();
+    /** Action called when the user clicks on Cancel. */
+    void cancelled();
 }

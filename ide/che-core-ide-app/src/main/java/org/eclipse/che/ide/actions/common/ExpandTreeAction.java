@@ -12,7 +12,7 @@ package org.eclipse.che.ide.actions.common;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.data.tree.TreeExpander;
+import org.eclipse.che.ide.ui.smartTree.data.TreeExpander;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

@@ -8,19 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.data.tree;
+package org.eclipse.che.ide.ui.dialogs.input;
 
 /**
- * Indicates that specified node can be transformed into leaf node.
+ * Callback called when the user clicks on "OK" in the input dialog.
  *
- * @author Vlad Zhukovskiy
+ * @author Artem Zatsarynnyi
  */
-public interface MutableNode {
+public interface InputCallback {
+
     /**
-     * Set current node status into leaf.
+     * Action called when the user clicks on OK.
      *
-     * @param leaf
-     *         true if node should be transformed into leaf
+     * @param value
+     *         the string typed into input dialog
      */
-    void setLeaf(boolean leaf);
+    void accepted(String value);
 }

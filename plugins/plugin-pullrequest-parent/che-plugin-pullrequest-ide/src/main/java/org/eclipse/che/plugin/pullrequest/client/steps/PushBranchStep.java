@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.pullrequest.client.steps;
 
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
 import org.eclipse.che.plugin.pullrequest.client.vcs.BranchUpToDateException;
 import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoPullRequestException;
@@ -27,9 +26,9 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.CancelCallback;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 
 /**

@@ -20,7 +20,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;

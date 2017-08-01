@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.dialogs;
+package org.eclipse.che.ide.ui.dialogs.askcredentials;
 
 /**
  * Credentials object for subversion operations.

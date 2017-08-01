@@ -8,26 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.data;
+package org.eclipse.che.ide.ui.dialogs.message;
 
 /**
- * Indicates that specified node can contains data object, e.g. project descriptor or item reference.
+ * Interface to the message/information dialog component.
  *
- * @author Vlad Zhukovskiy
+ * @author Mickaël Leduque
+ * @author Artem Zatsarynnyi
  */
-public interface HasDataObject<D> {
-    /**
-     * Retrieve stored data object.
-     *
-     * @return data object
-     */
-    D getData();
+public interface MessageDialog {
 
-    /**
-     * Store data object.
-     *
-     * @param data
-     *         data object
-     */
-    void setData(D data);
+    /** Operate the message dialog: show it and manage user actions. */
+    void show();
 }

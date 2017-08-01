@@ -8,16 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.dialogs;
+package org.eclipse.che.ide.ui.smartTree.data;
 
 /**
- * Callback called when the user clicks on "OK" in the confirmation dialog.
+ * Indicates that specified node can be transformed into leaf node.
  *
- * @author Mickaël Leduque
- * @author Artem Zatsarynnyi
+ * @author Vlad Zhukovskiy
  */
-public interface ConfirmCallback {
-
-    /** Action called when the user click on OK. */
-    void accepted();
+public interface MutableNode {
+    /**
+     * Set current node status into leaf.
+     *
+     * @param leaf
+     *         true if node should be transformed into leaf
+     */
+    void setLeaf(boolean leaf);
 }

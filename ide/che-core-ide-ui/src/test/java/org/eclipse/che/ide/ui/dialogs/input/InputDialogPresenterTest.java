@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.dialogs.input;
 
-import org.eclipse.che.ide.api.dialogs.InputValidator;
 import org.eclipse.che.ide.ui.UILocalizationConstant;
 import org.eclipse.che.ide.ui.dialogs.BaseTest;
 

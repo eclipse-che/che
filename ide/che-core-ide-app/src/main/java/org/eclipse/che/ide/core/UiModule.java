@@ -14,11 +14,11 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.dialogs.ChoiceDialog;
-import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputDialog;
-import org.eclipse.che.ide.api.dialogs.MessageDialog;
+import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialog;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.input.InputDialog;
+import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.icon.DefaultIconsRegistrar;
 import org.eclipse.che.ide.icon.IconRegistryImpl;

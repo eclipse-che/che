@@ -31,7 +31,7 @@ import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.constraints.Direction;
-import org.eclipse.che.ide.api.data.HasDataObject;
+import org.eclipse.che.ide.ui.smartTree.data.HasDataObject;
 import org.eclipse.che.ide.api.editor.AsyncEditorProvider;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;

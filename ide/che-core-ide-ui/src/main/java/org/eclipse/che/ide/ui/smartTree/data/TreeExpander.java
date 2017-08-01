@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.data.tree;
+package org.eclipse.che.ide.ui.smartTree.data;
 
 import com.google.common.annotations.Beta;
 

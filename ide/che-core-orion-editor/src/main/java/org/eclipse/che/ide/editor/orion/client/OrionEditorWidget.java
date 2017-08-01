@@ -36,7 +36,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModelEvent;
 import org.eclipse.che.ide.api.editor.codeassist.AdditionalInfoCallback;
@@ -865,7 +865,7 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     /**
      * Custom callback to pass given value to native javascript function.
      */
-    private class InputCallback implements org.eclipse.che.ide.api.dialogs.InputCallback {
+    private class InputCallback implements org.eclipse.che.ide.ui.dialogs.input.InputCallback {
 
         private JavaScriptObject callback;
 

@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.ext.git.client.commit;
 
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFileNode;

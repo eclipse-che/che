@@ -8,10 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.dialogs;
+package org.eclipse.che.ide.ui.dialogs.input;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.dialogs.InputDialog;
 
 /**
  * Validator for {@link InputDialog}.

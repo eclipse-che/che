@@ -8,16 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.dialogs;
+//TODO This is used in wizard/ProjectImporter, find a solution to move it to plugin-svn.
+package org.eclipse.che.ide.ui.dialogs.askcredentials;
+
+import org.eclipse.che.api.promises.client.Promise;
 
 /**
- * Callback called when the user clicks on "Cancel" in the confirmation/input dialog.
+ * Dialog for retrieving credentials for operations.
  *
- * @author Mickaël Leduque
- * @author Artem Zatsarynnyi
+ * @author Igor Vinokur
  */
-public interface CancelCallback {
+public interface AskCredentialsDialog {
 
-    /** Action called when the user clicks on Cancel. */
-    void cancelled();
+    /**
+     * Returns credentials from dialog.
+     *
+     * @return {@link Credentials} that contains user name and password
+     */
+    Promise<Credentials> askCredentials();
 }

@@ -13,7 +13,7 @@ package org.eclipse.che.ide.part.editor.recent;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.resources.tree.FileNode;
 import org.eclipse.che.ide.resources.tree.ResourceNode;

@@ -8,22 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.data.tree.settings.impl;
-
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
+package org.eclipse.che.ide.ui.smartTree.data;
 
 /**
+ * Indicates that specified node can contains data object, e.g. project descriptor or item reference.
+ *
  * @author Vlad Zhukovskiy
  */
-public class DummySettingsProvider implements SettingsProvider {
-    @Override
-    public NodeSettings getSettings() {
-        return NodeSettings.DEFAULT_SETTINGS;
-    }
+public interface HasDataObject<D> {
+    /**
+     * Retrieve stored data object.
+     *
+     * @return data object
+     */
+    D getData();
 
-    @Override
-    public void setSettings(NodeSettings settings) {
-        //stub
-    }
+    /**
+     * Store data object.
+     *
+     * @param data
+     *         data object
+     */
+    void setData(D data);
 }

@@ -8,22 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-//TODO This is used in wizard/ProjectImporter, find a solution to move it to plugin-svn.
-package org.eclipse.che.ide.api.dialogs;
-
-import org.eclipse.che.api.promises.client.Promise;
+package org.eclipse.che.ide.ui.dialogs.confirm;
 
 /**
- * Dialog for retrieving credentials for operations.
+ * Callback called when the user clicks on "OK" in the confirmation dialog.
  *
- * @author Igor Vinokur
+ * @author Mickaël Leduque
+ * @author Artem Zatsarynnyi
  */
-public interface AskCredentialsDialog {
+public interface ConfirmCallback {
 
-    /**
-     * Returns credentials from dialog.
-     *
-     * @return {@link Credentials} that contains user name and password
-     */
-    Promise<Credentials> askCredentials();
+    /** Action called when the user click on OK. */
+    void accepted();
 }

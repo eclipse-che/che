@@ -12,7 +12,7 @@ package org.eclipse.che.ide.search.presentation;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.api.resources.Resource;

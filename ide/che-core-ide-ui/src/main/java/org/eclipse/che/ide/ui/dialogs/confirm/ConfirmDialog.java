@@ -8,27 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.dialogs;
+package org.eclipse.che.ide.ui.dialogs.confirm;
 
 /**
- * Interface to the input dialog component.
+ * Interface to the confirmation dialog component.
  *
  * @author Mickaël Leduque
  * @author Artem Zatsarynnyi
  */
-public interface InputDialog {
+public interface ConfirmDialog {
 
-    /** Operate the input dialog: show it and manage user actions. */
+    /** Operate the confirmation dialog: show it and manage user actions. */
     void show();
-
-    /**
-     * Set the {@link InputValidator} to be called whenever the text changes in the input field in the view.
-     * <p/>
-     * If validator finds the input invalid, the error message is displayed in the dialog's view.
-     *
-     * @param inputValidator
-     *         validator to use
-     * @return this {@link InputDialog}
-     */
-    InputDialog withValidator(InputValidator inputValidator);
 }

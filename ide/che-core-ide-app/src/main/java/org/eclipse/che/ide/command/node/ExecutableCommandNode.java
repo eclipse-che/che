@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.data.tree.HasAction;
+import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.command.CommandUtils;
 
 /**

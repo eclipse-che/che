@@ -15,7 +15,7 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.ext.java.client.JavaResources;

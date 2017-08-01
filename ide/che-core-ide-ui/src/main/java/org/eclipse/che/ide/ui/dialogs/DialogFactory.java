@@ -8,10 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.dialogs;
+package org.eclipse.che.ide.ui.dialogs;
 
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialog;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
+import org.eclipse.che.ide.ui.dialogs.input.InputCallback;
+import org.eclipse.che.ide.ui.dialogs.input.InputDialog;
+import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.assistedinject.Assisted;
@@ -259,9 +265,9 @@ public interface DialogFactory {
      * @return a {@link ConfirmDialog} instance
      */
     ChoiceDialog createChoiceDialog(@NotNull @Assisted("title") String title,
-                                     @NotNull @Assisted("message") String content,
-                                     @NotNull @Assisted("firstChoice") String firstChoiceLabel,
-                                     @NotNull @Assisted("secondChoice") String secondChoiceLabel,
+                                    @NotNull @Assisted("message") String content,
+                                    @NotNull @Assisted("firstChoice") String firstChoiceLabel,
+                                    @NotNull @Assisted("secondChoice") String secondChoiceLabel,
                                     @Nullable @Assisted("firstCallback") ConfirmCallback firstChoiceCallback,
                                     @Nullable @Assisted("secondCallback") ConfirmCallback secondChoiceCallback);
 

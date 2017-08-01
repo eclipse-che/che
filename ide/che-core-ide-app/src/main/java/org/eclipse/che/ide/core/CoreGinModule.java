@@ -39,7 +39,7 @@ import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.ssh.SshServiceClientImpl;
-import org.eclipse.che.ide.api.dialogs.AskCredentialsDialog;
+import org.eclipse.che.ide.ui.dialogs.askcredentials.AskCredentialsDialog;
 import org.eclipse.che.ide.clipboard.ClipboardModule;
 import org.eclipse.che.ide.command.CommandApiModule;
 import org.eclipse.che.ide.console.ConsoleGinModule;

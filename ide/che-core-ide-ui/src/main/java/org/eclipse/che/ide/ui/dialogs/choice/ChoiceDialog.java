@@ -8,20 +8,15 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.dialogs;
+package org.eclipse.che.ide.ui.dialogs.choice;
 
 /**
- * Callback called when the user clicks on "OK" in the input dialog.
- *
- * @author Artem Zatsarynnyi
+ * Interface to the choice dialog component.
+ * 
+ * @author Mickaël Leduque
  */
-public interface InputCallback {
+public interface ChoiceDialog {
 
-    /**
-     * Action called when the user clicks on OK.
-     *
-     * @param value
-     *         the string typed into input dialog
-     */
-    void accepted(String value);
+    /** Operate the choice dialog: show it and manage user actions. */
+    void show();
 }
