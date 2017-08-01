@@ -69,7 +69,7 @@ public class NewTerminalAction extends AbstractPerspectiveAction implements Proc
         }
 
         if (ProcessTreeNode.ProcessNodeType.MACHINE_NODE == node.getType()) {
-            event.getPresentation().setEnabled(node.hasTerminalAgent());
+            event.getPresentation().setEnabled(node.isTerminalServerRunning());
             return;
         }
 
