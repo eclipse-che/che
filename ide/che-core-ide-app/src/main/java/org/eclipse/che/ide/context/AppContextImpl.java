@@ -38,6 +38,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
@@ -57,6 +58,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.addAll;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -404,11 +406,16 @@ public class AppContextImpl implements AppContext,
     @Override
     public String getWsAgentServerApiEndpoint() {
         RuntimeImpl runtime = getWorkspace().getRuntime();
-        Optional<ServerImpl> wsAgentServer = runtime.getWsAgentServer();
+        Optional<MachineImpl> devMachine = runtime.getDevMachine();
 
-        if (wsAgentServer.isPresent()) {
-            return wsAgentServer.get().getUrl();
+        if (devMachine.isPresent()) {
+            Optional<ServerImpl> wsAgentServer = devMachine.get().getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE);
+
+            if (wsAgentServer.isPresent()) {
+                return wsAgentServer.get().getUrl();
+            }
         }
+
 
         throw new RuntimeException("ws-agent server doesn't exist");
     }

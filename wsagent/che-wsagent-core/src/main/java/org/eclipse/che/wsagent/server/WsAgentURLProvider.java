@@ -24,7 +24,7 @@ import javax.inject.Provider;
 import java.io.IOException;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 
 /**
  * Provides URL to workspace agent inside container.
@@ -59,7 +59,7 @@ public class WsAgentURLProvider implements Provider<String> {
                                                              .asDto(WorkspaceDto.class);
                 if (workspace.getRuntime() != null) {
                     for (MachineDto machine : workspace.getRuntime().getMachines().values()) {
-                        ServerDto wsAgent = machine.getServers().get(WSAGENT_REFERENCE);
+                        ServerDto wsAgent = machine.getServers().get(SERVER_WS_AGENT_HTTP_REFERENCE);
                         if (wsAgent != null) {
                             cachedAgentUrl = wsAgent.getUrl();
                         }

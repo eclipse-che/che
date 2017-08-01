@@ -30,6 +30,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /** Initializes JSON-RPC connection to the ws-agent server. */
@@ -85,16 +86,14 @@ public class WsAgentJsonRpcInitializer {
             return; // workspace is stopped
         }
 
-        runtime.getWsAgentServer().ifPresent(server -> {
-            String wsAgentWebSocketUrl =
-                    server.getUrl().replaceFirst("http", "ws") + "/ws"; // TODO (spi ide): remove path when it comes with URL
-            String wsAgentUrl = wsAgentWebSocketUrl.replaceFirst("api/ws", "wsagent");
+        runtime.getDevMachine().ifPresent(devMachine -> {
+            devMachine.getServerByName(SERVER_WS_AGENT_WEBSOCKET_REFERENCE).ifPresent(server -> {
+                String separator = server.getUrl().contains("?") ? "&" : "?";
+                String queryParams = appContext.getApplicationWebsocketId().map(id -> separator + "clientId=" + id).orElse("");
+                Set<Runnable> initActions = appContext.getApplicationWebsocketId().isPresent() ? emptySet() : singleton(this::processWsId);
 
-            String separator = wsAgentUrl.contains("?") ? "&" : "?";
-            String queryParams = appContext.getApplicationWebsocketId().map(id -> separator + "clientId=" + id).orElse("");
-            Set<Runnable> initActions = appContext.getApplicationWebsocketId().isPresent() ? emptySet() : singleton(this::processWsId);
-
-            initializer.initialize(WS_AGENT_JSON_RPC_ENDPOINT_ID, singletonMap("url", wsAgentUrl + queryParams), initActions);
+                initializer.initialize(WS_AGENT_JSON_RPC_ENDPOINT_ID, singletonMap("url", server.getUrl() + queryParams), initActions);
+            });
         });
     }
 
