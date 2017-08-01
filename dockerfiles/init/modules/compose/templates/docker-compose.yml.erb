@@ -23,21 +23,30 @@ services:
 <% else -%>
       - '<%= ENV["CHE_ENV_FILE"] %>'
 <% end -%>
+<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
+    links:
+      - postgres:postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - default
+      - che-network
+<% end -%>
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
       - '<%= scope.lookupvar('che::che_instance') -%>/data:/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/logs:/logs'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/che:/conf'
+<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/che/server.xml:/home/user/eclipse-che-5.16.0-SNAPSHOT/tomcat/conf/server.xml'
+<% end -%>
 <% if scope.lookupvar('che::che_dev_env') == 'on' -%>
       - '<%= scope.lookupvar('che::che_assembly') -%>:/assembly'
 <% end -%>
 <% if scope.lookupvar('che::che_user') != 'root' -%>
       - '/etc/group:/etc/group:ro'
       - '/etc/passwd:/etc/passwd:ro'
-<% end -%>
-<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
-    networks:
-      - che-network
 <% end -%>
     ports:
 <% if @che_jmx_enabled == 'true' -%>
@@ -76,7 +85,7 @@ services:
     image: <%= ENV["IMAGE_TRAEFIK"] %>
     command: --logLevel=DEBUG
     links:
-      - 'che:che'
+      - che:che
     labels:
       traefik.enable: "false"
     ports:
@@ -101,6 +110,7 @@ services:
       - POSTGRES_DB=keycloak
     volumes:
       - '<%= scope.lookupvar('che::che_instance') -%>/data/postgres:/var/lib/postgresql/data'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user.sh:/docker-entrypoint-initdb.d/init-che-user.sh'
     ports:
       - '5432:5432'
     restart: always

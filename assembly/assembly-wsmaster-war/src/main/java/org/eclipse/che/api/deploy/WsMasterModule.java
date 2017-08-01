@@ -46,8 +46,6 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
-import javax.sql.DataSource;
-
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
 
@@ -67,7 +65,6 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
 
         // db configuration
-        bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
         bind(SchemaInitializer.class).to(org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer.class);
         bind(org.eclipse.che.core.db.DBInitializer.class).asEagerSingleton();
         bind(PlaceholderReplacer.class).toProvider(org.eclipse.che.core.db.schema.impl.flyway.PlaceholderReplacerProvider.class);
