@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.common.base.Preconditions;
+
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
@@ -17,8 +22,15 @@ import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.Collections;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -28,38 +40,70 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class WorkspaceServiceTermination implements ServiceTermination {
 
-    @Inject
-    private WorkspaceManager workspaceManager;
+    private static final Logger LOG = LoggerFactory.getLogger(WorkspaceServiceTermination.class);
+
+    /** Delay in MS between runtimes stopped checks. The value is experimental. */
+    private static final long DEFAULT_PULL_RUNTIMES_PERIOD_MS = TimeUnit.SECONDS.toMillis(1);
+
+    private final WorkspaceManager    manager;
+    private final WorkspaceSharedPool sharedPool;
+    private final WorkspaceRuntimes   runtimes;
+    private final EventService        eventService;
 
     @Inject
-    private EventService eventService;
+    public WorkspaceServiceTermination(WorkspaceManager manager,
+                                       WorkspaceSharedPool sharedPool,
+                                       WorkspaceRuntimes runtimes,
+                                       EventService eventService) {
+        this.manager = manager;
+        this.sharedPool = sharedPool;
+        this.runtimes = runtimes;
+        this.eventService = eventService;
+    }
+
+    @Override
+    public String getServiceName() { return "workspace"; }
 
     @Override
     public void terminate() throws InterruptedException {
-        EventSubscriber propagator = new WorkspaceStoppedEventsPropagator();
+        Preconditions.checkState(runtimes.refuseStart());
+
+        WorkspaceStoppedEventsPropagator propagator = new WorkspaceStoppedEventsPropagator();
         eventService.subscribe(propagator);
         try {
-            workspaceManager.shutdown();
+            stopRunningAndStartingWorkspacesAsync();
+            waitAllWorkspacesStopped();
+            sharedPool.shutdown();
         } finally {
             eventService.unsubscribe(propagator);
         }
     }
 
-    @Override
-    public String getServiceName() {
-        return "workspace";
+    private void stopRunningAndStartingWorkspacesAsync() {
+        for (String workspaceId : runtimes.getRuntimesIds()) {
+            WorkspaceStatus status = runtimes.getStatus(workspaceId);
+            if (status == WorkspaceStatus.RUNNING || status == WorkspaceStatus.STARTING) {
+                try {
+                    manager.stopWorkspace(workspaceId, Collections.emptyMap());
+                } catch (ServerException | ConflictException | NotFoundException x) {
+                    if (runtimes.hasRuntime(workspaceId)) {
+                        LOG.error("Couldn't get the workspace '{}' while it's running, the occurred error: '{}'",
+                                  workspaceId,
+                                  x.getMessage());
+                    }
+                }
+            }
+        }
     }
 
-    /**
-     * Propagates workspace stopped events as {@link SystemServiceStoppedEvent} events.
-     */
+    /** Propagates workspace stopped events as {@link SystemServiceStoppedEvent} events. */
     private class WorkspaceStoppedEventsPropagator implements EventSubscriber<WorkspaceStatusEvent> {
 
         private final int           totalRunning;
         private final AtomicInteger currentlyStopped;
 
         private WorkspaceStoppedEventsPropagator() {
-            this.totalRunning = workspaceManager.getRunningWorkspacesIds().size();
+            this.totalRunning = runtimes.getRuntimesIds().size();
             this.currentlyStopped = new AtomicInteger(0);
         }
 
@@ -72,5 +116,20 @@ public class WorkspaceServiceTermination implements ServiceTermination {
                                                                        totalRunning));
             }
         }
+    }
+
+    private void waitAllWorkspacesStopped() throws InterruptedException {
+        Timer timer = new Timer("RuntimesStoppedTracker", false);
+        CountDownLatch latch = new CountDownLatch(1);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!runtimes.isAnyRunning()) {
+                    timer.cancel();
+                    latch.countDown();
+                }
+            }
+        }, 0, DEFAULT_PULL_RUNTIMES_PERIOD_MS);
+        latch.await();
     }
 }

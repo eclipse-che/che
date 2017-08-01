@@ -237,34 +237,6 @@ public class WorkspaceManagerTest {
     }
 
     @Test
-    public void stopsRunningWorkspacesOnShutdown() throws Exception {
-        when(runtimes.refuseWorkspacesStart()).thenReturn(true);
-        WorkspaceImpl stopped = createAndMockWorkspace();
-        mockRuntime(stopped, STOPPED);
-        WorkspaceImpl starting = createAndMockWorkspace();
-        mockRuntime(starting, STARTING);
-        WorkspaceImpl running = createAndMockWorkspace();
-        mockRuntime(running, RUNNING);
-        when(runtimes.getRuntimesIds()).thenReturn(new HashSet<>(asList(running.getId(), starting.getId())));
-
-        workspaceManager.shutdown();
-
-        captureRunAsyncCallsAndRunSynchronously();
-        verify(runtimes).stop(eq(running.getId()), any());
-        verify(runtimes).stop(eq(starting.getId()), any());
-        verify(runtimes, never()).stop(eq(stopped.getId()), any());
-        verify(sharedPool).shutdown();
-    }
-
-    @Test
-    public void getsRunningWorkspacesIds() {
-        final ImmutableSet<String> ids = ImmutableSet.of("id1", "id2", "id3");
-        when(runtimes.getRuntimesIds()).thenReturn(ids);
-
-        assertEquals(workspaceManager.getRunningWorkspacesIds(), ids);
-    }
-
-    @Test
     public void getsWorkspacesAvailableForUserWithoutRuntimes() throws Exception {
         // given
         final WorkspaceConfig config = createConfig();
@@ -508,22 +480,18 @@ public class WorkspaceManagerTest {
     }
 
     private void mockRuntimeStatus(WorkspaceImpl workspace, WorkspaceStatus status) {
-        doAnswer(invocationOnMock -> {
-            WorkspaceImpl ws = (WorkspaceImpl)invocationOnMock.getArguments()[0];
-            ws.setStatus(status);
-            return null;
-        }).when(runtimes).injectStatus(workspace);
+        when(runtimes.getStatus(workspace.getId())).thenReturn(status);
     }
 
     private TestInternalRuntime mockRuntime(WorkspaceImpl workspace, WorkspaceStatus status) throws Exception {
         RuntimeIdentity identity = new RuntimeIdentityImpl(workspace.getId(),
                                                            workspace.getConfig().getDefaultEnv(),
                                                            workspace.getNamespace());
-        doAnswer(inv -> {
-            final WorkspaceImpl ws = (WorkspaceImpl)inv.getArguments()[0];
-            ws.setStatus(status);
-            return ws;
-        }).when(runtimes).injectStatus(workspace);
+//        doAnswer(inv -> {
+//            final WorkspaceImpl ws = (WorkspaceImpl)inv.getArguments()[0];
+//            ws.setStatus(status);
+//            return ws;
+//        }).when(runtimes).injectStatus(workspace);
         MachineImpl machine1 = spy(createMachine());
         MachineImpl machine2 = spy(createMachine());
         Map<String, Machine> machines = new HashMap<>();

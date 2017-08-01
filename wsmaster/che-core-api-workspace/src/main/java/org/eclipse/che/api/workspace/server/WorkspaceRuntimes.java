@@ -149,18 +149,17 @@ public class WorkspaceRuntimes {
     }
 
     /**
-     * Injects workspace status into provided workspace.
+     * Gets workspace status by its identifier.
      *
-     * @param workspace
-     *         the workspace to inject runtime into
+     * @param workspaceId
+     *         workspace identifier
      */
-    public void injectStatus(WorkspaceImpl workspace) {
-        RuntimeState state = runtimes.get(workspace.getId());
+    public WorkspaceStatus getStatus(String workspaceId) {
+        RuntimeState state = runtimes.get(workspaceId);
         if (state != null) {
-            workspace.setStatus(state.status);
-        } else {
-            workspace.setStatus(STOPPED);
+            return state.status;
         }
+        return STOPPED;
     }
 
     /**
@@ -392,7 +391,7 @@ public class WorkspaceRuntimes {
         eventService.subscribe(new CleanupRuntimeOnAbnormalRuntimeStop());
     }
 
-    private void publishWorkspaceStoppedEvent(String workspaceId, WorkspaceStatus previous,  String errorMsg) {
+    private void publishWorkspaceStoppedEvent(String workspaceId, WorkspaceStatus previous, String errorMsg) {
         eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                        .withWorkspaceId(workspaceId)
                                        .withPrevStatus(previous)
@@ -421,7 +420,7 @@ public class WorkspaceRuntimes {
      * @return true if this is the caller is the one who refused start,
      * otherwise if start is being already refused returns false
      */
-    public boolean refuseWorkspacesStart() {
+    public boolean refuseStart() {
         return isStartRefused.compareAndSet(false, true);
     }
 
