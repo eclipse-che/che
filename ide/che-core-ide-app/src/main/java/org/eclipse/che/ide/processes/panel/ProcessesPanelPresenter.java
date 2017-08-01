@@ -833,7 +833,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machineName, null, children);
         newMachineNode.setTerminalServerRunning(isServerRunning(machineName, SERVER_TERMINAL_REFERENCE));
-        newMachineNode.setSshServerRunning(isServerRunning(machineName, SERVER_SSH_REFERENCE));
+        // TODO (spi ide): for now ssh server's status isn't provided by server
+        newMachineNode.setSshServerRunning(/*isServerRunning(machineName, SERVER_SSH_REFERENCE)*/true);
         for (ProcessTreeNode child : children) {
             child.setParent(newMachineNode);
         }
