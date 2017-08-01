@@ -29,10 +29,10 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
-		<dependency>
-		  <groupId>com.google.guava</groupId>
-		  <artifactId>guava</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
@@ -141,12 +141,12 @@
                         <exclude>**/JsonUtil.java</exclude>
                         <exclude>**/DtoConversionTest.java</exclude>
                         <exclude>**/LanguageDescription.java</exclude>
-                       	<exclude>**/ServerCapabilitiesOverlay.java</exclude>
-                       	<exclude>**/DocumentFilter.java</exclude>
-                       	<exclude>**/CheLanguageClient.java</exclude>
-                       	<exclude>**/LanguageServerDescription.java</exclude>
-                       	<exclude>**/LSOperation.java</exclude>
-                       	<exclude>**/OperationUtil.java</exclude>
+                        <exclude>**/ServerCapabilitiesOverlay.java</exclude>
+                        <exclude>**/DocumentFilter.java</exclude>
+                        <exclude>**/CheLanguageClient.java</exclude>
+                        <exclude>**/LanguageServerDescription.java</exclude>
+                        <exclude>**/LSOperation.java</exclude>
+                        <exclude>**/OperationUtil.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
