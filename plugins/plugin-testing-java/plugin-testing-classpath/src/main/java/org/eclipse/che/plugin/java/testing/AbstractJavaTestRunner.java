@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.java.testing;
 
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.core.resources.IProject;
@@ -37,6 +38,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import static java.util.Collections.emptyList;
+
 /**
  * Abstract java test runner.
  * Can recognize test methods, find java project and compilation unit by path.
@@ -48,10 +51,12 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
     protected static final String JAVA_EXECUTABLE = "java";
 
     private int debugPort = -1;
-    private String workspacePath;
+    private String         workspacePath;
+    private JavaTestFinder javaTestFinder;
 
-    public AbstractJavaTestRunner(String workspacePath) {
+    public AbstractJavaTestRunner(String workspacePath, JavaTestFinder javaTestFinder) {
         this.workspacePath = workspacePath;
+        this.javaTestFinder = javaTestFinder;
     }
 
     @Override
@@ -105,8 +110,18 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
                          .withTestBodyLength(sourceRange.getLength());
     }
 
+    /**
+     * Verify if the method is test method.
+     *
+     * @param method
+     *         method declaration
+     * @param compilationUnit
+     *         compilation unit of the method
+     * @return {@code true} if the method is test method otherwise returns {@code false}
+     */
     protected abstract boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit);
 
+    /** Returns {@link IJavaProject} by path */
     protected IJavaProject getJavaProject(String projectPath) {
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectPath);
         return JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject(project);
@@ -131,7 +146,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
         return path;
     }
 
-    protected ICompilationUnit findCompilationUnitByPath(IJavaProject javaProject, String filePath) {
+    private ICompilationUnit findCompilationUnitByPath(IJavaProject javaProject, String filePath) {
         try {
             IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(false);
             IPath packageRootPath = null;
@@ -161,6 +176,44 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
         } catch (JavaModelException e) {
             throw new RuntimeException("Can't find Compilation Unit.", e);
         }
+    }
+
+    /**
+     * Creates test suite which should be ran.
+     *
+     * @param context
+     *         information about test runner
+     * @param javaProject
+     *         current project
+     * @param methodAnnotation
+     *         java annotation which describes test method in the test framework
+     * @param classAnnotation
+     *         java annotation which describes test class in the test framework
+     * @return list of full qualified names of test classes.
+     * If it is the declaration of a test method it should be: parent fqn + '#' + method name (a.b.c.ClassName#methodName)
+     */
+    protected List<String> createTestSuite(TestExecutionContext context,
+                                           IJavaProject javaProject,
+                                           String methodAnnotation,
+                                           String classAnnotation) {
+        switch (context.getContextType()) {
+            case FILE:
+                return javaTestFinder.findTestClassDeclaration(findCompilationUnitByPath(javaProject, context.getFilePath()));
+            case FOLDER:
+                return javaTestFinder.findClassesInPackage(javaProject,
+                                                           context.getFilePath(),
+                                                           methodAnnotation,
+                                                           classAnnotation);
+            case PROJECT:
+                return javaTestFinder.findClassesInProject(javaProject,
+                                                           methodAnnotation,
+                                                           classAnnotation);
+            case CURSOR_POSITION:
+                return javaTestFinder.findTestMethodDeclaration(findCompilationUnitByPath(javaProject, context.getFilePath()),
+                                                                context.getCursorOffset());
+        }
+
+        return emptyList();
     }
 
     @Override

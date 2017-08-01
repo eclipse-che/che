@@ -31,7 +31,7 @@ public class JUnitExecutionListener extends RunListener {
 
     @Override
     public void testRunStarted(Description description) throws Exception {
-        delegate.testRunStarted(description);
+        delegate.testRunStarted();
     }
 
     @Override
