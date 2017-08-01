@@ -102,7 +102,7 @@ public class ServersReadinessCheckerTest {
 
     @Test(timeOut = 1000)
     public void shouldNotCheckNotHardcodedServers() throws Exception {
-        Map<String, ServerImpl> servers = ImmutableMap.of("wsagent", new ServerImpl("http://localhost"),
+        Map<String, ServerImpl> servers = ImmutableMap.of("wsagent/http", new ServerImpl("http://localhost"),
                                                           "not-hardcoded", new ServerImpl("http://localhost"));
         checker = new ServersReadinessChecker(MACHINE_NAME, servers, factory);
 
@@ -147,8 +147,8 @@ public class ServersReadinessCheckerTest {
     }
 
     Map<String, ServerImpl> getDefaultServers() {
-        return ImmutableMap.of("wsagent", new ServerImpl("http://localhost"),
-                               "exec-agent", new ServerImpl("http://localhost"),
+        return ImmutableMap.of("wsagent/http", new ServerImpl("http://localhost"),
+                               "exec-agent/http", new ServerImpl("http://localhost"),
                                "terminal", new ServerImpl("http://localhost"));
     }
 }

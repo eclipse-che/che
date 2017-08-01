@@ -29,7 +29,7 @@ import java.util.Optional;
 
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.workspace.shared.Constants.EXEC_AGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE;
 
 /** Initializes JSON-RPC connection to the ws-agent server. */
 @Singleton
@@ -90,15 +90,9 @@ public class ExecAgentJsonRpcInitializer {
         }
 
         runtime.getMachineByName(machineName).ifPresent(machine -> {
-            Optional<ServerImpl> execAgentServer = machine.getServerByName(EXEC_AGENT_REFERENCE);
+            Optional<ServerImpl> execAgentServer = machine.getServerByName(SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE);
 
-            execAgentServer.ifPresent(server -> {
-                String execAgentServerURL = server.getUrl();
-                // TODO (spi ide): remove path when it comes with URL
-                execAgentServerURL = execAgentServerURL.replaceFirst("http", "ws") + "/connect";
-
-                initializer.initialize(machine.getName(), singletonMap("url", execAgentServerURL));
-            });
+            execAgentServer.ifPresent(server -> initializer.initialize(machine.getName(), singletonMap("url", server.getUrl())));
         });
     }
 }

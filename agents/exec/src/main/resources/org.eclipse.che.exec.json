@@ -5,9 +5,15 @@
   "dependencies": [],
   "properties": {},
   "servers": {
-    "exec-agent": {
+    "exec-agent/http": {
       "port": "4412/tcp",
-      "protocol": "http"
+      "protocol": "http",
+      "path" : "/process"
+    },
+    "exec-agent/ws": {
+      "port": "4412/tcp",
+      "protocol": "ws",
+      "path": "/connect"
     }
   }
 }

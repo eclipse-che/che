@@ -19,13 +19,12 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -93,8 +92,9 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.workspace.shared.Constants.TERMINAL_REFERENCE;
-import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_SSH_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
@@ -119,8 +119,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                                       BasicIDEInitializedEvent.Handler {
 
     public static final  String SSH_PORT              = "22";
-    public static final  String TERMINAL_AGENT        = "org.eclipse.che.terminal";
-    public static final  String SSH_AGENT             = "org.eclipse.che.ssh";
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
     final Map<String, OutputConsole>     consoles;
     final Map<OutputConsole, String>     consoleCommands;
@@ -220,7 +218,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         for (MachineImpl machine : machines) {
-            if (machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
+            if (machine.getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE).isPresent()) {
                 provideMachineNode(machine.getName(), true);
                 machines.remove(machine);
                 break;
@@ -775,59 +773,25 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         return null;
     }
 
-    /**
-     * Determines the agent is injected in the specified machine.
-     *
-     * @param machineName
-     *         machine name
-     * @param agent
-     *         agent
-     * @return <b>true</b> is the agent is injected, otherwise return <b>false</b>
-     */
-    private boolean hasAgent(String machineName, String agent) {
+    /** Checks whether the server is running in the machine. */
+    private boolean isServerRunning(String machineName, String serverName) {
         Workspace workspace = appContext.getWorkspace();
-        if (workspace == null) {
+        Runtime runtime = workspace.getRuntime();
+        if (runtime == null) {
             return false;
         }
 
-        WorkspaceConfig workspaceConfig = workspace.getConfig();
-        if (workspaceConfig == null) {
+        Machine machine = runtime.getMachines().get(machineName);
+        if (machine == null) {
             return false;
         }
 
-        Map<String, ? extends Environment> environments = workspaceConfig.getEnvironments();
-        if (environments == null) {
+        Server terminalServer = machine.getServers().get(serverName);
+        if (terminalServer == null) {
             return false;
         }
-        for (Environment environment : environments.values()) {
-            MachineConfig extendedMachine = environment.getMachines().get(machineName);
-            if (extendedMachine != null) {
-                if (extendedMachine.getInstallers() != null && extendedMachine.getInstallers().contains(agent)) {
-                    return true;
-                }
-            }
-        }
 
-        return false;
-    }
-
-    /**
-     * Checks supporting of the terminal for machine which is running out the workspace runtime.
-     *
-     * @param machineId
-     *         machine id
-     * @return <b>true</b> is the terminal url, otherwise return <b>false</b>
-     */
-    private boolean hasTerminal(String machineId) {
-        List<MachineImpl> wsMachines = getMachines();
-        for (MachineImpl machineEntity : wsMachines) {
-            if (machineId.equals(machineEntity.getName())) {
-                return false;
-            }
-        }
-
-        final MachineImpl machineEntity = machines.get(machineId);
-        return machineEntity != null && machineEntity.getServerByName(TERMINAL_REFERENCE).isPresent();
+        return terminalServer.getStatus() == ServerStatus.RUNNING;
     }
 
     /**
@@ -867,10 +831,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machineName, null, children);
-        // TODO (spi ide)
-        newMachineNode.setRunning(/*RUNNING == machine.getStatus()*/true);
-        newMachineNode.setHasTerminalAgent(hasAgent(machineName, TERMINAL_AGENT) || hasTerminal(machineName));
-        newMachineNode.setHasSSHAgent(hasAgent(machineName, SSH_AGENT));
+        newMachineNode.setTerminalServerRunning(isServerRunning(machineName, SERVER_TERMINAL_REFERENCE));
+        // TODO (spi ide): for now ssh server's status isn't provided by server
+        newMachineNode.setSshServerRunning(/*isServerRunning(machineName, SERVER_SSH_REFERENCE)*/true);
         for (ProcessTreeNode child : children) {
             child.setParent(newMachineNode);
         }
@@ -927,7 +890,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         MachineImpl devMachine = null;
         for (MachineImpl machine : wsMachines) {
-            if (machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
+            if (machine.getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE).isPresent()) {
                 devMachine = machine;
                 break;
             }
@@ -953,7 +916,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         for (MachineImpl machine : machines.values()) {
-            if (/*RUNNING.equals(machine.getStatus()) && */!wsMachines.contains(machine)) {
+            if (!wsMachines.contains(machine)) {
                 provideMachineNode(machine.getName(), true);
             }
         }
@@ -964,8 +927,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         try {
             for (ProcessTreeNode node : rootNode.getChildren()) {
                 if (MACHINE_NODE == node.getType()) {
-                    node.setRunning(false);
-
                     ArrayList<ProcessTreeNode> children = new ArrayList<>();
                     children.addAll(node.getChildren());
 
