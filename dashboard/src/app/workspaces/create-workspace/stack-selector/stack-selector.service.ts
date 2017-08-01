@@ -18,7 +18,7 @@ import {Observable} from '../../../../components/utils/observable';
  *
  * @author Oleksii Kurinnyi
  */
-export class StackSelectorSvc extends Observable {
+export class StackSelectorSvc extends Observable<any> {
   /**
    * Log service.
    */
