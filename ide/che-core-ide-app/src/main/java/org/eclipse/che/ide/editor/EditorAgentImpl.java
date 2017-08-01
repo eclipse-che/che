@@ -28,7 +28,7 @@ import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
-import org.eclipse.che.ide.api.component.StateComponent;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.constraints.Direction;
 import org.eclipse.che.ide.ui.smartTree.data.HasDataObject;

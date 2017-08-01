@@ -13,7 +13,7 @@ package org.eclipse.che.ide.statepersistance;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 
-import org.eclipse.che.ide.api.component.StateComponent;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerStateComponent;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;

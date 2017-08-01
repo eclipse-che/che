@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.component;
+package org.eclipse.che.ide.api.statepersistance;
 
 import elemental.json.JsonObject;
 

@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.ide.api.component.StateComponent;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;

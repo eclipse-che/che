@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.parts;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.component.StateComponent;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 
 import javax.validation.constraints.NotNull;

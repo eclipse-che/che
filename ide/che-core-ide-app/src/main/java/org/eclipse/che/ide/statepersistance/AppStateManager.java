@@ -28,7 +28,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.component.StateComponent;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.WindowActionEvent;
 import org.eclipse.che.ide.api.WindowActionHandler;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
