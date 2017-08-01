@@ -69,6 +69,10 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-keycloak-token-provider</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
