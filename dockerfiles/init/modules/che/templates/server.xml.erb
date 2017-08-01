@@ -55,10 +55,10 @@
               pathname="conf/tomcat-users.xml" /-->
 
               <Resource name="jdbc/che" auth="Container" type="javax.sql.DataSource"
-                          username="che"
-                          password="che"
+                          username="<%= scope.lookupvar('che::che_pg_username') -%>"
+                          password="<%= scope.lookupvar('che::che_pg_password') -%>"
                           driverClassName="org.postgresql.Driver"
-                          url="jdbc:postgresql://postgres:5432/che"
+                          url="jdbc:postgresql://<%= scope.lookupvar('che::che_pg_host') -%>:<%= scope.lookupvar('che::che_pg_port') -%>/<%= scope.lookupvar('che::che_pg_database') -%>"
                           maxTotal="20"
                           maxIdle="10"
                           maxWaitMillis="-1"
