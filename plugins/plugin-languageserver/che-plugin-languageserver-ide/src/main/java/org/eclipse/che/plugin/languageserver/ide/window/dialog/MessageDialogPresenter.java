@@ -40,22 +40,6 @@ public class MessageDialogPresenter implements MessageDialogView.ActionDelegate 
         this.view.setDelegate(this);
     }
 
-//    @Override
-//    public void cancelled() {
-//        this.view.closeDialog();
-//        if (this.cancelCallback != null) {
-//            this.cancelCallback.cancelled();
-//        }
-//    }
-//
-//    @Override
-//    public void accepted() {
-//        this.view.closeDialog();
-//        if (this.confirmCallback != null) {
-//            this.confirmCallback.accepted();
-//        }
-//    }
-
     public void show(String content, String title, List<MessageActionItem> actions, Consumer<MessageActionItem> callback) {
         this.callback = callback;
         view.setContent(content);
@@ -72,13 +56,6 @@ public class MessageDialogPresenter implements MessageDialogView.ActionDelegate 
 
     @Override
     public void onEnterClicked() {
-//        if (view.isOkButtonInFocus()) {
-//            accepted();
-//            return;
-//        }
-//
-//        if (view.isCancelButtonInFocus()) {
-//            cancelled();
-//        }
+        //ignore
     }
 }

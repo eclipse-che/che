@@ -25,17 +25,6 @@
         }
 
         .content {
-            /*
-                Not sure we need styles below, commenting them makes dialogs looking better.
-            */
-            /*width: -webkit-fill-available;*/
-            /*width: -moz-fill-available;*/
-            /*width: fill-available;*/
-            /*height: 100%; /!* in case the other values are not understood *!/*/
-            /*height: -webkit-fill-available;*/
-            /*height: -moz-fill-available;*/
-            /*height: fill-available;*/
-
             display: -webkit-flex;
             display: flex;
             -webkit-flex-flow: column;
