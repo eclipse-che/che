@@ -32,19 +32,21 @@ func main() {
 		cfg.MachineName,
 		cfg.InstallerTimeoutSec,
 		cfg.CheckServersPeriodSec,
+		cfg.LogsEndpointReconnectPeriodSec,
 	)
 	booter.AddAll(cfg.ReadInstallersConfig())
 
 	// push statuses
-	statusTun := connect(cfg.PushStatusesEndpoint)
+	statusTun := connectOrFail(cfg.PushStatusesEndpoint)
 	booter.PushStatuses(statusTun)
 
 	// push logs
 	if len(cfg.PushLogsEndpoint) != 0 {
+		connector := &wsDialConnector{cfg.PushLogsEndpoint}
 		if cfg.PushLogsEndpoint == cfg.PushStatusesEndpoint {
-			booter.PushLogs(statusTun)
+			booter.PushLogs(statusTun, connector)
 		} else {
-			booter.PushLogs(connect(cfg.PushLogsEndpoint))
+			booter.PushLogs(connectOrFail(cfg.PushLogsEndpoint), connector)
 		}
 	}
 
@@ -53,12 +55,22 @@ func main() {
 	}
 }
 
-func connect(endpoint string) *jsonrpc.Tunnel {
-	conn, err := jsonrpcws.Dial(endpoint)
+func connectOrFail(endpoint string) *jsonrpc.Tunnel {
+	tunnel, err := connect(endpoint)
 	if err != nil {
-		log.Fatalf("Couldn't connect to endpoint '%s', due to error '%s'", cfg.PushStatusesEndpoint, err)
+		log.Fatalf("Couldn't connect to endpoint '%s', due to error '%s'", endpoint, err)
 	}
-	tunnel := jsonrpc.NewManagedTunnel(conn)
-	tunnel.Go()
 	return tunnel
 }
+
+func connect(endpoint string) (*jsonrpc.Tunnel, error) {
+	conn, err := jsonrpcws.Dial(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	return jsonrpc.NewManagedTunnel(conn), nil
+}
+
+type wsDialConnector struct{ endpoint string }
+
+func (c *wsDialConnector) Connect() (*jsonrpc.Tunnel, error) { return connect(c.endpoint) }

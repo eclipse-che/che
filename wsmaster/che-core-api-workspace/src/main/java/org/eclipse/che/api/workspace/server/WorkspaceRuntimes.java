@@ -31,6 +31,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
@@ -235,15 +236,13 @@ public class WorkspaceRuntimes {
                     runtimes.replace(workspaceId, new RuntimeState(runtime, RUNNING));
                     eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                                    .withWorkspaceId(workspaceId)
-                                                   .withStatus(WorkspaceStatus.RUNNING)
+                                                   .withStatus(RUNNING)
                                                    .withPrevStatus(STARTING));
                 } catch (InfrastructureException e) {
                     runtimes.remove(workspaceId);
-                    eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                                   .withWorkspaceId(workspaceId)
-                                                   .withStatus(STOPPED)
-                                                   .withPrevStatus(STARTING)
-                                                   .withError(e.getMessage()));
+                    if (!(e instanceof RuntimeStartInterruptedException)) {
+                        publishWorkspaceStoppedEvent(workspaceId, STARTING, e.getMessage());
+                    }
                     throw new RuntimeException(e);
                 }
             }), sharedPool.getExecutor());
@@ -270,18 +269,15 @@ public class WorkspaceRuntimes {
      *         when workspace with specified identifier is not running
      * @throws ConflictException
      *         when running workspace status is different from {@link WorkspaceStatus#RUNNING}
-     * @throws InfrastructureException
-     *         when any other error occurs during workspace stopping
      * @see WorkspaceStatus#STOPPING
      */
     public void stop(String workspaceId, Map<String, String> options) throws NotFoundException,
-                                                                             InfrastructureException,
                                                                              ConflictException {
         RuntimeState state = runtimes.get(workspaceId);
         if (state == null) {
             throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
         }
-        if (!state.status.equals(RUNNING)) {
+        if (state.status != RUNNING && state.status != STARTING) {
             throw new ConflictException(
                     format("Could not stop workspace '%s' because its state is '%s'", workspaceId, state.status));
         }
@@ -293,27 +289,21 @@ public class WorkspaceRuntimes {
         }
         eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                        .withWorkspaceId(workspaceId)
-                                       .withPrevStatus(WorkspaceStatus.RUNNING)
-                                       .withStatus(WorkspaceStatus.STOPPING));
+                                       .withPrevStatus(state.status)
+                                       .withStatus(STOPPING));
 
         try {
             state.runtime.stop(options);
 
             // remove before firing an event to have consistency between state and the event
             runtimes.remove(workspaceId);
-            eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                           .withWorkspaceId(workspaceId)
-                                           .withPrevStatus(WorkspaceStatus.STOPPING)
-                                           .withStatus(STOPPED));
+            publishWorkspaceStoppedEvent(workspaceId, STOPPING, null);
         } catch (InfrastructureException e) {
             // remove before firing an event to have consistency between state and the event
             runtimes.remove(workspaceId);
-            eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
-                                           .withWorkspaceId(workspaceId)
-                                           .withPrevStatus(WorkspaceStatus.STOPPING)
-                                           .withStatus(STOPPED)
-                                           .withError("Error occurs on workspace runtime stop. Error: " +
-                                                      e.getMessage()));
+            publishWorkspaceStoppedEvent(workspaceId,
+                                         STOPPING,
+                                         "Error occurs on workspace runtime stop. Error: " + e.getMessage());
         }
     }
 
@@ -393,6 +383,14 @@ public class WorkspaceRuntimes {
         eventService.subscribe(new CleanupRuntimeOnAbnormalRuntimeStop());
     }
 
+    private void publishWorkspaceStoppedEvent(String workspaceId, WorkspaceStatus previous,  String errorMsg) {
+        eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                                       .withWorkspaceId(workspaceId)
+                                       .withPrevStatus(previous)
+                                       .withError(errorMsg)
+                                       .withStatus(STOPPED));
+    }
+
     private static EnvironmentImpl copyEnv(Workspace workspace, String envName) {
 
         requireNonNull(workspace, "Workspace should not be null.");
@@ -415,7 +413,7 @@ public class WorkspaceRuntimes {
                     eventService.publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
                                                    .withWorkspaceId(state.runtime.getContext().getIdentity()
                                                                                  .getWorkspaceId())
-                                                   .withPrevStatus(WorkspaceStatus.RUNNING)
+                                                   .withPrevStatus(RUNNING)
                                                    .withStatus(STOPPED)
                                                    .withError("Error occurs on workspace runtime stop. Error: " +
                                                               event.getError()));

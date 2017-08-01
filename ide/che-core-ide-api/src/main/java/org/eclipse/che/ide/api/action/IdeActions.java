@@ -41,6 +41,7 @@ public interface IdeActions {
     String GROUP_EDITOR_CONTEXT_MENU            = "editorContextMenu";
 
     String GROUP_PART_MENU                      = "partMenu";
+    String GROUP_TOOLBAR_CONTROLLER             = "toolbarController";
 
     String GROUP_OTHER_MENU                     = "otherMenu";
     String GROUP_LEFT_MAIN_MENU                 = "leftMainMenu";

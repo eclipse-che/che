@@ -12,7 +12,6 @@ package org.eclipse.che.ide.api.parts;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -21,38 +20,11 @@ public interface PartStackUIResources extends ClientBundle {
 
     interface PartStackCss extends CssResource {
 
-        @ClassName("ide-PartStack-Tab")
-        String idePartStackTab();
-
-        @ClassName("ide-Base-Part-Toolbar")
-        String ideBasePartToolbar();
-
-        @ClassName("ide-PartStack-Content")
-        String idePartStackContent();
-
-        @ClassName("ide-Base-Part-Title-Label")
-        String ideBasePartTitleLabel();
-
         @ClassName("ide-PartStack-Tab-Line-Warning")
         String lineWarning();
 
         @ClassName("ide-PartStack-Tab-Line-Error")
         String lineError();
-
-        @ClassName("leftTabs")
-        String leftTabs();
-
-        @ClassName("rightTabs")
-        String rightTabs();
-
-        @ClassName("bottomTabs")
-        String bottomTabs();
-
-        @ClassName("selectedRightOrLeftTab")
-        String selectedRightOrLeftTab();
-
-        @ClassName("selectedBottomTab")
-        String selectedBottomTab();
 
         String listItemPanel();
     }

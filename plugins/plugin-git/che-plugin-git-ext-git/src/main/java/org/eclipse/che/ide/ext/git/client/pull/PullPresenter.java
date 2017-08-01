@@ -14,16 +14,18 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
-import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.BranchListMode;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.ext.git.client.GitServiceClient;
+import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -134,7 +136,6 @@ public class PullPresenter implements PullView.ActionDelegate {
                });
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onPullClicked() {
         view.close();
@@ -142,7 +143,7 @@ public class PullPresenter implements PullView.ActionDelegate {
         final StatusNotification notification =
                 notificationManager.notify(constant.pullProcess(), PROGRESS, FLOAT_MODE);
 
-        service.pull(project.getLocation(), getRefs(), view.getRepositoryName())
+        service.pull(project.getLocation(), getRefs(), view.getRepositoryName(), view.getRebase())
                .then(response -> {
                    GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
                    console.print(response.getCommandOutput(), GREEN_COLOR);
@@ -160,12 +161,11 @@ public class PullPresenter implements PullView.ActionDelegate {
                    if (getErrorCode(error.getCause()) == ErrorCodes.MERGE_CONFLICT) {
                        project.synchronize();
                    }
-                   handleError(error.getCause(), PULL_COMMAND_NAME);
+                   handleError(error.getCause(), PULL_COMMAND_NAME, notification);
                });
     }
 
     /** @return list of refs to fetch */
-    @NotNull
     private String getRefs() {
         String remoteName = view.getRepositoryName();
         String localBranch = view.getLocalBranch();
@@ -183,7 +183,20 @@ public class PullPresenter implements PullView.ActionDelegate {
      * @param commandName
      *         name of the command
      */
-    private void handleError(@NotNull Throwable exception, @NotNull String commandName) {
+    private void handleError(Throwable exception, String commandName) {
+        handleError(exception, commandName, null);
+    }
+
+    /**
+     * Handler some action whether some exception happened.
+     *
+     * @param exception
+     *         exception that happened
+     * @param commandName
+     *         name of the command
+     * @param notification notification to set Error message, if not null
+     */
+    private void handleError(Throwable exception, String commandName, @Nullable Notification notification) {
         int errorCode = getErrorCode(exception);
         if (errorCode == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
             dialogFactory.createMessageDialog(constant.pullTitle(), constant.committerIdentityInfoEmpty(), null).show();
@@ -211,22 +224,23 @@ public class PullPresenter implements PullView.ActionDelegate {
         GitOutputConsole console = gitOutputConsoleFactory.create(commandName);
         console.printError(errorMessage);
         consolesPanelPresenter.addCommandOutput(console);
-        notificationManager.notify(errorMessage, FAIL, FLOAT_MODE);
+        if (notification != null) {
+            notification.setTitle(errorMessage);
+        } else {
+            notificationManager.notify(errorMessage, FAIL, FLOAT_MODE);
+        }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onCancelClicked() {
         view.close();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onRemoteBranchChanged() {
         view.selectLocalBranch(view.getRemoteBranch());
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onRemoteRepositoryChanged() {
         updateBranches(LIST_REMOTE);

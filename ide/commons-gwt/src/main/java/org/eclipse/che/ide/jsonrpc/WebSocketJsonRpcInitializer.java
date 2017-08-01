@@ -15,7 +15,12 @@ import org.eclipse.che.ide.websocket.impl.WebSocketInitializer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
+
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 
 /**
  * Web socket based json rpc initializer.
@@ -30,15 +35,27 @@ public class WebSocketJsonRpcInitializer implements JsonRpcInitializer {
     }
 
     @Override
-    public void initialize(String endpointId, Map<String, String> properties) {
-        Log.debug(getClass(), "Initializing with properties: " + properties);
-        final String url = properties.get("url");
-        webSocketInitializer.initialize(endpointId, url);
+    public void initialize(String endpointId, Map<String, String> initProperties) {
+        initialize(endpointId, initProperties, emptySet());
+    }
+
+    @Override
+    public void initialize(String endpointId, Map<String, String> initProperties, Set<Runnable> initActions) {
+        Log.debug(getClass(), "Initializing with properties: " + initProperties);
+
+        String url = initProperties.get("url");
+        webSocketInitializer.initialize(endpointId, url, initActions);
     }
 
     @Override
     public void terminate(String endpointId) {
+        terminate(endpointId, emptyMap(), emptySet());
+    }
+
+    @Override
+    public void terminate(String endpointId, Map<String, String> terminateProperties, Set<Runnable> terminateActions) {
         Log.debug(getClass(), "Terminating");
-        webSocketInitializer.terminate(endpointId);
+
+        webSocketInitializer.terminate(endpointId, terminateActions);
     }
 }

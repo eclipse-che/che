@@ -17,7 +17,9 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +39,8 @@ import java.util.function.Consumer;
 public class ServersReadinessChecker {
     // workaround to set correct paths for servers readiness checks
     // TODO replace with checks set in server config
-    private final static Map<String, String> LIVENESS_CHECKS_PATHS = ImmutableMap.of("wsagent", "/api/",
-                                                                                     "exec-agent", "/process",
+    private final static Map<String, String> LIVENESS_CHECKS_PATHS = ImmutableMap.of("wsagent/http", "/api/",
+                                                                                     "exec-agent/http", "/process",
                                                                                      "terminal", "/");
     private final String                  machineName;
     private final Map<String, ServerImpl> servers;
@@ -161,7 +163,9 @@ public class ServersReadinessChecker {
         // Create server readiness endpoint URL
         URL url;
         try {
-            url = UriBuilder.fromUri(server.getUrl())
+            // TODO: ws -> http is workaround used for terminal websocket server,
+            // should be removed after server checks added to model
+            url = UriBuilder.fromUri(server.getUrl().replaceFirst("^ws", "http"))
                             .replacePath(livenessCheckPath)
                             .build()
                             .toURL();

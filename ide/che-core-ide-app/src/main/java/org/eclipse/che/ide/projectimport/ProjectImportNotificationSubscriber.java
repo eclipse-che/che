@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
 
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_SUBSCRIBE;
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /**
  * Subscriber that register and deregister a listener for import project progress.
@@ -33,12 +33,12 @@ public class ProjectImportNotificationSubscriber {
     @Inject
     public ProjectImportNotificationSubscriber(EventBus eventBus, RequestTransmitter transmitter) {
         eventBus.addHandler(WsAgentServerRunningEvent.TYPE, e -> transmitter.newRequest()
-                                                                            .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                                                                            .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                                                                             .methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE).noParams()
                                                                             .sendAndSkipResult());
 
         eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> transmitter.newRequest()
-                                                                            .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                                                                            .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                                                                             .methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE).noParams()
                                                                             .sendAndSkipResult());
     }

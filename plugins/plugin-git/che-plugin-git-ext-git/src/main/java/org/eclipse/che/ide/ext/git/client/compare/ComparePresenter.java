@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.compare;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -22,8 +21,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitUtil;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
@@ -95,16 +94,16 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             return;
         }
 
-        final Optional<Project> project = file.getRelatedProject();
+        final Container rootProject = GitUtil.getRootProject(file);
 
-        if (!project.isPresent()) {
+        if (rootProject == null) {
             return;
         }
 
-        final Path relPath = file.getLocation().removeFirstSegments(project.get().getLocation().segmentCount());
+        final Path relPath = file.getLocation().removeFirstSegments(rootProject.getLocation().segmentCount());
 
         if (status.equals(DELETED)) {
-            service.showFileContent(project.get().getLocation(), relPath, revision)
+            service.showFileContent(rootProject.getLocation(), relPath, revision)
                    .then(content -> {
                        view.setTitle(file.getLocation().toString());
                        view.setColumnTitles(locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
@@ -114,7 +113,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else {
-            service.showFileContent(project.get().getLocation(), relPath, revision)
+            service.showFileContent(rootProject.getLocation(), relPath, revision)
                    .then(content -> {
                        showCompare(content.getContent());
                    })

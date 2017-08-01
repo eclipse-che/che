@@ -14,13 +14,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -58,6 +58,7 @@ import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundE
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -537,7 +538,8 @@ public class DockerMachineStarter {
                                    boolean isDev,
                                    String image,
                                    String networkName,
-                                   DockerContainerConfig containerConfig) throws IOException {
+                                   DockerContainerConfig containerConfig)
+            throws IOException, InternalInfrastructureException {
 
         long machineMemorySwap = memorySwapMultiplier == -1 ?
                                  -1 :
@@ -557,27 +559,25 @@ public class DockerMachineStarter {
                   .withMemory(containerConfig.getMemLimit())
                   .withNetworkMode(networkName)
                   .withLinks(toArrayIfNotNull(containerConfig.getLinks()))
-                  .withPortBindings(containerConfig.getPorts()
-                                           .stream()
-                                           .collect(toMap(Function.identity(), value -> new PortBinding[0])))
+                  .withPortBindings(convertPortBindings(containerConfig.getPorts(), machineName))
                   .withVolumesFrom(toArrayIfNotNull(containerConfig.getVolumesFrom()));
 
         ContainerConfig config = new ContainerConfig();
         config.withImage(image)
               .withExposedPorts(containerConfig.getExpose()
-                                       .stream()
-                                       .distinct()
-                                       .collect(toMap(Function.identity(), value -> emptyMap())))
+                                               .stream()
+                                               .distinct()
+                                               .collect(toMap(Function.identity(), value -> emptyMap())))
               .withHostConfig(hostConfig)
               .withCmd(toArrayIfNotNull(containerConfig.getCommand()))
               .withEntrypoint(toArrayIfNotNull(containerConfig.getEntrypoint()))
               .withLabels(containerConfig.getLabels())
               .withNetworkingConfig(networkingConfig)
               .withEnv(containerConfig.getEnvironment()
-                              .entrySet()
-                              .stream()
-                              .map(entry -> entry.getKey() + "=" + entry.getValue())
-                              .toArray(String[]::new));
+                                      .entrySet()
+                                      .stream()
+                                      .map(entry -> entry.getKey() + "=" + entry.getValue())
+                                      .toArray(String[]::new));
 
         List<String> bindMountVolumes = new ArrayList<>();
         Map<String, Volume> nonBindMountVolumes = new HashMap<>();
@@ -599,6 +599,20 @@ public class DockerMachineStarter {
         return docker.createContainer(CreateContainerParams.create(config)
                                                            .withContainerName(containerConfig.getContainerName()))
                      .getId();
+    }
+
+    private Map<String, PortBinding[]> convertPortBindings(List<String> portsSpecs, String machineName)
+            throws InternalInfrastructureException {
+        Map<String, PortBinding[]> portsBindings = Maps.newHashMapWithExpectedSize(portsSpecs.size());
+        for (String portSpec : portsSpecs) {
+            String[] portMapping = portSpec.split(":");
+            if (portMapping.length != 2) {
+                throw new InternalInfrastructureException(format("Invalid port specification '%s' found machine '%s'",
+                                                                 portsSpecs, machineName));
+            }
+            portsBindings.put(portMapping[0], new PortBinding[] {new PortBinding().withHostPort(portMapping[1])});
+        }
+        return portsBindings;
     }
 
     private void addStaticDockerConfiguration(ContainerConfig config) {
@@ -679,9 +693,9 @@ public class DockerMachineStarter {
 
     @VisibleForTesting
     void readContainerLogsInSeparateThread(String container,
-                                                   String workspaceId,
-                                                   String machineId,
-                                                   MessageProcessor<LogMessage> logsProcessor) {
+                                           String workspaceId,
+                                           String machineId,
+                                           MessageProcessor<LogMessage> logsProcessor) {
         executor.execute(() -> {
             long lastProcessedLogDate = 0;
             boolean isContainerRunning = true;

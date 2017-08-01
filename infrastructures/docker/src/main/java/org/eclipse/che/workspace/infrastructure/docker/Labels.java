@@ -41,7 +41,7 @@ public final class Labels {
     private static final String SERVER_PATH_LABEL_FMT     = LABEL_PREFIX + "server.%s.path";
 
     /** Pattern that matches server labels e.g. "org.eclipse.che.server.exec-agent.port". */
-    private static final Pattern SERVER_LABEL_PATTERN = Pattern.compile("org\\.eclipse\\.che\\.server\\.(?<ref>[\\w-]+)\\..+");
+    private static final Pattern SERVER_LABEL_PATTERN = Pattern.compile("org\\.eclipse\\.che\\.server\\.(?<ref>[\\w-/]+)\\..+");
 
     /** Creates new label serializer. */
     public static Serializer newSerializer() { return new Serializer(); }

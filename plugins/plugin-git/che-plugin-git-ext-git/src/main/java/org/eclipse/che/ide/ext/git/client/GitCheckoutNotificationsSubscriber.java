@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /** Subscribes on receiving notifications about changing the current git branch. */
 @Singleton
@@ -50,7 +50,7 @@ public class GitCheckoutNotificationsSubscriber {
 
     private void subscribe() {
         requestTransmitter.newRequest()
-                          .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                           .methodName("track:git-checkout")
                           .noParams()
                           .sendAndSkipResult();

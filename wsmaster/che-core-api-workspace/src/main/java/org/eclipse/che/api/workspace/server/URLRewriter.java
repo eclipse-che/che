@@ -11,34 +11,36 @@
 package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-
-import java.net.MalformedURLException;
-import java.net.URL;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * System specific strategy for rewriting URLs to use in rewriting Servers, Hyperlincs, etc
- * For example in a case when machines supposed to be accessible via reverse Proxy
+ * System specific strategy for rewriting URLs to use in rewriting Servers, Hyperlinks, etc
+ * For example in a case when machines supposed to be accessible via reverse Proxy.
  *
  * @author gazarenkov
  */
 public interface URLRewriter {
     /**
-     * Rewrites URL according to Strategy rules. May depend on RuntimeIdentityImpl(workspace, owner,..) and name (some id)
-     * of this particular URL
-     * @param identity RuntimeIdentityImpl (may be null)
-     * @param name symbolic name of the server (may be null)
+     * Rewrites URL according to URL rewriting strategy rules.
+     * May depend on RuntimeIdentityImpl(workspace, owner,..) and name (some id) of this particular URL
+     *
+     * @param identity RuntimeIdentityImpl
+     * @param name symbolic name of the server
      * @param url URL to rewrite
-     * @return Result
-     * @throws MalformedURLException if String -> URL conversion failed
+     * @return rewritten URL (may be unchanged)
+     * @throws InfrastructureException if URL rewriting failed
      */
-    URL rewriteURL(RuntimeIdentity identity, String name, URL url) throws MalformedURLException;
+    String rewriteURL(@Nullable RuntimeIdentity identity, @Nullable String name, String url) throws InfrastructureException;
 
     /**
-     * No rewriting, just pass internal URL back
+     * No rewriting, just pass URL back
      */
     class NoOpURLRewriter implements URLRewriter {
         @Override
-        public URL rewriteURL(RuntimeIdentity identity, String name, URL url) throws MalformedURLException {
+        public String rewriteURL(@Nullable RuntimeIdentity identity, @Nullable String name, String url)
+                throws InfrastructureException {
+
             return url;
         }
     }

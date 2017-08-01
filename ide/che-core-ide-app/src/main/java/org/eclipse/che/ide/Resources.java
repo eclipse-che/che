@@ -184,6 +184,24 @@ public interface Resources extends Window.Resources,
     @Source("part/che-logo.svg")
     SVGResource cheLogo();
 
+    @Source("panel/panel-selector-bottom.svg")
+    SVGResource panelSelectorBottom();
+
+    @Source("panel/panel-selector-full-editor.svg")
+    SVGResource panelSelectorFullEditor();
+
+    @Source("panel/panel-selector-left.svg")
+    SVGResource panelSelectorLeft();
+
+    @Source("panel/panel-selector-left-bottom.svg")
+    SVGResource panelSelectorLeftBottom();
+
+    @Source("panel/panel-selector-left-right-bottom.svg")
+    SVGResource panelSelectorLeftRightBottom();
+
+    @Source("panel/panel-selector-right.svg")
+    SVGResource panelSelectorRight();
+
     /** Interface for css resources. */
     interface CoreCss extends CssResource {
         String editorPaneMenuDelimiter();

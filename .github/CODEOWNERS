@@ -20,6 +20,9 @@ assembly/** @riuvshin @skabashnyuk
 # core
 core/** @skabashnyuk
 
+# workspace runtime infrastructure implementations
+infrastructures/** @garagatyi
+
 # plugins
 plugins/plugin*debugger/** @tolusha
 plugins/plugin-gdb/** @tolusha

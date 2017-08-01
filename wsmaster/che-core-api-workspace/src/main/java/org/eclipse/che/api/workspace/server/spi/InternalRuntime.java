@@ -19,16 +19,14 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.slf4j.Logger;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -40,14 +38,16 @@ import static org.slf4j.LoggerFactory.getLogger;
 public abstract class InternalRuntime <T extends RuntimeContext> implements Runtime {
 
     private static final Logger LOG = getLogger(InternalRuntime.class);
+
     private final T                    context;
     private final URLRewriter          urlRewriter;
-    private final List<Warning>        warnings = new ArrayList<>();
+    private final List<Warning>        warnings;
     private       WorkspaceStatus      status;
 
     public InternalRuntime(T context, URLRewriter urlRewriter, boolean running) {
         this.context = context;
-        this.urlRewriter = urlRewriter != null ? urlRewriter : new URLRewriter.NoOpURLRewriter();
+        this.urlRewriter = urlRewriter;
+        this.warnings = new CopyOnWriteArrayList<>();
         if (running) {
             status = WorkspaceStatus.RUNNING;
         }
@@ -96,12 +96,14 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
      *         when the context is already used
      * @throws InternalInfrastructureException
      *         when error that indicates system internal problem occurs
+     * @throws RuntimeStartInterruptedException
+     *         when start execution is cancelled
      * @throws InfrastructureException
      *         when any other error occurs
      */
     public void start(Map<String, String> startOptions) throws InfrastructureException {
         if (this.status != null) {
-            throw new StateException("Context already used");
+            throw new StateException("Runtime already started");
         }
         status = WorkspaceStatus.STARTING;
         internalStart(startOptions);
@@ -111,19 +113,25 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
     /**
      * Starts underlying environment in implementation specific way.
      *
-     * @param startOptions options of workspace that may used in environment start
+     * @param startOptions
+     *         options of workspace that may be used in environment start
      * @throws InternalInfrastructureException
      *         when error that indicates system internal problem occurs
+     * @throws RuntimeStartInterruptedException
+     *         when start execution is cancelled
      * @throws InfrastructureException
      *         when any other error occurs
      */
     protected abstract void internalStart(Map<String, String> startOptions) throws InfrastructureException;
 
     /**
-     * Stops Runtime
-     * Presumably can take some time so considered to launch in separate thread
+     * Stops Runtime.
+     * Presumably can take some time so considered to launch in separate thread.
      *
-     * @param stopOptions  options of workspace that may used in environment stop
+     * <p>Runtime will be stopped only if its state {@link WorkspaceStatus#RUNNING} or {@link WorkspaceStatus#STARTING}.
+     *
+     * @param stopOptions
+     *         options of workspace that may used in environment stop
      * @throws StateException
      *         when the context can't be stopped because otherwise it would be in inconsistent status
      *         (e.g. stop(interrupt) might not be allowed during start)
@@ -131,23 +139,38 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
      *         when any other error occurs
      */
     public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
-        if (this.status != WorkspaceStatus.RUNNING) {
-            throw new StateException("The environment must be running");
+        if (status != WorkspaceStatus.RUNNING && status != WorkspaceStatus.STARTING) {
+            throw new StateException("The environment must be running or starting");
         }
         status = WorkspaceStatus.STOPPING;
 
-        // TODO spi what to do in exception appears here?
         try {
             internalStop(stopOptions);
         } catch (InternalInfrastructureException e) {
-            LOG.error(format("Error occurs on stop of workspace %s. Error: " + e.getLocalizedMessage(),
-                             context.getIdentity().getWorkspaceId()), e);
+            LOG.error("Error occurs on stop of workspace {}. Error: {}",
+                      context.getIdentity().getWorkspaceId(),
+                      e.getMessage());
         } catch (InfrastructureException e) {
-            LOG.debug(e.getLocalizedMessage(), e);
+            LOG.debug(e.getMessage(), e);
         }
         status = WorkspaceStatus.STOPPED;
     }
 
+    /**
+     * Stops Runtime in an implementation specific way.
+     *
+     * <ul>
+     * <li>When runtime state is {@link WorkspaceStatus#STARTING} then process of start must be cancelled
+     * and all the resources must be released  including the cases when an exception occurs.</li>
+     * <li>When runtime state is {@link WorkspaceStatus#RUNNING} then runtime must be normally stopped
+     * and  all the resources must be released including the cases when an exception occurs.</li>
+     * </ul>
+     *
+     * @param stopOptions
+     *         workspace options that may be used on runtime stop
+     * @throws InfrastructureException
+     *         when any other error occurs
+     */
     protected abstract void internalStop(Map<String, String> stopOptions) throws InfrastructureException;
 
     /**
@@ -174,22 +197,11 @@ public abstract class InternalRuntime <T extends RuntimeContext> implements Runt
             String name = entry.getKey();
             Server incomingServer = entry.getValue();
             try {
-                URL url = new URL(incomingServer.getUrl());
-                ServerImpl server = new ServerImpl(urlRewriter.rewriteURL(identity, name, url).toString(),
+                ServerImpl server = new ServerImpl(urlRewriter.rewriteURL(identity, name, incomingServer.getUrl()),
                                                    incomingServer.getStatus());
                 outgoing.put(name, server);
-            } catch (MalformedURLException e) {
-                warnings.add(new Warning() {
-                    @Override
-                    public int getCode() {
-                        return 101;
-                    }
-
-                    @Override
-                    public String getMessage() {
-                        return "Malformed URL for " + name + " : " + e.getMessage();
-                    }
-                });
+            } catch (InfrastructureException e) {
+                warnings.add(new WarningImpl(101, "Malformed URL for " + name + " : " + e.getMessage()));
             }
         }
 

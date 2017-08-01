@@ -48,6 +48,17 @@ const (
 	DefaultMaxRequestHoldTimeout = time.Minute
 )
 
+const (
+	// The initial state of created tunnel, tunnel is not running(Go func is not called).
+	stateCreated = 0
+
+	// Go func was called on the tunnel, tunnel is running.
+	stateRunning = 1
+
+	// Tunnel is closed. Tunnel may be closed only if it was running before.
+	stateClosed = -1
+)
+
 var (
 	prevTunID uint64
 	prevReqID int64
@@ -77,6 +88,9 @@ type Tunnel struct {
 
 	// Helps to close the tunnel.
 	closer *closer
+
+	// Keeps current state of the tunnel.
+	state int32
 }
 
 // NewTunnel creates a new tunnel.
@@ -95,6 +109,7 @@ func NewTunnel(conn NativeConn, dispatcher ReqDispatcher) *Tunnel {
 		jsonOut:       make(chan interface{}),
 		reqDispatcher: dispatcher,
 		q:             q,
+		state:         stateCreated,
 	}
 	tunnel.closer = &closer{tunnel: tunnel, outClosed: make(chan bool, 1)}
 	return tunnel
@@ -102,10 +117,11 @@ func NewTunnel(conn NativeConn, dispatcher ReqDispatcher) *Tunnel {
 
 // NewManagedTunnel creates a new tunnel using given connection
 // and DefaultRouter as request dispatcher, then the tunnel is saved
-// in default registry and returned to you.
+// in default registry and Go func is called.
 func NewManagedTunnel(conn NativeConn) *Tunnel {
 	tunnel := NewTunnel(conn, DefaultRouter)
 	Save(tunnel)
+	tunnel.Go()
 	return tunnel
 }
 
@@ -165,9 +181,11 @@ func (tun *Tunnel) Conn() NativeConn { return tun.conn }
 
 // Go starts this tunnel, makes it functional.
 func (tun *Tunnel) Go() {
-	go tun.mainWriteLoop()
-	go tun.mainReadLoop()
-	go tun.q.watch()
+	if atomic.CompareAndSwapInt32(&tun.state, stateCreated, stateRunning) {
+		go tun.mainWriteLoop()
+		go tun.mainReadLoop()
+		go tun.q.watch()
+	}
 }
 
 // Notify sends notification(request without id) using given params as its body.
@@ -225,7 +243,7 @@ func (tun *Tunnel) Close() {
 
 // IsClosed returns true if this tunnel is closed and false otherwise.
 func (tun *Tunnel) IsClosed() bool {
-	return atomic.LoadInt32(&tun.closer.closed) != 0
+	return atomic.LoadInt32(&tun.state) == stateClosed
 }
 
 // SayHello sends hello notification.
@@ -414,26 +432,21 @@ type draft struct {
 }
 
 type closer struct {
-	once      sync.Once
 	tunnel    *Tunnel
 	outClosed chan bool
-	// 0 - not closed, 1 - closed
-	closed int32
 }
 
 func (closer *closer) closeOnce() {
-	closer.once.Do(func() {
-		atomic.StoreInt32(&closer.closed, 1)
-
+	if atomic.CompareAndSwapInt32(&closer.tunnel.state, stateRunning, stateClosed) {
 		close(closer.tunnel.jsonOut)
 		// wait write loop to complete
-		<- closer.outClosed
+		<-closer.outClosed
 
 		closer.tunnel.q.stopWatching()
 		if err := closer.tunnel.conn.Close(); err != nil {
 			log.Printf("Error while closing connection, %s", err.Error())
 		}
-	})
+	}
 }
 
 type rqPair struct {

@@ -35,7 +35,7 @@ public class LabelsTest {
         Map<String, String> serialized = Labels.newSerializer()
                                                .machineName("dev-machine")
                                                .runtimeId(new RuntimeIdentityImpl("workspace123", "my-env", "owner"))
-                                               .server("my-server1", new ServerConfigImpl("8000/tcp", "http", "/api/info"))
+                                               .server("my-server1/http", new ServerConfigImpl("8000/tcp", "http", "/api/info"))
                                                .server("my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect"))
                                                .labels();
         Map<String, String> expected =
@@ -44,9 +44,9 @@ public class LabelsTest {
                         .put("org.eclipse.che.workspace.id", "workspace123")
                         .put("org.eclipse.che.workspace.env", "my-env")
                         .put("org.eclipse.che.workspace.owner", "owner")
-                        .put("org.eclipse.che.server.my-server1.port", "8000/tcp")
-                        .put("org.eclipse.che.server.my-server1.protocol", "http")
-                        .put("org.eclipse.che.server.my-server1.path", "/api/info")
+                        .put("org.eclipse.che.server.my-server1/http.port", "8000/tcp")
+                        .put("org.eclipse.che.server.my-server1/http.protocol", "http")
+                        .put("org.eclipse.che.server.my-server1/http.path", "/api/info")
                         .put("org.eclipse.che.server.my-server2.port", "8080/tcp")
                         .put("org.eclipse.che.server.my-server2.protocol", "ws")
                         .put("org.eclipse.che.server.my-server2.path", "/connect")
@@ -65,9 +65,9 @@ public class LabelsTest {
                         .put("org.eclipse.che.workspace.id", "workspace123")
                         .put("org.eclipse.che.workspace.env", "my-env")
                         .put("org.eclipse.che.workspace.owner", "owner")
-                        .put("org.eclipse.che.server.my-server1.port", "8000/tcp")
-                        .put("org.eclipse.che.server.my-server1.protocol", "http")
-                        .put("org.eclipse.che.server.my-server1.path", "/api/info")
+                        .put("org.eclipse.che.server.my-server1/http.port", "8000/tcp")
+                        .put("org.eclipse.che.server.my-server1/http.protocol", "http")
+                        .put("org.eclipse.che.server.my-server1/http.path", "/api/info")
                         .put("org.eclipse.che.server.my-server2.port", "8080/tcp")
                         .put("org.eclipse.che.server.my-server2.protocol", "ws")
                         .put("org.eclipse.che.server.my-server2.path", "/connect")
@@ -83,7 +83,7 @@ public class LabelsTest {
         assertEquals(runtimeId.getOwner(), "owner", "workspace owner");
 
         Map<String, ServerConfig> servers = deserializer.servers();
-        ServerConfig server1 = servers.get("my-server1");
+        ServerConfig server1 = servers.get("my-server1/http");
         assertNotNull(server1, "first server");
         assertEquals(server1.getPort(), "8000/tcp");
         assertEquals(server1.getProtocol(), "http");

@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackView;
-import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.part.PartStackPresenterFactory;
 import org.eclipse.che.ide.part.PartStackViewFactory;
@@ -44,9 +43,6 @@ import java.util.Arrays;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.LEFT;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -119,8 +115,7 @@ public class AbstractPerspectiveTest {
         when(controllerFactory.createController(Matchers.<SplitLayoutPanel>anyObject(),
                                                 Matchers.<SimplePanel>anyObject())).thenReturn(workBenchController);
 
-        when(partStackViewFactory.create(Matchers.<TabPosition>anyObject(),
-                                         Matchers.<FlowPanel>anyObject())).thenReturn(partStackView);
+        when(partStackViewFactory.create(Matchers.<FlowPanel>anyObject())).thenReturn(partStackView);
 
         when(stackPresenterFactory.create(Matchers.<PartStackView>anyObject(),
                                           Matchers.<WorkBenchPartController>anyObject())).thenReturn(partStackPresenter);
@@ -143,9 +138,7 @@ public class AbstractPerspectiveTest {
         verify(view).getBottomPanel();
         verify(view).getRightPanel();
 
-        verify(partStackViewFactory).create(LEFT, panel);
-        verify(partStackViewFactory).create(BELOW, panel);
-        verify(partStackViewFactory).create(RIGHT, panel);
+        verify(partStackViewFactory, times(3)).create(panel);
 
         verify(view, times(3)).getSplitPanel();
         verify(view).getNavigationPanel();
@@ -190,7 +183,7 @@ public class AbstractPerspectiveTest {
 
         perspective.hidePart(partPresenter);
 
-        verify(partStackPresenter).minimize();
+        verify(partStackPresenter).hide();
     }
 
     @Test
@@ -201,10 +194,10 @@ public class AbstractPerspectiveTest {
     }
 
     @Test
-    public void partShouldBeCollapsed() {
+    public void partShouldBeMinimized() {
         perspective.onMaximize(extraPartStackPresenter);
 
-        verify(partStackPresenter, times(3)).collapse();
+        verify(partStackPresenter, times(3)).minimize();
         verify(extraPartStackPresenter).maximize();
     }
 

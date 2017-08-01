@@ -56,7 +56,7 @@ import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
@@ -93,8 +93,9 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.workspace.shared.Constants.TERMINAL_REFERENCE;
-import static org.eclipse.che.api.workspace.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_SSH_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
@@ -107,7 +108,7 @@ import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.TERM
 public class ProcessesPanelPresenter extends BasePresenter implements ProcessesPanelView.ActionDelegate,
                                                                       ProcessFinishedEvent.Handler,
                                                                       OutputConsole.ActionDelegate,
-                                                                      WorkspaceStartedEvent.Handler,
+                                                                      WorkspaceRunningEvent.Handler,
                                                                       WorkspaceStoppedEvent.Handler,
                                                                       MachineStartingEvent.Handler,
                                                                       MachineRunningEvent.Handler,
@@ -189,7 +190,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         view.setDelegate(this);
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStartingEvent.TYPE, this);
         eventBus.addHandler(MachineRunningEvent.TYPE, this);
@@ -218,7 +219,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         for (MachineImpl machine : machines) {
-            if (machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
+            if (machine.getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE).isPresent()) {
                 provideMachineNode(machine.getName(), true);
                 machines.remove(machine);
                 break;
@@ -831,8 +832,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machineName, null, children);
-        newMachineNode.setTerminalServerRunning(isServerRunning(machineName, TERMINAL_REFERENCE));
-        newMachineNode.setSshServerRunning(isServerRunning(machineName, "ssh"));
+        newMachineNode.setTerminalServerRunning(isServerRunning(machineName, SERVER_TERMINAL_REFERENCE));
+        newMachineNode.setSshServerRunning(isServerRunning(machineName, SERVER_SSH_REFERENCE));
         for (ProcessTreeNode child : children) {
             child.setParent(newMachineNode);
         }
@@ -881,7 +882,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     @Override
-    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+    public void onWorkspaceRunning(WorkspaceRunningEvent event) {
         List<MachineImpl> wsMachines = getMachines();
         if (wsMachines.isEmpty()) {
             return;
@@ -889,7 +890,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         MachineImpl devMachine = null;
         for (MachineImpl machine : wsMachines) {
-            if (machine.getServerByName(WSAGENT_REFERENCE).isPresent()) {
+            if (machine.getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE).isPresent()) {
                 devMachine = machine;
                 break;
             }

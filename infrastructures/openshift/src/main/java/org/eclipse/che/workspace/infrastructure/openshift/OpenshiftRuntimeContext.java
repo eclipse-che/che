@@ -55,6 +55,11 @@ public class OpenshiftRuntimeContext extends RuntimeContext {
         this.websocketEndpointBase = websocketEndpointBase;
     }
 
+    /** Returns openshift environment which based on normalized context environment configuration. */
+    public OpenshiftEnvironment getOpenshiftEnvironment() {
+        return openshiftEnvironment;
+    }
+
     @Override
     public URI getOutputChannel() throws InfrastructureException {
         try {
@@ -69,6 +74,6 @@ public class OpenshiftRuntimeContext extends RuntimeContext {
 
     @Override
     public InternalRuntime getRuntime() {
-        return runtimeFactory.create(environment, openshiftEnvironment, identity, this);
+        return runtimeFactory.create(this);
     }
 }

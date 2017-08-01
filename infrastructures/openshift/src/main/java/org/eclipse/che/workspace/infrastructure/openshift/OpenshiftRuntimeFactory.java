@@ -20,8 +20,5 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenshiftE
  * @author Sergii Leshchenko
  */
 public interface OpenshiftRuntimeFactory {
-    OpenshiftInternalRuntime create(@Assisted Environment environment,
-                                    @Assisted OpenshiftEnvironment openshiftEnvironment,
-                                    @Assisted RuntimeIdentity identity,
-                                    @Assisted OpenshiftRuntimeContext context);
+    OpenshiftInternalRuntime create(@Assisted OpenshiftRuntimeContext context);
 }

@@ -20,7 +20,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.monitoring.MachineMonitors;
 import org.eclipse.che.ide.terminal.AddTerminalClickHandler;
@@ -45,7 +44,6 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
 public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy, HasAddTerminalClickHandler, HasPreviewSshClickHandler {
     private final MachineResources         resources;
     private final CoreLocalizationConstant locale;
-    private final AppContext               appContext;
     private final MachineMonitors          machineMonitors;
 
     private AddTerminalClickHandler addTerminalClickHandler;
@@ -54,11 +52,9 @@ public class MachineNodeRenderStrategy implements ProcessTreeNodeRenderStrategy,
     @Inject
     public MachineNodeRenderStrategy(MachineResources resources,
                                      CoreLocalizationConstant locale,
-                                     AppContext appContext,
                                      MachineMonitors machineMonitors) {
         this.resources = resources;
         this.locale = locale;
-        this.appContext = appContext;
         this.machineMonitors = machineMonitors;
     }
 

@@ -13,28 +13,17 @@ package org.eclipse.che.ide.api.workspace.event;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.ide.api.app.AppContext;
-
 /** Fired when the current workspace goes into a stopped state. */
 public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedEvent.Handler> {
 
     public static final Type<WorkspaceStoppedEvent.Handler> TYPE = new Type<>();
 
-    private final Workspace workspace;
-    private final boolean   error;
-    private final String    errorMessage;
+    private final boolean error;
+    private final String  errorMessage;
 
-    public WorkspaceStoppedEvent(Workspace workspace, boolean error, String errorMessage) {
-        this.workspace = workspace;
+    public WorkspaceStoppedEvent(boolean error, String errorMessage) {
         this.error = error;
         this.errorMessage = errorMessage;
-    }
-
-    /** @deprecated use {@link AppContext#getWorkspace()} */
-    @Deprecated
-    public Workspace getWorkspace() {
-        return workspace;
     }
 
     public boolean isError() {

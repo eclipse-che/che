@@ -44,6 +44,9 @@ var (
 
 	// CheckServersPeriodSec how much time(seconds) is between servers checks for one installer.
 	CheckServersPeriodSec int
+
+	// LogsEndpointReconnectPeriodSec how much time(seconds) is between logs endpoint reconnect attempts.
+	LogsEndpointReconnectPeriodSec int
 )
 
 func init() {
@@ -95,8 +98,16 @@ func init() {
 		`Time(in seconds) between servers availability checks.
 	Once servers for one installer available - checks stopped`,
 	)
+	flag.IntVar(
+		&LogsEndpointReconnectPeriodSec,
+		"logs-endpoint-reconnect-period",
+		10,
+		`Time(in seconds) between attempts to reconnect to push-logs-endpoint.
+	Bootstrapper tries to reconnect to push-logs-endpoint when previously established connection lost`,
+	)
 }
 
+// Parse parses configuration.
 func Parse() {
 	flag.Parse()
 
@@ -140,7 +151,7 @@ func Parse() {
 func Print() {
 	log.Print("Bootstrapper configuration")
 	log.Printf("  Push endpoint: %s", PushStatusesEndpoint)
-	log.Printf("  Push logs Endpoint: %s", PushLogsEndpoint)
+	log.Printf("  Push logs endpoint: %s", PushLogsEndpoint)
 	log.Print("  Runtime ID:")
 	log.Printf("    Workspace: %s", RuntimeID.Workspace)
 	log.Printf("    Environment: %s", RuntimeID.Environment)
@@ -148,6 +159,7 @@ func Print() {
 	log.Printf("  Machine name: %s", MachineName)
 	log.Printf("  Installer timeout: %dseconds", InstallerTimeoutSec)
 	log.Printf("  Check servers period: %dseconds", CheckServersPeriodSec)
+	log.Printf("  Push logs endpoint reconnect period: %dseconds", LogsEndpointReconnectPeriodSec)
 }
 
 // ReadInstallersConfig reads content of file by path cfg.FilePath,

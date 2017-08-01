@@ -27,7 +27,7 @@ import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperation
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.START;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.STOP;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
-import static org.eclipse.che.ide.api.workspace.Constants.WORKSPACE_AGENT_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /**
  * @author Roman Nikitenko
@@ -81,7 +81,7 @@ public class ClientServerEventServiceImpl implements ClientServerEventService {
                                                        .withOldPath(oldPath);
         return promises.create((AsyncCallback<Void> callback) -> {
             JsonRpcPromise<Void> jsonRpcPromise = requestTransmitter.newRequest()
-                                                                    .endpointId(WORKSPACE_AGENT_ENDPOINT_ID)
+                                                                    .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                                                                     .methodName(OUTCOMING_METHOD)
                                                                     .paramsAsDto(dto)
                                                                     .sendAndReceiveResultAsEmpty();

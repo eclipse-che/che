@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
@@ -23,7 +23,8 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 // TODO rename to not interfere with main class
 public interface InfrastructureProvisioner {
     /**
-     * Modifies environment config and internal environment representation with everything needed for infrastructure of workspace.
+     * Modifies environment config and internal environment representation
+     * with everything needed for infrastructure of workspace.
      *
      * @param envConfig
      *         configuration of environment
@@ -32,7 +33,7 @@ public interface InfrastructureProvisioner {
      * @throws InfrastructureException
      *         if any error occurs
      */
-    void provision(Environment envConfig,
+    void provision(EnvironmentImpl envConfig,
                    DockerEnvironment internalEnv,
                    RuntimeIdentity identity) throws InfrastructureException;
 }
