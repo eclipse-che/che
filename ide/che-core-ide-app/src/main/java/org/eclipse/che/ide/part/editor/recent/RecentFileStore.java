@@ -17,7 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.events.FileEvent;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
@@ -31,7 +31,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
+import static org.eclipse.che.ide.api.editor.events.FileEvent.FileOperation.OPEN;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 
 /**

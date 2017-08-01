@@ -15,12 +15,12 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.ide.api.machine.events.WsAgentServerRunningEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentServerStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_SUBSCRIBE;
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE;
-import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /**
  * Subscriber that register and deregister a listener for import project progress.

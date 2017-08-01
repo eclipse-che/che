@@ -23,7 +23,7 @@ import static com.google.gwt.user.client.Window.Location.getProtocol;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.ide.api.workspace.Constants.WS_MASTER_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_MASTER_JSON_RPC_ENDPOINT_ID;
 
 /** Initializes JSON-RPC connection to the workspace master. */
 @Singleton

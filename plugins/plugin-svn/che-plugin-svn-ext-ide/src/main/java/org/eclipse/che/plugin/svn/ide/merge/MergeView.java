@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.svn.ide.merge;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.api.mvp.View;
 
 /**

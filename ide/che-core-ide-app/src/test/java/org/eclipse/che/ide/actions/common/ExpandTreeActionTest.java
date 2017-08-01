@@ -14,7 +14,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
-import org.eclipse.che.ide.api.data.tree.TreeExpander;
+import org.eclipse.che.ide.ui.smartTree.data.TreeExpander;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

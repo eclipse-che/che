@@ -19,7 +19,7 @@ import org.eclipse.che.api.testing.shared.common.TestResultStatus;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultTraceDto;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.view.navigation.factory.TestResultNodeFactory;

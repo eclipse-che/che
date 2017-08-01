@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -30,10 +29,9 @@ import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
-import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -374,15 +372,6 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
         eventBus.addHandler(EditorOpenedEvent.TYPE, event -> onOpenEditor(event.getFile().getLocation().toString(), event.getEditor()));
         eventBus.addHandler(FileContentUpdateEvent.TYPE, this::onFileContentUpdate);
-        eventBus.addHandler(DeleteProjectEvent.TYPE, event -> {
-            if (breakpoints.isEmpty()) {
-                return;
-            }
-
-            ProjectConfigDto config = event.getProjectConfig();
-            String path = config.getPath() + "/";
-            deleteBreakpoints(getBreakpointPaths(path));
-        });
 
         eventBus.addHandler(ResourceChangedEvent.getType(), event -> {
             if (event.getDelta().getKind() == ResourceDelta.REMOVED) {

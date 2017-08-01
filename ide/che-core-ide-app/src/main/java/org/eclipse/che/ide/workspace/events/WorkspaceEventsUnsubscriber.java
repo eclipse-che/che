@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.SubscriptionManagerClient;
+import org.eclipse.che.ide.api.jsonrpc.SubscriptionManagerClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 
 import java.util.Map;
@@ -26,7 +26,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
-import static org.eclipse.che.ide.api.workspace.Constants.WS_MASTER_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_MASTER_JSON_RPC_ENDPOINT_ID;
 
 /** Unsubscribes from receiving all JSON-RPC notifications from workspace master when workspace is stopped. */
 @Singleton

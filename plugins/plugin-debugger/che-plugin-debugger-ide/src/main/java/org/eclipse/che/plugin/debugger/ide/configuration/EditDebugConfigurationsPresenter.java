@@ -20,10 +20,10 @@ import org.eclipse.che.ide.api.debug.DebugConfigurationPage.DirtyStateListener;
 import org.eclipse.che.ide.api.debug.DebugConfigurationType;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.ChoiceDialog;
-import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialog;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
 
 import java.util.ArrayList;
 import java.util.Collections;

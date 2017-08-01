@@ -15,7 +15,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.events.MachineFailedEvent;
+import org.eclipse.che.ide.api.workspace.event.MachineFailedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 
 import static com.google.common.base.Strings.isNullOrEmpty;

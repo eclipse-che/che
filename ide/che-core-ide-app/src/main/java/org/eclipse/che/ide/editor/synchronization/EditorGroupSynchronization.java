@@ -12,7 +12,7 @@ package org.eclipse.che.ide.editor.synchronization;
 
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;

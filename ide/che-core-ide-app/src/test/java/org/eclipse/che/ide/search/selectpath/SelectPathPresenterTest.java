@@ -13,8 +13,8 @@ package org.eclipse.che.ide.search.selectpath;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.search.FullTextSearchView;

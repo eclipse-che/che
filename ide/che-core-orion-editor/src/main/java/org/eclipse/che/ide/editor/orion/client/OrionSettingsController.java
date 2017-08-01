@@ -14,8 +14,8 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent;
-import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent.EditorSettingsChangedHandler;
+import org.eclipse.che.ide.api.editor.events.EditorSettingsChangedEvent;
+import org.eclipse.che.ide.api.editor.events.EditorSettingsChangedEvent.EditorSettingsChangedHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorViewOverlay;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesManager;
 import org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties;

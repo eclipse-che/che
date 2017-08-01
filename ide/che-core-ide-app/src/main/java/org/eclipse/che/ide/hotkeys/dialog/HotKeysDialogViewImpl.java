@@ -31,7 +31,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
+import org.eclipse.che.ide.api.editor.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.keybinding.Scheme;
 import org.eclipse.che.ide.hotkeys.HotKeyResources;
 import org.eclipse.che.ide.ui.list.CategoriesList;

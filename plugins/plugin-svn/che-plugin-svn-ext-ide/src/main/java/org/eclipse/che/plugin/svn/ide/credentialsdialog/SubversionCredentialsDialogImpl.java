@@ -15,8 +15,8 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.user.AskCredentialsDialog;
-import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.ui.dialogs.askcredentials.AskCredentialsDialog;
+import org.eclipse.che.ide.ui.dialogs.askcredentials.Credentials;
 import org.eclipse.che.ide.user.AskCredentialsDialogImpl;
 
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;

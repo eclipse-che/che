@@ -23,7 +23,7 @@ import org.eclipse.lsp4j.ServerCapabilities;
 
 import java.util.concurrent.TimeoutException;
 
-import static org.eclipse.che.ide.api.workspace.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 @Singleton
 public class LanguageServerRegistryJsonRpcClient {

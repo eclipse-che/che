@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.java.plain.client.wizard.selector;
 
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 import java.util.List;
 

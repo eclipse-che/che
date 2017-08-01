@@ -15,10 +15,10 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.events.ExecAgentServerRunningEvent;
-import org.eclipse.che.ide.api.machine.execagent.dto.event.DtoWithPid;
-import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
+import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.workspace.event.ExecAgentServerRunningEvent;
+import org.eclipse.che.ide.api.command.exec.dto.event.DtoWithPid;
+import org.eclipse.che.ide.processes.panel.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;

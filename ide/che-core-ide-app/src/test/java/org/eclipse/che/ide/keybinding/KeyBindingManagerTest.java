@@ -13,6 +13,7 @@ package org.eclipse.che.ide.keybinding;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.ide.api.keybinding.Scheme;
+import org.eclipse.che.ide.api.keybinding.SchemeImpl;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import org.junit.Before;
 import org.junit.Test;

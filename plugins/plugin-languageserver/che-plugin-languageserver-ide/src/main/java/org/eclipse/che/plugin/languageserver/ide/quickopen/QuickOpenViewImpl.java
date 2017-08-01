@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
+import org.eclipse.che.ide.api.editor.codeassist.AutoCompleteResources;
 import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;

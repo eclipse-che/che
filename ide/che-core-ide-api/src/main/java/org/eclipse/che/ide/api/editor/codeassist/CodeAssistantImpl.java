@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.codeassist;
 
-import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;

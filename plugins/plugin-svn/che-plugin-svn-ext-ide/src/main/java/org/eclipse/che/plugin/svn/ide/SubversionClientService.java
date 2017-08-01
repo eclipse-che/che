@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.svn.ide;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.ui.dialogs.askcredentials.Credentials;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;

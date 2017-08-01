@@ -12,7 +12,7 @@ package org.eclipse.che.ide.resources.selector;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.resource.Path;
 
