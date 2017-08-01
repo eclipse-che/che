@@ -23,6 +23,16 @@ services:
 <% else -%>
       - '<%= ENV["CHE_ENV_FILE"] %>'
 <% end -%>
+<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
+    links:
+      - postgres:postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - default
+      - che-network
+<% end -%>
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
       - '<%= scope.lookupvar('che::che_instance') -%>/data:/data'
@@ -35,15 +45,6 @@ services:
 <% if scope.lookupvar('che::che_user') != 'root' -%>
       - '/etc/group:/etc/group:ro'
       - '/etc/passwd:/etc/passwd:ro'
-<% end -%>
-<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
-    depends_on:
-      postgres:
-        condition: service_healthy
-    links:
-      - postgres:postgres
-    networks:
-      - che-network
 <% end -%>
     ports:
 <% if @che_jmx_enabled == 'true' -%>
