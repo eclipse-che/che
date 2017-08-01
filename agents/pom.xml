@@ -38,4 +38,12 @@
         <module>ls-typescript</module>
         <module>ls-csharp</module>
     </modules>
+    <profiles>
+        <profile>
+            <id>test-ls</id>
+            <modules>
+                <module>test-ls</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

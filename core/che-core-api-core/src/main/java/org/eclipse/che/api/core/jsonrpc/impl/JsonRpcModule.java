@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -23,6 +25,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcQualifier;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcUnmarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.TimeoutActionRunner;
+import org.eclipse.che.dto.server.DtoFactory;
 
 import javax.inject.Singleton;
 
@@ -45,5 +48,11 @@ public class JsonRpcModule extends AbstractModule {
     @Singleton
     public JsonParser jsonParser() {
         return new JsonParser();
+    }
+
+    @Provides
+    @Singleton
+    protected Gson gson() {
+        return DtoFactory.getInstance().getGson();
     }
 }

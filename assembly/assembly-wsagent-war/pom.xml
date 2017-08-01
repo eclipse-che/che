@@ -162,4 +162,15 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>test-ls</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.che.plugin</groupId>
+                    <artifactId>che-plugin-test-ls-server</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

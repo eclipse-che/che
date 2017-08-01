@@ -25,4 +25,12 @@
     <modules>
         <module>che-plugin-languageserver-ide</module>
     </modules>
+    <profiles>
+        <profile>
+            <id>test-ls</id>
+            <modules>
+                <module>che-plugin-test-ls</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

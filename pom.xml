@@ -562,6 +562,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>che-test-ls</artifactId>
+                <version>${che.lib.version}</version>
+                <type>tar.gz</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-tomcat8-slf4j-logback</artifactId>
                 <version>${che.lib.version}</version>
                 <type>zip</type>
@@ -1190,6 +1196,23 @@
                 <mdep.analyze.skip>true</mdep.analyze.skip>
                 <skipTests>true</skipTests>
             </properties>
+        </profile>
+        <profile>
+            <id>test-ls</id>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.che</groupId>
+                        <artifactId>test-ls-agent</artifactId>
+                        <version>${che.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.eclipse.che.plugin</groupId>
+                        <artifactId>che-plugin-test-ls-server</artifactId>
+                        <version>${che.version}</version>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
         </profile>
     </profiles>
 </project>

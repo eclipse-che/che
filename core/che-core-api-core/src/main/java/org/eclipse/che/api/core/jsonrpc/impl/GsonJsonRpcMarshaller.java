@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.jsonrpc.impl;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -33,10 +34,12 @@ import static org.eclipse.che.api.core.jsonrpc.commons.JsonRpcUtils.cast;
 
 public class GsonJsonRpcMarshaller implements JsonRpcMarshaller {
     private final JsonParser jsonParser;
+    private final Gson gson;
 
     @Inject
-    public GsonJsonRpcMarshaller(JsonParser jsonParser) {
+    public GsonJsonRpcMarshaller(JsonParser jsonParser, Gson gson) {
         this.jsonParser = jsonParser;
+        this.gson = gson;
     }
 
     @Override
@@ -164,7 +167,7 @@ public class GsonJsonRpcMarshaller implements JsonRpcMarshaller {
         try {
             return jsonParser.parse(DtoFactory.getInstance().toJson(param));
         } catch (IllegalArgumentException e){
-            return jsonParser.parse(param.toString());
+            return gson.toJsonTree(param);
         }
     }
 }

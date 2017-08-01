@@ -91,18 +91,24 @@ public class ShowMessageJsonRpcTransmitter {
         if (showMessageRequestEndpointIds.isEmpty()) {
             result.complete(null);
         }
-        if (showMessageRequestEndpointIds.size() > 1) {
-            result.completeExceptionally(new Exception("Can't send show message request, too meany clients"));
-        } else {
-            String endpoint = showMessageRequestEndpointIds.iterator().next();
+//        if (showMessageRequestEndpointIds.size() > 1) {
+//            result.completeExceptionally(new Exception("Can't send show message request, too meany clients"));
+//        } else {
+        for (String endpointId : endpointIds) {
             requestTransmitter.newRequest()
-                              .endpointId(endpoint)
+                              .endpointId(endpointId)
                               .methodName("window/showMessageRequest")
                               .paramsAsDto(requestParams)
                               .sendAndReceiveResultAsDto(MessageActionItem.class)
-                              .onSuccess(result::complete)
+                              .onSuccess(actionItem -> {
+                                  if(!result.isDone()){
+                                      result.complete(actionItem);
+                                  }
+                              })
                               .onFailure(jsonRpcError -> result.completeExceptionally(new Exception(jsonRpcError.getMessage())));
         }
+
+//        }
 
         return result;
     }
