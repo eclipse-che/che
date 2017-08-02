@@ -20,6 +20,6 @@
     </ui:style>
     <g:FlowPanel styleName="{style.main}">
         <g:CheckBox ui:field="showArtifactId" text="{locale.mavenPreferencesShowArtifactIdCheckboxText}"
-                    debugId="window-preferences--plugins-maven-showArtifactId"/>
+                    debugId="window-preferences-plugins-maven-showArtifactId"/>
     </g:FlowPanel>
 </ui:UiBinder>
