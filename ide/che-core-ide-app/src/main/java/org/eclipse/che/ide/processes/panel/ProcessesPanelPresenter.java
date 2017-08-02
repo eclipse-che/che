@@ -36,14 +36,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
-import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.workspace.event.ExecAgentServerRunningEvent;
-import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
-import org.eclipse.che.ide.api.workspace.event.MachineStartingEvent;
 import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
-import org.eclipse.che.ide.api.workspace.event.TerminalAgentServerRunningEvent;
 import org.eclipse.che.ide.api.command.exec.dto.GetProcessLogsResponseDto;
 import org.eclipse.che.ide.api.command.exec.dto.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
@@ -55,10 +49,15 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
+import org.eclipse.che.ide.api.workspace.event.ExecAgentServerRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.MachineStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.TerminalAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.command.toolbar.processes.ActivateProcessOutputEvent;
@@ -74,6 +73,8 @@ import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenu;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenuFactory;
 import org.eclipse.che.ide.terminal.TerminalFactory;
 import org.eclipse.che.ide.terminal.TerminalPresenter;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 import org.eclipse.che.ide.ui.loaders.DownloadWorkspaceOutputEvent;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.util.loging.Log;
@@ -92,6 +93,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_SSH_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -432,17 +434,25 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     @Override
     public void onPreviewSsh(String machineId) {
         ProcessTreeNode machineTreeNode = findTreeNodeById(machineId);
-        if (machineTreeNode == null) {
+        if (machineTreeNode == null || machineTreeNode.getType() != MACHINE_NODE) {
             return;
         }
 
-        MachineImpl machine = (MachineImpl)machineTreeNode.getData();
+        String machineName = (String)machineTreeNode.getData();
+        RuntimeImpl runtime = appContext.getWorkspace().getRuntime();
+        if (runtime == null) {
+            return;
+        }
+
+        Optional<MachineImpl> machine = runtime.getMachineByName(machineName);
+        if (!machine.isPresent()) {
+            return;
+        }
 
         final OutputConsole defaultConsole = commandConsoleFactory.create("SSH");
         addCommandOutput(machineId, defaultConsole);
 
-        final String machineName = machine.getName();
-        String sshServiceAddress = getSshServerAddress(machine);
+        String sshServiceAddress = getSshServerAddress(machine.get());
         final String machineHost;
         final String sshPort;
         if (sshServiceAddress != null) {
@@ -456,7 +466,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         // user
         final String userName;
-        String user = machine.getProperties().get("config.user");
+        String user = machine.get().getProperties().get("config.user");
         if (isNullOrEmpty(user)) {
             userName = "root";
         } else {
@@ -526,10 +536,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      *         machine to retrieve address
      * @return ssh service address in format host:port
      */
-    private String getSshServerAddress(Machine machine) {
-        Map<String, ? extends Server> servers = machine.getServers();
-        final Server sshServer = servers.get(SSH_PORT + "/tcp");
-        return sshServer != null ? sshServer.getUrl() : null;
+    private String getSshServerAddress(MachineImpl machine) {
+        Optional<ServerImpl> server = machine.getServerByName(SERVER_SSH_REFERENCE);
+        if (server.isPresent()) {
+            return server.get().getUrl();
+        }
+
+        return null;
     }
 
     public void addCommandOutput(OutputConsole outputConsole) {
