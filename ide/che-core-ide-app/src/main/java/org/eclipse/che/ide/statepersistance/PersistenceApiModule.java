@@ -12,6 +12,7 @@ package org.eclipse.che.ide.statepersistance;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
+import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
 import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
@@ -33,9 +34,9 @@ public class PersistenceApiModule extends AbstractGinModule {
                     .addBinding("ZZ Restore Workspace State")
                     .to(WorkspaceStateRestorer.class);
 
-        GinMapBinder<String, StateComponent> stateComponents = GinMapBinder.newMapBinder(binder(), String.class, StateComponent.class);
-        stateComponents.addBinding("workspace").to(WorkspacePresenter.class);
-        stateComponents.addBinding("editor").to(EditorAgentImpl.class);
-        stateComponents.addBinding("projectExplorer").to(ProjectExplorerStateComponent.class);
+        GinMultibinder<StateComponent> stateComponents = GinMultibinder.newSetBinder(binder(), StateComponent.class);
+        stateComponents.addBinding().to(WorkspacePresenter.class);
+        stateComponents.addBinding().to(EditorAgentImpl.class);
+        stateComponents.addBinding().to(ProjectExplorerStateComponent.class);
     }
 }

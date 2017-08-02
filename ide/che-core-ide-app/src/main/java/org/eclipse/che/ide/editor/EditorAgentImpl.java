@@ -462,31 +462,32 @@ public class EditorAgentImpl implements EditorAgent,
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadState(@NotNull final JsonObject state) {
+    public Promise<Void> loadState(@NotNull final JsonObject state) {
         if (state.hasKey("FILES")) {
             JsonObject files = state.getObject("FILES");
             EditorPartStack partStack = editorMultiPartStack.createRootPartStack();
             final Map<EditorPartPresenter, EditorPartStack> activeEditors = new HashMap<>();
             List<Promise<Void>> restore = restore(files, partStack, activeEditors);
             Promise<ArrayOf<?>> promise = promiseProvider.all2(restore.toArray(new Promise[restore.size()]));
-            promise.then(new Operation() {
-                @Override
-                public void apply(Object arg) throws OperationException {
-                    String activeFile = "";
-                    if (state.hasKey("ACTIVE_EDITOR")) {
-                        activeFile = state.getString("ACTIVE_EDITOR");
-                    }
-                    EditorPartPresenter activeEditorPart = null;
-                    for (Map.Entry<EditorPartPresenter, EditorPartStack> entry : activeEditors.entrySet()) {
-                        entry.getValue().setActivePart(entry.getKey());
-                        if (activeFile.equals(entry.getKey().getEditorInput().getFile().getLocation().toString())) {
-                            activeEditorPart = entry.getKey();
-                        }
-                    }
-                    workspaceAgent.setActivePart(activeEditorPart);
+            promise.then((Operation)ignored -> {
+                String activeFile = "";
+                if (state.hasKey("ACTIVE_EDITOR")) {
+                    activeFile = state.getString("ACTIVE_EDITOR");
                 }
+                EditorPartPresenter activeEditorPart = null;
+                for (Map.Entry<EditorPartPresenter, EditorPartStack> entry : activeEditors.entrySet()) {
+                    entry.getValue().setActivePart(entry.getKey());
+                    if (activeFile.equals(entry.getKey().getEditorInput().getFile().getLocation().toString())) {
+                        activeEditorPart = entry.getKey();
+                    }
+                }
+                workspaceAgent.setActivePart(activeEditorPart);
             });
+
+            return promise.thenPromise(ignored -> promiseProvider.resolve(null));
         }
+
+        return promiseProvider.resolve(null);
     }
 
     private List<Promise<Void>> restore(JsonObject files, EditorPartStack editorPartStack,
@@ -688,5 +689,15 @@ public class EditorAgentImpl implements EditorAgent,
                 ((TextEditor)editor).setTopLine(topLine);
             }
         }
+    }
+
+    @Override
+    public int getPriority() {
+        return MIN_PRIORITY;
+    }
+
+    @Override
+    public String getId() {
+        return "editor";
     }
 }
