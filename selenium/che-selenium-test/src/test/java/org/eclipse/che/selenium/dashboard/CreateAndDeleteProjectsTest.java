@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -27,9 +28,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,8 +42,6 @@ public class CreateAndDeleteProjectsTest {
     private final        String                    WORKSPACE            = NameGenerator.generate("CreateAndDeletePrj", 2);
     private static final DashboardProject.Template PROJECT_TEMPLATE_ONE = DashboardProject.Template.WEB_JAVA_SPRING;
     private static final DashboardProject.Template PROJECT_TEMPLATE_TWO = DashboardProject.Template.CONSOLE_JAVA_SIMPLE;
-
-    private static final Logger LOG = LoggerFactory.getLogger(CreateAndDeleteProjectsTest.class);
 
     @Inject
     private Ide                        ide;
@@ -92,6 +88,7 @@ public class CreateAndDeleteProjectsTest {
         createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
         createWorkspace.typeWorkspaceName(WORKSPACE);
 
+        projectSourcePage.clickAddOrImportProjectButton();
 
         projectSourcePage.selectSample(PROJECT_TEMPLATE_ONE.value());
         projectSourcePage.selectSample(PROJECT_TEMPLATE_TWO.value());

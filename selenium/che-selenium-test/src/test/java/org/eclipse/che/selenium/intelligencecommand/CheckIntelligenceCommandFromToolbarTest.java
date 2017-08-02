@@ -14,15 +14,14 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -30,7 +29,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
+import static org.eclipse.che.selenium.core.constant.TestWorkspaceConstants.RUNNING_WORKSPACE_MESS;
 
 
 /**
@@ -39,42 +41,55 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTI
 
 public class CheckIntelligenceCommandFromToolbarTest {
 
-    private static final String PROJECT_NAME =
-            NameGenerator.generate(CheckIntelligenceCommandFromToolbarTest.class.getSimpleName(), 2);
+    private static final String PROJECT_NAME = NameGenerator.generate("project", 2);
 
     @Inject
-    private TestWorkspace     testWorkspace;
+    private TestWorkspace           testWorkspace;
     @Inject
-    private DefaultTestUser   defaultTestUser;
+    private Ide                     ide;
     @Inject
-    private Ide               ide;
+    private ProjectExplorer         projectExplorer;
     @Inject
-    private ProjectExplorer   projectExplorer;
+    private Consoles                consoles;
     @Inject
-    private Consoles          consoles;
+    private Menu                    menu;
     @Inject
-    private Menu              menu;
+    private Wizard                  wizard;
     @Inject
-    private Wizard            wizard;
+    private CommandsToolbar         commandsToolbar;
     @Inject
-    private CommandsToolbar   commandsToolbar;
+    private SeleniumWebDriver       seleniumWebDriver;
     @Inject
-    private SeleniumWebDriver seleniumWebDriver;
+    private NotificationsPopupPanel notificationsPanel;
 
     @BeforeClass
     public void setUp() throws Exception {
         ide.open(testWorkspace);
     }
 
-    @Test
+    @Test(priority = 1)
     public void launchClonedWepAppTest() throws Exception {
-        String currentWindow = ide.driver().getWindowHandle();
+        String currentWindow = seleniumWebDriver.getWindowHandle();
         projectExplorer.waitProjectExplorer();
-        menu.runCommand(TestMenuCommandsConstants.Workspace.WORKSPACE, TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
+        menu.runCommand(WORKSPACE, CREATE_PROJECT);
         wizard.selectProjectAndCreate(Wizard.SamplesName.WEB_JAVA_SPRING, PROJECT_NAME);
         projectExplorer.waitItem(PROJECT_NAME);
         commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
         consoles.waitExpectedTextIntoConsole(" Server startup in");
+        consoles.clickOnPreviewUrl();
+        checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
+        consoles.waitExpectedTextIntoConsole(" Server startup in");
+        seleniumWebDriver.navigate().refresh();
+        notificationsPanel.waitExpectedMessageOnProgressPanelAndClosed(RUNNING_WORKSPACE_MESS);
+        projectExplorer.waitProjectExplorer();
+        consoles.clickOnPreviewUrl();
+        checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
+    }
+
+    @Test(priority = 2)
+    public void checkButtonsOnToolbar() {
+        projectExplorer.waitProjectExplorer();
+        String currentWindow = seleniumWebDriver.getWindowHandle();
         commandsToolbar.clickExecStopBtn();
         consoles.clickOnPreviewUrl();
         checkTestAppAndReturnToIde(currentWindow, "This site can’t be reached");
@@ -84,7 +99,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
         checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
         Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
         Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
-        commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:8080");
+        commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("ws-machine:8080");
         checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
         commandsToolbar.clickExecStopBtn();
         commandsToolbar.clickWithHoldAndLaunchDebuCmdFromList(PROJECT_NAME + ": debug");

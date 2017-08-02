@@ -106,10 +106,11 @@ public interface TestMenuCommandsConstants {
         String TEST                     = "gwt-debug-topmenu/Run/TestingMainGroup";
 
         interface Test {
+            String TEST_NG_TEST      = "topmenu/Run/Test/Run Test";
             String TEST_NG_CLASS     = "gwt-debug-topmenu/Run/Test/TestNGActionRunClass";
             String TEST_NG_PROJECT   = "gwt-debug-topmenu/Run/Test/TestNGActionRunAllContext";
             String TEST_NG_XML_SUITE = "gwt-debug-topmenu/Run/Test/TestNGActionRunXMLContext";
-            String JUNIT_CLASS       = "gwt-debug-topmenu/Run/Test/TestJUnitActionRunClassContext";
+            String JUNIT_TEST        = "gwt-debug-topmenu/Run/Test/RunTest";
             String JUNIT_PROJECT     = "gwt-debug-topmenu/Run/Test/TestJUnitActionRunAllContext";
         }
     }

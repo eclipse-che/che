@@ -48,20 +48,26 @@ public class ProjectSourcePage {
     }
 
     private interface Locators {
-       String POPOVER_CSS = "project-source-selector";
-       String POPOVER_XPATH = "project-source-selector";
-       String ADD_BUTTON_XPATH = "//che-button-primary[@che-button-title='Add']";
+        String ADD_OR_IMPORT_PROJECT_BUTTON_XPATH = "//*[@id=\"ADD_PROJECT\"]";
 
-       String SOURCE_XPATH = "//che-toggle-joined-button//span[text()='%s']";
+        String POPOVER_CSS      = "project-source-selector";
+        String POPOVER_XPATH    = "project-source-selector";
+        String ADD_BUTTON_XPATH = "//che-button-primary[@che-button-title='Add']";
+
+        String SOURCE_XPATH = "//che-toggle-joined-button//span[text()='%s']";
 
 
-       String SAMPLE_XPATH = "//template-selector-item//span[text()='%s']";
-       String SAMPLE_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Sample %s']";
+        String SAMPLE_XPATH          = "//template-selector-item//span[text()='%s']";
+        String SAMPLE_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Sample %s']";
 
-       String GIT_REPO_XPATH = "//input[@name='remoteGitURL']";
-       String ZIP_XPATH = "//input[@name='remoteZipURL']";
-       String ZIP_SKIP_ROOT_XPATH = "//div[contains(@class, 'skip-root-container')]/md-checkbox";
+        String GIT_REPO_XPATH      = "//input[@name='remoteGitURL']";
+        String ZIP_XPATH           = "//input[@name='remoteZipURL']";
+        String ZIP_SKIP_ROOT_XPATH = "//div[contains(@class, 'skip-root-container')]/md-checkbox";
     }
+
+    @FindBy
+            (xpath = Locators.ADD_OR_IMPORT_PROJECT_BUTTON_XPATH)
+    WebElement addOrImportProjectButton;
 
     @FindBy
             (css = Locators.POPOVER_CSS)
@@ -83,6 +89,9 @@ public class ProjectSourcePage {
             (xpath = Locators.ADD_BUTTON_XPATH)
     WebElement addButton;
 
+    public void clickAddOrImportProjectButton() {
+        addOrImportProjectButton.click();
+    }
 
     public void waitOpened() {
         new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOADER_TIMEOUT_SEC).until

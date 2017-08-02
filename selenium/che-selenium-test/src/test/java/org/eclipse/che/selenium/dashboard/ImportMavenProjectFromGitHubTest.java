@@ -11,13 +11,12 @@
 package org.eclipse.che.selenium.dashboard;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
@@ -25,9 +24,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,10 +36,7 @@ import java.util.concurrent.ExecutionException;
 public class ImportMavenProjectFromGitHubTest {
     private final        String WORKSPACE    = NameGenerator.generate("ImtMvnPrjGitHub", 4);
     private static final String PROJECT_NAME = "guess-project";
-    private static final Logger LOG          = LoggerFactory.getLogger(ImportMavenProjectFromGitHubTest.class);
 
-    @Inject
-    private Ide                        ide;
     @Inject
     private Dashboard                  dashboard;
     @Inject
@@ -58,9 +51,6 @@ public class ImportMavenProjectFromGitHubTest {
     private CreateWorkspace            createWorkspace;
     @Inject
     private ProjectSourcePage          projectSourcePage;
-    @Inject
-    @Named("github.username")
-    private String                     gitHubUsername;
     @Inject
     private SeleniumWebDriver          seleniumWebDriver;
     @Inject
@@ -84,10 +74,13 @@ public class ImportMavenProjectFromGitHubTest {
         navigationBar.waitNavigationBar();
         navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
 
+
         dashboardWorkspace.clickOnNewWorkspaceBtn();
         createWorkspace.waitToolbar();
         createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
         createWorkspace.typeWorkspaceName(WORKSPACE);
+
+        projectSourcePage.clickAddOrImportProjectButton();
 
         projectSourcePage.selectSourceTab(ProjectSourcePage.Sources.GIT);
         projectSourcePage.typeGitRepositoryLocation("https://github.com/iedexmain1/guess-project.git");

@@ -67,9 +67,11 @@ public class MacrosCommandsEditorTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/java-project-with-additional-source-folder");
-        testProjectServiceClient.importProject(ws.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()), PROJ_NAME,
-                                               ProjectTemplates.PLAIN_JAVA
-        );
+        testProjectServiceClient.importProject(ws.getId(),
+                                               defaultTestUser.getAuthToken(),
+                                               Paths.get(resource.toURI()),
+                                               PROJ_NAME,
+                                               ProjectTemplates.PLAIN_JAVA);
         ide.open(ws);
     }
 

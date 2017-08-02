@@ -28,6 +28,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -228,9 +229,10 @@ public class CommandsToolbar {
      *         an expected command
      */
     public void selectPreviewUrlFromDropDawn(String urlCommand) {
-        redrawWait.until(ExpectedConditions.visibilityOf(previewsDropDawnContainer))
-                  .findElement(By.xpath(String.format("//div[text()='%s']", urlCommand)))
-                  .click();
+        redrawWait.until(ExpectedConditions.visibilityOf(previewsDropDawnContainer));
+        WebElement element = seleniumWebDriver.findElement(By.xpath(String.format("//div[text()='%s']", urlCommand)));
+        WaitUtils.sleepQuietly(1);
+        redrawWait.until(ExpectedConditions.visibilityOf(element)).click();
     }
 
     /**

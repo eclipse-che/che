@@ -74,6 +74,7 @@ public class CheckRailsStackTest {
         createWorkspace.clickAllStacksTab();
         createWorkspace.selectStack(TestStacksConstants.BITNAMI_RAILS.getId());
         createWorkspace.typeWorkspaceName(WS_NAME);
+        projectSourcePage.clickAddOrImportProjectButton();
         projectSourcePage.selectSample(PROJECT_NAME);
         projectSourcePage.clickAdd();
         createWorkspace.clickCreate();

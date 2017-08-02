@@ -275,6 +275,7 @@
                     <exclude name="checkEditingFileWithoutIDE"/>
                 </methods>
             </class>
+            <class name="org.eclipse.che.selenium.filewatcher.CheckDeletingProjectByApiTest"/>
             <class name="org.eclipse.che.selenium.git.AddFilesToIndexTest">
                 <methods>
                     <!-- https://github.com/eclipse/che/issues/5071 -->
@@ -541,7 +542,6 @@
                     <exclude name="checkRunPlainJavaProject"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit3Test"/>
             <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit4Test"/>
             <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginTestNgTest"/>
             <class name="org.eclipse.che.selenium.preferences.CheckErrorsWarningsTabTest">

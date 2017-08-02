@@ -12,6 +12,8 @@ package org.eclipse.che.examples;
 
 import org.eclipse.che.examples.HelloWorld;
 import org.junit.Test;
+import org.junit.Assert;
+import org.junit.Ignore;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -30,4 +32,8 @@ public class AppOneTest {
     public void shouldFailOfAppOne() {
         assertFalse(new HelloWorld().returnTrue());
     }
+
+    @Test
+    @Ignore
+    public void shouldBeIgnoredOfAppOne() { Assert.fail();}
 }

@@ -14,8 +14,9 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.TestBuildConstants;
+import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -25,11 +26,9 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -79,8 +78,6 @@ public class WorkingWithJavaMySqlStackTest {
     @Inject
     private DashboardWorkspace         dashboardWorkspace;
     @Inject
-    private DashboardProject           dashboardProject;
-    @Inject
     private AskDialog                  askDialog;
     @Inject
     private CodenvyEditor              editor;
@@ -109,7 +106,7 @@ public class WorkingWithJavaMySqlStackTest {
         loader.waitOnClosed();
         createWorkspace.selectStack(TestStacksConstants.JAVA_MYSQL.getId());
         createWorkspace.typeWorkspaceName(WORKSPACE);
-
+        projectSourcePage.clickAddOrImportProjectButton();
         projectSourcePage.selectSample(PROJECT_NAME);
         projectSourcePage.clickAdd();
 
@@ -118,7 +115,7 @@ public class WorkingWithJavaMySqlStackTest {
         seleniumWebDriver.switchFromDashboardIframeToIde(60);
 
         // expand the project
-        currentWindow = ide.driver().getWindowHandle();
+        currentWindow = seleniumWebDriver.getWindowHandle();
         loader.waitOnClosed();
         projectExplorer.waitProjectExplorer();
         projectExplorer.waitItem(PROJECT_NAME, 600);
@@ -156,8 +153,8 @@ public class WorkingWithJavaMySqlStackTest {
         consoles.clickOnPreviewUrl();
         seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
         checkWebJavaPetclinicAppl();
-        ide.driver().close();
-        ide.driver().switchTo().window(currentWindow);
+        seleniumWebDriver.close();
+        seleniumWebDriver.switchTo().window(currentWindow);
         seleniumWebDriver.switchFromDashboardIframeToIde();
         consoles.waitProcessInProcessConsoleTree(PROCESS_NAME);
         consoles.waitTabNameProcessIsPresent(PROCESS_NAME);
@@ -177,11 +174,11 @@ public class WorkingWithJavaMySqlStackTest {
      * check main elements of the web-java-petclinic
      */
     private void checkWebJavaPetclinicAppl() {
-        new WebDriverWait(ide.driver(), LOADER_TIMEOUT_SEC).until(ExpectedConditions.visibilityOfElementLocated
+        new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC).until(ExpectedConditions.visibilityOfElementLocated
                 (By.xpath("//h2[text()='Welcome']")));
-        new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC).until(ExpectedConditions.visibilityOfElementLocated
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(ExpectedConditions.visibilityOfElementLocated
                 (By.xpath("//div[@class='navbar-inner']")));
-        new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC).until(ExpectedConditions.presenceOfElementLocated
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(ExpectedConditions.presenceOfElementLocated
                 (By.xpath("//table[@class='footer']")));
     }
 }

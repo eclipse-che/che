@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -25,11 +26,9 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardProject;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -71,8 +70,6 @@ public class WorkingWithNodeWsTest {
     @Inject
     private DashboardWorkspace         dashboardWorkspace;
     @Inject
-    private DashboardProject           dashboardProject;
-    @Inject
     private NotificationsPopupPanel    notificationsPopupPanel;
     @Inject
     private AskDialog                  askDialog;
@@ -98,7 +95,7 @@ public class WorkingWithNodeWsTest {
         createWorkspace.waitToolbar();
         createWorkspace.selectStack(TestStacksConstants.NODE.getId());
         createWorkspace.typeWorkspaceName(WORKSPACE);
-
+        projectSourcePage.clickAddOrImportProjectButton();
         projectSourcePage.selectSample(NODE_JS_PROJECT_NAME);
         projectSourcePage.clickAdd();
 
@@ -108,7 +105,7 @@ public class WorkingWithNodeWsTest {
         seleniumWebDriver.switchFromDashboardIframeToIde();
 
         // expand web nodeJs simple project
-        currentWindow = ide.driver().getWindowHandle();
+        currentWindow = seleniumWebDriver.getWindowHandle();
         loader.waitOnClosed();
         projectExplorer.waitProjectExplorer();
         projectExplorer.waitItem(NODE_JS_PROJECT_NAME);
@@ -134,7 +131,7 @@ public class WorkingWithNodeWsTest {
 
         // check the preview url is present after refreshing
         consoles.waitPreviewUrlIsPresent();
-        ide.driver().navigate().refresh();
+        seleniumWebDriver.navigate().refresh();
         seleniumWebDriver.switchFromDashboardIframeToIde();
         notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
         consoles.waitPreviewUrlIsPresent();
@@ -146,8 +143,8 @@ public class WorkingWithNodeWsTest {
         consoles.clickOnPreviewUrl();
         seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
         checkAngularYeomanAppl();
-        ide.driver().close();
-        ide.driver().switchTo().window(currentWindow);
+        seleniumWebDriver.close();
+        seleniumWebDriver.switchTo().window(currentWindow);
         seleniumWebDriver.switchFromDashboardIframeToIde();
         consoles.closeProcessInProcessConsoleTreeByName("web-nodejs-simple:run");
         askDialog.acceptDialogWithText(ASK_DIALOG_MSG_ANGULAR_APP);

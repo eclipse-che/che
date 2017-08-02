@@ -74,7 +74,7 @@ public class CheckSwiftStackTest {
         createWorkspace.clickAllStacksTab();
         createWorkspace.selectStack(TestStacksConstants.BITNAMI_SWIFT.getId());
         createWorkspace.typeWorkspaceName(WS_NAME);
-
+        projectSourcePage.clickAddOrImportProjectButton();
         projectSourcePage.selectSample(PROJECT_NAME);
         projectSourcePage.clickAdd();
         createWorkspace.clickCreate();

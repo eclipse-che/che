@@ -74,6 +74,7 @@ public class CheckPlayForJavaStackTest {
         createWorkspace.clickAllStacksTab();
         createWorkspace.selectStack(TestStacksConstants.BITNAMI_PLAY_FOR_JAVA.getId());
         createWorkspace.typeWorkspaceName(WS_NAME);
+        projectSourcePage.clickAddOrImportProjectButton();
         projectSourcePage.selectSample(PROJECT_NAME);
         projectSourcePage.clickAdd();
         createWorkspace.clickCreate();

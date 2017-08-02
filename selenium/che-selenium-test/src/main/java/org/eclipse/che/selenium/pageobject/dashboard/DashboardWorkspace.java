@@ -29,6 +29,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 /**
@@ -107,7 +108,7 @@ public class DashboardWorkspace {
         String STACK_NAME_XPATH       = "//md-card[contains(@ng-class,'%s')]";
         String NAME_WORKSPACE_INPUT   = "//input[@placeholder='Name of the workspace']";
         String RUN_WORKSPACE_BTN      = "//button/span[text()='Run']";
-        String STOP_WORKSPACE_BTN     = "//button/span[text()='Stop']";
+        String STOP_WORKSPACE_BTN     = "//button/span[contains(text(),'Stop')]";
         String DELETE_WORKSPACE_BTN   = "//button/span[text()='Delete']";
         String STATE_WORKSPACE        = "//span[text()='%s']";
         String WORKSPACE_TITLE        = "//span[contains(@class,'che-toolbar-title-label') and text()='%s']";
@@ -226,7 +227,7 @@ public class DashboardWorkspace {
     }
 
     public void waitListWorkspacesOnDashboard() {
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC).until
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until
                 (ExpectedConditions.visibilityOf(listOfWorkspaces));
     }
 
@@ -349,9 +350,9 @@ public class DashboardWorkspace {
 
     public void enterNameWorkspace(String nameWorkspace) {
         new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC).until(ExpectedConditions.visibilityOf(nameWorkspaceInput))
-                                                                     .clear();
+                                                                          .clear();
         new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC).until(ExpectedConditions.visibilityOf(nameWorkspaceInput))
-                                                                     .sendKeys(nameWorkspace);
+                                                                          .sendKeys(nameWorkspace);
         new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
                 .until(ExpectedConditions.textToBePresentInElementValue(nameWorkspaceInput, nameWorkspace));
     }
@@ -365,9 +366,9 @@ public class DashboardWorkspace {
     public void enterRamWorkspace(int ram) {
         String ramValue = "//div[@class='che-ram-allocation-slider ng-isolate-scope ng-valid']//div[@class='ng-binding']";
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(ramWorkspace))
-                                                                       .clear();
+                                                                            .clear();
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(ramWorkspace))
-                                                                       .sendKeys(String.valueOf(ram));
+                                                                            .sendKeys(String.valueOf(ram));
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
                 .until(ExpectedConditions.textToBePresentInElementLocated(By.xpath(ramValue), String.valueOf(ram)));
     }
@@ -475,7 +476,7 @@ public class DashboardWorkspace {
      * Return true if workspaces present on the navigation panel
      */
     public boolean workspacesIsPresent() {
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC)
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
                 .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.LEFT_SIDE_BAR)));
 
         List<WebElement> workspaces = seleniumWebDriver.findElements(By.xpath(Locators.RESENT_WS_NAVBAR));
@@ -505,8 +506,9 @@ public class DashboardWorkspace {
      *         is an email of developer into sharing list
      */
     public void deleteDeveloperFromShareList(String email) {
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC).until(ExpectedConditions.visibilityOfElementLocated
-                (By.xpath(String.format(Locators.REMOVE_DEVELOPER_ICON, email)))).click();
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+                .until(ExpectedConditions.visibilityOfElementLocated
+                        (By.xpath(String.format(Locators.REMOVE_DEVELOPER_ICON, email)))).click();
 
     }
 
@@ -514,8 +516,9 @@ public class DashboardWorkspace {
      * Wait the text into warning dialog delete or remove
      */
     public void waitTextInWarningDialogDelete(String expText) {
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC).until(ExpectedConditions.visibilityOfElementLocated
-                (By.xpath(String.format(Locators.WARNING_DIALOG_DELETE, expText))));
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+                .until(ExpectedConditions.visibilityOfElementLocated
+                        (By.xpath(String.format(Locators.WARNING_DIALOG_DELETE, expText))));
     }
 
     /**
@@ -563,8 +566,9 @@ public class DashboardWorkspace {
      *         is the tab name into workspace menu
      */
     public void selectTabInWorspaceMenu(String tabName) {
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC).until(ExpectedConditions.visibilityOfElementLocated
-                (By.xpath(String.format(Locators.TAB_NAMES_IN_WS, tabName)))).click();
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+                .until(ExpectedConditions.visibilityOfElementLocated
+                        (By.xpath(String.format(Locators.TAB_NAMES_IN_WS, tabName)))).click();
 
     }
 
@@ -583,6 +587,12 @@ public class DashboardWorkspace {
 
     public String getWsTimeoutMessage() {
         return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(wsTimeotMessage))
-                                                                          .getText();
+                                                                                   .getText();
+    }
+
+    public void waitWsTimeoutMessage(String expectedMessage) {
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+                .until((WebDriver webdriver) -> webdriver.findElement(By.xpath(Locators.WS_TIMEOUT_MESSAGE))).getText()
+                .contains(expectedMessage);
     }
 }

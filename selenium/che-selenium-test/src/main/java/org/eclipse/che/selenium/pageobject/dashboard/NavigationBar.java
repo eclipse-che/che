@@ -82,7 +82,7 @@ public class NavigationBar {
         String locator = String.format(Locators.MENU_ITEM_XPATH, menuItem.title) + Locators.COUNTER_XPATH;
         String counter = seleniumWebDriver.findElement(By.xpath(locator)).getText();
         counter = counter.trim().replace("(", "").replace(")", "");
-        return counter;
+        return counter.equals("") ? "0" : counter;
     }
 
     public List<WebElement> getTeamListItems() {
