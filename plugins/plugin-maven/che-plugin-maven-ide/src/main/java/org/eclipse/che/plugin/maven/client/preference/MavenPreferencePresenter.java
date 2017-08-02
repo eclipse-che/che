@@ -59,7 +59,6 @@ public class MavenPreferencePresenter extends AbstractPreferencePagePresenter im
     @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
-
         view.setSelectedShowArtifactIdCheckBox(getShowArtifactIdPreferenceValue());
     }
 
