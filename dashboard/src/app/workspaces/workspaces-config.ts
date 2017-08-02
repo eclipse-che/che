@@ -22,11 +22,13 @@ import {WorkspaceEditModeToolbarButton} from './workspace-edit-mode/workspace-ed
 import {WorkspaceDetailsSsh} from './workspace-details/workspace-ssh/workspace-details-ssh.directive';
 import {WorkspaceDetailsSshCtrl} from './workspace-details/workspace-ssh/workspace-details-ssh.controller';
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
+import {WorkspaceDetailsProjects} from './workspace-details/workspace-projects/workspace-details-projects.directive';
+import {AddProjectPopoverController} from './workspace-details/workspace-projects/add-project-popover/add-project-popover.controller';
+import {AddProjectPopover} from './workspace-details/workspace-projects/add-project-popover/add-project-popover.directive';
 import {WorkspaceDetailsService} from './workspace-details/workspace-details.service';
 import {ExportWorkspaceController} from './workspace-details/export-workspace/export-workspace.controller';
 import {ExportWorkspace} from './workspace-details/export-workspace/export-workspace.directive';
 import {ExportWorkspaceDialogController} from  './workspace-details/export-workspace/dialog/export-workspace-dialog.controller';
-import {WorkspaceDetailsProjects} from './workspace-details/workspace-projects/workspace-details-projects.directive';
 import {ReadyToGoStacksController} from './workspace-details/select-stack/ready-to-go-stacks/ready-to-go-stacks.controller';
 import {ReadyToGoStacks} from './workspace-details/select-stack/ready-to-go-stacks/ready-to-go-stacks.directive';
 import {WorkspaceRecipeImportController} from './workspace-details/select-stack/recipe-import/workspace-recipe-import.controller';
@@ -174,6 +176,8 @@ export class WorkspacesConfig {
 
     register.controller('WorkspaceDetailsProjectsCtrl', WorkspaceDetailsProjectsCtrl);
     register.directive('workspaceDetailsProjects', WorkspaceDetailsProjects);
+    register.controller('AddProjectPopoverController', AddProjectPopoverController);
+    register.directive('addProjectPopover', AddProjectPopover);
     register.service('workspaceDetailsService', WorkspaceDetailsService);
 
     register.controller('ExportWorkspaceDialogController', ExportWorkspaceDialogController);

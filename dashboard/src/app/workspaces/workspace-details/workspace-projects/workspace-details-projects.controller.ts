@@ -63,7 +63,7 @@ export class WorkspaceDetailsProjectsCtrl {
     this.workspaceName = $route.current.params.workspaceName;
     this.workspaceKey = this.namespace + '/' + this.workspaceName;
 
-    let preferences = cheAPI.getPreferences().getPreferences();
+    const preferences = cheAPI.getPreferences().getPreferences();
 
     this.profileCreationDate = preferences['che:created'];
     this.projectFilter = {name: ''};
@@ -92,7 +92,7 @@ export class WorkspaceDetailsProjectsCtrl {
 
     // filter only root projects (do not show sub-projects of multi-project item):
     this.workspace.config.projects.forEach((project: any) => {
-      let path = project.path.replace('/', '');
+      const path = project.path.replace('/', '');
       if (path === project.name) {
         this.projects.push(project);
       }
@@ -117,7 +117,7 @@ export class WorkspaceDetailsProjectsCtrl {
       return;
     }
 
-    let confirmationPromise = this.showDeleteProjectsConfirmation(queueLength);
+    const confirmationPromise = this.showDeleteProjectsConfirmation(queueLength);
     confirmationPromise.then(() => {
       const numberToDelete = queueLength;
       const deleteProjectPromises = [];
