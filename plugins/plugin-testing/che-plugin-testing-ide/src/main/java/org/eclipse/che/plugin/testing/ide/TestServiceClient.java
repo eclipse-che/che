@@ -18,7 +18,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -62,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /**
  * Client for calling test services
@@ -281,7 +281,7 @@ public class TestServiceClient {
 
     public JsonRpcPromise<TestLaunchResult> runTests(TestExecutionContext context) {
         return requestTransmitter.newRequest()
-                                 .endpointId("ws-agent")
+                                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                                  .methodName(Constants.RUN_TESTS_METHOD)
                                  .paramsAsDto(context)
                                  .sendAndReceiveResultAsDto(TestLaunchResult.class);
@@ -289,7 +289,7 @@ public class TestServiceClient {
 
     public JsonRpcPromise<TestDetectionResult> detectTests(TestDetectionContext context) {
         return requestTransmitter.newRequest()
-                                 .endpointId("ws-agent")
+                                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                                  .methodName(Constants.TESTING_RPC_TEST_DETECTION_NAME)
                                  .paramsAsDto(context)
                                  .sendAndReceiveResultAsDto(TestDetectionResult.class);

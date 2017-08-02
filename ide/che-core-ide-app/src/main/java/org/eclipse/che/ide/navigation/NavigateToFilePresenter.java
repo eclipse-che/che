@@ -28,6 +28,7 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /**
  * Presenter for file navigation (find file by name and open it).
@@ -93,7 +94,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
                                                           .withName(URL.encodePathSegment(fileName + "*"));
 
         requestTransmitter.newRequest()
-                          .endpointId("ws-agent")
+                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                           .methodName("project/search")
                           .paramsAsDto(requestParams)
                           .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)
