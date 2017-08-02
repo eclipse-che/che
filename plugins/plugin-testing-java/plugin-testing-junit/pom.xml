@@ -22,6 +22,7 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Java Testing :: JUnit Parent</name>
     <modules>
+        <module>che-plugin-testing-junit-ide</module>
         <module>che-plugin-testing-junit-server</module>
         <module>che-plugin-testing-junit-runtime</module>
     </modules>

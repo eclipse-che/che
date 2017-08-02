@@ -12,6 +12,7 @@ package org.ecipse.che.plugin.testing.testng.server;
 
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestPosition;
+import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.testing.testng.server.TestNGRunner;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -32,12 +33,14 @@ import static org.fest.assertions.Assertions.assertThat;
 public class TestNGTestDiscoveryTest extends BaseTest {
 
     private IJavaProject     javaProject;
+    private JavaTestFinder   testNGTestFinder;
     private IPackageFragment packageFragment;
 
 
     @BeforeMethod
     public void setUp() throws Exception {
         javaProject = createJavaProject("testDiscovery", "bin");
+        testNGTestFinder = new JavaTestFinder();
         IPackageFragmentRoot packageFragmentRoot = addSourceContainer(javaProject, "src", "bin");
         javaProject.setRawClasspath(getTestNgClassPath("/testDiscovery/src"), null);
 
@@ -65,7 +68,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         ICompilationUnit compilationUnit = packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
         compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-        TestNGRunner runner = new TestNGRunner("", null, null);
+        TestNGRunner runner = new TestNGRunner("", testNGTestFinder, null, null);
 
         List<TestPosition> testPositions =
                 runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
@@ -94,7 +97,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         ICompilationUnit compilationUnit = packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
         compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-        TestNGRunner runner = new TestNGRunner("", null, null);
+        TestNGRunner runner = new TestNGRunner("", testNGTestFinder, null, null);
 
         List<TestPosition> testPositions =
                 runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
@@ -118,7 +121,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         ICompilationUnit compilationUnit = packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
         compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-        TestNGRunner runner = new TestNGRunner("", null, null);
+        TestNGRunner runner = new TestNGRunner("", testNGTestFinder, null, null);
 
         List<TestPosition> testPositions =
                 runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
@@ -143,7 +146,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         ICompilationUnit compilationUnit = packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
         compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-        TestNGRunner runner = new TestNGRunner("", null, null);
+        TestNGRunner runner = new TestNGRunner("", testNGTestFinder, null, null);
 
         List<TestPosition> testPositions =
                 runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
@@ -167,7 +170,7 @@ public class TestNGTestDiscoveryTest extends BaseTest {
         ICompilationUnit compilationUnit = packageFragment.createCompilationUnit("T.java", buf.toString(), false, null);
 
         compilationUnit.reconcile(0, true, DefaultWorkingCopyOwner.PRIMARY, null);
-        TestNGRunner runner = new TestNGRunner("", null, null);
+        TestNGRunner runner = new TestNGRunner("", testNGTestFinder, null, null);
 
         List<TestPosition> testPositions =
                 runner.detectTests(new MockTestDetectionContext("/testDiscovery", "/testDiscovery/src/test/T.java", -1));
