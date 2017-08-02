@@ -65,6 +65,7 @@ public class OpenShiftPvcHelper {
     private static final String POD_PHASE_FAILED           = "Failed";
     private static final String[] MKDIR_WORKSPACE_COMMAND  = new String[] {"mkdir", "-p"};
     private static final String[] RMDIR_WORKSPACE_COMMAND  = new String[] {"rm", "-rf"};
+    private static final int JOB_TIMEOUT_SECONDS           = 120;
 
     private static final Set<String> createdWorkspaces = ConcurrentHashMap.newKeySet();
 
@@ -176,7 +177,7 @@ public class OpenShiftPvcHelper {
         try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()){
             openShiftClient.pods().inNamespace(projectNamespace).create(podSpec);
             boolean completed = false;
-            while(!completed) {
+            for(int waitCount = 0; (waitCount < JOB_TIMEOUT_SECONDS) && !completed; waitCount++) {
                 Pod pod = openShiftClient.pods().inNamespace(projectNamespace).withName(podName).get();
                 String phase = pod.getStatus().getPhase();
                 switch (phase) {
