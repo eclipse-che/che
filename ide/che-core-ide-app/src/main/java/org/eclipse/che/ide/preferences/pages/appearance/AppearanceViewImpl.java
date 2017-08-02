@@ -14,11 +14,9 @@ import org.eclipse.che.ide.api.theme.Theme;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
@@ -36,12 +34,11 @@ public class AppearanceViewImpl implements AppearanceView {
     private final FlowPanel rootElement;
     @UiField
     CustomListBox themeBox;
-    @UiField
-    CheckBox      showMavenArtifactId;
     private ActionDelegate delegate;
 
     public AppearanceViewImpl() {
         rootElement = ourUiBinder.createAndBindUi(this);
+
     }
 
     @Override
@@ -66,20 +63,10 @@ public class AppearanceViewImpl implements AppearanceView {
         }
     }
 
-    @Override
-    public void setSelectedShowMavenArtifactIdCheckBox(boolean selected) {
-        showMavenArtifactId.setValue(selected);
-    }
-
     @UiHandler("themeBox")
     void handleSelectionChanged(ChangeEvent event) {
         themeBox.getSelectedIndex();
         delegate.themeSelected(themeBox.getValue(themeBox.getSelectedIndex()));
-    }
-
-    @UiHandler("showMavenArtifactId")
-    void handleShowMavenArtifactIdCheckBox(ClickEvent event) {
-        delegate.showMavenArtifactIdCheckBoxValueChanged(showMavenArtifactId.getValue());
     }
 
     interface AppearanceViewImplUiBinder

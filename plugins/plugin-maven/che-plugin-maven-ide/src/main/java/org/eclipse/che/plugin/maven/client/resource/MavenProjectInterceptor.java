@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.resources.marker.PresentableTextMarker;
 import javax.inject.Inject;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.ide.preferences.pages.appearance.AppearancePresenter.PREF_SHOW_MAVEN_ARTIFACT_ID;
+import static org.eclipse.che.plugin.maven.client.preference.MavenPreferencePresenter.PREF_SHOW_ARTIFACT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
@@ -41,7 +41,7 @@ public class MavenProjectInterceptor implements ResourceInterceptor {
     /** {@inheritDoc} */
     @Override
     public void intercept(Resource resource) {
-        if (!Boolean.valueOf(preferencesManager.getValue(PREF_SHOW_MAVEN_ARTIFACT_ID))) {
+        if (!Boolean.valueOf(preferencesManager.getValue(PREF_SHOW_ARTIFACT_ID))) {
             return;
         }
         if (resource.isProject() && ((Project)resource).isTypeOf(MAVEN_ID)) {

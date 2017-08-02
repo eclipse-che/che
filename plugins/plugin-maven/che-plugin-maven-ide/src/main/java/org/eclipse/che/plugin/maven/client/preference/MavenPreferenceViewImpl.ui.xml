@@ -11,16 +11,15 @@
 
 -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
-
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.plugin.maven.client.MavenLocalizationConstant'/>
     <ui:style>
         .main {
             margin: 5px;
         }
     </ui:style>
     <g:FlowPanel styleName="{style.main}">
-        <g:Label>Theme:</g:Label>
-        <che:CustomListBox ui:field="themeBox" debugId="window-preferences-appearance-themeBox"/>
+        <g:CheckBox ui:field="showArtifactId" text="{locale.mavenPreferencesShowArtifactIdCheckboxText}"
+                    debugId="window-preferences--plugins-maven-showArtifactId"/>
     </g:FlowPanel>
 </ui:UiBinder>
