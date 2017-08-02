@@ -25,18 +25,22 @@ public class BasicWebSocketEndpoint implements WebSocketEndpoint {
     private final WebSocketConnectionSustainer sustainer;
     private final MessagesReSender             reSender;
     private final WebSocketDispatcher          dispatcher;
+    private final WebSocketActionManager       actionManager;
 
     @Inject
-    public BasicWebSocketEndpoint(WebSocketConnectionSustainer sustainer, MessagesReSender reSender, WebSocketDispatcher dispatcher) {
+    public BasicWebSocketEndpoint(WebSocketConnectionSustainer sustainer, MessagesReSender reSender, WebSocketDispatcher dispatcher,
+                                  WebSocketActionManager actionManager) {
         this.sustainer = sustainer;
         this.reSender = reSender;
         this.dispatcher = dispatcher;
+        this.actionManager = actionManager;
     }
 
     @Override
     public void onOpen(String url) {
         Log.debug(getClass(), "Session opened.");
 
+        actionManager.getOnOpenActions(url).forEach(Runnable::run);
         sustainer.reset(url);
         reSender.reSend(url);
     }
@@ -45,6 +49,7 @@ public class BasicWebSocketEndpoint implements WebSocketEndpoint {
     public void onClose(String url) {
         Log.debug(getClass(), "Session closed.");
 
+        actionManager.getOnCloseActions(url).forEach(Runnable::run);
         sustainer.sustain(url);
     }
 

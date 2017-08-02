@@ -20,19 +20,17 @@ import org.eclipse.che.commons.lang.execution.CommandLine;
 import org.eclipse.che.commons.lang.execution.ExecutionException;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
+import org.eclipse.che.junit.junit4.CheJUnitCoreRunner;
 import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
+import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
+import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.che.junit.junit4.CheJUnitCoreRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,18 +46,20 @@ import java.util.Set;
 public class JUnit4TestRunner extends AbstractJavaTestRunner {
     private static final Logger LOG = LoggerFactory.getLogger(JUnit4TestRunner.class);
 
-    private static final String JUNIT_TEST_ANNOTATION = "org.junit.Test";
-    private static final String JUNIT_TEST_NAME       = "junit";
-    private static final String MAIN_CLASS_NAME       = "org.eclipse.che.junit.junit4.CheJUnitLauncher";
+    private static final String JUNIT_TEST_NAME = "junit";
+    private static final String MAIN_CLASS_NAME = "org.eclipse.che.junit.junit4.CheJUnitLauncher";
 
     private String                   workspacePath;
+    private JavaTestFinder           javaTestFinder;
     private ProjectClasspathProvider classpathProvider;
 
     @Inject
     public JUnit4TestRunner(@Named("che.user.workspaces.storage") String workspacePath,
+                            JavaTestFinder javaTestFinder,
                             ProjectClasspathProvider classpathProvider) {
-        super(workspacePath);
+        super(workspacePath, javaTestFinder);
         this.workspacePath = workspacePath;
+        this.javaTestFinder = javaTestFinder;
         this.classpathProvider = classpathProvider;
     }
 
@@ -82,15 +82,14 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
     public boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
         try {
             int flags = method.getFlags();
-            if (method.isConstructor() ||
-                !Flags.isPublic(flags) ||
-                Flags.isAbstract(flags) ||
-                Flags.isStatic(flags) ||
-                !"V".equals(method.getReturnType())) { // 'V' is void signature
-                return false;
-            }
+            // 'V' is void signature
+            return !(method.isConstructor() ||
+                     !Flags.isPublic(flags) ||
+                     Flags.isAbstract(flags) ||
+                     Flags.isStatic(flags) ||
+                     !"V".equals(method.getReturnType()))
+                   && javaTestFinder.isTest(method, compilationUnit, JavaTestAnnotations.JUNIT4X_TEST.getName());
 
-            return isTest(method, compilationUnit);
         } catch (JavaModelException ignored) {
             return false;
         }
@@ -108,8 +107,13 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
         classPath.add(ClasspathUtil.getJarPathForClass(CheJUnitCoreRunner.class));
         parameters.getClassPath().addAll(classPath);
 
-        String suite = createTestSuite(context, javaProject);
-        parameters.getParametersList().add(suite);
+        List<String> suite = createTestSuite(context,
+                                             javaProject,
+                                             JavaTestAnnotations.JUNIT4X_TEST.getName(),
+                                             JavaTestAnnotations.JUNIT4X_RUN_WITH.getName());
+        for (String element : suite) {
+            parameters.getParametersList().add(element);
+        }
         if (context.isDebugModeEnable()) {
             generateDebuggerPort();
             parameters.getVmParameters().add("-Xdebug");
@@ -123,94 +127,6 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
         }
 
         return null;
-    }
-
-    private String createTestSuite(TestExecutionContext context, IJavaProject javaProject) {
-        switch (context.getTestType()) {
-            case FILE:
-                return createClassRequest(javaProject, context.getFilePath());
-            case FOLDER:
-                return createPackageRequest(javaProject, context.getFilePath());
-            case PROJECT:
-                return createProjectRequest(javaProject);
-            case CURSOR_POSITION:
-                return createMethodRequest(javaProject, context.getFilePath(), context.getCursorOffset());
-        }
-
-        return null;
-    }
-
-    private String createMethodRequest(IJavaProject javaProject, String filePath, int cursorOffset) {
-        ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, filePath);
-        IType primaryType = compilationUnit.findPrimaryType();
-        String qualifiedName = primaryType.getFullyQualifiedName();
-        try {
-            IJavaElement element = compilationUnit.getElementAt(cursorOffset);
-            if (element instanceof IMethod) {
-                IMethod method = (IMethod)element;
-                qualifiedName = qualifiedName + '#' + method.getElementName();
-            }
-        } catch (JavaModelException e) {
-            LOG.debug("Can't read a method.", e);
-        }
-        return qualifiedName;
-    }
-
-    private String createProjectRequest(IJavaProject javaProject) {
-        //TODO add suite to run all tests from the project
-        return null;
-    }
-
-    private String createPackageRequest(IJavaProject javaProject, String filePath) {
-        //TODO add suite to run all tests from the package
-        return null;
-    }
-
-    private String createClassRequest(IJavaProject javaProject, String filePath) {
-        ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, filePath);
-        IType primaryType = compilationUnit.findPrimaryType();
-        return primaryType.getFullyQualifiedName();
-    }
-
-    private boolean isTest(IMethod method, ICompilationUnit compilationUnit) {
-        try {
-            IAnnotation[] annotations = method.getAnnotations();
-            IAnnotation test = null;
-            for (IAnnotation annotation : annotations) {
-                String annotationElementName = annotation.getElementName();
-                if ("Test".equals(annotationElementName)) {
-                    test = annotation;
-                    break;
-                }
-                if (JUNIT_TEST_ANNOTATION.equals(annotationElementName)) {
-                    return true;
-                }
-            }
-            return test != null && isImportOfTestAnnotationExist(compilationUnit);
-        } catch (JavaModelException e) {
-            LOG.info("Can't read method's annotations.", e);
-            return false;
-        }
-    }
-
-    private boolean isImportOfTestAnnotationExist(ICompilationUnit compilationUnit) {
-        try {
-            IImportDeclaration[] imports = compilationUnit.getImports();
-            for (IImportDeclaration importDeclaration : imports) {
-                String elementName = importDeclaration.getElementName();
-                if (JUNIT_TEST_ANNOTATION.equals(elementName)) {
-                    return true;
-                }
-                if (importDeclaration.isOnDemand() &&
-                    JUNIT_TEST_ANNOTATION.startsWith(elementName.substring(0, elementName.length() - 3))) { //remove .*
-                    return true;
-                }
-            }
-        } catch (JavaModelException e) {
-            LOG.info("Can't read class imports.", e);
-            return false;
-        }
-        return false;
     }
 
     @Override
