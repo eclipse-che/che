@@ -45,15 +45,7 @@ public class JUnitExecutionListener extends RunListener {
 
     @Override
     public void testStarted(Description description) throws Exception {
-        if (currentSuite.isEmpty()) {
-            currentSuite = description.getClassName();
-            delegate.testSuiteStarted(description);
-        } else if (!currentSuite.equals(description.getClassName())) {
-            delegate.testSuiteFinished(currentSuite);
-            currentSuite = description.getClassName();
-            delegate.testSuiteStarted(description);
-        }
-
+        updateCurrentSuite(description);
         delegate.testStarted(description);
     }
 
@@ -74,6 +66,18 @@ public class JUnitExecutionListener extends RunListener {
 
     @Override
     public void testIgnored(Description description) throws Exception {
+        updateCurrentSuite(description);
         delegate.testIgnored(description);
+    }
+
+    private void updateCurrentSuite(Description description) {
+        if (currentSuite.isEmpty()) {
+            currentSuite = description.getClassName();
+            delegate.testSuiteStarted(description);
+        } else if (!currentSuite.equals(description.getClassName())) {
+            delegate.testSuiteFinished(currentSuite);
+            currentSuite = description.getClassName();
+            delegate.testSuiteStarted(description);
+        }
     }
 }
