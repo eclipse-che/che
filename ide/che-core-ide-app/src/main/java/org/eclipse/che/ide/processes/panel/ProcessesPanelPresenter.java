@@ -844,8 +844,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machineName, null, children);
         newMachineNode.setTerminalServerRunning(isServerRunning(machineName, SERVER_TERMINAL_REFERENCE));
-        // TODO (spi ide): for now ssh server's status isn't provided by server
-        newMachineNode.setSshServerRunning(/*isServerRunning(machineName, SERVER_SSH_REFERENCE)*/true);
+        // TODO (spi ide): for now SSH server's status is always UNKNOWN.
+        // So check ws-agent's status till SSH server's status fixed.
+        newMachineNode.setSshServerRunning(isServerRunning(machineName, /*SERVER_SSH_REFERENCE*/SERVER_WS_AGENT_HTTP_REFERENCE));
         for (ProcessTreeNode child : children) {
             child.setParent(newMachineNode);
         }
