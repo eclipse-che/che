@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+
 /**
  * Tracks and allows to manage the file watcher exclude patterns for tracking creation,
  * modification and deletion events for corresponding entries.
@@ -35,7 +37,6 @@ import java.util.Set;
  */
 @Singleton
 public class FileWatcherExcludesOperation implements WindowActionHandler {
-    private static final String ENDPOINT_ID          = "ws-agent";
     private static final String EXCLUDES_SUBSCRIBE   = "fileWatcher/excludes/subscribe";
     private static final String EXCLUDES_UNSUBSCRIBE = "fileWatcher/excludes/unsubscribe";
     private static final String EXCLUDES_CHANGED     = "fileWatcher/excludes/changed";
@@ -95,7 +96,7 @@ public class FileWatcherExcludesOperation implements WindowActionHandler {
      */
     public Promise<Boolean> addToFileWatcherExcludes(Set<String> pathsToExclude) {
         JsonRpcPromise<Boolean> jsonRpcPromise = requestTransmitter.newRequest()
-                                                                   .endpointId(ENDPOINT_ID)
+                                                                   .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                                                                    .methodName(ADD_TO_EXCLUDES)
                                                                    .paramsAsListOfString(new ArrayList<>(pathsToExclude))
                                                                    .sendAndReceiveResultAsBoolean();
@@ -111,7 +112,7 @@ public class FileWatcherExcludesOperation implements WindowActionHandler {
      */
     public Promise<Boolean> removeFromFileWatcherExcludes(Set<String> paths) {
         JsonRpcPromise<Boolean> jsonRpcPromise = requestTransmitter.newRequest()
-                                                                   .endpointId(ENDPOINT_ID)
+                                                                   .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                                                                    .methodName(REMOVE_FROM_EXCLUDES)
                                                                    .paramsAsListOfString(new ArrayList<>(paths))
                                                                    .sendAndReceiveResultAsBoolean();
@@ -138,7 +139,7 @@ public class FileWatcherExcludesOperation implements WindowActionHandler {
 
     private void subscribe() {
         requestTransmitter.newRequest()
-                          .endpointId(ENDPOINT_ID)
+                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                           .methodName(EXCLUDES_SUBSCRIBE)
                           .noParams()
                           .sendAndSkipResult();
@@ -146,7 +147,7 @@ public class FileWatcherExcludesOperation implements WindowActionHandler {
 
     private void unSubscribe() {
         requestTransmitter.newRequest()
-                          .endpointId(ENDPOINT_ID)
+                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                           .methodName(EXCLUDES_UNSUBSCRIBE)
                           .noParams()
                           .sendAndSkipResult();

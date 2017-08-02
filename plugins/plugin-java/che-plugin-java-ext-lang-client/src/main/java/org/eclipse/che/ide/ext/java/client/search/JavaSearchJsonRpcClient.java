@@ -22,6 +22,7 @@ import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -46,7 +47,7 @@ public class JavaSearchJsonRpcClient implements JavaSearchService {
         return createFromAsyncRequest(callback -> {
             loader.show();
             transmitter.newRequest()
-                       .endpointId("ws-agent")
+                       .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                        .methodName("javaSearch/findUsages")
                        .paramsAsDto(request)
                        .sendAndReceiveResultAsDto(FindUsagesResponse.class, 20_000)
