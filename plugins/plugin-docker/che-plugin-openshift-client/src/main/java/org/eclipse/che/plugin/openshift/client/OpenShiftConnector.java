@@ -122,6 +122,8 @@ import org.eclipse.che.plugin.openshift.client.kubernetes.KubernetesStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -441,6 +443,9 @@ public class OpenShiftConnector extends DockerConnector {
         Map<String, String> portsToRefName = getPortsToRefName(labels, exposedPorts);
 
         String[] envVariables = createContainerParams.getContainerConfig().getEnv();
+        // Overwrite CHE_API env var with che-host cluster IP instead of service name
+        setClusterIpEnvVar(envVariables);
+
         String[] volumes = createContainerParams.getContainerConfig().getHostConfig().getBinds();
 
         Map<String, String> additionalLabels = createContainerParams.getContainerConfig().getLabels();
@@ -1681,4 +1686,31 @@ public class OpenShiftConnector extends DockerConnector {
         return deploymentName;
     }
 
+    /**
+     *
+     * @param envVariables
+     * @return
+     */
+    @VisibleForTesting
+    protected void setClusterIpEnvVar(String[] envVariables) {
+        // Replace CHE_API env var with ClusterIP for che-host
+        String cheHostClusterIp = getCheHostClusterIp();
+        for (int i = 0; i < envVariables.length; i++) {
+            if (envVariables[i].contains("CHE_API")) {
+                envVariables[i] = envVariables[i].replaceAll("che-host", cheHostClusterIp);
+                return;
+            }
+        }
+        LOG.warn("Could not set CHE_API workspace environment variable to Cluster IP");
+    }
+
+    /**
+     * Get ClusterIP for the che-host service.
+     */
+    @VisibleForTesting
+    protected String getCheHostClusterIp() {
+        try (OpenShiftClient client = new DefaultOpenShiftClient()) {
+            return client.services().withName(OPENSHIFT_CHE_SERVER_SERVICE_NAME).get().getSpec().getClusterIP();
+        }
+    }
 }

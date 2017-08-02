@@ -176,8 +176,9 @@ public class OpenShiftPvcHelper {
 
         try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()){
             openShiftClient.pods().inNamespace(projectNamespace).create(podSpec);
-            boolean completed = false;
-            for(int waitCount = 0; (waitCount < JOB_TIMEOUT_SECONDS) && !completed; waitCount++) {
+
+            int waitCount = 0;
+            while(waitCount < JOB_TIMEOUT_SECONDS) {
                 Pod pod = openShiftClient.pods().inNamespace(projectNamespace).withName(podName).get();
                 String phase = pod.getStatus().getPhase();
                 switch (phase) {
@@ -190,6 +191,7 @@ public class OpenShiftPvcHelper {
                     default:
                         Thread.sleep(1000);
                 }
+                waitCount++;
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
