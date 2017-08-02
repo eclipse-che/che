@@ -2774,9 +2774,9 @@
   }
   },
   {
-    "id": "openshift",
-    "name": "openshift",
-    "description": "Openshift Workspace",
+    "id": "openshift-default",
+    "name": "Openshift Default",
+    "description": "Openshift Single Pod Workspace",
     "scope": "general",
     "tags": [
       "Openshift"
@@ -2785,18 +2785,63 @@
       "environments": {
         "default": {
           "machines": {
-            "dev-machine/main": {
+            "app/main": {
               "installers": [
                 "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
-              "servers": {},
-              "attributes" : {
-                "memoryLimitBytes": "2147483648"
+              "servers": {
+                "web": {
+                  "protocol": "http",
+                  "port": "8080/tcp"
+                }
               }
             }
           },
           "recipe": {
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: dev-machine\n    labels:\n        pod: dev-machine\n  spec:\n    containers:\n      -\n        image: rhche/spring-boot:latest\n        imagePullPolicy: Always\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP\n          -\n            containerPort: 4401\n            protocol: TCP\n          -\n            containerPort: 4403\n            protocol: TCP\n          -\n            containerPort: 4411\n            protocol: TCP\n        resources: {}\n-\n  apiVersion: v1\n  kind: Service\n  metadata:\n    name: dev-machine\n  spec:\n    ports:\n      -\n        name: wsagent\n        port: 4401\n        protocol: TCP\n        targetPort: 4401\n      -\n        name: terminal\n        port: 4411\n        protocol: TCP\n        targetPort: 4411\n    selector:\n      pod: dev-machine\n-\n  apiVersion: v1\n  kind: Route\n  metadata:\n    name: dev-machine-agent\n  spec:\n    port:\n      targetPort: wsagent\n    to:\n      kind: Service\n      name: dev-machine\n    wildcardPolicy: None\n-\n  apiVersion: v1\n  kind: Route\n  metadata:\n    name: dev-machine-terminal\n  spec:\n    port:\n      targetPort: terminal\n    to:\n      kind: Service\n      name: dev-machine\n    wildcardPolicy: None",
+            "content": "kind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: app\n  spec:\n    containers:\n      -\n        image: rhche/centos_jdk8:latest\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP",
+            "contentType": "application/x-yaml",
+            "type": "openshift"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    }
+  },
+  {
+    "id": "openshift-sql",
+    "name": "Openshift Sql",
+    "description": "Openshift Multi Pod Workspace",
+    "scope": "general",
+    "tags": [
+      "Openshift"
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "web/main": {
+              "installers": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+              ],
+              "servers": {
+                "web": {
+                  "protocol": "http",
+                  "port": "8080/tcp"
+                }
+              }
+            },
+            "db/main": {
+              "installers": [
+                "org.eclipse.che.terminal"
+              ],
+              "servers": {}
+            }
+          },
+          "recipe": {
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: web\n  spec:\n    containers:\n      -\n        image: rhche/centos_jdk8:latest\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: db\n    label:\n      type: db\n  spec:\n    containers:\n      -\n        image: centos/mysql-57-centos7\n        name: main\n        ports:\n          -\n            name: mysql\n            containerPort: 3306\n            protocol: TCP\n-\n  apiVersion: v1\n  kind: Service\n  metadata:\n    name: mysql\n  spec:\n    selector:\n      type: db\n    ports:\n      - name: mysql\n        port: 3306\n        protocol: TCP\n        targetPort: mysql",
             "contentType": "application/x-yaml",
             "type": "openshift"
           }
