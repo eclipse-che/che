@@ -10,7 +10,7 @@
         <#if realm.password>
             <form id="kc-form-login" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
                 <div class="${properties.kcFormGroupClass!}">                    
-                    <div class="kc-form-title">${msg("passowrdLogin")}</div>
+                    <div class="kc-form-title">${msg("passwordLogin")}</div>
                     <div class="${properties.kcInputWrapperClass!}">
                         <#if usernameEditDisabled??>
                             <input id="username" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')?html}" type="text" disabled />
