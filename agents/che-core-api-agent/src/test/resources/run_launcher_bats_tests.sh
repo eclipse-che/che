@@ -1,16 +1,13 @@
 #!/bin/bash
-# Copyright (c) 2012-2017 Red Hat, Inc
+#
+# Copyright (c) 2012-2017 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-#   Mario
-#
-# How to run this script:
-#   cd <root of che local git repository>
-#   sh agents/che-core-api-agent/src/test/resources/run_launcher_bats_tests.sh
+#   Codenvy, S.A. - initial API and implementation
 #
 
 #images=(bitnami/che-codeigniter:3.1.3-r6 bitnami/che-express:4.15.3-r2 bitnami/che-java-play:1.3.12-r3 bitnami/che-laravel:5.4.23-r1 bitnami/che-rails:5.1.2-r0 bitnami/che-swift:3.1.1-r0 bitnami/che-symfony:3.3.2-r0 eclipse/centos_jdk8 eclipse/cpp_gcc eclipse/debian_jdk8 eclipse/debian_jre eclipse/dotnet_core eclipse/hadoop-dev eclipse/kotlin eclipse/node eclipse/php eclipse/php:5.6 eclipse/php:gae eclipse/selenium eclipse/ubuntu_android eclipse/ubuntu_go eclipse/ubuntu_jdk8 eclipse/ubuntu_jre eclipse/ubuntu_python:2.7 eclipse/ubuntu_python:gae_python2.7 eclipse/ubuntu_python:latest eclipse/ubuntu_rails kaloyanraev/che-zendserver registry.centos.org/che-stacks/centos-go registry.centos.org/che-stacks/centos-nodejs registry.centos.org/che-stacks/spring-boot registry.centos.org/che-stacks/vertx registry.centos.org/che-stacks/wildfly-swarm tomitribe/ubuntu_tomee_173_jdk8 registry.centos.org/che-stacks/centos-git)

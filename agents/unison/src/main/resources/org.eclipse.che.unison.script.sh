@@ -21,6 +21,7 @@ set_sudo_command() {
     if is_current_user_sudoer && ! is_current_user_root; then SUDO="sudo -E"; else unset SUDO; fi
 }
 
+set_sudo_command
 unset PACKAGES
 
 if [ -f /etc/centos-release ]; then

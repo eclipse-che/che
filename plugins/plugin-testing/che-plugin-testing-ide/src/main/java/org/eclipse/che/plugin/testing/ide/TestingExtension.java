@@ -77,8 +77,7 @@ public class TestingExtension {
             testAction.addContextMenuItems(testContextMenu);
             testContextMenu.addSeparator();
         }
-        testContextMenu.add(runTestAction);
-        testContextMenu.add(debugTestAction);
+
         explorerMenu.addSeparator();
         explorerMenu.add(testContextMenu);
         explorerMenu.addSeparator();

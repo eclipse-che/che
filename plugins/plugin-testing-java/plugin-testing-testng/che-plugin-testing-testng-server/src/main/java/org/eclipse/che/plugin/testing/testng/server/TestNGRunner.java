@@ -24,44 +24,48 @@ import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
+import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
+import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
-import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 
 /**
  * TestNG implementation for the test runner service.
  */
 public class TestNGRunner extends AbstractJavaTestRunner {
-    private static final String TESTNG_NAME         = "testng";
-    private static final String TEST_ANNOTATION_FQN = Test.class.getName();
-    private static final Logger LOG                 = LoggerFactory.getLogger(TestNGRunner.class);
+    private static final String TESTNG_NAME    = "testng";
+    private static final Logger LOG            = LoggerFactory.getLogger(TestNGRunner.class);
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+
     private       String                   workspacePath;
+    private       JavaTestFinder           javaTestFinder;
     private final ProjectClasspathProvider classpathProvider;
     private final TestNGSuiteUtil          suiteUtil;
 
     @Inject
     public TestNGRunner(@Named("che.user.workspaces.storage") String workspacePath,
+                        JavaTestFinder javaTestFinder,
                         ProjectClasspathProvider classpathProvider,
                         TestNGSuiteUtil suiteUtil) {
-        super(workspacePath);
+        super(workspacePath, javaTestFinder);
         this.workspacePath = workspacePath;
+        this.javaTestFinder = javaTestFinder;
         this.classpathProvider = classpathProvider;
         this.suiteUtil = suiteUtil;
     }
@@ -134,54 +138,47 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     }
 
     private File createSuite(TestExecutionContext context, IJavaProject javaProject) {
-        switch (context.getTestType()) {
+        List<String> testSuite = createTestSuite(context, javaProject, JavaTestAnnotations.TESTNG_TEST.getName(), "");
+
+        Map<String, List<String>> classes = buildTestNgSuite(testSuite, context);
+
+        return suiteUtil.writeSuite(System.getProperty(JAVA_IO_TMPDIR), javaProject.getElementName(), classes);
+    }
+
+    private Map<String, List<String>> buildTestNgSuite(List<String> tests, TestExecutionContext context) {
+        switch (context.getContextType()) {
             case FILE:
-                return createClassSuite(javaProject, context.getFilePath());
             case FOLDER:
-                return createPackageSuite(javaProject, context.getFilePath());
             case PROJECT:
-                return createProjectSuite(javaProject);
+                return createContainerSuite(tests);
             case CURSOR_POSITION:
-                return createMethodSuite(javaProject, context.getFilePath(), context.getCursorOffset());
+                return createMethodSuite(tests);
+            default:
+                return emptyMap();
+        }
+    }
+
+    private Map<String, List<String>> createMethodSuite(List<String> tests) {
+        if (tests.isEmpty()) {
+            return Collections.emptyMap();
         }
 
-        return null;
+        String testMethodDeclaration = tests.get(0);
+        int separatorIndex = testMethodDeclaration.indexOf('#');
+
+        return Collections.singletonMap(testMethodDeclaration.substring(0, separatorIndex),
+                                        singletonList(testMethodDeclaration.substring(separatorIndex + 1)));
     }
 
-    private File createMethodSuite(IJavaProject javaProject, String filePath, int cursorOffset) {
-        ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, filePath);
-        IType primaryType = compilationUnit.findPrimaryType();
-        String qualifiedName = primaryType.getFullyQualifiedName();
-        List<String> methods = new ArrayList<>();
-        try {
-            IJavaElement element = compilationUnit.getElementAt(cursorOffset);
-            if (element instanceof IMethod) {
-                IMethod method = (IMethod)element;
-                methods.add(method.getElementName());
-            }
-        } catch (JavaModelException e) {
-            LOG.debug("Can't read a method.", e);
+    private Map<String, List<String>> createContainerSuite(List<String> tests) {
+        if (tests.isEmpty()) {
+            return emptyMap();
         }
-        Map<String, List<String>> classes = Collections.singletonMap(qualifiedName, methods);
-        return suiteUtil.writeSuite(System.getProperty("java.io.tmpdir"), javaProject.getElementName(), classes);
-    }
-
-    private File createProjectSuite(IJavaProject javaProject) {
-        //TODO add suite to run all tests from project
-        return null;
-    }
-
-    private File createPackageSuite(IJavaProject javaProject, String packagePath) {
-        //TODO add suite to run all tests from package
-        return null;
-    }
-
-    private File createClassSuite(IJavaProject javaProject, String filePath) {
-        ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, filePath);
-        IType primaryType = compilationUnit.findPrimaryType();
-        String qualifiedName = primaryType.getFullyQualifiedName();
-        Map<String, List<String>> classes = Collections.singletonMap(qualifiedName, null);
-        return suiteUtil.writeSuite(System.getProperty("java.io.tmpdir"), javaProject.getElementName(), classes);
+        Map<String, List<String>> classes = new HashMap<>(tests.size());
+        for (String testClass : tests) {
+            classes.put(testClass, null);
+        }
+        return classes;
     }
 
     /**
@@ -194,45 +191,6 @@ public class TestNGRunner extends AbstractJavaTestRunner {
 
     @Override
     protected boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
-        try {
-            IAnnotation[] annotations = method.getAnnotations();
-            IAnnotation test = null;
-            for (IAnnotation annotation : annotations) {
-                if (annotation.getElementName().equals("Test")) {
-                    test = annotation;
-                    break;
-                }
-                if (annotation.getElementName().equals(TEST_ANNOTATION_FQN)) {
-                    return true;
-                }
-            }
-
-            if (test == null) {
-                return false;
-            }
-
-            IImportDeclaration[] imports = compilationUnit.getImports();
-            for (IImportDeclaration importDeclaration : imports) {
-                if (importDeclaration.getElementName().equals(TEST_ANNOTATION_FQN)) {
-                    return true;
-                }
-            }
-
-            for (IImportDeclaration importDeclaration : imports) {
-                if (importDeclaration.isOnDemand()) {
-                    String elementName = importDeclaration.getElementName();
-                    elementName = elementName.substring(0, elementName.length() - 3); //remove .*
-                    if (TEST_ANNOTATION_FQN.startsWith(elementName)) {
-                        return true;
-                    }
-
-                }
-            }
-
-            return false;
-        } catch (JavaModelException e) {
-            LOG.info("Can't read method annotations.", e);
-            return false;
-        }
+        return javaTestFinder.isTest(method, compilationUnit, JavaTestAnnotations.TESTNG_TEST.getName());
     }
 }

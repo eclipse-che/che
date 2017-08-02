@@ -1026,6 +1026,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-testing-junit-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-testing-junit-runtime</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -1042,6 +1047,11 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-testing-phpunit-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-testing-testng-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
