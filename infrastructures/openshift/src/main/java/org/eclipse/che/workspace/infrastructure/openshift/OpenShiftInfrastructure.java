@@ -21,7 +21,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftEnvironmentProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.InstallerConfigApplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,19 +31,19 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class OpenShiftInfrastructure extends RuntimeInfrastructure {
-    private final OpenShiftRuntimeContextFactory  runtimeContextFactory;
-    private final OpenShiftEnvironmentProvisioner envProvisioner;
-    private final OpenShiftEnvironmentParser      envParser;
+    private final OpenShiftRuntimeContextFactory runtimeContextFactory;
+    private final InstallerConfigApplier         installerConfigApplier;
+    private final OpenShiftEnvironmentParser     envParser;
 
     @Inject
     public OpenShiftInfrastructure(EventService eventService,
                                    OpenShiftRuntimeContextFactory runtimeContextFactory,
                                    OpenShiftEnvironmentParser envParser,
-                                   OpenShiftEnvironmentProvisioner envProvisioner) {
+                                   InstallerConfigApplier installerConfigApplier) {
         super("openshift", ImmutableSet.of("openshift"), eventService);
         this.runtimeContextFactory = runtimeContextFactory;
         this.envParser = envParser;
-        this.envProvisioner = envProvisioner;
+        this.installerConfigApplier = installerConfigApplier;
     }
 
     @Override
@@ -56,7 +56,8 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     public RuntimeContext prepare(RuntimeIdentity id, Environment environment) throws ValidationException,
                                                                                       InfrastructureException {
         OpenShiftEnvironment openShiftEnvironment = envParser.parse(environment);
-        envProvisioner.provision(environment, openShiftEnvironment, id);
+
+        installerConfigApplier.apply(id, environment, openShiftEnvironment);
 
         return runtimeContextFactory.create(environment,
                                             openShiftEnvironment,

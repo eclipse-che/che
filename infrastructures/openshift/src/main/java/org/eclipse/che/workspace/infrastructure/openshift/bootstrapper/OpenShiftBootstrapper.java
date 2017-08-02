@@ -28,7 +28,7 @@ import javax.inject.Named;
 import java.util.List;
 
 /**
- * Bootstraps installers in openshift machine.
+ * Bootstraps installers in OpenShift machine.
  *
  * @author Sergii Leshchenko
  */

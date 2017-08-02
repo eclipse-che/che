@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftClient;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -45,7 +46,7 @@ public class OpenShiftClientFactory {
         config.setTrustCerts(doTrustCerts);
     }
 
-    public DefaultOpenShiftClient create() {
+    public OpenShiftClient create() {
         return new DefaultOpenShiftClient(config);
     }
 }

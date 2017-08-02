@@ -55,7 +55,7 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
         this.websocketEndpointBase = websocketEndpointBase;
     }
 
-    /** Returns openshift environment which based on normalized context environment configuration. */
+    /** Returns OpenShift environment which based on normalized context environment configuration. */
     public OpenShiftEnvironment getOpenShiftEnvironment() {
         return openShiftEnvironment;
     }

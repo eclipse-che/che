@@ -18,14 +18,11 @@ import org.eclipse.che.api.workspace.server.OutputEndpoint;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Bootstraps installers.
@@ -33,10 +30,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Sergii Leshchenko
  */
 public abstract class AbstractBootstrapper {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractBootstrapper.class);
-
-    private static final AtomicInteger ENDPOINT_IDS = new AtomicInteger();
-
     private final String                                     machineName;
     private final int                                        bootstrappingTimeoutMinutes;
     private final EventService                               eventService;
