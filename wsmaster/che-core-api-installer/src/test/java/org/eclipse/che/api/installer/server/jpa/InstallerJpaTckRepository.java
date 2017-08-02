@@ -8,45 +8,38 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.user.server.jpa;
+package org.eclipse.che.api.installer.server.jpa;
 
 import com.google.inject.persist.Transactional;
 
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
-import org.eclipse.che.security.PasswordEncryptor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import java.util.Collection;
 
+/**
+ * @author Anatolii Bazko
+ */
 @Transactional
-public class UserJpaTckRepository implements TckRepository<UserImpl> {
+public class InstallerJpaTckRepository implements TckRepository<InstallerImpl> {
 
     @Inject
     private Provider<EntityManager> managerProvider;
 
-    @Inject
-    private PasswordEncryptor encryptor;
-
     @Override
-    public void createAll(Collection<? extends UserImpl> entities) throws TckRepositoryException {
+    public void createAll(Collection<? extends InstallerImpl> entities) throws TckRepositoryException {
         final EntityManager manager = managerProvider.get();
-        entities.stream()
-                .map(user -> new UserImpl(user.getId(),
-                                          user.getEmail(),
-                                          user.getName(),
-                                          encryptor.encrypt(user.getPassword()),
-                                          user.getAliases()))
-                .forEach(manager::persist);
+        entities.forEach(manager::persist);
     }
 
     @Override
     public void removeAll() throws TckRepositoryException {
         managerProvider.get()
-                       .createQuery("SELECT u FROM Usr u", UserImpl.class)
+                       .createQuery("SELECT i FROM Inst i", InstallerImpl.class)
                        .getResultList()
                        .forEach(managerProvider.get()::remove);
     }

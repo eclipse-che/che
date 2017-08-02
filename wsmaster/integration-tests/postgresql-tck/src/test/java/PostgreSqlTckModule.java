@@ -16,6 +16,10 @@ import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.installer.server.jpa.JpaInstallerDao;
+import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.api.installer.server.model.impl.InstallerServerConfigImpl;
+import org.eclipse.che.api.installer.server.spi.InstallerDao;
 import org.eclipse.che.api.recipe.JpaRecipeDao;
 import org.eclipse.che.api.recipe.RecipeDao;
 import org.eclipse.che.api.ssh.server.jpa.JpaSshDao;
@@ -111,7 +115,9 @@ public class PostgreSqlTckModule extends TckModule {
                                                                 ServerConfigImpl.class,
                                                                 StackImpl.class,
                                                                 CommandImpl.class,
-                                                                SshPairImpl.class)
+                                                                SshPairImpl.class,
+                                                                InstallerImpl.class,
+                                                                InstallerServerConfigImpl.class)
                                               .addEntityClass("org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
                                               .build());
         bind(TckResourcesCleaner.class).to(JpaCleaner.class);
@@ -151,6 +157,10 @@ public class PostgreSqlTckModule extends TckModule {
         bind(StackDao.class).to(JpaStackDao.class);
         bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
         bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
+
+        // installer
+        bind(InstallerDao.class).to(JpaInstallerDao.class);
+        bind(new TypeLiteral<TckRepository<InstallerImpl>>() {}).toInstance(new JpaTckRepository<>(InstallerImpl.class));
     }
 
     private static void waitConnectionIsEstablished(String dbUrl, String dbUser, String dbPassword) {

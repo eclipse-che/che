@@ -11,26 +11,90 @@
 package org.eclipse.che.api.installer.server.model.impl;
 
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Anatoliy Bazko
  */
+@Entity(name = "Inst")
+@NamedQueries(
+        {
+                @NamedQuery(name = "Inst.getAll",
+                            query = "SELECT i FROM Inst i"),
+                @NamedQuery(name = "Inst.getAllById",
+                            query = "SELECT i FROM Inst i WHERE i.id = :id"),
+                @NamedQuery(name = "Inst.getTotalCount",
+                            query = "SELECT COUNT(i) FROM Inst i")
+
+        }
+)
+@Table(name = "installer")
+@IdClass(InstallerFqn.class)
 public class InstallerImpl implements Installer {
-    private String                    id;
-    private String                    name;
-    private String                    version;
-    private String                    description;
-    private List<String>              dependencies;
-    private Map<String, String>       properties;
-    private String                    script;
-    private Map<String, ServerConfig> servers;
+    @Id
+    @Column(name = "id", nullable = false)
+    private String id;
+
+    @Column(name = "name")
+    private String name;
+
+    @Id
+    @Column(name = "version", nullable = false)
+    private String version;
+
+    @Column(name = "description")
+    private String description;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "dependency", nullable = false)
+    @CollectionTable(name = "installer_dependencies",
+                     joinColumns = {@JoinColumn(name = "installer_id", referencedColumnName = "id"),
+                                    @JoinColumn(name = "installer_version", referencedColumnName = "version")})
+    private List<String> dependencies;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "name")
+    @Column(name = "value", nullable = false)
+    @CollectionTable(name = "installer_properties",
+                     joinColumns = {@JoinColumn(name = "installer_id", referencedColumnName = "id"),
+                                    @JoinColumn(name = "installer_version", referencedColumnName = "version")})
+    private Map<String, String> properties;
+
+    @Column(name = "script")
+    private String script;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumns({@JoinColumn(name = "installer_id", referencedColumnName = "id"),
+                  @JoinColumn(name = "installer_version", referencedColumnName = "version")})
+    @MapKeyColumn(name = "server_key")
+    private Map<String, InstallerServerConfigImpl> servers;
+
+    public InstallerImpl() {
+    }
 
     public InstallerImpl(String id,
                          String name,
@@ -42,13 +106,24 @@ public class InstallerImpl implements Installer {
                          Map<String, ? extends ServerConfig> servers) {
         this.id = id;
         this.name = name;
-        this.version = version;
+        this.version = version == null ? InstallerFqn.DEFAULT_VERSION : version;
         this.description = description;
         this.dependencies = dependencies;
         this.properties = properties;
         this.script = script;
         if (servers != null) {
-            this.servers = new HashMap<>(servers);
+            this.servers = servers.entrySet()
+                                  .stream()
+                                  .collect(Collectors.toMap(Map.Entry::getKey,
+                                                            e -> {
+                                                                ServerConfig serverConfig = e.getValue();
+                                                                return new InstallerServerConfigImpl(id,
+                                                                                                     version,
+                                                                                                     serverConfig.getPort(),
+                                                                                                     serverConfig.getProtocol(),
+                                                                                                     serverConfig.getPath());
+                                                            }));
+
         }
     }
 
@@ -68,9 +143,17 @@ public class InstallerImpl implements Installer {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -78,9 +161,17 @@ public class InstallerImpl implements Installer {
         return version;
     }
 
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
     @Override
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
@@ -91,12 +182,20 @@ public class InstallerImpl implements Installer {
         return dependencies;
     }
 
+    public void setDependencies(List<String> dependencies) {
+        this.dependencies = dependencies;
+    }
+
     @Override
     public Map<String, String> getProperties() {
         if (properties == null) {
             properties = new HashMap<>();
         }
         return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 
     @Override
@@ -114,6 +213,10 @@ public class InstallerImpl implements Installer {
             servers = new HashMap<>();
         }
         return servers;
+    }
+
+    public void setServers(Map<String, InstallerServerConfigImpl> servers) {
+        this.servers = servers;
     }
 
     @Override

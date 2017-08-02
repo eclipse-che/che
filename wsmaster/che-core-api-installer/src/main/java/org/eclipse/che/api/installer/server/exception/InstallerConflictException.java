@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.api.installer.server.exception;
 
-import org.eclipse.che.api.core.BadRequestException;
-
 /**
- * @author Sergii Leshchenko
+ * Installer conflict error.
+ *
+ * @author Anatolii Bazko
  */
-public class IllegalInstallerKey extends RuntimeException {
-    public IllegalInstallerKey(String message) {
+public class InstallerConflictException extends InstallerException {
+    public InstallerConflictException(String message) {
         super(message);
     }
 
-    public IllegalInstallerKey(String message, BadRequestException cause) {
+    public InstallerConflictException(String message, Throwable cause) {
         super(message, cause);
     }
 }

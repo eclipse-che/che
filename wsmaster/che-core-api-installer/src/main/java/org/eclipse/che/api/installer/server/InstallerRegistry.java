@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.installer.server;
 
-import org.eclipse.che.api.installer.server.exception.IllegalInstallerKey;
+import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
+import org.eclipse.che.api.installer.server.exception.InstallerConflictException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
+import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
 import java.util.Collection;
@@ -28,12 +30,47 @@ import java.util.List;
 public interface InstallerRegistry {
 
     /**
+     * Adds installer to the registry.
+     *
+     * @param installer
+     *      the installer to add
+     * @throws InstallerConflictException
+     *         if installer with corresponding {@link InstallerFqn} already exists
+     * @throws InstallerException
+     *         if unexpected error occurred
+     */
+    void add(Installer installer) throws InstallerException;
+
+    /**
+     * Updates installer in the registry.
+     *
+     * @param installer
+     *      the installer to update
+     * @throws InstallerNotFoundException
+     *         if installer with corresponding {@link InstallerFqn} does not exist in the registry
+     * @throws InstallerException
+     *         if unexpected error occurred
+     */
+    void update(Installer installer) throws InstallerException;
+
+    /**
+     * Removes installer from the registry.
+     *
+     * @param fqn
+     *      the installer fully-qualified key
+     *      {@link InstallerFqn}
+     * @throws InstallerException
+     *         if unexpected error occurred
+     */
+    void remove(InstallerFqn fqn) throws InstallerException;
+
+    /**
      * Gets {@link Installer} by key.
      *
      * @param installerKey
      *         the installer key
      * @return {@link Installer}
-     * @throws IllegalInstallerKey
+     * @throws IllegalInstallerKeyException
      *         if specified installer key has wrong format
      * @throws InstallerNotFoundException
      *         if installer not found in the registry
@@ -72,7 +109,7 @@ public interface InstallerRegistry {
      * @param installers
      *         installers to fetch dependencies and order
      * @return list of installers
-     * @throws IllegalInstallerKey
+     * @throws IllegalInstallerKeyException
      *         if specified installer key has wrong format
      * @throws InstallerNotFoundException
      *         if some of specified installer is not found in the registry

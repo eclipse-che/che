@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.api.installer.server.exception;
 
+import org.eclipse.che.api.core.BadRequestException;
+
 /**
- * Base class for all installer errors.
- *
- * @author Anatoliy Bazko
+ * @author Sergii Leshchenko
  */
-public class InstallerException extends Exception {
-    public InstallerException(String message) {
+public class IllegalInstallerKeyException extends InstallerException {
+    public IllegalInstallerKeyException(String message) {
         super(message);
     }
 
-    public InstallerException(String message, Throwable cause) {
+    public IllegalInstallerKeyException(String message, BadRequestException cause) {
         super(message, cause);
     }
 }

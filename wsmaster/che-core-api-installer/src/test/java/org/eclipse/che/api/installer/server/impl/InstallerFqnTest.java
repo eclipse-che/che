@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.installer.server.impl;
 
-import org.eclipse.che.api.installer.server.exception.IllegalInstallerKey;
-import org.eclipse.che.api.installer.server.impl.LocalInstallerRegistry.InstallerFqn;
+import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -23,7 +22,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class InstallerFqnTest {
     @Test
-    public void testInstallerFqnWithIdAndVersion() {
+    public void testInstallerFqnWithIdAndVersion() throws Exception {
         InstallerFqn installerFqn = InstallerFqn.parse("id:1");
 
         assertEquals(installerFqn.getId(), "id");
@@ -31,15 +30,15 @@ public class InstallerFqnTest {
     }
 
     @Test
-    public void testParseInstallerFqnWithId() {
+    public void testParseInstallerFqnWithId() throws Exception {
         InstallerFqn agentKey = InstallerFqn.parse("id");
 
         assertEquals(agentKey.getId(), "id");
         assertEquals(agentKey.getVersion(), "latest");
     }
 
-    @Test(expectedExceptions = IllegalInstallerKey.class)
-    public void testParseInstallerFqnFails() {
+    @Test(expectedExceptions = IllegalInstallerKeyException.class)
+    public void testParseInstallerFqnFails() throws Exception {
         InstallerFqn.parse("id:1:2");
     }
 }
