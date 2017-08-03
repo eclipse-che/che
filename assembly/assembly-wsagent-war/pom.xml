@@ -22,6 +22,11 @@
     <packaging>war</packaging>
     <name>Che Workspace Agent War Packaging</name>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-wsagent-core</artifactId>
