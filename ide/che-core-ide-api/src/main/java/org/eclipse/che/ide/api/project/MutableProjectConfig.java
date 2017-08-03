@@ -20,6 +20,7 @@ import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 
@@ -55,7 +56,7 @@ public class MutableProjectConfig implements ProjectConfig {
 
     @Override
     public String getName() {
-        return name;
+        return firstNonNull(name, "");
     }
 
     public void setName(String name) {
@@ -64,7 +65,7 @@ public class MutableProjectConfig implements ProjectConfig {
 
     @Override
     public String getPath() {
-        return path;
+        return firstNonNull(path, "");
     }
 
     public void setPath(String path) {
@@ -73,7 +74,7 @@ public class MutableProjectConfig implements ProjectConfig {
 
     @Override
     public String getDescription() {
-        return description;
+        return firstNonNull(description, "");
     }
 
     public void setDescription(String description) {
@@ -82,7 +83,7 @@ public class MutableProjectConfig implements ProjectConfig {
 
     @Override
     public String getType() {
-        return type;
+        return firstNonNull(type, "");
     }
 
     public void setType(String type) {
@@ -91,11 +92,7 @@ public class MutableProjectConfig implements ProjectConfig {
 
     @Override
     public List<String> getMixins() {
-        if (mixins == null) {
-            mixins = newArrayList();
-        }
-
-        return mixins;
+        return firstNonNull(mixins, newArrayList());
     }
 
     public void setMixins(List<String> mixins) {
@@ -104,11 +101,7 @@ public class MutableProjectConfig implements ProjectConfig {
 
     @Override
     public Map<String, List<String>> getAttributes() {
-        if (attributes == null) {
-            attributes = newHashMap();
-        }
-
-        return attributes;
+        return firstNonNull(attributes, newHashMap());
     }
 
     public void setAttributes(Map<String, List<String>> attributes) {
@@ -117,11 +110,7 @@ public class MutableProjectConfig implements ProjectConfig {
 
     @Override
     public MutableSourceStorage getSource() {
-        if (sourceStorage == null) {
-            sourceStorage = new MutableSourceStorage();
-        }
-
-        return sourceStorage;
+        return firstNonNull(sourceStorage, new MutableSourceStorage());
     }
 
     public void setSource(SourceStorage sourceStorage) {
@@ -129,23 +118,17 @@ public class MutableProjectConfig implements ProjectConfig {
     }
 
     public Map<String, String> getOptions() {
-        if (options == null) {
-            options = newHashMap();
-        }
-        return options;
+        return firstNonNull(options, newHashMap());
     }
 
     public void setOptions(Map<String, String> options) {
         this.options = options;
     }
-    
+
     public List<CommandDto> getCommands() {
-        if (commands == null) {
-            commands = newArrayList();
-        }
-        return commands;
+        return firstNonNull(commands, newArrayList());
     }
-    
+
     public void setCommands(List<CommandDto> commands) {
         this.commands = commands;
     }
@@ -156,10 +139,7 @@ public class MutableProjectConfig implements ProjectConfig {
      * @return the list of {@link NewProjectConfig} to creating projects
      */
     public List<NewProjectConfig> getProjects() {
-        if (projects == null) {
-            return newArrayList();
-        }
-        return projects;
+        return firstNonNull(projects, newArrayList());
     }
 
     /**
@@ -188,7 +168,7 @@ public class MutableProjectConfig implements ProjectConfig {
 
         @Override
         public String getType() {
-            return type;
+            return firstNonNull(type, "");
         }
 
         public void setType(String type) {
@@ -197,7 +177,7 @@ public class MutableProjectConfig implements ProjectConfig {
 
         @Override
         public String getLocation() {
-            return location;
+            return firstNonNull(location, "");
         }
 
         public void setLocation(String location) {
@@ -206,11 +186,7 @@ public class MutableProjectConfig implements ProjectConfig {
 
         @Override
         public Map<String, String> getParameters() {
-            if (parameters == null) {
-                parameters = newHashMap();
-            }
-
-            return parameters;
+            return firstNonNull(parameters, newHashMap());
         }
 
         public void setParameters(Map<String, String> parameters) {
