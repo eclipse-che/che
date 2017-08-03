@@ -8,22 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.wsagent.server;
+package org.eclipse.che.plugin.activity;
 
 import com.google.inject.servlet.ServletModule;
 
 import org.eclipse.che.inject.DynaModule;
-import org.everrest.websockets.WSConnectionTracker;
 
 /**
- * General binding that may be reused by other basic assembly
- *
- * @author Sergii Kabashiuk
+ * @author Mihail Kuznyetsov
  */
 @DynaModule
-public class WsAgentServletModule extends ServletModule {
+public class ActivityServletModule extends ServletModule {
+
     @Override
     protected void configureServlets() {
-        getServletContext().addListener(new WSConnectionTracker());
+        filter("/*").through(org.eclipse.che.plugin.activity.LastAccessTimeFilter.class);
     }
 }

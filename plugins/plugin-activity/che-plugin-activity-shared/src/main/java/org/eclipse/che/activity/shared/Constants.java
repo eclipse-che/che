@@ -8,22 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.wsagent.server;
-
-import com.google.inject.servlet.ServletModule;
-
-import org.eclipse.che.inject.DynaModule;
-import org.everrest.websockets.WSConnectionTracker;
+package org.eclipse.che.activity.shared;
 
 /**
- * General binding that may be reused by other basic assembly
+ * Workspace activity constants.
  *
- * @author Sergii Kabashiuk
+ * @author Mykhailo Kuznietsov
  */
-@DynaModule
-public class WsAgentServletModule extends ServletModule {
-    @Override
-    protected void configureServlets() {
-        getServletContext().addListener(new WSConnectionTracker());
+public final class Constants {
+
+    public static final String ACTIVITY_CHECKER     = "activity-checker";
+
+    private Constants() {
     }
 }

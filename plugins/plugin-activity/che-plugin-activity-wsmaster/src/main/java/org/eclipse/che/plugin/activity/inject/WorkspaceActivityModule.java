@@ -8,22 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.wsagent.server;
+package org.eclipse.che.plugin.activity.inject;
 
-import com.google.inject.servlet.ServletModule;
+import com.google.inject.AbstractModule;
 
-import org.eclipse.che.inject.DynaModule;
-import org.everrest.websockets.WSConnectionTracker;
+import org.eclipse.che.plugin.activity.WorkspaceActivityManager;
+import org.eclipse.che.plugin.activity.WorkspaceActivityService;
 
-/**
- * General binding that may be reused by other basic assembly
- *
- * @author Sergii Kabashiuk
- */
-@DynaModule
-public class WsAgentServletModule extends ServletModule {
+public class WorkspaceActivityModule extends AbstractModule {
+
     @Override
-    protected void configureServlets() {
-        getServletContext().addListener(new WSConnectionTracker());
+    protected void configure() {
+        bind(WorkspaceActivityService.class);
+        bind(WorkspaceActivityManager.class);
     }
 }
