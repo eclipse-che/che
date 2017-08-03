@@ -39,7 +39,7 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/logs:/logs'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/che:/conf'
 <% if scope.lookupvar('che::che_multiuser') == 'true' -%>
-      - '<%= scope.lookupvar('che::che_instance') -%>/config/che/server.xml:/home/user/eclipse-che-5.16.0-SNAPSHOT/tomcat/conf/server.xml'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/che/server.xml:/home/user/eclipse-che/tomcat/conf/server.xml'
 <% end -%>
 <% if scope.lookupvar('che::che_dev_env') == 'on' -%>
       - '<%= scope.lookupvar('che::che_assembly') -%>:/assembly'

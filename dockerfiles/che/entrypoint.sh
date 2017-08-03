@@ -214,7 +214,7 @@ init() {
     export CHE_HOME="/assembly"
   else
     echo "Using embedded assembly..."
-    export CHE_HOME=$(echo /home/user/eclipse-che-*)
+    export CHE_HOME=$(echo /home/user/eclipse-che/)
   fi
 
   ### Are we using the included assembly or did user provide their own?
