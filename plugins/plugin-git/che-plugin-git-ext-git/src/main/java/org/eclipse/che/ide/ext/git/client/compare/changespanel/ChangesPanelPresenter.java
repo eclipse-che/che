@@ -118,12 +118,15 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
                                                             : locale.changeListGroupByDirectoryButtonText());
     }
 
-    public interface FileNodeDoubleClickHandler {
-        void onFileNodeDoubleClicked(String path, final Status status);
-    }
-
     public void setFileNodeDoubleClickHandler(FileNodeDoubleClickHandler fileNodeDoubleClickHandler) {
         this.fileNodeDoubleClickHandler = fileNodeDoubleClickHandler;
+    }
+
+    /**
+     * Describes behaviour on double click action on a selected path.
+     */
+    public interface FileNodeDoubleClickHandler {
+        void onFileNodeDoubleClicked(String path, final Status status);
     }
 
 }
