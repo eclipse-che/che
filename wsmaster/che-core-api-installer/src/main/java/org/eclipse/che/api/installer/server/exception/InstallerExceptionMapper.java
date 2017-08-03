@@ -20,8 +20,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 /**
- * @author andrew00x
- * @author gazarenkov
+ * @author Anatolii Bazko
  */
 @Provider
 @Singleton
