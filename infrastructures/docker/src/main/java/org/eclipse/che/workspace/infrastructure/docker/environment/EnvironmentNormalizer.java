@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.RecipeDownloader;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.workspace.infrastructure.docker.ContainerNameGenerator;
+import org.eclipse.che.workspace.infrastructure.docker.container.ContainerNameGenerator;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
@@ -36,19 +36,16 @@ public class EnvironmentNormalizer {
     private final RecipeDownloader       recipeDownloader;
     private final Pattern                recipeApiPattern;
     private final ContainerNameGenerator containerNameGenerator;
-    private final long                   defaultMachineMemorySizeBytes;
 
     @Inject
     public EnvironmentNormalizer(RecipeDownloader recipeDownloader,
                                  @Named("che.api") String apiEndpoint,
-                                 ContainerNameGenerator containerNameGenerator,
-                                 @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
+                                 ContainerNameGenerator containerNameGenerator) {
         this.recipeDownloader = recipeDownloader;
         this.recipeApiPattern = Pattern.compile("(^https?" +
                                                 apiEndpoint.substring(apiEndpoint.indexOf(":")) +
                                                 "/recipe/.*$)|(^/recipe/.*$)");
         this.containerNameGenerator = containerNameGenerator;
-        this.defaultMachineMemorySizeBytes = defaultMachineMemorySizeMB * 1_024 * 1_024;
     }
 
     public void normalize(Environment environment, DockerEnvironment dockerEnvironment, RuntimeIdentity identity)
@@ -125,10 +122,7 @@ public class EnvironmentNormalizer {
                            String workspaceId,
                            String machineName,
                            DockerContainerConfig container) throws InfrastructureException {
-        // set default mem limit for container if it is not set
-        if (container.getMemLimit() == null || container.getMemLimit() == 0) {
-            container.setMemLimit(defaultMachineMemorySizeBytes);
-        }
+
         // download dockerfile if it is hosted by API to avoid problems with unauthorized requests from docker daemon
         if (container.getBuild() != null &&
             container.getBuild().getContext() != null &&

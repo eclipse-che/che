@@ -51,9 +51,9 @@ public class DockerfileEnvironmentParser implements DockerConfigSourceSpecificEn
         cheContainerEnv.getContainers().put(getMachineName(environment), container);
 
         if (recipe.getLocation() != null) {
-            container.setBuild(new DockerBuildContext().withContext(recipe.getLocation()));
+            container.setBuild(new DockerBuildContext().setContext(recipe.getLocation()));
         } else {
-            container.setBuild(new DockerBuildContext().withDockerfileContent(recipe.getContent()));
+            container.setBuild(new DockerBuildContext().setDockerfileContent(recipe.getContent()));
         }
 
         return cheContainerEnv;

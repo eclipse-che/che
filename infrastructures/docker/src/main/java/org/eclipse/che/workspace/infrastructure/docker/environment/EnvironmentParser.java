@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -35,12 +36,6 @@ import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator
  * @author Alexander Andrienko
  */
 public class EnvironmentParser {
-
-    protected static final String SERVER_CONF_LABEL_PREFIX          = "che:server:";
-    protected static final String SERVER_CONF_LABEL_REF_SUFFIX      = ":ref";
-    protected static final String SERVER_CONF_LABEL_PROTOCOL_SUFFIX = ":protocol";
-    protected static final String SERVER_CONF_LABEL_PATH_SUFFIX     = ":path";
-
     private final Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers;
 
     @Inject
@@ -105,31 +100,15 @@ public class EnvironmentParser {
         container.setExpose(container.getExpose()
                                      .stream()
                                      .map(expose -> expose.contains("/") ?
-                                                expose :
-                                                expose + "/tcp")
+                                                    expose :
+                                                    expose + "/tcp")
                                      .collect(toList()));
-        machineConfig.getServers().forEach((serverRef, serverConf) -> {
-            String normalizedPort = serverConf.getPort().contains("/") ?
-                                    serverConf.getPort() :
-                                    serverConf.getPort() + "/tcp";
+        for (ServerConfig serverConfig : machineConfig.getServers().values()) {
+            String normalizedPort = serverConfig.getPort().contains("/") ?
+                                    serverConfig.getPort() :
+                                    serverConfig.getPort() + "/tcp";
 
             container.getExpose().add(normalizedPort);
-
-            String portLabelPrefix = SERVER_CONF_LABEL_PREFIX + normalizedPort;
-
-            container.getLabels().put(portLabelPrefix +
-                                      SERVER_CONF_LABEL_REF_SUFFIX,
-                                      serverRef);
-            if (serverConf.getPath() != null) {
-                container.getLabels().put(portLabelPrefix +
-                                          SERVER_CONF_LABEL_PATH_SUFFIX,
-                                          serverConf.getPath());
-            }
-            if (serverConf.getProtocol() != null) {
-                container.getLabels().put(portLabelPrefix +
-                                          SERVER_CONF_LABEL_PROTOCOL_SUFFIX,
-                                          serverConf.getProtocol());
-            }
-        });
+        }
     }
 }

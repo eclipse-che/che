@@ -22,7 +22,6 @@
     <packaging>pom</packaging>
     <name>Che IDE :: Assemblies Tomcat</name>
     <dependencies>
-        <!-- FIXME: spi -->
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-ide-war</artifactId>

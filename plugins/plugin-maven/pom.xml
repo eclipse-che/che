@@ -29,7 +29,6 @@
         <module>che-plugin-maven-shared</module>
         <module>che-plugin-maven-ide</module>
         <module>che-plugin-maven-server</module>
-        <module>che-plugin-maven-wsmaster</module>
     </modules>
     <!-- skip tests on Windows -->
     <profiles>

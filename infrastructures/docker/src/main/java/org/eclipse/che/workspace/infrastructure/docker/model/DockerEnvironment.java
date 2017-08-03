@@ -47,11 +47,10 @@ public class DockerEnvironment {
         return containers;
     }
 
-    public void setContainers(Map<String, DockerContainerConfig> containers) {
-        this.containers = containers;
-    }
-
-    public DockerEnvironment withContainers(Map<String, DockerContainerConfig> containers) {
+    public DockerEnvironment setContainers(Map<String, DockerContainerConfig> containers) {
+        if (containers != null) {
+            containers = new HashMap<>(containers);
+        }
         this.containers = containers;
         return this;
     }
@@ -60,11 +59,7 @@ public class DockerEnvironment {
         return network;
     }
 
-    public void setNetwork(String network) {
-        this.network = network;
-    }
-
-    public DockerEnvironment withNetwork(String network) {
+    public DockerEnvironment setNetwork(String network) {
         this.network = network;
         return this;
     }

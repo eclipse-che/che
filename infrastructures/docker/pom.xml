@@ -194,6 +194,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
+                        <!--TODO remove this after removal of strategies-->
                         <!-- Exclude files until #3281 is resolved -->
                         <exclude>**/ServerEvaluationStrategyProvider.java</exclude>
                         <exclude>**/ServerEvaluationStrategy.java</exclude>
@@ -204,8 +205,6 @@
                         <exclude>**/LocalDockerServerEvaluationStrategyTest.java</exclude>
                         <exclude>**/LocalDockerCustomServerEvaluationStrategy.java</exclude>
                         <exclude>**/LocalDockerCustomServerEvaluationStrategyTest.java</exclude>
-                        <exclude>**/DockerInstanceRuntimeInfo.java</exclude>
-                        <exclude>**/DockerInstanceRuntimeInfoTest.java</exclude>
                         <!-- End excluded files -->
                     </excludes>
                 </configuration>
