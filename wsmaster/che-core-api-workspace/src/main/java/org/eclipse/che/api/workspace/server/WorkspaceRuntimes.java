@@ -49,6 +49,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -442,6 +443,19 @@ public class WorkspaceRuntimes {
      */
     public boolean isAnyRunning() {
         return !runtimes.isEmpty();
+    }
+
+    /**
+     * Returns an optional wrapping the runtime context of the workspace
+     * with the given identifier, an empty optional is returned in case
+     * the workspace doesn't have the runtime.
+     */
+    public Optional<RuntimeContext> getRuntimeContext(String id) {
+        RuntimeState state = runtimes.get(id);
+        if (state == null) {
+            return Optional.empty();
+        }
+        return Optional.of(state.runtime.getContext());
     }
 
     private class CleanupRuntimeOnAbnormalRuntimeStop implements EventSubscriber<RuntimeStatusEvent> {

@@ -12,18 +12,15 @@ package org.eclipse.che.api.workspace.shared.dto;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
 import java.util.Map;
 
 /**
  * @author Yevhenii Voevodin
  */
 @DTO
-public interface WorkspaceDto extends Workspace, Hyperlinks {
+public interface WorkspaceDto extends Workspace {
 
     @Override
     WorkspaceConfigDto getConfig();
@@ -59,6 +56,9 @@ public interface WorkspaceDto extends Workspace, Hyperlinks {
 
     WorkspaceDto withAttributes(Map<String, String> attributes);
 
-    @Override
-    WorkspaceDto withLinks(List<Link> links);
+    Map<String, String> getLinks();
+
+    void setLinks(Map<String, String> links);
+
+    WorkspaceDto withLinks(Map<String, String> links);
 }
