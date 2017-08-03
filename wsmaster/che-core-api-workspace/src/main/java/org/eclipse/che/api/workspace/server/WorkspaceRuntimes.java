@@ -28,6 +28,7 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
@@ -339,6 +340,10 @@ public class WorkspaceRuntimes {
                 }
             } catch (UnsupportedOperationException x) {
                 LOG.warn("Not recoverable infrastructure: '{}'", infra.getName());
+            } catch (InternalInfrastructureException x) {
+                LOG.error(
+                        "An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
+                        infra.getName(), x);
             } catch (ServerException | InfrastructureException x) {
                 LOG.error("An error occurred while attempted to recover runtimes using infrastructure '{}'. Reason: '{}'",
                           infra.getName(), x.getMessage());

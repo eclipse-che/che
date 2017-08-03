@@ -48,13 +48,13 @@ public class CgroupOOMDetector implements DockerOOMDetector {
 
     @Inject
     public CgroupOOMDetector(DockerConnectorConfiguration connectorConfiguration,
-                             DockerConnectorProvider dockerProvider) {
-        this(connectorConfiguration.getDockerDaemonUri(), dockerProvider);
+                             DockerConnector docker) {
+        this(connectorConfiguration.getDockerDaemonUri(), docker);
     }
 
-    public CgroupOOMDetector(URI dockerDaemonUri, DockerConnectorProvider dockerConnectorProvider) {
+    public CgroupOOMDetector(URI dockerDaemonUri, DockerConnector dockerConnector) {
         this.dockerDaemonUri = dockerDaemonUri;
-        this.dockerConnector = dockerConnectorProvider.get();
+        this.dockerConnector = dockerConnector;
         this.oomDetectors = new ConcurrentHashMap<>();
         this.executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("CgroupOOMDetector-%d")
                                                                                 .setUncaughtExceptionHandler(

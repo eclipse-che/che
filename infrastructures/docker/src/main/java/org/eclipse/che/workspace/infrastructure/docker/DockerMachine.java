@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.docker.DockerRegistryClient.MACHINE_SNAPSHOT_PREFIX;
+import static org.eclipse.che.workspace.infrastructure.docker.registry.DockerRegistryClient.MACHINE_SNAPSHOT_PREFIX;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -153,16 +153,17 @@ public class DockerMachine implements Machine {
     public void destroy() throws InfrastructureException {
         dockerMachineStopDetector.stopDetection(container);
         try {
-            docker.removeContainer(RemoveContainerParams.create(this.container)
+            docker.removeContainer(RemoveContainerParams.create(container)
                                                         .withRemoveVolumes(true)
                                                         .withForce(true));
         } catch (IOException e) {
             throw new InternalInfrastructureException(e.getMessage(), e);
         }
         try {
-            docker.removeImage(RemoveImageParams.create(this.image).withForce(false));
+            docker.removeImage(RemoveImageParams.create(image).withForce(false));
         } catch (IOException e) {
-            LOG.error("IOException during destroy(). Ignoring.");
+            // TODO make log level warning if we ignoring it or remove ignoring phrase
+            LOG.error("IOException during destroy(). Ignoring.", e);
         }
     }
 

@@ -16,11 +16,10 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /**
- * Modifies environment of workspace with everything needed for infrastructure of workspaces in CHE.
+ * Modifies environment of workspace with everything needed for runtime infrastructure to run.
  *
  * @author Alexander Garagatyi
  */
-// TODO rename to not interfere with main class
 public interface InfrastructureProvisioner {
     /**
      * Modifies environment config and internal environment representation

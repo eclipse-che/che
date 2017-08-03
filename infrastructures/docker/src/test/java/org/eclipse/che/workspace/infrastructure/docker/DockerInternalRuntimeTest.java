@@ -26,10 +26,14 @@ import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapper;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.docker.logs.MachineLoggersFactory;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
+import org.eclipse.che.workspace.infrastructure.docker.network.NetworkLifecycle;
+import org.eclipse.che.workspace.infrastructure.docker.registry.DockerRegistryClient;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -50,7 +54,6 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUN
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STOPPED;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -134,7 +137,7 @@ public class DockerInternalRuntimeTest {
         mockContainerStart();
         dockerRuntime.start(emptyMap());
 
-        verify(starter, times(2)).startContainer(anyString(), anyString(), any(), any(), anyBoolean(), any());
+        verify(starter, times(2)).startContainer(anyString(), anyString(), any(), any(), any());
         verify(eventService, times(4)).publish(any(MachineStatusEvent.class));
         verifyEventsOrder(newEvent(DEV_MACHINE, STARTING, null),
                           newEvent(DEV_MACHINE, RUNNING, null),
@@ -151,7 +154,7 @@ public class DockerInternalRuntimeTest {
         try {
             dockerRuntime.start(emptyMap());
         } catch (InfrastructureException ex) {
-            verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), anyBoolean(), any());
+            verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), any());
             verify(eventService, times(2)).publish(any(MachineStatusEvent.class));
             verifyEventsOrder(newEvent(DEV_MACHINE, STARTING, null),
                               newEvent(DEV_MACHINE, FAILED, msg));
@@ -166,7 +169,7 @@ public class DockerInternalRuntimeTest {
         try {
             dockerRuntime.start(emptyMap());
         } catch (InfrastructureException ex) {
-            verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), anyBoolean(), any());
+            verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), any());
             verify(bootstrapper, times(1)).bootstrap();
             verify(eventService, times(3)).publish(any(MachineStatusEvent.class));
             verifyEventsOrder(newEvent(DEV_MACHINE, STARTING, null),
@@ -183,7 +186,7 @@ public class DockerInternalRuntimeTest {
         try {
             dockerRuntime.start(emptyMap());
         } catch (InfrastructureException ex) {
-            verify(starter, never()).startContainer(anyString(), anyString(), any(), any(), anyBoolean(), any());
+            verify(starter, never()).startContainer(anyString(), anyString(), any(), any(), any());
             throw ex;
         }
     }
@@ -196,7 +199,7 @@ public class DockerInternalRuntimeTest {
         try {
             dockerRuntime.start(emptyMap());
         } catch (InfrastructureException ex) {
-            verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), anyBoolean(), any());
+            verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), any());
             throw ex;
         }
     }
@@ -212,13 +215,12 @@ public class DockerInternalRuntimeTest {
                                         anyString(),
                                         any(DockerContainerConfig.class),
                                         any(RuntimeIdentity.class),
-                                        anyBoolean(),
                                         any(AbnormalMachineStopHandler.class));
 
         try {
             dockerRuntime.start(emptyMap());
         } catch (InfrastructureException ex) {
-            verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), anyBoolean(), any());
+            verify(starter, times(1)).startContainer(anyString(), anyString(), any(), any(), any());
             throw ex;
         }
     }
@@ -257,7 +259,6 @@ public class DockerInternalRuntimeTest {
                                     anyString(),
                                     any(DockerContainerConfig.class),
                                     any(RuntimeIdentity.class),
-                                    anyBoolean(),
                                     any(AbnormalMachineStopHandler.class))).thenReturn(mock(DockerMachine.class));
     }
 
@@ -266,7 +267,6 @@ public class DockerInternalRuntimeTest {
                                     anyString(),
                                     any(DockerContainerConfig.class),
                                     any(RuntimeIdentity.class),
-                                    anyBoolean(),
                                     any(AbnormalMachineStopHandler.class)))
                 .thenThrow(exception);
     }

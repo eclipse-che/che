@@ -20,10 +20,13 @@ import java.util.Objects;
  * @author Alexander Garagatyi
  */
 public class DockerBuildContext {
-    private String             context;
-    private String             dockerfilePath;
-    private String             dockerfileContent;
-    private Map<String,String> args;
+    private Map<String, String> args;
+    private String              context;
+    private String              dockerfilePath;
+    private String              dockerfileContent;
+    private Long                cpuPeriod;
+    private Long                cpuQuota;
+    private String              cpuSet;
 
     public DockerBuildContext() {}
 
@@ -44,6 +47,9 @@ public class DockerBuildContext {
              buildContext.getDockerfilePath(),
              buildContext.getDockerfileContent(),
              buildContext.getArgs());
+        this.cpuPeriod = buildContext.getCpuPeriod();
+        this.cpuQuota = buildContext.getCpuQuota();
+        this.cpuSet = buildContext.getCpuSet();
     }
 
     /**
@@ -55,11 +61,7 @@ public class DockerBuildContext {
         return context;
     }
 
-    public void setContext(String context) {
-        this.context = context;
-    }
-
-    public DockerBuildContext withContext(String context) {
+    public DockerBuildContext setContext(String context) {
         this.context = context;
         return this;
     }
@@ -74,11 +76,7 @@ public class DockerBuildContext {
         return dockerfilePath;
     }
 
-    public void setDockerfilePath(String dockerfilePath) {
-        this.dockerfilePath = dockerfilePath;
-    }
-
-    public DockerBuildContext withDockerfilePath(String dockerfilePath) {
+    public DockerBuildContext setDockerfilePath(String dockerfilePath) {
         this.dockerfilePath = dockerfilePath;
         return this;
     }
@@ -92,11 +90,7 @@ public class DockerBuildContext {
         return dockerfileContent;
     }
 
-    public void setDockerfileContent(String dockerfileContent) {
-        this.dockerfileContent = dockerfileContent;
-    }
-
-    public DockerBuildContext withDockerfileContent(String dockerfileContent) {
+    public DockerBuildContext setDockerfileContent(String dockerfileContent) {
         this.dockerfileContent = dockerfileContent;
         return this;
     }
@@ -111,12 +105,38 @@ public class DockerBuildContext {
         return args;
     }
 
-    public void setArgs(Map<String,String> args) {
+    public DockerBuildContext setArgs(Map<String,String> args) {
+        if (args != null) {
+            args = new HashMap<>(args);
+        }
         this.args = args;
+        return this;
     }
 
-    public DockerBuildContext withArgs(Map<String,String> args) {
-        this.args = args;
+    public Long getCpuPeriod() {
+        return cpuPeriod;
+    }
+
+    public DockerBuildContext setCpuPeriod(Long cpuPeriod) {
+        this.cpuPeriod = cpuPeriod;
+        return this;
+    }
+
+    public Long getCpuQuota() {
+        return cpuQuota;
+    }
+
+    public DockerBuildContext setCpuQuota(Long cpuQuota) {
+        this.cpuQuota = cpuQuota;
+        return this;
+    }
+
+    public String getCpuSet() {
+        return cpuSet;
+    }
+
+    public DockerBuildContext setCpuSet(String cpuSet) {
+        this.cpuSet = cpuSet;
         return this;
     }
 
@@ -125,24 +145,33 @@ public class DockerBuildContext {
         if (this == o) return true;
         if (!(o instanceof DockerBuildContext)) return false;
         DockerBuildContext that = (DockerBuildContext)o;
-        return Objects.equals(context, that.context) &&
-               Objects.equals(dockerfilePath, that.dockerfilePath) &&
-               Objects.equals(dockerfileContent, that.dockerfileContent) &&
-               Objects.equals(args, that.args);
+        return Objects.equals(getArgs(), that.getArgs()) &&
+               Objects.equals(getContext(), that.getContext()) &&
+               Objects.equals(getDockerfilePath(), that.getDockerfilePath()) &&
+               Objects.equals(getDockerfileContent(), that.getDockerfileContent()) &&
+               Objects.equals(getCpuPeriod(), that.getCpuPeriod()) &&
+               Objects.equals(getCpuQuota(), that.getCpuQuota()) &&
+               Objects.equals(getCpuSet(), that.getCpuSet());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(context, dockerfilePath, dockerfileContent, args);
+        return Objects
+                .hash(getArgs(), getContext(), getDockerfilePath(), getDockerfileContent(), getCpuPeriod(),
+                      getCpuQuota(),
+                      getCpuSet());
     }
 
     @Override
     public String toString() {
-        return "CheServiceBuildContextImpl{" +
-               "context='" + context + '\'' +
+        return "DockerBuildContext{" +
+               "args=" + args +
+               ", context='" + context + '\'' +
                ", dockerfilePath='" + dockerfilePath + '\'' +
                ", dockerfileContent='" + dockerfileContent + '\'' +
-               ", args='" + args + '\'' +
+               ", cpuPeriod=" + cpuPeriod +
+               ", cpuQuota=" + cpuQuota +
+               ", cpuSet='" + cpuSet + '\'' +
                '}';
     }
 }

@@ -142,18 +142,6 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
         bind(org.eclipse.che.api.core.notification.WSocketEventBusServer.class);
-        // additional ports for development of extensions
-// FIXME: spi
-//        Multibinder<org.eclipse.che.api.core.model.machine.ServerConf> machineServers
-//                = Multibinder.newSetBinder(binder(),
-//                                           org.eclipse.che.api.core.model.machine.ServerConf.class,
-//                                           Names.named("machine.docker.dev_machine.machine_servers"));
-//        machineServers.addBinding().toInstance(
-//                new org.eclipse.che.api.machine.server.model.impl.ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http",
-//                                                                                 null));
-
-//        bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
-//                .to(org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl.class);
 
         bind(org.eclipse.che.api.recipe.RecipeLoader.class);
         Multibinder.newSetBinder(binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
@@ -177,25 +165,11 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
-// FIXME: spi
-//        Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =
-//                Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
-//        machineImageProviderMultibinder.addBinding().to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
-
-//        bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
-//                .to(org.eclipse.che.plugin.docker.machine.MachineProviderImpl.class);
         install(new org.eclipse.che.api.workspace.server.activity.inject.WorkspaceActivityModule());
 
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
-// FIXME: spi
-//        install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
-//        install(new org.eclipse.che.api.machine.server.MachineModule());
-// FIXME: spi
-//        install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
-// FIXME: spi
-//        install(new org.eclipse.che.workspace.infrastructure.docker.old.proxy.DockerProxyModule());
         install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
 
         final Multibinder<MessageBodyAdapter> adaptersMultibinder = Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
@@ -206,20 +180,12 @@ public class WsMasterModule extends AbstractModule {
         final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
         requestInjection(interceptor);
         bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
-// FIXME: spi
-//        bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class);
-//                .to(org.eclipse.che.workspace.infrastructure.docker.old.cleaner.LocalWorkspaceFilesCleaner.class);
-//        bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
-//                .to(org.eclipse.che.plugin.docker.machine.local.LocalCheInfrastructureProvisioner.class);
 
         // system components
         install(new SystemModule());
         Multibinder.newSetBinder(binder(), ServiceTermination.class)
                    .addBinding()
                    .to(org.eclipse.che.api.workspace.server.WorkspaceServiceTermination.class);
-// FIXME: spi
-//        install(new org.eclipse.che.workspace.infrastructure.docker.old.config.dns.DnsResolversModule());
-
 // FIXME: spi
 //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
 //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);

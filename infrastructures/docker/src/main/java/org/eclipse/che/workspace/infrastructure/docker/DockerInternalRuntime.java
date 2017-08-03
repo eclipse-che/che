@@ -35,12 +35,16 @@ import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
+import org.eclipse.che.workspace.infrastructure.docker.logs.MachineLoggersFactory;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.ServersReadinessChecker;
+import org.eclipse.che.workspace.infrastructure.docker.network.NetworkLifecycle;
+import org.eclipse.che.workspace.infrastructure.docker.registry.DockerRegistryClient;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSource;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
@@ -287,7 +291,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
                                                                 name,
                                                                 containerConfig,
                                                                 getContext().getIdentity(),
-                                                                getContext().getDevMachineName().equals(name),
                                                                 new AbnormalMachineStopHandlerImpl());
         try {
             startSynchronizer.addMachine(name, machine);
