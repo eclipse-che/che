@@ -23,7 +23,7 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 
 @Extension(title = "Datasource Extension", version = "0.0.1")
-public class DatasourceExtensions {
+public class DatasourceExtension {
 
     /**
      * Constructor.
@@ -34,7 +34,7 @@ public class DatasourceExtensions {
      *         hello world action
      */
     @Inject
-    public DatasourceExtensions(
+    public DatasourceExtension(
             ActionManager actionManager,
             HelloWorldAction helloWorldAction) {
 
