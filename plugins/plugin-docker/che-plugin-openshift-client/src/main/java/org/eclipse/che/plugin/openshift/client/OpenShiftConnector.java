@@ -318,7 +318,7 @@ public class OpenShiftConnector extends DockerConnector {
      *         the configuration of the container
      * @param imageConfig
      *         the configuration of the image
-     * @return all ex foundposed ports
+     * @return all exposed ports
      */
     protected Set<String> getExposedPorts(ContainerConfig containerConfig, ImageConfig imageConfig) {
 
@@ -360,7 +360,7 @@ public class OpenShiftConnector extends DockerConnector {
      *         the mapping for known port labels
      * @param exposedPorts
      *         the ports that are exposed
-     * @return
+     * @return a map that allow to get the service name for a given exposed port
      */
     protected Map<String, String> getPortsToRefName(Map<String, String> labels, Set<String> exposedPorts) {
 
