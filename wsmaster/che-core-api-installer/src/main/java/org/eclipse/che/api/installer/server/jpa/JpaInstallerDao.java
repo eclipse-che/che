@@ -14,20 +14,21 @@ import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.installer.server.exception.InstallerConflictException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.server.spi.InstallerDao;
-import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
@@ -53,7 +54,7 @@ public class JpaInstallerDao implements InstallerDao {
         try {
             doCreate(installer);
         } catch (DuplicateKeyException x) {
-            throw new InstallerConflictException(
+            throw new InstallerAlreadyExistException(
                     format("Installer with such fqn '%s:%s' already exists", installer.getId(), installer.getVersion()));
         } catch (RuntimeException x) {
             throw new InstallerException(x.getMessage(), x);
@@ -65,6 +66,8 @@ public class JpaInstallerDao implements InstallerDao {
         requireNonNull(installer, "Required non-null update");
         try {
             doUpdate(installer);
+        } catch (NoResultException e) {
+            throw new InstallerNotFoundException(format("Installer with fqn '%s' doesn't exist", InstallerFqn.of(installer)));
         } catch (RuntimeException x) {
             throw new InstallerException(x.getMessage(), x);
         }
@@ -75,6 +78,7 @@ public class JpaInstallerDao implements InstallerDao {
         requireNonNull(fqn, "Required non-null fqn");
         try {
             doRemove(fqn);
+        } catch (NoResultException e) {
         } catch (RuntimeException x) {
             throw new InstallerException(x.getMessage(), x);
         }
@@ -86,11 +90,14 @@ public class JpaInstallerDao implements InstallerDao {
         requireNonNull(fqn, "Required non-null fqn");
 
         try {
-            InstallerImpl installer = managerProvider.get().find(InstallerImpl.class, fqn);
-            if (installer == null) {
-                throw new InstallerNotFoundException(format("Installer with fqn '%s' doesn't exist", fqn));
-            }
+            InstallerImpl installer = managerProvider.get()
+                                                     .createNamedQuery("Inst.getByKey", InstallerImpl.class)
+                                                     .setParameter("id", fqn.getId())
+                                                     .setParameter("version", fqn.getVersion())
+                                                     .getSingleResult();
             return new InstallerImpl(installer);
+        } catch (NoResultException e) {
+            throw new InstallerNotFoundException(format("Installer with fqn '%s' doesn't exist", fqn));
         } catch (RuntimeException e) {
             throw new InstallerException(e.getMessage(), e);
         }
@@ -98,19 +105,15 @@ public class JpaInstallerDao implements InstallerDao {
 
     @Override
     @Transactional
-    public Page<InstallerImpl> getVersions(String id, int maxItems, long skipCount) throws InstallerException {
-        checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
-        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
-                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
-
+    public List<String> getVersions(String id) throws InstallerException {
         try {
-            final List<InstallerImpl> list = managerProvider.get()
-                                                            .createNamedQuery("Inst.getAllById", InstallerImpl.class)
-                                                            .setParameter("id", id)
-                                                            .setMaxResults(maxItems)
-                                                            .setFirstResult((int)skipCount)
-                                                            .getResultList();
-            return new Page<>(list, skipCount, maxItems, getTotalCount());
+            return managerProvider.get()
+                                  .createNamedQuery("Inst.getAllById", InstallerImpl.class)
+                                  .setParameter("id", id)
+                                  .getResultList()
+                                  .stream()
+                                  .map(InstallerImpl::getVersion)
+                                  .collect(Collectors.toList());
         } catch (RuntimeException x) {
             throw new InstallerException(x.getMessage(), x);
         }
@@ -142,14 +145,16 @@ public class JpaInstallerDao implements InstallerDao {
     }
 
     @Transactional
-    protected void doUpdate(Installer update) throws InstallerNotFoundException {
-        final EntityManager manager = managerProvider.get();
+    protected void doUpdate(InstallerImpl update) throws InstallerNotFoundException {
         InstallerFqn fqn = InstallerFqn.of(update);
 
-        final InstallerImpl installer = manager.find(InstallerImpl.class, fqn);
-        if (installer == null) {
-            throw new InstallerNotFoundException(format("Couldn't update installer with fqn with '%s' because it doesn't exist", fqn));
-        }
+        final EntityManager manager = managerProvider.get();
+        InstallerImpl installer = manager.createNamedQuery("Inst.getByKey", InstallerImpl.class)
+                                         .setParameter("id", fqn.getId())
+                                         .setParameter("version", fqn.getVersion())
+                                         .getSingleResult();
+        update.setInternalId(installer.getInternalId());
+
         manager.merge(update);
         manager.flush();
     }
@@ -157,11 +162,12 @@ public class JpaInstallerDao implements InstallerDao {
     @Transactional
     protected void doRemove(InstallerFqn fqn) {
         final EntityManager manager = managerProvider.get();
-        final InstallerImpl installer = manager.find(InstallerImpl.class, fqn);
-        if (installer != null) {
-            manager.remove(installer);
-            manager.flush();
-        }
+        InstallerImpl installer = manager.createNamedQuery("Inst.getByKey", InstallerImpl.class)
+                                         .setParameter("id", fqn.getId())
+                                         .setParameter("version", fqn.getVersion())
+                                         .getSingleResult();
+        manager.remove(installer);
+        manager.flush();
     }
 
     @Override

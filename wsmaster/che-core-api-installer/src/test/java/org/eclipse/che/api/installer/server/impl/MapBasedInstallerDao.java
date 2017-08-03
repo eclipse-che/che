@@ -13,7 +13,7 @@ package org.eclipse.che.api.installer.server.impl;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.installer.server.exception.InstallerConflictException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
@@ -43,7 +43,7 @@ public class MapBasedInstallerDao implements InstallerDao {
     public void create(InstallerImpl installer) throws InstallerException {
         InstallerFqn fqn = InstallerFqn.of(installer);
         if (installers.containsKey(fqn)) {
-            throw new InstallerConflictException("Already exists");
+            throw new InstallerAlreadyExistException("Already exists");
         }
 
         installers.put(fqn, installer);
@@ -74,16 +74,12 @@ public class MapBasedInstallerDao implements InstallerDao {
     }
 
     @Override
-    public Page<InstallerImpl> getVersions(String id, int maxItems, long skipCount) throws InstallerException {
-        List<InstallerImpl> result = installers.entrySet()
-                                               .stream()
-                                               .filter(e -> e.getKey().getId().equals(id))
-                                               .skip(skipCount)
-                                               .limit(maxItems)
-                                               .map(e -> new InstallerImpl(e.getValue()))
-                                               .collect(Collectors.toList());
-        return new Page<>(result, 0, maxItems, result.size());
-
+    public List<String> getVersions(String id) throws InstallerException {
+        return installers.entrySet()
+                         .stream()
+                         .filter(e -> e.getKey().getId().equals(id))
+                         .map(e -> e.getValue().getVersion())
+                         .collect(Collectors.toList());
     }
 
     @Override
@@ -94,7 +90,7 @@ public class MapBasedInstallerDao implements InstallerDao {
                                                .limit(maxItems)
                                                .map(e -> new InstallerImpl(e.getValue()))
                                                .collect(Collectors.toList());
-        return new Page<>(result, 0, maxItems, result.size());
+        return new Page<>(result, skipCount, maxItems, getTotalCount());
     }
 
     @Override

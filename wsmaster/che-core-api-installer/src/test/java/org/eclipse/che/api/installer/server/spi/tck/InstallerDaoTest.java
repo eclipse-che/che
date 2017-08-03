@@ -11,7 +11,7 @@
 package org.eclipse.che.api.installer.server.spi.tck;
 
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.installer.server.exception.InstallerConflictException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.server.impl.TestInstallerFactory;
@@ -108,9 +108,9 @@ public class InstallerDaoTest {
 
     @Test
     public void shouldReturnAllInstallersBySpecificId() throws Exception {
-        Page<InstallerImpl> result = installerDao.getVersions("id_0", 6, 0);
-        assertEquals(result.getItems().size(), 1);
-        assertEquals(result.getItems().get(0), installers[0]);
+        List<String> result = installerDao.getVersions("id_0");
+        assertEquals(result.size(), 1);
+        assertEquals(result.get(0), "version_0");
     }
 
     @Test
@@ -166,7 +166,7 @@ public class InstallerDaoTest {
         assertEquals(installerDao.getByFqn(new InstallerFqn("id_new", "version_new")), new InstallerImpl(newInstaller));
     }
 
-    @Test(expectedExceptions = InstallerConflictException.class)
+    @Test(expectedExceptions = InstallerAlreadyExistException.class)
     public void shouldThrowConflictExceptionWhenCreatingInstallerWithExistingFqn() throws Exception {
         InstallerImpl newInstaller = TestInstallerFactory.createInstaller(installers[0].getId(), installers[0].getVersion());
 

@@ -16,11 +16,13 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.InstallerRegistryService;
 import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
-import org.eclipse.che.api.installer.server.exception.InstallerConflictException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.shared.dto.InstallerDto;
@@ -88,7 +90,7 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
                           .usePostMethod()
                           .request();
         } catch (ConflictException e) {
-            throw new InstallerConflictException(e.getMessage(), e);
+            throw new InstallerAlreadyExistException(e.getMessage(), e);
         } catch (IOException | ApiException e) {
             throw new InstallerException(e.getMessage(), e);
         }
@@ -114,13 +116,13 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
     }
 
     @Override
-    public void remove(InstallerFqn fqn) throws InstallerException {
+    public void remove(String installerKey) throws InstallerException {
         checkConfiguration();
 
         try {
             requestFactory.fromUrl(UriBuilder.fromUri(registryServiceUrl)
                                              .path(InstallerRegistryService.class, "remove")
-                                             .build(fqn.toKey())
+                                             .build(installerKey)
                                              .toString())
                           .useDeleteMethod()
                           .request();
@@ -172,17 +174,28 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
     }
 
     @Override
-    public List<Installer> getInstallers() throws InstallerException {
+    public Page<? extends Installer> getInstallers(int maxItems, int skipCount) throws InstallerException {
         checkConfiguration();
 
         try {
-            return new ArrayList<>(requestFactory.fromUrl(UriBuilder.fromUri(registryServiceUrl)
-                                                                    .path(InstallerRegistryService.class, "getInstallers")
-                                                                    .build()
-                                                                    .toString())
-                                                 .useGetMethod()
-                                                 .request()
-                                                 .asList(InstallerDto.class));
+            HttpJsonResponse response = requestFactory.fromUrl(UriBuilder.fromUri(registryServiceUrl)
+                                                                         .path(InstallerRegistryService.class, "getInstallers")
+                                                                         .queryParam("maxItems", maxItems)
+                                                                         .queryParam("skipCount", skipCount)
+                                                                         .build()
+                                                                         .toString())
+                                                      .useGetMethod()
+                                                      .request();
+
+            int totalCount = -1;
+            List<String> totalItemsCountHeader = response.getHeaders().get("TotalItemsCount");
+
+            if (totalItemsCountHeader != null && !totalItemsCountHeader.isEmpty()) {
+                totalCount = Integer.valueOf(totalItemsCountHeader.get(0));
+            }
+            return new Page<>(response.asList(InstallerDto.class), skipCount, maxItems, totalCount);
+        } catch (BadRequestException e) {
+            throw new IllegalArgumentException(e);
         } catch (IOException | ApiException e) {
             throw new InstallerException(e.getMessage(), e);
         }

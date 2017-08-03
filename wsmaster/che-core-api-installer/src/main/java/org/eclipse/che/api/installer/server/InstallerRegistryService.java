@@ -18,22 +18,24 @@ import io.swagger.annotations.ApiResponses;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
-import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.shared.dto.InstallerDto;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,7 +79,6 @@ public class InstallerRegistryService extends Service {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get a list of available versions of the specified installer", response = List.class)
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains available versions of the specified installers"),
-                   @ApiResponse(code = 404, message = "Installer not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public List<String> getVersions(@ApiParam("The installer id") @PathParam("id") String id) throws InstallerException {
         return installerRegistry.getVersions(id);
@@ -87,12 +88,22 @@ public class InstallerRegistryService extends Service {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get a collection of the available installers", response = Installer.class, responseContainer = "collection")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains collection of available installers"),
+                   @ApiResponse(code = 400, message = "Bad Request"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public Collection<InstallerDto> getInstallers() throws InstallerException {
-        return installerRegistry.getInstallers()
-                                .stream()
-                                .map(DtoConverter::asDto)
-                                .collect(Collectors.toList());
+    public Response getInstallers(@ApiParam(value = "Max items") @QueryParam("maxItems") @DefaultValue("30") int maxItems,
+                                  @ApiParam(value = "Skip count") @QueryParam("skipCount") @DefaultValue("0") int skipCount)
+            throws InstallerException, BadRequestException {
+
+        try {
+            Page<? extends Installer> installers = installerRegistry.getInstallers(maxItems, skipCount);
+            return Response.ok()
+                           .entity(installers.getItems())
+                           .header("Link", createLinkHeader(installers))
+                           .header("TotalItemsCount", installers.getTotalItemsCount())
+                           .build();
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 
     @POST
@@ -128,7 +139,7 @@ public class InstallerRegistryService extends Service {
                    @ApiResponse(code = 400, message = "Invalid installer key"),
                    @ApiResponse(code = 500, message = "Couldn't remove installer due to internal server error")})
     public void remove(@ApiParam("The installer key") @PathParam("key") String key) throws InstallerException {
-        installerRegistry.remove(InstallerFqn.parse(key));
+        installerRegistry.remove(key);
     }
 
     @PUT

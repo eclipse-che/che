@@ -32,33 +32,27 @@ public class InstallerServerConfigImpl implements ServerConfig {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "installer_id", nullable = false)
-    private String installerId;
-
-    @Column(name = "installer_version", nullable = false)
-    private String installerVersion;
-
-    @Column(name = "port", nullable = false)
+    @Column(name = "port")
     private String port;
 
-    @Column(name = "protocol", nullable = false)
+    @Column(name = "protocol")
     private String protocol;
 
-    @Column(name = "path", nullable = false)
+    @Column(name = "path")
     private String path;
 
     public InstallerServerConfigImpl() {}
 
-    public InstallerServerConfigImpl(String installerId,
-                                     String installerVersion,
-                                     String port,
-                                     String protocol,
-                                     String path) {
-        this.installerId = installerId;
-        this.installerVersion = installerVersion;
+    public InstallerServerConfigImpl(String port, String protocol, String path) {
         this.port = port;
         this.protocol = protocol;
         this.path = path;
+    }
+
+    public InstallerServerConfigImpl(ServerConfig serverConfig) {
+        this.port = serverConfig.getPort();
+        this.protocol = serverConfig.getProtocol();
+        this.path = serverConfig.getPath();
     }
 
     @Override
@@ -96,21 +90,6 @@ public class InstallerServerConfigImpl implements ServerConfig {
         this.id = id;
     }
 
-    public String getInstallerId() {
-        return installerId;
-    }
-
-    public void setInstallerId(String installerId) {
-        this.installerId = installerId;
-    }
-
-    public String getInstallerVersion() {
-        return installerVersion;
-    }
-
-    public void setInstallerVersion(String installerVersion) {
-        this.installerVersion = installerVersion;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -118,8 +97,6 @@ public class InstallerServerConfigImpl implements ServerConfig {
         if (!(o instanceof InstallerServerConfigImpl)) return false;
         InstallerServerConfigImpl that = (InstallerServerConfigImpl)o;
         return Objects.equal(id, that.id) &&
-               Objects.equal(installerId, that.installerId) &&
-               Objects.equal(installerVersion, that.installerVersion) &&
                Objects.equal(port, that.port) &&
                Objects.equal(protocol, that.protocol) &&
                Objects.equal(path, that.path);
@@ -127,15 +104,13 @@ public class InstallerServerConfigImpl implements ServerConfig {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, installerId, installerVersion, port, protocol, path);
+        return Objects.hashCode(id, port, protocol, path);
     }
 
     @Override
     public String toString() {
         return "InstallerServerConfigImpl{" +
                "id=" + id +
-               ", installerId='" + installerId + '\'' +
-               ", installerVersion='" + installerVersion + '\'' +
                ", port='" + port + '\'' +
                ", protocol='" + protocol + '\'' +
                ", path='" + path + '\'' +

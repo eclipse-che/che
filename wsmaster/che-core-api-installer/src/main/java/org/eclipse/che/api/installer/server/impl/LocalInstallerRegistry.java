@@ -13,6 +13,7 @@ package org.eclipse.che.api.installer.server.impl;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
@@ -26,7 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Local implementation of the {@link InstallerRegistry}.
@@ -72,8 +72,8 @@ public class LocalInstallerRegistry implements InstallerRegistry {
     }
 
     @Override
-    public void remove(InstallerFqn fqn) throws InstallerException {
-        installerDao.remove(fqn);
+    public void remove(String installerKey) throws InstallerException {
+        installerDao.remove(InstallerFqn.parse(installerKey));
     }
 
     @Override
@@ -83,16 +83,12 @@ public class LocalInstallerRegistry implements InstallerRegistry {
 
     @Override
     public List<String> getVersions(String id) throws InstallerException {
-        return installerDao.getVersions(id, Integer.MAX_VALUE, 0)
-                           .getItems()
-                           .stream()
-                           .map(InstallerImpl::getVersion)
-                           .collect(Collectors.toList());
+        return installerDao.getVersions(id);
     }
 
     @Override
-    public List<Installer> getInstallers() throws InstallerException {
-        return new ArrayList<>(installerDao.getAll(Integer.MAX_VALUE, 0).getItems());
+    public Page<? extends Installer> getInstallers(int maxItems, int skipCount) throws InstallerException {
+        return installerDao.getAll(maxItems, skipCount);
     }
 
     @Override

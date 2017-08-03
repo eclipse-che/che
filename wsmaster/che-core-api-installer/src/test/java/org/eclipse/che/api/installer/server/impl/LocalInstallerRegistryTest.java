@@ -12,6 +12,7 @@ package org.eclipse.che.api.installer.server.impl;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
@@ -31,6 +32,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.installer.server.impl.InstallerFqn.DEFAULT_VERSION;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -99,18 +101,84 @@ public class LocalInstallerRegistryTest {
 
     @Test
     public void shouldReturnAllInstallers() throws Exception {
-        List<Installer> installers = registry.getInstallers();
-        installers.sort((o1, o2) -> {
-            InstallerFqn fqn1 = InstallerFqn.of(o1);
-            InstallerFqn fqn2 = InstallerFqn.of(o2);
-            return fqn1.toKey().compareTo(fqn2.toKey());
-        });
+        Page<? extends Installer> installers = registry.getInstallers(Integer.MAX_VALUE, 0);
 
-        assertEquals(installers.size(), 4);
-        assertTrue(installers.contains(new InstallerImpl(installer1latest)));
-        assertTrue(installers.contains(new InstallerImpl(installer1v1)));
-        assertTrue(installers.contains(new InstallerImpl(installer2latest)));
-        assertTrue(installers.contains(new InstallerImpl(installer3latest)));
+        assertEquals(installers.getTotalItemsCount(), 4);
+        assertEquals(installers.getItemsCount(), 4);
+        assertEquals(installers.getSize(), Integer.MAX_VALUE);
+        assertFalse(installers.hasNextPage());
+        assertFalse(installers.hasPreviousPage());
+    }
+
+    @Test
+    public void shouldReturnFirstPage() throws Exception {
+        Page<? extends Installer> installers = registry.getInstallers(1, 0);
+        assertEquals(installers.getTotalItemsCount(), 4);
+        assertEquals(installers.getItemsCount(), 1);
+        assertEquals(installers.getSize(), 1);
+        assertTrue(installers.hasNextPage());
+        assertFalse(installers.hasPreviousPage());
+
+        Page.PageRef nextPageRef = installers.getNextPageRef();
+        assertEquals(nextPageRef.getItemsBefore(), 1);
+        assertEquals(nextPageRef.getPageSize(), 1);
+
+        List<? extends Installer> items = installers.getItems();
+        assertEquals(items.size(), 1);
+        assertEquals(items.get(0), new InstallerImpl(installer1v1));
+    }
+
+    @Test
+    public void shouldReturnMiddlePage() throws Exception {
+        Page<? extends Installer> installers = registry.getInstallers(1, 1);
+        assertEquals(installers.getTotalItemsCount(), 4);
+        assertEquals(installers.getItemsCount(), 1);
+        assertEquals(installers.getSize(), 1);
+        assertTrue(installers.hasNextPage());
+        assertTrue(installers.hasPreviousPage());
+
+        Page.PageRef nextPageRef = installers.getNextPageRef();
+        assertEquals(nextPageRef.getItemsBefore(), 2);
+        assertEquals(nextPageRef.getPageSize(), 1);
+
+        Page.PageRef previousPageRef = installers.getPreviousPageRef();
+        assertEquals(previousPageRef.getItemsBefore(), 0);
+        assertEquals(previousPageRef.getPageSize(), 1);
+
+        List<? extends Installer> items = installers.getItems();
+        assertEquals(items.size(), 1);
+        assertTrue(items.contains(new InstallerImpl(installer3latest)));
+    }
+
+    @Test
+    public void shouldReturnLastPage() throws Exception {
+        Page<? extends Installer> installers = registry.getInstallers(3, 2);
+        assertEquals(installers.getTotalItemsCount(), 4);
+        assertEquals(installers.getItemsCount(), 2);
+        assertEquals(installers.getSize(), 3);
+        assertFalse(installers.hasNextPage());
+        assertFalse(installers.hasPreviousPage());
+
+        List<? extends Installer> items = installers.getItems();
+        assertEquals(items.size(), 2);
+        assertTrue(items.contains(new InstallerImpl(installer1latest)));
+        assertTrue(items.contains(new InstallerImpl(installer2latest)));
+    }
+
+    @Test
+    public void shouldReturnEmptyPageIfNoInstallersFound() throws Exception {
+        registry.remove("installer1:v1");
+        registry.remove("installer1:latest");
+        registry.remove("installer2:latest");
+        registry.remove("installer3:latest");
+
+        Page<? extends Installer> installers = registry.getInstallers(Integer.MAX_VALUE, 0);
+
+        assertEquals(installers.getTotalItemsCount(), 0);
+        assertEquals(installers.getItemsCount(), 0);
+        assertEquals(installers.getSize(), Integer.MAX_VALUE);
+        assertFalse(installers.hasNextPage());
+        assertFalse(installers.hasPreviousPage());
     }
 
     @Test(dataProvider = "installerKeys")

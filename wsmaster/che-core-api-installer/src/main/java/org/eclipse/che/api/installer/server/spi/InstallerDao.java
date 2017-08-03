@@ -11,11 +11,13 @@
 package org.eclipse.che.api.installer.server.spi;
 
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.installer.server.exception.InstallerConflictException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+
+import java.util.List;
 
 /**
  * Defines data access object contract for {@link InstallerImpl}.
@@ -40,7 +42,7 @@ public interface InstallerDao {
      *         installer to create
      * @throws NullPointerException
      *         when {@code installer} is null
-     * @throws InstallerConflictException
+     * @throws InstallerAlreadyExistException
      *         when installer with such id and version already exists
      * @throws InstallerException
      *         when any other error occurs
@@ -92,23 +94,16 @@ public interface InstallerDao {
     InstallerImpl getByFqn(InstallerFqn fqn) throws InstallerException;
 
     /**
-     * Gets all installers from persistent layer of the specific id.
-     * The version of the installer are not taken into account.
+     * Gets all available versions of the installer with giving id.
      *
      * @param id
      *        the installer id
      *        {@link InstallerFqn#id}
-     * @param maxItems
-     *         the maximum number of installers to return
-     * @param skipCount
-     *         the number of installers to skip
      * @return list of installers or empty list if no installers were found
-     *         when {@code maxItems} or {@code skipCount} is negative
      * @throws InstallerException
      *         when any other error occurs
      */
-    Page<InstallerImpl> getVersions(String id, int maxItems, long skipCount) throws InstallerException;
-
+    List<String> getVersions(String id) throws InstallerException;
 
     /**
      * Gets all installers from persistent layer.

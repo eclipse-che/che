@@ -20,6 +20,7 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
@@ -47,49 +48,48 @@ import java.util.stream.Collectors;
                             query = "SELECT i FROM Inst i"),
                 @NamedQuery(name = "Inst.getAllById",
                             query = "SELECT i FROM Inst i WHERE i.id = :id"),
+                @NamedQuery(name = "Inst.getByKey",
+                            query = "SELECT i FROM Inst i WHERE i.id = :id AND i.version = :version"),
                 @NamedQuery(name = "Inst.getTotalCount",
                             query = "SELECT COUNT(i) FROM Inst i")
 
         }
 )
 @Table(name = "installer")
-@IdClass(InstallerFqn.class)
 public class InstallerImpl implements Installer {
     @Id
+    @GeneratedValue
+    @Column(name = "internal_id")
+    private Long internalId;
+
     @Column(name = "id", nullable = false)
     private String id;
 
-    @Column(name = "name")
-    private String name;
-
-    @Id
     @Column(name = "version", nullable = false)
     private String version;
+
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "description")
     private String description;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "dependency", nullable = false)
-    @CollectionTable(name = "installer_dependencies",
-                     joinColumns = {@JoinColumn(name = "installer_id", referencedColumnName = "id"),
-                                    @JoinColumn(name = "installer_version", referencedColumnName = "version")})
+    @CollectionTable(name = "installer_dependencies", joinColumns = {@JoinColumn(name = "inst_int_id", referencedColumnName = "internal_id")})
     private List<String> dependencies;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "name")
     @Column(name = "value", nullable = false)
-    @CollectionTable(name = "installer_properties",
-                     joinColumns = {@JoinColumn(name = "installer_id", referencedColumnName = "id"),
-                                    @JoinColumn(name = "installer_version", referencedColumnName = "version")})
+    @CollectionTable(name = "installer_properties", joinColumns = {@JoinColumn(name = "inst_int_id", referencedColumnName = "internal_id")})
     private Map<String, String> properties;
 
     @Column(name = "script")
     private String script;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumns({@JoinColumn(name = "installer_id", referencedColumnName = "id"),
-                  @JoinColumn(name = "installer_version", referencedColumnName = "version")})
+    @JoinColumn(name = "inst_int_id", referencedColumnName = "internal_id")
     @MapKeyColumn(name = "server_key")
     private Map<String, InstallerServerConfigImpl> servers;
 
@@ -115,14 +115,7 @@ public class InstallerImpl implements Installer {
             this.servers = servers.entrySet()
                                   .stream()
                                   .collect(Collectors.toMap(Map.Entry::getKey,
-                                                            e -> {
-                                                                ServerConfig serverConfig = e.getValue();
-                                                                return new InstallerServerConfigImpl(id,
-                                                                                                     version,
-                                                                                                     serverConfig.getPort(),
-                                                                                                     serverConfig.getProtocol(),
-                                                                                                     serverConfig.getPath());
-                                                            }));
+                                                            e -> new InstallerServerConfigImpl(e.getValue())));
 
         }
     }
@@ -219,6 +212,14 @@ public class InstallerImpl implements Installer {
         this.servers = servers;
     }
 
+    public Long getInternalId() {
+        return internalId;
+    }
+
+    public void setInternalId(Long internalId) {
+        this.internalId = internalId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -255,7 +256,6 @@ public class InstallerImpl implements Installer {
                ", description='" + description + '\'' +
                ", dependencies=" + dependencies +
                ", properties=" + properties +
-               ", script='" + script + '\'' +
                ", servers=" + servers +
                '}';
     }

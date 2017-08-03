@@ -30,9 +30,7 @@ public class TestInstallerFactory {
                                  singletonMap(generate("prop"), generate("value")),
                                  generate("script"),
                                  singletonMap(generate("server"),
-                                              new InstallerServerConfigImpl(id,
-                                                                            version,
-                                                                            generate("port"),
+                                              new InstallerServerConfigImpl(generate("port"),
                                                                             generate("protocol"),
                                                                             generate("path"))));
     }

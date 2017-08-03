@@ -15,12 +15,12 @@ package org.eclipse.che.api.installer.server.exception;
  *
  * @author Anatolii Bazko
  */
-public class InstallerConflictException extends InstallerException {
-    public InstallerConflictException(String message) {
+public class InstallerAlreadyExistException extends InstallerException {
+    public InstallerAlreadyExistException(String message) {
         super(message);
     }
 
-    public InstallerConflictException(String message, Throwable cause) {
+    public InstallerAlreadyExistException(String message, Throwable cause) {
         super(message, cause);
     }
 }
