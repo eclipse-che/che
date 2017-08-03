@@ -17,6 +17,11 @@ Installation instructions for Node.js and npm can be found on the following [lin
 cd che/dashboard
 mvn clean install
 ```
+note: by default it will build dashboard using a docker image. If all required tools are installed locally, the native profile can be used by performing
+```
+`mvn -Pnative clean install
+```
+
 
 ## Running
 In order to run the project, the serve command is used
