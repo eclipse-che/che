@@ -46,5 +46,6 @@
         <module>che-datasource-shared</module>
         <module>che-datasource-api</module>
         <module>che-datasource-ssl-socket-factory</module>
+        <module>che-datasource-ide</module>
     </modules>
 </project>
