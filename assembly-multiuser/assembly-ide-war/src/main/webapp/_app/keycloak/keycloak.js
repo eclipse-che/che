@@ -1,13 +1,20 @@
 /*
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright 2016 Red Hat, Inc. and/or its affiliates
+ * and other contributors as indicated by the @author tags.
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 (function( window, undefined ) {
 
     var Keycloak = function (config) {
@@ -80,6 +87,10 @@
                     }
                     kc.flow = initOptions.flow;
                 }
+
+                if (initOptions.timeSkew != null) {
+                    kc.timeSkew = initOptions.timeSkew;
+                }
             }
 
             if (!kc.responseMode) {
@@ -146,7 +157,7 @@
                     processCallback(callback, initPromise);
                     return;
                 } else if (initOptions) {
-                    if (initOptions.token || initOptions.refreshToken) {
+                    if (initOptions.token && initOptions.refreshToken) {
                         setToken(initOptions.token, initOptions.refreshToken, initOptions.idToken);
 
                         if (loginIframe.enable) {
@@ -155,12 +166,8 @@
                                     kc.onAuthSuccess && kc.onAuthSuccess();
                                     initPromise.setSuccess();
                                 }).error(function () {
-                                    kc.onAuthError && kc.onAuthError();
-                                    if (initOptions.onLoad) {
-                                        onLoad();
-                                    } else {
-                                        initPromise.setError();
-                                    }
+                                    setToken(null, null, null);
+                                    initPromise.setSuccess();
                                 });
                             });
                         } else {
@@ -362,6 +369,11 @@
                 throw 'Not authenticated';
             }
 
+            if (kc.timeSkew == null) {
+                console.info('[KEYCLOAK] Unable to determine if token is expired as timeskew is not set');
+                return true;
+            }
+
             var expiresIn = kc.tokenParsed['exp'] - Math.ceil(new Date().getTime() / 1000) + kc.timeSkew;
             if (minValidity) {
                 expiresIn -= minValidity;
@@ -372,7 +384,7 @@
         kc.updateToken = function(minValidity) {
             var promise = createPromise();
 
-            if (!kc.tokenParsed || !kc.refreshToken) {
+            if (!kc.refreshToken) {
                 promise.setError();
                 return promise.promise;
             }
@@ -381,14 +393,10 @@
 
             var exec = function() {
                 var refreshToken = false;
-                if (kc.timeSkew == -1) {
-                    console.info('Skew ' + kc.timeSkew);
-                    refreshToken = true;
-                    console.info('[KEYCLOAK] Refreshing token: time skew not set');
-                } else if (minValidity == -1) {
+                if (minValidity == -1) {
                     refreshToken = true;
                     console.info('[KEYCLOAK] Refreshing token: forced refresh');
-                } else if (kc.isTokenExpired(minValidity)) {
+                } else if (!kc.tokenParsed || kc.isTokenExpired(minValidity)) {
                     refreshToken = true;
                     console.info('[KEYCLOAK] Refreshing token: token expired');
                 }
@@ -579,7 +587,7 @@
 
                 req.onreadystatechange = function () {
                     if (req.readyState == 4) {
-                        if (req.status == 200) {
+                        if (req.status == 200 || fileLoaded(req)) {
                             var config = JSON.parse(req.responseText);
 
                             kc.authServerUrl = config['auth-server-url'];
@@ -625,53 +633,14 @@
             return promise.promise;
         }
 
+        function fileLoaded(xhr) {
+            return xhr.status == 0 && xhr.responseText && xhr.responseURL.startsWith('file:');
+        }
+
         function setToken(token, refreshToken, idToken, timeLocal) {
             if (kc.tokenTimeoutHandle) {
                 clearTimeout(kc.tokenTimeoutHandle);
                 kc.tokenTimeoutHandle = null;
-            }
-
-            if (token) {
-                kc.token = token;
-                kc.tokenParsed = decodeToken(token);
-                var sessionId = kc.realm + '/' + kc.tokenParsed.sub;
-                if (kc.tokenParsed.session_state) {
-                    sessionId = sessionId + '/' + kc.tokenParsed.session_state;
-                }
-                kc.sessionId = sessionId;
-                kc.authenticated = true;
-                kc.subject = kc.tokenParsed.sub;
-                kc.realmAccess = kc.tokenParsed.realm_access;
-                kc.resourceAccess = kc.tokenParsed.resource_access;
-
-                if (timeLocal) {
-                    kc.timeSkew = Math.floor(timeLocal / 1000) - kc.tokenParsed.iat;
-                    console.info('[KEYCLOAK] Estimated time difference between browser and server is ' + kc.timeSkew + ' seconds');
-                } else {
-                    kc.timeSkew = -1;
-                }
-
-                if (kc.onTokenExpired) {
-                    if (kc.timeSkew == -1) {
-                        kc.onTokenExpired();
-                    } else {
-                        var expiresIn = (kc.tokenParsed['exp'] - (new Date().getTime() / 1000) + kc.timeSkew) * 1000;
-                        if (expiresIn <= 0) {
-                            kc.onTokenExpired();
-                        } else {
-                            kc.tokenTimeoutHandle = setTimeout(kc.onTokenExpired, expiresIn);
-                        }
-                    }
-                }
-
-            } else {
-                delete kc.token;
-                delete kc.tokenParsed;
-                delete kc.subject;
-                delete kc.realmAccess;
-                delete kc.resourceAccess;
-
-                kc.authenticated = false;
             }
 
             if (refreshToken) {
@@ -688,6 +657,42 @@
             } else {
                 delete kc.idToken;
                 delete kc.idTokenParsed;
+            }
+
+            if (token) {
+                kc.token = token;
+                kc.tokenParsed = decodeToken(token);
+                kc.sessionId = kc.tokenParsed.session_state;
+                kc.authenticated = true;
+                kc.subject = kc.tokenParsed.sub;
+                kc.realmAccess = kc.tokenParsed.realm_access;
+                kc.resourceAccess = kc.tokenParsed.resource_access;
+
+                if (timeLocal) {
+                    kc.timeSkew = Math.floor(timeLocal / 1000) - kc.tokenParsed.iat;
+                }
+
+                if (kc.timeSkew != null) {
+                    console.info('[KEYCLOAK] Estimated time difference between browser and server is ' + kc.timeSkew + ' seconds');
+
+                    if (kc.onTokenExpired) {
+                        var expiresIn = (kc.tokenParsed['exp'] - (new Date().getTime() / 1000) + kc.timeSkew) * 1000;
+                        console.info('[KEYCLOAK] Token expires in ' + Math.round(expiresIn / 1000) + ' s');
+                        if (expiresIn <= 0) {
+                            kc.onTokenExpired();
+                        } else {
+                            kc.tokenTimeoutHandle = setTimeout(kc.onTokenExpired, expiresIn);
+                        }
+                    }
+                }
+            } else {
+                delete kc.token;
+                delete kc.tokenParsed;
+                delete kc.subject;
+                delete kc.realmAccess;
+                delete kc.resourceAccess;
+
+                kc.authenticated = false;
             }
         }
 
@@ -831,11 +836,16 @@
             document.body.appendChild(iframe);
 
             var messageCallback = function(event) {
-                if (event.origin !== loginIframe.iframeOrigin) {
+                if ((event.origin !== loginIframe.iframeOrigin) || (loginIframe.iframe.contentWindow !== event.source)) {
                     return;
                 }
 
-                if (event.data != "unchanged") {
+                if (!(event.data == 'unchanged' || event.data == 'changed' || event.data == 'error')) {
+                    return;
+                }
+
+
+                if (event.data != 'unchanged') {
                     kc.clearToken();
                 }
 
@@ -843,7 +853,7 @@
 
                 for (var i = callbacks.length - 1; i >= 0; --i) {
                     var promise = callbacks[i];
-                    if (event.data == "unchanged") {
+                    if (event.data == 'unchanged') {
                         promise.setSuccess();
                     } else {
                         promise.setError();
@@ -1222,7 +1232,7 @@
                             break;
                         default:
                             if (responseMode != 'query' || !handleQueryParam(param, queryParams[param], oauth)) {
-                                oauth.newUrl += (oauth.newUrl.indexOf('?') == -1 ? '?' : '&') + param + '=' + queryParams[param];
+                                oauth.newUrl += (oauth.newUrl.indexOf('?') == -1 ? '?' : '&') + param + '=' + encodeURIComponent(queryParams[param]);
                             }
                             break;
                     }
