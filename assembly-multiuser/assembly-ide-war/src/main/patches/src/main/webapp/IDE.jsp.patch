@@ -1,15 +1,19 @@
 --- src/main/webapp/IDE.jsp
 +++ src/main/webapp/IDE.jsp
-@@ -55,7 +55,30 @@
+@@ -55,7 +55,34 @@
          };
 
      </script>
 +  <script type="text/javascript" language="javascript" src="/_app/keycloak/keycloak.js"></script>
 +  <script>
++    const req = new XMLHttpRequest();
++    req.open('GET', window.IDE.config['restContext'] + '/keycloak/settings', false);
++    req.send(null); console.log('responseText = ' + req.responseText);
++    const keycloakSettings = JSON.parse(req.responseText);
 +    window.keycloak = Keycloak({
-+      url: 'http://172.17.0.1:5050/auth',
-+      realm: 'che',
-+      clientId: 'che-public',
++      url: keycloakSettings['che.keycloak.auth-server-url'],
++      realm: keycloakSettings['che.keycloak.realm'],
++      clientId: keycloakSettings['che.keycloak.client-id']
 +    });
 +    window.keycloak.init({ onLoad: 'check-sso', checkLoginIframe: false, responseMode: 'query' }).success(function(authenticated) {
 +       console.log('IDE.jsp authenticated with token:'+ window.keycloak.token);

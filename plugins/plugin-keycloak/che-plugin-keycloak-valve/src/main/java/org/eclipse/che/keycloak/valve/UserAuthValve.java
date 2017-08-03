@@ -6,7 +6,6 @@ import org.eclipse.che.keycloak.shared.KeycloakSettings;
 import org.keycloak.adapters.tomcat.KeycloakAuthenticatorValve;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 
@@ -20,6 +19,7 @@ import java.util.Map;
  */
 public class UserAuthValve extends KeycloakAuthenticatorValve {
 
+
     synchronized void retrieveKeycloakSettingsIfNecessary(String apiEndpoint) {
         Map<String, String> keycloakSettings = KeycloakSettings.get();
         if (keycloakSettings == null) {
@@ -29,7 +29,7 @@ public class UserAuthValve extends KeycloakAuthenticatorValve {
 
     @Override
     public void invoke(Request request, Response response) throws IOException, ServletException {
-        retrieveKeycloakSettingsIfNecessary(((HttpServletRequest)request).getScheme() + "://" + request.getLocalAddr() + ":" + request.getLocalPort() + "/api");
+        retrieveKeycloakSettingsIfNecessary(request.getProtocol() + "://" + request.getLocalAddr() + ":" + request.getLocalPort() + "/api");
         super.invoke(request, response);
     }
 }
