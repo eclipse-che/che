@@ -4,10 +4,10 @@ Eclipse Che is a next generation Eclipse IDE and open source alternative to Inte
 Che Dashboard
 ==============
 
-#Requirements
+## Requirements
 - Docker
 
-#Quick start
+## Quick start
 
 ```sh
 cd che/dashboard
@@ -16,9 +16,10 @@ mvn clean install
 
 note: by default it will build dashboard using a docker image. If all required tools are installed locally, the native profile can be used by pe$
 
-```
+```sh
 $ mvn -Pnative clean install
 ```
+
 Required tools for native build:
 - Python `v2.7.x`(`v3.x.x`currently not supported)
 - Node.js `v4.x.x` (`v5.x.x` / `v6.x.x` are currently not supported)
