@@ -25,7 +25,9 @@ import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
 /**
  * @author Evgen Vidolob
+ * @deprecated within replacing everrest based Websocket calls with new RPC framework now it is considered as deprecated and will be removed
  */
+@Deprecated
 public class WsConnectionListener implements ConnectionClosedHandler, ConnectionOpenedHandler {
 
     private final EventBus                 eventBus;

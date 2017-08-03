@@ -2364,7 +2364,7 @@
           "goal": "Build"
         }
       }, {
-        "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
+        "commandLine": "scl enable rh-maven33 'mvn compile vertx:run -f ${current.project.path}'",
         "name": "run",
         "type": "custom",
         "attributes": {
@@ -2422,6 +2422,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
+                "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
                 "org.eclipse.che.ssh"
@@ -2440,7 +2441,7 @@
           "type": "mvn"
         },
         {
-          "commandLine": "java -jar ${current.project.path}/target/*.jar",
+          "commandLine": "scl enable rh-maven33 'mvn compile spring-boot:run -f ${current.project.path}'",
           "name": "run",
           "type": "custom",
           "attributes": {
@@ -2634,7 +2635,31 @@
     "source": {
       "type": "image",
       "origin": "eclipse/kotlin"
- }
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "eclipse/kotlin",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    }
 },
 {
     "id": "centos-go",

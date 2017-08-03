@@ -2,6 +2,9 @@
   $stack-selector-list-header-border = lighten($very-light-grey-color, 4%)
   $stack-selector-list-header-background = lighten($very-light-grey-color, 28%)
 
+  & *
+    outline none
+
   .stack-selector-buttons-right
     & > *
       margin 0
@@ -18,6 +21,9 @@
 
         md-icon
           font-size 28px
+
+  toggle-button-popover.stack-selector-active-tags-filter toggle-single-button md-icon
+    color $primary-color !important
 
   .stack-selector-list
     background-color $stack-selector-list-header-background

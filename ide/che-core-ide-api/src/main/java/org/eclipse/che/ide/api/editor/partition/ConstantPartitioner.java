@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.editor.partition;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.text.TypedRegion;
 import org.eclipse.che.ide.api.editor.text.TypedRegionImpl;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
@@ -53,7 +53,7 @@ public class ConstantPartitioner implements DocumentPartitioner {
     }
 
     @Override
-    public void onDocumentChange(final DocumentChangeEvent event) {
+    public void onDocumentChanged(final DocumentChangedEvent event) {
         final int removed = event.getLength();
         int added = 0;
         if (event.getText() != null) {

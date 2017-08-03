@@ -18,13 +18,11 @@ import org.eclipse.che.api.core.jsonrpc.commons.transmission.SendConfiguratorFro
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectCreatedEvent;
 import org.eclipse.che.api.testing.server.dto.DtoServerImpls;
-import org.eclipse.che.api.testing.server.framework.TestMessagesOutputTransmitter;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
-import org.eclipse.che.commons.lang.execution.ProcessHandler;
-import org.eclipse.che.ide.runtime.Assert;
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
 import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
+import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.che.plugin.testing.testng.server.TestNGRunner;
 import org.eclipse.che.plugin.testing.testng.server.TestNGSuiteUtil;
@@ -33,7 +31,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JavaModelManager;
-import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -47,6 +44,7 @@ public class TestNGRunnerTest extends BaseTest {
     private MethodNameConfigurator  startMethodNameConfigurator;
     private ParamsConfigurator      startParamsConfigurator;
     private SendConfiguratorFromOne startSendConfiguratorFromOne;
+    private JavaTestFinder          testNGTestFinder;
     private RequestTransmitter      transmitter;
 
     private TestNGRunner runner;
@@ -54,12 +52,13 @@ public class TestNGRunnerTest extends BaseTest {
     @BeforeMethod
     public void setUp() throws Exception {
         startEndpointIdConfigurator = mock(EndpointIdConfigurator.class);
+        testNGTestFinder = mock(JavaTestFinder.class);
         startMethodNameConfigurator = mock(MethodNameConfigurator.class);
         startParamsConfigurator = mock(ParamsConfigurator.class);
         startSendConfiguratorFromOne = mock(SendConfiguratorFromOne.class);
         transmitter = mock(RequestTransmitter.class);
 
-        runner = new TestNGRunner(new ProjectClasspathProvider(""), new TestNGSuiteUtil());
+        runner = new TestNGRunner("", testNGTestFinder, new ProjectClasspathProvider(""), new TestNGSuiteUtil());
     }
 
     @Test()
@@ -89,7 +88,7 @@ public class TestNGRunnerTest extends BaseTest {
 
         DtoServerImpls.TestExecutionContextImpl context = new DtoServerImpls.TestExecutionContextImpl();
         context.setDebugModeEnable(false);
-        context.setTestType(TestExecutionContext.TestType.FILE);
+        context.setContextType(TestExecutionContext.ContextType.FILE);
         context.setProjectPath("/Test");
         context.setFilePath("/Test/src/tests/TestNGTest.java");
         assertEquals("testng", runner.getName());

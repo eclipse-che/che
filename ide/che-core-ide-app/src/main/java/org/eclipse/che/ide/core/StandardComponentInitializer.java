@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.actions.AddToFileWatcherExcludesAction;
 import org.eclipse.che.ide.actions.CloseActiveEditorAction;
 import org.eclipse.che.ide.actions.CollapseAllAction;
 import org.eclipse.che.ide.actions.CompleteAction;
@@ -38,6 +39,7 @@ import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
 import org.eclipse.che.ide.actions.RedoAction;
 import org.eclipse.che.ide.actions.RefreshPathAction;
+import org.eclipse.che.ide.actions.RemoveFromFileWatcherExcludesAction;
 import org.eclipse.che.ide.actions.RenameItemAction;
 import org.eclipse.che.ide.actions.RunCommandAction;
 import org.eclipse.che.ide.actions.SaveAction;
@@ -74,7 +76,6 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
-import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.imageviewer.PreviewImageAction;
 import org.eclipse.che.ide.machine.MachineResources;
@@ -416,6 +417,12 @@ public class StandardComponentInitializer {
     private ShowConsoleTreeAction showConsoleTreeAction;
 
     @Inject
+    private AddToFileWatcherExcludesAction addToFileWatcherExcludesAction;
+
+    @Inject
+    private RemoveFromFileWatcherExcludesAction removeFromFileWatcherExcludesAction;
+
+    @Inject
     private PerspectiveManager perspectiveManager;
 
     @Inject
@@ -471,8 +478,6 @@ public class StandardComponentInitializer {
     @Inject
     @Named("CommandFileType")
     private FileType              commandFileType;
-    @Inject
-    private WsConnectionListener  wsConnectionListener;
 
     @Inject
     private ProjectConfigSynchronized projectConfigSynchronized;
@@ -723,6 +728,10 @@ public class StandardComponentInitializer {
         resourceOperation.add(linkWithEditorAction);
         resourceOperation.addSeparator();
         resourceOperation.add(convertFolderToProjectAction);
+        resourceOperation.addSeparator();
+        resourceOperation.addSeparator();
+        resourceOperation.add(addToFileWatcherExcludesAction);
+        resourceOperation.add(removeFromFileWatcherExcludesAction);
         resourceOperation.addSeparator();
 
         DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);

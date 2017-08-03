@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 
 import javax.inject.Singleton;
 import javax.websocket.Session;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -40,17 +40,37 @@ public class WebSocketSessionRegistry {
         sessionsMap.put(endpointId, session);
     }
 
-    public void remove(String endpointId) {
+    public Optional<Session> remove(String endpointId) {
         LOG.debug("Cancelling registration for session with endpoint {}", endpointId);
 
-        sessionsMap.remove(endpointId);
+        return Optional.ofNullable(sessionsMap.remove(endpointId));
+    }
+
+    public Optional<Session> remove(Session session) {
+        return get(session).flatMap(id -> Optional.ofNullable(sessionsMap.remove(id)));
     }
 
     public Optional<Session> get(String endpointId) {
         return Optional.ofNullable(sessionsMap.get(endpointId));
     }
 
+    public Set<Session> getByPartialMatch(String partialEndpointId) {
+        return sessionsMap.entrySet()
+                          .stream()
+                          .filter(it -> it.getKey().contains(partialEndpointId))
+                          .map(Map.Entry::getValue)
+                          .collect(toSet());
+    }
+
+    public Optional<String> get(Session session) {
+        return sessionsMap.entrySet()
+                          .stream()
+                          .filter(entry -> entry.getValue().equals(session))
+                          .map(Map.Entry::getKey)
+                          .findAny();
+    }
+
     public Set<Session> getSessions() {
-        return sessionsMap.values().stream().collect(toSet());
+        return new HashSet<>(sessionsMap.values());
     }
 }

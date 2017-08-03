@@ -14,6 +14,8 @@ import {CheEnvironmentRegistry} from '../../../../components/api/environment/che
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {StackSelectorScope} from './stack-selector-scope.enum';
 import {StackSelectorSvc} from './stack-selector.service';
+import {CheBranding} from '../../../../components/branding/che-branding.factory';
+import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * @ngdoc controller
@@ -21,12 +23,19 @@ import {StackSelectorSvc} from './stack-selector.service';
  * @description This class is handling the controller of stack selector.
  * @author Oleksii Kurinnyi
  */
-
 export class StackSelectorController {
   /**
    * Filter service.
    */
   $filter: ng.IFilterService;
+  /**
+   * Location service.
+   */
+  $location: ng.ILocationService;
+  /**
+   * Dialog service.
+   */
+  $mdDialog: ng.material.IDialogService;
   /**
    * Lodash library.
    */
@@ -39,6 +48,10 @@ export class StackSelectorController {
    * Environments manager.
    */
   cheEnvironmentRegistry: CheEnvironmentRegistry;
+  /**
+   * Confirm dialog service.
+   */
+  confirmDialogService: ConfirmDialogService;
   /**
    * Stack selector service.
    */
@@ -111,21 +124,36 @@ export class StackSelectorController {
    * The list of tags of visible stacks.
    */
   private allStackTags: Array<string>;
+  /**
+   * The default stack to be preselected (comes from configuration).
+   */
+  private defaultStack: string;
+  /**
+   * The priority stacks to be placed before others (comes from configuration).
+   */
+  private priorityStacks: Array<string>;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($filter: ng.IFilterService, lodash: _.LoDashStatic, cheStack: CheStack, cheEnvironmentRegistry: CheEnvironmentRegistry, stackSelectorSvc: StackSelectorSvc) {
+  constructor($filter: ng.IFilterService, $mdDialog: ng.material.IDialogService, lodash: _.LoDashStatic, cheStack: CheStack,
+              confirmDialogService: ConfirmDialogService, $location: ng.ILocationService, cheBranding: CheBranding,
+              cheEnvironmentRegistry: CheEnvironmentRegistry, stackSelectorSvc: StackSelectorSvc) {
     this.$filter = $filter;
+    this.$location = $location;
+    this.$mdDialog = $mdDialog;
     this.lodash = lodash;
     this.cheStack = cheStack;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.stackSelectorSvc = stackSelectorSvc;
+    this.confirmDialogService = confirmDialogService;
 
+    this.priorityStacks = cheBranding.getWorkspace().priorityStacks;
+    this.defaultStack = cheBranding.getWorkspace().defaultStack;
     this.scope = StackSelectorScope;
     this.showFilters = false;
-    this.selectedScope = StackSelectorScope.ALL;
+    this.selectedScope = StackSelectorScope.QUICK_START;
     this.stackOrderBy = 'name';
     this.stacksByScope = {};
     this.stacksFiltered = [];
@@ -165,18 +193,21 @@ export class StackSelectorController {
         this.stackIconLinks[stack.id] = findLink.href;
       }
 
-      // get machines memory limits
-      const defaultEnv = stack.workspaceConfig.defaultEnv,
-            environment = stack.workspaceConfig.environments[defaultEnv],
-            environmentManager = this.getEnvironmentManager(environment.recipe.type),
-            machines = environmentManager.getMachines(environment);
       this.stackMachines[stack.id] = [];
-      machines.forEach((machine: any) => {
-        this.stackMachines[stack.id].push({
-          name: machine.name,
-          memoryLimitBytes: environmentManager.getMemoryLimit(machine)
-        });
-      });
+      if (stack.workspaceConfig) {
+        // get machines memory limits
+              const defaultEnv = stack.workspaceConfig.defaultEnv,
+                    environment = stack.workspaceConfig.environments[defaultEnv],
+                    environmentManager = this.getEnvironmentManager(environment.recipe.type),
+                    machines = environmentManager.getMachines(environment);
+
+              machines.forEach((machine: any) => {
+                this.stackMachines[stack.id].push({
+                  name: machine.name,
+                  memoryLimitBytes: environmentManager.getMemoryLimit(machine)
+                });
+              });
+      }
     });
   }
 
@@ -250,6 +281,14 @@ export class StackSelectorController {
 
     this.stacksFiltered = this.$filter('orderBy')(this.stacksFiltered, this.stackOrderBy);
 
+    if (this.priorityStacks) {
+      let priorityStacks = this.lodash.remove(this.stacksFiltered, (stack: che.IStack) => {
+        return this.priorityStacks.indexOf(stack.name) >= 0;
+      });
+
+      this.stacksFiltered = priorityStacks.concat(this.stacksFiltered);
+    }
+
     this.updateTags();
 
     if (this.stacksFiltered.length === 0) {
@@ -257,8 +296,30 @@ export class StackSelectorController {
     }
 
     if (this.needToSelectStack()) {
-      this.selectStack(this.stacksFiltered[0].id);
+      let ids = this.lodash.pluck(this.stacksFiltered, 'id');
+      let stackId = (this.defaultStack && ids.indexOf(this.defaultStack) >= 0) ? this.defaultStack : this.stacksFiltered[0].id;
+      this.selectStack(stackId);
     }
+  }
+
+  /**
+   * Handles the adding stack options.
+   */
+  onAddStack(): void {
+    this.confirmDialogService.showConfirmDialog('Create stack', 'Would you like to create a stack from a recipe?', 'Yes', 'No').then(() => {
+      this.$mdDialog.show({
+        controller: 'ImportStackController',
+        controllerAs: 'importStackController',
+        bindToController: true,
+        clickOutsideToClose: true,
+        locals: {
+          callbackController: this
+        },
+        templateUrl: 'app/stacks/list-stacks/import-stack/import-stack.html'
+      });
+    }, () => {
+      this.$location.path('/stack/create');
+    });
   }
 
   /**

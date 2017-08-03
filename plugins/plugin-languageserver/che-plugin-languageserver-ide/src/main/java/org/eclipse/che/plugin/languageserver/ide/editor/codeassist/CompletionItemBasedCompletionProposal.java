@@ -215,6 +215,15 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
                 } else {
                     document.replace(cursorOffset - offset, offset, completionItem.getInsertText());
                 }
+                if (currentWordLength == 0) {
+                    TextPosition cursorPosition = document.getCursorPosition();
+                    if (cursorPosition == null) {
+                        return;
+                    }
+                    int line = cursorPosition.getLine();
+                    int character = cursorPosition.getCharacter();
+                    document.setCursorPosition(new TextPosition(line, character + completionItem.getLabel().length()));
+                }
             }
         }
 

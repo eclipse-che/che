@@ -15,20 +15,18 @@ import com.google.gwt.i18n.client.Messages;
 /**
  * Localization constants. Interface to represent the constants defined in resource bundle:
  * 'JUnitTestLocalizationConstant.properties'.
- *
- * @author Mirage Abeysekara
  */
 public interface JUnitTestLocalizationConstant extends Messages {
 
-    @Key("action.runClass.title")
-    String actionRunClassTitle();
+    @Key("action.run.title")
+    String actionRunTestTitle();
 
-    @Key("action.runClass.description")
-    String actionRunClassDescription();
+    @Key("action.run.description")
+    String actionRunTestDescription();
 
-    @Key("action.runAll.title")
-    String actionRunAllTitle();
+    @Key("action.debug.title")
+    String actionDebugTestTitle();
 
-    @Key("action.runAll.description")
-    String actionRunAllDescription();
+    @Key("action.debug.description")
+    String actionDebugDescription();
 }

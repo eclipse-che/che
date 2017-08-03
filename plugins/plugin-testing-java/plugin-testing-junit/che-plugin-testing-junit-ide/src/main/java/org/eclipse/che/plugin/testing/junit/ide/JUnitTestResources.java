@@ -10,19 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.junit.ide;
 
-import org.vectomatic.dom.svg.ui.SVGResource;
-
 import com.google.gwt.resources.client.ClientBundle;
+
+import org.vectomatic.dom.svg.ui.SVGResource;
 /**
- *
- * @author Mirage Abeysekara
+ * Resource bundle for JUnit module.
  */
 public interface JUnitTestResources extends ClientBundle {
 
     @Source("org/eclipse/che/plugin/testing/junit/ide/svg/test.svg")
     SVGResource testIcon();
-
-    @Source("org/eclipse/che/plugin/testing/junit/ide/svg/test_all.svg")
-    SVGResource testAllIcon();
 
 }

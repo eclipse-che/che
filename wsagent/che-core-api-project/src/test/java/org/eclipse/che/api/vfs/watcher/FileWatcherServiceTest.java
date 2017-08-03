@@ -23,15 +23,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.WatchService;
-import java.util.Set;
 
 import static java.nio.file.Files.createDirectory;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-import static java.util.Collections.emptySet;
 import static org.apache.commons.io.FileUtils.write;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -52,8 +49,9 @@ public class FileWatcherServiceTest {
     public TemporaryFolder rootFolder = new TemporaryFolder();
 
     @Mock
-    FileWatcherEventHandler handler;
-    Set<PathMatcher> excludes     = emptySet();
+    FileWatcherEventHandler            handler;
+    @Mock
+    FileWatcherExcludePatternsRegistry fileWatcherExcludePatternsRegistry;
     WatchService     watchService = FileSystems.getDefault().newWatchService();
 
     FileWatcherService service;
@@ -63,7 +61,7 @@ public class FileWatcherServiceTest {
 
     @BeforeClass
     public void setUp() throws Exception {
-        service = new FileWatcherService(excludes, handler, watchService);
+        service = new FileWatcherService(fileWatcherExcludePatternsRegistry, handler, watchService);
 
         service.start();
     }

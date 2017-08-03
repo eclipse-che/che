@@ -26,8 +26,9 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
  * - CSharpOutputCustomizer - that is expected to process C# Compilation 
  *   Error/Warning and Stacktrace lines
  * 
- * See: CHE-15 - Java stacktrace support (From Platform to Che Workspace) See:
- * Issue #5489 - .NET C# stacktrace support #5489
+ * See: CHE-15 - Java stacktrace support (From Platform to Che Workspace) 
+ * See: Issue #5489 - .NET C# stacktrace support #5489
+ * See: Issue #5565 - C/CPP compilation error/warning messages support #5565
  * 
  * @author Victor Rubezhny
  */
@@ -42,7 +43,8 @@ public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
     public void setUp() throws Exception {
         OutputCustomizer[] customizers = new OutputCustomizer[] { 
                 new JavaOutputCustomizer(appContext, editorAgent),
-                new CSharpOutputCustomizer(appContext, editorAgent)
+                new CSharpOutputCustomizer(appContext, editorAgent),
+                new CPPOutputCustomizer(appContext, editorAgent)
             };
 
         setupTestCustomizers(new CompoundOutputCustomizer(customizers), customizers);
@@ -67,6 +69,9 @@ public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
         // .NET C# Stacktrace lines
         testStackTraceLine(
                 "Unhandled Exception: System.NullReferenceException: Object reference not set to an instance of an object.");
+
+        // CPP Compilation Messages
+        testStackTraceLine("hello.cc: In function ‘int main()’:");
     }
 
     /**
@@ -104,6 +109,20 @@ public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
         testStackTraceLine(CSharpOutputCustomizer.class,
                 "ppp/PPPProgram.cs(9,17): warning CS0219: The variable 'testIntValue' is assigned but its value is never used [/home/jeremy/projects/csharp/hwapp/hwapp.csproj]",
                 "<a href='javascript:openCSCM(\"ppp/PPPProgram.cs\",\"/home/jeremy/projects/csharp/hwapp/hwapp.csproj\",9,17);'>ppp/PPPProgram.cs(9,17)</a>: warning CS0219: The variable 'testIntValue' is assigned but its value is never used [/home/jeremy/projects/csharp/hwapp/hwapp.csproj]");
+
+        // CPP Compilation Messages
+        testStackTraceLine(CPPOutputCustomizer.class,
+                "hello.cc:8:13: warning: division by zero [-Wdiv-by-zero]",
+                "<a href='javascript:openCM(\"hello.cc\",8,13);'>hello.cc:8:13</a>: warning: division by zero [-Wdiv-by-zero]");
+        testStackTraceLine(CPPOutputCustomizer.class,
+                "hello.cc:8:2: error: ‘Module’ was not declared in this scope",
+                "<a href='javascript:openCM(\"hello.cc\",8,2);'>hello.cc:8:2</a>: error: ‘Module’ was not declared in this scope");
+        testStackTraceLine(CPPOutputCustomizer.class,
+                "hello.cc:4:25: fatal error: module/Module: No such file or directory",
+                "<a href='javascript:openCM(\"hello.cc\",4,25);'>hello.cc:4:25</a>: fatal error: module/Module: No such file or directory");
+        testStackTraceLine(CPPOutputCustomizer.class,
+                "/projects/console-cc-simple/hello.cc:23: undefined reference to `Module::sayHello[abi:cxx11]()'",
+                "<a href='javascript:openLM(\"/projects/console-cc-simple/hello.cc\",23);'>/projects/console-cc-simple/hello.cc:23</a>: undefined reference to `Module::sayHello[abi:cxx11]()'");
     }
 
     /**
@@ -117,6 +136,10 @@ public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
     public void testOtherStackTraceLines() throws Exception {
         // Java Stacktrace lines
         testStackTraceLine("   ... 1 more");
+
+        // CPP Compilation Messages
+        testStackTraceLine("     return 0/0;");
+        testStackTraceLine("             ^");
     }
 
     /**
@@ -128,5 +151,7 @@ public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
     @Test
     public void testNonStackTraceLines() throws Exception {
         testStackTraceLine("[STDOUT] Listening for transport dt_socket at address: 4403");
+        testStackTraceLine(
+                "[STDOUT] 2017-07-06 08:58:34,647 [ForkJoinPool.commonPool-worker-3] DEBUG o.j.t.l.t.DocumentManager.findSelectedWord - Looking for word at Position 2 in 'textDocument/badWord:Warning:name:So bad! '");
     }
 }

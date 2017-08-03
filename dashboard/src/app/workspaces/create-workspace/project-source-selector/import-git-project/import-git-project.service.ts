@@ -9,13 +9,14 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {editingProgress, IEditingProgress} from '../project-source-selector-editing-progress';
 
 /**
  * This class is handling the service for the Git project import.
  *
  * @author Oleksii Kurinnyi
  */
-export class ImportGitProjectService {
+export class ImportGitProjectService implements IEditingProgress {
   /**
    * Git project location.
    */
@@ -34,6 +35,22 @@ export class ImportGitProjectService {
   }
 
   /**
+   * Returns project's adding progress.
+   *
+   * @return {editingProgress}
+   */
+  checkEditingProgress(): editingProgress {
+    if (!this.location) {
+      return null;
+    }
+
+    return {
+      message: 'Adding of a project from Git repository is not completed yet.',
+      number: 1
+    };
+  }
+
+  /**
    * Callback which is called when location is changed.
    *
    * @param {string=""} location
@@ -49,8 +66,7 @@ export class ImportGitProjectService {
    */
   getProjectProps(): che.IProjectTemplate {
     const props = {} as che.IProjectTemplate;
-
-    const [ , name] = /\/([^\/]+)\.git$/i.exec(this._location);
+    const [ , name] = /.*\/([^.]+)(\.git?|$)/i.exec(this._location);
     const path = '/' +  name.replace(/[^\w-_]/g, '_');
     props.name = name;
     props.displayName = name;

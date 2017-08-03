@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.java.testing;
 
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.core.resources.IProject;
@@ -30,17 +31,33 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+
+import static java.util.Collections.emptyList;
 
 /**
  * Abstract java test runner.
  * Can recognize test methods, find java project and compilation unit by path.
  */
 public abstract class AbstractJavaTestRunner implements TestRunner {
+    private static final Logger LOG                = LoggerFactory.getLogger(AbstractJavaTestRunner.class);
+    private static final String TEST_OUTPUT_FOLDER = "/test-output";
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractJavaTestRunner.class);
+    protected static final String JAVA_EXECUTABLE = "java";
+
+    private int debugPort = -1;
+    private String         workspacePath;
+    private JavaTestFinder javaTestFinder;
+
+    public AbstractJavaTestRunner(String workspacePath, JavaTestFinder javaTestFinder) {
+        this.workspacePath = workspacePath;
+        this.javaTestFinder = javaTestFinder;
+    }
 
     @Override
     public List<TestPosition> detectTests(TestDetectionContext context) {
@@ -56,7 +73,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
                 addAllTestsMethod(result, compilationUnit);
             } else {
                 IJavaElement element = compilationUnit.getElementAt(context.getOffset());
-                if ((element.getElementType() == IJavaElement.METHOD)) {
+                if (element != null && element.getElementType() == IJavaElement.METHOD) {
                     if (isTestMethod((IMethod)element, compilationUnit)) {
                         result.add(createTestPosition((IMethod)element));
                     }
@@ -93,14 +110,43 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
                          .withTestBodyLength(sourceRange.getLength());
     }
 
+    /**
+     * Verify if the method is test method.
+     *
+     * @param method
+     *         method declaration
+     * @param compilationUnit
+     *         compilation unit of the method
+     * @return {@code true} if the method is test method otherwise returns {@code false}
+     */
     protected abstract boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit);
 
+    /** Returns {@link IJavaProject} by path */
     protected IJavaProject getJavaProject(String projectPath) {
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectPath);
         return JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject(project);
     }
 
-    protected ICompilationUnit findCompilationUnitByPath(IJavaProject javaProject, String filePath) {
+    protected String getOutputDirectory(IJavaProject javaProject) {
+        String path = workspacePath + javaProject.getPath() + TEST_OUTPUT_FOLDER;
+        try {
+            IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(true);
+            for (IClasspathEntry iClasspathEntry : resolvedClasspath) {
+                if (iClasspathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+                    IPath outputLocation = iClasspathEntry.getOutputLocation();
+                    if (outputLocation == null) {
+                        continue;
+                    }
+                    return workspacePath + outputLocation.removeLastSegments(1).append(TEST_OUTPUT_FOLDER);
+                }
+            }
+        } catch (JavaModelException e) {
+            return path;
+        }
+        return path;
+    }
+
+    private ICompilationUnit findCompilationUnitByPath(IJavaProject javaProject, String filePath) {
         try {
             IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(false);
             IPath packageRootPath = null;
@@ -132,9 +178,65 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
         }
     }
 
+    /**
+     * Creates test suite which should be ran.
+     *
+     * @param context
+     *         information about test runner
+     * @param javaProject
+     *         current project
+     * @param methodAnnotation
+     *         java annotation which describes test method in the test framework
+     * @param classAnnotation
+     *         java annotation which describes test class in the test framework
+     * @return list of full qualified names of test classes.
+     * If it is the declaration of a test method it should be: parent fqn + '#' + method name (a.b.c.ClassName#methodName)
+     */
+    protected List<String> createTestSuite(TestExecutionContext context,
+                                           IJavaProject javaProject,
+                                           String methodAnnotation,
+                                           String classAnnotation) {
+        switch (context.getContextType()) {
+            case FILE:
+                return javaTestFinder.findTestClassDeclaration(findCompilationUnitByPath(javaProject, context.getFilePath()));
+            case FOLDER:
+                return javaTestFinder.findClassesInPackage(javaProject,
+                                                           context.getFilePath(),
+                                                           methodAnnotation,
+                                                           classAnnotation);
+            case PROJECT:
+                return javaTestFinder.findClassesInProject(javaProject,
+                                                           methodAnnotation,
+                                                           classAnnotation);
+            case CURSOR_POSITION:
+                return javaTestFinder.findTestMethodDeclaration(findCompilationUnitByPath(javaProject, context.getFilePath()),
+                                                                context.getCursorOffset());
+        }
+
+        return emptyList();
+    }
+
     @Override
     public int getDebugPort() {
-        return -1;
+        return debugPort;
+    }
+
+    protected void generateDebuggerPort() {
+        Random random = new Random();
+        int port = random.nextInt(65535);
+        if (isPortAvailable(port)) {
+            debugPort = port;
+        } else {
+            generateDebuggerPort();
+        }
+    }
+
+    private static boolean isPortAvailable(int port) {
+        try (Socket ignored = new Socket("localhost", port)) {
+            return false;
+        } catch (IOException ignored) {
+            return true;
+        }
     }
 
     private RuntimeException getRuntimeException(String filePath) {

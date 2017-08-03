@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.editor.EditorOpenedEventHandler;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.autosave.AutoSaveMode;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
 import org.eclipse.che.ide.api.editor.reconciler.DirtyRegionQueue;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
@@ -156,13 +156,13 @@ public class AutoSaveModeImpl implements AutoSaveMode, EditorSettingsChangedHand
     public void onEditorOpened(EditorOpenedEvent editorOpenedEvent) {
         if (documentHandle != null && editor == editorOpenedEvent.getEditor()) {
             HandlerRegistration documentChangeHandlerRegistration =
-                    documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, this);
+                    documentHandle.getDocEventBus().addHandler(DocumentChangedEvent.TYPE, this);
             handlerRegistrations.add(documentChangeHandlerRegistration);
         }
     }
 
     @Override
-    public void onDocumentChange(final DocumentChangeEvent event) {
+    public void onDocumentChanged(final DocumentChangedEvent event) {
         if (documentHandle == null || !event.getDocument().isSameAs(documentHandle)) {
             return;
         }
@@ -184,7 +184,7 @@ public class AutoSaveModeImpl implements AutoSaveMode, EditorSettingsChangedHand
      * @param event
      *         the document event for which to create a dirty region
      */
-    private void createDirtyRegion(final DocumentChangeEvent event) {
+    private void createDirtyRegion(final DocumentChangedEvent event) {
         if (event.getRemoveCharCount() == 0 && event.getText() != null && !event.getText().isEmpty()) {
             // Insert
             dirtyRegionQueue.addDirtyRegion(new DirtyRegion(event.getOffset(),

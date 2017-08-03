@@ -150,14 +150,16 @@ public class EditorInitializePromiseHolder {
                       "orion/keyBinding",
                       "che/editor/contentAssist",
                       "orion/editor/eventTarget",
-                      "orion/uiUtils"},
+                      "orion/uiUtils",
+                      "orion/editor/annotations"},
          new String[]{"CodeEditWidget",
                       "OrionEmacs",
                       "OrionVi",
                       "OrionKeyBinding",
                       "CheContentAssistMode",
                       "OrionEventTarget",
-                      "UiUtils"});
+                      "UiUtils",
+                      "OrionAnnotations"});
     }
 
     private void endConfiguration(final AsyncCallback<Void> callback) {
