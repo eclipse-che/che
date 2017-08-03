@@ -14,6 +14,7 @@ import com.google.inject.AbstractModule;
 
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.user.server.TokenValidator;
+import org.eclipse.che.keycloak.server.KeycloakConfigurationService;
 import org.eclipse.che.keycloak.server.KeycloakTokenValidator;
 
 
@@ -22,5 +23,6 @@ public class KeycloakModule extends AbstractModule {
     protected void configure() {
         bind(HttpJsonRequestFactory.class).to(org.eclipse.che.keycloak.server.KeycloakHttpJsonRequestFactory.class);
         bind(TokenValidator.class).to(KeycloakTokenValidator.class);
+        bind(KeycloakConfigurationService.class);
     }
 }

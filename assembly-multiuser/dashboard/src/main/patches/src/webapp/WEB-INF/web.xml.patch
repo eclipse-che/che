@@ -1,0 +1,24 @@
+--- src/webapp/WEB-INF/web.xml
++++ src/webapp/WEB-INF/web.xml
+@@ -29,4 +29,21 @@
+        <filter-name>cacheForcingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
++
++    <security-constraint>
++        <web-resource-collection>
++            <web-resource-name>IDE</web-resource-name>
++            <url-pattern>/*</url-pattern>
++        </web-resource-collection>
++        <auth-constraint>
++            <role-name>*</role-name>
++        </auth-constraint>
++    </security-constraint>
++    <login-config>
++        <auth-method>BASIC</auth-method>
++        <realm-name>this is ignored currently</realm-name>
++    </login-config>
++    <security-role>
++        <role-name>*</role-name>
++     </security-role>
+ </web-app>

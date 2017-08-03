@@ -64,9 +64,20 @@
             <outputDirectory>lib</outputDirectory>
             <includes>
                 <include>org.postgresql:postgresql</include>
+                <include>org.eclipse.che.plugin:che-plugin-keycloak-valve</include>
+                <include>org.eclipse.che.plugin:che-plugin-keycloak-shared</include>
             </includes>
         </dependencySet>
-    </dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>tomcat/lib</outputDirectory>
+            <includes>
+                <include>org.eclipse.che.plugin:che-plugin-keycloak-valve</include>
+                <include>org.eclipse.che.plugin:che-plugin-keycloak-shared</include>
+            </includes>
+        </dependencySet>
+  </dependencySets>
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/dependency/eclipse-che-${che.version}</directory>

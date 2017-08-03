@@ -1,39 +1,56 @@
 --- src/app/index.module.ts
 +++ src/app/index.module.ts
-@@ -36,12 +36,36 @@
+@@ -36,12 +36,53 @@
  import {CheBranding} from '../components/branding/che-branding.factory';
  import {ChePreferences} from '../components/api/che-preferences.factory';
 -
 +import * as Keycloak from '../components/keycloak/keycloak';
 +
 +
-+let keycloakConfig = {
-+  "url": "http://172.17.0.1:5050/auth",
-+  "realm": "che",
-+  "clientId": "che-public",
-+};
++function buildKeycloakConfig(keycloakSettings) {
++    return {
++        url: keycloakSettings['che.keycloak.auth-server-url'],
++        realm: keycloakSettings['che.keycloak.realm'],
++        clientId: keycloakSettings['che.keycloak.client-id']
++    };
++}
++
++let keycloakConfig;
 
  // init module
  let initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
    'angular-websocket', 'ui.bootstrap', 'ui.codemirror', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
    'ngDropdowns', 'ngLodash', 'angularCharts', 'ngClipboard', 'uuid4', 'angularFileUpload']);
 
-+angular.element(document).ready(() => {
-+  console.log('running keycloak init sequence');
++angular.element(document).ready(($injector) => {
 +
-+  window['_keycloak'] = Keycloak(keycloakConfig);
++  let promise = $injector.get('../wsmaster/api/keycloak/settings');
 +
-+  window['_keycloak']
-+    .init({
-+      onLoad: 'login-required'
-+    })
-+    .success(() => {
-+      angular.bootstrap(document, ['userDashboard'], {strictDi:true}); // manually bootstrap Angular
-+    });
++  function keycloakInit(keycloakSettings) {
++        keycloakConfig = buildKeycloakConfig(keycloakSettings);
++        window['_keycloak'] = Keycloak(keycloakConfig);
++        window['_keycloak']
++          .init({
++             onLoad: 'login-required'
++          })
++          .success(() => {
++            angular.bootstrap(document, ['userDashboard'], {strictDi:true}); // manually bootstrap Angular
++          });
++  }
++
++  promise.then((keycloakSettings) => {
++    console.log('keycloakSettings : ', keycloakSettings);
++    keycloakInit(keycloakSettings);
++  }, (error) => {
++    console.log('Error when retrieving Keycloak settings:', error);
++  });
++
++  console.log('Running Keycloak init sequence');
++
 +});
 +
 +initModule.factory('keycloak', $window => {
-+  return $window._keycloak;
++    return $window._keycloak;
 +});
 
  // add a global resolve flag on all routes (user needs to be resolved first)
@@ -86,7 +103,7 @@
 +initModule.factory('KeyCloakTokenInterceptor', ($q, keycloak) => {
 +  return {
 +    request: (config) => {
-+      if (config.url.indexOf(keycloakConfig.url) > -1) {
++      if (keycloak && config.url.indexOf(keycloakConfig.url) > -1) {
 +        return config;
 +      }
 +      if (keycloak && keycloak.token) {

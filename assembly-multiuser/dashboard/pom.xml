@@ -169,7 +169,6 @@
                         </resource>
                     </webResources>
                     <webXml>${npm-build-root}/src/webapp/WEB-INF/web.xml</webXml>
-                    <packagingExcludes>/webapp/</packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>
