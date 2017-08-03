@@ -21,7 +21,6 @@
         <format>zip</format>
         <format>tar.gz</format>
     </formats>
-    <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -70,7 +69,7 @@
     </dependencySets>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/dependency/</directory>
+            <directory>${project.build.directory}/dependency/eclipse-che-${che.version}</directory>
             <outputDirectory />
             <excludes>
                 <exclude>**/tomcat/webapps/ROOT.war</exclude>
