@@ -75,9 +75,9 @@ import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 @Path("/workspace")
 public class WorkspaceService extends Service {
 
-    private final WorkspaceManager              workspaceManager;
-    private final WorkspaceServiceLinksInjector linksInjector;
-    private final String                        apiEndpoint;
+    private final WorkspaceManager        workspaceManager;
+    private final WorkspaceLinksGenerator linksGenerator;
+    private final String                  apiEndpoint;
     //    private final boolean                       cheWorkspaceAutoSnapshot;
 //    private final boolean                       cheWorkspaceAutoRestore;
     @Context
@@ -86,13 +86,13 @@ public class WorkspaceService extends Service {
     @Inject
     public WorkspaceService(@Named("che.api") String apiEndpoint,
                             WorkspaceManager workspaceManager,
-                            WorkspaceServiceLinksInjector workspaceServiceLinksInjector
+                            WorkspaceLinksGenerator linksGenerator
 //                            @Named(CHE_WORKSPACE_AUTO_SNAPSHOT) boolean cheWorkspaceAutoSnapshot,
 //                            @Named(CHE_WORKSPACE_AUTO_RESTORE) boolean cheWorkspaceAutoRestore
     ) {
         this.apiEndpoint = apiEndpoint;
         this.workspaceManager = workspaceManager;
-        this.linksInjector = workspaceServiceLinksInjector;
+        this.linksGenerator = linksGenerator;
 //        this.cheWorkspaceAutoSnapshot = cheWorkspaceAutoSnapshot;
 //        this.cheWorkspaceAutoRestore = cheWorkspaceAutoRestore;
     }
@@ -148,7 +148,7 @@ public class WorkspaceService extends Service {
             workspaceManager.startWorkspace(workspace.getId(), null, new HashMap<>());
         }
         return Response.status(201)
-                       .entity(linksInjector.injectLinks(asDto(workspace), getServiceContext()))
+                       .entity(asDtoWithLinks(workspace))
                        .build();
     }
 
@@ -172,8 +172,7 @@ public class WorkspaceService extends Service {
                                                                       ForbiddenException,
                                                                       BadRequestException {
         validateKey(key);
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
-        return linksInjector.injectLinks(asDto(workspace), getServiceContext());
+        return asDtoWithLinks(workspaceManager.getWorkspace(key));
     }
 
     @GET
@@ -196,11 +195,11 @@ public class WorkspaceService extends Service {
                                             @QueryParam("status")
                                                     String status) throws ServerException, BadRequestException {
         //TODO add maxItems & skipCount to manager
-        return workspaceManager.getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId(), false)
-                               .stream()
-                               .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
-                               .map(workspace -> linksInjector.injectLinks(asDto(workspace), getServiceContext()))
-                               .collect(toList());
+        return withLinks(workspaceManager.getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId(), false)
+                                         .stream()
+                                         .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
+                                         .map(DtoConverter::asDto)
+                                         .collect(toList()));
     }
 
     @GET
@@ -218,11 +217,11 @@ public class WorkspaceService extends Service {
                                              @ApiParam("The namespace")
                                              @PathParam("namespace")
                                                      String namespace) throws ServerException, BadRequestException {
-        return workspaceManager.getByNamespace(namespace, false)
-                               .stream()
-                               .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
-                               .map(workspace -> linksInjector.injectLinks(asDto(workspace), getServiceContext()))
-                               .collect(toList());
+        return withLinks(workspaceManager.getByNamespace(namespace, false)
+                                         .stream()
+                                         .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
+                                         .map(DtoConverter::asDto)
+                                         .collect(toList()));
     }
 
     @PUT
@@ -298,8 +297,7 @@ public class WorkspaceService extends Service {
         Map<String, String> options = new HashMap<>();
         if (restore != null)
             options.put("restore", restore.toString());
-        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, options)),
-                                         getServiceContext());
+        return asDtoWithLinks(workspaceManager.startWorkspace(workspaceId, envName, options));
     }
 
     @POST
@@ -338,7 +336,7 @@ public class WorkspaceService extends Service {
 
         try {
             Workspace workspace = workspaceManager.startWorkspace(config, namespace, isTemporary, new HashMap<>());
-            return linksInjector.injectLinks(asDto(workspace), getServiceContext());
+            return asDtoWithLinks(workspace);
         } catch (ValidationException x) {
             throw new BadRequestException(x.getMessage());
         }
@@ -732,10 +730,20 @@ public class WorkspaceService extends Service {
                                                                       NotFoundException,
                                                                       ServerException {
         try {
-            Workspace updated = workspaceManager.updateWorkspace(id, update);
-            return linksInjector.injectLinks(asDto(updated), getServiceContext());
+            return asDtoWithLinks(workspaceManager.updateWorkspace(id, update));
         } catch (ValidationException x) {
             throw new BadRequestException(x.getMessage());
         }
+    }
+
+    private List<WorkspaceDto> withLinks(List<WorkspaceDto> workspaces) throws ServerException {
+        for (WorkspaceDto workspace : workspaces) {
+            workspace.setLinks(linksGenerator.genLinks(workspace));
+        }
+        return workspaces;
+    }
+
+    private WorkspaceDto asDtoWithLinks(Workspace workspace) throws ServerException {
+        return asDto(workspace).withLinks(linksGenerator.genLinks(workspace));
     }
 }
