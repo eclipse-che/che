@@ -32,16 +32,16 @@ import org.eclipse.che.ide.util.TextUtils;
  * @since 4.4.0
  */
 @Beta
-class FileImpl extends ResourceImpl implements File {
+public class FileImpl extends ResourceImpl implements File {
 
     private final String contentUrl;
 
     private String modificationStamp;
 
     @Inject
-    protected FileImpl(@Assisted Path path,
-                       @Assisted String contentUrl,
-                       @Assisted ResourceManager resourceManager) {
+    public FileImpl(@Assisted Path path,
+                    @Assisted String contentUrl,
+                    @Assisted ResourceManager resourceManager) {
         super(path, resourceManager);
 
         this.contentUrl = contentUrl;

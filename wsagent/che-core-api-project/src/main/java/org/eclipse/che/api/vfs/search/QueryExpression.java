@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.search;
 
-/** Container for parameters of query that executed by Searcher.*/
+/** Container for parameters of query that executed by Searcher. */
 public class QueryExpression {
     private String name;
     private String path;
     private String text;
     private int    skipCount;
     private int    maxItems;
+    private boolean includePositions;
 
     /** Optional file path parameter. Only file with the specified path or children are included in result. */
     public String getPath() {
@@ -65,6 +66,18 @@ public class QueryExpression {
 
     public QueryExpression setMaxItems(int maxItems) {
         this.maxItems = maxItems;
+        return this;
+    }
+
+    /**
+     * search for term position information or not.
+     */
+    public boolean isIncludePositions() {
+        return includePositions;
+    }
+
+    public QueryExpression setIncludePositions(boolean includePositions) {
+        this.includePositions = includePositions;
         return this;
     }
 

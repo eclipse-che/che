@@ -17,6 +17,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;
@@ -257,7 +258,7 @@ public interface ProjectServiceClient {
      * @see ItemReference
      * @since 4.4.0
      */
-    Promise<List<ItemReference>> search(QueryExpression expression);
+    Promise<List<SearchResult>> search(QueryExpression expression);
 
     /**
      * Gets list of {@link SourceEstimation} for all supposed project types.
