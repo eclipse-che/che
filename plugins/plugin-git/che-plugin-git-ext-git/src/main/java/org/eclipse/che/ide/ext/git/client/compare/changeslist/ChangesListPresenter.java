@@ -60,7 +60,7 @@ public class ChangesListPresenter implements ChangesListView.ActionDelegate {
         this.view = view;
         this.notificationManager = notificationManager;
         this.changesPanelPresenter = changesPanelPresenter;
-        this.changesPanelPresenter.setOnFileNodeDoubleClickedHandler((path, status) -> this.onCompareClicked());
+        this.changesPanelPresenter.setFileNodeDoubleClickHandler((path, status) -> this.onCompareClicked());
         this.view.setDelegate(this);
 
         SelectionChangedHandler handler = event -> {

@@ -39,7 +39,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
     private Map<String, Status> changedFiles;
     private ViewMode            viewMode;
 
-    private OnFileNodeDoubleClickedHandler onFileNodeDoubleClickedHandler;
+    private FileNodeDoubleClickHandler fileNodeDoubleClickHandler;
 
     @Inject
     public ChangesPanelPresenter(GitLocalizationConstant locale,
@@ -52,7 +52,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
         this.view.setDelegate(this);
         this.viewMode = TREE;
 
-        this.onFileNodeDoubleClickedHandler = (path, status) -> {
+        this.fileNodeDoubleClickHandler = (path, status) -> {
             appContext.getRootProject()
                       .getFile(path)
                       .then(file -> {
@@ -92,7 +92,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
 
     @Override
     public void onFileNodeDoubleClicked(String path, final Status status) {
-        onFileNodeDoubleClickedHandler.onFileNodeDoubleClicked(path, status);
+        fileNodeDoubleClickHandler.onFileNodeDoubleClicked(path, status);
     }
 
     @Override
@@ -118,12 +118,12 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
                                                             : locale.changeListGroupByDirectoryButtonText());
     }
 
-    public interface OnFileNodeDoubleClickedHandler {
+    public interface FileNodeDoubleClickHandler {
         void onFileNodeDoubleClicked(String path, final Status status);
     }
 
-    public void setOnFileNodeDoubleClickedHandler(OnFileNodeDoubleClickedHandler onFileNodeDoubleClickedHandler) {
-        this.onFileNodeDoubleClickedHandler = onFileNodeDoubleClickedHandler;
+    public void setFileNodeDoubleClickHandler(FileNodeDoubleClickHandler fileNodeDoubleClickHandler) {
+        this.fileNodeDoubleClickHandler = fileNodeDoubleClickHandler;
     }
 
 }
