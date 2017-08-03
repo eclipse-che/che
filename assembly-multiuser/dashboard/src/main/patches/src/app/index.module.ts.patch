@@ -25,7 +25,7 @@
 +
 +  window['_keycloak']
 +    .init({
-+      onLoad: 'login-required'
++      onLoad: 'check-sso', checkLoginIframe: false, responseMode: 'query'
 +    })
 +    .success(() => {
 +      angular.bootstrap(document, ['userDashboard'], {strictDi:true}); // manually bootstrap Angular
