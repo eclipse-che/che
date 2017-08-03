@@ -34,13 +34,12 @@ import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.T
 public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
 
     private final ChangesPanelView        view;
-    private final AppContext              appContext;
-    private final NotificationManager     notificationManager;
-    private final ComparePresenter        comparePresenter;
     private final GitLocalizationConstant locale;
 
     private Map<String, Status> changedFiles;
     private ViewMode            viewMode;
+
+    private OnFileNodeDoubleClickedHandler onFileNodeDoubleClickedHandler;
 
     @Inject
     public ChangesPanelPresenter(GitLocalizationConstant locale,
@@ -50,11 +49,21 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
                                  ComparePresenter comparePresenter) {
         this.locale = locale;
         this.view = view;
-        this.appContext = appContext;
-        this.notificationManager = notificationManager;
-        this.comparePresenter = comparePresenter;
         this.view.setDelegate(this);
         this.viewMode = TREE;
+
+        this.onFileNodeDoubleClickedHandler = (path, status) -> {
+            appContext.getRootProject()
+                      .getFile(path)
+                      .then(file -> {
+                          if (file.isPresent()) {
+                              comparePresenter.showCompareWithLatest(file.get(), status, "HEAD");
+                          }
+                      })
+                      .catchError(error -> {
+                          notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                      });
+        };
     }
 
     /**
@@ -83,16 +92,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
 
     @Override
     public void onFileNodeDoubleClicked(String path, final Status status) {
-        appContext.getRootProject()
-                  .getFile(path)
-                  .then(file -> {
-                      if (file.isPresent()) {
-                          comparePresenter.showCompareWithLatest(file.get(), status, "HEAD");
-                      }
-                  })
-                  .catchError(error -> {
-                      notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                  });
+        onFileNodeDoubleClickedHandler.onFileNodeDoubleClicked(path, status);
     }
 
     @Override
@@ -117,4 +117,13 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
         view.setTextToChangeViewModeButton(viewMode == TREE ? locale.changeListRowListViewButtonText()
                                                             : locale.changeListGroupByDirectoryButtonText());
     }
+
+    public interface OnFileNodeDoubleClickedHandler {
+        void onFileNodeDoubleClicked(String path, final Status status);
+    }
+
+    public void setOnFileNodeDoubleClickedHandler(OnFileNodeDoubleClickedHandler onFileNodeDoubleClickedHandler) {
+        this.onFileNodeDoubleClickedHandler = onFileNodeDoubleClickedHandler;
+    }
+
 }
