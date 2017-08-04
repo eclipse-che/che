@@ -11,7 +11,7 @@
 package org.eclipse.che.api.installer.server.spi.tck;
 
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.server.impl.TestInstallerFactory;
@@ -166,7 +166,7 @@ public class InstallerDaoTest {
         assertEquals(installerDao.getByFqn(new InstallerFqn("id_new", "version_new")), new InstallerImpl(newInstaller));
     }
 
-    @Test(expectedExceptions = InstallerAlreadyExistException.class)
+    @Test(expectedExceptions = InstallerAlreadyExistsException.class)
     public void shouldThrowConflictExceptionWhenCreatingInstallerWithExistingFqn() throws Exception {
         InstallerImpl newInstaller = TestInstallerFactory.createInstaller(installers[0].getId(), installers[0].getVersion());
 

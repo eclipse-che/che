@@ -11,7 +11,7 @@
 package org.eclipse.che.api.installer.server.spi;
 
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
@@ -42,7 +42,7 @@ public interface InstallerDao {
      *         installer to create
      * @throws NullPointerException
      *         when {@code installer} is null
-     * @throws InstallerAlreadyExistException
+     * @throws InstallerAlreadyExistsException
      *         when installer with such id and version already exists
      * @throws InstallerException
      *         when any other error occurs

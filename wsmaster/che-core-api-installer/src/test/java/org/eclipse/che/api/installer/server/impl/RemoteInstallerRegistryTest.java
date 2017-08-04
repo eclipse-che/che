@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.installer.server.InstallerRegistryService;
 import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
-import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerExceptionMapper;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
@@ -78,7 +78,7 @@ public class RemoteInstallerRegistryTest {
         assertInstaller(registry.getInstaller(newInstallerKey), newInstaller);
     }
 
-    @Test(expectedExceptions = InstallerAlreadyExistException.class)
+    @Test(expectedExceptions = InstallerAlreadyExistsException.class)
     public void shouldThrowInstallerConflictExceptionOnAddingIfInstallerExist() throws Exception {
         registry.add(installer);
     }

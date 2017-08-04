@@ -10,17 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.api.installer.server.exception;
 
+import org.eclipse.che.api.installer.server.impl.InstallerFqn;
+
 /**
- * Installer conflict error.
+ * Is thrown when installer with the same {@link InstallerFqn} already exists.
  *
  * @author Anatolii Bazko
  */
-public class InstallerAlreadyExistException extends InstallerException {
-    public InstallerAlreadyExistException(String message) {
+public class InstallerAlreadyExistsException extends InstallerException {
+    public InstallerAlreadyExistsException(String message) {
         super(message);
     }
 
-    public InstallerAlreadyExistException(String message, Throwable cause) {
+    public InstallerAlreadyExistsException(String message, Throwable cause) {
         super(message, cause);
     }
 }

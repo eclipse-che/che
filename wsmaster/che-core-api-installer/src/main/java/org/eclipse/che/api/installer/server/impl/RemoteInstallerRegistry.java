@@ -22,7 +22,7 @@ import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.InstallerRegistryService;
 import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
-import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.shared.dto.InstallerDto;
@@ -90,7 +90,7 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
                           .usePostMethod()
                           .request();
         } catch (ConflictException e) {
-            throw new InstallerAlreadyExistException(e.getMessage(), e);
+            throw new InstallerAlreadyExistsException(e.getMessage(), e);
         } catch (IOException | ApiException e) {
             throw new InstallerException(e.getMessage(), e);
         }

@@ -14,7 +14,7 @@ import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
@@ -54,7 +54,7 @@ public class JpaInstallerDao implements InstallerDao {
         try {
             doCreate(installer);
         } catch (DuplicateKeyException x) {
-            throw new InstallerAlreadyExistException(
+            throw new InstallerAlreadyExistsException(
                     format("Installer with such fqn '%s:%s' already exists", installer.getId(), installer.getVersion()));
         } catch (RuntimeException x) {
             throw new InstallerException(x.getMessage(), x);

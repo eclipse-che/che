@@ -12,7 +12,7 @@ package org.eclipse.che.api.installer.server;
 
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
-import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
@@ -34,7 +34,7 @@ public interface InstallerRegistry {
      *
      * @param installer
      *      the installer to add
-     * @throws InstallerAlreadyExistException
+     * @throws InstallerAlreadyExistsException
      *         if installer with corresponding {@link InstallerFqn} already exists
      * @throws InstallerException
      *         if unexpected error occurred

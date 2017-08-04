@@ -36,7 +36,7 @@ public class InstallerExceptionMapper implements ExceptionMapper<InstallerExcept
                            .type(MediaType.APPLICATION_JSON)
                            .build();
 
-        } else if (exception instanceof InstallerAlreadyExistException) {
+        } else if (exception instanceof InstallerAlreadyExistsException) {
             return Response.status(Response.Status.CONFLICT)
                            .entity(errorAsJson)
                            .type(MediaType.APPLICATION_JSON)

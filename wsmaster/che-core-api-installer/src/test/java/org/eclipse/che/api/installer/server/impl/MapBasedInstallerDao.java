@@ -13,7 +13,7 @@ package org.eclipse.che.api.installer.server.impl;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
@@ -43,7 +43,7 @@ public class MapBasedInstallerDao implements InstallerDao {
     public void create(InstallerImpl installer) throws InstallerException {
         InstallerFqn fqn = InstallerFqn.of(installer);
         if (installers.containsKey(fqn)) {
-            throw new InstallerAlreadyExistException("Already exists");
+            throw new InstallerAlreadyExistsException("Already exists");
         }
 
         installers.put(fqn, installer);
