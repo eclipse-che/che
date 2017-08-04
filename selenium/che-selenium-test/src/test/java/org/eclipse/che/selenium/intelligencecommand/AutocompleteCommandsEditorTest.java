@@ -48,8 +48,6 @@ public class AutocompleteCommandsEditorTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -67,7 +65,7 @@ public class AutocompleteCommandsEditorTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJ_NAME,
                                                ProjectTemplates.PLAIN_JAVA
         );

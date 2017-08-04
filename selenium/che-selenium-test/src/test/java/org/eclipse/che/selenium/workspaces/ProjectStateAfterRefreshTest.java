@@ -41,8 +41,6 @@ public class ProjectStateAfterRefreshTest {
     @Inject
     private TestWorkspace            workspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -64,7 +62,7 @@ public class ProjectStateAfterRefreshTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = ProjectStateAfterRefreshTest.this.getClass().getResource("/projects/guess-project");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );

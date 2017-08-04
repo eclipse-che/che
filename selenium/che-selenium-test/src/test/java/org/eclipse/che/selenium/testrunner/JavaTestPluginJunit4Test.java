@@ -84,8 +84,6 @@ public class JavaTestPluginJunit4Test {
     @Inject
     private Ide                         ide;
     @Inject
-    private DefaultTestUser             user;
-    @Inject
     private Consoles                    consoles;
     @Inject
     private CodenvyEditor               editor;
@@ -99,11 +97,10 @@ public class JavaTestPluginJunit4Test {
     @BeforeClass
     public void prepareTestProject() throws Exception {
         CompileCommand compileCommand = new CompileCommand();
-        testCommandServiceClient.createCommand(DtoConverter.asDto(compileCommand), user.getAuthToken(), ws.getName());
+        testCommandServiceClient.createCommand(DtoConverter.asDto(compileCommand), ws.getId());
 
         URL resource = getClass().getResource("/projects/plugins/JavaTestRunnerPlugin/junit4-tests");
         testProjectServiceClient.importProject(ws.getId(),
-                                               user.getAuthToken(),
                                                Paths.get(resource.toURI()),
                                                JUNIT4_PROJECT,
                                                ProjectTemplates.CONSOLE_JAVA_SIMPLE);

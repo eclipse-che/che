@@ -70,7 +70,7 @@ public class CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest {
     @BeforeClass
     public void prepare() throws Exception {
         try {
-            String publicKey = testSshServiceClient.generateSshKeys(productUser.getAuthToken());
+            String publicKey = testSshServiceClient.generateGithubKey();
             gitHubClientService.uploadPublicKey(gitHubUsername, gitHubPassword, publicKey);
         } catch (ConflictException ignored) {
             // already generated

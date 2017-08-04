@@ -69,9 +69,9 @@ public class CreateAndDeleteLocalBranchTest {
 
     @BeforeClass
     public void prepare() throws Exception {
-        testUserPreferencesServiceClient.addGitCommitter(user.getAuthToken(), gitHubUsername, user.getEmail());
+        testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, user.getEmail());
         URL resource = CreateAndDeleteLocalBranchTest.class.getResource("/projects/create-local-branch-project");
-        testProjectServiceClient.importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING);
         ide.open(ws);
     }

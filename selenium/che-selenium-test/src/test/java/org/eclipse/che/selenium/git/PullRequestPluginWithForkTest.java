@@ -98,7 +98,7 @@ public class PullRequestPluginWithForkTest {
         ide.open(ws);
 
         // add committer info
-        testUserPreferencesServiceClient.addGitCommitter(productUser.getAuthToken(), gitHubUsername, productUser.getEmail());
+        testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
         // authorize application on GitHub
         menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, TestMenuCommandsConstants.Profile.PREFERENCES);

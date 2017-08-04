@@ -71,8 +71,6 @@ public class ImportProjectIntoSpecifiedBranchTest {
     private TestGitHubServiceClient   gitHubClientService;
     @Inject
     private TestProjectServiceClient  projectServiceClient;
-    @Inject
-    private DefaultTestUser           testUser;
 
     @BeforeClass
     public void prepare() throws Exception {
@@ -87,7 +85,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
 
     @AfterMethod
     public void tearDown() throws Exception {
-        projectServiceClient.deleteResource(ws.getId(), testUser.getAuthToken(), PROJECT_NAME);
+        projectServiceClient.deleteResource(ws.getId(), PROJECT_NAME);
     }
 
     @Test

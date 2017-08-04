@@ -49,8 +49,6 @@ public class RenamePackageSpringTest {
     @Inject
     private TestWorkspace            workspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -72,13 +70,13 @@ public class RenamePackageSpringTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME_1,
                                                ProjectTemplates.MAVEN_SPRING
         );
 
         resource = getClass().getResource("/projects/spring-project-with-main-method");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME_2,
                                                ProjectTemplates.MAVEN_SPRING
         );

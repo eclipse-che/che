@@ -118,7 +118,7 @@ public class PullRequestPluginTest {
         webDriverWait = new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC);
         ide.open(ws);
         // add committer info
-        testUserPreferencesServiceClient.addGitCommitter(productUser.getAuthToken(), gitHubUsername, productUser.getEmail());
+        testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
         // authorize application on GitHub
         menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, TestMenuCommandsConstants.Profile.PREFERENCES);
         preferences.waitPreferencesForm();
@@ -129,7 +129,7 @@ public class PullRequestPluginTest {
     @AfterClass
     public void tearDown() throws Exception {
         if (factoryWsName != null) {
-            workspaceServiceClient.delete(factoryWsName, user.getName(), user.getAuthToken());
+            workspaceServiceClient.delete(factoryWsName, user.getName());
         }
 
         List<String> listPullRequest = gitHubClientService.getNumbersOfOpenedPullRequests(NAME_REPO, gitHubUsername, gitHubPassword);

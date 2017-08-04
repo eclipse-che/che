@@ -54,8 +54,6 @@ public class AutocompleteProposalJavaDocTest {
     @Inject
     private TestWorkspace            workspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -71,7 +69,7 @@ public class AutocompleteProposalJavaDocTest {
     @BeforeClass
     public void setup() throws Exception {
         URL resource = getClass().getResource("/projects/multi-module-java-with-ext-libs");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT,
                                                ProjectTemplates.CONSOLE_JAVA_SIMPLE
         );

@@ -54,8 +54,6 @@ public class ConvertToProjectWithPomFileTest {
                                                    "</project>";
 
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private TestWorkspace            workspace;
     @Inject
     private Ide                      ide;
@@ -81,7 +79,7 @@ public class ConvertToProjectWithPomFileTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/guess-project");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(),
+        testProjectServiceClient.importProject(workspace.getId(),
                                                Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING

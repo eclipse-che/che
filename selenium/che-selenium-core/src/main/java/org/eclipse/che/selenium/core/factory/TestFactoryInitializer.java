@@ -106,7 +106,7 @@ public class TestFactoryInitializer {
         }
 
         public TestFactory build() throws Exception {
-            String factoryUrl = testFactoryServiceClient.createFactory(factoryDto, defaultUser.getAuthToken());
+            String factoryUrl = testFactoryServiceClient.createFactory(factoryDto);
             return new TestFactory(factoryUrl, defaultUser, factoryDto, dashboardUrlProvider, testFactoryServiceClient,
                                    workspaceServiceClient);
         }

@@ -36,7 +36,6 @@ import java.nio.file.Paths;
 public class OpenFileWithHelpContextMenuTest {
 
     private static final String PROJECT_NAME        = OpenFileWithHelpContextMenuTest.class.getSimpleName();
-    private static final String PROJECT_PATH        = "src/test/resources/projects/defaultSpringProjectWithDifferentTypeOfFiles";
     private static final String NAME_JSP            = "index.jsp";
     private static final String NAME_LESS           = "LessFile.less";
     private static final String NAME_CSS            = "cssFile.css";
@@ -153,8 +152,6 @@ public class OpenFileWithHelpContextMenuTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -172,7 +169,7 @@ public class OpenFileWithHelpContextMenuTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/defaultSpringProjectWithDifferentTypeOfFiles");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );

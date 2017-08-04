@@ -106,14 +106,14 @@ public class TestUserImpl implements TestUser {
 
         List<String> workspaces = new ArrayList<>();
         try {
-            workspaces = workspaceServiceClient.getAll(auth);
+            workspaces = workspaceServiceClient.getAll();
         } catch (Exception e) {
             LOG.error("Failed to get all workspaces.", e);
         }
 
         for (String workspace : workspaces) {
             try {
-                workspaceServiceClient.delete(workspace, name, auth);
+                workspaceServiceClient.delete(workspace, name);
             } catch (Exception e) {
                 LOG.error(format("User name='%s' failed to remove workspace name='%s'", workspace, name), e);
             }

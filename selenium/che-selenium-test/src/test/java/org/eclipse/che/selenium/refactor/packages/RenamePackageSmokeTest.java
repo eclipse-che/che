@@ -49,8 +49,6 @@ public class RenamePackageSmokeTest {
     @Inject
     private TestWorkspace            workspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -68,7 +66,7 @@ public class RenamePackageSmokeTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/rename-package");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(),
+        testProjectServiceClient.importProject(workspace.getId(),
                                                Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING

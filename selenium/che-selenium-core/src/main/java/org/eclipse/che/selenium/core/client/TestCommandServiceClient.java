@@ -37,29 +37,26 @@ public class TestCommandServiceClient {
     public void createCommand(String commandLine,
                               String commandName,
                               String commandType,
-                              String wsId,
-                              String accessToken) throws Exception {
+                              String wsId) throws Exception {
         CommandDto commandDto = DtoFactory.newDto(CommandDto.class);
         commandDto.setName(commandName);
         commandDto.setType(commandType);
         commandDto.setCommandLine(commandLine);
         commandDto.setAttributes(ImmutableMap.of("previewUrl", ""));
-        createCommand(commandDto, wsId, accessToken);
+        createCommand(commandDto, wsId);
     }
 
-    public void createCommand(CommandDto command, String wsId, String accessToken) throws Exception {
+    public void createCommand(CommandDto command, String wsId) throws Exception {
         requestFactory.fromUrl(apiEndpoint + "workspace/" + wsId + "/command")
-                      .setAuthorizationHeader(accessToken)
                       .usePostMethod()
                       .setBody(command)
                       .request();
     }
 
 
-    public void deleteCommand(String commandName, String wsId, String authToken) throws Exception {
+    public void deleteCommand(String commandName, String wsId) throws Exception {
         requestFactory.fromUrl(apiEndpoint + "workspace/" + wsId + "/command/" + commandName)
                       .useDeleteMethod()
-                      .setAuthorizationHeader(authToken)
                       .request();
     }
 }

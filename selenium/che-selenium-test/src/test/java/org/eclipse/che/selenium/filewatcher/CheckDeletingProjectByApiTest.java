@@ -34,8 +34,6 @@ public class CheckDeletingProjectByApiTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultUser;
-    @Inject
     private TestProjectServiceClient projectServiceClient;
     @Inject
     private Ide                      ide;
@@ -63,14 +61,13 @@ public class CheckDeletingProjectByApiTest {
 
     private void createProject(String projectName) throws Exception {
         projectServiceClient.importProject(testWorkspace.getId(),
-                                           defaultUser.getAuthToken(),
                                            Paths.get(getClass().getResource("/projects/default-spring-project").toURI()),
                                            projectName,
                                            ProjectTemplates.MAVEN_SPRING);
     }
 
     private void deleteAndWaitProjectNotExistByApi(String projectName) throws Exception {
-        projectServiceClient.deleteResource(projectName, testWorkspace.getName(), defaultUser.getAuthToken());
+        projectServiceClient.deleteResource(projectName, testWorkspace.getName());
         projectExplorer.waitItemIsNotPresentVisibleArea(projectName);
         events.waitExpectedMessage(String.format("Project '%s' is removed", projectName));
     }

@@ -34,18 +34,17 @@ public class TestProfileServiceClient {
         this.requestFactory = requestFactory;
     }
 
-    public void setAttributes(Map<String, String> attributes, String authToken) throws Exception {
+    public void setAttributes(Map<String, String> attributes) throws Exception {
         requestFactory.fromUrl(apiEndpoint + "profile/attributes")
                       .usePutMethod()
-                      .setAuthorizationHeader(authToken)
                       .setBody(attributes)
                       .request();
     }
 
-    public void setUserNames(String name, String lastName, String authToken) throws Exception {
+    public void setUserNames(String name, String lastName) throws Exception {
         Map<String, String> attributes = ImmutableMap.of("firstName", name,
                                                          "lastName", lastName);
 
-        setAttributes(attributes, authToken);
+        setAttributes(attributes);
     }
 }

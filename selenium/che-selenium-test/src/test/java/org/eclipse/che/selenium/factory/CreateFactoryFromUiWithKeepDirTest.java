@@ -102,7 +102,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     @AfterClass
     public void tearDown() throws Exception {
         if (factoryWsName != null) {
-            workspaceServiceClient.delete(factoryWsName, user.getName(), user.getAuthToken());
+            workspaceServiceClient.delete(factoryWsName, user.getName());
         }
     }
 

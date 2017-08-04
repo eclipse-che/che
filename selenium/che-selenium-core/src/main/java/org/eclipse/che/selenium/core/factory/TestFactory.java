@@ -69,7 +69,7 @@ public class TestFactory {
 
     private void deleteFactory() throws Exception {
         if (isNamedFactory()) {
-            testFactoryServiceClient.deleteFactoryByName(owner.getAuthToken(), factoryDto.getName());
+            testFactoryServiceClient.deleteFactoryByName(factoryDto.getName());
         }
     }
 
@@ -77,11 +77,11 @@ public class TestFactory {
         String originalName = factoryDto.getWorkspace().getName();
         String workspace2delete = originalName;
         for (int i = 1; ; i++) {
-            if (!workspaceServiceClient.exists(workspace2delete, owner.getName(), owner.getAuthToken())) {
+            if (!workspaceServiceClient.exists(workspace2delete, owner.getName())) {
                 break;
             }
 
-            workspaceServiceClient.delete(workspace2delete, owner.getName(), owner.getAuthToken());
+            workspaceServiceClient.delete(workspace2delete, owner.getName());
             workspace2delete = originalName + "_" + i;
         }
     }

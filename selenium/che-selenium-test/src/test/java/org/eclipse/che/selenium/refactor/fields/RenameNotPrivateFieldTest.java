@@ -49,8 +49,6 @@ public class RenameNotPrivateFieldTest {
     @Inject
     private TestWorkspace            workspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -68,7 +66,7 @@ public class RenameNotPrivateFieldTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/rename-non-private-field");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SIMPLE
         );

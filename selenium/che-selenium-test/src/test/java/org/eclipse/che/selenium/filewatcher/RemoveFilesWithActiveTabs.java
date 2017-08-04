@@ -44,8 +44,6 @@ public class RemoveFilesWithActiveTabs {
 
     @Inject
     private TestWorkspace   ws;
-    @Inject
-    private DefaultTestUser user;
 
     @InjectPageObject(driverId = 1)
     private Ide ide1;
@@ -99,7 +97,7 @@ public class RemoveFilesWithActiveTabs {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/spring-project-for-file-watcher-tabs");
-        testProjectServiceClient.importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );
 
@@ -158,14 +156,14 @@ public class RemoveFilesWithActiveTabs {
         projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt2);
         editor1.waitTabIsPresent(nameFiletxt2);
 
-        testProjectServiceClient.deleteResource(ws.getId(), user.getAuthToken(), PROJECT_NAME + "/" + nameFiletxt2);
+        testProjectServiceClient.deleteResource(ws.getId(), PROJECT_NAME + "/" + nameFiletxt2);
 
         events1.waitExpectedMessage(expectedMessage1, 10);
         editor1.waitTabIsNotPresent(nameFiletxt2);
         projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
         editor2.waitTabIsPresent(nameFiletxt3);
 
-        testProjectServiceClient.deleteResource(ws.getId(), user.getAuthToken(), PROJECT_NAME + "/" + nameFiletxt3);
+        testProjectServiceClient.deleteResource(ws.getId(), PROJECT_NAME + "/" + nameFiletxt3);
 
         editor2.waitTabIsNotPresent(nameFiletxt2);
         events2.waitExpectedMessage(expectedMessage2, 10);

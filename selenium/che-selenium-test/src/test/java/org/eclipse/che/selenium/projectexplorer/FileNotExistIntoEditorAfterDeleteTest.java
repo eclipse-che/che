@@ -78,8 +78,6 @@ public class FileNotExistIntoEditorAfterDeleteTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -101,7 +99,7 @@ public class FileNotExistIntoEditorAfterDeleteTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );

@@ -44,8 +44,6 @@ public class QuickFixAndCodeAssistantFeaturesTest {
     @Inject
     private TestWorkspace            workspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -63,7 +61,7 @@ public class QuickFixAndCodeAssistantFeaturesTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(),
+        testProjectServiceClient.importProject(workspace.getId(),
                                                Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING

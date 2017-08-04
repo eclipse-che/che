@@ -80,7 +80,7 @@ public class UpdateFilesWithoutIDE {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/spring-project-for-file-watcher-tabs");
-        testProjectServiceClient.importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );
@@ -105,7 +105,7 @@ public class UpdateFilesWithoutIDE {
         projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt2);
         editor1.waitActiveEditor();
 
-        testProjectServiceClient.updateFile(ws.getId(), user.getAuthToken(),
+        testProjectServiceClient.updateFile(ws.getId(),
                                             PROJECT_NAME + "/" + nameFiletxt2, Long.toString(System.currentTimeMillis())
         );
 
@@ -116,7 +116,7 @@ public class UpdateFilesWithoutIDE {
         editor2.waitActiveEditor();
 
         String currentTimeInMs = Long.toString(System.currentTimeMillis());
-        testProjectServiceClient.updateFile(ws.getId(), user.getAuthToken(),
+        testProjectServiceClient.updateFile(ws.getId(),
                                             PROJECT_NAME + "/" + nameFiletxt3, Long.toString(System.currentTimeMillis()));
 
         editor1.waitTextIntoEditor(currentTimeInMs, 5);

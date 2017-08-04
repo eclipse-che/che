@@ -54,8 +54,6 @@ public class RenameVirtualMethodsTest {
     @Inject
     private TestWorkspace            workspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -73,7 +71,7 @@ public class RenameVirtualMethodsTest {
     @BeforeClass
     public void setup() throws Exception {
         URL resource = getClass().getResource("/projects/RenameVirtualMethods");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                nameOfProject,
                                                ProjectTemplates.MAVEN_SIMPLE
         );

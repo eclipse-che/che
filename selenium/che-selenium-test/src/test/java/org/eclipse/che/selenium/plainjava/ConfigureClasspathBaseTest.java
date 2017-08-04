@@ -41,8 +41,6 @@ public class ConfigureClasspathBaseTest {
     @Inject
     private Ide                      ide;
     @Inject
-    private DefaultTestUser          productUser;
-    @Inject
     private ProjectExplorer          projectExplorer;
     @Inject
     private ConfigureClasspath       configureClasspath;
@@ -54,7 +52,7 @@ public class ConfigureClasspathBaseTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/java-multimodule");
-        testProjectServiceClient.importProject(ws.getId(), productUser.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_JAVA_MULTIMODULE
         );
         ide.open(ws);

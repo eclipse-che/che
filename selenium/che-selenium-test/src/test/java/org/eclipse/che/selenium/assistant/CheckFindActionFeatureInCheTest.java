@@ -89,8 +89,6 @@ public class CheckFindActionFeatureInCheTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private FindAction               findAction;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -105,7 +103,7 @@ public class CheckFindActionFeatureInCheTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = CheckFindActionFeatureInCheTest.this.getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(),
+        testProjectServiceClient.importProject(testWorkspace.getId(),
                                                Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING

@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.user.shared.dto.UserDto;
@@ -36,7 +37,7 @@ public class TestUserServiceClient {
     @Inject
     public TestUserServiceClient(TestApiEndpointUrlProvider apiEndpointProvider,
                                  AdminTestUser adminTestUser,
-                                 HttpJsonRequestFactory requestFactory) {
+                                 DefaultHttpJsonRequestFactory requestFactory) {
         this.apiEndpoint = apiEndpointProvider.get().toString();
         this.adminTestUser = adminTestUser;
         this.requestFactory = requestFactory;
@@ -66,15 +67,6 @@ public class TestUserServiceClient {
                              .usePostMethod()
                              .setAuthorizationHeader(adminTestUser.getAuthToken())
                              .setBody(newDto(UserDto.class).withName(email.split("@")[0]).withPassword(password).withEmail(email))
-                             .request()
-                             .asDto(UserDto.class);
-    }
-
-    public UserDto getUser(String auth) throws Exception {
-        String url = apiEndpoint + "user";
-        return requestFactory.fromUrl(url)
-                             .useGetMethod()
-                             .setAuthorizationHeader(auth)
                              .request()
                              .asDto(UserDto.class);
     }

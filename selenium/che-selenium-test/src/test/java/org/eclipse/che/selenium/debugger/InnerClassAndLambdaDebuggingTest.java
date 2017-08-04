@@ -50,8 +50,6 @@ public class InnerClassAndLambdaDebuggingTest {
     private TestWorkspace   ws;
     @Inject
     private Ide             ide;
-    @Inject
-    private DefaultTestUser user;
 
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -79,7 +77,6 @@ public class InnerClassAndLambdaDebuggingTest {
     @BeforeClass
     public void setup() throws Exception {
         testProjectServiceClient.importProject(ws.getId(),
-                                               user.getAuthToken(),
                                                Paths.get(getClass().getResource("/projects/plugins/DebuggerPlugin/java-inner-lambda")
                                                                    .toURI()),
                                                PROJECT,
@@ -90,8 +87,8 @@ public class InnerClassAndLambdaDebuggingTest {
                                                "${current.project.path}/target/*.jar",
                                                BUILD_AND_DEBUG_COMMAND_NAME,
                                                TestCommandsConstants.MAVEN,
-                                               ws.getId(),
-                                               user.getAuthToken());
+                                               ws.getId()
+        );
 
         // open IDE
         ide.open(ws);

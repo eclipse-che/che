@@ -28,7 +28,9 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  */
 @Singleton
 public class TestSshServiceClient {
-    private final String                 apiEndpoint;
+    private static final String MACHINE_SERVICE = "machine";
+    private static final String VCS_SERVICE = "vcs";
+    private final String apiEndpoint;
     private final HttpJsonRequestFactory requestFactory;
 
     @Inject
@@ -39,9 +41,8 @@ public class TestSshServiceClient {
     }
 
 
-    public String getPrivateKeyByName(String authToken, String key) throws Exception {
-        HttpJsonResponse request = requestFactory.fromUrl(apiEndpoint + "ssh/machine/" + "?name=" + key)
-                                                 .setAuthorizationHeader(authToken)
+    public String getPrivateKeyByName(String name) throws Exception {
+        HttpJsonResponse request = requestFactory.fromUrl(String.format("%sssh/%s/?name=%s", apiEndpoint, MACHINE_SERVICE, name))
                                                  .useGetMethod()
                                                  .request();
         List<SshPairDto> sshPair = request.asList(SshPairDto.class);
@@ -49,21 +50,19 @@ public class TestSshServiceClient {
     }
 
 
-    public void deleteMachineKeyByName(String authToken, String key) throws Exception {
-        requestFactory.fromUrl(apiEndpoint + "ssh/machine/" + "?name=" + key)
-                      .setAuthorizationHeader(authToken)
+    public void deleteMachineKeyByName(String name) throws Exception {
+        requestFactory.fromUrl(apiEndpoint + "ssh/" + MACHINE_SERVICE + "/?name=" + name)
                       .useDeleteMethod()
                       .request();
     }
 
-    public String generateSshKeys(String authToken) throws Exception {
+    public String generateGithubKey() throws Exception {
         GenerateSshPairRequest generateSshKeyData = newDto(GenerateSshPairRequest.class)
                 .withName("github.com")
-                .withService("vcs");
+                .withService(VCS_SERVICE);
 
         HttpJsonResponse response = requestFactory.fromUrl(apiEndpoint + "ssh/generate")
                                                   .usePostMethod()
-                                                  .setAuthorizationHeader(authToken)
                                                   .setBody(generateSshKeyData)
                                                   .request();
         return response.asDto(SshPairDto.class).getPublicKey();

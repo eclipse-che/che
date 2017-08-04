@@ -114,10 +114,10 @@ public class CommitFilesByMultiSelectTest {
 
     @BeforeClass
     public void prepare() throws Exception {
-        testUserPreferencesServiceClient.addGitCommitter(productUser.getAuthToken(), gitHubUsername, productUser.getEmail());
+        testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
         URL resource = getClass().getResource("/projects/java-project-for-multiselect");
-        testProjectServiceClient.importProject(ws.getId(), productUser.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_JAVA_MULTIMODULE
                                               );
         ide.open(ws);

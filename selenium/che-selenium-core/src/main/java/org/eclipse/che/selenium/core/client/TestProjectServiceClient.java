@@ -57,18 +57,17 @@ public class TestProjectServiceClient {
      * Set type for existing project on vfs
      */
     public void setProjectType(String workspaceId,
-                               String authToken,
                                String template,
                                String projectName) throws Exception {
         InputStream in = getClass().getResourceAsStream("/templates/project/" + template);
         String json = IoUtil.readAndCloseQuietly(in);
 
-        String url = getWsAgentUrl(workspaceId, authToken);
+        String url = getWsAgentUrl(workspaceId);
         ProjectConfigDto project = getInstance().createDtoFromJson(json, ProjectConfigDto.class);
 
         requestFactory.fromUrl(url + "/" + projectName)
                       .usePutMethod()
-                      .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId, authToken))
+                      .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
                       .setBody(project)
                       .request();
     }
@@ -76,18 +75,18 @@ public class TestProjectServiceClient {
     /**
      * Delete resource.
      */
-    public void deleteResource(String workspaceId, String authToken, String path) throws Exception {
-        String wsAgentUrl = getWsAgentUrl(workspaceId, authToken);
+    public void deleteResource(String workspaceId, String path) throws Exception {
+        String wsAgentUrl = getWsAgentUrl(workspaceId);
         requestFactory.fromUrl(wsAgentUrl + "/" + path)
-                      .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId, authToken))
+                      .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
                       .useDeleteMethod()
                       .request();
     }
 
-    public void createFolder(String workspaceId, String authToken, String folder) throws Exception {
-        String url = getWsAgentUrl(workspaceId, authToken) + "/folder/" + folder;
+    public void createFolder(String workspaceId, String folder) throws Exception {
+        String url = getWsAgentUrl(workspaceId) + "/folder/" + folder;
         requestFactory.fromUrl(url)
-                      .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId, authToken))
+                      .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
                       .usePostMethod()
                       .request();
     }
@@ -96,19 +95,18 @@ public class TestProjectServiceClient {
      * Import zip project from file system into user workspace.
      */
     public void importZipProject(String workspaceId,
-                                 String authToken,
                                  Path zipFile,
                                  String projectName,
                                  String template) throws Exception {
-        String url = getWsAgentUrl(workspaceId, authToken) + "/import/" + projectName;
-        createFolder(workspaceId, authToken, projectName);
+        String url = getWsAgentUrl(workspaceId) + "/import/" + projectName;
+        createFolder(workspaceId, projectName);
 
         HttpURLConnection httpConnection = null;
         try {
             httpConnection = (HttpURLConnection)new URL(url).openConnection();
             httpConnection.setRequestMethod("POST");
             httpConnection.setRequestProperty("Content-Type", "application/zip");
-            httpConnection.addRequestProperty("Authorization", machineServiceClient.getMachineApiToken(workspaceId, authToken));
+            httpConnection.addRequestProperty("Authorization", machineServiceClient.getMachineApiToken(workspaceId));
             httpConnection.setDoOutput(true);
 
             try (OutputStream outputStream = httpConnection.getOutputStream()) {
@@ -124,7 +122,7 @@ public class TestProjectServiceClient {
             ofNullable(httpConnection).ifPresent(HttpURLConnection::disconnect);
         }
 
-        setProjectType(workspaceId, authToken, template, projectName);
+        setProjectType(workspaceId, template, projectName);
     }
 
 
@@ -132,7 +130,6 @@ public class TestProjectServiceClient {
      * Import project from file system into a user workspace
      */
     public void importProject(String workspaceId,
-                              String authToken,
                               Path sourceFolder,
                               String projectName,
                               String template) throws Exception {
@@ -148,7 +145,7 @@ public class TestProjectServiceClient {
         Path zip = Files.createTempFile("project", projectName);
         ZipUtils.zipDir(sourceFolder.toString(), sourceFolder.toFile(), zip.toFile(), null);
 
-        importZipProject(workspaceId, authToken, zip, projectName, template);
+        importZipProject(workspaceId, zip, projectName, template);
     }
 
 
@@ -156,18 +153,17 @@ public class TestProjectServiceClient {
      * Creates file in the project.
      */
     public void createFileInProject(String workspaceId,
-                                    String authToken,
                                     String parentFolder,
                                     String fileName,
                                     String content) throws Exception {
-        String apiRESTUrl = getWsAgentUrl(workspaceId, authToken) + "/file/" + parentFolder + "?name=" + fileName;
+        String apiRESTUrl = getWsAgentUrl(workspaceId) + "/file/" + parentFolder + "?name=" + fileName;
 
         HttpURLConnection httpConnection = null;
         try {
             httpConnection = (HttpURLConnection)new URL(apiRESTUrl).openConnection();
             httpConnection.setRequestMethod("POST");
             httpConnection.setRequestProperty("Content-Type", "text/plain");
-            httpConnection.addRequestProperty("Authorization", machineServiceClient.getMachineApiToken(workspaceId, authToken));
+            httpConnection.addRequestProperty("Authorization", machineServiceClient.getMachineApiToken(workspaceId));
             httpConnection.setDoOutput(true);
             try (OutputStream output = httpConnection.getOutputStream()) {
                 output.write(content.getBytes("UTF-8"));
@@ -183,10 +179,10 @@ public class TestProjectServiceClient {
         }
     }
 
-    public ProjectConfig getFirstProject(String workspaceId, String authToken) throws Exception {
-        String apiUrl = getWsAgentUrl(workspaceId, authToken);
+    public ProjectConfig getFirstProject(String workspaceId) throws Exception {
+        String apiUrl = getWsAgentUrl(workspaceId);
         return requestFactory.fromUrl(apiUrl)
-                             .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId, authToken))
+                             .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
                              .request()
                              .asList(ProjectConfigDto.class)
                              .get(0);
@@ -196,17 +192,16 @@ public class TestProjectServiceClient {
      * Updates file content.
      */
     public void updateFile(String workspaceId,
-                           String authToken,
                            String pathToFile,
                            String content) throws Exception {
-        String url = getWsAgentUrl(workspaceId, authToken) + "/file/" + pathToFile;
+        String url = getWsAgentUrl(workspaceId) + "/file/" + pathToFile;
 
         HttpURLConnection httpConnection = null;
         try {
             httpConnection = (HttpURLConnection)new URL(url).openConnection();
             httpConnection.setRequestMethod("PUT");
             httpConnection.setRequestProperty("Content-Type", "text/plain");
-            httpConnection.addRequestProperty("Authorization", machineServiceClient.getMachineApiToken(workspaceId, authToken));
+            httpConnection.addRequestProperty("Authorization", machineServiceClient.getMachineApiToken(workspaceId));
             httpConnection.setDoOutput(true);
 
             try (OutputStream output = httpConnection.getOutputStream()) {
@@ -223,8 +218,8 @@ public class TestProjectServiceClient {
         }
     }
 
-    private String getWsAgentUrl(String workspaceId, String authToken) throws Exception {
-        Workspace workspace = workspaceServiceClient.getById(workspaceId, authToken);
+    private String getWsAgentUrl(String workspaceId) throws Exception {
+        Workspace workspace = workspaceServiceClient.getById(workspaceId);
         workspaceServiceClient.ensureRunningStatus(workspace);
 
         return workspace.getRuntime()

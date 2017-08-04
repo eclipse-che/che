@@ -57,8 +57,6 @@ public class MultimoduleProjectDebuggingTest {
     private TestWorkspace   ws;
     @Inject
     private Ide             ide;
-    @Inject
-    private DefaultTestUser user;
 
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -87,14 +85,14 @@ public class MultimoduleProjectDebuggingTest {
     public void setup() throws Exception {
         URL resource = getClass().getResource("/projects/plugins/DebuggerPlugin/java-multimodule");
         testProjectServiceClient
-                .importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()), PROJECT, ProjectTemplates.CONSOLE_JAVA_SIMPLE
+                .importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT, ProjectTemplates.CONSOLE_JAVA_SIMPLE
                 );
 
         testCommandServiceClient.createCommand(BUILD_AND_DEBUG_CONSOLE_APPLICATION_COMMAND,
                                                BUILD_AND_DEBUG_COMMAND_NAME,
                                                TestCommandsConstants.MAVEN,
-                                               ws.getId(),
-                                               user.getAuthToken());
+                                               ws.getId()
+        );
 
         // open IDE
         ide.open(ws);

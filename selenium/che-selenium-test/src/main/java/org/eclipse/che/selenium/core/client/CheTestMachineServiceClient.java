@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class CheTestMachineServiceClient implements TestMachineServiceClient {
     @Override
-    public String getMachineApiToken(String workspaceId, String authToken) throws Exception {
+    public String getMachineApiToken(String workspaceId) throws Exception {
         return "machineToken" + workspaceId;
     }
 }

@@ -60,7 +60,7 @@ public class TransitiveDependencyTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );

@@ -45,8 +45,6 @@ public class CheckMavenPluginTest {
     @Inject
     private TestWorkspace            workspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -75,8 +73,8 @@ public class CheckMavenPluginTest {
         commandServiceClient.createCommand("cd /projects/" + PROJECT_NAME + " && git checkout contrib-12042015",
                                            CHECKOUT_COMMAND,
                                            TestCommandsConstants.CUSTOM,
-                                           workspace.getId(),
-                                           defaultTestUser.getAuthToken());
+                                           workspace.getId()
+        );
 
         ide.open(workspace);
         projectExplorer.waitProjectExplorer();

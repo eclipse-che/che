@@ -54,8 +54,6 @@ public class NodeJsDebugTest {
     private TestWorkspace   ws;
     @Inject
     private Ide             ide;
-    @Inject
-    private DefaultTestUser user;
 
     @Inject
     private DebugPanel               debugPanel;
@@ -75,7 +73,7 @@ public class NodeJsDebugTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/node-js-simple");
-        testProjectServiceClient.importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME, ProjectTemplates.NODE_JS
         );
         ide.open(ws);

@@ -38,8 +38,6 @@ public class Eclipse0091Test {
     @Inject
     private TestWorkspace            ws;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -51,7 +49,7 @@ public class Eclipse0091Test {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/resolveTests_1_5_t0091");
-        testProjectServiceClient.importProject(ws.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );
         ide.open(ws);

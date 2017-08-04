@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.git;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -18,6 +17,8 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -28,7 +29,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.pageobject.git.Git;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -74,44 +75,44 @@ public class AddFilesToIndexTest {
             " deleted:    README.md";
 
     @Inject
-    private TestWorkspace                               ws;
+    private TestWorkspace                    ws;
     @Inject
-    private Ide                                         ide;
-    @Inject
-    private DefaultTestUser                             productUser;
+    private Ide                              ide;
     @Inject
     @Named("github.username")
-    private String                                      gitHubUsername;
+    private String                           gitHubUsername;
     @Inject
     @Named("github.password")
-    private String                                      gitHubPassword;
+    private String                           gitHubPassword;
     @Inject
-    private ProjectExplorer                             projectExplorer;
+    private DefaultTestUser                  productUser;
     @Inject
-    private Menu                                        menu;
+    private ProjectExplorer                  projectExplorer;
     @Inject
-    private AskDialog                                   askDialog;
+    private Menu                             menu;
     @Inject
-    private org.eclipse.che.selenium.pageobject.git.Git git;
+    private AskDialog                        askDialog;
     @Inject
-    private Events                                      events;
+    private Git                              git;
     @Inject
-    private Loader                                      loader;
+    private Events                           events;
     @Inject
-    private CodenvyEditor                               editor;
+    private Loader                           loader;
     @Inject
-    private AskForValueDialog                           askForValueDialog;
+    private CodenvyEditor                    editor;
     @Inject
-    private TestUserPreferencesServiceClient            testUserPreferencesServiceClient;
+    private AskForValueDialog                askForValueDialog;
     @Inject
-    private TestProjectServiceClient                    testProjectServiceClient;
+    private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+    @Inject
+    private TestProjectServiceClient         testProjectServiceClient;
 
     @BeforeClass
     public void prepare() throws Exception {
-        testUserPreferencesServiceClient.addGitCommitter(productUser.getAuthToken(), gitHubUsername, productUser.getEmail());
+        testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(ws.getId(), productUser.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
                                               );
         ide.open(ws);

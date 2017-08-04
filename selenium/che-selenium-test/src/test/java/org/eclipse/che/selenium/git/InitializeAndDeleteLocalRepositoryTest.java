@@ -76,10 +76,10 @@ public class InitializeAndDeleteLocalRepositoryTest {
 
     @BeforeClass
     public void prepare() throws Exception {
-        testUserPreferencesServiceClient.addGitCommitter(productUser.getAuthToken(), gitHubUsername, productUser.getEmail());
+        testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(ws.getId(), productUser.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
                                               );
         ide.open(ws);

@@ -57,8 +57,6 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     private TestWorkspace   ws;
     @Inject
     private Ide             ide;
-    @Inject
-    private DefaultTestUser user;
 
     @Inject
     private ProjectExplorer            projectExplorer;
@@ -88,7 +86,6 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     @BeforeClass
     public void prepare() throws Exception {
         testProjectServiceClient.importProject(ws.getId(),
-                                               user.getAuthToken(),
                                                Paths.get(getClass().getResource("/projects/debugStepInto").toURI()),
                                                PROJECT,
                                                ProjectTemplates.MAVEN_SPRING);
@@ -98,20 +95,20 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
                                                "/home/user/tomcat8/bin/catalina.sh jpda run",
                                                START_DEBUG,
                                                TestCommandsConstants.CUSTOM,
-                                               ws.getId(),
-                                               user.getAuthToken());
+                                               ws.getId()
+        );
 
         testCommandServiceClient.createCommand("mvn clean install -f /projects/" + PROJECT,
                                                BUILD,
                                                TestCommandsConstants.CUSTOM,
-                                               ws.getId(),
-                                               user.getAuthToken());
+                                               ws.getId()
+        );
 
         testCommandServiceClient.createCommand("/home/user/tomcat8/bin/shutdown.sh && rm -rf /home/user/tomcat8/webapps/*",
                                                CLEAN_TOMCAT,
                                                TestCommandsConstants.CUSTOM,
-                                               ws.getId(),
-                                               user.getAuthToken());
+                                               ws.getId()
+        );
 
         ide.open(ws);
     }
@@ -137,7 +134,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
                         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT);
         editor.waitBreakPointWithActiveState(34);
         String appUrl =
-                "http" + "://" + workspaceServiceClient.getServerAddressByPort(ws.getId(), user.getAuthToken(), 8080) + "/spring/guess";
+                "http" + "://" + workspaceServiceClient.getServerAddressByPort(ws.getId(), 8080) + "/spring/guess";
         String requestMess = "6";
         CompletableFuture<String> instToRequestThread = debugUtils.gotoDebugAppAndSendRequest(appUrl, requestMess);
         editor.waitBreakPointWithActiveState(34);

@@ -48,9 +48,7 @@ public class DeletePackageTest {
     private static final String PATH_TO_PACKAGE3 = PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples";
 
     @Inject
-    private TestWorkspace           testWorkspace;
-    @Inject
-    private DefaultTestUser          defaultTestUser;
+    private TestWorkspace            testWorkspace;
     @Inject
     private Ide                      ide;
     @Inject
@@ -71,7 +69,7 @@ public class DeletePackageTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );

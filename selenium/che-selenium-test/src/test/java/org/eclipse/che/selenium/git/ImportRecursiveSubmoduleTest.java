@@ -44,8 +44,6 @@ public class ImportRecursiveSubmoduleTest {
     @Inject
     private Ide                       ide;
     @Inject
-    private DefaultTestUser           productUser;
-    @Inject
     @Named("github.username")
     private String                    gitHubUsername;
     @Inject
@@ -83,7 +81,7 @@ public class ImportRecursiveSubmoduleTest {
 
     @AfterMethod
     public void tearDown() throws Exception {
-        testProjectServiceClient.deleteResource(ws.getId(), productUser.getAuthToken(), PROJECT_NAME);
+        testProjectServiceClient.deleteResource(ws.getId(), PROJECT_NAME);
     }
 
     @Test

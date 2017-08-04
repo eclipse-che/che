@@ -60,8 +60,6 @@ public class PhpProjectDebuggingTest {
     private TestWorkspace   ws;
     @Inject
     private Ide             ide;
-    @Inject
-    private DefaultTestUser user;
 
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -85,7 +83,7 @@ public class PhpProjectDebuggingTest {
     @BeforeClass
     public void setup() throws Exception {
         URL resource = getClass().getResource("/projects/plugins/DebuggerPlugin/php-tests");
-        testProjectServiceClient.importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()), PROJECT, ProjectTemplates.PHP
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT, ProjectTemplates.PHP
         );
 
         // open IDE

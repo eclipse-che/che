@@ -47,8 +47,6 @@ public class CheckMacrosFeatureTest {
                                                " /CheckMacrosFeatureTest/README.md CheckMacrosFeatureTest maven";
 
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private TestWorkspace            workspace;
     @Inject
     private Ide                      ide;
@@ -70,7 +68,7 @@ public class CheckMacrosFeatureTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/guess-project");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING
                 .toString()
         );
         ide.open(workspace);

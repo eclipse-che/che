@@ -55,7 +55,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
             }
 
             try {
-                final Workspace ws = workspaceServiceClient.createWorkspace(name, memoryInGB, GB, resource.getPath(), owner.getAuthToken());
+                final Workspace ws = workspaceServiceClient.createWorkspace(name, memoryInGB, GB, resource.getPath());
                 workspaceServiceClient.start(id.updateAndGet((s) -> ws.getId()), name, owner);
 
                 LOG.info("Workspace name='{}' id='{}' has been created.", name, ws.getId());
@@ -65,7 +65,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
                 LOG.error(errorMessage, e);
 
                 try {
-                    workspaceServiceClient.delete(name, owner.getName(), owner.getAuthToken());
+                    workspaceServiceClient.delete(name, owner.getName());
                 } catch (Exception e1) {
                     throw new IllegalStateException(format("Failed to remove workspace name='%s' when start is failed.", name), e);
                 }
@@ -100,7 +100,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
     public void delete() {
         future.thenAccept(aVoid -> {
             try {
-                workspaceServiceClient.delete(name, owner.getName(), owner.getAuthToken());
+                workspaceServiceClient.delete(name, owner.getName());
                 LOG.info("Workspace name='{}', id='{}' removed", name, getId());
             } catch (Exception e) {
                 throw new RuntimeException(format("Failed to remove workspace '%s'", this), e);

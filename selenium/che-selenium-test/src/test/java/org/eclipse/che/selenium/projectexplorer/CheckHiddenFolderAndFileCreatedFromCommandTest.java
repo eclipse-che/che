@@ -48,8 +48,6 @@ public class CheckHiddenFolderAndFileCreatedFromCommandTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -67,7 +65,7 @@ public class CheckHiddenFolderAndFileCreatedFromCommandTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );
@@ -75,14 +73,14 @@ public class CheckHiddenFolderAndFileCreatedFromCommandTest {
         testCommandServiceClient.createCommand(COMMAND_FOLDER,
                                                COMMAND_CREATE_FOLDER_NAME,
                                                TestCommandsConstants.CUSTOM,
-                                               testWorkspace.getId(),
-                                               defaultTestUser.getAuthToken());
+                                               testWorkspace.getId()
+        );
 
         testCommandServiceClient.createCommand(COMMAND_FILE,
                                                COMMAND_CREATE_FILE_NAME,
                                                TestCommandsConstants.CUSTOM,
-                                               testWorkspace.getId(),
-                                               defaultTestUser.getAuthToken());
+                                               testWorkspace.getId()
+        );
         ide.open(testWorkspace);
     }
 

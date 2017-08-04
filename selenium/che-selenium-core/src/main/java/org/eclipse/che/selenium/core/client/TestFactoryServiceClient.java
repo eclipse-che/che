@@ -52,9 +52,8 @@ public class TestFactoryServiceClient {
      *         DTO object to create the factory
      * @return URL for the saved factory
      */
-    public String createFactory(FactoryDto createFactoryDto, String authToken) throws Exception {
+    public String createFactory(FactoryDto createFactoryDto) throws Exception {
         HttpJsonResponse request = requestFactory.fromUrl(factoryApiEndpoint)
-                                                 .setAuthorizationHeader(authToken)
                                                  .usePostMethod()
                                                  .setBody(createFactoryDto)
                                                  .request();
@@ -67,21 +66,19 @@ public class TestFactoryServiceClient {
         return String.format("%sf?id=%s", ideUrl, responseDto.getId());
     }
 
-    public String findFactoryIdByName(String authToken, String name) throws Exception {
+    public String findFactoryIdByName(String name) throws Exception {
         String queryParamPrefix = "find?name=" + name;
         HttpJsonResponse request = requestFactory.fromUrl(factoryApiEndpoint + queryParamPrefix)
-                                                 .setAuthorizationHeader(authToken)
                                                  .request();
         List<FactoryDto> dtos = request.asList(FactoryDto.class);
         return dtos.isEmpty() ? null : dtos.get(0).getId();
     }
 
 
-    public void deleteFactoryByName(String authToken, String name) throws Exception {
-        String id = findFactoryIdByName(authToken, name);
+    public void deleteFactoryByName(String name) throws Exception {
+        String id = findFactoryIdByName(name);
         if (id != null) {
             requestFactory.fromUrl(factoryApiEndpoint + id)
-                          .setAuthorizationHeader(authToken)
                           .useDeleteMethod()
                           .request();
         }

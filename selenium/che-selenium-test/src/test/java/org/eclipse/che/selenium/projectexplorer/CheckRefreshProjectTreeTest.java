@@ -43,8 +43,6 @@ public class CheckRefreshProjectTreeTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -58,7 +56,7 @@ public class CheckRefreshProjectTreeTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );
@@ -99,7 +97,7 @@ public class CheckRefreshProjectTreeTest {
                             String fileName,
                             String content) throws Exception {
 
-        testProjectServiceClient.createFileInProject(testWorkspace.getId(), defaultTestUser.getAuthToken(),
+        testProjectServiceClient.createFileInProject(testWorkspace.getId(),
                                                      path,
                                                      fileName,
                                                      content);

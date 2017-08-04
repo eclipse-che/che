@@ -48,8 +48,6 @@ public class MacrosCommandsEditorTest {
     @Inject
     private TestWorkspace            ws;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -68,7 +66,6 @@ public class MacrosCommandsEditorTest {
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/java-project-with-additional-source-folder");
         testProjectServiceClient.importProject(ws.getId(),
-                                               defaultTestUser.getAuthToken(),
                                                Paths.get(resource.toURI()),
                                                PROJ_NAME,
                                                ProjectTemplates.PLAIN_JAVA);

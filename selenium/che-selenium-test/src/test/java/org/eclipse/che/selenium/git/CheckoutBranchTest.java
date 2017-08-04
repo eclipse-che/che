@@ -108,8 +108,8 @@ public class CheckoutBranchTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/checkoutSpringSimple");
-        testUserPreferencesServiceClient.addGitCommitter(user.getAuthToken(), gitHubUsername, user.getEmail());
-        testProjectServiceClient.importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, user.getEmail());
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING);
         ide.open(ws);
     }

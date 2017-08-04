@@ -48,9 +48,7 @@ public class DeleteProjectsTest {
                                                                     "DeleteProjectTest5");
 
     @Inject
-    private TestWorkspace        workspace;
-    @Inject
-    private DefaultTestUser      defaultTestUser;
+    private TestWorkspace            workspace;
     @Inject
     private Ide                      ide;
     @Inject
@@ -72,7 +70,7 @@ public class DeleteProjectsTest {
     public void setUp() throws Exception {
         for (String projectName : PROJECT_NAMES) {
             URL resource = getClass().getResource("/projects/ProjectWithDifferentTypeOfFiles");
-            testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+            testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                    projectName,
                                                    ProjectTemplates.MAVEN_SPRING
             );

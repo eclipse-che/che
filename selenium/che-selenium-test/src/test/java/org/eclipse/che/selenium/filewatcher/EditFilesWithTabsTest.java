@@ -37,8 +37,6 @@ import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
  */
 public class EditFilesWithTabsTest {
     @Inject
-    private DefaultTestUser defaultUser;
-    @Inject
     private TestWorkspace   testWorkspace;
 
     @InjectPageObject(driverId = 1)
@@ -64,7 +62,7 @@ public class EditFilesWithTabsTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/spring-project-for-file-watcher-tabs");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                projectName,
                                                ProjectTemplates.MAVEN_SPRING
         );

@@ -44,8 +44,6 @@ public class GenerateEffectivePomTest {
     @Inject
     private ProjectExplorer          projectExplorer;
     @Inject
-    private DefaultTestUser          defaultUser;
-    @Inject
     private Loader                   loader;
     @Inject
     private CodenvyEditor            editor;
@@ -61,7 +59,7 @@ public class GenerateEffectivePomTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/java-multimodule");
-        testProjectServiceClient.importProject(workspace.getId(), defaultUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );

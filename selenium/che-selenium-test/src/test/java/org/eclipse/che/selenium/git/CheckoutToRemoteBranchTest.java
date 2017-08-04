@@ -101,13 +101,13 @@ public class CheckoutToRemoteBranchTest {
     @BeforeClass
     public void prepare() throws Exception {
         try {
-            String publicKey = testSshServiceClient.generateSshKeys(productUser.getAuthToken());
+            String publicKey = testSshServiceClient.generateGithubKey();
             gitHubClientService.uploadPublicKey(gitHubUsername, gitHubPassword, publicKey);
         } catch (ConflictException ignored) {
             // already generated
         }
 
-        testUserPreferencesServiceClient.addGitCommitter(productUser.getAuthToken(), gitHubUsername, productUser.getEmail());
+        testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
         ide.open(ws);
     }
 

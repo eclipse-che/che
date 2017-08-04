@@ -48,8 +48,6 @@ public class KeyBindingsTest {
     private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
 
     @Inject
-    private DefaultTestUser          defaultUser;
-    @Inject
     private TestWorkspace            testWorkspace;
     @Inject
     private Ide                      ide;
@@ -80,7 +78,6 @@ public class KeyBindingsTest {
 
         URL resource = KeyBindings.class.getResource("/projects/default-spring-project");
         projectServiceClient.importProject(testWorkspace.getId(),
-                                           defaultUser.getAuthToken(),
                                            Paths.get(resource.toURI()),
                                            PROJECT_NAME,
                                            ProjectTemplates.MAVEN_SPRING);

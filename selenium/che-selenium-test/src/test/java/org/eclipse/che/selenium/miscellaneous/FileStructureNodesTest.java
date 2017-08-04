@@ -102,8 +102,6 @@ public class FileStructureNodesTest {
                                                   "TEN";
 
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private TestWorkspace            workspace;
     @Inject
     private Ide                      ide;
@@ -121,7 +119,7 @@ public class FileStructureNodesTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/prOutline");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SIMPLE
         );
         ide.open(workspace);

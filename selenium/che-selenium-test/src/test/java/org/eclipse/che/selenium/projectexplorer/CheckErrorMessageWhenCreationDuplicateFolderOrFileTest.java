@@ -42,9 +42,7 @@ public class CheckErrorMessageWhenCreationDuplicateFolderOrFileTest {
     private static final String NOTIFICATION_MESSAGE   = "Failed to create resource";
 
     @Inject
-    private TestWorkspace           testWorkspace;
-    @Inject
-    private DefaultTestUser         defaultTestUser;
+    private TestWorkspace            testWorkspace;
     @Inject
     private Ide                      ide;
     @Inject
@@ -68,7 +66,7 @@ public class CheckErrorMessageWhenCreationDuplicateFolderOrFileTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );

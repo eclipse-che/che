@@ -11,10 +11,12 @@
 package org.eclipse.che.selenium.core;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
@@ -67,6 +69,8 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     public void configure() {
         TestConfiguration config = new SeleniumTestConfiguration();
         config.getMap().forEach((key, value) -> bindConstant().annotatedWith(Names.named(key)).to(value));
+
+        bind(HttpJsonRequestFactory.class).to(TestHttpJsonRequestFactory.class);
 
         bind(TestSvnPasswordProvider.class).to(CheTestSvnPasswordProvider.class);
         bind(TestSvnUsernameProvider.class).to(CheTestSvnUsernameProvider.class);

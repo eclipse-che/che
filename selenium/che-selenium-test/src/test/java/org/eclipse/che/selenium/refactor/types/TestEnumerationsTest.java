@@ -26,7 +26,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
-import org.eclipse.che.selenium.refactor.fields.FailNotPrivateFieldTest;
 import org.openqa.selenium.Keys;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -75,7 +74,7 @@ public class TestEnumerationsTest {
     @BeforeClass
     public void setup() throws Exception {
         URL resource = TestEnumerationsTest.this.getClass().getResource("/projects/RenameType");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                NAME_OF_PROJECT,
                                                ProjectTemplates.MAVEN_SIMPLE
         );

@@ -43,8 +43,6 @@ public class CheckBasicFunctionalityInCommandsExplorerTest {
     @InjectTestWorkspace(memoryGb = 4)
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private CommandsExplorer         commandsExplorer;
@@ -61,7 +59,7 @@ public class CheckBasicFunctionalityInCommandsExplorerTest {
     public void prepare() throws Exception {
         String projectName = "commandsExplorerTestProject";
         URL resource = getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultUser.getAuthToken(),
+        testProjectServiceClient.importProject(testWorkspace.getId(),
                                                Paths.get(resource.toURI()),
                                                projectName,
                                                MAVEN_SPRING.toString()

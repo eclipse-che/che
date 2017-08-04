@@ -60,7 +60,7 @@ public class CheckCodeigniterStackTest {
 
     @AfterClass
     public void tearDown() throws Exception {
-        workspaceServiceClient.delete(WS_NAME, user.getName(), user.getAuthToken());
+        workspaceServiceClient.delete(WS_NAME, user.getName());
     }
 
     @Test

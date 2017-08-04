@@ -32,9 +32,8 @@ public class TestUserPreferencesServiceClient {
         this.httpRequestFactory = httpRequestFactory;
     }
 
-    public void addGitCommitter(String authToken, String committerName, String committerEmail) throws Exception {
+    public void addGitCommitter(String committerName, String committerEmail) throws Exception {
         httpRequestFactory.fromUrl(apiEndpoint + "preferences")
-                          .setAuthorizationHeader(authToken)
                           .usePutMethod()
                           .setBody(ImmutableMap.of("git.committer.name", committerName,
                                                    "git.committer.email", committerEmail))

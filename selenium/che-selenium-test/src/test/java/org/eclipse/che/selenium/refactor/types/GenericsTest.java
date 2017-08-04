@@ -26,7 +26,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
-import org.eclipse.che.selenium.refactor.fields.FailNotPrivateFieldTest;
 import org.openqa.selenium.Keys;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -52,9 +51,7 @@ public class GenericsTest {
     private String contentFromOutB;
 
     @Inject
-    private TestWorkspace        workspace;
-    @Inject
-    private DefaultTestUser          defaultTestUser;
+    private TestWorkspace            workspace;
     @Inject
     private Ide                      ide;
     @Inject
@@ -77,7 +74,7 @@ public class GenericsTest {
     @BeforeClass
     public void setup() throws Exception {
         URL resource = GenericsTest.this.getClass().getResource("/projects/RenameType");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                nameOfProject,
                                                ProjectTemplates.MAVEN_SIMPLE
         );

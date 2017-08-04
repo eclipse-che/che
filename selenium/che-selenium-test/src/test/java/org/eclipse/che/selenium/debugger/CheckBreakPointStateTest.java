@@ -45,8 +45,6 @@ public class CheckBreakPointStateTest {
     private TestWorkspace   ws;
     @Inject
     private Ide             ide;
-    @Inject
-    private DefaultTestUser user;
 
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -66,14 +64,14 @@ public class CheckBreakPointStateTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = CheckBreakPointStateTest.this.getClass().getResource("/projects/debug-spring-project");
-        testProjectServiceClient.importProject(ws.getId(), user.getAuthToken(),
+        testProjectServiceClient.importProject(ws.getId(),
                                                Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );
 
         resource = CheckBreakPointStateTest.this.getClass().getResource("/projects/debugStepInto");
-        testProjectServiceClient.importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME_2,
                                                ProjectTemplates.MAVEN_SPRING
         );
@@ -114,7 +112,7 @@ public class CheckBreakPointStateTest {
         askDialog.confirmAndWaitClosed();
         projectExplorer.waitDisappearItemByPath(PROJECT_NAME_2 + "/src/main/java");
         debugPanel.waitBreakPointsPanelIsEmpty();
-        testProjectServiceClient.deleteResource(ws.getId(), user.getAuthToken(), PROJECT_NAME_2);
+        testProjectServiceClient.deleteResource(ws.getId(), PROJECT_NAME_2);
         projectExplorer.waitDisappearItemByPath(PROJECT_NAME_2);
     }
 

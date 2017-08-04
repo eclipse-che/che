@@ -49,9 +49,7 @@ public class CommandsEditorTest {
             "java -classpath ${project.java.classpath}${project.java.output.dir} com.company.nba.MainClass";
 
     @Inject
-    private TestWorkspace        testWorkspace;
-    @Inject
-    private DefaultTestUser      defaultTestUser;
+    private TestWorkspace            testWorkspace;
     @Inject
     private Ide                      ide;
     @Inject
@@ -74,7 +72,7 @@ public class CommandsEditorTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/java-project-for-commands");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.PLAIN_JAVA
         );

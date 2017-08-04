@@ -16,7 +16,6 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -69,8 +68,6 @@ public class NavigateToFileTest {
              "createdFrom.con (/NavigateFile_2)", "createdFrom.api (/NavigateFile)");
 
     @Inject
-    private DefaultTestUser            defaultTestUser;
-    @Inject
     private TestWorkspace              workspace;
     @Inject
     private Ide                        ide;
@@ -95,13 +92,11 @@ public class NavigateToFileTest {
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/guess-project");
         testProjectServiceClient.importProject(workspace.getId(),
-                                               defaultTestUser.getAuthToken(),
                                                Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SIMPLE);
 
         testProjectServiceClient.importProject(workspace.getId(),
-                                               defaultTestUser.getAuthToken(),
                                                Paths.get(resource.toURI()),
                                                PROJECT_NAME_2,
                                                ProjectTemplates.MAVEN_SIMPLE);
@@ -220,9 +215,7 @@ public class NavigateToFileTest {
     }
 
     private void createFileFromAPI(String path, String fileName, String content) throws Exception {
-        String wsID = workspaceServiceClient.getByName(workspace.getName(), defaultTestUser.getName(), defaultTestUser.getAuthToken())
-                                            .getId();
-        testProjectServiceClient.createFileInProject(wsID, defaultTestUser.getAuthToken(), path, fileName, content);
+        testProjectServiceClient.createFileInProject(workspace.getId(), path, fileName, content);
     }
 
     private void createFileInTerminal(String projectName, String fileName) {
