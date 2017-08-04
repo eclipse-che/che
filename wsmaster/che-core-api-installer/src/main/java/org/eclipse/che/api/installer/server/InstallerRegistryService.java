@@ -55,6 +55,8 @@ import static org.eclipse.che.api.installer.server.DtoConverter.asDto;
 @Path("/installer")
 public class InstallerRegistryService extends Service {
 
+    public static final String TOTAL_ITEMS_COUNT_HEADER = "Total-Items-Count";
+
     private final InstallerRegistry installerRegistry;
 
     @Inject
@@ -99,7 +101,7 @@ public class InstallerRegistryService extends Service {
             return Response.ok()
                            .entity(installers.getItems())
                            .header("Link", createLinkHeader(installers))
-                           .header("TotalItemsCount", installers.getTotalItemsCount())
+                           .header(TOTAL_ITEMS_COUNT_HEADER, installers.getTotalItemsCount())
                            .build();
         } catch (IllegalArgumentException e) {
             throw new BadRequestException(e.getMessage());

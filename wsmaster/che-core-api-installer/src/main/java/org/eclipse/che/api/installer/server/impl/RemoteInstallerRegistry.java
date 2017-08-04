@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.api.installer.server.DtoConverter.asDto;
+import static org.eclipse.che.api.installer.server.InstallerRegistryService.TOTAL_ITEMS_COUNT_HEADER;
 
 /**
  * Remote implementation of the {@link InstallerRegistry}.
@@ -188,7 +189,7 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
                                                       .request();
 
             int totalCount = -1;
-            List<String> totalItemsCountHeader = response.getHeaders().get("TotalItemsCount");
+            List<String> totalItemsCountHeader = response.getHeaders().get(TOTAL_ITEMS_COUNT_HEADER);
 
             if (totalItemsCountHeader != null && !totalItemsCountHeader.isEmpty()) {
                 totalCount = Integer.valueOf(totalItemsCountHeader.get(0));
