@@ -13,10 +13,12 @@ package org.eclipse.che.junit.junit4;
 import org.eclipse.che.junit.TestingMessageHelper;
 import org.eclipse.che.junit.junit4.listeners.CheJUnitTestListener;
 import org.eclipse.che.junit.junit4.listeners.JUnitExecutionListener;
-import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
-import org.junit.runner.Request;
-import org.junit.runner.Runner;
+import org.junit.runner.Result;
+import org.junit.runner.notification.RunListener;
+import org.junit.runner.notification.RunNotifier;
+
+import java.util.List;
 
 /**
  * Custom JUnit4 runner that reports results visa {@link CheJUnitTestListener}.
@@ -33,28 +35,37 @@ public class CheJUnitCoreRunner extends JUnitCore {
      *         (for example full.qualified.ClassName#methodName)
      */
     public void run(String[] suites) {
-        Request request = TestRunnerUtil.buildRequest(suites);
-        if (request == null) {
+        createListener();
+
+        List<JUnit4TestReference> newSuites = TestRunnerUtil.createTestReferences(suites);
+
+        if (newSuites.isEmpty()) {
             TestingMessageHelper.reporterAttached(System.out);
-            System.err.print("No test found to run.");
-        } else {
-            Runner runner = request.getRunner();
-            Description description = runner.getDescription();
-
-            if (cheJUnitTestListener != null) {
-                cheJUnitTestListener.suiteTreeStarted(description);
-                cheJUnitTestListener.suiteSendTree(description);
-                cheJUnitTestListener.suiteTreeEnded(description);
-            }
-
-            super.run(request);
+            return;
         }
+
+        RunNotifier runNotifier = new RunNotifier();
+        runNotifier.addListener(new JUnitExecutionListener(cheJUnitTestListener));
+        cheJUnitTestListener.testRunStarted();
+
+        for (JUnit4TestReference jUnit4TestReference : newSuites) {
+            jUnit4TestReference.sendTree(cheJUnitTestListener);
+        }
+
+        Result result = new Result();
+        final RunListener listener = result.createListener();
+        runNotifier.addListener(listener);
+
+        for (JUnit4TestReference testReference : newSuites) {
+            testReference.run(runNotifier);
+        }
+        runNotifier.fireTestRunFinished(result);
     }
 
     /**
      * Creates custom listener {@link CheJUnitTestListener} and adds it to
      */
-    public void createListener() {
+    private void createListener() {
         cheJUnitTestListener = new CheJUnitTestListener();
         this.addListener(new JUnitExecutionListener(cheJUnitTestListener));
     }

@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
+import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
 import org.eclipse.che.ide.ext.java.shared.dto.HighlightedPosition;
 import org.eclipse.che.ide.ext.java.shared.dto.ReconcileResult;
 import org.eclipse.che.ide.project.ResolvingProjectStateHolder;
@@ -60,8 +61,9 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class JavaReconcilerStrategyTest {
-    private static final String FILE_NAME = "TestClass.java";
-    private static final String FILE_PATH = "some/path/to/file/TestClass.java";
+    private static final String FILE_NAME    = "TestClass.java";
+    private static final String FILE_PATH    = "some/path/to/file/TestClass.java";
+    private static final String PROJECT_PATH = "some/path/to/project";
 
     @Mock
     private EventBus                            eventBus;
@@ -100,20 +102,18 @@ public class JavaReconcilerStrategyTest {
     @Before
     public void setUp() throws Exception {
         EditorInput editorInput = mock(EditorInput.class);
-        Optional project = mock(Optional.class);
-        Project projectConfig = mock(Project.class);
+        Project project = mock(Project.class);
+        when(project.exists()).thenReturn(true);
         Optional<Resource> srcFolder = mock(Optional.class);
         Container startPoint = mock(Container.class);
 
         when(editor.getEditorInput()).thenReturn(editorInput);
         when(editorInput.getFile()).thenReturn(file);
         when(file.getName()).thenReturn(FILE_NAME);
-        when(file.getRelatedProject()).thenReturn(project);
+        when(file.getProject()).thenReturn(project);
         when(file.getLocation()).thenReturn(Path.valueOf(FILE_PATH));
 
-        when(project.get()).thenReturn(projectConfig);
-        when(projectConfig.getLocation()).thenReturn(Path.valueOf("some/path/to/project"));
-        when(project.isPresent()).thenReturn(true);
+        when(project.getPath()).thenReturn(PROJECT_PATH);
         when(file.getParentWithMarker(any())).thenReturn(srcFolder);
         when(srcFolder.isPresent()).thenReturn(true);
         when(srcFolder.get()).thenReturn(startPoint);
@@ -194,5 +194,25 @@ public class JavaReconcilerStrategyTest {
         verify(codeAssistProcessor).enableCodeAssistant();
         verify(codeAssistProcessor, never()).disableCodeAssistant(anyString());
         verify(highlighter).reconcile(eq(positions));
+    }
+
+    @Test
+    public void shouldDoReconcileWhenClasspathIsChanged() throws Exception {
+        ClasspathChangedEvent event = mock(ClasspathChangedEvent.class);
+        when(event.getPath()).thenReturn(PROJECT_PATH);
+
+        javaReconcilerStrategy.onClasspathChanged(event);
+
+        verify(client).reconcile(anyString(), anyString());
+    }
+
+    @Test
+    public void shouldSkipReconcileWhenClasspathIsChangedForAnotherProject() throws Exception {
+        ClasspathChangedEvent event = mock(ClasspathChangedEvent.class);
+        when(event.getPath()).thenReturn("some/another/project");
+
+        javaReconcilerStrategy.onClasspathChanged(event);
+
+        verify(client, never()).reconcile(anyString(), anyString());
     }
 }

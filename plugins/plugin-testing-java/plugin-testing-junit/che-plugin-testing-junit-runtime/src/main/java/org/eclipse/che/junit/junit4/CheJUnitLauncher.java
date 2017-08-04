@@ -23,12 +23,11 @@ public class CheJUnitLauncher {
      *         arrays of tests to be executed
      */
     public static void main(String[] args) {
-        CheJUnitCoreRunner jUnitCore = new CheJUnitCoreRunner();
-        jUnitCore.createListener();
         if (args.length == 0) {
             TestingMessageHelper.reporterAttached(System.out);
             System.err.print("No test found to run.");
         } else {
+            CheJUnitCoreRunner jUnitCore = new CheJUnitCoreRunner();
             jUnitCore.run(args);
         }
     }

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
-import com.google.common.base.Optional;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -28,7 +27,8 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.editor.ReconcileOperationEvent.ReconcileOperationHandler;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
+import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
+import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent.ClasspathChangedHandler;
 import org.eclipse.che.ide.ext.java.shared.dto.HighlightedPosition;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ReconcileResult;
@@ -43,9 +43,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.resolveFQN;
 import static org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingProjectState.IN_PROGRESS;
 
-public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingProjectStateListener, ReconcileOperationHandler {
+public class JavaReconcilerStrategy
+        implements ReconcilingStrategy, ResolvingProjectStateListener, ReconcileOperationHandler, ClasspathChangedHandler {
     private final TextEditor                          editor;
     private final JavaCodeAssistProcessor             codeAssistProcessor;
     private final AnnotationModel                     annotationModel;
@@ -82,29 +84,30 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
         HandlerRegistration reconcileOperationHandlerRegistration = eventBus.addHandler(ReconcileOperationEvent.TYPE, this);
         handlerRegistrations.add(reconcileOperationHandlerRegistration);
+
+        HandlerRegistration classpathChangedHandlerRegistration = eventBus.addHandler(ClasspathChangedEvent.TYPE, this);
+        handlerRegistrations.add(classpathChangedHandlerRegistration);
     }
 
     @Override
     public void setDocument(final Document document) {
         highlighter.init(editor.getEditorWidget(), document);
 
-        if (getFile() instanceof Resource) {
-            final Optional<Project> project = ((Resource)getFile()).getRelatedProject();
+        VirtualFile file = getFile();
+        Project project = getProject(file);
+        if (project == null) {
+            return;
+        }
 
-            if (!project.isPresent()) {
-                return;
-            }
+        String projectType = project.getType();
+        resolvingProjectStateHolder = resolvingProjectStateHolderRegistry.getResolvingProjectStateHolder(projectType);
+        if (resolvingProjectStateHolder == null) {
+            return;
+        }
+        resolvingProjectStateHolder.addResolvingProjectStateListener(this);
 
-            String projectType = project.get().getType();
-            resolvingProjectStateHolder = resolvingProjectStateHolderRegistry.getResolvingProjectStateHolder(projectType);
-            if (resolvingProjectStateHolder == null) {
-                return;
-            }
-            resolvingProjectStateHolder.addResolvingProjectStateListener(this);
-
-            if (isProjectResolving()) {
-                disableReconciler(localizationConstant.codeAssistErrorMessageResolvingProject());
-            }
+        if (isProjectResolving()) {
+            disableReconciler(localizationConstant.codeAssistErrorMessageResolvingProject());
         }
     }
 
@@ -114,35 +117,31 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
     }
 
     void parse() {
-        if (getFile() instanceof Resource) {
-            final Optional<Project> project = ((Resource)getFile()).getRelatedProject();
+        VirtualFile file = getFile();
+        Project project = getProject(file);
+        if (project == null) {
+            return;
+        }
 
-            if (!project.isPresent()) {
+        String fqn = resolveFQN(file);
+        String projectPath = project.getPath();
+
+        client.reconcile(fqn, projectPath).onSuccess(reconcileResult -> {
+            if (isProjectResolving()) {
+                disableReconciler(localizationConstant.codeAssistErrorMessageResolvingProject());
+                return;
+            } else {
+                codeAssistProcessor.enableCodeAssistant();
+            }
+
+            if (reconcileResult == null) {
                 return;
             }
 
-            String fqn = JavaUtil.resolveFQN(getFile());
-            String projectPath = project.get().getLocation().toString();
-
-            client.reconcile(fqn, projectPath).onSuccess(reconcileResult -> {
-                if (isProjectResolving()) {
-                    disableReconciler(localizationConstant.codeAssistErrorMessageResolvingProject());
-                    return;
-                } else {
-                    codeAssistProcessor.enableCodeAssistant();
-                }
-
-                if (reconcileResult == null) {
-                    return;
-                }
-
-                doReconcile(reconcileResult.getProblems());
-                highlighter.reconcile(reconcileResult.getHighlightedPositions());
-                eventBus.fireEvent(new JavaReconsilerEvent(editor));
-            }).onFailure(jsonRpcError -> {
-                Log.info(getClass(), jsonRpcError.getMessage());
-            });
-        }
+            doReconcile(reconcileResult.getProblems());
+            highlighter.reconcile(reconcileResult.getHighlightedPositions());
+            eventBus.fireEvent(new JavaReconsilerEvent(editor));
+        }).onFailure(jsonRpcError -> Log.info(getClass(), jsonRpcError.getMessage()));
     }
 
 
@@ -151,8 +150,17 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
         parse();
     }
 
-    public VirtualFile getFile() {
+    private VirtualFile getFile() {
         return editor.getEditorInput().getFile();
+    }
+
+    private Project getProject(VirtualFile file) {
+        if (file == null || !(file instanceof Resource)) {
+            return null;
+        }
+
+        Project project = ((Resource)file).getProject();
+        return (project != null && project.exists()) ? project : null;
     }
 
     private void doReconcile(final List<Problem> problems) {
@@ -246,5 +254,19 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
 
         doReconcile(reconcileResult.getProblems());
         highlighter.reconcile(reconcileResult.getHighlightedPositions());
+    }
+
+    @Override
+    public void onClasspathChanged(ClasspathChangedEvent event) {
+        VirtualFile file = getFile();
+        Project project = getProject(file);
+        if (project == null) {
+            return;
+        }
+
+        String projectPath = project.getPath();
+        if (projectPath.equals(event.getPath())) {
+            parse();
+        }
     }
 }

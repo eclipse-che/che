@@ -25,6 +25,7 @@ import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Represents current context of the IDE application.
@@ -219,7 +220,13 @@ public interface AppContext {
      *
      * @return identifier
      */
-    String getAppId();
+    Optional<String> getApplicationWebsocketId();
+
+    /**
+     * Sets web application identifier. Most obvious use - to distinguish web applications
+     * on server side (e.g. connected via websocket)
+     */
+    void setApplicationWebsocketId(String id);
 
     /**
      * Returns context properties, key-value storage that allows to store

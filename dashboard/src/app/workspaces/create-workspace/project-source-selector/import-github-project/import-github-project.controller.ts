@@ -16,6 +16,7 @@ import {IProjectSourceSelectorServiceObserver} from '../project-source-selector-
 import {ProjectSourceSelectorService} from '../project-source-selector.service';
 import {ProjectSource} from '../project-source.enum';
 import {IGithubRepository} from './github-repository-interface';
+import {ActionType} from '../project-source-selector-action-type.enum';
 
 /**
  * This class is handling the controller for the GitHub part
@@ -72,10 +73,6 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
    * Import GitHub project service.
    */
   private importGithubProjectService: ImportGithubProjectService;
-  /**
-   * Number of selected GitHub projects.
-   */
-  private selectedRepositoriesNumber: number;
   /**
    * The GitHub organization.
    */
@@ -177,16 +174,16 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
    * Callback which is called when repositories are added to the list of ready-to-import projects.
    * Make repositories not selected.
    *
+   * @param {ActionType} action the type of action
    * @param {ProjectSource} source the project's source
    */
-  onProjectSourceSelectorServicePublish(source: ProjectSource): void {
-    if (source !== ProjectSource.GITHUB) {
+  onProjectSourceSelectorServicePublish(action: ActionType, source: ProjectSource): void {
+    if (action !== ActionType.ADD_PROJECT || source !== ProjectSource.GITHUB) {
       return;
     }
 
     this.cheListHelper.deselectAllItems();
     this.selectedRepositories = [];
-    this.selectedRepositoriesNumber = this.cheListHelper.getSelectedItems().length;
 
     this.importGithubProjectService.onRepositorySelected(this.selectedRepositories);
   }
@@ -201,7 +198,7 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
         controllerAs: 'noGithubOauthDialogController',
         bindToController: true,
         clickOutsideToClose: true,
-        templateUrl: 'app/projects/create-project/github/oauth-dialog/no-github-oauth-dialog.html'
+        templateUrl: 'app/workspaces/create-workspace/project-source-selector/import-github-project/oauth-dialog/no-github-oauth-dialog.html'
       });
 
       return;
@@ -240,21 +237,11 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
   }
 
   /**
-   * Returns <code>true</code> if at least one repository is selected in the list.
-   *
-   * @return {boolean}
-   */
-  isRepositorySelected(): boolean {
-    return this.selectedRepositoriesNumber > 0;
-  }
-
-  /**
    * Callback which is called when repository is clicked.
    */
   onRepositorySelected(): void {
     this.selectedRepositories = this.cheListHelper.getSelectedItems() as Array<IGithubRepository>;
     this.importGithubProjectService.onRepositorySelected(this.selectedRepositories);
-    this.selectedRepositoriesNumber = this.cheListHelper.getSelectedItems().length;
   }
 
   /**
@@ -265,7 +252,6 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
   onSearchChanged(str: string): void {
     this.repositoryFilter.name = str;
     this.cheListHelper.applyFilter('name', this.repositoryFilter);
-    this.selectedRepositoriesNumber = this.cheListHelper.getSelectedItems().length;
   };
 
   /**
@@ -275,7 +261,6 @@ export class ImportGithubProjectController implements IProjectSourceSelectorServ
     const login = this.organization && this.organization.login ? this.organization.login : '';
     this.organizationFilter.owner.login = login;
     this.cheListHelper.applyFilter('name', this.organizationFilter);
-    this.selectedRepositoriesNumber = this.cheListHelper.getSelectedItems().length;
   };
 
 }
