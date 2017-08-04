@@ -15,8 +15,8 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
-import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.server.spi.InstallerDao;
 import org.eclipse.che.api.installer.shared.model.Installer;
@@ -41,10 +41,6 @@ public class LocalInstallerRegistry implements InstallerRegistry {
 
     /**
      * Primary registry initialization with shipped installers.
-     *
-     * Motivation to update installers:
-     *  -   product updating with the same version will keep installers up to date,
-     *      especially it make sense for a snapshot version of the product
      */
     @Inject
     public LocalInstallerRegistry(Set<Installer> installers, InstallerDao installerDao) throws InstallerException {
@@ -54,9 +50,9 @@ public class LocalInstallerRegistry implements InstallerRegistry {
             InstallerImpl installer = new InstallerImpl(i);
 
             try {
-                installerDao.update(installer);
-            } catch (InstallerNotFoundException e) {
                 installerDao.create(installer);
+            } catch (InstallerAlreadyExistsException e) {
+                // ignore
             }
         }
     }
