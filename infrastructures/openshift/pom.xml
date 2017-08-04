@@ -20,7 +20,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>infrastructure-openshift</artifactId>
-    <name>Infrastructure :: Openshift</name>
+    <name>Infrastructure :: OpenShift</name>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>

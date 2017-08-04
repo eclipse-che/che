@@ -53,17 +53,17 @@ import static java.util.Collections.emptyMap;
 /**
  * @author Sergii Leshchenko
  */
-public class OpenshiftMachine implements Machine {
-    private static final Logger LOG = LoggerFactory.getLogger(OpenshiftMachine.class);
+public class OpenShiftMachine implements Machine {
+    private static final Logger LOG = LoggerFactory.getLogger(OpenShiftMachine.class);
 
     private static final String OPENSHIFT_POD_STATUS_RUNNING = "Running";
 
-    private final OpenshiftClientFactory clientFactory;
+    private final OpenShiftClientFactory clientFactory;
     private final String                 projectName;
     private final String                 podName;
     private final String                 containerName;
 
-    public OpenshiftMachine(OpenshiftClientFactory clientFactory,
+    public OpenShiftMachine(OpenShiftClientFactory clientFactory,
                             String projectName,
                             String podName,
                             String containerName) {

@@ -32,7 +32,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenshiftBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,26 +48,26 @@ import static java.util.Collections.emptyMap;
 /**
  * @author Sergii Leshchenko
  */
-public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeContext> {
-    private static final Logger LOG = LoggerFactory.getLogger(OpenshiftInternalRuntime.class);
+public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeContext> {
+    private static final Logger LOG = LoggerFactory.getLogger(OpenShiftInternalRuntime.class);
 
-    private final OpenshiftClientFactory        clientFactory;
+    private final OpenShiftClientFactory        clientFactory;
     private final EventService                  eventService;
-    private final OpenshiftBootstrapperFactory  openshiftBootstrapperFactory;
-    private final Map<String, OpenshiftMachine> machines;
+    private final OpenShiftBootstrapperFactory  openShiftBootstrapperFactory;
+    private final Map<String, OpenShiftMachine> machines;
     private final int                           machineStartTimeoutMin;
 
     @Inject
-    public OpenshiftInternalRuntime(@Assisted OpenshiftRuntimeContext context,
+    public OpenShiftInternalRuntime(@Assisted OpenShiftRuntimeContext context,
                                     URLRewriter.NoOpURLRewriter urlRewriter,
-                                    OpenshiftClientFactory clientFactory,
+                                    OpenShiftClientFactory clientFactory,
                                     EventService eventService,
-                                    OpenshiftBootstrapperFactory openshiftBootstrapperFactory,
+                                    OpenShiftBootstrapperFactory openShiftBootstrapperFactory,
                                     @Named("che.infra.openshift.machine_start_timeout_min") int machineStartTimeoutMin) {
         super(context, urlRewriter, false);
         this.clientFactory = clientFactory;
         this.eventService = eventService;
-        this.openshiftBootstrapperFactory = openshiftBootstrapperFactory;
+        this.openShiftBootstrapperFactory = openShiftBootstrapperFactory;
         this.machineStartTimeoutMin = machineStartTimeoutMin;
         this.machines = new ConcurrentHashMap<>();
     }
@@ -81,13 +81,13 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
         // TODO Add Persistent Volumes claims for projects
         try (OpenShiftClient client = clientFactory.create()) {
             LOG.info("Creating pods from environment");
-            for (Pod toCreate : getContext().getOpenshiftEnvironment().getPods().values()) {
+            for (Pod toCreate : getContext().getOpenShiftEnvironment().getPods().values()) {
                 Pod createdPod = client.pods()
                                        .inNamespace(projectName)
                                        .create(toCreate);
 
                 for (Container container : createdPod.getSpec().getContainers()) {
-                    OpenshiftMachine machine = new OpenshiftMachine(clientFactory,
+                    OpenShiftMachine machine = new OpenShiftMachine(clientFactory,
                                                                     projectName,
                                                                     createdPod.getMetadata().getName(),
                                                                     container.getName());
@@ -97,14 +97,14 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
             }
 
             LOG.info("Creating services from environment");
-            for (Service service : getContext().getOpenshiftEnvironment().getServices().values()) {
+            for (Service service : getContext().getOpenShiftEnvironment().getServices().values()) {
                 client.services()
                       .inNamespace(projectName)
                       .create(service);
             }
 
             LOG.info("Creating routes from environment");
-            for (Route route : getContext().getOpenshiftEnvironment().getRoutes().values()) {
+            for (Route route : getContext().getOpenShiftEnvironment().getRoutes().values()) {
                 client.routes()
                       .inNamespace(projectName)
                       .create(route);
@@ -112,10 +112,10 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
 
             LOG.info("Waiting until pods created by deployment configs become available and bootstrapping them");
 
-            for (OpenshiftMachine machine : machines.values()) {
+            for (OpenShiftMachine machine : machines.values()) {
                 machine.waitRunning(machineStartTimeoutMin);
 
-                openshiftBootstrapperFactory.create(machine.getName(),
+                openShiftBootstrapperFactory.create(machine.getName(),
                                                     getContext().getIdentity(),
                                                     getContext().getMachineConfigs().get(machine.getName())
                                                                 .getInstallers(),

@@ -15,7 +15,7 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenshiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -23,16 +23,16 @@ import javax.inject.Named;
 /**
  * @author Sergii Leshchenko
  */
-public class OpenshiftEnvironmentProvisioner {
+public class OpenShiftEnvironmentProvisioner {
     private final String cheServerEndpoint;
 
     @Inject
-    public OpenshiftEnvironmentProvisioner(@Named("che.infra.openshift.che_server_endpoint") String cheServerEndpoint) {
+    public OpenShiftEnvironmentProvisioner(@Named("che.infra.openshift.che_server_endpoint") String cheServerEndpoint) {
         this.cheServerEndpoint = cheServerEndpoint;
     }
 
     public void provision(Environment envConfig,
-                          OpenshiftEnvironment internalEnv,
+                          OpenShiftEnvironment internalEnv,
                           RuntimeIdentity identity) throws InfrastructureException {
         //TODO Add required ports to service(or create new one) and routes for agents
 

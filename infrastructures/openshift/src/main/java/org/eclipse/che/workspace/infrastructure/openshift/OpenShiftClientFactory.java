@@ -21,11 +21,11 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 /**
  * @author Sergii Leshchenko
  */
-public class OpenshiftClientFactory {
+public class OpenShiftClientFactory {
     private final Config config;
 
     @Inject
-    public OpenshiftClientFactory(@Named("che.infra.openshift.master_url") String masterUrl,
+    public OpenShiftClientFactory(@Named("che.infra.openshift.master_url") String masterUrl,
                                   @Named("che.infra.openshift.username") String username,
                                   @Named("che.infra.openshift.password") String password,
                                   @Named("che.infra.openshift.trust_certs") boolean doTrustCerts) {

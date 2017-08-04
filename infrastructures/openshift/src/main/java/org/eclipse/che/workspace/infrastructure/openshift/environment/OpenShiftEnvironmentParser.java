@@ -24,7 +24,7 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.workspace.server.RecipeDownloader;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenshiftClientFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
@@ -34,18 +34,18 @@ import java.util.Map;
 /**
  * @author Sergii Leshchenko
  */
-public class OpenshiftEnvironmentParser {
-    private final OpenshiftClientFactory clientFactory;
+public class OpenShiftEnvironmentParser {
+    private final OpenShiftClientFactory clientFactory;
     private final RecipeDownloader       recipeDownloader;
 
     @Inject
-    public OpenshiftEnvironmentParser(OpenshiftClientFactory clientFactory,
+    public OpenShiftEnvironmentParser(OpenShiftClientFactory clientFactory,
                                       RecipeDownloader recipeDownloader) {
         this.clientFactory = clientFactory;
         this.recipeDownloader = recipeDownloader;
     }
 
-    public OpenshiftEnvironment parse(Environment environment) throws ValidationException,
+    public OpenShiftEnvironment parse(Environment environment) throws ValidationException,
                                                                       InfrastructureException {
 
         checkNotNull(environment, "Environment should not be null");
@@ -95,7 +95,7 @@ public class OpenshiftEnvironmentParser {
             }
         }
 
-        return new OpenshiftEnvironment().withPods(pods)
+        return new OpenShiftEnvironment().withPods(pods)
                                          .withServices(services)
                                          .withRoutes(routes);
     }

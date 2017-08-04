@@ -21,7 +21,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenshiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,30 +34,30 @@ import static org.eclipse.che.api.workspace.server.OutputEndpoint.OUTPUT_WEBSOCK
 /**
  * @author Sergii Leshchenko
  */
-public class OpenshiftRuntimeContext extends RuntimeContext {
-    private final OpenshiftEnvironment    openshiftEnvironment;
-    private final OpenshiftRuntimeFactory runtimeFactory;
+public class OpenShiftRuntimeContext extends RuntimeContext {
+    private final OpenShiftEnvironment    openShiftEnvironment;
+    private final OpenShiftRuntimeFactory runtimeFactory;
     private final String                  websocketEndpointBase;
 
     @Inject
-    public OpenshiftRuntimeContext(@Assisted Environment environment,
-                                   @Assisted OpenshiftEnvironment openshiftEnvironment,
+    public OpenShiftRuntimeContext(@Assisted Environment environment,
+                                   @Assisted OpenShiftEnvironment openShiftEnvironment,
                                    @Assisted RuntimeIdentity identity,
                                    @Assisted RuntimeInfrastructure infrastructure,
                                    InstallerRegistry installerRegistry,
-                                   OpenshiftRuntimeFactory runtimeFactory,
+                                   OpenShiftRuntimeFactory runtimeFactory,
                                    @Named("che.websocket.endpoint.base") String websocketEndpointBase)
             throws ValidationException,
                    InfrastructureException {
         super(environment, identity, infrastructure, installerRegistry);
         this.runtimeFactory = runtimeFactory;
-        this.openshiftEnvironment = openshiftEnvironment;
+        this.openShiftEnvironment = openShiftEnvironment;
         this.websocketEndpointBase = websocketEndpointBase;
     }
 
     /** Returns openshift environment which based on normalized context environment configuration. */
-    public OpenshiftEnvironment getOpenshiftEnvironment() {
-        return openshiftEnvironment;
+    public OpenShiftEnvironment getOpenShiftEnvironment() {
+        return openShiftEnvironment;
     }
 
     @Override
