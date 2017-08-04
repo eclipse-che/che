@@ -12,8 +12,6 @@ package org.eclipse.che.ide.ext.git.client.compare;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -29,7 +27,6 @@ import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.orion.compare.CompareConfig;
 import org.eclipse.che.ide.orion.compare.CompareFactory;
 import org.eclipse.che.ide.orion.compare.CompareWidget;
-import org.eclipse.che.ide.orion.compare.CompareWidget.ContentCallBack;
 import org.eclipse.che.ide.orion.compare.FileOptions;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.window.Window;
@@ -59,6 +56,10 @@ final class CompareViewImpl extends Window implements CompareView {
     @UiField(provided = true)
     final GitLocalizationConstant locale;
 
+    private final Button btnSaveChanges;
+    private final Button btnNextDiff;
+    private final Button btnPrevDiff;
+
     private ActionDelegate delegate;
     private ThemeAgent     themeAgent;
     private CompareWidget  compare;
@@ -78,22 +79,18 @@ final class CompareViewImpl extends Window implements CompareView {
 
         setWidget(UI_BINDER.createAndBindUi(this));
 
-        Button closeButton = createButton(locale.buttonClose(), "git-compare-close-btn", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                onClose();
-            }
-        });
+        Button closeButton = createButton(locale.buttonClose(), "git-compare-close-btn", event -> onClose());
+        Button refreshButton = createButton(locale.buttonRefresh(), "git-compare-refresh-btn", event -> compare.refresh());
 
-        Button refreshButton = createButton(locale.buttonRefresh(), "git-compare-refresh-btn", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                compare.refresh();
-            }
-        });
+        btnSaveChanges = createButton(locale.buttonSaveChanges(), "git-compare-save-changes-btn", event -> delegate.onSaveChangesClicked());
+        btnNextDiff = createButton(locale.buttonNextDiff(), "git-compare-next-diff-btn", event -> delegate.onNextDiffClicked());
+        btnPrevDiff = createButton(locale.buttonPreviousDiff(), "git-compare-prev-diff-btn", event -> delegate.onPreviousDiffClicked());
 
         addButtonToFooter(closeButton);
         addButtonToFooter(refreshButton);
+        addButtonToFooter(btnSaveChanges);
+        addButtonToFooter(btnNextDiff);
+        addButtonToFooter(btnPrevDiff);
 
         comparePanel.getElement().setId(Document.get().createUniqueId());
     }
@@ -105,12 +102,7 @@ final class CompareViewImpl extends Window implements CompareView {
 
     @Override
     protected void onClose() {
-        compare.getContent(new ContentCallBack() {
-            @Override
-            public void onContentReceived(String content) {
-                delegate.onClose(content);
-            }
-        });
+        compare.getContent(content -> delegate.onClose(content));
     }
 
     @Override
@@ -146,6 +138,21 @@ final class CompareViewImpl extends Window implements CompareView {
         compare = new CompareWidget(compareConfig, themeAgent.getCurrentThemeId(), loaderFactory);
         comparePanel.clear();
         comparePanel.add(compare);
+    }
+
+    @Override
+    public void setEnableSaveChangesButton(boolean enabled) {
+        btnSaveChanges.setEnabled(enabled);
+    }
+
+    @Override
+    public void setEnableNextDiffButton(boolean enabled) {
+        btnNextDiff.setEnabled(enabled);
+    }
+
+    @Override
+    public void setEnablePreviousDiffButton(boolean enabled) {
+        btnPrevDiff.setEnabled(enabled);
     }
 
 }

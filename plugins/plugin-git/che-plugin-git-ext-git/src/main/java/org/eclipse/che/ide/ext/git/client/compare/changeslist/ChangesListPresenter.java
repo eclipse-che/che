@@ -33,7 +33,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
- * Presenter for displaying list of changed files.
+ * Presenter for displaying window with list of changed files.
  *
  * @author Igor Vinokur
  * @author Vlad Zhukovskyi

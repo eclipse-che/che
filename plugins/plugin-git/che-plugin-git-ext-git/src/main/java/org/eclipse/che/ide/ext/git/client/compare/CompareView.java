@@ -22,6 +22,25 @@ import org.eclipse.che.ide.api.mvp.View;
 @ImplementedBy(CompareViewImpl.class)
 interface CompareView extends View<CompareView.ActionDelegate> {
 
+    interface ActionDelegate {
+        /**
+         * Performs some actions in response to user's closing the window.
+         *
+         * @param newContent
+         *         new content of compare widget
+         */
+        void onClose(String newContent);
+
+        /** Performs save of editable panel in diff dialog. */
+        void onSaveChangesClicked();
+
+        /** Shows next diff. */
+        void onNextDiffClicked();
+
+        /** Shows previous diff. */
+        void onPreviousDiffClicked();
+    }
+
     /**
      * Set a title for the window.
      *
@@ -57,13 +76,12 @@ interface CompareView extends View<CompareView.ActionDelegate> {
      */
     void show(String oldContent, String newContent, String file, boolean readOnly);
 
-    interface ActionDelegate {
-        /**
-         * Performs some actions in response to user's closing the window.
-         *
-         * @param newContent
-         *         new content of compare widget
-         */
-        void onClose(String newContent);
-    }
+    /** Change the enable state of the Save Changes button */
+    void setEnableSaveChangesButton(boolean enabled);
+
+    /** Change the enable state of the Next Diff button */
+    void setEnableNextDiffButton(boolean enabled);
+
+    /** Change the enable state of the Previous Diff button */
+    void setEnablePreviousDiffButton(boolean enabled);
 }

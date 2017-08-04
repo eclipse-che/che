@@ -26,7 +26,7 @@ import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.L
 import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
 
 /**
- * Presenter for displaying window with list of changed files.
+ * Presenter for displaying list of changed files.
  *
  * @author Igor Vinokur
  * @author Vlad Zhukovskyi

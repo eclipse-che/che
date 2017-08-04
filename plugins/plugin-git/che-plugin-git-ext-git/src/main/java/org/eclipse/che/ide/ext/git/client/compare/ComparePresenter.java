@@ -29,6 +29,8 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.resource.Path;
 
+import java.util.List;
+
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED;
@@ -39,6 +41,7 @@ import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.DELET
  *
  * @author Igor Vinokur
  * @author Vlad Zhukovskyi
+ * @author Mykola Morhun
  */
 @Singleton
 public class ComparePresenter implements CompareView.ActionDelegate {
@@ -51,10 +54,17 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     private final GitLocalizationConstant locale;
     private final NotificationManager     notificationManager;
 
+    private boolean           compareWithLatest;
+    private List<ChangedItem> changedItems;
+    private int               currentItemNumber;
+
     private File    comparedFile;
     private String  revision;
     private String  localContent;
-    private boolean compareWithLatest;
+
+    private Path   projectLocation;
+    private String revisionA;
+    private String revisionB;
 
     @Inject
     public ComparePresenter(AppContext appContext,
@@ -75,27 +85,107 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     }
 
     /**
-     * Show compare window.
+     * Show compare window for given set of files between given revision and latest code version.
      *
-     * @param file
-     *         file name with its full path
-     * @param status
-     *         status of the file
+     * @param changedItems
+     *         ordered list with touched files
+     * @param currentFile
+     *         file which will be shown first
      * @param revision
      *         hash of revision or branch
      */
-    public void showCompareWithLatest(final File file, final Status status, final String revision) {
-        this.comparedFile = file;
+    public void showCompareWithLatest(final List<ChangedItem> changedItems,
+                                      final File currentFile,
+                                      final String revision) {
+        this.changedItems = changedItems;
         this.revision = revision;
+
         this.compareWithLatest = true;
+
+        showCompareWithLatestForFile(findItem(currentFile));
+    }
+
+    /**
+     * Shows compare window for given set of files between specified revisions.
+     *
+     * @param changedItems
+     *         ordered list with touched files
+     * @param currentFile
+     *         file which will be shown first
+     * @param revisionA
+     *         hash of the first revision or branch.
+     *         If it is set to {@code null}, compare with empty repository state will be performed
+     * @param revisionB
+     *         hash of the second revision or branch.
+     *         If it is set to {@code null}, compare with latest repository state will be performed
+     */
+    public void showCompareBetweenRevisions(final List<ChangedItem> changedItems,
+                                            final File currentFile,
+                                            @Nullable final String revisionA,
+                                            @Nullable final String revisionB) {
+        this.changedItems = changedItems;
+        this.revisionA = revisionA;
+        this.revisionB = revisionB;
+
+        this.compareWithLatest = false;
+        this.projectLocation = appContext.getRootProject().getLocation();
+
+        showCompareBetweenRevisionsForFile(findItem(currentFile));
+    }
+
+    private void showCompareBetweenRevisionsForFile(final ChangedItem item) {
+        final Path pathToFile = item.getFile().getLocation();
+        final Status status = item.getStatus();
+
+        view.setTitle(pathToFile.toString());
+        if (status == Status.ADDED) {
+            service.showFileContent(projectLocation, pathToFile, revisionB)
+                   .then(response -> {
+                       view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
+                                            revisionA == null ? "" : revisionA + locale.compareReadOnlyTitle());
+                       view.show("", response.getContent(), pathToFile.toString(), true);
+                   })
+                   .catchError(error -> {
+                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                   });
+        } else if (status == Status.DELETED) {
+            service.showFileContent(projectLocation, pathToFile, revisionA)
+                   .then(response -> {
+                       view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(), revisionA + locale.compareReadOnlyTitle());
+                       view.show(response.getContent(), "", pathToFile.toString(), true);
+                   })
+                   .catchError(error -> {
+                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                   });
+        } else {
+            service.showFileContent(projectLocation, pathToFile, revisionA)
+                   .then(contentAResponse -> {
+                       service.showFileContent(projectLocation, pathToFile, revisionB)
+                              .then(contentBResponse -> {
+                                  view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
+                                                       revisionA + locale.compareReadOnlyTitle());
+                                  view.show(contentAResponse.getContent(), contentBResponse.getContent(), pathToFile.toString(), true);
+                              })
+                              .catchError(error -> {
+                                  notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                              });
+                   });
+        }
+    }
+
+    private void showCompareWithLatestForFile(final ChangedItem item) {
+        final File file = item.getFile();
+        final Status status = item.getStatus();
+
+        this.comparedFile = file;
 
         if (status.equals(ADDED)) {
             showCompare("");
             return;
         }
 
+        // Get project/module in which git repository is located.
         final Container rootProject = GitUtil.getRootProject(file);
-
         if (rootProject == null) {
             return;
         }
@@ -119,62 +209,6 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                    })
                    .catchError(error -> {
                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                   });
-        }
-    }
-
-    /**
-     * @param file
-     *         path of the file
-     * @param status
-     *         status of the file
-     * @param revisionA
-     *         hash of the first revision or branch.
-     *         If it is set to {@code null}, compare with empty repository state will be performed
-     * @param revisionB
-     *         hash of the second revision or branch.
-     *         If it is set to {@code null}, compare with latest repository state will be performed
-     */
-    public void showCompareBetweenRevisions(final Path file,
-                                            final Status status,
-                                            @Nullable final String revisionA,
-                                            @Nullable final String revisionB) {
-        this.compareWithLatest = false;
-
-        final Path projectLocation = appContext.getRootProject().getLocation();
-
-        view.setTitle(file.toString());
-        if (status == Status.ADDED) {
-            service.showFileContent(projectLocation, file, revisionB)
-                   .then(response -> {
-                       view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
-                                            revisionA == null ? "" : revisionA + locale.compareReadOnlyTitle());
-                       view.show("", response.getContent(), file.toString(), true);
-                   })
-                   .catchError(error -> {
-                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                   });
-        } else if (status == Status.DELETED) {
-            service.showFileContent(projectLocation, file, revisionA)
-                   .then(response -> {
-                       view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(), revisionA + locale.compareReadOnlyTitle());
-                       view.show(response.getContent(), "", file.toString(), true);
-                   })
-                   .catchError(error -> {
-                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                   });
-        } else {
-            service.showFileContent(projectLocation, file, revisionA)
-                   .then(contentAResponse -> {
-                       service.showFileContent(projectLocation, file, revisionB)
-                              .then(contentBResponse -> {
-                                  view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
-                                                       revisionA + locale.compareReadOnlyTitle());
-                                  view.show(contentAResponse.getContent(), contentBResponse.getContent(), file.toString(), true);
-                              })
-                              .catchError(error -> {
-                                  notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                              });
                    });
         }
     }
@@ -205,6 +239,36 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                                           confirmCallback, cancelCallback).show();
     }
 
+    @Override
+    public void onSaveChangesClicked() {
+        // TODO impl
+        view.setEnableSaveChangesButton(false);
+    }
+
+    @Override
+    public void onNextDiffClicked() {
+        currentItemNumber++;
+        showCurrentDiff();
+    }
+
+    @Override
+    public void onPreviousDiffClicked() {
+        currentItemNumber--;
+        showCurrentDiff();
+    }
+
+    /** Updates diff window with diff for current item. */
+    private void showCurrentDiff() {
+        if (compareWithLatest) {
+            showCompareWithLatestForFile(changedItems.get(currentItemNumber));
+        } else {
+            showCompareBetweenRevisionsForFile(changedItems.get(currentItemNumber));
+        }
+
+        view.setEnableNextDiffButton(currentItemNumber != (changedItems.size() - 1));
+        view.setEnablePreviousDiffButton(currentItemNumber != 0);
+    }
+
     private void showCompare(final String remoteContent) {
         comparedFile.getContent().then(local -> {
             localContent = local;
@@ -214,4 +278,21 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             view.show(remoteContent, localContent, path, false);
         });
     }
+
+    /**
+     * Searches for given file in the changes files list and save it sequential number to class field.
+     * @throws RuntimeException
+     *         if given file isn't contained in changed files
+     */
+    private ChangedItem findItem(File file) {
+        currentItemNumber = 0;
+        for (ChangedItem changedItem : changedItems) {
+            if (changedItem.getFile().equals(file)) {
+                return changedItem;
+            }
+            currentItemNumber++;
+        }
+        throw new RuntimeException("File " + file + " not found in the diff list.");
+    }
+
 }
