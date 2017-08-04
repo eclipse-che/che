@@ -35,10 +35,10 @@ import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
@@ -167,11 +167,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
                             if (arg.isEmpty()) {
                                 return Collections.emptyList();
                             }
-                            List<SearchResult> results = new ArrayList<>(arg.size());
-                            for (SearchResultDto dto : arg) {
-                                results.add(new SearchResult(dto));
-                            }
-                            return results;
+                            return arg.stream().map(SearchResult::new).collect(Collectors.toList());
                         });
     }
 
