@@ -19,7 +19,6 @@ import java.util.Map;
  */
 public class UserAuthValve extends KeycloakAuthenticatorValve {
 
-
     synchronized void retrieveKeycloakSettingsIfNecessary(String apiEndpoint) {
         Map<String, String> keycloakSettings = KeycloakSettings.get();
         if (keycloakSettings == null) {
@@ -29,7 +28,7 @@ public class UserAuthValve extends KeycloakAuthenticatorValve {
 
     @Override
     public void invoke(Request request, Response response) throws IOException, ServletException {
-        retrieveKeycloakSettingsIfNecessary(request.getProtocol() + "://" + request.getLocalAddr() + ":" + request.getLocalPort() + "/api");
+        retrieveKeycloakSettingsIfNecessary(request.getScheme() + "://" + request.getLocalAddr() + ":" + request.getLocalPort() + "/api");
         super.invoke(request, response);
     }
 }

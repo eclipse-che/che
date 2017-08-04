@@ -13,7 +13,7 @@ package org.eclipse.che.wsagent.server;
 import com.google.inject.AbstractModule;
 
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.commons.auth.token.HeaderRequestTokenExtractor;
+import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
 
@@ -25,6 +25,6 @@ public class WsAgentMachineAuthModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(HttpJsonRequestFactory.class).to(AgentHttpJsonRequestFactory.class);
-        bind(RequestTokenExtractor.class).to(HeaderRequestTokenExtractor.class);
+        bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
     }
 }
