@@ -55,6 +55,8 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.DeployableScalableResource;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
@@ -77,6 +79,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
+import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.json.ImageInfo;
 import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
@@ -134,7 +137,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -143,6 +145,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -187,6 +191,12 @@ public class OpenShiftConnector extends DockerConnector {
     private static final String OPENSHIFT_CHE_SERVER_SERVICE_NAME        = "che-host";
     private static final String IDLING_ALPHA_OPENSHIFT_IO_UNIDLE_TARGETS = "idling.alpha.openshift.io/unidle-targets";
     private static final String ISO_8601_DATE_FORMAT                     = "yyyy-MM-dd'T'HH:mm:ssX";
+
+    /**
+     * Regexp to extract port (under the form 22/tcp or 4401/tcp, etc.) from label references
+     */
+    public static final String LABEL_CHE_SERVER_REF_KEY = "^che:server:(.*):ref$";
+
 
     private Map<String, KubernetesExecHolder> execMap = new HashMap<>();
 
@@ -302,6 +312,83 @@ public class OpenShiftConnector extends DockerConnector {
     }
 
     /**
+     * Gets exposed ports for both container and image.
+     *
+     * @param containerConfig
+     *         the configuration of the container
+     * @param imageConfig
+     *         the configuration of the image
+     * @return all exposed ports
+     */
+    protected Set<String> getExposedPorts(ContainerConfig containerConfig, ImageConfig imageConfig) {
+
+        Set<String> containerExposedPorts = containerConfig.getExposedPorts().keySet();
+        Set<String> imageExposedPorts = imageConfig.getExposedPorts().keySet();
+        return ImmutableSet.<String>builder().addAll(containerExposedPorts)
+                                             .addAll(imageExposedPorts)
+                                             .build();
+
+    }
+
+    /**
+     * Gets labels for both container and image.
+     *
+     * @param containerConfig
+     *         the configuration of the container
+     * @param imageConfig
+     *         the configuration of the image
+     * @return all labels found
+     */
+    protected Map<String, String> getLabels(ContainerConfig containerConfig, ImageConfig imageConfig) {
+
+        // first, get labels defined in the container configuration
+        Map<String, String> containerLabels = containerConfig.getLabels();
+
+        // Also, get labels from the image itself
+        Map<String, String> imageLabels = imageConfig.getLabels();
+
+        // Now merge all labels
+        final Map<String, String> allLabels = new HashMap<>(containerLabels);
+        allLabels.putAll(imageLabels);
+        return allLabels;
+    }
+
+    /**
+     * Gets the mapping between the port (with format 8080/tcp) and the associated label (if found)
+     *
+     * @param labels
+     *         the mapping for known port labels
+     * @param exposedPorts
+     *         the ports that are exposed
+     * @return a map that allow to get the service name for a given exposed port
+     */
+    protected Map<String, String> getPortsToRefName(Map<String, String> labels, Set<String> exposedPorts) {
+
+        // Ports to known/unknown ref is map like : 8080/tcp <--> myCustomLabel
+        Pattern pattern = Pattern.compile(LABEL_CHE_SERVER_REF_KEY);
+        Map<String, String> portsToKnownRefName = labels.entrySet().stream()
+                                                        .filter(map -> pattern.matcher(map.getKey()).matches())
+                                                        .collect(Collectors.toMap(p -> {
+                                                            Matcher matcher = pattern.matcher(p.getKey());
+                                                            matcher.matches();
+                                                            String val = matcher.group(1);
+                                                            return val.contains("/") ? val : val.concat("/tcp");
+                                                        }, p -> p.getValue()));
+
+        // add to this map only port without a known ref name
+        Map<String, String> portsToUnkownRefName =
+                exposedPorts.stream().filter((port) -> !portsToKnownRefName.containsKey(port))
+                            .collect(Collectors.toMap(p -> p, p -> "server-" + p.replace('/', '-')));
+
+        // list of all ports with refName (known/unknown)
+        Map<String, String> portsToRefName = new HashMap(portsToKnownRefName);
+        portsToRefName.putAll(portsToUnkownRefName);
+
+        return portsToRefName;
+
+    }
+
+    /**
      * @param createContainerParams
      * @return
      * @throws IOException
@@ -346,10 +433,12 @@ public class OpenShiftConnector extends DockerConnector {
                                                           openShiftCheProjectName,
                                                           imageStreamTagPullSpec);
 
-        Set<String> containerExposedPorts = createContainerParams.getContainerConfig().getExposedPorts().keySet();
-        Set<String> imageExposedPorts = inspectImage(InspectImageParams.create(imageForDocker))
-                                                    .getConfig().getExposedPorts().keySet();
-        Set<String> exposedPorts = getExposedPorts(containerExposedPorts, imageExposedPorts);
+        ContainerConfig containerConfig = createContainerParams.getContainerConfig();
+        ImageConfig imageConfig = inspectImage(InspectImageParams.create(imageForDocker)).getConfig();
+
+        final Set<String> exposedPorts = getExposedPorts(containerConfig, imageConfig);
+        final Map<String, String> labels = getLabels(containerConfig, imageConfig);
+        Map<String, String> portsToRefName = getPortsToRefName(labels, exposedPorts);
 
         String[] envVariables = createContainerParams.getContainerConfig().getEnv();
         String[] volumes = createContainerParams.getContainerConfig().getHostConfig().getBinds();
@@ -393,11 +482,12 @@ public class OpenShiftConnector extends DockerConnector {
         String containerID;
         OpenShiftClient openShiftClient = new DefaultOpenShiftClient();
         try {            
-            createOpenShiftService(deploymentName, serviceName, exposedPorts, additionalLabels, endpointAliases);
+            createOpenShiftService(deploymentName, serviceName, exposedPorts, portsToRefName, additionalLabels, endpointAliases);
             createOpenShiftDeployment(deploymentName,
                                                 dockerPullSpec,
                                                 containerName,
                                                 exposedPorts,
+                                                portsToRefName,
                                                 envVariables,
                                                 volumes,
                                                 resourceLimits,
@@ -1082,10 +1172,11 @@ public class OpenShiftConnector extends DockerConnector {
     private void createOpenShiftService(String deploymentName,
                                         String serviceName,
                                         Set<String> exposedPorts,
+                                        Map<String, String> portsToRefName,
                                         Map<String, String> additionalLabels,
                                         String[] endpointAliases) {
         Map<String, String> selector = Collections.singletonMap(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
-        List<ServicePort> ports = KubernetesService.getServicePortsFrom(exposedPorts);
+        List<ServicePort> ports = KubernetesService.getServicePortsFrom(exposedPorts, portsToRefName);
 
         try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
             Service service = openShiftClient
@@ -1127,6 +1218,7 @@ public class OpenShiftConnector extends DockerConnector {
                                              String imageName,
                                              String sanitizedContainerName,
                                              Set<String> exposedPorts,
+                                             Map<String, String> portsToRefName,
                                              String[] envVariables,
                                              String[] volumes,
                                              Map<String, Quantity> resourceLimits,
@@ -1146,7 +1238,7 @@ public class OpenShiftConnector extends DockerConnector {
                                     .withName(sanitizedContainerName)
                                     .withImage(imageName)
                                     .withEnv(KubernetesEnvVar.getEnvFrom(envVariables))
-                                    .withPorts(KubernetesContainer.getContainerPortsFrom(exposedPorts))
+                                    .withPorts(KubernetesContainer.getContainerPortsFrom(exposedPorts, portsToRefName))
                                     .withImagePullPolicy(OPENSHIFT_IMAGE_PULL_POLICY_IFNOTPRESENT)
                                     .withNewSecurityContext()
                                         .withPrivileged(false)
@@ -1562,17 +1654,7 @@ public class OpenShiftConnector extends DockerConnector {
         return networkSettingsPorts;
     }
 
-    /**
-     * @param containerExposedPorts
-     * @param imageExposedPorts
-     * @return ports exposed by both image and container
-     */
-    private Set<String> getExposedPorts(Set<String> containerExposedPorts, Set<String> imageExposedPorts) {
-        Set<String> exposedPorts = new HashSet<>();
-        exposedPorts.addAll(containerExposedPorts);
-        exposedPorts.addAll(imageExposedPorts);
-        return exposedPorts;
-    }
+
 
     /**
      * @param exposedPorts

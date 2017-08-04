@@ -342,6 +342,9 @@ public interface GitLocalizationConstant extends Messages {
     @Key("view.branch.delete_ask")
     String branchDeleteAsk(String name);
 
+    @Key("view.branch.filter.label")
+    String branchFilterLabel();
+
     @Key("view.branch.title")
     String branchTitle();
 

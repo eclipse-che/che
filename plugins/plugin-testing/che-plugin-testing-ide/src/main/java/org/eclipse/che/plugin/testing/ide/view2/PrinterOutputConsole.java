@@ -20,11 +20,9 @@ import org.eclipse.che.plugin.testing.ide.model.TestState;
 import javax.inject.Inject;
 
 /**
- *
+ * Represents an output console for test results.
  */
 public class PrinterOutputConsole extends OutputConsoleViewImpl implements Printer {
-
-
     private TestState currentTest;
 
     @Inject
@@ -47,6 +45,7 @@ public class PrinterOutputConsole extends OutputConsoleViewImpl implements Print
         } else {
             print(text, false);
         }
+        enableAutoScroll(true);
     }
 
     @Override
