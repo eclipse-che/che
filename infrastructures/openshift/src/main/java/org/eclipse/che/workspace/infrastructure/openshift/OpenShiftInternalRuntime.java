@@ -156,13 +156,6 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
 
                 //TODO clean up project instead it recreation
                 cleanUpOpenshiftProject(projectName);
-                //Projects creation immediately after its removing doesn't work TODO Fix it
-                client.projectrequests()
-                      .createNew()
-                      .withNewMetadata()
-                      .withName(projectName)
-                      .endMetadata()
-                      .done();
             } catch (KubernetesClientException e) {
                 if (e.getCode() == 403) {
                     // project is foreign or doesn't exist
