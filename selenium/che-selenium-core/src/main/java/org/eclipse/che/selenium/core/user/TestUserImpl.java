@@ -102,11 +102,9 @@ public class TestUserImpl implements TestUser {
     @Override
     @PreDestroy
     public void delete() {
-        String auth = getAuthToken();
-
         List<String> workspaces = new ArrayList<>();
         try {
-            workspaces = workspaceServiceClient.getAll();
+            workspaces = workspaceServiceClient.getAll(getAuthToken());
         } catch (Exception e) {
             LOG.error("Failed to get all workspaces.", e);
         }

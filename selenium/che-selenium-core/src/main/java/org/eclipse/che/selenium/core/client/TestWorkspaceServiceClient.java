@@ -61,8 +61,9 @@ public class TestWorkspaceServiceClient {
     /**
      * Returns the list of workspaces names that belongs to the user.
      */
-    public List<String> getAll() throws Exception {
+    public List<String> getAll(String authToken) throws Exception {
         List<WorkspaceDto> workspaces = requestFactory.fromUrl(baseHttpUrl)
+                                                      .setAuthorizationHeader(authToken)
                                                       .request()
                                                       .asList(WorkspaceDto.class);
         return workspaces.stream()
@@ -100,10 +101,20 @@ public class TestWorkspaceServiceClient {
     }
 
     /**
-     * Returns workspace by its name.
+     * Returns workspace of default user by its name.
      */
     public Workspace getByName(String workspace, String username) throws Exception {
         return requestFactory.fromUrl(getNameBasedUrl(workspace, username))
+                             .request()
+                             .asDto(WorkspaceDto.class);
+    }
+
+    /**
+     * Returns workspace by its name.
+     */
+    public Workspace getByName(String workspace, String username, String authToken) throws Exception {
+        return requestFactory.fromUrl(getNameBasedUrl(workspace, username))
+                             .setAuthorizationHeader(authToken)
                              .request()
                              .asDto(WorkspaceDto.class);
     }
@@ -123,7 +134,7 @@ public class TestWorkspaceServiceClient {
     }
 
     /**
-     * Deletes workspace.
+     * Deletes workspace of default user.
      */
     public void delete(String workspaceName, String userName) throws Exception {
         if (!exists(workspaceName, userName)) {
@@ -136,6 +147,25 @@ public class TestWorkspaceServiceClient {
         }
 
         requestFactory.fromUrl(getIdBasedUrl(workspace.getId()))
+                      .useDeleteMethod()
+                      .request();
+    }
+
+    /**
+     * Deletes workspace.
+     */
+    public void delete(String workspaceName, String userName, String authToken) throws Exception {
+        if (!exists(workspaceName, userName)) {
+            return;
+        }
+
+        Workspace workspace = getByName(workspaceName, userName);
+        if (workspace.getStatus() != STOPPED) {
+            stop(workspaceName, userName, false);
+        }
+
+        requestFactory.fromUrl(getIdBasedUrl(workspace.getId()))
+                      .setAuthorizationHeader(authToken)
                       .useDeleteMethod()
                       .request();
     }

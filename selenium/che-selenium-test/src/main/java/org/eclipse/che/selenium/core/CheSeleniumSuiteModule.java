@@ -70,8 +70,6 @@ public class CheSeleniumSuiteModule extends AbstractModule {
         TestConfiguration config = new SeleniumTestConfiguration();
         config.getMap().forEach((key, value) -> bindConstant().annotatedWith(Names.named(key)).to(value));
 
-        bind(HttpJsonRequestFactory.class).to(TestHttpJsonRequestFactory.class);
-
         bind(TestSvnPasswordProvider.class).to(CheTestSvnPasswordProvider.class);
         bind(TestSvnUsernameProvider.class).to(CheTestSvnUsernameProvider.class);
         bind(TestSvnRepo1Provider.class).to(CheTestSvnRepo1Provider.class);
@@ -81,6 +79,9 @@ public class CheSeleniumSuiteModule extends AbstractModule {
         bind(TestApiEndpointUrlProvider.class).to(CheTestApiEndpointUrlProvider.class);
         bind(TestIdeUrlProvider.class).to(CheTestIdeUrlProvider.class);
         bind(TestDashboardUrlProvider.class).to(CheTestDashboardUrlProvider.class);
+
+        bind(HttpJsonRequestFactory.class).to(TestHttpJsonRequestFactory.class);
+
         bind(AdminTestUser.class).to(CheAdminTestUser.class);
 
         bind(TestAuthServiceClient.class).to(CheTestAuthServiceClient.class);

@@ -70,4 +70,13 @@ public class TestUserServiceClient {
                              .request()
                              .asDto(UserDto.class);
     }
+
+    public UserDto getUser(String auth) throws Exception {
+        String url = apiEndpoint + "user";
+        return requestFactory.fromUrl(url)
+                             .useGetMethod()
+                             .setAuthorizationHeader(auth)
+                             .request()
+                             .asDto(UserDto.class);
+    }
 }
