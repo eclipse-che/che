@@ -166,6 +166,10 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         String testMethodDeclaration = tests.get(0);
         int separatorIndex = testMethodDeclaration.indexOf('#');
 
+        if (separatorIndex == -1) {
+            return createContainerSuite(tests);
+        }
+
         return Collections.singletonMap(testMethodDeclaration.substring(0, separatorIndex),
                                         singletonList(testMethodDeclaration.substring(separatorIndex + 1)));
     }
