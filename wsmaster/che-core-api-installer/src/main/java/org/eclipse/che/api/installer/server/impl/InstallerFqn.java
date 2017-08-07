@@ -21,7 +21,7 @@ import java.util.Objects;
  * @author Anatolii Bazko
  */
 public class InstallerFqn implements Serializable {
-    public static final String DEFAULT_VERSION = "latest";
+    public static final String LATEST_VERSION_TAG = "latest";
 
     private String id;
     private String version;
@@ -31,7 +31,7 @@ public class InstallerFqn implements Serializable {
 
     public InstallerFqn(String id, @Nullable String version) {
         this.id = id;
-        this.version = version == null ? DEFAULT_VERSION : version;
+        this.version = version == null ? LATEST_VERSION_TAG : version;
     }
 
     public String getId() {
@@ -70,6 +70,10 @@ public class InstallerFqn implements Serializable {
 
     public String toKey() {
         return id + ":" + version;
+    }
+
+    public boolean hasLatestTag() {
+        return LATEST_VERSION_TAG.equals(version);
     }
 
     @Override

@@ -11,6 +11,7 @@
 package org.eclipse.che.api.installer.server.model.impl;
 
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.util.Version;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
@@ -22,15 +23,12 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +74,8 @@ public class InstallerImpl implements Installer {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "dependency", nullable = false)
-    @CollectionTable(name = "installer_dependencies", joinColumns = {@JoinColumn(name = "inst_int_id", referencedColumnName = "internal_id")})
+    @CollectionTable(name = "installer_dependencies", joinColumns = {
+            @JoinColumn(name = "inst_int_id", referencedColumnName = "internal_id")})
     private List<String> dependencies;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -104,9 +103,11 @@ public class InstallerImpl implements Installer {
                          Map<String, String> properties,
                          String script,
                          Map<String, ? extends ServerConfig> servers) {
+        Version.validate(version);
+
         this.id = id;
         this.name = name;
-        this.version = version == null ? InstallerFqn.DEFAULT_VERSION : version;
+        this.version = version;
         this.description = description;
         this.dependencies = dependencies;
         this.properties = properties;

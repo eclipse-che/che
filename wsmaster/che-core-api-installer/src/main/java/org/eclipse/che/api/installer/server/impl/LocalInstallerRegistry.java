@@ -14,19 +14,27 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.util.Version;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
+import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.server.spi.InstallerDao;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+
+import static java.lang.String.format;
 
 /**
  * Local implementation of the {@link InstallerRegistry}.
@@ -37,6 +45,8 @@ import java.util.Set;
  */
 @Singleton
 public class LocalInstallerRegistry implements InstallerRegistry {
+    private static final Logger LOG = LoggerFactory.getLogger(LocalInstallerRegistry.class);
+
     private final InstallerDao installerDao;
 
     /**
@@ -69,7 +79,8 @@ public class LocalInstallerRegistry implements InstallerRegistry {
 
     @Override
     public void remove(String installerKey) throws InstallerException {
-        installerDao.remove(InstallerFqn.parse(installerKey));
+        InstallerFqn installerFqn = InstallerFqn.parse(installerKey);
+        installerDao.remove(stripOffLatestTag(installerFqn));
     }
 
     @Override
@@ -88,12 +99,13 @@ public class LocalInstallerRegistry implements InstallerRegistry {
     }
 
     @Override
-    public List<Installer> getOrderedInstallers(List<String> installers) throws InstallerException {
+    public List<Installer> getOrderedInstallers(List<String> installerKeys) throws InstallerException {
         Map<InstallerFqn, Installer> sorted = new LinkedHashMap<>();
         Set<InstallerFqn> pending = new HashSet<>();
 
-        for (String installer : installers) {
-            doSort(InstallerFqn.parse(installer), sorted, pending);
+        for (String installer : installerKeys) {
+            InstallerFqn installerFqn = InstallerFqn.parse(installer);
+            doSort(stripOffLatestTag(installerFqn), sorted, pending);
         }
 
         return new ArrayList<>(sorted.values());
@@ -111,12 +123,12 @@ public class LocalInstallerRegistry implements InstallerRegistry {
         pending.add(installerFqn);
 
         for (String dependency : installer.getDependencies()) {
-            InstallerFqn dependencyFqn = InstallerFqn.parse(dependency);
+            InstallerFqn dependencyFqn = stripOffLatestTag(InstallerFqn.parse(dependency));
             if (pending.contains(dependencyFqn)) {
                 throw new InstallerException(
-                        String.format("Installers circular dependency found between '%s' and '%s'",
-                                      dependencyFqn.toString(),
-                                      installerFqn));
+                        format("Installers circular dependency found between '%s' and '%s'",
+                               dependencyFqn.toString(),
+                               installerFqn));
             }
             doSort(dependencyFqn, sorted, pending);
         }
@@ -126,6 +138,35 @@ public class LocalInstallerRegistry implements InstallerRegistry {
     }
 
     private Installer doGet(InstallerFqn installerFqn) throws InstallerException {
-        return installerDao.getByFqn(installerFqn);
+        return installerDao.getByFqn(stripOffLatestTag(installerFqn));
+    }
+
+    private InstallerFqn stripOffLatestTag(InstallerFqn installerFqn) throws InstallerException {
+        if (!installerFqn.hasLatestTag()) {
+            return installerFqn;
+        }
+
+        Optional<Version> latestVersion = getVersions(installerFqn.getId()).stream()
+                                                                           .map(v -> {
+                                                                               try {
+                                                                                   return Version.parse(v);
+                                                                               } catch (IllegalArgumentException e) {
+                                                                                   LOG.error(
+                                                                                           format("Invalid version '%s' for installer '%s'. Skipped.",
+                                                                                                  installerFqn.getId(),
+                                                                                                  v));
+                                                                                   return null;
+                                                                               }
+                                                                           })
+                                                                           .filter(Objects::nonNull)
+                                                                           .sorted(new Version.ReverseOrderComparator())
+                                                                           .findFirst();
+
+        if (!latestVersion.isPresent()) {
+            throw new InstallerNotFoundException(format("No installer '%s' found of the latest version", installerFqn.getId()));
+        }
+
+        return new InstallerFqn(installerFqn.getId(),
+                                latestVersion.get().toString());
     }
 }

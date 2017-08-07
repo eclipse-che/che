@@ -20,7 +20,7 @@ import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.server.spi.InstallerDao;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,7 +36,7 @@ public class MapBasedInstallerDao implements InstallerDao {
 
     @Inject
     public MapBasedInstallerDao() {
-        this.installers = new HashMap<>();
+        this.installers = new LinkedHashMap<>();
     }
 
     @Override

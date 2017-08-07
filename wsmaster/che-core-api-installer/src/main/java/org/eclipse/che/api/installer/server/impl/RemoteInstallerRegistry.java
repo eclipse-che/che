@@ -203,7 +203,7 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
     }
 
     @Override
-    public List<Installer> getOrderedInstallers(List<String> installers) throws InstallerException {
+    public List<Installer> getOrderedInstallers(List<String> installerKeys) throws InstallerException {
         checkConfiguration();
 
         try {
@@ -212,7 +212,7 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
                                                                     .build()
                                                                     .toString())
                                                  .usePostMethod()
-                                                 .setBody(installers)
+                                                 .setBody(installerKeys)
                                                  .request()
                                                  .asList(InstallerDto.class));
         } catch (NotFoundException e) {
