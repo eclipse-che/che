@@ -18,7 +18,6 @@ import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.user.TestUser;
 
 import javax.validation.constraints.NotNull;
 
@@ -27,22 +26,39 @@ import javax.validation.constraints.NotNull;
  */
 @Singleton
 public class TestHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
-    private final Provider<DefaultTestUser> testUserProvider;
+    private Provider<DefaultTestUser> testUserProvider;
+    private String authToken;
 
     @Inject
     public TestHttpJsonRequestFactory(Provider<DefaultTestUser> testUserProvider) {
         this.testUserProvider = testUserProvider;
     }
 
+    public TestHttpJsonRequestFactory(String authToken) {
+        this.authToken = authToken;
+    }
+
     @Override
     public HttpJsonRequest fromUrl(@NotNull String url) {
         return super.fromUrl(url)
-                    .setAuthorizationHeader(testUserProvider.get().getAuthToken());
+                    .setAuthorizationHeader(getAuthToken());
     }
 
     @Override
     public HttpJsonRequest fromLink(@NotNull Link link) {
         return super.fromLink(link)
-                    .setAuthorizationHeader(testUserProvider.get().getAuthToken());
+                    .setAuthorizationHeader(getAuthToken());
+    }
+
+    private String getAuthToken() {
+        if (authToken == null) {
+            if (testUserProvider == null) {
+                throw new IllegalStateException("Both autToken and testUserProvider are undefined.");
+            }
+
+            authToken = testUserProvider.get().getAuthToken();
+        }
+
+        return authToken;
     }
 }

@@ -22,6 +22,8 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.selenium.core.TestHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
@@ -37,33 +39,35 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
-import static org.eclipse.che.dto.server.DtoFactory.getInstance;
 
 /**
  * @author Musienko Maxim
  */
 @Singleton
 public class TestWorkspaceServiceClient {
-    private final String                    baseHttpUrl;
-    private final HttpJsonRequestFactory    requestFactory;
-    private final TestUserNamespaceResolver testUserNamespaceResolver;
+    private final TestApiEndpointUrlProvider apiEndpointProvider;
+    private final HttpJsonRequestFactory     requestFactory;
+    private final TestUserNamespaceResolver  testUserNamespaceResolver;
 
     @Inject
     public TestWorkspaceServiceClient(TestApiEndpointUrlProvider apiEndpointProvider,
                                       HttpJsonRequestFactory requestFactory,
                                       TestUserNamespaceResolver testUserNamespaceResolver) {
-        this.baseHttpUrl = apiEndpointProvider.get() + "workspace";
+        this.apiEndpointProvider = apiEndpointProvider;
         this.requestFactory = requestFactory;
         this.testUserNamespaceResolver = testUserNamespaceResolver;
+    }
+
+    private String getBaseUrl() {
+        return apiEndpointProvider.get() + "workspace";
     }
 
 
     /**
      * Returns the list of workspaces names that belongs to the user.
      */
-    public List<String> getAll(String authToken) throws Exception {
-        List<WorkspaceDto> workspaces = requestFactory.fromUrl(baseHttpUrl)
-                                                      .setAuthorizationHeader(authToken)
+    public List<String> getAll() throws Exception {
+        List<WorkspaceDto> workspaces = requestFactory.fromUrl(getBaseUrl())
                                                       .request()
                                                       .asList(WorkspaceDto.class);
         return workspaces.stream()
@@ -152,25 +156,6 @@ public class TestWorkspaceServiceClient {
     }
 
     /**
-     * Deletes workspace.
-     */
-    public void delete(String workspaceName, String userName, String authToken) throws Exception {
-        if (!exists(workspaceName, userName)) {
-            return;
-        }
-
-        Workspace workspace = getByName(workspaceName, userName);
-        if (workspace.getStatus() != STOPPED) {
-            stop(workspaceName, userName, false);
-        }
-
-        requestFactory.fromUrl(getIdBasedUrl(workspace.getId()))
-                      .setAuthorizationHeader(authToken)
-                      .useDeleteMethod()
-                      .request();
-    }
-
-    /**
      * Waits needed status.
      */
     public void waitStatus(String workspaceName,
@@ -198,7 +183,7 @@ public class TestWorkspaceServiceClient {
                                      MemoryMeasure memoryUnit,
                                      String pathToPattern) throws Exception {
         String json = FileUtils.readFileToString(new File(pathToPattern), Charset.forName("UTF-8"));
-        WorkspaceConfigDto workspace = getInstance().createDtoFromJson(json, WorkspaceConfigDto.class);
+        WorkspaceConfigDto workspace = DtoFactory.getInstance().createDtoFromJson(json, WorkspaceConfigDto.class);
 
         EnvironmentDto environment = workspace.getEnvironments().get("replaced_name");
         environment.getMachines().get("dev-machine").getAttributes()
@@ -208,7 +193,7 @@ public class TestWorkspaceServiceClient {
         workspace.setName(workspaceName);
         workspace.setDefaultEnv(workspaceName);
 
-        return requestFactory.fromUrl(baseHttpUrl)
+        return requestFactory.fromUrl(getBaseUrl())
                              .usePostMethod()
                              .setBody(workspace)
                              .request()
@@ -298,8 +283,20 @@ public class TestWorkspaceServiceClient {
         }
     }
 
+    /**
+     * Get instance of client where each requests to server have authorisation header with certain auth token.
+     * @param authToken
+     *         auth token to be set in each requests to server.
+     * @return instance which is ready to use certain auth token.
+     */
+    public TestWorkspaceServiceClient getInstance(String authToken) {
+            return new TestWorkspaceServiceClient(apiEndpointProvider,
+                                                  new TestHttpJsonRequestFactory(authToken),
+                                                  testUserNamespaceResolver);
+    }
+
     private String getNameBasedUrl(String workspaceName, String username) {
-        return baseHttpUrl
+        return getBaseUrl()
                + "/"
                + testUserNamespaceResolver.resolve(username)
                + "/"
@@ -307,7 +304,7 @@ public class TestWorkspaceServiceClient {
     }
 
     private String getIdBasedUrl(String workspaceId) {
-        return baseHttpUrl + "/" + workspaceId;
+        return getBaseUrl() + "/" + workspaceId;
     }
 
     private long convertToByte(int numberOfMemValue, MemoryMeasure desiredMeasureMemory) {
