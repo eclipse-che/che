@@ -32,5 +32,18 @@ public enum BranchListMode {
      * Show only local branches. <br/>
      * Corresponds to -l or empty option in console git.
      */
-    LIST_LOCAL
+    LIST_LOCAL;
+
+    public static BranchListMode from(String mode) {
+        switch (mode.toLowerCase()) {
+            case "all":
+                return LIST_ALL;
+            case "remote":
+                return LIST_REMOTE;
+            case "local":
+                return LIST_LOCAL;
+            default:
+                return null;
+        }
+    }
 }

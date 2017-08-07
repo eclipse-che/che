@@ -12,6 +12,8 @@ package org.eclipse.che.ide.api.component;
 
 import elemental.json.JsonObject;
 
+import org.eclipse.che.api.promises.client.Promise;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -20,13 +22,47 @@ import javax.validation.constraints.NotNull;
  * a multibinder in order to be picked-up on IDE start-up:
  * <p>
  * <code>
- *     GinMapBinder<String, StateComponent> stateComponents = GinMapBinder.newMapBinder(binder(), String.class, StateComponent.class);
- *     stateComponents.addBinding("foo").to(Foo.class);
+ * GinMultibinder<StateComponent> stateComponents = GinMultibinder.newSetBinder(binder(), StateComponent.class);
+ * stateComponents.addBinding().to(Foo.class);
  * </code>
  * </p>
+ *
  * @author Evgen Vidolob
+ * @author Vlad Zhukovskyi
  */
 public interface StateComponent {
+
+    /**
+     * The minimum priority that state component can have.
+     *
+     * @see #getPriority()
+     * @since 5.16.0
+     */
+    int MIN_PRIORITY = 1;
+
+    /**
+     * The default priority that is assigned to a state component.
+     *
+     * @see #getPriority()
+     * @since 5.16.0
+     */
+    int DEFAULT_PRIORITY = 5;
+
+    /**
+     * The maximum priority that state component can have.
+     *
+     * @see #getPriority()
+     * @since 5.16.0
+     */
+    int MAX_PRIORITY = 10;
+
+    /**
+     * Identifier of the component which may have persistent state. Usually uses to identify from the raw json.
+     *
+     * @return component id, any string value, non-null and non-empty. If null occurred, then component is not take a part in serialization
+     * @since 5.16.0
+     */
+    String getId();
 
     /**
      * Called when component should store his state.
@@ -39,8 +75,23 @@ public interface StateComponent {
     /**
      * Called when component should restore his state.
      *
-     * @param state the component state object
+     * @param state
+     *         the component state object
      */
-    void loadState(@NotNull JsonObject state);
+    Promise<Void> loadState(@NotNull JsonObject state);
+
+    /**
+     * Priority of the execution. Each component may be prioritized to execute one self.
+     * Values should be from 1 (the last one to execute) to 10 (should be executed as first). Default value is 5.
+     *
+     * @return priority for the interceptor in which it should be run
+     * @see #MIN_PRIORITY
+     * @see #DEFAULT_PRIORITY
+     * @see #MAX_PRIORITY
+     * @since 5.16.0
+     */
+    default int getPriority() {
+        return DEFAULT_PRIORITY;
+    }
 
 }
