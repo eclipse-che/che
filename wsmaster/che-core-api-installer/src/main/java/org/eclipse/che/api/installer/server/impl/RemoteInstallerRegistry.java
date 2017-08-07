@@ -14,11 +14,15 @@ import com.google.common.reflect.TypeToken;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.InstallerRegistryService;
-import org.eclipse.che.api.installer.server.exception.IllegalInstallerKey;
+import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.shared.dto.InstallerDto;
@@ -35,8 +39,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+
+import static org.eclipse.che.api.installer.server.DtoConverter.asDto;
+import static org.eclipse.che.api.installer.server.InstallerRegistryService.TOTAL_ITEMS_COUNT_HEADER;
 
 /**
  * Remote implementation of the {@link InstallerRegistry}.
@@ -45,6 +51,7 @@ import java.util.List;
  * which is configured by registry.installer.remote property.
  *
  * @author Sergii Leshchenko
+ * @author Anatolii Bazko
  */
 @Singleton
 public class RemoteInstallerRegistry implements InstallerRegistry {
@@ -72,6 +79,60 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
     }
 
     @Override
+    public void add(Installer installer) throws InstallerException {
+        checkConfiguration();
+
+        try {
+            requestFactory.fromUrl(UriBuilder.fromUri(registryServiceUrl)
+                                             .path(InstallerRegistryService.class, "add")
+                                             .build()
+                                             .toString())
+                          .setBody(asDto(installer))
+                          .usePostMethod()
+                          .request();
+        } catch (ConflictException e) {
+            throw new InstallerAlreadyExistsException(e.getMessage(), e);
+        } catch (IOException | ApiException e) {
+            throw new InstallerException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void update(Installer installer) throws InstallerException {
+        checkConfiguration();
+
+        try {
+            requestFactory.fromUrl(UriBuilder.fromUri(registryServiceUrl)
+                                             .path(InstallerRegistryService.class, "update")
+                                             .build()
+                                             .toString())
+                          .setBody(asDto(installer))
+                          .usePutMethod()
+                          .request();
+        } catch (NotFoundException e) {
+            throw new InstallerNotFoundException(e.getMessage(), e);
+        } catch (IOException | ApiException e) {
+            throw new InstallerException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void remove(String installerKey) throws InstallerException {
+        checkConfiguration();
+
+        try {
+            requestFactory.fromUrl(UriBuilder.fromUri(registryServiceUrl)
+                                             .path(InstallerRegistryService.class, "remove")
+                                             .build(installerKey)
+                                             .toString())
+                          .useDeleteMethod()
+                          .request();
+        } catch (IOException | ApiException e) {
+            throw new InstallerException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public Installer getInstaller(String installerKey) throws InstallerException {
         checkConfiguration();
 
@@ -86,7 +147,7 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
         } catch (NotFoundException e) {
             throw new InstallerNotFoundException(e.getMessage(), e);
         } catch (BadRequestException e) {
-            throw new IllegalInstallerKey(e.getMessage(), e);
+            throw new IllegalInstallerKeyException(e.getMessage(), e);
         } catch (IOException | ApiException e) {
             throw new InstallerException(e.getMessage(), e);
         }
@@ -114,20 +175,28 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
     }
 
     @Override
-    public Collection<Installer> getInstallers() throws InstallerException {
+    public Page<? extends Installer> getInstallers(int maxItems, int skipCount) throws InstallerException {
         checkConfiguration();
 
         try {
-            return new ArrayList<>(requestFactory.fromUrl(UriBuilder.fromUri(registryServiceUrl)
-                                                                    .path(InstallerRegistryService.class,
-                                                                          "getInstallers")
-                                                                    .build()
-                                                                    .toString())
-                                                 .useGetMethod()
-                                                 .request()
-                                                 .asList(InstallerDto.class));
-        } catch (NotFoundException e) {
-            throw new InstallerNotFoundException(e.getMessage(), e);
+            HttpJsonResponse response = requestFactory.fromUrl(UriBuilder.fromUri(registryServiceUrl)
+                                                                         .path(InstallerRegistryService.class, "getInstallers")
+                                                                         .queryParam("maxItems", maxItems)
+                                                                         .queryParam("skipCount", skipCount)
+                                                                         .build()
+                                                                         .toString())
+                                                      .useGetMethod()
+                                                      .request();
+
+            int totalCount = -1;
+            List<String> totalItemsCountHeader = response.getHeaders().get(TOTAL_ITEMS_COUNT_HEADER);
+
+            if (totalItemsCountHeader != null && !totalItemsCountHeader.isEmpty()) {
+                totalCount = Integer.valueOf(totalItemsCountHeader.get(0));
+            }
+            return new Page<>(response.asList(InstallerDto.class), skipCount, maxItems, totalCount);
+        } catch (BadRequestException e) {
+            throw new IllegalArgumentException(e);
         } catch (IOException | ApiException e) {
             throw new InstallerException(e.getMessage(), e);
         }
@@ -139,17 +208,17 @@ public class RemoteInstallerRegistry implements InstallerRegistry {
 
         try {
             return new ArrayList<>(requestFactory.fromUrl(UriBuilder.fromUri(registryServiceUrl)
-                                                                    .path(InstallerRegistryService.class,
-                                                                          "getOrderedInstallers")
-                                                                    .build(installers)
+                                                                    .path(InstallerRegistryService.class, "getOrderedInstallers")
+                                                                    .build()
                                                                     .toString())
-                                                 .useGetMethod()
+                                                 .usePostMethod()
+                                                 .setBody(installers)
                                                  .request()
                                                  .asList(InstallerDto.class));
         } catch (NotFoundException e) {
             throw new InstallerNotFoundException(e.getMessage(), e);
         } catch (BadRequestException e) {
-            throw new IllegalInstallerKey(e.getMessage(), e);
+            throw new IllegalInstallerKeyException(e.getMessage(), e);
         } catch (IOException | ApiException e) {
             throw new InstallerException(e.getMessage(), e);
         }

@@ -11,6 +11,8 @@
 package org.eclipse.che.api.installer.server.exception;
 
 /**
+ * Installer not found error.
+ *
  * @author Anatolii Bazko
  */
 public class InstallerNotFoundException extends InstallerException {

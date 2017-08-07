@@ -1,0 +1,31 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.api.installer.server;
+
+import com.google.inject.AbstractModule;
+
+import org.eclipse.che.api.installer.server.exception.InstallerExceptionMapper;
+import org.eclipse.che.api.installer.server.jpa.JpaInstallerDao;
+import org.eclipse.che.api.installer.server.spi.InstallerDao;
+
+/**
+ * @author Anatolii Bazko
+ */
+public class InstallerModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
+        bind(InstallerExceptionMapper.class);
+        bind(InstallerRegistry.class).toProvider(InstallerRegistryProvider.class);
+        bind(InstallerRegistryService.class);
+        bind(InstallerDao.class).to(JpaInstallerDao.class);
+    }
+}

@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.installer.server;
 
-import org.eclipse.che.api.installer.server.exception.IllegalInstallerKey;
+import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
+import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -28,12 +30,48 @@ import java.util.List;
 public interface InstallerRegistry {
 
     /**
+     * Adds installer to the registry.
+     *
+     * @param installer
+     *      the installer to add
+     * @throws InstallerAlreadyExistsException
+     *         if installer with corresponding {@link InstallerFqn} already exists
+     * @throws InstallerException
+     *         if unexpected error occurred
+     */
+    void add(Installer installer) throws InstallerException;
+
+    /**
+     * Updates installer in the registry.
+     *
+     * @param installer
+     *      the installer to update
+     * @throws InstallerNotFoundException
+     *         if installer with corresponding {@link InstallerFqn} does not exist in the registry
+     * @throws InstallerException
+     *         if unexpected error occurred
+     */
+    void update(Installer installer) throws InstallerException;
+
+    /**
+     * Removes installer from the registry.
+     *
+     * @param installerKey
+     *         the installer key
+     * @throws IllegalInstallerKeyException
+     *         if specified installer key has wrong format
+     * @throws InstallerException
+     *         if unexpected error occurred
+     */
+    void remove(String installerKey) throws InstallerException;
+
+    /**
      * Gets {@link Installer} by key.
      *
      * @param installerKey
      *         the installer key
      * @return {@link Installer}
-     * @throws IllegalInstallerKey
+     * @throws IllegalInstallerKeyException
      *         if specified installer key has wrong format
      * @throws InstallerNotFoundException
      *         if installer not found in the registry
@@ -48,8 +86,6 @@ public interface InstallerRegistry {
      * @param id
      *         the id of the installer
      * @return list of versions
-     * @throws InstallerNotFoundException
-     *         if installer not found in the registry
      * @throws InstallerException
      *         if unexpected error occurred
      */
@@ -57,13 +93,19 @@ public interface InstallerRegistry {
 
 
     /**
-     * Returns the collection of available installers.
+     * Returns all installers using pagination.
      *
-     * @return collection of installers
+     * @param maxItems
+     *         the maximum number of installers to return
+     * @param skipCount
+     *         the number of installers to skip
+     * @return list of installers or empty list if no installers were found
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative
      * @throws InstallerException
      *         if unexpected error occurred
      */
-    Collection<Installer> getInstallers() throws InstallerException;
+    Page<? extends Installer> getInstallers(int maxItems, int skipCount) throws InstallerException;
 
     /**
      * Traverses dependencies of all listed installers and
@@ -72,7 +114,7 @@ public interface InstallerRegistry {
      * @param installers
      *         installers to fetch dependencies and order
      * @return list of installers
-     * @throws IllegalInstallerKey
+     * @throws IllegalInstallerKeyException
      *         if specified installer key has wrong format
      * @throws InstallerNotFoundException
      *         if some of specified installer is not found in the registry

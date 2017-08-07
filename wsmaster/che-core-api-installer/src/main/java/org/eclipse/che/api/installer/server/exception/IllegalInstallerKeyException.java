@@ -13,14 +13,18 @@ package org.eclipse.che.api.installer.server.exception;
 import org.eclipse.che.api.core.BadRequestException;
 
 /**
+ * Is thrown when installer key has a wrong format
+
+ * @see org.eclipse.che.api.installer.server.impl.InstallerFqn#parse(String)
+ *
  * @author Sergii Leshchenko
  */
-public class IllegalInstallerKey extends RuntimeException {
-    public IllegalInstallerKey(String message) {
+public class IllegalInstallerKeyException extends InstallerException {
+    public IllegalInstallerKeyException(String message) {
         super(message);
     }
 
-    public IllegalInstallerKey(String message, BadRequestException cause) {
+    public IllegalInstallerKeyException(String message, BadRequestException cause) {
         super(message, cause);
     }
 }

@@ -13,66 +13,78 @@ package org.eclipse.che.api.installer.server.impl;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.installer.server.exception.IllegalInstallerKey;
+import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
-import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
+import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.api.installer.server.spi.InstallerDao;
 import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static java.lang.String.format;
-import static java.util.Collections.unmodifiableCollection;
 
 /**
  * Local implementation of the {@link InstallerRegistry}.
+ * Persistent layer is represented by {@link InstallerDao}.
  *
  * @author Anatoliy Bazko
  * @author Sergii Leshchenko
  */
 @Singleton
 public class LocalInstallerRegistry implements InstallerRegistry {
-    private final Map<InstallerFqn, Installer> installers;
+    private final InstallerDao installerDao;
 
+    /**
+     * Primary registry initialization with shipped installers.
+     */
     @Inject
-    public LocalInstallerRegistry(Set<Installer> installers) throws IllegalArgumentException {
-        this.installers = new HashMap<>(installers.size());
-        for (Installer installer : installers) {
-            InstallerFqn fqn = new InstallerFqn(installer.getId(), installer.getVersion());
-            Installer registeredInstaller = this.installers.put(fqn, installer);
-            if (registeredInstaller != null) {
-                throw new IllegalArgumentException("Installer with fqn '" + fqn.toString()
-                                                   + "' has been registered already.");
+    public LocalInstallerRegistry(Set<Installer> installers, InstallerDao installerDao) throws InstallerException {
+        this.installerDao = installerDao;
+
+        for (Installer i : installers) {
+            InstallerImpl installer = new InstallerImpl(i);
+
+            try {
+                installerDao.create(installer);
+            } catch (InstallerAlreadyExistsException e) {
+                // ignore
             }
         }
     }
 
     @Override
-    public Installer getInstaller(String installerKey) throws InstallerNotFoundException {
+    public void add(Installer installer) throws InstallerException {
+        installerDao.create(new InstallerImpl(installer));
+    }
+
+    @Override
+    public void update(Installer installer) throws InstallerException {
+        installerDao.update(new InstallerImpl(installer));
+    }
+
+    @Override
+    public void remove(String installerKey) throws InstallerException {
+        installerDao.remove(InstallerFqn.parse(installerKey));
+    }
+
+    @Override
+    public Installer getInstaller(String installerKey) throws InstallerException {
         return doGet(InstallerFqn.parse(installerKey));
     }
 
     @Override
     public List<String> getVersions(String id) throws InstallerException {
-        return installers.entrySet().stream()
-                         .filter(e -> e.getKey().getId().equals(id))
-                         .map(e -> e.getKey().getVersion())
-                         .collect(Collectors.toList());
+        return installerDao.getVersions(id);
     }
 
     @Override
-    public Collection<Installer> getInstallers() throws InstallerException {
-        return unmodifiableCollection(installers.values());
+    public Page<? extends Installer> getInstallers(int maxItems, int skipCount) throws InstallerException {
+        return installerDao.getAll(maxItems, skipCount);
     }
 
     @Override
@@ -113,80 +125,7 @@ public class LocalInstallerRegistry implements InstallerRegistry {
         pending.remove(InstallerFqn.of(installer));
     }
 
-    private Installer doGet(InstallerFqn installerFqn) throws InstallerNotFoundException {
-        Installer installer = installers.get(installerFqn);
-
-        if (installer == null) {
-            throw new InstallerNotFoundException(format("Installer %s not found", installerFqn));
-        }
-        return installer;
-    }
-
-    /**
-     * @author Anatolii Bazko
-     */
-    static class InstallerFqn {
-        static final String DEFAULT_VERSION = "latest";
-
-        private final String id;
-        private final String version;
-
-        InstallerFqn(String id, @Nullable String version) {
-            this.id = id;
-            this.version = version == null ? DEFAULT_VERSION : version;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        /**
-         * Factory method. Installer key is basically a string meeting the format: {@code id:version}.
-         * The version part can be omitted.
-         *
-         * @throws IllegalInstallerKey
-         *         in case of wrong format
-         */
-        public static InstallerFqn parse(String installerKey) {
-            String[] parts = installerKey.split(":");
-
-            if (parts.length == 1) {
-                return new InstallerFqn(parts[0], null);
-            } else if (parts.length == 2) {
-                return new InstallerFqn(parts[0], parts[1]);
-            } else {
-                throw new IllegalInstallerKey("Illegal installer key format: " + installerKey);
-            }
-        }
-
-        /**
-         * Factory method for fetching fqn of installer.
-         */
-        public static InstallerFqn of(Installer installer) {
-            return new InstallerFqn(installer.getId(), installer.getVersion());
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof InstallerFqn)) return false;
-            InstallerFqn installerFqn = (InstallerFqn)o;
-            return Objects.equals(id, installerFqn.id) &&
-                   Objects.equals(version, installerFqn.version);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, version);
-        }
-
-        @Override
-        public String toString() {
-            return id + ":" + version;
-        }
+    private Installer doGet(InstallerFqn installerFqn) throws InstallerException {
+        return installerDao.getByFqn(installerFqn);
     }
 }

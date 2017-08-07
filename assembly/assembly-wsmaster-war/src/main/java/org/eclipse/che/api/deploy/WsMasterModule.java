@@ -33,9 +33,7 @@ import org.eclipse.che.api.installer.SshInstaller;
 import org.eclipse.che.api.installer.TerminalInstaller;
 import org.eclipse.che.api.installer.UnisonInstaller;
 import org.eclipse.che.api.installer.WsInstaller;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.installer.server.InstallerRegistryProvider;
-import org.eclipse.che.api.installer.server.InstallerRegistryService;
+import org.eclipse.che.api.installer.server.InstallerModule;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.recipe.JpaRecipeDao;
 import org.eclipse.che.api.recipe.RecipeDao;
@@ -129,9 +127,6 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
         bind(org.eclipse.che.everrest.ETagResponseFilter.class);
 
-        bind(InstallerRegistry.class).toProvider(InstallerRegistryProvider.class);
-        bind(InstallerRegistryService.class);
-
         // temporary solution
         bind(org.eclipse.che.api.workspace.server.event.RuntimeStatusJsonRpcMessenger.class).asEagerSingleton();
         bind(org.eclipse.che.api.workspace.server.event.MachineStatusJsonRpcMessenger.class).asEagerSingleton();
@@ -165,6 +160,8 @@ public class WsMasterModule extends AbstractModule {
                    .addBinding().toInstance("predefined-recipes.json");
 
         // installers
+        install(new InstallerModule());
+
         Multibinder<Installer> installers = Multibinder.newSetBinder(binder(), Installer.class);
         installers.addBinding().to(SshInstaller.class);
         installers.addBinding().to(UnisonInstaller.class);

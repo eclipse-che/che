@@ -10,17 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.api.installer.server.exception;
 
+import org.eclipse.che.api.installer.server.impl.InstallerFqn;
+
 /**
- * Base class for all installer errors.
+ * Is thrown when installer with the same {@link InstallerFqn} already exists.
  *
- * @author Anatoliy Bazko
+ * @author Anatolii Bazko
  */
-public class InstallerException extends Exception {
-    public InstallerException(String message) {
+public class InstallerAlreadyExistsException extends InstallerException {
+    public InstallerAlreadyExistsException(String message) {
         super(message);
     }
 
-    public InstallerException(String message, Throwable cause) {
+    public InstallerAlreadyExistsException(String message, Throwable cause) {
         super(message, cause);
     }
 }
