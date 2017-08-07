@@ -29,6 +29,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
+                        <exclude>**/type-ceylon.svg</exclude>
                         <exclude>**/type-bitnami.svg</exclude>
                         <exclude>**/type-zend.svg</exclude>
                     </excludes>

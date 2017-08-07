@@ -2364,7 +2364,7 @@
           "goal": "Build"
         }
       }, {
-        "commandLine": "scl enable rh-maven33 'mvn compile vertx:run -f ${current.project.path}'",
+        "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
         "name": "run",
         "type": "custom",
         "attributes": {
@@ -2441,7 +2441,7 @@
           "type": "mvn"
         },
         {
-          "commandLine": "scl enable rh-maven33 'mvn compile spring-boot:run -f ${current.project.path}'",
+          "commandLine": "java -jar ${current.project.path}/target/*.jar",
           "name": "run",
           "type": "custom",
           "attributes": {
@@ -2772,5 +2772,155 @@
     "name": "type-blank.svg",
     "mediaType": "image/svg+xml"
   }
- }
+ },
+  {
+    "description": "Ceylon stack with Java, JavaScript and Dart backends on CentOS.",
+    "creator": "ide",
+    "scope": "advanced",
+    "name": "Ceylon with Java JavaScript Dart on CentOS",
+    "id": "ceylon-java-javascript-dart-centos",
+    "source": {
+      "origin": "eclipse/centos_ceylon_nodejs_dart",
+      "type": "image"
+    },
+    "components": [
+      {
+        "version": "---",
+        "name": "CentOS"
+      },
+      {
+        "version": "1.8.0_131",
+        "name": "JDK"
+      },
+      {
+        "version": "3.3.9",
+        "name": "Maven"
+      },
+      {
+        "version": "8.0.24",
+        "name": "Tomcat"
+      },
+      {
+        "version": "1.3.2",
+        "name": "Ceylon"
+      },
+      {
+        "version": "1.24.2",
+        "name": "Dart SDK"
+      },
+      {
+        "version": "6.11.1",
+        "name": "NodeJS"
+      }
+    ],
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "Tomcat",
+      "CentOS",
+      "Git",
+      "Ceylon",
+      "Dart"
+    ],
+    "workspaceConfig": {
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              },
+              "servers": {},
+              "agents": [
+                "org.eclipse.che.exec",
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ssh",
+                "org.eclipse.che.ls.json",
+                "org.eclipse.che.ls.js-ts"
+              ]
+            }
+          },
+          "recipe": {
+            "location": "eclipse/centos_ceylon_nodejs_dart",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "projects": [],
+      "name": "default",
+      "commands": [
+        {
+          "commandLine": "rm -Rf ${current.project.path}/modules ",
+          "name": "clean modules",
+          "attributes": {
+            "goal": "Build",
+            "previewUrl": ""
+          },
+          "type": "custom"
+        },
+        {
+          "commandLine": "cd ${current.project.path} && ceylon compile",
+          "name": "compile for JVM",
+          "attributes": {
+            "goal": "Build",
+            "previewUrl": ""
+          },
+          "type": "custom"
+        },
+        {
+          "commandLine": "cd ${current.project.path} && ceylon compile-js",
+          "name": "compile for JS",
+          "attributes": {
+            "goal": "Build",
+            "previewUrl": ""
+          },
+          "type": "custom"
+        },
+        {
+          "commandLine": "cd ${current.project.path} && ceylon compile-dart",
+          "name": "compile for Dart",
+          "attributes": {
+            "goal": "Build",
+            "previewUrl": ""
+          },
+          "type": "custom"
+        },
+        {
+          "commandLine": "cd ${current.project.path} && ceylon run",
+          "name": "Run on JVM",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+          },
+          "type": "custom"
+        },
+        {
+          "commandLine": "cd ${current.project.path} && ceylon run-js",
+          "name": "Run on NodeJS",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+          },
+          "type": "custom"
+        },
+        {
+          "commandLine": "cd ${current.project.path} && ceylon run-dart $(ceylon config get runtool.module)",
+          "name": "Run on Dart",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+          },
+          "type": "custom"
+        }
+      ],
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-ceylon.svg",
+      "mediaType": "image/svg+xml"
+    }
+  }
 ]
