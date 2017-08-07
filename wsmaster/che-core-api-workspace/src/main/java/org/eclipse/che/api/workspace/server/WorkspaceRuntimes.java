@@ -48,6 +48,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -329,8 +330,9 @@ public class WorkspaceRuntimes {
         return runtimes.containsKey(workspaceId);
     }
 
-    private void recover() {
-        for (RuntimeInfrastructure infra : infraByRecipe.values()) {
+    @VisibleForTesting
+    void recover() {
+        for (RuntimeInfrastructure infra : new HashSet<>(infraByRecipe.values())) {
             try {
                 for (RuntimeIdentity identity : infra.getIdentities()) {
                     recoverOne(infra, identity);

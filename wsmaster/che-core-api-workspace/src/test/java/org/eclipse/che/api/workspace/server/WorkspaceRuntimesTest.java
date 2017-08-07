@@ -35,6 +35,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -158,6 +160,19 @@ public class WorkspaceRuntimesTest {
         assertEquals(workspace.getRuntime().getMachines().keySet(), r1machines.keySet());
     }
 
+    @Test
+    public void doesNotRecoverTheSameInfraTwice() throws Exception {
+        TestInfrastructure infra = spy(new TestInfrastructure(eventService, "test1", "test2"));
+
+        new WorkspaceRuntimes(eventService,
+                              Collections.singleton(infra),
+                              sharedPool,
+                              workspaceDao,
+                              dbInitializer).recover();
+
+        verify(infra).getIdentities();
+    }
+
     private RuntimeContext mockContext(RuntimeIdentity identity) throws ValidationException, InfrastructureException {
         RuntimeContext context = mock(RuntimeContext.class);
         doReturn(context).when(infrastructure).prepare(eq(identity), anyObject());
@@ -183,7 +198,11 @@ public class WorkspaceRuntimesTest {
 
     private static class TestInfrastructure extends RuntimeInfrastructure {
         public TestInfrastructure(EventService eventService) {
-            super("test", Collections.singleton("test"), eventService);
+            this(eventService, "test");
+        }
+
+        public TestInfrastructure(EventService eventService, String... types) {
+            super("test", Arrays.asList(types), eventService);
         }
 
         @Override
