@@ -29,7 +29,7 @@ import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrap
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
-import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;

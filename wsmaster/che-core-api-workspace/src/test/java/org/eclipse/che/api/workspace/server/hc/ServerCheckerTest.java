@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.server;
+package org.eclipse.che.api.workspace.server.hc;
 
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.testng.annotations.AfterMethod;
