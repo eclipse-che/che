@@ -60,6 +60,38 @@
       </md-tab-body>
     </md-tab>
 
+    <!-- Servers -->
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Servers);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Servers</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-machine-selector content-title="Servers"
+                              workspace-details="workspaceDetailsController.workspaceDetails"
+                              on-change="workspaceDetailsController.switchEditMode()">
+          <che-machine-servers environment-manager="environmentManager"
+                               selected-machine="machine"
+                               on-change="onChange()"></che-machine-servers>
+        </che-machine-selector>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Env Variables -->
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Env_Variables);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Env Variables</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-machine-selector content-title="Environment variables"
+                              workspace-details="workspaceDetailsController.workspaceDetails"
+                              on-change="workspaceDetailsController.switchEditMode()">
+          <che-env-variables environment-manager="environmentManager"
+                             selected-machine="machine"
+                             on-change="onChange()"></che-env-variables>
+        </che-machine-selector>
+      </md-tab-body>
+    </md-tab>
+
     <!-- Settings Tab -->
     <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Settings);">
       <md-tab-label>
@@ -207,10 +239,10 @@
     </md-tab>
 
     <!-- Other tabs -->
-    <md-tab ng-if="workspaceDetailsController.isCreationFlow === false"
+    <md-tab ng-repeat="section in workspaceDetailsController.getPages()"
+            ng-if="workspaceDetailsController.isCreationFlow === false"
             ng-init="workspaceDetailsController.addTab(section.title);"
-            md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab[section.title]);"
-            ng-repeat="section in workspaceDetailsController.getPages()">
+            md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab[section.title]);">
       <md-tab-label>
         <span class="che-tab-label-title">{{section.title}}</span>
       </md-tab-label>

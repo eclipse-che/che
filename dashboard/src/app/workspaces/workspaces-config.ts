@@ -124,6 +124,14 @@ import {EditMachineDialogController} from './workspace-details/workspace-machine
 import {ChangeDevMachineDialogController} from './workspace-details/workspace-machines/change-dev-machine-dialog/change-dev-machine-dialog.controller';
 import {WorkspaceDetailsOverviewController} from './workspace-details/workspace-overview/workspace-details-overview.controller';
 import {WorkspaceDetailsOverview} from './workspace-details/workspace-overview/workspace-details-overview.directive';
+import {EnvVariablesController} from './workspace-details/workspace-machine-env-variables/env-variables.controller';
+import {EnvVariables} from './workspace-details/workspace-machine-env-variables/env-variables.directive';
+import {EditEnvVariableDialogController} from './workspace-details/workspace-machine-env-variables/edit-variable-dialog/edit-variable-dialog.controller';
+import {MachineSelectorController} from './workspace-details/machine-selector/machine-selector.controller';
+import {MachineSelector} from './workspace-details/machine-selector/machine-selector.directive';
+import {MachineServersController} from './workspace-details/workspace-machine-servers/machine-servers.controller';
+import {MachineServers} from './workspace-details/workspace-machine-servers/machine-servers.directive';
+import {EditMachineServerDialogController} from './workspace-details/workspace-machine-servers/edit-machine-server-dialog/edit-server-dialog.controller';
 
 
 /**
@@ -273,6 +281,19 @@ export class WorkspacesConfig {
 
     register.controller('WorkspaceDetailsOverviewController', WorkspaceDetailsOverviewController);
     register.directive('workspaceDetailsOverview', WorkspaceDetailsOverview);
+
+    register.controller('EnvVariablesController', EnvVariablesController);
+    register.directive('cheEnvVariables', EnvVariables);
+
+    register.controller('EditEnvVariableDialogController', EditEnvVariableDialogController);
+
+    register.controller('MachineSelectorController', MachineSelectorController);
+    register.directive('cheMachineSelector', MachineSelector);
+
+    register.controller('MachineServersController', MachineServersController);
+    register.directive('cheMachineServers', MachineServers);
+
+    register.controller('EditMachineServerDialogController', EditMachineServerDialogController);
 
     // config routes
     register.app.config(($routeProvider: che.route.IRouteProvider) => {
