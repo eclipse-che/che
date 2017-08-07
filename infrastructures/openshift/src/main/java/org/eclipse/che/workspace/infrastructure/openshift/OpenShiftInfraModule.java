@@ -15,23 +15,23 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenshiftBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
 
 /**
  * @author Sergii Leshchenko
  */
-public class OpenshiftInfraModule extends AbstractModule {
+public class OpenShiftInfraModule extends AbstractModule {
     @Override
     protected void configure() {
 
         Multibinder<RuntimeInfrastructure> infrastructures = Multibinder.newSetBinder(binder(),
                                                                                       RuntimeInfrastructure.class);
-        infrastructures.addBinding().to(OpenshiftInfrastructure.class);
+        infrastructures.addBinding().to(OpenShiftInfrastructure.class);
 
 //      TODO Revise bind(WorkspaceFilesCleaner.class).toInstance(workspace -> {});
 
-        install(new FactoryModuleBuilder().build(OpenshiftRuntimeContextFactory.class));
-        install(new FactoryModuleBuilder().build(OpenshiftRuntimeFactory.class));
-        install(new FactoryModuleBuilder().build(OpenshiftBootstrapperFactory.class));
+        install(new FactoryModuleBuilder().build(OpenShiftRuntimeContextFactory.class));
+        install(new FactoryModuleBuilder().build(OpenShiftRuntimeFactory.class));
+        install(new FactoryModuleBuilder().build(OpenShiftBootstrapperFactory.class));
     }
 }

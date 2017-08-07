@@ -14,16 +14,16 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenshiftMachine;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftMachine;
 
 import java.util.List;
 
 /**
  * @author Sergii Leshchenko
  */
-public interface OpenshiftBootstrapperFactory {
-    OpenshiftBootstrapper create(@Assisted String machineName,
+public interface OpenShiftBootstrapperFactory {
+    OpenShiftBootstrapper create(@Assisted String machineName,
                                  @Assisted RuntimeIdentity runtimeIdentity,
                                  @Assisted List<InstallerImpl> agents,
-                                 @Assisted OpenshiftMachine openshiftMachine);
+                                 @Assisted OpenShiftMachine openShiftMachine);
 }

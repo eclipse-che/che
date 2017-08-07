@@ -10,15 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import com.google.inject.assistedinject.Assisted;
-
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenshiftEnvironment;
-
 /**
+ * Constants for OpenShift implementation of spi.
+ *
  * @author Sergii Leshchenko
  */
-public interface OpenshiftRuntimeFactory {
-    OpenshiftInternalRuntime create(@Assisted OpenshiftRuntimeContext context);
+public final class Constants {
+
+    public static final String CHE_POD_NAME_LABEL = "che.pod.name";
+
+    public static final String CHE_SERVER_NAME_ANNOTATION     = "che.server.name";
+    public static final String CHE_SERVER_PROTOCOL_ANNOTATION = "che.server.protocol";
+    public static final String CHE_SERVER_PATH_ANNOTATION     = "che.server.path";
+
+    private Constants() {}
 }

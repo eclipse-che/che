@@ -16,7 +16,6 @@ import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 
@@ -32,7 +31,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenshiftBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,26 +47,26 @@ import static java.util.Collections.emptyMap;
 /**
  * @author Sergii Leshchenko
  */
-public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeContext> {
-    private static final Logger LOG = LoggerFactory.getLogger(OpenshiftInternalRuntime.class);
+public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeContext> {
+    private static final Logger LOG = LoggerFactory.getLogger(OpenShiftInternalRuntime.class);
 
-    private final OpenshiftClientFactory        clientFactory;
+    private final OpenShiftClientFactory        clientFactory;
     private final EventService                  eventService;
-    private final OpenshiftBootstrapperFactory  openshiftBootstrapperFactory;
-    private final Map<String, OpenshiftMachine> machines;
+    private final OpenShiftBootstrapperFactory  bootstrapperFactory;
+    private final Map<String, OpenShiftMachine> machines;
     private final int                           machineStartTimeoutMin;
 
     @Inject
-    public OpenshiftInternalRuntime(@Assisted OpenshiftRuntimeContext context,
+    public OpenShiftInternalRuntime(@Assisted OpenShiftRuntimeContext context,
                                     URLRewriter.NoOpURLRewriter urlRewriter,
-                                    OpenshiftClientFactory clientFactory,
+                                    OpenShiftClientFactory clientFactory,
                                     EventService eventService,
-                                    OpenshiftBootstrapperFactory openshiftBootstrapperFactory,
+                                    OpenShiftBootstrapperFactory bootstrapperFactory,
                                     @Named("che.infra.openshift.machine_start_timeout_min") int machineStartTimeoutMin) {
         super(context, urlRewriter, false);
         this.clientFactory = clientFactory;
         this.eventService = eventService;
-        this.openshiftBootstrapperFactory = openshiftBootstrapperFactory;
+        this.bootstrapperFactory = bootstrapperFactory;
         this.machineStartTimeoutMin = machineStartTimeoutMin;
         this.machines = new ConcurrentHashMap<>();
     }
@@ -76,18 +75,18 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
     protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
         String projectName = getContext().getIdentity().getWorkspaceId();
 
-        prepareOpenshiftProject(projectName);
-
         // TODO Add Persistent Volumes claims for projects
         try (OpenShiftClient client = clientFactory.create()) {
+            prepareOpenShiftProject(projectName);
+
             LOG.info("Creating pods from environment");
-            for (Pod toCreate : getContext().getOpenshiftEnvironment().getPods().values()) {
+            for (Pod toCreate : getContext().getOpenShiftEnvironment().getPods().values()) {
                 Pod createdPod = client.pods()
                                        .inNamespace(projectName)
                                        .create(toCreate);
 
                 for (Container container : createdPod.getSpec().getContainers()) {
-                    OpenshiftMachine machine = new OpenshiftMachine(clientFactory,
+                    OpenShiftMachine machine = new OpenShiftMachine(clientFactory,
                                                                     projectName,
                                                                     createdPod.getMetadata().getName(),
                                                                     container.getName());
@@ -97,14 +96,14 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
             }
 
             LOG.info("Creating services from environment");
-            for (Service service : getContext().getOpenshiftEnvironment().getServices().values()) {
+            for (Service service : getContext().getOpenShiftEnvironment().getServices().values()) {
                 client.services()
                       .inNamespace(projectName)
                       .create(service);
             }
 
             LOG.info("Creating routes from environment");
-            for (Route route : getContext().getOpenshiftEnvironment().getRoutes().values()) {
+            for (Route route : getContext().getOpenShiftEnvironment().getRoutes().values()) {
                 client.routes()
                       .inNamespace(projectName)
                       .create(route);
@@ -112,19 +111,20 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
 
             LOG.info("Waiting until pods created by deployment configs become available and bootstrapping them");
 
-            for (OpenshiftMachine machine : machines.values()) {
+            for (OpenShiftMachine machine : machines.values()) {
                 machine.waitRunning(machineStartTimeoutMin);
 
-                openshiftBootstrapperFactory.create(machine.getName(),
-                                                    getContext().getIdentity(),
-                                                    getContext().getMachineConfigs().get(machine.getName())
+                bootstrapperFactory.create(machine.getName(),
+                                           getContext().getIdentity(),
+                                           getContext().getMachineConfigs().get(machine.getName())
                                                                 .getInstallers(),
-                                                    machine)
-                                            .bootstrap();
+                                           machine)
+                                   .bootstrap();
 
                 sendRunningEvent(machine.getName());
             }
         } catch (RuntimeException | InterruptedException e) {
+            //TODO Openshift client throws runtime exception investigate what should be mapped to InternalInfrastructureException
             LOG.error("Failed to start of openshift runtime. " + e.getMessage(), e);
             throw new InfrastructureException(e.getMessage(), e);
         }
@@ -148,21 +148,13 @@ public class OpenshiftInternalRuntime extends InternalRuntime<OpenshiftRuntimeCo
         }
     }
 
-    private void prepareOpenshiftProject(String projectName) throws InfrastructureException {
+    private void prepareOpenShiftProject(String projectName) throws InfrastructureException {
         try (OpenShiftClient client = clientFactory.create()) {
             LOG.info("Trying to resolve project for workspace {}", getContext().getIdentity().getWorkspaceId());
             try {
-                Project project = client.projects().withName(projectName).get();
-
-                //TODO clean up project instead it recreation
+                client.projects().withName(projectName).get();
                 cleanUpOpenshiftProject(projectName);
-                //Projects creation immediately after its removing doesn't work TODO Fix it
-                client.projectrequests()
-                      .createNew()
-                      .withNewMetadata()
-                      .withName(projectName)
-                      .endMetadata()
-                      .done();
+                //TODO Wait until object will be removed
             } catch (KubernetesClientException e) {
                 if (e.getCode() == 403) {
                     // project is foreign or doesn't exist

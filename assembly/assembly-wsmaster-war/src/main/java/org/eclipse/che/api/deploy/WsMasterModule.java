@@ -56,7 +56,7 @@ import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.JpaSnapshotDao;
 import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenshiftInfraModule;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 import javax.sql.DataSource;
@@ -230,7 +230,7 @@ public class WsMasterModule extends AbstractModule {
 // FIXME: spi
         install(new DockerInfraModule());
         install(new LocalDockerModule());
-        install(new OpenshiftInfraModule());
+        install(new OpenShiftInfraModule());
         bind(RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class).asEagerSingleton();
     }
 }

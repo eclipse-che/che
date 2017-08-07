@@ -18,6 +18,15 @@ package org.eclipse.che.api.core.model.workspace.config;
 public interface ServerConfig {
     /**
      * Port used by server.
+     *
+     * <p>It may contain protocol(tcp or udp) after '/' symbol.
+     * If protocol is missed tcp will be used by default.
+     * Example:
+     * <ul>
+     *     <li>8080/tcp</li>
+     *     <li>8080/udp</li>
+     *     <li>8080</li>
+     * </ul>
      */
     String getPort();
 

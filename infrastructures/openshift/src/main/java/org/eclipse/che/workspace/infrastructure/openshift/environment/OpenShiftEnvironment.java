@@ -20,12 +20,12 @@ import java.util.Map;
 /**
  * @author Sergii Leshchenko
  */
-public class OpenshiftEnvironment {
+public class OpenShiftEnvironment {
     private Map<String, Pod>     pods;
     private Map<String, Service> services;
     private Map<String, Route>   routes;
 
-    public OpenshiftEnvironment() {
+    public OpenShiftEnvironment() {
     }
 
     public Map<String, Pod> getPods() {
@@ -39,7 +39,7 @@ public class OpenshiftEnvironment {
         this.pods = pods;
     }
 
-    public OpenshiftEnvironment withPods(Map<String, Pod> pods) {
+    public OpenShiftEnvironment withPods(Map<String, Pod> pods) {
         this.pods = pods;
         return this;
     }
@@ -55,7 +55,7 @@ public class OpenshiftEnvironment {
         this.services = services;
     }
 
-    public OpenshiftEnvironment withServices(Map<String, Service> services) {
+    public OpenShiftEnvironment withServices(Map<String, Service> services) {
         this.services = services;
         return this;
     }
@@ -71,7 +71,7 @@ public class OpenshiftEnvironment {
         this.routes = routes;
     }
 
-    public OpenshiftEnvironment withRoutes(Map<String, Route> routes) {
+    public OpenShiftEnvironment withRoutes(Map<String, Route> routes) {
         this.routes = routes;
         return this;
     }

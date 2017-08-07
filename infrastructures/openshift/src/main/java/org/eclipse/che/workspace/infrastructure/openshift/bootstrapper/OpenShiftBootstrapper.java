@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.bootstrap.AbstractBootstrapper;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenshiftMachine;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,12 +28,12 @@ import javax.inject.Named;
 import java.util.List;
 
 /**
- * Bootstraps installers in openshift machine.
+ * Bootstraps installers in OpenShift machine.
  *
  * @author Sergii Leshchenko
  */
-public class OpenshiftBootstrapper extends AbstractBootstrapper {
-    private static final Logger LOG = LoggerFactory.getLogger(OpenshiftBootstrapper.class);
+public class OpenShiftBootstrapper extends AbstractBootstrapper {
+    private static final Logger LOG = LoggerFactory.getLogger(OpenShiftBootstrapper.class);
 
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping()
                                                       .create();
@@ -48,14 +48,14 @@ public class OpenshiftBootstrapper extends AbstractBootstrapper {
     private final List<InstallerImpl> installers;
     private final int                 serverCheckPeriodSeconds;
     private final int                 installerTimeoutSeconds;
-    private final OpenshiftMachine    openshiftMachine;
+    private final OpenShiftMachine    openShiftMachine;
     private final String              bootstrapperBinaryUrl;
 
     @Inject
-    public OpenshiftBootstrapper(@Assisted String machineName,
+    public OpenShiftBootstrapper(@Assisted String machineName,
                                  @Assisted RuntimeIdentity runtimeIdentity,
                                  @Assisted List<InstallerImpl> installers,
-                                 @Assisted OpenshiftMachine openshiftMachine,
+                                 @Assisted OpenShiftMachine openShiftMachine,
                                  @Named("che.infra.openshift.che_server_websocket_endpoint_base") String websocketBaseEndpoint,
                                  @Named("che.infra.openshift.bootstrapper.binary_url") String bootstrapperBinaryUrl,
                                  @Named("che.infra.openshift.bootstrapper.timeout_min") int bootstrappingTimeoutMinutes,
@@ -69,7 +69,7 @@ public class OpenshiftBootstrapper extends AbstractBootstrapper {
         this.installers = installers;
         this.serverCheckPeriodSeconds = serverCheckPeriodSeconds;
         this.installerTimeoutSeconds = installerTimeoutSeconds;
-        this.openshiftMachine = openshiftMachine;
+        this.openShiftMachine = openShiftMachine;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class OpenshiftBootstrapper extends AbstractBootstrapper {
                                     String outputWebsocketEndpoint) throws InfrastructureException {
         injectBootstrapper();
 
-        openshiftMachine.exec("sh", "-c", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE +
+        openShiftMachine.exec("sh", "-c", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE +
                                           " -machine-name " + machineName +
                                           " -runtime-id " + String.format("%s:%s:%s", runtimeIdentity.getWorkspaceId(),
                                                                           runtimeIdentity.getEnvName(),
@@ -91,13 +91,13 @@ public class OpenshiftBootstrapper extends AbstractBootstrapper {
 
     private void injectBootstrapper() throws InfrastructureException {
         LOG.info("Creating folder for bootstrapper");
-        openshiftMachine.exec("mkdir", "-p", BOOTSTRAPPER_DIR);
+        openShiftMachine.exec("mkdir", "-p", BOOTSTRAPPER_DIR);
         LOG.info("Downloading bootstrapper binary");
-        openshiftMachine.exec("curl", "-o", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE, bootstrapperBinaryUrl);
-        openshiftMachine.exec("chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
+        openShiftMachine.exec("curl", "-o", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE, bootstrapperBinaryUrl);
+        openShiftMachine.exec("chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
 
         LOG.info("Creating bootstrapper config file");
-        openshiftMachine.exec("sh", "-c", "cat > " + BOOTSTRAPPER_DIR + CONFIG_FILE + " << 'EOF'\n"
+        openShiftMachine.exec("sh", "-c", "cat > " + BOOTSTRAPPER_DIR + CONFIG_FILE + " << 'EOF'\n"
                                           + GSON.toJson(installers)
                                           + "\nEOF");
     }
