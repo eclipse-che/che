@@ -1578,7 +1578,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/davidfestal/ceylon-hello-world",
+      "location": "https://github.com/che-samples/ceylon-hello-world",
       "parameters": {}
     },
     "commands": [],
