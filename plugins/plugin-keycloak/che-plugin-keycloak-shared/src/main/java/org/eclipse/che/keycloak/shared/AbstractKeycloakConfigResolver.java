@@ -26,7 +26,7 @@ public abstract class AbstractKeycloakConfigResolver implements KeycloakConfigRe
 
     private static final Logger LOG = Logger.getLogger(AbstractKeycloakConfigResolver.class.getName());
 
-    private KeycloakDeployment keycloakDeployment = null;
+    protected KeycloakDeployment keycloakDeployment = null;
 
     protected abstract AdapterConfig prepareConfig();
 

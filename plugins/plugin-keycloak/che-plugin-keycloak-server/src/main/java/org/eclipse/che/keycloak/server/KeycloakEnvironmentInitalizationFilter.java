@@ -69,7 +69,7 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
             throws IOException, ServletException {
 
         final HttpServletRequest httpRequest = (HttpServletRequest)request;
-        if (request.getScheme().startsWith("ws") || tokenExtractor.getToken(httpRequest) == null || tokenExtractor.getToken(httpRequest).startsWith("machine")) {
+        if (request.getScheme().startsWith("ws") || (tokenExtractor.getToken(httpRequest) != null && tokenExtractor.getToken(httpRequest).startsWith("machine"))) {
             filterChain.doFilter(request, response);
             return;
         }

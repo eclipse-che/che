@@ -11,6 +11,7 @@
 package org.eclipse.che.keycloak.server;
 
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
+import org.keycloak.adapters.KeycloakConfigResolver;
 
 import javax.inject.Inject;
 import javax.servlet.FilterChain;
@@ -23,12 +24,18 @@ import java.io.IOException;
 public class KeycloakAuthenticationFilter extends org.keycloak.adapters.servlet.KeycloakOIDCFilter {
 
     @Inject
+    public KeycloakAuthenticationFilter(KeycloakConfigResolver configResolver) {
+        super(configResolver);
+    }
+
+    @Inject
     private RequestTokenExtractor tokenExtractor;
 
+    @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
-        if (request.getScheme().startsWith("ws") || tokenExtractor.getToken(request) == null || tokenExtractor.getToken(request).startsWith("machine")) {
+        if (request.getScheme().startsWith("ws") || (tokenExtractor.getToken(request) != null && tokenExtractor.getToken(request).startsWith("machine"))) {
             chain.doFilter(req, res);
             return;
         } else {

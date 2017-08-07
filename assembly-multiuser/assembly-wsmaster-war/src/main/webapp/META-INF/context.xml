@@ -11,9 +11,7 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<Context allowCasualMultipartParsing="true" sessionCookiePath="/api">
-    <Valve className="org.apache.catalina.valves.rewrite.RewriteValve"/>
-
+<Context allowCasualMultipartParsing="true">
     <ResourceLink global="jdbc/che"
                   name="jdbc/che"
                   type="javax.sql.DataSource"/>

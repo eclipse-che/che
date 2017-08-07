@@ -22,8 +22,9 @@ public class KeycloakServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         bind(KeycloakAuthenticationFilter.class).in(Singleton.class);
-        // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
-        filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(KeycloakAuthenticationFilter.class);
-        filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(KeycloakEnvironmentInitalizationFilter.class);
+
+        // Not contains '/websocket/' and not ends with '/ws' or '/eventbus' or '/settings/'
+        filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus|/settings)$).*").through(KeycloakAuthenticationFilter.class);
+        filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus|/settings)$).*").through(KeycloakEnvironmentInitalizationFilter.class);
     }
 }

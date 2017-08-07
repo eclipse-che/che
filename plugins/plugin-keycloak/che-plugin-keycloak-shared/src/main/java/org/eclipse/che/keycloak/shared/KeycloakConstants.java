@@ -16,11 +16,17 @@ package org.eclipse.che.keycloak.shared;
 public class KeycloakConstants {
 
     public static final String KEYCLOAK_SETTING_PREFIX = "che.keycloak.";
+    public static final String PRIVATE_PREFIX = "private.";
     public static final String KEYCLOAK_SETTINGS_ENDPOINT_PATH = "/keycloak/settings";
 
     public static final String AUTH_SERVER_URL_SETTING = KEYCLOAK_SETTING_PREFIX + "auth-server-url";
     public static final String REALM_SETTING           = KEYCLOAK_SETTING_PREFIX + "realm";
     public static final String CLIENT_ID_SETTING       = KEYCLOAK_SETTING_PREFIX + "client-id";
+    public static final String REWRITE_RULE_SETTING       = KEYCLOAK_SETTING_PREFIX + "redirect-rewrite-rules";
+
+    public static final String PRIVATE_REALM_SETTING           = KEYCLOAK_SETTING_PREFIX + PRIVATE_PREFIX +  "realm";
+    public static final String PRIVATE_CLIENT_ID_SETTING       = KEYCLOAK_SETTING_PREFIX + PRIVATE_PREFIX + "client-id";
+    public static final String PRIVATE_CLIENT_SECRET_SETTING       = KEYCLOAK_SETTING_PREFIX + PRIVATE_PREFIX + "client-secret";
 
     public static final String OSO_ENDPOINT_SETTING    = KEYCLOAK_SETTING_PREFIX + "oso.endpoint";
     public static final String GITHUB_ENDPOINT_SETTING = KEYCLOAK_SETTING_PREFIX + "github.endpoint";

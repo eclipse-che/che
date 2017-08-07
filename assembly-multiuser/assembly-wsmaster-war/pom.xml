@@ -38,10 +38,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-db</artifactId>
         </dependency>
         <dependency>
@@ -55,11 +51,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-docker-machine-auth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-docker-machine-auth</artifactId>
-            <version>5.16.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -103,13 +94,6 @@
                         </overlay>
                     </overlays>
                     <webResources>
-                        <resource>
-                            <directory>${basedir}/src/main/webapp/WEB-INF</directory>
-                            <targetPath>WEB-INF</targetPath>
-                            <includes>
-                                <include>**/*</include>
-                            </includes>
-                        </resource>
                         <resource>
                             <directory>${basedir}/src/main/webapp/META-INF</directory>
                             <targetPath>META-INF</targetPath>
