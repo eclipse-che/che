@@ -23,6 +23,8 @@ type machine = {
   memoryLimitGBytes: number;
 };
 
+const MACHINE_LIST_HELPER_ID = 'workspace-machine-list';
+
 /**
  * @ngdoc controller
  * @name workspace.machines.controller:WorkspaceMachinesController
@@ -109,7 +111,7 @@ export class WorkspaceMachinesController {
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
     this.absUrl = $location.absUrl().split('?')[0];
-    this.cheListHelper = cheListHelperFactory.getHelper('workspace-machine-list');
+    this.cheListHelper = cheListHelperFactory.getHelper(MACHINE_LIST_HELPER_ID);
 
     this.onDevChange = (machineName: string) => {
       return this.changeDevMachine(machineName).catch((error: string) => {
@@ -124,6 +126,7 @@ export class WorkspaceMachinesController {
     }, true);
 
     $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(MACHINE_LIST_HELPER_ID);
       deRegistrationFn();
     });
   }
@@ -321,8 +324,6 @@ export class WorkspaceMachinesController {
   /**
    * Shows confirmation popup before machine to delete.
    * @param name {string}
-   *
-   * @returns {ng.IPromise<any>}
    */
   deleteMachine(name: string): void {
     const machine: IEnvironmentManagerMachine = this.machines.find((machine: IEnvironmentManagerMachine) => {
@@ -372,5 +373,4 @@ export class WorkspaceMachinesController {
     const [, memoryLimitNumber] = /^([^\s]+)\s+[^\s]+$/.exec(memoryLimit);
     return parseFloat(memoryLimitNumber);
   }
-
 }

@@ -27,7 +27,7 @@ import {CheUser} from '../../../components/api/che-user.factory';
  * @author Oleksii Kurinnyi
  */
 
-const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Settings', 'Config', 'Runtime'];
+const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Servers', 'Env_Variables', 'Settings', 'Config', 'Runtime'];
 
 export class WorkspaceDetailsController {
   $location: ng.ILocationService;
