@@ -22,8 +22,7 @@ import java.util.List;
  * @author Sergii Leshchenko
  */
 public interface OpenShiftBootstrapperFactory {
-    OpenShiftBootstrapper create(@Assisted String machineName,
-                                 @Assisted RuntimeIdentity runtimeIdentity,
+    OpenShiftBootstrapper create(@Assisted RuntimeIdentity runtimeIdentity,
                                  @Assisted List<InstallerImpl> agents,
                                  @Assisted OpenShiftMachine openShiftMachine);
 }
