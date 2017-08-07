@@ -8,18 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.server;
+package org.eclipse.che.api.workspace.server.hc;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriBuilderException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,9 +40,9 @@ public class ServersReadinessChecker {
     private final static Map<String, String> LIVENESS_CHECKS_PATHS = ImmutableMap.of("wsagent/http", "/api/",
                                                                                      "exec-agent/http", "/process",
                                                                                      "terminal", "/");
-    private final String                  machineName;
-    private final Map<String, ServerImpl> servers;
-    private final ServerCheckerFactory    serverCheckerFactory;
+    private final String                        machineName;
+    private final Map<String, ? extends Server> servers;
+    private final ServerCheckerFactory          serverCheckerFactory;
 
     private Timer             timer;
     private long              resultTimeoutSeconds;
@@ -59,7 +57,7 @@ public class ServersReadinessChecker {
      *         map of servers in a machine
      */
     public ServersReadinessChecker(String machineName,
-                                   Map<String, ServerImpl> servers,
+                                   Map<String, ? extends Server> servers,
                                    ServerCheckerFactory serverCheckerFactory) {
         this.machineName = machineName;
         this.servers = servers;
@@ -145,7 +143,7 @@ public class ServersReadinessChecker {
 
     private List<ServerChecker> getServerCheckers() throws InfrastructureException {
         ArrayList<ServerChecker> checkers = new ArrayList<>(servers.size());
-        for (Map.Entry<String, ServerImpl> serverEntry : servers.entrySet()) {
+        for (Map.Entry<String, ? extends Server> serverEntry : servers.entrySet()) {
             // TODO replace with correct behaviour
             // workaround needed because we don't have server readiness check in the model
             if (LIVENESS_CHECKS_PATHS.containsKey(serverEntry.getKey())) {
@@ -156,7 +154,7 @@ public class ServersReadinessChecker {
         return checkers;
     }
 
-    private ServerChecker getChecker(String serverRef, ServerImpl server) throws InfrastructureException {
+    private ServerChecker getChecker(String serverRef, Server server) throws InfrastructureException {
         // TODO replace with correct behaviour
         // workaround needed because we don't have server readiness check in the model
         String livenessCheckPath = LIVENESS_CHECKS_PATHS.get(serverRef);

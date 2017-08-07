@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.server;
+package org.eclipse.che.api.workspace.server.hc;
 
 import com.google.common.collect.ImmutableMap;
 

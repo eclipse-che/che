@@ -21,8 +21,6 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver;
 import org.eclipse.che.plugin.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl;
 import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
-import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapper;
-import org.eclipse.che.workspace.infrastructure.docker.bootstrap.DockerBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.docker.config.DockerExtraHostsFromPropertyProvider;
 import org.eclipse.che.workspace.infrastructure.docker.config.dns.DnsResolversModule;
 import org.eclipse.che.workspace.infrastructure.docker.config.env.ApiEndpointEnvVariableProvider;
@@ -31,8 +29,8 @@ import org.eclipse.che.workspace.infrastructure.docker.config.env.ProjectsRootEn
 import org.eclipse.che.workspace.infrastructure.docker.config.proxy.DockerProxyModule;
 import org.eclipse.che.workspace.infrastructure.docker.config.volume.ExtraVolumeModule;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerEnvironmentTypeModule;
-import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactory;
-import org.eclipse.che.workspace.infrastructure.docker.server.ServerCheckerFactoryImpl;
+import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactoryImpl;
 import org.eclipse.che.workspace.infrastructure.docker.strategy.ServerEvaluationStrategyModule;
 
 import java.util.Set;

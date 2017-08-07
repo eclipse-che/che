@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.docker.server;
+package org.eclipse.che.api.workspace.server.hc;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -24,13 +24,13 @@ import java.util.concurrent.TimeUnit;
  */
 // TODO add readiness endpoint to terminal and remove this class
 class TerminalHttpConnectionServerChecker extends HttpConnectionServerChecker {
-    public TerminalHttpConnectionServerChecker(URL url,
-                                               String machineName,
-                                               String serverRef,
-                                               long period,
-                                               long timeout,
-                                               TimeUnit timeUnit,
-                                               Timer timer) {
+    TerminalHttpConnectionServerChecker(URL url,
+                                        String machineName,
+                                        String serverRef,
+                                        long period,
+                                        long timeout,
+                                        TimeUnit timeUnit,
+                                        Timer timer) {
         super(url, machineName, serverRef, period, timeout, timeUnit, timer);
     }
 
