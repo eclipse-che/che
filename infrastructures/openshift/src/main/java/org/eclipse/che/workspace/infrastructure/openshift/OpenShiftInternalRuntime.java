@@ -24,12 +24,16 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
+import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.ServersReadinessChecker;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
 import org.slf4j.Logger;
@@ -41,17 +45,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import static java.util.Collections.emptyMap;
 
 /**
  * @author Sergii Leshchenko
+ * @author Anton Korneta
  */
 public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeContext> {
     private static final Logger LOG = LoggerFactory.getLogger(OpenShiftInternalRuntime.class);
 
     private final OpenShiftClientFactory        clientFactory;
     private final EventService                  eventService;
+    private final ServerCheckerFactory          serverCheckerFactory;
     private final OpenShiftBootstrapperFactory  bootstrapperFactory;
     private final Map<String, OpenShiftMachine> machines;
     private final int                           machineStartTimeoutMin;
@@ -62,11 +69,13 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
                                     OpenShiftClientFactory clientFactory,
                                     EventService eventService,
                                     OpenShiftBootstrapperFactory bootstrapperFactory,
+                                    ServerCheckerFactory serverCheckerFactory,
                                     @Named("che.infra.openshift.machine_start_timeout_min") int machineStartTimeoutMin) {
         super(context, urlRewriter, false);
         this.clientFactory = clientFactory;
         this.eventService = eventService;
         this.bootstrapperFactory = bootstrapperFactory;
+        this.serverCheckerFactory = serverCheckerFactory;
         this.machineStartTimeoutMin = machineStartTimeoutMin;
         this.machines = new ConcurrentHashMap<>();
     }
@@ -113,23 +122,28 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
 
             for (OpenShiftMachine machine : machines.values()) {
                 machine.waitRunning(machineStartTimeoutMin);
-
-                bootstrapperFactory.create(machine.getName(),
-                                           getContext().getIdentity(),
-                                           getContext().getMachineConfigs().get(machine.getName())
-                                                                .getInstallers(),
+                final String machineName = machine.getName();
+                bootstrapperFactory.create(getContext().getIdentity(),
+                                           getContext().getMachineConfigs()
+                                                       .get(machineName)
+                                                       .getInstallers(),
                                            machine)
                                    .bootstrap();
 
+                ServersReadinessChecker check = new ServersReadinessChecker(machineName,
+                                                                            machine.getServers(),
+                                                                            serverCheckerFactory);
+                check.startAsync(new ServerReadinessHandler(machineName));
+                check.await();
                 sendRunningEvent(machine.getName());
             }
         } catch (RuntimeException | InterruptedException e) {
-            //TODO Openshift client throws runtime exception investigate what should be mapped to InternalInfrastructureException
+            //TODO OpenShift client throws runtime exception investigate what should be mapped to InternalInfrastructureException
             LOG.error("Failed to start of openshift runtime. " + e.getMessage(), e);
             throw new InfrastructureException(e.getMessage(), e);
         }
 
-        LOG.info("Openshift Runtime for workspace {} started", getContext().getIdentity().getWorkspaceId());
+        LOG.info("OpenShift Runtime for workspace {} started", getContext().getIdentity().getWorkspaceId());
     }
 
     @Override
@@ -141,7 +155,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
         LOG.info("Stopping workspace " + getContext().getIdentity().getWorkspaceId());
         try {
-            cleanUpOpenshiftProject(getContext().getIdentity().getWorkspaceId());
+            cleanUpOpenShiftProject(getContext().getIdentity().getWorkspaceId());
         } catch (KubernetesClientException e) {
             //projects doesn't exist or is foreign
             LOG.info("Workspace {} was already stopped.", getContext().getIdentity().getWorkspaceId());
@@ -153,7 +167,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
             LOG.info("Trying to resolve project for workspace {}", getContext().getIdentity().getWorkspaceId());
             try {
                 client.projects().withName(projectName).get();
-                cleanUpOpenshiftProject(projectName);
+                cleanUpOpenShiftProject(projectName);
                 //TODO Wait until object will be removed
             } catch (KubernetesClientException e) {
                 if (e.getCode() == 403) {
@@ -175,7 +189,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         }
     }
 
-    private void cleanUpOpenshiftProject(String projectName) {
+    private void cleanUpOpenShiftProject(String projectName) {
         try (OpenShiftClient client = clientFactory.create()) {
             List<HasMetadata> toDelete = new ArrayList<>();
             toDelete.addAll(client.pods().inNamespace(projectName).list().getItems());
@@ -186,6 +200,30 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
             toDeleteList.setItems(toDelete);
 
             client.lists().inNamespace(projectName).delete(toDeleteList);
+        }
+    }
+
+    private class ServerReadinessHandler implements Consumer<String> {
+        private String machineName;
+
+        public ServerReadinessHandler(String machineName) {
+            this.machineName = machineName;
+        }
+
+        @Override
+        public void accept(String serverRef) {
+            final OpenShiftMachine machine = machines.get(machineName);
+            if (machine == null) {
+                // Probably machine was removed from the list during server check start due to some reason
+                return;
+            }
+            // TODO set server status
+            eventService.publish(DtoFactory.newDto(ServerStatusEvent.class)
+                                           .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
+                                           .withMachineName(machineName)
+                                           .withServerName(serverRef)
+                                           .withStatus(ServerStatus.RUNNING)
+                                           .withServerUrl(machine.getServers().get(serverRef).getUrl()));
         }
     }
 
