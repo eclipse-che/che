@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.languageserver;
 
-import org.eclipse.che.selenium.pageobject.Ide;
+import com.google.inject.Inject;
+
+import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
-import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
-import com.google.inject.Inject;
-
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.projectexplorer;
 
+import com.google.inject.Inject;
+
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import com.google.inject.Inject;
-
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
