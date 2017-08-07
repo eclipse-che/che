@@ -29,8 +29,6 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.resource.Path;
 
-import java.util.List;
-
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED;
@@ -54,9 +52,9 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     private final GitLocalizationConstant locale;
     private final NotificationManager     notificationManager;
 
-    private boolean           compareWithLatest;
-    private List<ChangedItem> changedItems;
-    private int               currentItemNumber;
+    private boolean      compareWithLatest;
+    private ChangedItems changedItems;
+    private int          currentItemIndex;
 
     private File    comparedFile;
     private String  revision;
@@ -88,30 +86,31 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      * Show compare window for given set of files between given revision and latest code version.
      *
      * @param changedItems
-     *         ordered list with touched files
+     *         ordered touched files
      * @param currentFile
-     *         file which will be shown first
+     *         file which will be shown first, if null then the first from the list will be shown
      * @param revision
      *         hash of revision or branch
      */
-    public void showCompareWithLatest(final List<ChangedItem> changedItems,
-                                      final File currentFile,
+    public void showCompareWithLatest(final ChangedItems changedItems,
+                                      @Nullable final String currentFile,
                                       final String revision) {
         this.changedItems = changedItems;
         this.revision = revision;
 
         this.compareWithLatest = true;
 
-        showCompareWithLatestForFile(findItem(currentFile));
+        setupCurrentFile(currentFile);
+        showCompareForCurrentFile();
     }
 
     /**
      * Shows compare window for given set of files between specified revisions.
      *
      * @param changedItems
-     *         ordered list with touched files
+     *         ordered touched files
      * @param currentFile
-     *         file which will be shown first
+     *         file which will be shown first, if null then the first from the list will be shown
      * @param revisionA
      *         hash of the first revision or branch.
      *         If it is set to {@code null}, compare with empty repository state will be performed
@@ -119,8 +118,8 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      *         hash of the second revision or branch.
      *         If it is set to {@code null}, compare with latest repository state will be performed
      */
-    public void showCompareBetweenRevisions(final List<ChangedItem> changedItems,
-                                            final File currentFile,
+    public void showCompareBetweenRevisions(final ChangedItems changedItems,
+                                            @Nullable final String currentFile,
                                             @Nullable final String revisionA,
                                             @Nullable final String revisionB) {
         this.changedItems = changedItems;
@@ -128,14 +127,34 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         this.revisionB = revisionB;
 
         this.compareWithLatest = false;
-        this.projectLocation = appContext.getRootProject().getLocation();
+        this.projectLocation = appContext.getRootProject().getLocation(); // TODO replace with given project
 
-        showCompareBetweenRevisionsForFile(findItem(currentFile));
+        setupCurrentFile(currentFile);
+        showCompareForCurrentFile();
     }
 
-    private void showCompareBetweenRevisionsForFile(final ChangedItem item) {
-        final Path pathToFile = item.getFile().getLocation();
-        final Status status = item.getStatus();
+    /**
+     * Shows comparison for selected file.
+     * Type of comparison to show depends on {@code compareWithLatest} field.
+     */
+    private void showCompareForCurrentFile() {
+        changedItems.getProject()
+                    .getFile(changedItems.getItemByIndex(currentItemIndex))
+                    .then(file -> {
+                        if (file.isPresent()) {
+                            if (compareWithLatest) {
+                                showCompareBetweenRevisionsForFile(file.get(), changedItems.getStatusByIndex(currentItemIndex));
+                            } else {
+                                showCompareWithLatestForFile(file.get(), changedItems.getStatusByIndex(currentItemIndex));
+                            }
+                        }
+                    }).catchError(error -> {
+                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                    });
+    }
+
+    private void showCompareBetweenRevisionsForFile(File file, Status status) {
+        final Path pathToFile = file.getLocation();
 
         view.setTitle(pathToFile.toString());
         if (status == Status.ADDED) {
@@ -173,10 +192,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         }
     }
 
-    private void showCompareWithLatestForFile(final ChangedItem item) {
-        final File file = item.getFile();
-        final Status status = item.getStatus();
-
+    private void showCompareWithLatestForFile(File file, Status status) {
         this.comparedFile = file;
 
         if (status.equals(ADDED)) {
@@ -247,26 +263,23 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     @Override
     public void onNextDiffClicked() {
-        currentItemNumber++;
-        showCurrentDiff();
+        currentItemIndex++;
+        updateDiff();
     }
 
     @Override
     public void onPreviousDiffClicked() {
-        currentItemNumber--;
-        showCurrentDiff();
+        currentItemIndex--;
+        updateDiff();
     }
 
     /** Updates diff window with diff for current item. */
-    private void showCurrentDiff() {
-        if (compareWithLatest) {
-            showCompareWithLatestForFile(changedItems.get(currentItemNumber));
-        } else {
-            showCompareBetweenRevisionsForFile(changedItems.get(currentItemNumber));
-        }
+    private void updateDiff() {
+        // TODO check for changes and show dialog
+        showCompareForCurrentFile();
 
-        view.setEnableNextDiffButton(currentItemNumber != (changedItems.size() - 1));
-        view.setEnablePreviousDiffButton(currentItemNumber != 0);
+        view.setEnableNextDiffButton(currentItemIndex != (changedItems.getFilesQuantity() - 1));
+        view.setEnablePreviousDiffButton(currentItemIndex != 0);
     }
 
     private void showCompare(final String remoteContent) {
@@ -281,18 +294,15 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     /**
      * Searches for given file in the changes files list and save it sequential number to class field.
-     * @throws RuntimeException
-     *         if given file isn't contained in changed files
+     *
+     * @param currentFile
+     *         name of file to set up as current; if null or invalid, the first one will be chosen.
      */
-    private ChangedItem findItem(File file) {
-        currentItemNumber = 0;
-        for (ChangedItem changedItem : changedItems) {
-            if (changedItem.getFile().equals(file)) {
-                return changedItem;
-            }
-            currentItemNumber++;
+    private void setupCurrentFile(@Nullable  String currentFile) {
+        currentItemIndex = changedItems.getChangedItemsList().indexOf(currentFile);
+        if (currentItemIndex == -1) {
+            currentItemIndex = 0;
         }
-        throw new RuntimeException("File " + file + " not found in the diff list.");
     }
 
 }

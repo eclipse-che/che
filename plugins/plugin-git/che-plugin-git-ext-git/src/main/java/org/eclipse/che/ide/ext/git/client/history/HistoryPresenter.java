@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
@@ -171,18 +172,12 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
                        dialogFactory.createMessageDialog(locale.historyTitle(), locale.historyNothingToDisplay(), null).show();
                        return;
                    }
-                   final String[] changedFiles = diff.split("\n");
-                   if (changedFiles.length == 1) {
-                       comparePresenter.showCompareBetweenRevisions(Path.valueOf(diff.substring(2)),
-                                                                    defineStatus(diff.substring(0, 1)),
-                                                                    revisionA,
-                                                                    revisionB);
+
+                   ChangedItems changedItems = new ChangedItems(project, diff);
+                   if (changedItems.getFilesQuantity() == 1) {
+                       comparePresenter.showCompareBetweenRevisions(changedItems, null, revisionA, revisionB);
                    } else {
-                       Map<String, FileStatus.Status> items = new HashMap<>();
-                       for (String item : changedFiles) {
-                           items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
-                       }
-                       changesListPresenter.show(items, revisionA, revisionB, project);
+                       changesListPresenter.show(changedItems, revisionA, revisionB);
                    }
                })
                .catchError(error -> {

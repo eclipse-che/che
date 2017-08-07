@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -18,7 +19,6 @@ import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -51,7 +51,7 @@ public interface ChangesPanelView extends View<ChangesPanelView.ActionDelegate> 
      */
     void addSelectionHandler(SelectionChangedHandler handler);
 
-    void viewChangedFiles(Map<String, Status> files,  ViewMode viewMode);
+    void viewChangedFiles(ChangedItems files, ViewMode viewMode);
 
     /**
      * Clear panel from old nodes.
