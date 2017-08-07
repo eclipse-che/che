@@ -19,10 +19,10 @@ interface IWorkspaceStatusButtonScope extends ng.IScope {
   workspaceStatus: string;
   dropDownSelectPos: number;
   dropDownItems: Array<string>;
-  runWorkspace: Function;
+  onRunWorkspace: Function;
   changeWorkspaceStatus: Function;
   onSelect: (dropDownItem: number) => void;
-  stopWorkspace: (data: { isCreateSnapshot: boolean }) => void;
+  onStopWorkspace: (data: { isCreateSnapshot: boolean }) => void;
 }
 
 const STARTING = 'STARTING';
@@ -43,8 +43,8 @@ const STOP_WITHOUT_SNAPSHOT = 'Stop without snapshot';
  * `<workspace-status-button>` defines a status-button component
  *
  * @param {string=} workspaceStatus
- * @param {Function=} runWorkspace
- * @param {Function=} stopWorkspace
+ * @param {Function=} onRunWorkspace
+ * @param {Function=} onStopWorkspace
  *
  * @author Oleksii Orel
  */
@@ -57,8 +57,8 @@ export class CheWorkspaceStatusButton {
   // scope values
   scope = {
     workspaceStatus: '=',
-    runWorkspace: '&',
-    stopWorkspace: '&'
+    onRunWorkspace: '&',
+    onStopWorkspace: '&'
   };
 
   private cheWorkspace: CheWorkspace;
@@ -99,9 +99,9 @@ export class CheWorkspaceStatusButton {
     $scope.changeWorkspaceStatus = () => {
       if ($scope.isStopButton) {
         const isCreateSnapshot = !$scope.isStarting ? $scope.dropDownItems.indexOf(STOP_WITH_SNAPSHOT) === $scope.dropDownSelectPos : false;
-        $scope.stopWorkspace({isCreateSnapshot: isCreateSnapshot});
+        $scope.onStopWorkspace({isCreateSnapshot: isCreateSnapshot});
       } else {
-        $scope.runWorkspace();
+        $scope.onRunWorkspace();
       }
     };
 

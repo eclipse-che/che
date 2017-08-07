@@ -13,8 +13,8 @@ import {CheHttpBackend} from '../../../../components/api/test/che-http-backend';
 interface ITestScope extends ng.IRootScopeService {
   model: {
     workspaceStatus?: string;
-    stopWorkspace: Function;
-    runWorkspace: Function;
+    onStopWorkspace: Function;
+    onRunWorkspace: Function;
   };
 }
 
@@ -30,7 +30,7 @@ const STOP_WITHOUT_SNAPSHOT = 'Stop without snapshot';
  * Test of the WorkspaceStatusButton directive.
  * @author Oleksii Orel
  */
-describe('WorkspaceStatusButton >', () => {
+fdescribe('WorkspaceStatusButton >', () => {
 
   let $rootScope: ITestScope,
     $timeout: ng.ITimeoutService,
@@ -56,8 +56,8 @@ describe('WorkspaceStatusButton >', () => {
     httpBackend.when('OPTIONS', '/api/').respond({});
 
     $rootScope.model = {
-      stopWorkspace: angular.noop,
-      runWorkspace: angular.noop
+      onStopWorkspace: angular.noop,
+      onRunWorkspace: angular.noop
     };
 
   }));
@@ -70,9 +70,9 @@ describe('WorkspaceStatusButton >', () => {
     $rootScope.model.workspaceStatus = workspaceStatus ? workspaceStatus : STOPPED;
 
     const element = $compile(angular.element(
-      `<workspace-status-button run-workspace="model.runWorkspace()"
-                                workspace-status="model.workspaceStatus"
-                                stop-workspace="model.stopWorkspace(isCreateSnapshot)"></workspace-status-button>`
+      `<workspace-status-button workspace-status="model.workspaceStatus"
+                                on-run-workspace="model.onRunWorkspace()"
+                                on-stop-workspace="model.onStopWorkspace(isCreateSnapshot)"></workspace-status-button>`
     ))($rootScope);
     $rootScope.$digest();
 
@@ -98,7 +98,7 @@ describe('WorkspaceStatusButton >', () => {
     });
 
     it('should call the runWorkspace callback', () => {
-      spyOn($rootScope.model, 'runWorkspace');
+      spyOn($rootScope.model, 'onRunWorkspace');
 
       // click Run button
       jqstatusButton.click();
@@ -108,7 +108,7 @@ describe('WorkspaceStatusButton >', () => {
       $timeout.flush();
 
       expect($rootScope.model.workspaceStatus).toEqual(STOPPED);
-      expect($rootScope.model.runWorkspace).toHaveBeenCalled();
+      expect($rootScope.model.onRunWorkspace).toHaveBeenCalled();
     });
   });
 
@@ -169,7 +169,7 @@ describe('WorkspaceStatusButton >', () => {
     });
 
     it('should call the stopWorkspace callback without snapshot', () => {
-      spyOn($rootScope.model, 'stopWorkspace');
+      spyOn($rootScope.model, 'onStopWorkspace');
 
       // click Stop button
       jqstatusButton.click();
@@ -179,7 +179,7 @@ describe('WorkspaceStatusButton >', () => {
       $timeout.flush();
 
       expect($rootScope.model.workspaceStatus).toEqual(STARTING);
-      expect($rootScope.model.stopWorkspace).toHaveBeenCalledWith(false);
+      expect($rootScope.model.onStopWorkspace).toHaveBeenCalledWith(false);
     });
   });
 
@@ -228,7 +228,7 @@ describe('WorkspaceStatusButton >', () => {
       // select item
       jqMenuItems.find(`span:contains(${STOP_WITH_SNAPSHOT})`).mousedown();
 
-      spyOn($rootScope.model, 'stopWorkspace');
+      spyOn($rootScope.model, 'onStopWorkspace');
 
       // click Stop button
       jqstatusButton.click();
@@ -238,7 +238,7 @@ describe('WorkspaceStatusButton >', () => {
       $timeout.flush();
 
       expect($rootScope.model.workspaceStatus).toEqual(RUNNING);
-      expect($rootScope.model.stopWorkspace).toHaveBeenCalledWith(true);
+      expect($rootScope.model.onStopWorkspace).toHaveBeenCalledWith(true);
     });
 
     it('should call the stopWorkspace callback without snapshot', () => {
@@ -248,7 +248,7 @@ describe('WorkspaceStatusButton >', () => {
       // select item
       jqMenuItems.find(`span:contains(${STOP_WITHOUT_SNAPSHOT})`).mousedown();
 
-      spyOn($rootScope.model, 'stopWorkspace');
+      spyOn($rootScope.model, 'onStopWorkspace');
 
       // click Stop button
       jqstatusButton.click();
@@ -258,7 +258,7 @@ describe('WorkspaceStatusButton >', () => {
       $timeout.flush();
 
       expect($rootScope.model.workspaceStatus).toEqual(RUNNING);
-      expect($rootScope.model.stopWorkspace).toHaveBeenCalledWith(false);
+      expect($rootScope.model.onStopWorkspace).toHaveBeenCalledWith(false);
     });
   });
 });
