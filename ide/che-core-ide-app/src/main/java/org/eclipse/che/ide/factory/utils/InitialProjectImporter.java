@@ -73,7 +73,7 @@ public class InitialProjectImporter extends ProjectImporter {
             return;
         }
 
-        final Project importProject = projects.get(0);
+        final Project importProject = projects.remove(0);
         final StatusNotification notification = notificationManager.notify(locale.cloningSource(importProject.getName()), null, PROGRESS, FLOAT_MODE);
         subscriber.subscribe(importProject.getName(), notification);
 
