@@ -79,7 +79,6 @@ export class CheWebsocket {
     return this.bus;
   }
 
-
   /**
    * Gets a bus for a remote workspace, by providing the remote URL to this websocket
    * @param websocketURL the remote host base WS url
