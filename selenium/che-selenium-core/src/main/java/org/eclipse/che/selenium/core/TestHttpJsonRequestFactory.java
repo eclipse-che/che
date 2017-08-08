@@ -37,12 +37,12 @@ public class TestHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
     }
 
     public TestHttpJsonRequestFactory(String authToken) {
+        Objects.requireNonNull(authToken, "Auth token can't be null");
         this.authToken = authToken;
     }
 
     @Override
     public HttpJsonRequest fromUrl(@NotNull String url) {
-        Objects.requireNonNull(url, "Auth token can't be null");
         return super.fromUrl(url)
                     .setAuthorizationHeader(getAuthToken());
     }
