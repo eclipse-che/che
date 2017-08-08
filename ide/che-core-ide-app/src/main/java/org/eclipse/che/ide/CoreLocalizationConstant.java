@@ -1204,4 +1204,7 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("failed.to.find.machine")
     String failedToFindMachine(String machineId);
 
+    @Key("formatter.preferences.title")
+    String formatterPreferencesTitle();
+
 }

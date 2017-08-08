@@ -21,6 +21,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalApplyResult;
 import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
 import org.eclipse.che.plugin.java.server.CodeAssist;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -112,8 +113,8 @@ public class CodeAssistService {
     @Produces({MediaType.APPLICATION_JSON})
     public OrganizeImportResult organizeImports(@QueryParam("projectpath") String projectPath,
                                                 @QueryParam("fqn") String fqn) throws NotFoundException,
-                                                                                        CoreException,
-                                                                                        BadLocationException {
+                                                                                      CoreException,
+                                                                                      BadLocationException {
         IJavaProject project = model.getJavaProject(projectPath);
         return codeAssist.organizeImports(project, fqn);
     }
@@ -125,7 +126,7 @@ public class CodeAssistService {
      *         path to the project
      * @param fqn
      *         fully qualified name of the java file
-     * @param  chosen
+     * @param chosen
      * @return list of document changes
      */
     @POST
@@ -135,8 +136,8 @@ public class CodeAssistService {
     public List<Change> applyChosenImports(@QueryParam("projectpath") String projectPath,
                                            @QueryParam("fqn") String fqn,
                                            ConflictImportDTO chosen) throws NotFoundException,
-                                                                    CoreException,
-                                                                    BadLocationException {
+                                                                            CoreException,
+                                                                            BadLocationException {
         IJavaProject project = model.getJavaProject(projectPath);
         return codeAssist.applyChosenImports(project, fqn, chosen.getTypeMatches());
     }
@@ -146,13 +147,17 @@ public class CodeAssistService {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Creates edits that describe how to format the given string")
-    public List<Change> getFormatChanges(@ApiParam(value = "The given offset to start recording the edits (inclusive)")
+    public List<Change> getFormatChanges(@ApiParam(value = "Path to the root project")
+                                         @QueryParam("projectpath") String projectPath,
+                                         @ApiParam(value = "The given offset to start recording the edits (inclusive)")
                                          @QueryParam("offset") int offset,
                                          @ApiParam(value = "The given length to stop recording the edits (exclusive)")
                                          @QueryParam("length") int length,
-                                         @ApiParam(value = "The content to format. Java code formatting is supported only")
-                                         final String content) throws BadLocationException, IllegalArgumentException {
-        return formatter.getFormatChanges(content, offset, length);
+                                         @ApiParam(value = "The content to format. Java code formatting is supported only") final String content)
+            throws BadLocationException, IllegalArgumentException {
+        IJavaProject javaProject = model.getJavaProject(projectPath);
+        IFile file = javaProject.getProject().getFile(".che/che-formatter.xml");
+        return formatter.getFormatChanges(file, content, offset, length);
     }
 
 }

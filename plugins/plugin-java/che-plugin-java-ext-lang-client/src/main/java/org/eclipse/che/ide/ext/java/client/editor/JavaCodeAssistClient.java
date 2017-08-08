@@ -116,8 +116,8 @@ public class JavaCodeAssistClient {
      * @param content
      *         the content to format
      */
-    public Promise<List<Change>> format(final int offset, final int length, final String content) {
-        return getFormatChanges(offset, length, content).then(new Function<List<Change>, List<Change>>() {
+    public Promise<List<Change>> format(String projectPath, final int offset, final int length, final String content) {
+        return getFormatChanges(projectPath, offset, length, content).then(new Function<List<Change>, List<Change>>() {
             @Override
             public List<Change> apply(List<Change> arg) throws FunctionException {
                 return arg.stream().collect(Collectors.toList());
@@ -125,9 +125,12 @@ public class JavaCodeAssistClient {
         });
     }
 
-    private Promise<List<Change>> getFormatChanges(final int offset, final int length, final String content) {
+    private Promise<List<Change>> getFormatChanges(String projectPath, final int offset, final int length, final String content) {
         final String baseUrl = appContext.getDevMachine().getWsAgentBaseUrl();
-        final String url = baseUrl + CODE_ASSIST_URL_PREFIX + "/format?offset=" + offset + "&length=" + length;
+        final String url = baseUrl + CODE_ASSIST_URL_PREFIX +
+                           "/format?projectpath=" + projectPath +
+                           "&offset=" + offset +
+                           "&length=" + length;
         return asyncRequestFactory.createPostRequest(url, null)
                                   .header(CONTENT_TYPE, MimeType.TEXT_PLAIN)
                                   .data(content)

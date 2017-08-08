@@ -18,6 +18,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -39,6 +41,18 @@ public class CheCodeFormatterOptions {
             return formatSettings;
         }
         return DefaultCodeFormatterConstants.getEclipseDefaultSettings();
+    }
+
+    public static  Map<String, String> getFormatSettingsFromFile(File file) {
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        XMLParser parserXML = new XMLParser();
+        try {
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(new FileInputStream(file), parserXML);
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            LOG.error("It is not possible to parse file " + file.getName(), e);
+        }
+        return parserXML.getSettings();
     }
 
     private Map<String, String> getCheDefaultSettings() {
