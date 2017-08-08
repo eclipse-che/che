@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.core;
 
+import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -20,6 +21,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 /**
  * @author Dmytro Nochevnov
@@ -40,6 +42,7 @@ public class TestHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
 
     @Override
     public HttpJsonRequest fromUrl(@NotNull String url) {
+        Objects.requireNonNull(url, "Auth token can't be null");
         return super.fromUrl(url)
                     .setAuthorizationHeader(getAuthToken());
     }
@@ -51,14 +54,6 @@ public class TestHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
     }
 
     private String getAuthToken() {
-        if (authToken == null) {
-            if (testUserProvider == null) {
-                throw new IllegalStateException("Both autToken and testUserProvider are undefined.");
-            }
-
-            authToken = testUserProvider.get().getAuthToken();
-        }
-
-        return authToken;
+        return MoreObjects.firstNonNull(authToken, testUserProvider.get().getAuthToken());
     }
 }
