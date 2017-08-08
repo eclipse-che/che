@@ -156,6 +156,7 @@ public class InstallerImpl implements Installer {
     }
 
     public void setVersion(String version) {
+        Version.validate(version);
         this.version = version;
     }
 

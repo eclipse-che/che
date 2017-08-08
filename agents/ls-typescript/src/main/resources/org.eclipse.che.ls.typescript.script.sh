@@ -26,7 +26,7 @@ unset PACKAGES
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 
-AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.typescript.binaries
+AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.typescript.binaries/1.0.1
 CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-typescript
 LS_LAUNCHER=${LS_DIR}/launch.sh

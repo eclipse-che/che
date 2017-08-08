@@ -29,7 +29,7 @@ command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 command -v python3.5 >/dev/null 2>&1 || { PYTHON_DEPS=${PYTHON_DEPS}" python3.5"; }
 command -v pip3 >/dev/null 2>&1 || { PYTHON_DEPS=${PYTHON_DEPS}" pip3"; }
 
-AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.python.binaries
+AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.python.binaries/1.0.3
 CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-python
 LS_LAUNCHER=${LS_DIR}/launch.sh

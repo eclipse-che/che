@@ -123,6 +123,10 @@ public class Version implements Comparable<Version> {
         return pattern.matcher(toString()).matches();
     }
 
+    public boolean isSnapshot() {
+        return snapshot;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
