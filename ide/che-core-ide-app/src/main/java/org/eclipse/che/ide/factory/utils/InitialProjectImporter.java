@@ -78,29 +78,29 @@ public class InitialProjectImporter extends ProjectImporter {
         subscriber.subscribe(importProject.getName(), notification);
 
         appContext.getWorkspaceRoot()
-                .importProject()
-                .withBody(importProject)
-                .send()
-                .then(new Operation<Project>() {
-                    @Override
-                    public void apply(Project project) throws OperationException {
-                        subscriber.onSuccess();
+                  .importProject()
+                  .withBody(importProject)
+                  .send()
+                  .then(new Operation<Project>() {
+                      @Override
+                      public void apply(Project project) throws OperationException {
+                          subscriber.onSuccess();
 
-                        appContext.getWorkspaceRoot().synchronize();
+                          appContext.getWorkspaceRoot().synchronize();
 
-                        importProjects(projects);
-                    }
-                }).catchErrorPromise(
-                new Function<PromiseError, Promise<Project>>() {
-                    @Override
-                    public Promise<Project> apply(PromiseError err) throws FunctionException {
-                        subscriber.onFailure(err.getMessage());
-                        notification.setTitle(locale.cloningSourceFailedTitle(importProject.getName()));
-                        notification.setStatus(FAIL);
+                          importProjects(projects);
+                      }
+                  }).catchErrorPromise(
+                  new Function<PromiseError, Promise<Project>>() {
+                      @Override
+                      public Promise<Project> apply(PromiseError err) throws FunctionException {
+                          subscriber.onFailure(err.getMessage());
+                          notification.setTitle(locale.cloningSourceFailedTitle(importProject.getName()));
+                          notification.setStatus(FAIL);
 
-                        return Promises.resolve(null);
-                    }
-                }
+                          return Promises.resolve(null);
+                      }
+                  }
         );
     }
 
