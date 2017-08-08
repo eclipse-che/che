@@ -1,5 +1,6 @@
 {
   "id": "org.eclipse.che.terminal",
+  "version": "1.0.0",
   "name": "Terminal",
   "description": "Embedded web terminal",
   "dependencies": [],

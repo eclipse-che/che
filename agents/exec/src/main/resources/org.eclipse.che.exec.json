@@ -1,5 +1,6 @@
 {
   "id": "org.eclipse.che.exec",
+  "version": "1.0.0",
   "name": "Exec",
   "description": "Agent for command execution",
   "dependencies": [],
