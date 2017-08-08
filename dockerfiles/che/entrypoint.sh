@@ -156,7 +156,7 @@ call_catalina () {
 
   ### Cannot add this in setenv.sh.
   ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
-  export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT} -Dche.home=${CHE_HOME}"
+  export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=bridge -Dport.http=${CHE_PORT} -Dche.home=${CHE_HOME}"
   export SERVER_PORT=${CHE_PORT}
 
   # Launch the Che application server, passing in command line parameters
@@ -317,8 +317,6 @@ init() {
     cp -rf "${CHE_HOME}"/templates/* "${CHE_DATA}"/templates
   fi
 
-  # A che property, which names the Docker network used for che + ws to communicate
-  export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=bridge"
 }
 
 get_che_data_from_host() {
