@@ -27,17 +27,14 @@ public class WorkspaceComponentProvider implements Provider<WorkspaceComponent> 
 
     private final Provider<DefaultWorkspaceComponent>       workspaceComponentProvider;
     private final Provider<FactoryWorkspaceComponent>       factoryComponentProvider;
-    private final Provider<PredefinedWorkspaceComponent>    predefinedWorkspaceComponentProvider;
     private final QueryParameters                           queryParameters;
 
     @Inject
     public WorkspaceComponentProvider(Provider<DefaultWorkspaceComponent> workspaceComponentProvider,
                                       Provider<FactoryWorkspaceComponent> factoryComponentProvider,
-                                      Provider<PredefinedWorkspaceComponent> predefinedWorkspaceComponentProvider,
                                       QueryParameters queryParameters) {
         this.workspaceComponentProvider = workspaceComponentProvider;
         this.factoryComponentProvider = factoryComponentProvider;
-        this.predefinedWorkspaceComponentProvider = predefinedWorkspaceComponentProvider;
         this.queryParameters = queryParameters;
     }
 
@@ -45,10 +42,6 @@ public class WorkspaceComponentProvider implements Provider<WorkspaceComponent> 
     public WorkspaceComponent get() {
         if (!queryParameters.getByName("factory").isEmpty()) {
             return factoryComponentProvider.get();
-        }
-
-        if (!queryParameters.getByName("init").isEmpty()) {
-            return predefinedWorkspaceComponentProvider.get();
         }
 
         return workspaceComponentProvider.get();

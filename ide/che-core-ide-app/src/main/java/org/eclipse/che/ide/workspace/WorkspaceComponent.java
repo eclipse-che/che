@@ -284,8 +284,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         };
     }
 
-    abstract void tryStartWorkspace();
-
     private void startWorkspaceById(String workspaceId, String defaultEnvironment, Boolean restoreFromSnapshot) {
         loader.show(STARTING_WORKSPACE_RUNTIME);
         workspaceServiceClient.startById(workspaceId, defaultEnvironment, restoreFromSnapshot).catchError(new Operation<PromiseError>() {

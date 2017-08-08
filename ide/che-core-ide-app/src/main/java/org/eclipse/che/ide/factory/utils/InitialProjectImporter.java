@@ -33,7 +33,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 
 /**
- * Imports predefined projects.
+ * Imports projects on file system.
  */
 @Singleton
 public class InitialProjectImporter extends ProjectImporter {
@@ -59,23 +59,21 @@ public class InitialProjectImporter extends ProjectImporter {
         this.subscriber = subscriber;
         this.notificationManager = notificationManager;
         this.locale = locale;
-
     }
 
     /**
      * Import source projects and if it's already exist in workspace
      * then show warning notification
      *
-     * @param importProjects
+     * @param projects
      *         list of projects that already exist in workspace and will be imported on file system
      */
-    public void importProjects(final List<Project> importProjects) {
-        if (importProjects.isEmpty()) {
+    public void importProjects(final List<Project> projects) {
+        if (projects.isEmpty()) {
             return;
         }
 
-        Project importProject = importProjects.get(0);
-
+        final Project importProject = projects.get(0);
         final StatusNotification notification = notificationManager.notify(locale.cloningSource(importProject.getName()), null, PROGRESS, FLOAT_MODE);
         subscriber.subscribe(importProject.getName(), notification);
 
@@ -87,7 +85,10 @@ public class InitialProjectImporter extends ProjectImporter {
                     @Override
                     public void apply(Project project) throws OperationException {
                         subscriber.onSuccess();
-                        updateProject(importProject);
+
+                        appContext.getWorkspaceRoot().synchronize();
+
+                        importProjects(projects);
                     }
                 }).catchErrorPromise(
                 new Function<PromiseError, Promise<Project>>() {
@@ -101,11 +102,6 @@ public class InitialProjectImporter extends ProjectImporter {
                     }
                 }
         );
-    }
-
-    private void updateProject(Project project) {
-        project.update().withBody(project).send();
-        appContext.getWorkspaceRoot().synchronize();
     }
 
 }
