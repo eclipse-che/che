@@ -11,11 +11,14 @@
 package org.eclipse.che.workspace.infrastructure.openshift;
 
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesList;
+import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 
@@ -44,8 +47,10 @@ import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.concurrent.ExecutionException;
 
 import static java.util.Collections.emptyMap;
 
@@ -162,13 +167,17 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         }
     }
 
+    @Override
+    public Map<String, String> getProperties() {
+        return emptyMap();
+    }
+
     private void prepareOpenShiftProject(String projectName) throws InfrastructureException {
         try (OpenShiftClient client = clientFactory.create()) {
             LOG.info("Trying to resolve project for workspace {}", getContext().getIdentity().getWorkspaceId());
             try {
                 client.projects().withName(projectName).get();
                 cleanUpOpenShiftProject(projectName);
-                //TODO Wait until object will be removed
             } catch (KubernetesClientException e) {
                 if (e.getCode() == 403) {
                     // project is foreign or doesn't exist
@@ -186,20 +195,47 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
             }
 
             LOG.info("Created new project for workspace {}", getContext().getIdentity().getWorkspaceId());
+        } catch (KubernetesClientException e) {
+            throw new InfrastructureException(e.getMessage(), e);
         }
     }
 
-    private void cleanUpOpenShiftProject(String projectName) {
+    private void cleanUpOpenShiftProject(String projectName) throws InfrastructureException {
         try (OpenShiftClient client = clientFactory.create()) {
             List<HasMetadata> toDelete = new ArrayList<>();
-            toDelete.addAll(client.pods().inNamespace(projectName).list().getItems());
             toDelete.addAll(client.services().inNamespace(projectName).list().getItems());
             toDelete.addAll(client.routes().inNamespace(projectName).list().getItems());
 
-            KubernetesList toDeleteList = new KubernetesList();
-            toDeleteList.setItems(toDelete);
+            //services and routes will be removed immediately
+            client.lists()
+                  .inNamespace(projectName)
+                  .delete(new KubernetesListBuilder().withItems(toDelete)
+                                                     .build());
 
-            client.lists().inNamespace(projectName).delete(toDeleteList);
+            //pods are removed with some delay related to stopping of containers. It is need to wait them
+            List<Pod> pods = client.pods().inNamespace(projectName).list().getItems();
+            List<CompletableFuture> deleteFutures = new ArrayList<>();
+            for (Pod pod : pods) {
+                PodResource<Pod, DoneablePod> podResource = client.pods()
+                                                                  .inNamespace(projectName)
+                                                                  .withName(pod.getMetadata().getName());
+                CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
+                deleteFutures.add(deleteFuture);
+                podResource.watch(new DeleteWatcher(deleteFuture));
+                podResource.delete();
+            }
+            CompletableFuture<Void> allRemoved =
+                    CompletableFuture.allOf(deleteFutures.toArray(new CompletableFuture[deleteFutures.size()]));
+            try {
+                allRemoved.get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new InfrastructureException("Interrupted while waiting for workspace stop. " + e.getMessage());
+            } catch (ExecutionException e) {
+                throw new InfrastructureException("Error occurred while waiting for pod removing. " + e.getMessage());
+            }
+        } catch (KubernetesClientException e) {
+            throw new InfrastructureException(e.getMessage(), e);
         }
     }
 
@@ -227,11 +263,6 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         }
     }
 
-    @Override
-    public Map<String, String> getProperties() {
-        return emptyMap();
-    }
-
     private void sendStartingEvent(String machineName) {
         eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
                                        .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
@@ -244,5 +275,25 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
                                        .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
                                        .withEventType(MachineStatus.RUNNING)
                                        .withMachineName(machineName));
+    }
+
+    private static class DeleteWatcher implements Watcher<Pod> {
+        private final CompletableFuture<Void> future;
+
+        private DeleteWatcher(CompletableFuture<Void> future) {
+            this.future = future;
+        }
+
+        @Override
+        public void eventReceived(Action action, Pod hasMetadata) {
+            if (action == Action.DELETED) {
+                future.complete(null);
+            }
+        }
+
+        @Override
+        public void onClose(KubernetesClientException e) {
+            future.completeExceptionally(e);
+        }
     }
 }
