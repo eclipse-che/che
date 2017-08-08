@@ -40,15 +40,11 @@ public class KeycloakSettings {
     @SuppressWarnings("unchecked")
     public static void pullFromApiEndpointIfNecessary(String apiEndpoint) {
         if (settings == null) {
-            URL url;
             HttpURLConnection conn;
             try {
-                url = new URL(KeycloakConstants.getEndpoint(apiEndpoint));
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
+                conn = (HttpURLConnection)new URL(KeycloakConstants.getEndpoint(apiEndpoint)).openConnection();
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-                    ObjectMapper mapper = new ObjectMapper();
-                    settings = mapper.readValue(in, Map.class);
+                    settings = new ObjectMapper().readValue(in, Map.class);
                 }
             } catch (IOException e) {
                 LOG.log(Level.SEVERE, "Exception during Keycloak settings retrieval", e);

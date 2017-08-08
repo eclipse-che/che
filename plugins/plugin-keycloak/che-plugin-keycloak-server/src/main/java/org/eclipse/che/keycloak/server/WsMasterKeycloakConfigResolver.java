@@ -60,6 +60,9 @@ public class WsMasterKeycloakConfigResolver extends AbstractKeycloakConfigResolv
         config.setPublicClient(false);
         config.setConnectionPoolSize(20);
         config.setDisableTrustManager(true);
+        config.setAuthServerUrl(authURL);
+        config.setRealm(realm);
+        config.setResource(clientId);
         config.setCredentials(ImmutableMap.of("secret", clientSecret));
         if (redirectRules != null) {
             config.setRedirectRewriteRules(redirectRules);
@@ -74,9 +77,6 @@ public class WsMasterKeycloakConfigResolver extends AbstractKeycloakConfigResolv
             return keycloakDeployment;
         }
         AdapterConfig config = prepareConfig();
-        config.setAuthServerUrl(authURL);
-        config.setRealm(realm);
-        config.setResource(clientId);
         keycloakDeployment = KeycloakDeploymentBuilder.build(config);
         return keycloakDeployment;
     }

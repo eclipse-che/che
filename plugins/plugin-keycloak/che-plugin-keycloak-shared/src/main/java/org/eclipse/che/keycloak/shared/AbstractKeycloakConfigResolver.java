@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
+ * Creates keycloak deployment config using values from {@link KeycloakSettings}.
+ *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
 public abstract class AbstractKeycloakConfigResolver implements KeycloakConfigResolver {

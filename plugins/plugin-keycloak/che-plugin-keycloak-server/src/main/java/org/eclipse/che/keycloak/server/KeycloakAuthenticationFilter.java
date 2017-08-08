@@ -32,8 +32,7 @@ public class KeycloakAuthenticationFilter extends org.keycloak.adapters.servlet.
     private RequestTokenExtractor tokenExtractor;
 
     @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
         if (request.getScheme().startsWith("ws") || (tokenExtractor.getToken(request) != null && tokenExtractor.getToken(request).startsWith("machine"))) {
             chain.doFilter(req, res);

@@ -18,7 +18,7 @@ import javax.sql.DataSource;
 
 
 @DynaModule
-public class MultyUserCheWsMasterModule extends AbstractModule {
+public class MultiUserCheWsMasterModule extends AbstractModule {
 
     @Override
     protected void configure() {
