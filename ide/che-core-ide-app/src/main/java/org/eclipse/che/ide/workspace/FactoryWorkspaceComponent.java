@@ -133,7 +133,6 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
 
     }
 
-    @Override
     public void tryStartWorkspace() {
         if (this.workspaceId == null) {
             notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceIdUndefined(), FAIL, FLOAT_MODE);

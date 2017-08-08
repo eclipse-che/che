@@ -163,7 +163,7 @@ export class CreateWorkspaceSvc {
   createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes?: any): ng.IPromise<any> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-
+    workspaceConfig.projects = projectTemplates;
     return this.checkEditingProgress().then(() => {
       return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
 
@@ -177,13 +177,9 @@ export class CreateWorkspaceSvc {
         }).then(() => {
           return this.cheWorkspace.fetchWorkspaceDetails(workspace.id);
         }).then(() => {
-          return this.createProjects(workspace.id, projectTemplates);
-        }).then(() => {
-          this.getIDE().ProjectExplorer.refresh();
-          return this.importProjects(workspace.id, projectTemplates);
+          return this.addProjectCommands(workspace.id, projectTemplates);
         }).then(() => {
           let IDE = this.getIDE();
-          IDE.ProjectExplorer.refresh();
           IDE.CommandManager.refresh();
         });
       }, (error: any) => {
@@ -242,19 +238,17 @@ export class CreateWorkspaceSvc {
   }
 
   /**
-   * Imports bunch of projects in row.
-   * Returns resolved promise if all project are imported properly, otherwise returns rejected promise with list of names of failed projects.
+   * Adds commands from the bunch of projects in row.
+   * Returns resolved promise if all commands are aded properly, otherwise returns rejected promise with list of names of failed projects.
    *
    * @param {string} workspaceId the workspace ID
-   * @param {Array<che.IProjectTemplate>} projectTemplates the list of project templates to import
+   * @param {Array<che.IProjectTemplate>} projectTemplates the list of project templates
    * @return {IPromise<any>}
    */
-  importProjects(workspaceId: string, projectTemplates: Array<che.IProjectTemplate>): ng.IPromise<any> {
+  addProjectCommands(workspaceId: string, projectTemplates: Array<che.IProjectTemplate>): ng.IPromise<any> {
     const defer = this.$q.defer();
     defer.resolve();
     let accumulatorPromise = defer.promise;
-
-    const projectTypeResolverService = this.cheWorkspace.getWorkspaceAgent(workspaceId).getProjectTypeResolver();
 
     const failedProjects = [];
 
@@ -263,8 +257,6 @@ export class CreateWorkspaceSvc {
         return this.addCommands(workspaceId, project.name, project.commands).catch(() => {
           // adding commands errors, ignore them here
           return this.$q.when();
-        }).then(() => {
-          return projectTypeResolverService.resolveProjectType(project as any);
         }).catch((error: any) => {
           failedProjects.push(project.name);
           if (error && error.message) {
