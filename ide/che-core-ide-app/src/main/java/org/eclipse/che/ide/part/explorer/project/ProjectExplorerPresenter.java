@@ -445,9 +445,10 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
     @Override
     public void onVcsBranchClicked(Project project) {
+        String projectVcsName = project.getAttribute("vcs.provider.name");
         showVcsBranchActionProviders.get()
                                     .stream()
-                                    .filter(provider -> provider.getVcsName().equals(project.getAttribute("vcs.provider.name")))
+                                    .filter(provider -> provider.getVcsName().equals(projectVcsName))
                                     .findAny()
                                     .ifPresent(provider -> provider.show(project));
     }
