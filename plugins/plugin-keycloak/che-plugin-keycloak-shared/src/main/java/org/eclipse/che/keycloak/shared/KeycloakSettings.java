@@ -50,7 +50,6 @@ public class KeycloakSettings {
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 ObjectMapper mapper = new ObjectMapper();
                 settings = mapper.readValue(in, Map.class);
-                LOG.info("KeycloakSettings = " + settings);
             } catch (IOException e) {
                 LOG.log(Level.SEVERE, "Exception during Keycloak settings retrieval", e);
             }
