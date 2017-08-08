@@ -36,71 +36,12 @@
         <finalName>dashboard-war</finalName>
         <plugins>
             <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${basedir}/bower_components</directory>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
-                        <fileset>
-                            <directory>${basedir}/node_modules</directory>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
-                        <fileset>
-                            <directory>${basedir}/dist</directory>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <!-- Download NPM dependencies -->
-                                <exec dir="${basedir}" executable="npm" failonerror="true">
-                                    <arg value="install" />
-                                </exec>
-                                <!-- Change base HREF of the application that will be hosted on /dashboard -->
-                                <replace file="${basedir}/dist/index.html">
-                                    <replacetoken><![CDATA[<base href="/">]]></replacetoken>
-                                    <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
-                                </replace>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>compilation</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target unless="skipTests">
-                                <!-- Run unit tests -->
-                                <exec dir="${basedir}" executable="gulp" failonerror="true">
-                                    <arg value="test" />
-                                </exec>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <webResources>
                         <resource>
-                            <directory>dist</directory>
+                            <directory>target/dist</directory>
                         </resource>
                     </webResources>
                     <webXml>${basedir}/src/webapp/WEB-INF/web.xml</webXml>
@@ -129,6 +70,134 @@
         </plugins>
     </build>
     <profiles>
+        <profile>
+            <!-- Docker build used by default, to use native build, use -Pnative -->
+            <id>docker</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>build-image</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- build user dashboard with maven -->
+                                        <exec dir="${basedir}" executable="docker" failonerror="true">
+                                            <arg value="build" />
+                                            <arg value="-t" />
+                                            <arg value="eclipse-che-dashboard" />
+                                            <arg value="." />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-docker-build</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- build user dashboard with docker -->
+                                        <exec executable="bash">
+                                            <arg value="-c" />
+                                            <arg value="docker run --rm eclipse-che-dashboard | tar -C target/ -xf -" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>update-href</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- Change base HREF of the application that will be hosted on /dashboard -->
+                                        <replace file="${basedir}/target/dist/index.html">
+                                            <replacetoken><![CDATA[<base href="/">]]></replacetoken>
+                                            <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
+                                        </replace>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${basedir}/bower_components</directory>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                                <fileset>
+                                    <directory>${basedir}/node_modules</directory>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>build-dashboard</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- build user dashboard -->
+                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                            <arg value="install" />
+                                        </exec>
+                                        <!-- Change base HREF of the application that will be hosted on /dashboard -->
+                                        <replace file="${basedir}/target/dist/index.html">
+                                            <replacetoken><![CDATA[<base href="/">]]></replacetoken>
+                                            <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
+                                        </replace>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>compilation</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target unless="skipTests">
+                                        <!-- Run unit tests -->
+                                        <exec dir="${basedir}" executable="gulp" failonerror="true">
+                                            <arg value="test" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>qa</id>
             <build>

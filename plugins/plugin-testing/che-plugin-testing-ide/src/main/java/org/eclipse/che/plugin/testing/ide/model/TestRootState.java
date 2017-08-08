@@ -14,6 +14,7 @@ package org.eclipse.che.plugin.testing.ide.model;
  * Describes test root state.
  */
 public class TestRootState extends TestState {
+    public static final String ROOT = "Root";
 
     private boolean testReporterAttached;
 
@@ -22,7 +23,7 @@ public class TestRootState extends TestState {
     private String comment;
 
     public TestRootState() {
-        super("Root", true, null);
+        super(ROOT, true, null);
     }
 
     public boolean isTestReporterAttached() {

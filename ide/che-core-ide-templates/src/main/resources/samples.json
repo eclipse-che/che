@@ -1564,5 +1564,28 @@
     "tags": [
       "TypeScript","ts"
     ]
+  },
+  {
+    "name": "ceylon-hello-world",
+    "displayName": "ceylon-hello-world",
+    "path": "/ceylon-hello-world",
+    "description": "A Ceylon 'Hello World' project example that runs on all supported backends.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/ceylon-hello-world",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Ceylon"
+    ]
   }
 ]

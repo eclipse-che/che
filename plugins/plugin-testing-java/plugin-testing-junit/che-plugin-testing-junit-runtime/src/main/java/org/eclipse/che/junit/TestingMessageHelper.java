@@ -60,13 +60,9 @@ public class TestingMessageHelper {
      *
      * @param out
      *         output stream
-     * @param description
-     *         information about test cass
      */
-    public static void rootPresentation(PrintStream out, Description description) {
-        out.println(create(ROOT_NAME,
-                           new Pair(NAME, "Default Suite"),
-                           new Pair(LOCATION, "file://" + description.getClassName())));
+    public static void rootPresentation(PrintStream out) {
+        out.println(create(ROOT_NAME, new Pair(NAME, "Default Suite")));
     }
 
     /**
@@ -150,7 +146,7 @@ public class TestingMessageHelper {
     public static void testSuiteStarted(PrintStream out, Description description) {
         out.println(create(TEST_SUITE_STARTED,
                            new Pair(NAME, escape(description.getClassName())),
-                           new Pair(LOCATION, escape(description.getClassName()))));
+                           new Pair(LOCATION, "java:test://" + escape(description.getClassName()))));
     }
 
     /**

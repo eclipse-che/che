@@ -15,10 +15,10 @@ import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ImageConfig;
-import org.eclipse.che.plugin.openshift.client.CheServicePorts;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -38,7 +38,7 @@ public final class KubernetesContainer {
      * @param exposedPorts
      * @return list of {@link ContainerPort}
      */
-    public static List<ContainerPort> getContainerPortsFrom(Set<String> exposedPorts) {
+    public static List<ContainerPort> getContainerPortsFrom(Set<String> exposedPorts, Map<String, String> portsToRefName) {
         List<ContainerPort> containerPorts = new ArrayList<>(exposedPorts.size());
         for (String exposedPort : exposedPorts) {
             String[] portAndProtocol = exposedPort.split("/", 2);
@@ -46,7 +46,7 @@ public final class KubernetesContainer {
             String protocol = portAndProtocol[1].toUpperCase();
 
             int portNumber = Integer.parseInt(port);
-            String portName = CheServicePorts.get().get(portNumber);
+            String portName = portsToRefName.get(exposedPort);
             portName = isNullOrEmpty(portName) ? "server-" + exposedPort.replace("/", "-") : portName;
 
             ContainerPort containerPort = new ContainerPortBuilder().withName(portName).withProtocol(protocol)
