@@ -10,18 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.ContainerPort;
-import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
-import io.fabric8.openshift.api.model.Route;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.openshift.client.OpenShiftClient;
 import okhttp3.Response;
 
@@ -36,21 +32,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_SERVER_NAME_ANNOTATION;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_SERVER_PATH_ANNOTATION;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_SERVER_PROTOCOL_ANNOTATION;
 
 /**
  * @author Sergii Leshchenko
@@ -60,19 +49,22 @@ public class OpenShiftMachine implements Machine {
 
     private static final String OPENSHIFT_POD_STATUS_RUNNING = "Running";
 
-    private final OpenShiftClientFactory clientFactory;
-    private final String                 projectName;
-    private final String                 podName;
-    private final String                 containerName;
+    private final OpenShiftClientFactory  clientFactory;
+    private final String                  projectName;
+    private final String                  podName;
+    private final String                  containerName;
+    private final Map<String, ServerImpl> servers;
 
     public OpenShiftMachine(OpenShiftClientFactory clientFactory,
                             String projectName,
                             String podName,
-                            String containerName) {
+                            String containerName,
+                            Map<String, ServerImpl> servers) {
         this.clientFactory = clientFactory;
         this.projectName = projectName;
         this.podName = podName;
         this.containerName = containerName;
+        this.servers = servers;
     }
 
     public String getName() {
@@ -86,42 +78,11 @@ public class OpenShiftMachine implements Machine {
 
     @Override
     public Map<String, ? extends Server> getServers() {
-        //TODO https://github.com/eclipse/che/issues/5688
-        try (OpenShiftClient client = clientFactory.create()) {
-            Set<String> matchedServices = getMatchedServices().stream()
-                                                              .map(s -> s.getMetadata().getName())
-                                                              .collect(Collectors.toSet());
-
-            List<Route> routes = client.routes()
-                                       .inNamespace(projectName)
-                                       .list()
-                                       .getItems();
-
-            Map<String, ServerImpl> servers = new HashMap<>();
-            for (Route route : routes) {
-                if (matchedServices.contains(route.getSpec().getTo().getName())) {
-                    Map<String, String> annotations = route.getMetadata().getAnnotations();
-                    String serverName = annotations.get(CHE_SERVER_NAME_ANNOTATION);
-                    String serverPath = annotations.get(CHE_SERVER_PATH_ANNOTATION);
-                    String serverProtocol = annotations.get(CHE_SERVER_PROTOCOL_ANNOTATION);
-                    if (serverName != null) {
-                        servers.put(serverName,
-                                    //TODO Fix server status https://github.com/eclipse/che/issues/5689
-                                    new ServerImpl(serverProtocol + "://" + route.getSpec().getHost() + serverPath, ServerStatus.RUNNING));
-                    }
-                }
-            }
-            return servers;
-        }
+        return servers;
     }
 
-    private Pod getPod() {
-        try (OpenShiftClient client = clientFactory.create()) {
-            return client.pods()
-                         .inNamespace(projectName)
-                         .withName(podName)
-                         .get();
-        }
+    public void setStatus(String name, ServerStatus status) {
+        servers.get(name).setStatus(status);
     }
 
     public void exec(String... command) throws InfrastructureException {
@@ -150,13 +111,13 @@ public class OpenShiftMachine implements Machine {
         LOG.info("Waiting machine {}", getName());
 
         CompletableFuture<Void> future = new CompletableFuture<>();
-        Watch watch;
+        Watch watch = null;
         try (OpenShiftClient client = clientFactory.create()) {
-            Pod actualPod = client.pods()
-                                  .inNamespace(projectName)
-                                  .withName(podName)
-                                  .get();
+            PodResource<Pod, DoneablePod> podResource = client.pods()
+                                                              .inNamespace(projectName)
+                                                              .withName(podName);
 
+            Pod actualPod = podResource.get();
             if (actualPod == null) {
                 throw new InternalInfrastructureException("Can't find created pod " + podName);
             }
@@ -164,44 +125,42 @@ public class OpenShiftMachine implements Machine {
             LOG.info("Machine {} is {}", getName(), status);
             if (OPENSHIFT_POD_STATUS_RUNNING.equals(status)) {
                 future.complete(null);
-                return;
             } else {
-                watch = client.pods()
-                              .inNamespace(projectName)
-                              .withName(podName)
-                              .watch(new Watcher<Pod>() {
-                                         @Override
-                                         public void eventReceived(Action action, Pod pod) {
-                                             //TODO Replace with checking container status
-                                             String phase = pod.getStatus().getPhase();
-                                             LOG.info("Machine {} is {}", getName(), status);
-                                             if (OPENSHIFT_POD_STATUS_RUNNING.equals(phase)) {
-                                                 future.complete(null);
-                                             }
-                                         }
+                watch = podResource.watch(new Watcher<Pod>() {
+                                              @Override
+                                              public void eventReceived(Action action, Pod pod) {
+                                                  //TODO Replace with checking container status
+                                                  String phase = pod.getStatus().getPhase();
+                                                  LOG.info("Machine {} is {}", getName(), status);
+                                                  if (OPENSHIFT_POD_STATUS_RUNNING.equals(phase)) {
+                                                      future.complete(null);
+                                                  }
+                                              }
 
-                                         @Override
-                                         public void onClose(KubernetesClientException cause) {
-                                             if (!future.isDone()) {
-                                                 future.completeExceptionally(
-                                                         new InfrastructureException("Machine watching is interrupted"));
-                                             }
-                                         }
-                                     }
-                              );
+                                              @Override
+                                              public void onClose(KubernetesClientException cause) {
+                                                  if (!future.isDone()) {
+                                                      future.completeExceptionally(
+                                                              new InfrastructureException("Machine watching is interrupted"));
+                                                  }
+                                              }
+                                          }
+                );
+                try {
+                    future.get(timeoutMin, TimeUnit.MINUTES);
+                } catch (ExecutionException e) {
+                    throw new InfrastructureException(e.getCause().getMessage(), e);
+                } catch (TimeoutException e) {
+                    throw new InfrastructureException("Starting of machine " + getName() + " reached timeout");
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new InfrastructureException("Starting of machine " + getName() + " was interrupted");
+                }
             }
-        }
-
-        try {
-            future.get(timeoutMin, TimeUnit.MINUTES);
-            watch.close();
-        } catch (ExecutionException e) {
-            throw new InfrastructureException(e.getCause().getMessage(), e);
-        } catch (TimeoutException e) {
-            throw new InfrastructureException("Starting of machine " + getName() + " reached timeout");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new InfrastructureException("Starting of machine " + getName() + " was interrupted");
+        } finally {
+            if (watch != null) {
+                watch.close();
+            }
         }
     }
 
@@ -215,62 +174,6 @@ public class OpenShiftMachine implements Machine {
             }
         }
         return encoded;
-    }
-
-    private List<Service> getMatchedServices() {
-        Pod pod = getPod();
-        Container container = pod.getSpec()
-                                 .getContainers()
-                                 .stream()
-                                 .filter(c -> containerName.equals(c.getName()))
-                                 .findAny()
-                                 .orElseThrow(
-                                         () -> new IllegalStateException("Corresponding pod for OpenShift machine doesn't exist."));
-
-        try (OpenShiftClient client = clientFactory.create()) {
-            return client.services()
-                         .inNamespace(projectName)
-                         .list()
-                         .getItems()
-                         .stream()
-                         .filter(service -> isExposedByService(pod, service))
-                         .filter(service -> isExposedByService(container, service))
-                         .collect(Collectors.toList());
-        }
-    }
-
-    private static boolean isExposedByService(Pod pod, Service service) {
-        Map<String, String> labels = pod.getMetadata().getLabels();
-        Map<String, String> selectorLabels = service.getSpec().getSelector();
-        if (labels == null) {
-            return false;
-        }
-        for (Map.Entry<String, String> selectorLabelEntry : selectorLabels.entrySet()) {
-            if (!selectorLabelEntry.getValue().equals(labels.get(selectorLabelEntry.getKey()))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean isExposedByService(Container container, Service service) {
-        for (ServicePort servicePort : service.getSpec().getPorts()) {
-            IntOrString targetPort = servicePort.getTargetPort();
-            if (targetPort.getIntVal() != null) {
-                for (ContainerPort containerPort : container.getPorts()) {
-                    if (targetPort.getIntVal().equals(containerPort.getContainerPort())) {
-                        return true;
-                    }
-                }
-            } else {
-                for (ContainerPort containerPort : container.getPorts()) {
-                    if (targetPort.getStrVal().equals(containerPort.getName())) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     private class ExecWatchdog implements ExecListener {

@@ -14,8 +14,11 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
+import io.fabric8.kubernetes.api.model.ContainerPort;
+import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.PodResource;
@@ -33,6 +36,7 @@ import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.ServersReadinessChecker;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
@@ -46,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,6 +61,11 @@ import java.util.function.Consumer;
 
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
+import java.util.stream.Collectors;
+
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_SERVER_NAME_ANNOTATION;
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_SERVER_PATH_ANNOTATION;
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_SERVER_PROTOCOL_ANNOTATION;
 
 /**
  * @author Sergii Leshchenko
@@ -96,22 +106,6 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
             prepareOpenShiftProject(projectName);
             prepareOpenShiftPVCs(getContext().getOpenShiftEnvironment(), projectName);
 
-            LOG.info("Creating pods from environment");
-            for (Pod toCreate : getContext().getOpenShiftEnvironment().getPods().values()) {
-                Pod createdPod = client.pods()
-                                       .inNamespace(projectName)
-                                       .create(toCreate);
-
-                for (Container container : createdPod.getSpec().getContainers()) {
-                    OpenShiftMachine machine = new OpenShiftMachine(clientFactory,
-                                                                    projectName,
-                                                                    createdPod.getMetadata().getName(),
-                                                                    container.getName());
-                    machines.put(machine.getName(), machine);
-                    sendStartingEvent(machine.getName());
-                }
-            }
-
             LOG.info("Creating services from environment");
             for (Service service : getContext().getOpenShiftEnvironment().getServices().values()) {
                 client.services()
@@ -124,6 +118,51 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
                 client.routes()
                       .inNamespace(projectName)
                       .create(route);
+            }
+
+            List<Service> services = client.services()
+                                           .inNamespace(projectName)
+                                           .list()
+                                           .getItems();
+
+            List<Route> routes = client.routes()
+                                       .inNamespace(projectName)
+                                       .list()
+                                       .getItems();
+
+            LOG.info("Creating pods from environment");
+            for (Pod toCreate : getContext().getOpenShiftEnvironment().getPods().values()) {
+                Pod createdPod = client.pods()
+                                       .inNamespace(projectName)
+                                       .create(toCreate);
+
+                for (Container container : createdPod.getSpec().getContainers()) {
+                    Map<String, ServerImpl> servers = new HashMap<>();
+                    Set<String> matchedServices = getMatchedServices(services, toCreate, container).stream()
+                                                                                                   .map(s -> s.getMetadata().getName())
+                                                                                                   .collect(Collectors.toSet());
+                    for (Route route : routes) {
+                        if (matchedServices.contains(route.getSpec().getTo().getName())) {
+                            Map<String, String> annotations = route.getMetadata().getAnnotations();
+                            String serverName = annotations.get(CHE_SERVER_NAME_ANNOTATION);
+                            String serverPath = annotations.get(CHE_SERVER_PATH_ANNOTATION);
+                            String serverProtocol = annotations.get(CHE_SERVER_PROTOCOL_ANNOTATION);
+                            if (serverName != null) {
+                                servers.put(serverName, new ServerImpl(serverProtocol + "://" + route.getSpec().getHost() + serverPath,
+                                                                       ServerStatus.UNKNOWN));
+                            }
+                        }
+                    }
+
+                    OpenShiftMachine machine = new OpenShiftMachine(clientFactory,
+                                                                    projectName,
+                                                                    createdPod.getMetadata().getName(),
+                                                                    container.getName(),
+                                                                    servers);
+
+                    machines.put(machine.getName(), machine);
+                    sendStartingEvent(machine.getName());
+                }
             }
 
             LOG.info("Waiting until pods created by deployment configs become available and bootstrapping them");
@@ -152,6 +191,47 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         }
 
         LOG.info("OpenShift Runtime for workspace {} started", getContext().getIdentity().getWorkspaceId());
+    }
+
+    private List<Service> getMatchedServices(List<Service> services, Pod pod, Container container) {
+        return services.stream()
+                       .filter(service -> isExposedByService(pod, service))
+                       .filter(service -> isExposedByService(container, service))
+                       .collect(Collectors.toList());
+    }
+
+    private static boolean isExposedByService(Pod pod, Service service) {
+        Map<String, String> labels = pod.getMetadata().getLabels();
+        Map<String, String> selectorLabels = service.getSpec().getSelector();
+        if (labels == null) {
+            return false;
+        }
+        for (Map.Entry<String, String> selectorLabelEntry : selectorLabels.entrySet()) {
+            if (!selectorLabelEntry.getValue().equals(labels.get(selectorLabelEntry.getKey()))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isExposedByService(Container container, Service service) {
+        for (ServicePort servicePort : service.getSpec().getPorts()) {
+            IntOrString targetPort = servicePort.getTargetPort();
+            if (targetPort.getIntVal() != null) {
+                for (ContainerPort containerPort : container.getPorts()) {
+                    if (targetPort.getIntVal().equals(containerPort.getContainerPort())) {
+                        return true;
+                    }
+                }
+            } else {
+                for (ContainerPort containerPort : container.getPorts()) {
+                    if (targetPort.getStrVal().equals(containerPort.getName())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -277,7 +357,9 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
                 // Probably machine was removed from the list during server check start due to some reason
                 return;
             }
-            // TODO set server status
+
+            machine.setStatus(serverRef, ServerStatus.RUNNING);
+
             eventService.publish(DtoFactory.newDto(ServerStatusEvent.class)
                                            .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
                                            .withMachineName(machineName)
