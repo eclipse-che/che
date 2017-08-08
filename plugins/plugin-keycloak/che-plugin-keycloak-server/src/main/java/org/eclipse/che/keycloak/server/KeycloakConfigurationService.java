@@ -33,6 +33,8 @@ import static org.eclipse.che.keycloak.shared.KeycloakConstants.OSO_ENDPOINT_SET
 import static org.eclipse.che.keycloak.shared.KeycloakConstants.REALM_SETTING;
 
 /**
+ * Endpoint which provides keycloak public client authentication information (such as URL, realm, cliend_id).
+ *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
 @Singleton

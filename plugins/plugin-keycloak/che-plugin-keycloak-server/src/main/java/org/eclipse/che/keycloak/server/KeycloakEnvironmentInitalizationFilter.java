@@ -46,6 +46,8 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.util.Collections.emptyList;
 
 /**
+ * Sets subject attribute into session based on keycloak authentication data.
+ *
  * @author Max Shaposhnik (mshaposhnik@redhat.com)
  */
 @Singleton

@@ -44,12 +44,12 @@ public class KeycloakSettings {
             HttpURLConnection conn;
             try {
                 url = new URL(KeycloakConstants.getEndpoint(apiEndpoint));
-                LOG.info("Pulling Keycloak settings from URL :" + url);
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                ObjectMapper mapper = new ObjectMapper();
-                settings = mapper.readValue(in, Map.class);
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    settings = mapper.readValue(in, Map.class);
+                }
             } catch (IOException e) {
                 LOG.log(Level.SEVERE, "Exception during Keycloak settings retrieval", e);
             }

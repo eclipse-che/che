@@ -14,6 +14,8 @@ import org.keycloak.common.enums.SslRequired;
 import org.keycloak.representations.adapters.config.AdapterConfig;
 
 /**
+ * Config resolver for public client applications.
+ *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
 public class ApplicationKeycloakConfigResolver extends AbstractKeycloakConfigResolver {

@@ -15,9 +15,9 @@ package org.eclipse.che.keycloak.shared;
  */
 public class KeycloakConstants {
 
-    public static final String KEYCLOAK_SETTING_PREFIX = "che.keycloak.";
-    public static final String PRIVATE_PREFIX = "private.";
-    public static final String KEYCLOAK_SETTINGS_ENDPOINT_PATH = "/keycloak/settings";
+    private static final String KEYCLOAK_SETTING_PREFIX         = "che.keycloak.";
+    private static final String PRIVATE_PREFIX                  = "private.";
+    private static final String KEYCLOAK_SETTINGS_ENDPOINT_PATH = "/keycloak/settings";
 
     public static final String AUTH_SERVER_URL_SETTING = KEYCLOAK_SETTING_PREFIX + "auth-server-url";
     public static final String REALM_SETTING           = KEYCLOAK_SETTING_PREFIX + "realm";
