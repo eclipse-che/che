@@ -149,9 +149,9 @@ call_catalina () {
 
   ### Initialize default JVM arguments to run che
   if [[ "${CHE_BLOCKING_ENTROPY}" == true ]]; then
-    [ -z "${JAVA_OPTS}" ] && JAVA_OPTS="-Xms256m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
+    [ -z ${JAVA_OPTS} ] && JAVA_OPTS="-Xms256m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
   else
-    [ -z "${JAVA_OPTS}" ] && JAVA_OPTS="-Xms256m -Xmx1024m"
+    [ -z ${JAVA_OPTS} ] && JAVA_OPTS="-Xms256m -Xmx1024m"
   fi
 
   ### Cannot add this in setenv.sh.
