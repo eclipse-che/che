@@ -38,11 +38,11 @@ public class ExtraHostsProvisioner implements ContainerSystemSettingsProvisioner
     private final List<String> extraHosts;
 
     @Inject
-    public ExtraHostsProvisioner(@Nullable @Named(PROPERTY) String[] extraHosts) {
-        if (extraHosts == null || extraHosts.length == 0) {
+    public ExtraHostsProvisioner(@Nullable @Named(PROPERTY) String extraHosts) {
+        if (extraHosts == null || extraHosts.isEmpty()) {
             this.extraHosts = Collections.emptyList();
         } else {
-            this.extraHosts = Arrays.stream(extraHosts)
+            this.extraHosts = Arrays.stream(extraHosts.split(" *, *"))
                                     .filter(host -> !host.isEmpty())
                                     .collect(toList());
         }

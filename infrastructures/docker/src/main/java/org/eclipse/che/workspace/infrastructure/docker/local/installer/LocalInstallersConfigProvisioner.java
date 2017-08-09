@@ -13,8 +13,8 @@ package org.eclipse.che.workspace.infrastructure.docker.local.installer;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.installer.InstallerConfigApplier;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.installer.InstallersConfigProvisioner;
 
@@ -31,12 +31,12 @@ public class LocalInstallersConfigProvisioner extends InstallersConfigProvisione
     public static final String LOCAL_INSTALLERS_PROVISIONERS =
             "infrastructure.docker.local_installers_provisioners";
 
-    private final Set<InfrastructureProvisioner> localInstallerProvisioners;
+    private final Set<ConfigurationProvisioner> localInstallerProvisioners;
 
     @Inject
     public LocalInstallersConfigProvisioner(
             InstallerConfigApplier installerConfigApplier,
-            @Named(LOCAL_INSTALLERS_PROVISIONERS) Set<InfrastructureProvisioner> localInstallerProvisioners) {
+            @Named(LOCAL_INSTALLERS_PROVISIONERS) Set<ConfigurationProvisioner> localInstallerProvisioners) {
         super(installerConfigApplier);
         this.localInstallerProvisioners = localInstallerProvisioners;
     }
@@ -46,7 +46,7 @@ public class LocalInstallersConfigProvisioner extends InstallersConfigProvisione
             throws InfrastructureException {
 
         super.provision(envConfig, internalEnv, identity);
-        for (InfrastructureProvisioner infrastructureProvisioner : localInstallerProvisioners) {
+        for (ConfigurationProvisioner infrastructureProvisioner : localInstallerProvisioners) {
             infrastructureProvisioner.provision(envConfig, internalEnv, identity);
         }
     }
