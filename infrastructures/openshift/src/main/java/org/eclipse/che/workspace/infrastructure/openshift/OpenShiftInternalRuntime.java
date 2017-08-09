@@ -14,11 +14,8 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
-import io.fabric8.kubernetes.api.model.ContainerPort;
-import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.PodResource;
@@ -28,6 +25,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -62,10 +60,6 @@ import java.util.function.Consumer;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
 import java.util.stream.Collectors;
-
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_SERVER_NAME_ANNOTATION;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_SERVER_PATH_ANNOTATION;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_SERVER_PROTOCOL_ANNOTATION;
 
 /**
  * @author Sergii Leshchenko
@@ -138,19 +132,23 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
 
                 for (Container container : createdPod.getSpec().getContainers()) {
                     Map<String, ServerImpl> servers = new HashMap<>();
-                    Set<String> matchedServices = getMatchedServices(services, toCreate, container).stream()
-                                                                                                   .map(s -> s.getMetadata().getName())
-                                                                                                   .collect(Collectors.toSet());
+                    Set<String> matchedServices = ServiceMatcher.from(services)
+                                                                .match(createdPod, container)
+                                                                .stream()
+                                                                .map(s -> s.getMetadata().getName())
+                                                                .collect(Collectors.toSet());
                     for (Route route : routes) {
                         if (matchedServices.contains(route.getSpec().getTo().getName())) {
-                            Map<String, String> annotations = route.getMetadata().getAnnotations();
-                            String serverName = annotations.get(CHE_SERVER_NAME_ANNOTATION);
-                            String serverPath = annotations.get(CHE_SERVER_PATH_ANNOTATION);
-                            String serverProtocol = annotations.get(CHE_SERVER_PROTOCOL_ANNOTATION);
-                            if (serverName != null) {
-                                servers.put(serverName, new ServerImpl(serverProtocol + "://" + route.getSpec().getHost() + serverPath,
-                                                                       ServerStatus.UNKNOWN));
-                            }
+                            RoutesAnnotations.newDeserializer(route.getMetadata().getAnnotations())
+                                             .servers()
+                                             .entrySet()
+                                             .forEach(e -> {
+                                                 String name = e.getKey();
+                                                 ServerConfig config = e.getValue();
+                                                 servers.put(name, new ServerImpl(
+                                                         config.getProtocol() + "://" + route.getSpec().getHost() + config.getPath(),
+                                                         ServerStatus.UNKNOWN));
+                                             });
                         }
                     }
 
@@ -191,47 +189,6 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         }
 
         LOG.info("OpenShift Runtime for workspace {} started", getContext().getIdentity().getWorkspaceId());
-    }
-
-    private List<Service> getMatchedServices(List<Service> services, Pod pod, Container container) {
-        return services.stream()
-                       .filter(service -> isExposedByService(pod, service))
-                       .filter(service -> isExposedByService(container, service))
-                       .collect(Collectors.toList());
-    }
-
-    private static boolean isExposedByService(Pod pod, Service service) {
-        Map<String, String> labels = pod.getMetadata().getLabels();
-        Map<String, String> selectorLabels = service.getSpec().getSelector();
-        if (labels == null) {
-            return false;
-        }
-        for (Map.Entry<String, String> selectorLabelEntry : selectorLabels.entrySet()) {
-            if (!selectorLabelEntry.getValue().equals(labels.get(selectorLabelEntry.getKey()))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean isExposedByService(Container container, Service service) {
-        for (ServicePort servicePort : service.getSpec().getPorts()) {
-            IntOrString targetPort = servicePort.getTargetPort();
-            if (targetPort.getIntVal() != null) {
-                for (ContainerPort containerPort : container.getPorts()) {
-                    if (targetPort.getIntVal().equals(containerPort.getContainerPort())) {
-                        return true;
-                    }
-                }
-            } else {
-                for (ContainerPort containerPort : container.getPorts()) {
-                    if (targetPort.getStrVal().equals(containerPort.getName())) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     @Override
