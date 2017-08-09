@@ -41,6 +41,12 @@ interface CompareView extends View<CompareView.ActionDelegate> {
         void onPreviousDiffClicked();
     }
 
+    interface ContentConsumer {
+        void processContent(String content);
+    }
+
+    void getEditableContent(ContentConsumer contentConsumer);
+
     /**
      * Set a title for the window.
      *

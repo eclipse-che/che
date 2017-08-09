@@ -127,7 +127,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         this.revisionB = revisionB;
 
         this.compareWithLatest = false;
-        this.projectLocation = appContext.getRootProject().getLocation(); // TODO replace with given project
+        this.projectLocation = appContext.getRootProject().getLocation();
 
         setupCurrentFile(currentFile);
         showCompareForCurrentFile();
@@ -231,23 +231,15 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     @Override
     public void onClose(final String newContent) {
-        if (!compareWithLatest || this.localContent == null || newContent.equals(localContent)) {
+        if (!isEdited(newContent)) {
             view.hide();
             return;
         }
 
-        ConfirmCallback confirmCallback = () -> comparedFile.updateContent(newContent)
-                                                            .then(ignored -> {
-                                                                final Container parent = comparedFile.getParent();
-
-                                                                if (parent != null) {
-                                                                    parent.synchronize();
-                                                                }
-
-                                                                eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getLocation()
-                                                                                                                          .toString()));
-                                                                view.hide();
-                                                            });
+        ConfirmCallback confirmCallback = () -> {
+            saveContent(newContent);
+            view.hide();
+        };
 
         CancelCallback cancelCallback = view::hide;
 
@@ -257,29 +249,43 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     @Override
     public void onSaveChangesClicked() {
-        // TODO impl
-        view.setEnableSaveChangesButton(false);
+        view.getEditableContent(content -> {
+            if (isEdited(content)) {
+                saveContent(content);
+            }
+        });
     }
 
     @Override
     public void onNextDiffClicked() {
-        currentItemIndex++;
-        updateDiff();
+        view.getEditableContent(content -> {
+            if (isEdited(content)) {
+                saveContent(content);
+            }
+
+            currentItemIndex++;
+            updateDiff();
+        });
     }
 
     @Override
     public void onPreviousDiffClicked() {
-        currentItemIndex--;
-        updateDiff();
+        view.getEditableContent(content -> {
+            if (isEdited(content)) {
+                saveContent(content);
+            }
+
+            currentItemIndex--;
+            updateDiff();
+        });
     }
 
     /** Updates diff window with diff for current item. */
     private void updateDiff() {
-        // TODO check for changes and show dialog
-        showCompareForCurrentFile();
-
         view.setEnableNextDiffButton(currentItemIndex != (changedItems.getFilesQuantity() - 1));
         view.setEnablePreviousDiffButton(currentItemIndex != 0);
+
+        showCompareForCurrentFile();
     }
 
     private void showCompare(final String remoteContent) {
@@ -303,6 +309,29 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         if (currentItemIndex == -1) {
             currentItemIndex = 0;
         }
+    }
+
+    /** @return true if user edited content in the compare widget i.e. initial and current isn't equal. */
+    private boolean isEdited(String newContent) {
+        return compareWithLatest && this.localContent != null && !newContent.equals(localContent);
+    }
+
+    /** Saves given contents into file under edit. */
+    private void saveContent(String content) {
+        comparedFile.updateContent(content)
+                    .then(ignored -> {
+                        final Container parent = comparedFile.getParent();
+
+                        if (parent != null) {
+                            parent.synchronize();
+                        }
+
+                        eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getLocation()
+                                                                                  .toString()));
+                    })
+                    .catchError(error -> {
+                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                    });
     }
 
 }
