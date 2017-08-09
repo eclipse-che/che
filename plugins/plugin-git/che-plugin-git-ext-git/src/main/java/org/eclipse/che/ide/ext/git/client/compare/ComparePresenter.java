@@ -146,9 +146,9 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                     .then(file -> {
                         if (file.isPresent()) {
                             if (compareWithLatest) {
-                                showCompareBetweenRevisionsForFile(file.get(), changedItems.getStatusByIndex(currentItemIndex));
-                            } else {
                                 showCompareWithLatestForFile(file.get(), changedItems.getStatusByIndex(currentItemIndex));
+                            } else {
+                                showCompareBetweenRevisionsForFile(file.get(), changedItems.getStatusByIndex(currentItemIndex));
                             }
                         }
                     }).catchError(error -> {
