@@ -31,7 +31,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Strings.nullToEmpty;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_POD_NAME_LABEL;
 
 /**
@@ -117,15 +116,19 @@ public class ServerExposer {
 
         openShiftEnvironment.getServices().put(service.getMetadata().getName(), service);
 
-        for (Map.Entry<String, ? extends ServerConfig> serverEntry : servers.entrySet()) {
-            String serverName = serverEntry.getKey();
-            ServerConfig serverConfig = serverEntry.getValue();
-            ServicePort servicePort = portToServicePort.get(serverConfig.getPort());
 
-            //TODO 1 route for 1 service port could be enough. Implement it in scope of //TODO https://github.com/eclipse/che/issues/5688
-            Route route = new RouteBuilder().withName(namePrefix + "-" + machineName + "-" + serverName)
+        for (ServicePort servicePort : portToServicePort.values()) {
+            Map<String, ? extends ServerConfig> routesServers = servers.entrySet()
+                                                                       .stream()
+                                                                       .filter(e -> {
+                                                                           String port = e.getValue().getPort();
+                                                                           return Integer.parseInt(port.split("/")[0]) == servicePort.getTargetPort().getIntVal();
+                                                                       })
+                                                                       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            Route route = new RouteBuilder().withName(namePrefix + "-" + machineName + "-" + servicePort.getName())
                                             .withTargetPort(servicePort.getName())
-                                            .withServer(serverName, serverConfig)
+                                            .withServers(routesServers)
                                             .withTo(service.getMetadata().getName())
                                             .build();
             openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
@@ -190,22 +193,23 @@ public class ServerExposer {
         private Service build() {
             io.fabric8.kubernetes.api.model.ServiceBuilder builder = new io.fabric8.kubernetes.api.model.ServiceBuilder();
             return builder.withNewMetadata()
-                              .withName(name.replace("/", "-"))
+                          .withName(name.replace("/", "-"))
                           .endMetadata()
                           .withNewSpec()
-                              .withSelector(selector)
-                              .withPorts(ports)
+                          .withSelector(selector)
+                          .withPorts(ports)
                           .endSpec()
                           .build();
         }
     }
 
     private static class RouteBuilder {
-        private String       name;
-        private String       serviceName;
-        private IntOrString  targetPort;
-        private String       serverName;
-        private ServerConfig serverConfig;
+        private String                    name;
+        private String                    serviceName;
+        private IntOrString               targetPort;
+        private String                    serverName;
+        private ServerConfig              serverConfig;
+        private Map<String, ? extends ServerConfig> serversConfigs;
 
         private RouteBuilder withName(String name) {
             this.name = name;
@@ -233,24 +237,27 @@ public class ServerExposer {
             return this;
         }
 
+        private RouteBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
+            this.serversConfigs = serversConfigs;
+            return this;
+        }
+
         private Route build() {
             io.fabric8.openshift.api.model.RouteBuilder builder = new io.fabric8.openshift.api.model.RouteBuilder();
-            HashMap<String, String> annotations = new HashMap<>();
-            annotations.put(Constants.CHE_SERVER_NAME_ANNOTATION, serverName);
-            annotations.put(Constants.CHE_SERVER_PROTOCOL_ANNOTATION, serverConfig.getProtocol());
-            annotations.put(Constants.CHE_SERVER_PATH_ANNOTATION, nullToEmpty(serverConfig.getPath()));
 
             return builder.withNewMetadata()
-                              .withName(name.replace("/", "-"))
-                              .withAnnotations(annotations)
+                          .withName(name.replace("/", "-"))
+                          .withAnnotations(RoutesAnnotations.newSerializer()
+                                                            .servers(serversConfigs)
+                                                            .annotations())
                           .endMetadata()
                           .withNewSpec()
-                              .withNewTo()
-                                  .withName(serviceName)
-                              .endTo()
-                              .withNewPort()
-                                  .withTargetPort(targetPort)
-                              .endPort()
+                          .withNewTo()
+                          .withName(serviceName)
+                          .endTo()
+                          .withNewPort()
+                          .withTargetPort(targetPort)
+                          .endPort()
                           .endSpec()
                           .build();
         }
