@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.vcs.ShowVcsBranchActionProvider;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
@@ -42,7 +41,7 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class BranchPresenter implements BranchView.ActionDelegate, ShowVcsBranchActionProvider {
+public class BranchPresenter implements BranchView.ActionDelegate {
 
     private static final String BRANCH_RENAME_COMMAND_NAME   = "Git rename branch";
     private static final String BRANCH_DELETE_COMMAND_NAME   = "Git delete branch";
@@ -274,15 +273,5 @@ public class BranchPresenter implements BranchView.ActionDelegate, ShowVcsBranch
         for (String line : lines) {
             console.printError(line);
         }
-    }
-
-    @Override
-    public String getVcsName() {
-        return "git";
-    }
-
-    @Override
-    public void show(Project project) {
-        showBranches(project);
     }
 }

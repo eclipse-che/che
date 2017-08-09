@@ -15,8 +15,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -38,7 +36,6 @@ import org.eclipse.che.ide.api.parts.base.ToolButton;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resources.tree.ContainerNode;
@@ -360,15 +357,10 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                     String head = container.getProject().getAttribute("git.current.head.name");
                     if (head != null) {
                         Element nodeContainer = element.getFirstChildElement();
-                        Element link = new Anchor("(" + head + ")").getElement();
-                        link.getStyle().setColor(Style.getOutputLinkColor());
                         DivElement divElement = Document.get().createDivElement();
-                        divElement.setClassName(treeStyles.styles().vcsHeadLinkContainer());
-                        divElement.appendChild(link);
+                        divElement.setInnerText("(" + head + ")");
+                        divElement.setClassName(treeStyles.styles().presentableTextContainer());
                         nodeContainer.insertBefore(divElement, nodeContainer.getLastChild());
-                        //Add head link click handler.
-                        Event.sinkEvents(link, Event.ONCLICK);
-                        Event.setEventListener(link, event -> delegate.onVcsBranchClicked((Project)container));
                     }
                 }
             }

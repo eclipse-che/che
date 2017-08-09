@@ -18,11 +18,9 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.api.vcs.ShowVcsBranchActionProvider;
 import org.eclipse.che.ide.ext.git.client.GitCheckoutHandler;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
-import org.eclipse.che.ide.ext.git.client.branch.BranchPresenter;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
 import org.eclipse.che.ide.ext.git.client.branch.BranchViewImpl;
 import org.eclipse.che.ide.ext.git.client.commit.CommitView;
@@ -72,7 +70,6 @@ public class GitGinModule extends AbstractGinModule {
     protected void configure() {
         GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class).addBinding().to(GitImportWizardRegistrar.class);
         GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class).addBinding().to(CommitterPreferencePresenter.class);
-        GinMultibinder.newSetBinder(binder(), ShowVcsBranchActionProvider.class).addBinding().to(BranchPresenter.class);
 
         bind(AddToIndexView.class).to(AddToIndexViewImpl.class).in(Singleton.class);
         bind(ResetToCommitView.class).to(ResetToCommitViewImpl.class).in(Singleton.class);

@@ -13,7 +13,6 @@ package org.eclipse.che.ide.part.explorer.project;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 
 import java.util.List;
@@ -101,6 +100,5 @@ public interface ProjectExplorerView extends View<ProjectExplorerView.ActionDele
     Tree getTree();
 
     interface ActionDelegate extends BaseActionDelegate {
-        void onVcsBranchClicked(Project project);
     }
 }
