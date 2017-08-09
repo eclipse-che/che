@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.resource.Path;
@@ -150,13 +151,8 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
                        dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
                                                          locale.compareMessageIdenticalContentText(), null).show();
                    } else {
-                       appContext.getRootProject().getFile(diff.substring(2)).then(file -> {
-                           if (file.isPresent()) {
-                               comparePresenter.showCompareWithLatest(file.get(), defineStatus(diff.substring(0, 1)),
-                                                                      selectedRevision.getId());
-                           }
-                       });
-
+                       ChangedItems changedItems = new ChangedItems(project, diff);
+                       comparePresenter.showCompareWithLatest(changedItems, null, selectedRevision.getId());
                    }
                })
                .catchError(arg -> {

@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
@@ -124,21 +125,11 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                        dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
                                                          locale.compareMessageIdenticalContentText(), null).show();
                    } else {
-                       final String[] changedFiles = diff.split("\n");
-                       if (changedFiles.length == 1) {
-                           project.getFile(changedFiles[0].substring(2)).then(file -> {
-                               if (file.isPresent()) {
-                                   comparePresenter.showCompareWithLatest(file.get(),
-                                                                          defineStatus(changedFiles[0].substring(0, 1)),
-                                                                          selectedBranch.getName());
-                               }
-                           });
+                       ChangedItems changedItems = new ChangedItems(project, diff);
+                       if (changedItems.getFilesQuantity() == 1) {
+                           comparePresenter.showCompareWithLatest(changedItems, null, selectedBranch.getName());
                        } else {
-                           Map<String, Status> items = new HashMap<>();
-                           for (String item : changedFiles) {
-                               items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
-                           }
-                           changesListPresenter.show(items, selectedBranch.getName(), null, project);
+                           changesListPresenter.show(changedItems, selectedBranch.getName(), null);
                        }
                    }
                })

@@ -18,10 +18,10 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
+import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.resource.Path;
@@ -35,13 +35,11 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.MODIFIED;
 import static org.eclipse.che.ide.resource.Path.EMPTY;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -139,6 +137,9 @@ public class HistoryPresenterTest extends BaseTest {
 
     @Test
     public void shouldShowCompareWhenOneFileChangedInCurrentRevision() throws Exception {
+        final String diff = "M file";
+        final ChangedItems changedItems = new ChangedItems(project, diff);
+
         Revision parentRevision = mock(Revision.class);
         Revision selectedRevision = mock(Revision.class);
         when(parentRevision.getId()).thenReturn("commitA");
@@ -155,13 +156,16 @@ public class HistoryPresenterTest extends BaseTest {
         logCaptor.getValue().apply(logResponse);
         presenter.onCompareClicked();
         verify(stringPromise).then(stringCaptor.capture());
-        stringCaptor.getValue().apply("M file");
+        stringCaptor.getValue().apply(diff);
 
-        verify(comparePresenter).showCompareBetweenRevisions(eq(Path.valueOf("file")), eq(MODIFIED), eq("commitA"), eq("commitB"));
+        verify(comparePresenter).showCompareBetweenRevisions(eq(changedItems), anyString(), eq("commitA"), eq("commitB"));
     }
 
     @Test
     public void shouldShowChangedListWhenSeveralFilesChangedInSelectedRevision() throws Exception {
+        final String diff = "M file1\nM file2";
+        final ChangedItems changedItems = new ChangedItems(project, diff);
+
         Revision revisionA = mock(Revision.class);
         Revision revisionB = mock(Revision.class);
         when(revisionA.getId()).thenReturn("commitA");
@@ -178,9 +182,9 @@ public class HistoryPresenterTest extends BaseTest {
         logCaptor.getValue().apply(logResponse);
         presenter.onCompareClicked();
         verify(stringPromise).then(stringCaptor.capture());
-        stringCaptor.getValue().apply("M file1\nM file2");
+        stringCaptor.getValue().apply(diff);
 
-        verify(changesListPresenter).show(anyMap(), eq("commitB"), eq("commitA"), any(Project.class));
+        verify(changesListPresenter).show(eq(changedItems), eq("commitB"), eq("commitA"));
     }
 
     @Test

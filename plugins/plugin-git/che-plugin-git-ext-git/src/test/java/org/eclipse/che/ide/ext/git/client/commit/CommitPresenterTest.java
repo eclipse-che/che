@@ -26,6 +26,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
+import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
@@ -143,6 +144,9 @@ public class CommitPresenterTest extends BaseTest {
 
     @Test
     public void shouldShowDialog() throws Exception {
+        final String diff = "M file";
+        final ChangedItems changedItems = new ChangedItems(project, diff);
+
         ConfirmDialog dialog = mock(ConfirmDialog.class);
         when(dialogFactory.createConfirmDialog(anyString(),
                                                anyString(),
@@ -159,7 +163,7 @@ public class CommitPresenterTest extends BaseTest {
 
         verify(view).setEnableAmendCheckBox(true);
         verify(view).setEnablePushAfterCommitCheckBox(true);
-        verify(changesPanelPresenter).show(eq(singletonMap("file", MODIFIED)));
+        verify(changesPanelPresenter).show(eq(changedItems));
         verify(view).focusInMessageField();
         verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
         verify(view).getMessage();
@@ -169,6 +173,9 @@ public class CommitPresenterTest extends BaseTest {
 
     @Test
     public void shouldShowUntrackedFilesOnInitialCommit() throws Exception {
+        final String diff = "A file";
+        final ChangedItems changedItems = new ChangedItems(project, diff);
+
         PromiseError error = mock(PromiseError.class);
         ServerException exception = mock(ServerException.class);
         when(exception.getErrorCode()).thenReturn(ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED);
@@ -186,7 +193,7 @@ public class CommitPresenterTest extends BaseTest {
 
         verify(view).setEnableAmendCheckBox(false);
         verify(view).setEnablePushAfterCommitCheckBox(false);
-        verify(changesPanelPresenter).show(eq(singletonMap("file", ADDED)));
+        verify(changesPanelPresenter).show(eq(changedItems));
         verify(view).focusInMessageField();
         verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
         verify(view).getMessage();

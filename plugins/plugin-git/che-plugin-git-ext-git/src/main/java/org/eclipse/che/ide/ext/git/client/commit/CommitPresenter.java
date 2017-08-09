@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
@@ -76,7 +77,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     private final ProcessesPanelPresenter consolesPanelPresenter;
 
     private Project      project;
-    private Set<String>  allFiles;
+    private List<String> allFiles;
     private List<String> filesToCommit;
 
     @Inject
@@ -165,24 +166,16 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     }
 
     private void show(@Nullable String diff) {
-        Map<String, Status> files = toFileStatusMap(diff);
+        ChangedItems changedItems = new ChangedItems(project, diff);
         filesToCommit.clear();
-        allFiles = files.keySet();
+        allFiles = changedItems.getChangedItemsList();
 
         view.setEnableCommitButton(!view.getMessage().isEmpty());
         view.focusInMessageField();
         view.showDialog();
-        changesPanelPresenter.show(files);
+        changesPanelPresenter.show(changedItems);
         view.setMarkedCheckBoxes(stream(appContext.getResources()).map(resource -> resource.getLocation().removeFirstSegments(1))
                                                                   .collect(Collectors.toSet()));
-    }
-
-    private Map<String, Status> toFileStatusMap(@Nullable String diff) {
-        Map<String, Status> items = new HashMap<>();
-        if (!isNullOrEmpty(diff)) {
-            stream(diff.split("\n")).forEach(item -> items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1))));
-        }
-        return items;
     }
 
     @Override
@@ -279,7 +272,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     }
 
     @Override
-    public Set<String> getChangedFiles() {
+    public List<String> getChangedFiles() {
         return allFiles;
     }
 

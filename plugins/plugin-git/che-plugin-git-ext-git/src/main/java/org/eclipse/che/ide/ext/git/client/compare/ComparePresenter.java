@@ -138,6 +138,9 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      * Type of comparison to show depends on {@code compareWithLatest} field.
      */
     private void showCompareForCurrentFile() {
+        view.setEnableNextDiffButton(currentItemIndex != (changedItems.getFilesQuantity() - 1));
+        view.setEnablePreviousDiffButton(currentItemIndex != 0);
+
         changedItems.getProject()
                     .getFile(changedItems.getItemByIndex(currentItemIndex))
                     .then(file -> {
@@ -264,7 +267,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             }
 
             currentItemIndex++;
-            updateDiff();
+            showCompareForCurrentFile();
         });
     }
 
@@ -276,16 +279,8 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             }
 
             currentItemIndex--;
-            updateDiff();
+            showCompareForCurrentFile();
         });
-    }
-
-    /** Updates diff window with diff for current item. */
-    private void updateDiff() {
-        view.setEnableNextDiffButton(currentItemIndex != (changedItems.getFilesQuantity() - 1));
-        view.setEnablePreviousDiffButton(currentItemIndex != 0);
-
-        showCompareForCurrentFile();
     }
 
     private void showCompare(final String remoteContent) {
