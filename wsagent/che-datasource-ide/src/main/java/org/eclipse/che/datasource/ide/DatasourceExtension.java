@@ -11,12 +11,13 @@
 package org.eclipse.che.datasource.ide;
 
 import com.google.inject.Inject;
+
+import org.eclipse.che.datasource.ide.newDatasource.NewDatasourceWizardAction;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
-import org.eclipse.che.datasource.ide.action.HelloWorldAction;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_HELP;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
@@ -30,32 +31,26 @@ public class DatasourceExtension {
      *
      * @param actionManager
      *         the {@link ActionManager} that is used to register our actions
-     * @param helloWorldAction
-     *         hello world action
+     * @param newDatasourceWizardAction
+     *         new datasource wizard action
      */
     @Inject
     public DatasourceExtension(
             ActionManager actionManager,
-            HelloWorldAction helloWorldAction) {
+            NewDatasourceWizardAction newDatasourceWizardAction) {
 
-        actionManager.registerAction("helloWorldAction", helloWorldAction);
-        DefaultActionGroup sampleGroup = new DefaultActionGroup("Sample actions", true, actionManager);
+        actionManager.registerAction("New Datasource", newDatasourceWizardAction);
+        DefaultActionGroup datasourceGroup = new DefaultActionGroup("Datasource", true, actionManager);
 
-        sampleGroup.add(helloWorldAction);
+        datasourceGroup.add(newDatasourceWizardAction);
 
-        // contribute sample group to main menu
         DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
-        mainMenu.add(sampleGroup, new Constraints(AFTER, GROUP_HELP));
+        mainMenu.add(datasourceGroup, new Constraints(AFTER, GROUP_HELP));
 
-        // add the HelloWorldAction to the beginning of the toolbar
-        DefaultActionGroup toolbar = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_CENTER_TOOLBAR);
-        toolbar.add(helloWorldAction, Constraints.FIRST);
 
         // add HelloWorldAction to context menu as last entry
         DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction("resourceOperation");
-        mainContextMenuGroup.add(helloWorldAction, Constraints.LAST);
+        mainContextMenuGroup.add(newDatasourceWizardAction, Constraints.LAST);
 
-        // add HelloWorldAction after help menu entry
-        mainContextMenuGroup.add(helloWorldAction, Constraints.LAST);
     }
 }

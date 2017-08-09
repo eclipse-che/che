@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2017 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+			 xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+	<ui:with field='res' type='org.eclipse.che.ide.Resources' />
+	<ui:with field='locale' type='org.eclipse.che.ide.CoreLocalizationConstant' />
+	<ui:with field='localeDatasource'
+			 type='org.eclipse.che.datasource.ide.newDatasource.NewDatasourceWizardMessages' />
+	<ui:style
+			type="org.eclipse.che.datasource.ide.newDatasource.view.NewDatasourceWizardHeadViewImpl.Style">
+
+		.blueButton {
+			background: linear-gradient(to bottom, #497bae 0, #497bae 1px, #3a68a2 1px, #3a68a2
+			100%);
+			border-radius: 2px;
+			margin-top: 4px;
+			position: absolute;
+			right: 10px;
+		}
+
+		.borderPanelLeft, .borderPanelRight {
+			background-color: #484848;
+			position: absolute;
+			/*border-style:solid;
+            border-color:#ff0000 #0000ff;*/
+		}
+
+		.borderPanelLeft {
+			box-shadow: 1px 0px 0 0 #505050;
+			top: 0;
+			left: 0;
+			bottom: 0;
+		}
+
+		.borderPanelRight {
+			box-shadow: -1px 0px 0 0 #505050;
+			top: 0;
+			right: 0;
+			bottom: 0;
+		}
+
+		.centerPanel {
+			position: relative;
+			box-shadow: 0 -1px 0 0 #232323;
+		}
+
+		.datasource {
+			margin-top: 4px;
+			margin-left: 5px;
+		}
+
+		.datasourceNamePosition {
+			position: relative;
+			line-height: 29px;
+			margin-left: 9px;
+			font-weight: 700;
+			float: left;
+			font-size: 12px;
+		}
+
+		.disabled {
+			opacity: 0.4;
+		}
+
+		.hard1{
+			border-style:solid;
+			border-color:#ff0000 #0000ff;
+		}
+		.hard2{
+			border-style:solid;
+			border-color:#222222 #222222;
+		}
+
+		.inputError {
+			border-color: red;
+			box-shadow: 0 0 5px red;
+		}
+
+		.namePanel,.namePanelRight {
+			border-right: 1px solid #232323;
+			box-shadow: 1px 0px 0px 0px rgba(188, 195, 199, 0.5);
+			position: relative;
+			top: -1px;
+			overflow: hidden;
+			display: inline-block;
+		}
+
+		.namePanelRight {
+			border-right: none;
+			box-shadow: 0px 0px 0 0 rgba(188, 195, 199, 0.5);
+		}
+
+		.projectNamePosition {
+			position: relative;
+			line-height: 29px;
+			margin-left: 9px;
+			font-weight: 700;
+			float: left;
+			font-size: 12px;
+		}
+
+		.project {
+			/*margin-right: 8px;*/
+			margin-top: 3px;
+			margin-left: 5px;
+		}
+
+		.rootPanel {
+			position: relative;
+			top: -2px;
+		}
+
+		.topPanel {
+			margin-top: -1px;
+			border-top: 1px solid rgba(188, 195, 199, 0.5);
+			box-shadow: 0 -1px 0 0 #232323;
+			z-index: 4;
+			background-color: #656565;
+		}
+
+		.tab {
+			left: 26px;
+			top: 0px;
+			right: 26px;
+			bottom: 0px;
+			position: absolute !important;
+		}
+
+	</ui:style>
+	<g:FlowPanel width="774px" height="530px" addStyleNames="{style.rootPanel}">
+
+		<g:FlowPanel width="774px" height="29px" addStyleNames="{style.topPanel}">
+			<g:FlowPanel width="360px" height="29px" addStyleNames="{style.namePanel}">
+				<g:Label text="{localeDatasource.datasourceOnlyName}"
+						 addStyleNames="{style.projectNamePosition}" />
+				<g:TextBox width="280px" height="16px" ui:field="datasourceName"
+						   addStyleNames="{style.project}" />
+			</g:FlowPanel>
+			<g:FlowPanel width="410px" height="29px" addStyleNames="{style.namePanelRight}">
+				<g:Button ui:field="saveButton" text="SAVE" addStyleNames="{style.blueButton}" />
+			</g:FlowPanel>
+		</g:FlowPanel>
+
+		<g:DockLayoutPanel width="774px" height="501px" unit="PCT" addStyleNames="{style.centerPanel}">
+			<g:west size="3">
+				<g:SimplePanel addStyleNames="{style.borderPanelLeft}"/>
+			</g:west>
+			<g:center>
+				<g:DockLayoutPanel unit="PCT">
+					<g:west size="50">
+						<g:SimplePanel ui:field="datasourcesPanel"/> <!-- addStyleNames="{style.hard1}" -->
+					</g:west>
+					<g:east size="50">
+						<g:SimplePanel ui:field="settingsPanel"/> <!-- addStyleNames="{style.hard2}" -->
+					</g:east>
+				</g:DockLayoutPanel>
+			</g:center>
+			<g:east size="3">
+				<g:SimplePanel addStyleNames="{style.borderPanelRight}"/>
+			</g:east>
+		</g:DockLayoutPanel>
+
+	</g:FlowPanel>
+</ui:UiBinder>

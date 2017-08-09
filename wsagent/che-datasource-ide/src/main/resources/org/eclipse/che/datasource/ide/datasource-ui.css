@@ -1,0 +1,274 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+.formField-Label {
+    color: mainFontColor;
+    font-family: mainFontFamily;
+    font-size: boxFontSize;
+    font-weight: normal;
+    text-shadow: boxTextShadow;
+}
+
+.explorer-datasourceList {
+    width: literal("calc(100% - 2px)");
+    margin-top: 5px;
+    margin-right: 0px;
+    margin-bottom: 5px;
+    margin-left: 2px;
+}
+
+.explorer-refreshButton {
+    width: 23px;
+    height: 23px;
+    margin-top: 5px;
+    margin-right: 0;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    padding: 0px;
+}
+
+.explorer-refreshButton > svg {
+    width: 19px;
+    height: 19px;
+    fill: #dbdbdb;
+    margin: 2px;
+}
+
+.explorer-refreshButton-up {
+}
+
+.explorer-refreshButton-down {
+}
+
+.explorer-refreshButton-up-hover {
+}
+
+.explorer-refreshButton-down-hover {
+}
+
+.explorer-topPanel {
+    background-color: activeTabBackground;
+    border-bottom: 1px;
+    height: 35px;
+}
+
+.requestLauncher-editorBar {
+    background: activeTabBackground;
+    box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.3);
+}
+
+.requestLauncher-listBox {
+    height: 25px;
+    margin-top: 5px;
+    margin-left: 2px;
+    margin-bottom: 5px;
+    margin-right: 2px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 0;
+    padding-bottom: 0;
+    float: right;
+}
+.requestLauncher-executionModeListBox {
+}
+
+.requestLauncher-datasourceListBox {
+}
+
+.requestLauncher-textBox {
+    height: 25px;
+    margin: 2px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: right;
+    float: right;
+    padding-top: 0;
+    padding-bottom: 0;
+    box-sizing: border-box; /* to stay cohesive with the listbox */
+}
+.resultHeader-clear-button {
+    cursor: pointer;
+}
+.requestLauncher-resultLimitInput {
+}
+
+.requestLauncher-executeButton {
+    color: notableButtonTopColor;
+    background: none repeat scroll 0% 0% notableButtonColor;
+    border-color: brColor;
+    font-size: boxFontSize;
+    font-weight: bold;
+    padding-left: 12px;
+    padding-right: 12px;
+    height: 25px;
+    margin: 5px;
+
+    box-shadow: 0px 1px 1px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 1px 0px rgba(0, 0, 0, 0.29);
+}
+
+.datasourceWizard-testConnection {
+    color: notableButtonTopColor;
+    background: none repeat scroll 0% 0% notableButtonColor;
+    border-color: brColor;
+    font-size: boxFontSize;
+    font-weight: bold;
+    padding-left: 12px;
+    padding-right: 12px;
+    height: 25px;
+    margin: 5px;
+
+    box-shadow: 0px 1px 1px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 1px 0px rgba(0, 0, 0, 0.29);
+}
+
+.datasourceWizard-testConnection-ok, .datasourceWizard-testConnection-ok:hover {
+    color: notableButtonTopColor;
+    background: none repeat scroll 0% 0% #51a351;
+    border-color: brColor;
+    font-size: boxFontSize;
+    font-weight: bold;
+    padding-left: 12px;
+    padding-right: 12px;
+    height: 25px;
+    margin: 5px;
+
+    box-shadow: 0px 1px 1px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 1px 0px rgba(0, 0, 0, 0.29);
+}
+
+.datasourceWizard-testConnection-ko, .datasourceWizard-testConnection-ko:hover {
+    color: notableButtonTopColor;
+    background: none repeat scroll 0% 0% #bd362f;
+    border-color: brColor;
+    font-size: boxFontSize;
+    font-weight: bold;
+    padding-left: 12px;
+    padding-right: 12px;
+    height: 25px;
+    margin: 5px;
+
+    box-shadow: 0px 1px 1px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 1px 0px rgba(0, 0, 0, 0.29);
+}
+
+.requestLauncher-label {
+    height: 20px;
+    margin-right: 4px;
+    margin-left: 25px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    float: right;
+}
+
+.requestLauncher-executionModeLabel {
+}
+
+.requestLauncher-resultLimitLabel {
+}
+
+.requestLauncher-selectDatasourceLabel {
+}
+
+.resultItemHeader-queryReminder {
+  font-weight: normal;
+  font-size: boxFontSize;
+  font-family: editorFontFamily;
+  text-shadow: boxTextShadow;
+  color: boxTextColor;
+
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding-right: 2em;
+  white-space: nowrap;
+  width: 50em;
+  line-height: 2em;
+}
+
+.resultItemHeader-csvButton {
+  font-weight: bold;
+  font-size: boxFontSize;
+  text-shadow: boxTextShadow;
+
+  padding-left: 0.8em;
+  padding-right: 0.8em;
+  height: 1.6em;
+}
+
+.resultItemHeader-csvLink {
+  font-weight: normal;
+  font-size: fontSize;
+  font-family: mainFontFamily;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 2em;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.resultZoneHeader-bar {
+  height: 18px;
+  box-shadow: boxInnerShadow, boxOuterShadow;
+}
+.resultZoneHeader-text {
+  font-weight: bold;
+  font-size: boxFontSize;
+  text-shadow: boxTextShadow;
+  color: boxTextColor;
+}
+
+.resultZoneOutput {
+  background-color: activeTabBackground;
+}
+
+.resultItemHeader-bar {
+  height: 2em;
+}
+
+.resultItem {
+  background-color: cellEvenRow;
+  border: 1px solid boxBorderColor;
+  margin-bottom: 4px;
+}
+
+.propertiesTable-firstColumn {
+  font-weight: bold;
+  color: #888888;
+}
+
+.propertiesPanel-background {
+  background-color: cellEvenRow;
+  width: 100%;
+  height: 100%;
+}
+
+.editDatasourceList-datasourceTypeStyle {
+  overflow: hidden;
+  font-family: mainFontFamily;
+  font-size: secondaryTextFontSize;
+  text-shadow: 0px 1px 0px rgba(46, 46, 46, 0.5);
+  border: none;
+  font-weight: normal;
+  color: mainFontColor;
+}
+
+.editDatasourceList-datasourceIdStyle {
+  overflow: hidden;
+  font-family: mainFontFamily;
+  font-size: secondaryTextFontSize;
+  text-shadow: 0px 1px 0px rgba(46, 46, 46, 0.5);
+  border: none;
+  font-weight: normal;
+  color: mainFontColor;
+}
+
+.editDatasourceList-datasourceIdCellStyle {
+  width: 12em;
+}
+
+.editDatasourceList-datasourceTypeCellStyle {
+  width: 10em;
+}
