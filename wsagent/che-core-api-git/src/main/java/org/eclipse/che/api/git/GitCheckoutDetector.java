@@ -120,7 +120,7 @@ public class GitCheckoutDetector {
                 String name = type == REVISION ? content : PATTERN.split(content)[1];
 
                 //Update project attributes with new git values
-                projectRegistry.setProjectType(it.split("/")[1], GitProjectType.TYPE_ID, false);
+                projectRegistry.setProjectType(it.split("/")[1], GitProjectType.TYPE_ID, true);
 
                 endpointIds.forEach(transmitConsumer(type, name));
 

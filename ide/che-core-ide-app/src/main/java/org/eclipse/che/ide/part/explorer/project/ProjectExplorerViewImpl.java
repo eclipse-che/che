@@ -359,7 +359,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                         Element nodeContainer = element.getFirstChildElement();
                         DivElement divElement = Document.get().createDivElement();
                         divElement.setInnerText("(" + head + ")");
-                        divElement.setClassName(treeStyles.styles().presentableTextContainer());
+                        divElement.setClassName(treeStyles.styles().vcsHeadContainer());
                         nodeContainer.insertBefore(divElement, nodeContainer.getLastChild());
                     }
                 }
