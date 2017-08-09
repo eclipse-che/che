@@ -20,6 +20,14 @@ import static java.lang.String.format;
 import static java.util.regex.Pattern.compile;
 
 /**
+ * Version format:
+ * {MajorVersion}.{MinorVersion}.{BugFixVersion}.{HotFixVersion}-M{MilestoneVersion}-beta-{BetaVersion}-RC-SNAPSHOT.
+ * </p>
+ * Mandatory parts are only major, minor and bug fix versions.
+ *
+ * @see #toString()
+ * @see #VERSION
+ *
  * @author Anatoliy Bazko
  */
 public class Version implements Comparable<Version> {
@@ -69,7 +77,7 @@ public class Version implements Comparable<Version> {
      */
     public static void validate(@NotNull String version) {
         if (!VERSION.matcher(version).matches()) {
-            throw new IllegalArgumentException(format("Illegal version '%s'", version));
+            throw new IllegalArgumentException(format("Illegal version '%s' format.", version));
         }
     }
 
@@ -82,7 +90,7 @@ public class Version implements Comparable<Version> {
     public static Version parse(@NotNull String version) throws IllegalArgumentException {
         Matcher matcher = VERSION.matcher(version);
         if (!matcher.find()) {
-            throw new IllegalArgumentException(format("Illegal version '%s'", version));
+            throw new IllegalArgumentException(format("Illegal version '%s' format.", version));
         }
 
         int hotFix = 0;
@@ -123,47 +131,19 @@ public class Version implements Comparable<Version> {
         return pattern.matcher(toString()).matches();
     }
 
-    public boolean isSnapshot() {
-        return snapshot;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Version)) {
-            return false;
-        }
-
+        if (this == o) return true;
+        if (!(o instanceof Version)) return false;
         Version version = (Version)o;
-
-        if (bugFix != version.bugFix) {
-            return false;
-        }
-        if (hotFix != version.hotFix) {
-            return false;
-        }
-        if (major != version.major) {
-            return false;
-        }
-        if (milestone != version.milestone) {
-            return false;
-        }
-        if (beta != version.beta) {
-            return false;
-        }
-        if (minor != version.minor) {
-            return false;
-        }
-        if (rc != version.rc) {
-            return false;
-        }
-        if (snapshot != version.snapshot) {
-            return false;
-        }
-
-        return true;
+        return major == version.major &&
+               minor == version.minor &&
+               bugFix == version.bugFix &&
+               hotFix == version.hotFix &&
+               milestone == version.milestone &&
+               beta == version.beta &&
+               snapshot == version.snapshot &&
+               rc == version.rc;
     }
 
     @Override
@@ -181,25 +161,67 @@ public class Version implements Comparable<Version> {
 
     @Override
     public int compareTo(Version o) {
-        if (major > o.major
-            || (major == o.major && minor > o.minor)
-            || (major == o.major && minor == o.minor && bugFix > o.bugFix)
-            || (major == o.major && minor == o.minor && bugFix == o.bugFix && hotFix > o.hotFix)
-            || (major == o.major && minor == o.minor && bugFix == o.bugFix && hotFix == o.hotFix
-                && (milestone == 0 && o.milestone != 0 || milestone != 0 && o.milestone != 0 && milestone > o.milestone))
-            || (major == o.major && minor == o.minor && bugFix == o.bugFix && hotFix == o.hotFix && milestone == o.milestone
-                && (beta == 0 && o.beta != 0 || beta != 0 && o.beta != 0 && beta > o.beta))
-            || (major == o.major && minor == o.minor && bugFix == o.bugFix && hotFix == o.hotFix && milestone == o.milestone
-                && beta == o.beta && !rc && o.rc)
-            || (major == o.major && minor == o.minor && bugFix == o.bugFix && hotFix == o.hotFix && milestone == o.milestone
-                && beta == o.beta && rc == o.rc && !snapshot && o.snapshot)) {
+        if (major > o.major) {
             return 1;
-        } else if (major == o.major && minor == o.minor && bugFix == o.bugFix && hotFix == o.hotFix
-                   && milestone == o.milestone && beta == o.beta && rc == o.rc && snapshot == o.snapshot) {
-            return 0;
-        } else {
+        } else if (major < o.major) {
             return -1;
         }
+
+        if (minor > o.minor) {
+            return 1;
+        } else if (minor < o.minor) {
+            return -1;
+        }
+
+        if (bugFix > o.bugFix) {
+            return 1;
+        } else if (bugFix < o.bugFix) {
+            return -1;
+        }
+
+        if (hotFix > o.hotFix) {
+            return 1;
+        } else if (hotFix < o.hotFix) {
+            return -1;
+        }
+
+        // existence milestone version is considered lower in comparision with its absence
+        if (milestone == 0 && o.milestone != 0) {
+            return 1;
+        } else if (milestone != 0 && o.milestone == 0) {
+            return -1;
+        } else if (milestone > o.milestone) {
+            return 1;
+        } else if (milestone < o.milestone) {
+            return -1;
+        }
+
+        // existence beta version is considered lower in comparision with its absence
+        if (beta == 0 && o.beta != 0) {
+            return 1;
+        } else if (beta != 0 && o.beta == 0) {
+            return -1;
+        } else if (beta > o.beta) {
+            return 1;
+        } else if (beta < o.beta) {
+            return -1;
+        }
+
+        // existence RC mark is considered lower in comparision with its absence
+        if (!rc && o.rc) {
+            return 1;
+        } else if (rc && !o.rc) {
+            return -1;
+        }
+
+        // existence SNAPSHOT mark is considered lower in comparision with its absence
+        if (!snapshot && o.snapshot) {
+            return 1;
+        } else if (snapshot && !o.snapshot) {
+            return -1;
+        }
+
+        return 0;
     }
 
     @Override
