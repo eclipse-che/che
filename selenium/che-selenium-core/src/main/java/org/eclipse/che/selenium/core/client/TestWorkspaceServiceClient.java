@@ -23,8 +23,8 @@ import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.selenium.core.TestHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestHttpJsonRequestFactoryForUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -291,7 +291,7 @@ public class TestWorkspaceServiceClient {
      */
     public TestWorkspaceServiceClient getInstance(String authToken) {
             return new TestWorkspaceServiceClient(apiEndpointProvider,
-                                                  new TestHttpJsonRequestFactory(authToken),
+                                                  new TestHttpJsonRequestFactoryForUser(authToken),
                                                   testUserNamespaceResolver);
     }
 

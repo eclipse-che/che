@@ -8,39 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.selenium.core;
-
-import com.google.common.base.MoreObjects;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+package org.eclipse.che.selenium.core.requestfactory;
 
 import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 
 import javax.validation.constraints.NotNull;
-import java.util.Objects;
 
 /**
  * @author Dmytro Nochevnov
  */
-@Singleton
-public class TestHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
-    private Provider<DefaultTestUser> testUserProvider;
-    private String authToken;
-
-    @Inject
-    public TestHttpJsonRequestFactory(Provider<DefaultTestUser> testUserProvider) {
-        this.testUserProvider = testUserProvider;
-    }
-
-    public TestHttpJsonRequestFactory(String authToken) {
-        Objects.requireNonNull(authToken, "Auth token can't be null");
-        this.authToken = authToken;
-    }
-
+public abstract class TestHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
     @Override
     public HttpJsonRequest fromUrl(@NotNull String url) {
         return super.fromUrl(url)
@@ -53,7 +32,5 @@ public class TestHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
                     .setAuthorizationHeader(getAuthToken());
     }
 
-    private String getAuthToken() {
-        return MoreObjects.firstNonNull(authToken, testUserProvider.get().getAuthToken());
-    }
+    abstract protected String getAuthToken();
 }

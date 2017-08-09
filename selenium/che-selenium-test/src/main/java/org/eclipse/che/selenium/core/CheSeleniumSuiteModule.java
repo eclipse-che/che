@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.core;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
@@ -40,6 +39,7 @@ import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestHttpJsonRequestFactoryForDefaultUser;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.CheAdminTestUser;
 import org.eclipse.che.selenium.core.user.CheTestUserNamespaceResolver;
@@ -80,7 +80,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
         bind(TestIdeUrlProvider.class).to(CheTestIdeUrlProvider.class);
         bind(TestDashboardUrlProvider.class).to(CheTestDashboardUrlProvider.class);
 
-        bind(HttpJsonRequestFactory.class).to(TestHttpJsonRequestFactory.class);
+        bind(HttpJsonRequestFactory.class).to(TestHttpJsonRequestFactoryForDefaultUser.class);
 
         bind(AdminTestUser.class).to(CheAdminTestUser.class);
 
