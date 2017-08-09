@@ -19,8 +19,18 @@
         .emptyBorder {
             margin: 6px;
         }
+
+        .alignLeft {
+            float: left;
+        }
     </ui:style>
-    <g:DockLayoutPanel unit="PX" width="450px" height="600px" addStyleNames="{style.emptyBorder}" debugId="git-branches-mainForm">
+    <g:DockLayoutPanel unit="PX" width="450px" height="500px" addStyleNames="{style.emptyBorder}" debugId="git-branches-mainForm">
+        <g:north size="25" addStyleNames="{style.emptyBorder}">
+            <g:FlowPanel >
+                <g:Label text="{locale.branchFilterLabel}" width="85px" addStyleNames="{style.alignLeft}"/>
+                <g:ListBox ui:field="filter" width="80px" addStyleNames="{style.alignLeft}"/>
+            </g:FlowPanel>
+        </g:north>
         <g:center>
             <g:ScrollPanel ui:field="branchesPanel" addStyleNames="{res.gitCSS.simpleListContainer}" debugId="git-branches-branchesPanel"/>
         </g:center>
