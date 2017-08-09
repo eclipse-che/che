@@ -34,9 +34,9 @@ public interface TestExecutionContext {
     void setFilePath(String filePath);
 
     /** returns type of the test. */
-    TestType getTestType();
+    ContextType getContextType();
 
-    void setTestType(TestType testType);
+    void setContextType(ContextType contextType);
 
     /** returns cursor position. */
     int getCursorOffset();
@@ -50,7 +50,7 @@ public interface TestExecutionContext {
 
     TestExecutionContext withDebugModeEnable(Boolean enable);
 
-    enum TestType {
+    enum ContextType {
         FILE, FOLDER, PROJECT, CURSOR_POSITION
     }
 }

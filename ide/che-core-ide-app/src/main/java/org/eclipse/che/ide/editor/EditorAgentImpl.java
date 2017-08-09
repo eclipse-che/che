@@ -280,40 +280,45 @@ public class EditorAgentImpl implements EditorAgent,
         initEditor(file, callback, fileType, editor, constraints, editorProvider);
     }
 
-    private void initEditor(final VirtualFile file, final OpenEditorCallback callback, FileType fileType,
+    private void initEditor(final VirtualFile file, final OpenEditorCallback openEditorCallback, FileType fileType,
                             final EditorPartPresenter editor, final Constraints constraints, EditorProvider editorProvider) {
-        editor.init(new EditorInputImpl(fileType, file), callback);
-        editor.addCloseHandler(this);
+        OpenEditorCallback initializeCallback = new OpenEditorCallbackImpl() {
+            @Override
+            public void onEditorOpened(EditorPartPresenter editor) {
+                workspaceAgent.openPart(editor, EDITING, constraints);
+                workspaceAgent.setActivePart(editor);
 
-        workspaceAgent.openPart(editor, EDITING, constraints);
-        finalizeInit(file, callback, editor, editorProvider);
+                openEditorCallback.onEditorOpened(editor);
+            }
+
+            @Override
+            public void onInitializationFailed() {
+                openEditorCallback.onInitializationFailed();
+            }
+        };
+
+        editor.init(new EditorInputImpl(fileType, file), initializeCallback);
+        finalizeInit(file, editor, editorProvider);
     }
 
-    private Promise<Void> finalizeInit(final VirtualFile file,
-                                       final OpenEditorCallback openEditorCallback,
-                                       final EditorPartPresenter editor,
-                                       EditorProvider editorProvider) {
-        return AsyncPromiseHelper.createFromAsyncRequest(promiseCallback -> {
-            openedEditors.add(editor);
-            openedEditorsToProviders.put(editor, editorProvider.getId());
+    private void finalizeInit(VirtualFile file, EditorPartPresenter editor, EditorProvider editorProvider) {
+        openedEditors.add(editor);
+        openedEditorsToProviders.put(editor, editorProvider.getId());
 
-            workspaceAgent.setActivePart(editor);
-            editor.addPropertyListener((source, propId) -> {
-                if (propId == EditorPartPresenter.PROP_INPUT) {
-                    promiseCallback.onSuccess(null);
-
-                    if (editor instanceof HasReadOnlyProperty) {
-                        ((HasReadOnlyProperty)editor).setReadOnly(file.isReadOnly());
-                    }
-
-                    if (editor instanceof TextEditor) {
-                        editorContentSynchronizer.trackEditor(editor);
-                    }
-                    openEditorCallback.onEditorOpened(editor);
-                    eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
-                    eventBus.fireEvent(new EditorOpenedEvent(file, editor));
+        editor.addCloseHandler(this);
+        editor.addPropertyListener((source, propId) -> {
+            if (propId == EditorPartPresenter.PROP_INPUT) {
+                if (editor instanceof HasReadOnlyProperty) {
+                    ((HasReadOnlyProperty)editor).setReadOnly(file.isReadOnly());
                 }
-            });
+
+                if (editor instanceof TextEditor) {
+                    editorContentSynchronizer.trackEditor(editor);
+                }
+
+                eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
+                eventBus.fireEvent(new EditorOpenedEvent(file, editor));
+            }
         });
     }
 
@@ -457,31 +462,32 @@ public class EditorAgentImpl implements EditorAgent,
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadState(@NotNull final JsonObject state) {
+    public Promise<Void> loadState(@NotNull final JsonObject state) {
         if (state.hasKey("FILES")) {
             JsonObject files = state.getObject("FILES");
             EditorPartStack partStack = editorMultiPartStack.createRootPartStack();
             final Map<EditorPartPresenter, EditorPartStack> activeEditors = new HashMap<>();
             List<Promise<Void>> restore = restore(files, partStack, activeEditors);
             Promise<ArrayOf<?>> promise = promiseProvider.all2(restore.toArray(new Promise[restore.size()]));
-            promise.then(new Operation() {
-                @Override
-                public void apply(Object arg) throws OperationException {
-                    String activeFile = "";
-                    if (state.hasKey("ACTIVE_EDITOR")) {
-                        activeFile = state.getString("ACTIVE_EDITOR");
-                    }
-                    EditorPartPresenter activeEditorPart = null;
-                    for (Map.Entry<EditorPartPresenter, EditorPartStack> entry : activeEditors.entrySet()) {
-                        entry.getValue().setActivePart(entry.getKey());
-                        if (activeFile.equals(entry.getKey().getEditorInput().getFile().getLocation().toString())) {
-                            activeEditorPart = entry.getKey();
-                        }
-                    }
-                    workspaceAgent.setActivePart(activeEditorPart);
+            promise.then((Operation)ignored -> {
+                String activeFile = "";
+                if (state.hasKey("ACTIVE_EDITOR")) {
+                    activeFile = state.getString("ACTIVE_EDITOR");
                 }
+                EditorPartPresenter activeEditorPart = null;
+                for (Map.Entry<EditorPartPresenter, EditorPartStack> entry : activeEditors.entrySet()) {
+                    entry.getValue().setActivePart(entry.getKey());
+                    if (activeFile.equals(entry.getKey().getEditorInput().getFile().getLocation().toString())) {
+                        activeEditorPart = entry.getKey();
+                    }
+                }
+                workspaceAgent.setActivePart(activeEditorPart);
             });
+
+            return promise.thenPromise(ignored -> promiseProvider.resolve(null));
         }
+
+        return promiseProvider.resolve(null);
     }
 
     private List<Promise<Void>> restore(JsonObject files, EditorPartStack editorPartStack,
@@ -579,14 +585,29 @@ public class EditorAgentImpl implements EditorAgent,
         }
     }
 
-    private Promise<Void> restoreInitEditor(final VirtualFile file, final OpenEditorCallback callback, FileType fileType,
+    private Promise<Void> restoreInitEditor(final VirtualFile file, final OpenEditorCallback openEditorCallback, FileType fileType,
                                             final EditorPartPresenter editor, EditorProvider editorProvider,
                                             EditorPartStack editorPartStack) {
-        editor.init(new EditorInputImpl(fileType, file), callback);
-        editor.addCloseHandler(this);
+        return AsyncPromiseHelper.createFromAsyncRequest((AsyncCallback<Void> promiseCallback) -> {
+            OpenEditorCallback initializeCallback = new OpenEditorCallbackImpl() {
+                @Override
+                public void onEditorOpened(EditorPartPresenter editor) {
+                    editorPartStack.addPart(editor);
 
-        editorPartStack.addPart(editor);
-        return finalizeInit(file, callback, editor, editorProvider);
+                    promiseCallback.onSuccess(null);
+                    openEditorCallback.onEditorOpened(editor);
+                }
+
+                @Override
+                public void onInitializationFailed() {
+                    promiseCallback.onFailure(new Exception("Can not initialize editor for " + file.getLocation()));
+                    openEditorCallback.onInitializationFailed();
+                }
+            };
+
+            editor.init(new EditorInputImpl(fileType, file), initializeCallback);
+            finalizeInit(file, editor, editorProvider);
+        });
     }
 
     @Override
@@ -668,5 +689,15 @@ public class EditorAgentImpl implements EditorAgent,
                 ((TextEditor)editor).setTopLine(topLine);
             }
         }
+    }
+
+    @Override
+    public int getPriority() {
+        return MIN_PRIORITY;
+    }
+
+    @Override
+    public String getId() {
+        return "editor";
     }
 }

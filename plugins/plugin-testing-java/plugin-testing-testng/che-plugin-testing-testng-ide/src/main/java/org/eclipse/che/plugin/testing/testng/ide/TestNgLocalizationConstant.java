@@ -10,20 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.testng.ide;
 
-import org.vectomatic.dom.svg.ui.SVGResource;
-
-import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.i18n.client.Messages;
 
 /**
- *
- * @author Mirage Abeysekara
+ * Localization constants. Interface to represent the constants defined in resource bundle:
+ * 'TestNgTestLocalizationConstant.properties'.
  */
-public interface TestNGResources extends ClientBundle {
+public interface TestNgLocalizationConstant extends Messages {
 
-    @Source("org/eclipse/che/plugin/testing/ide/svg/test.svg")
-    SVGResource testIcon();
+    @Key("action.testNg.run.title")
+    String actionRunTestTitle();
 
-    @Source("org/eclipse/che/plugin/testing/ide/svg/test_all.svg")
-    SVGResource testAllIcon();
+    @Key("action.testNg.run.description")
+    String actionRunTestDescription();
 
+    @Key("action.testNg.debug.title")
+    String actionDebugTestTitle();
+
+    @Key("action.testNg.debug.description")
+    String actionDebugDescription();
 }

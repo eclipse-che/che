@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.api.editor.autosave;
 
 import org.eclipse.che.ide.api.editor.document.UseDocumentHandle;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
 /**
@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
  *
  * @author Roman Nikitenko
  */
-public interface AutoSaveMode extends DocumentChangeHandler, UseDocumentHandle {
+public interface AutoSaveMode extends DocumentChangedHandler, UseDocumentHandle {
 
     /**
      * Installs auto save mode on the given editor.

@@ -35,8 +35,10 @@
                   class="stack-library-filter-suggestions"
                   readonly="true">
           <md-chip-template>
-            <div class="stack-library-filter-suggestion-text">{{$chip | uppercase}}</div>
-            <div class="stack-library-filter-suggestion-btn" ng-click="cheStackLibraryFilterCtrl.onSelectSuggestion($chip)">
+            <div class="stack-library-filter-suggestion-text"
+                 ng-dblclick="cheStackLibraryFilterCtrl.onSelectSuggestion($chip)">{{$chip | uppercase}}</div>
+            <div class="stack-library-filter-suggestion-btn"
+                 ng-click="cheStackLibraryFilterCtrl.onSelectSuggestion($chip)">
               <i class="fa fa-plus"></i>
             </div>
           </md-chip-template>

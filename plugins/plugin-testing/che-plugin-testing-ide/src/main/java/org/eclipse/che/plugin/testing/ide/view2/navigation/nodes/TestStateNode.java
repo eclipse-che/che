@@ -27,17 +27,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Describes UI state of the test node.
  */
 public class TestStateNode extends AbstractTreeNode implements HasPresentation {
 
-    private final PromiseProvider promiseProvider;
-    private final TestResources testResources;
-    private final TestState testState;
-    private NodePresentation nodePresentation;
+    private final PromiseProvider  promiseProvider;
+    private final TestResources    testResources;
+    private final TestState        testState;
+
+    private       NodePresentation nodePresentation;
 
     @Inject
-    public TestStateNode(PromiseProvider promiseProvider, TestResources testResources, @Assisted TestState testState) {
+    public TestStateNode(PromiseProvider promiseProvider,
+                         TestResources testResources,
+                         @Assisted TestState testState) {
         this.promiseProvider = promiseProvider;
         this.testResources = testResources;
         this.testState = testState;
@@ -76,10 +79,17 @@ public class TestStateNode extends AbstractTreeNode implements HasPresentation {
         }
         if (testState.getDescription() == TestStateDescription.PASSED) {
             presentation.setPresentableTextCss("color: green;");
+            presentation.setPresentableIcon(testResources.testResultSuccessIcon());
         } else if (testState.getDescription() == TestStateDescription.IGNORED) {
             presentation.setPresentableTextCss("text-decoration: line-through; color: yellow;");
+            presentation.setPresentableIcon(testResources.testResultSkippedIcon());
         } else if (testState.getDescription() == TestStateDescription.FAILED || testState.getDescription() == TestStateDescription.ERROR) {
             presentation.setPresentableTextCss("color: red;");
+            presentation.setPresentableIcon(testResources.testResultFailureIcon());
+        } else if (testState.getDescription() == TestStateDescription.RUNNING) {
+            presentation.setPresentableIcon(testResources.testInProgressIcon());
+        } else if (testState.getDescription() == TestStateDescription.NOT_RUN) {
+            presentation.setPresentableIcon(testResources.testResultSkippedIcon());
         }
     }
 

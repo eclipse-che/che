@@ -164,7 +164,9 @@ public abstract class PopupWidget<T> {
         if (needsFocus()) {
             // save previous focus and set focus in popup
             previousFocus = Elements.getDocument().getActiveElement();
-            listElement.getFirstElementChild().focus();
+            Element elementToFocus = listElement.getFirstElementChild();
+            elementToFocus.setAttribute("selected", "true");
+            elementToFocus.focus();
         }
 
         // add key event listener on popup

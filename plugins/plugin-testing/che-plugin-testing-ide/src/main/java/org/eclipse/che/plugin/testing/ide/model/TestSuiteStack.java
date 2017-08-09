@@ -22,15 +22,51 @@ public class TestSuiteStack {
 
     private Deque<TestState> stack = new ArrayDeque<>();
 
+    /**
+     * Pushes an element onto the stack at the head of this deque.
+     *
+     * @param state
+     *         new test state
+     */
     public void push(TestState state) {
         stack.push(state);
     }
 
+    /**
+     * Inserts the specified element at the tail of this deque.
+     *
+     * @param state
+     *         new test state
+     */
+    public void add(TestState state) {
+        stack.add(state);
+    }
+
+    /**
+     * Retrieves, but does not remove, the last element of this deque,
+     * or returns {@code null} if this deque is empty.
+     */
+    public TestState peekLast() {
+        return stack.peekLast();
+    }
+
+    /**
+     * Retrieves, but does not remove, the head of the queue represented by
+     * this deque (in other words, the first element of this deque), or
+     * returns {@code null} if this deque is empty.
+     */
     public TestState getCurrent() {
         return stack.peek();
     }
 
-
+    /**
+     * Pops an element from the stack represented by this deque.  In other
+     * words, removes and returns the first element of this deque.
+     *
+     * @param suiteName
+     *         name of suite
+     * @return element from the stack which has same name
+     */
     public TestState pop(String suiteName) {
         if (stack.isEmpty()) {
             Log.error(getClass(), "Test suite stack is empty, unexpected suite name: " + suiteName);
@@ -67,10 +103,19 @@ public class TestSuiteStack {
         return state;
     }
 
+    /**
+     * Returns <tt>true</tt> if this collection contains no elements.
+     *
+     * @return <tt>true</tt> if this collection contains no elements
+     */
     public boolean isEmpty() {
         return stack.isEmpty();
     }
 
+    /**
+     * Removes all of the elements from this collection (optional operation).
+     * The collection will be empty after this method returns.
+     */
     public void clear() {
         stack.clear();
     }

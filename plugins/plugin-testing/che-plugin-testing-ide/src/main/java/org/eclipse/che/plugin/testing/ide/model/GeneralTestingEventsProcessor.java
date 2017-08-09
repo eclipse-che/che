@@ -35,7 +35,7 @@ import java.util.function.Function;
 import static org.eclipse.che.plugin.testing.ide.model.Printer.OutputType;
 
 /**
- * Event processor converts events form runner to internal form.
+ * Event processor converts events from runner to internal form.
  */
 public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcessor {
     private final TestRootState testRootState;
@@ -43,8 +43,9 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
     private final Set<TestState>         currentChildren     = new LinkedHashSet<>();
     private final Map<String, TestState> testNameToTestState = new HashMap<>();
     private final List<Runnable>         buildTreeEvents     = new ArrayList<>();
+    private       boolean                gettingChildren     = true;
 
-    private boolean     gettingChildren      = true;
+    private TestState lastTreeState;
     private boolean     treeBuildBeforeStart = false;
     private TestLocator testLocator          = null;
 
@@ -54,6 +55,7 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
     public GeneralTestingEventsProcessor(String testFrameworkName, TestRootState testRootState) {
         super(testFrameworkName);
         this.testRootState = testRootState;
+        this.lastTreeState = testRootState;
     }
 
     @Override
@@ -67,7 +69,13 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
     public void onTestSuiteStarted(TestSuiteStartedEvent event) {
         String name = event.getName();
         String location = event.getLocation();
-        TestState currentSuite = getCurrentSuite();
+        TestState currentSuite;
+        if (treeBuildBeforeStart) {
+            findState(testRootState, name);
+            currentSuite = lastTreeState;
+        } else {
+            currentSuite = getCurrentSuite();
+        }
         TestState newState;
         if (location == null) {
             newState = findChildByName(currentSuite, name, true);
@@ -89,8 +97,26 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
         }
 
         gettingChildren = true;
-        testSuiteStack.push(newState);
+        if (treeBuildBeforeStart) {
+            testSuiteStack.add(newState);
+        } else {
+            testSuiteStack.push(newState);
+        }
         callSuiteStarted(newState);
+    }
+
+    private void findState(TestState currentState, String name) {
+        List<TestState> children = currentState.getChildren();
+        for (TestState state : children) {
+            if (state.getName().equals(name)) {
+                lastTreeState = currentState;
+                return;
+            }
+        }
+
+        for (TestState state : children) {
+            findState(state, name);
+        }
     }
 
     @Override
@@ -241,18 +267,20 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
     @Override
     public void onSuiteTreeStarted(String suiteName, String location) {
         treeBuildBeforeStart = true;
-        buildTreeEvents.add(() -> {
-            TestState currentSuite = getCurrentSuite();
-            TestState newSuite = new TestState(suiteName, true, location);
-            if (testLocator != null) {
-                newSuite.setTestLocator(testLocator);
-            }
+        TestState newSuite = new TestState(suiteName, true, location);
+        if (testLocator != null) {
+            newSuite.setTestLocator(testLocator);
+        }
 
-            currentSuite.addChild(newSuite);
+        if (TestRootState.ROOT.equals(lastTreeState.getName())) {
+            testRootState.addChild(newSuite);
+        } else {
+            lastTreeState.addChild(newSuite);
+        }
 
-            testSuiteStack.push(newSuite);
-            callSuiteTreeStarted(newSuite);
-        });
+        lastTreeState = newSuite;
+        testSuiteStack.add(newSuite);
+        callSuiteTreeStarted(newSuite);
     }
 
     private void callSuiteTreeStarted(TestState newSuite) {
@@ -271,25 +299,27 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
 
     @Override
     public void onSuiteTreeEnded(String suiteName) {
-        buildTreeEvents.add(() -> testSuiteStack.pop(suiteName));
+        if (!(TestRootState.ROOT.equals(lastTreeState.getName()))) {
+            lastTreeState = lastTreeState.getParent();
+        }
+
+        testSuiteStack.pop(suiteName);
     }
 
     @Override
     public void onSuiteTreeNodeAdded(String suiteName, String location) {
         treeBuildBeforeStart = true;
-        buildTreeEvents.add(() -> {
-            TestState newState = new TestState(suiteName, false, location);
-            newState.setTreeBuildBeforeStart();
-            if (testLocator != null) {
-                newState.setTestLocator(testLocator);
-            }
+        TestState newState = new TestState(suiteName, false, location);
+        newState.setTreeBuildBeforeStart();
+        if (testLocator != null) {
+            newState.setTestLocator(testLocator);
+        }
 
-            TestState currentSuite = getCurrentSuite();
-            currentSuite.setTreeBuildBeforeStart();
-            currentSuite.addChild(newState);
+        TestState currentSuite = testSuiteStack.peekLast();
+        currentSuite.setTreeBuildBeforeStart();
+        currentSuite.addChild(newState);
 
-            callSuiteTreeNodeAdded(newState);
-        });
+        callSuiteTreeNodeAdded(newState);
     }
 
     private void callSuiteTreeNodeAdded(TestState newState) {

@@ -31,7 +31,7 @@ import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.events.CompletionRequestEvent;
 import org.eclipse.che.ide.api.editor.events.CompletionRequestHandler;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.events.TextChangeEvent;
 import org.eclipse.che.ide.api.editor.events.TextChangeHandler;
 import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
@@ -143,7 +143,7 @@ public class OrionEditorInit {
         final DocumentPartitioner partitioner = configuration.getPartitioner();
         if (partitioner != null) {
             partitioner.setDocumentHandle(documentHandle);
-            documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, partitioner);
+            documentHandle.getDocEventBus().addHandler(DocumentChangedEvent.TYPE, partitioner);
             partitioner.initialize();
         }
     }
@@ -156,7 +156,7 @@ public class OrionEditorInit {
         final Reconciler reconciler = configuration.getReconciler();
         if (reconciler != null) {
             reconciler.setDocumentHandle(documentHandle);
-            documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, reconciler);
+            documentHandle.getDocEventBus().addHandler(DocumentChangedEvent.TYPE, reconciler);
             reconciler.install(textEditor);
         }
     }
@@ -175,7 +175,7 @@ public class OrionEditorInit {
             ((HasAnnotationRendering)textEditor).configure(annotationModel, documentHandle);
         }
         annotationModel.setDocumentHandle(documentHandle);
-        documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, annotationModel);
+        documentHandle.getDocEventBus().addHandler(DocumentChangedEvent.TYPE, annotationModel);
 
         // the model listens to QueryAnnotation events
         documentHandle.getDocEventBus().addHandler(QueryAnnotationsEvent.TYPE, annotationModel);

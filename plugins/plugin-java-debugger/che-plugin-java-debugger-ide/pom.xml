@@ -16,16 +16,12 @@
     <parent>
         <artifactId>che-plugin-java-debugger-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.16.0-SNAPSHOT</version>
+        <version>5.17.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-debugger-ide</artifactId>
     <packaging>jar</packaging>
     <name>Che Plugin :: Java :: Java Debugger IDE</name>
     <dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.google.gwt.inject</groupId>
             <artifactId>gin</artifactId>

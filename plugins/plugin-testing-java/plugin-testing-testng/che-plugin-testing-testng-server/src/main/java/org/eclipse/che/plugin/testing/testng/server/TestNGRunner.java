@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.testing.testng.server;
 
 import com.beust.jcommander.JCommander;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
@@ -23,50 +24,48 @@ import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
+import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
+import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.IAnnotation;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
+
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 
 /**
  * TestNG implementation for the test runner service.
- *
- * @author Mirage Abeysekara
  */
 public class TestNGRunner extends AbstractJavaTestRunner {
-    private static final String PROJECTS_ROOT_FOLDER = "/projects";
-    private static final String TEST_OUTPUT_FOLDER   = "/test-output";
-    private static final String TESTNG_NAME          = "testng";
-    private static final String TEST_ANNOTATION_FQN  = Test.class.getName();
-    private static final Logger LOG                  = LoggerFactory.getLogger(TestNGRunner.class);
+    private static final String TESTNG_NAME    = "testng";
+    private static final Logger LOG            = LoggerFactory.getLogger(TestNGRunner.class);
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+
+    private       String                   workspacePath;
+    private       JavaTestFinder           javaTestFinder;
     private final ProjectClasspathProvider classpathProvider;
     private final TestNGSuiteUtil          suiteUtil;
 
-    private int debugPort;
-
     @Inject
-    public TestNGRunner(ProjectClasspathProvider classpathProvider, TestNGSuiteUtil suiteUtil) {
+    public TestNGRunner(@Named("che.user.workspaces.storage") String workspacePath,
+                        JavaTestFinder javaTestFinder,
+                        ProjectClasspathProvider classpathProvider,
+                        TestNGSuiteUtil suiteUtil) {
+        super(workspacePath, javaTestFinder);
+        this.workspacePath = workspacePath;
+        this.javaTestFinder = javaTestFinder;
         this.classpathProvider = classpathProvider;
         this.suiteUtil = suiteUtil;
     }
@@ -103,11 +102,6 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         return null;
     }
 
-    @Override
-    public int getDebugPort() {
-        return debugPort;
-    }
-
     private ProcessHandler startTestProcess(IJavaProject javaProject, TestExecutionContext context) {
         File suiteFile = createSuite(context, javaProject);
         if (suiteFile == null) {
@@ -115,11 +109,11 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         }
 
         JavaParameters parameters = new JavaParameters();
-        parameters.setJavaExecutable("java");
+        parameters.setJavaExecutable(JAVA_EXECUTABLE);
         parameters.setMainClassName("org.testng.CheTestNGLauncher");
         String outputDirectory = getOutputDirectory(javaProject);
         parameters.getParametersList().add("-d", outputDirectory);
-        parameters.setWorkingDirectory(PROJECTS_ROOT_FOLDER + javaProject.getPath());
+        parameters.setWorkingDirectory(workspacePath + javaProject.getPath());
         List<String> classPath = new ArrayList<>();
         Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);
         classPath.addAll(projectClassPath);
@@ -129,9 +123,9 @@ public class TestNGRunner extends AbstractJavaTestRunner {
 
         parameters.getParametersList().add("-suiteFile", suiteFile.getAbsolutePath());
         if (context.isDebugModeEnable()) {
-            debugPort = generateDebuggerPort();
+            generateDebuggerPort();
             parameters.getVmParameters().add("-Xdebug");
-            parameters.getVmParameters().add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + debugPort);
+            parameters.getVmParameters().add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + getDebugPort());
         }
         CommandLine command = parameters.createCommand();
         try {
@@ -143,88 +137,52 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         return null;
     }
 
-    private String getOutputDirectory(IJavaProject javaProject) {
-        String path = PROJECTS_ROOT_FOLDER + javaProject.getPath() + TEST_OUTPUT_FOLDER;
-        try {
-            IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(true);
-            for (IClasspathEntry iClasspathEntry : resolvedClasspath) {
-                if (iClasspathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-                    IPath outputLocation = iClasspathEntry.getOutputLocation();
-                    if (outputLocation == null) {
-                        continue;
-                    }
-                    return PROJECTS_ROOT_FOLDER + outputLocation.removeLastSegments(1).append(TEST_OUTPUT_FOLDER);
-                }
-            }
-        } catch (JavaModelException e) {
-            return path;
-        }
-        return path;
-    }
-
-    private int generateDebuggerPort() {
-        Random random = new Random();
-        int port = random.nextInt(65535);
-        return isPortAvailable(port) ? port : generateDebuggerPort();
-    }
-
-    private static boolean isPortAvailable(int port) {
-        try (Socket ignored = new Socket("localhost", port)) {
-            return false;
-        } catch (IOException ignored) {
-            return true;
-        }
-    }
-
     private File createSuite(TestExecutionContext context, IJavaProject javaProject) {
-        switch (context.getTestType()) {
+        List<String> testSuite = createTestSuite(context, javaProject, JavaTestAnnotations.TESTNG_TEST.getName(), "");
+
+        Map<String, List<String>> classes = buildTestNgSuite(testSuite, context);
+
+        return suiteUtil.writeSuite(System.getProperty(JAVA_IO_TMPDIR), javaProject.getElementName(), classes);
+    }
+
+    private Map<String, List<String>> buildTestNgSuite(List<String> tests, TestExecutionContext context) {
+        switch (context.getContextType()) {
             case FILE:
-                return createClassSuite(javaProject, context.getFilePath());
             case FOLDER:
-                return createPackageSuite(javaProject, context.getFilePath());
             case PROJECT:
-                return createProjectSuite(javaProject);
+                return createContainerSuite(tests);
             case CURSOR_POSITION:
-                return createMethodSuite(javaProject, context.getFilePath(), context.getCursorOffset());
+                return createMethodSuite(tests);
+            default:
+                return emptyMap();
+        }
+    }
+
+    private Map<String, List<String>> createMethodSuite(List<String> tests) {
+        if (tests.isEmpty()) {
+            return Collections.emptyMap();
         }
 
-        return null;
-    }
+        String testMethodDeclaration = tests.get(0);
+        int separatorIndex = testMethodDeclaration.indexOf('#');
 
-    private File createMethodSuite(IJavaProject javaProject, String filePath, int cursorOffset) {
-        ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, filePath);
-        IType primaryType = compilationUnit.findPrimaryType();
-        String qualifiedName = primaryType.getFullyQualifiedName();
-        List<String> methods = new ArrayList<>();
-        try {
-            IJavaElement element = compilationUnit.getElementAt(cursorOffset);
-            if (element instanceof IMethod) {
-                IMethod method = (IMethod)element;
-                methods.add(method.getElementName());
-            }
-        } catch (JavaModelException e) {
-            LOG.debug("Can't read a method.", e);
+        if (separatorIndex == -1) {
+            return createContainerSuite(tests);
         }
-        Map<String, List<String>> classes = Collections.singletonMap(qualifiedName, methods);
-        return suiteUtil.writeSuite(System.getProperty("java.io.tmpdir"), javaProject.getElementName(), classes);
+
+        return Collections.singletonMap(testMethodDeclaration.substring(0, separatorIndex),
+                                        singletonList(testMethodDeclaration.substring(separatorIndex + 1)));
     }
 
-    private File createProjectSuite(IJavaProject javaProject) {
-        //TODO add suite to run all tests from project
-        return null;
-    }
-
-    private File createPackageSuite(IJavaProject javaProject, String packagePath) {
-        //TODO add suite to run all tests from package
-        return null;
-    }
-
-    private File createClassSuite(IJavaProject javaProject, String filePath) {
-        ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, filePath);
-        IType primaryType = compilationUnit.findPrimaryType();
-        String qualifiedName = primaryType.getFullyQualifiedName();
-        Map<String, List<String>> classes = Collections.singletonMap(qualifiedName, null);
-        return suiteUtil.writeSuite(System.getProperty("java.io.tmpdir"), javaProject.getElementName(), classes);
+    private Map<String, List<String>> createContainerSuite(List<String> tests) {
+        if (tests.isEmpty()) {
+            return emptyMap();
+        }
+        Map<String, List<String>> classes = new HashMap<>(tests.size());
+        for (String testClass : tests) {
+            classes.put(testClass, null);
+        }
+        return classes;
     }
 
     /**
@@ -237,45 +195,6 @@ public class TestNGRunner extends AbstractJavaTestRunner {
 
     @Override
     protected boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
-        try {
-            IAnnotation[] annotations = method.getAnnotations();
-            IAnnotation test = null;
-            for (IAnnotation annotation : annotations) {
-                if (annotation.getElementName().equals("Test")) {
-                    test = annotation;
-                    break;
-                }
-                if (annotation.getElementName().equals(TEST_ANNOTATION_FQN)) {
-                    return true;
-                }
-            }
-
-            if (test == null) {
-                return false;
-            }
-
-            IImportDeclaration[] imports = compilationUnit.getImports();
-            for (IImportDeclaration importDeclaration : imports) {
-                if (importDeclaration.getElementName().equals(TEST_ANNOTATION_FQN)) {
-                    return true;
-                }
-            }
-
-            for (IImportDeclaration importDeclaration : imports) {
-                if (importDeclaration.isOnDemand()) {
-                    String elementName = importDeclaration.getElementName();
-                    elementName = elementName.substring(0, elementName.length() - 3); //remove .*
-                    if (TEST_ANNOTATION_FQN.startsWith(elementName)) {
-                        return true;
-                    }
-
-                }
-            }
-
-            return false;
-        } catch (JavaModelException e) {
-            LOG.info("Can't read method annotations.", e);
-            return false;
-        }
+        return javaTestFinder.isTest(method, compilationUnit, JavaTestAnnotations.TESTNG_TEST.getName());
     }
 }

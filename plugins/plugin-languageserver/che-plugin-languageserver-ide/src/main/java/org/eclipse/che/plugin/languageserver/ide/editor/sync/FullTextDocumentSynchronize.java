@@ -12,9 +12,8 @@ package org.eclipse.che.plugin.languageserver.ide.editor.sync;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -41,8 +40,7 @@ class FullTextDocumentSynchronize implements TextDocumentSynchronize {
     }
 
     @Override
-    public void syncTextDocument(DocumentChangeEvent event, int version) {
-        Document document = event.getDocument().getDocument();
+    public void syncTextDocument(Document document, TextPosition start, TextPosition end, String insertedText, int version) {
 
         DidChangeTextDocumentParams changeDTO = dtoFactory.createDto(DidChangeTextDocumentParams.class);
         String uri = document.getFile().getLocation().toString();
@@ -53,7 +51,7 @@ class FullTextDocumentSynchronize implements TextDocumentSynchronize {
         changeDTO.setTextDocument(versionedDocId);
         TextDocumentContentChangeEvent actualChange = dtoFactory.createDto(TextDocumentContentChangeEvent.class);
 
-        actualChange.setText(event.getDocument().getDocument().getContents());
+        actualChange.setText(document.getContents());
         changeDTO.setContentChanges(Collections.singletonList(actualChange));
         textDocumentService.didChange(changeDTO);
     }

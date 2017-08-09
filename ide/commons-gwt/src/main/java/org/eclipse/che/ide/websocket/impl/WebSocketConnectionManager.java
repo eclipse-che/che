@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @Singleton
 public class WebSocketConnectionManager {
-    private final WebSocketFactory webSocketFactory;
+    private final WebSocketFactory       webSocketFactory;
 
     private final Map<String, WebSocketConnection> connectionsRegistry = new HashMap<>();
 
@@ -82,6 +82,7 @@ public class WebSocketConnectionManager {
         }
 
         webSocketConnection.close();
+
         Log.debug(WebSocketConnectionManager.class, "Closing connection.");
     }
 
@@ -111,7 +112,6 @@ public class WebSocketConnectionManager {
      *
      * @param url
      *         url of a web socket connection to be checked
-     *
      * @return connection status: true if opened, false if else
      */
     public boolean isConnectionOpen(String url) {

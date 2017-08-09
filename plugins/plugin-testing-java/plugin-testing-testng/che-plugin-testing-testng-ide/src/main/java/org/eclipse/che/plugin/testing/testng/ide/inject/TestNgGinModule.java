@@ -11,16 +11,19 @@
 package org.eclipse.che.plugin.testing.testng.ide.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.plugin.testing.ide.TestAction;
+import org.eclipse.che.plugin.testing.testng.ide.TestNgTestAction;
 
 /**
- *
- * @author Mirage Abeysekara
+ * Gin module for TestNg extension.
  */
 @ExtensionGinModule
-public class TestNGGinModule extends AbstractGinModule {
+public class TestNgGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
+        GinMultibinder.newSetBinder(binder(), TestAction.class).addBinding().to(TestNgTestAction.class);
     }
 }
