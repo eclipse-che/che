@@ -64,6 +64,7 @@ import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent.ResourceChangedHandler {
 
     private static EmptyEditorsPanelUiBinder ourUiBinder = GWT.create(EmptyEditorsPanelUiBinder.class);
+
     protected final AppContext                   appContext;
     private final   ActionManager                actionManager;
     private final   Provider<PerspectiveManager> perspectiveManagerProvider;
@@ -98,12 +99,12 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
         this(actionManager, perspectiveManagerProvider, keyBindingAgent, appContext, localizationConstant, newFileAction,
              createProjectAction, importProjectAction);
 
-
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
         final SVGResource logo = productInfoDataProvider.getWaterMarkLogo();
         if (nonNull(logo)) {
             this.logo.appendChild(new SVGImage(logo).getSvgElement().getElement());
         }
+
         //Sometimes initialization of Create/Import Project actions are completed after the Empty editor page is rendered.
         //In this case we need to wait when actions will be initialized.
         Timer hoverToRenderTimer = new Timer() {
@@ -137,8 +138,7 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
 
         presentationFactory = new PresentationFactory();
 
-        Widget rootElement = ourUiBinder.createAndBindUi(this);
-        initWidget(rootElement);
+        initWidget(ourUiBinder.createAndBindUi(this));
     }
 
     @Override
@@ -156,7 +156,6 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
                 updateOnProjectsChange();
             }
         });
-
     }
 
     private void updateOnProjectsChange() {
@@ -179,7 +178,6 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
         this.title.setInnerText(title);
         container.removeAllChildren();
         Element listElement = Elements.createElement("ul", new String[] {style.list()});
-
 
         for (Map.Entry<String, Action> pair : actions.entrySet()) {
             LIElement liElement = Elements.createLiElement();
@@ -238,4 +236,5 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
     }
 
     interface EmptyEditorsPanelUiBinder extends UiBinder<Widget, EmptyEditorsPanel> {}
+
 }
