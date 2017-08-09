@@ -204,7 +204,6 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
 
         TestState testState = getStateByStateName(name);
         if (testState == null) {
-            Log.error(getClass(), "Test wasn't started: " + name);
             onTestStarted(new TestStartedEvent(name, null));
             testState = getStateByStateName(name);
         }
@@ -225,7 +224,6 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
         TestState testState = getStateByStateName(name);
 
         if (testState == null) {
-            Log.error(getClass(), "Test wasn't started: " + name);
             return;
         }
 
@@ -245,7 +243,6 @@ public class GeneralTestingEventsProcessor extends AbstractTestingEventsProcesso
         TestState testState = getStateByStateName(name);
 
         if (testState == null) {
-            Log.error(getClass(), "Test wasn't started: " + name);
             onTestStarted(new TestStartedEvent(name, null));
             testState = getStateByStateName(name);
         }
