@@ -6,8 +6,8 @@
   </div>
   <div flex layout="row" layout-align="end center">
     <workspace-status-button workspace-status="workspaceDetailsController.getWorkspaceStatus()"
-                             stop-workspace="workspaceDetailsController.stopWorkspace(isCreateSnapshot)"
-                             run-workspace="workspaceDetailsController.runWorkspace()"></workspace-status-button>
+                             on-stop-workspace="workspaceDetailsController.stopWorkspace(isCreateSnapshot)"
+                             on-run-workspace="workspaceDetailsController.runWorkspace()"></workspace-status-button>
     <che-button-default ng-if="workspaceDetailsController.editMode === false"
                         che-button-title="Open"
                         href="#/ide/{{workspaceDetailsController.namespaceId}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
@@ -60,6 +60,22 @@
       </md-tab-body>
     </md-tab>
 
+    <!-- Agents -->
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Agents);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Agents</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-machine-selector content-title="Workspace Agents"
+                              workspace-details="workspaceDetailsController.workspaceDetails"
+                              on-change="workspaceDetailsController.switchEditMode()">
+          <che-machine-agents environment-manager="environmentManager"
+                              selected-machine="machine"
+                              on-change="onChange()"></che-machine-agents>
+        </che-machine-selector>
+      </md-tab-body>
+    </md-tab>
+
     <!-- Servers -->
     <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Servers);">
       <md-tab-label>
@@ -92,113 +108,6 @@
       </md-tab-body>
     </md-tab>
 
-    <!-- Settings Tab -->
-    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Settings);">
-      <md-tab-label>
-        <span class="che-tab-label-title">Settings</span>
-      </md-tab-label>
-      <md-tab-body>
-        <div class="workspace-details-tab-content">
-
-          <!-- Name -->
-          <che-label-container che-label-name="Workspace name">
-            <div layout="column" class="workspace-details-input">
-              <ng-form flex layout="column"
-                       name="workspaceNameForm">
-                <che-input
-                  ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Settings, workspaceNameForm)"
-                  che-form="workspaceNameForm"
-                  che-name="name"
-                  che-place-holder="Name of the workspace"
-                  aria-label="Name of the workspace"
-                  ng-model="workspaceDetailsController.newName"
-                  ng-change="workspaceNameForm.$valid && workspaceDetailsController.updateName()"
-                  ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: true }"
-                  required
-                  custom-validator="workspaceDetailsController.isNameUnique($value)"
-                  ng-minlength="3"
-                  ng-maxlength="20"
-                  ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-                  <che-error-messages che-message-scope="workspace-details-settings"
-                                      che-message-name="Workspace name">
-                    <div ng-message="required">A name is required.</div>
-                    <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.
-                    </div>
-                    <div ng-message="minlength">The name has to be more than 3 characters long.</div>
-                    <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-                    <div ng-message="customValidator">This workspace name is already used.</div>
-                  </che-error-messages>
-                </che-input>
-              </ng-form>
-            </div>
-          </che-label-container>
-          <!-- Namespace -->
-          <che-label-container che-label-name="{{workspaceDetailsController.getNamespaceCaption()}}"
-                               ng-if="workspaceDetailsController.getNamespaces().length > 0 || workspaceDetailsController.getNamespaceEmptyMessage()">
-
-            <div
-              ng-if="workspaceDetailsController.isCreationFlow && workspaceDetailsController.getNamespaces().length > 0"
-              layout="row" layout-align="start center">
-              <che-filter-selector che-values="workspaceDetailsController.namespaceLabels"
-                                   ng-model="workspaceDetailsController.namespaceLabel"
-                                   che-width="200px"
-                                   che-on-change="workspaceDetailsController.onNamespaceChanged"></che-filter-selector>
-              <span class="namespace-additional-info" ng-if="workspaceDetailsController.namespaceInfo">
-                {{workspaceDetailsController.namespaceInfo}}
-              </span>
-            </div>
-            <div
-              ng-if="workspaceDetailsController.getNamespaces().length === 0 && workspaceDetailsController.getNamespaceEmptyMessage()"
-              class="empty-namespace-label">
-              <i class="fa-exclamation-triangle fa fa-2x"></i>
-              {{workspaceDetailsController.getNamespaceEmptyMessage()}}
-            </div>
-            <che-button-default
-              ng-if="!workspaceDetailsController.isCreationFlow && workspaceDetailsController.getNamespaces().length > 0"
-              che-button-title="{{workspaceDetailsController.getNamespaceLabel(workspaceDetailsController.namespaceId)}}"
-              ng-disabled="!workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId) || !workspaceDetailsController.getNamespace(workspaceDetailsController.namespaceId).location"
-              ng-click="workspaceDetailsController.namespaceOnClick(workspaceDetailsController.namespaceId)"
-              class="namespace-button"></che-button-default>
-          </che-label-container>
-
-          <!-- Status -->
-          <che-label-container che-label-name="State">
-            <div layout="column">
-              <workspace-status che-status="workspaceDetailsController.getWorkspaceStatus()"></workspace-status>
-              <div flex class="workspace-details-description"
-                   ng-show="(workspaceDetailsController.errorMessage)">
-                {{workspaceDetailsController.errorMessage}}
-              </div>
-            </div>
-          </che-label-container>
-
-          <!-- Other workspace details sections -->
-          <che-label-container ng-if="!workspaceDetailsController.isCreationFlow"
-                               ng-repeat="section in workspaceDetailsController.getSections()"
-                               che-label-name="{{section.title}}" che-label-description="{{section.description}}">
-            <div che-compile="section.content"></div>
-          </che-label-container>
-
-          <!-- Export workspace -->
-          <che-label-container che-label-name="Export workspace">
-            <export-workspace workspace-id="{{workspaceDetailsController.workspaceId}}"
-                              workspace-details="workspaceDetailsController.workspaceDetails"
-                              workspace-export-disabled="workspaceDetailsController.isCreationFlow"></export-workspace>
-          </che-label-container>
-
-          <!-- Delete workspace -->
-          <che-label-container class="workspace-details-delete-label"
-                               che-label-name="Delete workspace"
-                               che-label-description="This is irreversible. Deleting your workspace will also delete its projects.">
-            <che-button-danger che-button-title="Delete"
-                               ng-disabled="workspaceDetailsController.isCreationFlow || (workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsController.getWorkspaceStatus() !== 'STOPPED' && workspaceDetailsController.getWorkspaceStatus() !== 'ERROR')"
-                               ng-click="workspaceDetailsController.deleteWorkspace()"></che-button-danger>
-          </che-label-container>
-
-        </div>
-      </md-tab-body>
-    </md-tab>
-
     <!-- Config tab -->
     <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Config);">
       <md-tab-label>
@@ -213,28 +122,6 @@
               workspace-config-on-change="workspaceDetailsController.updateWorkspaceConfigImport(config)"></che-workspace-config-import>
           </ng-form>
         </che-label-container>
-      </md-tab-body>
-    </md-tab>
-
-    <!-- Runtime Tab -->
-    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Runtime);">
-      <md-tab-label>
-        <span class="che-tab-label-title">Runtime</span>
-      </md-tab-label>
-      <md-tab-body>
-        <ng-form name="workspaceRuntimeForm">
-          <workspace-environments
-            ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Runtime, workspaceRuntimeForm)"
-            workspace-runtime="workspaceDetailsController.workspaceDetails.runtime"
-            workspace-creation-flow="workspaceDetailsController.isCreationFlow"
-            workspace-name="workspaceDetailsController.newName"
-            stack-id="workspaceDetailsController.stackId"
-            environment-name="workspaceDetailsController.workspaceDetails.config.defaultEnv"
-            workspace-config="workspaceDetailsController.workspaceDetails.config"
-            workspace-imported-recipe="workspaceDetailsController.workspaceImportedRecipe"
-            machines-view-status="workspaceDetailsController.machinesViewStatus"
-            environment-on-change="workspaceDetailsController.updateWorkspaceConfigEnvironment()"></workspace-environments>
-        </ng-form>
       </md-tab-body>
     </md-tab>
 

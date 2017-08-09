@@ -34,15 +34,12 @@
         line-height 47px
         background-color $cat-gray-color
         border 1px solid $very-light-grey-color
-
       .che-list-item-checkbox
         min-width 50px
         height inherit
-
         md-checkbox
           top 0
           margin 0
-
           div.md-container
             left calc(50% - 10px)
 
@@ -56,12 +53,12 @@
       span
         padding-right 25px
 
-  .environment-variables-list
+  .machine-servers-list
     margin-left 0
     margin-right 0
     margin-bottom 1px
     che-box-shadow()
-  .environment-variables-list .environment-variables-item
+  .machine-servers-list .machine-servers-item
     position relative
     background-color $che-white-color
     border 1px solid $very-light-grey-color
@@ -72,34 +69,28 @@
     md-item.che-list-item
       display block
       border none
-
     md-item-content
       display block
       border none
-
       md-checkbox[disabled] div.md-icon
         border none
-
       md-switch
         overflow visible !important
-
       .che-list-item-row
         line-height 58px
         height 58px
         .list-servers-item-runtime
           line-height 22px
-
         .che-list-item-checkbox
           min-width 50px
           height inherit
-
           md-checkbox
             top 0
             margin 0
             div.md-container
               left calc(50% - 10px)
 
-    .environment-variables-actions
+    .machine-servers-actions
       filter grayscale(100%) opacity(50%)
       min-width 120px
       & > *
