@@ -39,6 +39,7 @@ export class MachineServersController {
   private serversList: Array<IServerListItem> = [];
   private serversSelectedNumber: number = 0;
   private onChange: Function;
+  private hasUserScope: boolean;
 
   /**
    * Default constructor that is using resource.
@@ -72,9 +73,13 @@ export class MachineServersController {
       return;
     }
     this.serversList = [];
+    this.hasUserScope = false;
     Object.keys(this.servers).forEach((reference: string) => {
       const serverItem = angular.extend({}, {reference: reference}, this.servers[reference]);
       serverItem.protocol = serverItem.protocol ? serverItem.protocol : '-';
+      if (!this.hasUserScope && serverItem.userScope) {
+        this.hasUserScope = true;
+      }
       this.serversList.push(serverItem);
     });
   }
@@ -129,7 +134,6 @@ export class MachineServersController {
     this.serversSelectedNumber = 0;
   }
 
-
   /**
    * Updates the existing server or create a new one.
    * @param {string} reference
@@ -149,7 +153,6 @@ export class MachineServersController {
     this.environmentManager.setServers(this.selectedMachine, this.servers);
     this.onChange();
   }
-
 
   /**
    * Show dialog to edit the existing server or add a new one.
@@ -197,7 +200,6 @@ export class MachineServersController {
       this.onChange();
     });
   }
-
 
   /**
    * Show confirmation popup before environment server to delete.

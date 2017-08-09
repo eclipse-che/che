@@ -1,7 +1,7 @@
 <div class="che-machine-servers">
   <div flex>
     <!-- Servers list header -->
-    <div md-scroll-y flex layout="column" md-theme="maincontent-theme">
+    <div flex layout="column" md-theme="maincontent-theme">
       <che-list-header che-add-button-title="Add Server item"
                        che-on-add="machineServersController.showEditDialog()"
                        che-delete-button-title="Delete"
@@ -15,6 +15,7 @@
           <!-- Checkbox -->
           <div layout="column" layout-align="center center" class="che-list-item-checkbox">
             <md-checkbox class="che-list-item-checkbox"
+                         ng-hide="!machineServersController.hasUserScope"
                          aria-label="All environment variables"
                          md-theme="default"
                          ng-checked="machineServersController.isBulkChecked"
@@ -39,9 +40,9 @@
         </div>
       </che-list-header>
       <!-- Servers list-->
-      <che-list class="environment-variables-list" flex
+      <che-list class="machine-servers-list" flex
                 ng-if="machineServersController.serversList && machineServersController.serversList.length > 0">
-        <div class="environment-variables-item"
+        <div class="machine-servers-item"
              ng-repeat="server in machineServersController.serversList | orderBy:['-userScope', machineServersController.serversOrderBy]">
           <che-list-item flex>
             <div flex="100"
@@ -51,6 +52,7 @@
               <!-- Checkbox -->
               <div layout="column" layout-align="center center" class="che-list-item-checkbox">
                 <md-checkbox ng-disabled="!server.userScope"
+                             ng-hide="!machineServersController.hasUserScope"
                              aria-label="Port {{server.reference}}"
                              ng-model="machineServersController.serversSelectedStatus[server.reference]"
                              ng-change="machineServersController.updateSelectedStatus()"></md-checkbox>
@@ -89,7 +91,7 @@
                   </div>
                 </div>
                 <!-- Actions -->
-                <div flex="10" layout="column" layout-align="center end" class="environment-variables-actions">
+                <div flex="10" layout="column" layout-align="center end" class="machine-servers-actions">
                   <did flex layout="row">
                     <div ng-if="server.userScope"
                          ng-click="machineServersController.showEditDialog(server.reference)">

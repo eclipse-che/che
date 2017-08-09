@@ -51,10 +51,6 @@ export class MachineSelectorController {
    */
   private workspaceDetails: che.IWorkspace;
   /**
-   * Workspace config.
-   */
-  private workspaceConfig: che.IWorkspaceConfig;
-  /**
    * Environment.
    */
   private environment: che.IWorkspaceEnvironment;
@@ -95,18 +91,14 @@ export class MachineSelectorController {
   }
 
   /**
-   * Update workspace data.  .runtime
+   * Update workspace data.
    * @param workspaceDetails {che.IWorkspace}
    */
   init(workspaceDetails: che.IWorkspace): void {
     if (!workspaceDetails) {
       return;
     }
-    const workspaceConfig: che.IWorkspaceConfig = workspaceDetails.config;
-    if (!workspaceConfig || angular.equals(workspaceConfig, this.workspaceConfig)) {
-      return;
-    }
-    this.workspaceConfig = angular.copy(workspaceConfig);
+    const workspaceConfig: che.IWorkspaceConfig = angular.copy(workspaceDetails.config);
     const environment = workspaceConfig.environments[workspaceConfig.defaultEnv];
     if (!environment || !environment.recipe) {
       return;
@@ -129,7 +121,7 @@ export class MachineSelectorController {
     this.machinesList.length = 0;
 
     const machines = this.environmentManager.getMachines(this.environment, workspaceDetails.runtime);
-    if (!angular.isArray(machines)) {
+    if (!angular.isArray(machines) || machines.length === 0) {
       return;
     }
     machines.forEach((machine: IEnvironmentManagerMachine) => {
@@ -143,7 +135,7 @@ export class MachineSelectorController {
         isDev: isDev
       });
     });
-    this.updateData(this.selectedMachine.name);
+    this.updateData(this.selectedMachine ? this.selectedMachine.name : machines[0].name);
   }
 
   /**

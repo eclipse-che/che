@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
+import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/che-workspace.factory';
 
 interface IWorkspaceStatusButtonScope extends ng.IScope {
   isDisabled: boolean;
@@ -25,10 +25,10 @@ interface IWorkspaceStatusButtonScope extends ng.IScope {
   onStopWorkspace: (data: { isCreateSnapshot: boolean }) => void;
 }
 
-const STARTING = 'STARTING';
-const RUNNING = 'RUNNING';
-const STOPPING = 'STOPPING';
-const SNAPSHOTTING = 'SNAPSHOTTING';
+const STARTING = WorkspaceStatus[WorkspaceStatus.STARTING];
+const RUNNING = WorkspaceStatus[WorkspaceStatus.RUNNING];
+const STOPPING = WorkspaceStatus[WorkspaceStatus.STOPPING];
+const SNAPSHOTTING = WorkspaceStatus[WorkspaceStatus.SNAPSHOTTING];
 const STOP_WITH_SNAPSHOT = 'Stop with snapshot';
 const STOP_WITHOUT_SNAPSHOT = 'Stop without snapshot';
 

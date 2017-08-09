@@ -11,7 +11,7 @@
 'use strict';
 import {IEnvironmentManagerMachineServer} from '../../../../../components/api/environment/environment-manager-machine';
 
-const PORT_MIN = 1023;
+const PORT_MIN = 1;
 const PORT_MAX = 65535;
 
 /**
@@ -57,7 +57,7 @@ export class EditMachineServerDialogController {
       let server = this.servers[this.toEdit];
       this.reference = this.toEdit;
       this.protocol = server.protocol;
-      this.port = parseInt(<string>server.port, 10);
+      this.port = parseInt(server.port.toString(), 10);
       this.popupTitle = 'Edit the server';
     } else {
       this.protocol = 'http';

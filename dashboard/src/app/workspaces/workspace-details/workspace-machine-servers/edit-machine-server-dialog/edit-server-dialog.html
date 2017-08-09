@@ -22,20 +22,19 @@
         <div ng-message="customValidator">This reference is already in use.</div>
       </che-input-box>
       <!-- Port -->
-
       <che-input-box che-label-name="Port"
                      che-form="editServerForm"
                      che-name="port"
                      che-place-holder="Port number"
                      ng-model="editMachineServerDialogController.port"
                      type="number"
-                     min="1023"
+                     min="1"
                      max="65535"
                      custom-validator="editMachineServerDialogController.isUniquePort($value)"
                      aria-label="Server port number"
                      required>
         <div ng-message="customValidator">This port is already in use.</div>
-        <div ng-message="min">A number should be greater than 1023.</div>
+        <div ng-message="min">A number should be greater than 0.</div>
         <div ng-message="max">A number should be less than 65536.</div>
       </che-input-box>
       <!-- Protocol -->

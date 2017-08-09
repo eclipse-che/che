@@ -27,7 +27,7 @@ import {CheUser} from '../../../components/api/che-user.factory';
  * @author Oleksii Kurinnyi
  */
 
-const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Servers', 'Env_Variables', 'Settings', 'Config', 'Runtime'];
+const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Agents', 'Servers', 'Env_Variables', 'Config'];
 
 export class WorkspaceDetailsController {
   $location: ng.ILocationService;
@@ -61,7 +61,7 @@ export class WorkspaceDetailsController {
   newName: string = '';
   stackId: string = '';
   workspaceDetails: any = {};
-  copyWorkspaceDetails: any = {};
+  originWorkspaceDetails: any = {};
   machinesViewStatus: any = {};
   errorMessage: string = '';
   invalidWorkspace: string = '';
@@ -220,7 +220,7 @@ export class WorkspaceDetailsController {
           name: this.workspaceName
         }
       };
-      this.copyWorkspaceDetails = angular.copy(this.workspaceDetails);
+      this.originWorkspaceDetails = angular.copy(this.workspaceDetails);
       this.cheNamespaceRegistry.fetchNamespaces().then(() => {
         // check provided namespace exists:
         let namespace = this.$location.search().namespace ? this.getNamespace(this.$location.search().namespace) : null;
@@ -410,7 +410,7 @@ export class WorkspaceDetailsController {
       this.loading = false;
     }
     this.workspaceId = this.workspaceDetails.id;
-    this.copyWorkspaceDetails = angular.copy(this.workspaceDetails);
+    this.originWorkspaceDetails = angular.copy(this.workspaceDetails);
     this.switchEditMode();
   }
 
@@ -547,7 +547,7 @@ export class WorkspaceDetailsController {
 
   switchEditMode(): void {
     if (!this.isCreationFlow) {
-      this.editMode = !angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config);
+      this.editMode = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
 
       let status = this.getWorkspaceStatus();
       if (status === 'STOPPED' || status === 'STOPPING') {
@@ -614,7 +614,7 @@ export class WorkspaceDetailsController {
     if (this.isCreationFlow) {
       this.$location.path('/workspaces');
     }
-    this.workspaceDetails = angular.copy(this.copyWorkspaceDetails);
+    this.workspaceDetails = angular.copy(this.originWorkspaceDetails);
     this.updateWorkspaceData();
   }
 
@@ -632,7 +632,7 @@ export class WorkspaceDetailsController {
       this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespaceId, this.workspaceName);
       this.updateWorkspaceData();
       this.cheNotification.showInfo('Workspace updated.');
-      return this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceName);
+      return this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceName).search({tab: this.tab[this.selectedTabIndex]});
     }, (error: any) => {
       this.loading = false;
       this.cheNotification.showError('Update workspace failed.', error);
@@ -683,7 +683,7 @@ export class WorkspaceDetailsController {
       this.updateRecentWorkspace(workspaceData.id);
       this.cheWorkspace.fetchWorkspaces().then(() => {
         this.$location.path('/workspace/' + workspaceData.namespace + '/' + workspaceData.config.name);
-        this.$location.search({page: this.tab[this.selectedTabIndex]});
+        this.$location.search({tab: this.tab[this.selectedTabIndex]});
       });
     }, (error: any) => {
       this.cheNotification.showError('Error during workspace creation.', error);

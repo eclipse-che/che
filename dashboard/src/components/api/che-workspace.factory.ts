@@ -33,6 +33,16 @@ interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   getSettings: any;
 }
 
+export enum WorkspaceStatus {
+  RUNNING = 1,
+  STOPPED,
+  PAUSED,
+  STARTING,
+  STOPPING,
+  SNAPSHOTTING,
+  ERROR
+}
+
 /**
  * This class is handling the workspace retrieval
  * It sets to the array workspaces the current workspaces which are not temporary
@@ -353,7 +363,7 @@ export class CheWorkspace {
         'machines': {
           'dev-machine': {
             'attributes': {'memoryLimitBytes': ram},
-            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'agents': ['org.eclipse.che.ws-agentItem', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
         }
       };
@@ -377,7 +387,7 @@ export class CheWorkspace {
     }
 
     let devMachine = this.lodash.find(defaultEnvironment.machines, (machine: any) => {
-      return machine.agents.indexOf('org.eclipse.che.ws-agent') >= 0;
+      return machine.agents.indexOf('org.eclipse.che.ws-agentItem') >= 0;
     });
 
     // check dev machine is provided and add if there is no:
@@ -386,7 +396,7 @@ export class CheWorkspace {
         'name': 'ws-machine',
         'attributes': {'memoryLimitBytes': ram},
         'type': 'docker',
-        'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+        'agents': ['org.eclipse.che.ws-agentItem', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
       };
       defaultEnvironment.machines[devMachine.name] = devMachine;
     } else {
@@ -654,7 +664,16 @@ export class CheWorkspace {
       });
       this.workspaces.push(workspace);
     }
-    this.workspacesById.set(workspace.id, workspace);
+
+    const workspaceDetails = this.getWorkspaceById(workspace.id);
+    if (workspaceDetails && WorkspaceStatus[workspaceDetails.status] === WorkspaceStatus.RUNNING && workspaceDetails.runtime && !workspace.runtime) {
+      const runtime = angular.copy(workspaceDetails.runtime);
+      this.workspacesById.set(workspace.id, workspace);
+      this.getWorkspaceById(workspace.id).runtime = runtime;
+    } else {
+      this.workspacesById.set(workspace.id, workspace);
+    }
+
     this.startUpdateWorkspaceStatus(workspace.id);
   }
 

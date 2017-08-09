@@ -132,6 +132,8 @@ import {MachineSelector} from './workspace-details/machine-selector/machine-sele
 import {MachineServersController} from './workspace-details/workspace-machine-servers/machine-servers.controller';
 import {MachineServers} from './workspace-details/workspace-machine-servers/machine-servers.directive';
 import {EditMachineServerDialogController} from './workspace-details/workspace-machine-servers/edit-machine-server-dialog/edit-server-dialog.controller';
+import {MachineAgents} from './workspace-details/workspace-machine-agents/machine-agents.directive';
+import {MachineAgentsController} from './workspace-details/workspace-machine-agents/machine-agents.controller';
 
 
 /**
@@ -294,6 +296,9 @@ export class WorkspacesConfig {
     register.directive('cheMachineServers', MachineServers);
 
     register.controller('EditMachineServerDialogController', EditMachineServerDialogController);
+
+    register.controller('MachineAgentsController', MachineAgentsController);
+    register.directive('cheMachineAgents', MachineAgents);
 
     // config routes
     register.app.config(($routeProvider: che.route.IRouteProvider) => {
