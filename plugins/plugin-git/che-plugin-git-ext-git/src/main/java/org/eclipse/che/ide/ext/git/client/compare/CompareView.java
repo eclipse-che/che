@@ -31,7 +31,10 @@ interface CompareView extends View<CompareView.ActionDelegate> {
          */
         void onClose(String newContent);
 
-        /** Performs save of editable panel in diff dialog. */
+        /**
+         * Performs save of editable panel in diff dialog.
+         * Does nothing if content isn't editable.
+         */
         void onSaveChangesClicked();
 
         /** Shows next diff. */

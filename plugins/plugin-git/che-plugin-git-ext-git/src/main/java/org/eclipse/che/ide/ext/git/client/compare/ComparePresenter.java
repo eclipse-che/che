@@ -94,6 +94,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         this.revision = revision;
 
         this.compareWithLatest = true;
+        view.setEnableSaveChangesButton(true);
 
         setupCurrentFile(currentFile);
         showCompareForCurrentFile();
@@ -122,6 +123,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         this.revisionB = revisionB;
 
         this.compareWithLatest = false;
+        view.setEnableSaveChangesButton(false);
 
         setupCurrentFile(currentFile);
         showCompareForCurrentFile();
@@ -248,11 +250,13 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     @Override
     public void onSaveChangesClicked() {
-        view.getEditableContent(content -> {
-            if (isEdited(content)) {
-                saveContent(content);
-            }
-        });
+        if (compareWithLatest) {
+            view.getEditableContent(content -> {
+                if (isEdited(content)) {
+                    saveContent(content);
+                }
+            });
+        }
     }
 
     @Override
@@ -309,6 +313,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     /** Saves given contents into file under edit. */
     private void saveContent(final String content) {
+        localContent = content;
         comparedFile.updateContent(content)
                     .then(ignored -> {
                         final Container parent = comparedFile.getParent();
