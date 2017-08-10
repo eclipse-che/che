@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestHttpJsonRequestFactoryForAdmin;
+import org.eclipse.che.selenium.core.requestfactory.TestAdminHttpJsonRequestFactory;
 
 import java.net.URLEncoder;
 
@@ -34,7 +34,7 @@ public class TestUserServiceClient {
 
     @Inject
     public TestUserServiceClient(TestApiEndpointUrlProvider apiEndpointProvider,
-                                 TestHttpJsonRequestFactoryForAdmin requestFactory) {
+                                 TestAdminHttpJsonRequestFactory requestFactory) {
         this.apiEndpoint = apiEndpointProvider.get().toString();
         this.requestFactory = requestFactory;
     }

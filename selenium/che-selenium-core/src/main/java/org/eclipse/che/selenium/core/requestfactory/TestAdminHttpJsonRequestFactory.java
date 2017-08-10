@@ -12,23 +12,22 @@ package org.eclipse.che.selenium.core.requestfactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.AdminTestUser;
 
 /**
  * @author Dmytro Nochevnov
  */
-@Singleton
-public class TestHttpJsonRequestFactoryForDefaultUser extends TestHttpJsonRequestFactory {
-    private Provider<DefaultTestUser> testUserProvider;
+public class TestAdminHttpJsonRequestFactory extends TestHttpJsonRequestFactory {
+
+    private Provider<AdminTestUser> adminProvider;
 
     @Inject
-    public TestHttpJsonRequestFactoryForDefaultUser(Provider<DefaultTestUser> testUserProvider) {
-        this.testUserProvider = testUserProvider;
+    public TestAdminHttpJsonRequestFactory(Provider<AdminTestUser> adminProvider) {
+        this.adminProvider = adminProvider;
     }
 
     protected String getAuthToken() {
-        return testUserProvider.get().getAuthToken();
+        return adminProvider.get().getAuthToken();
     }
 }

@@ -24,7 +24,6 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestHttpJsonRequestFactoryForUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -281,18 +280,6 @@ public class TestWorkspaceServiceClient {
                                                    WorkspaceStatus.RUNNING,
                                                    workspace.getStatus()));
         }
-    }
-
-    /**
-     * Get instance of client where each requests to server have authorisation header with certain auth token.
-     * @param authToken
-     *         auth token to be set in each requests to server.
-     * @return instance which is ready to use certain auth token.
-     */
-    public TestWorkspaceServiceClient getInstance(String authToken) {
-            return new TestWorkspaceServiceClient(apiEndpointProvider,
-                                                  new TestHttpJsonRequestFactoryForUser(authToken),
-                                                  testUserNamespaceResolver);
     }
 
     private String getNameBasedUrl(String workspaceName, String username) {

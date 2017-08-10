@@ -16,11 +16,11 @@ import java.util.Objects;
 /**
  * @author Dmytro Nochevnov
  */
-public class TestHttpJsonRequestFactoryForUser extends TestHttpJsonRequestFactory {
+public class TestUserHttpJsonRequestFactory extends TestHttpJsonRequestFactory {
 
     private final String authToken;
 
-    public TestHttpJsonRequestFactoryForUser(@NotNull String authToken) {
+    public TestUserHttpJsonRequestFactory(@NotNull String authToken) {
         Objects.requireNonNull(authToken);
         this.authToken = authToken;
     }
