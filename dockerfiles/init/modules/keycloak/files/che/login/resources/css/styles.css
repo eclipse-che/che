@@ -1,8 +1,10 @@
 
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
 body {
-    background-color: #1b2b57;  
+    background-color: #1b2b57;
     color: #4a90e2;
-    font-family: 'Open Sans';
+    font-family: 'Roboto';
     font-size: 14px;
 }
 
@@ -12,7 +14,7 @@ a {
 }
 
 a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 div#kc-content {
@@ -30,7 +32,7 @@ div#kc-form {
 
 div#kc-form label {
     display: block;
-    font-family: 'Open Sans';
+    font-family: 'Roboto';
     font-size: 24px;
     margin-bottom: 10px;
 }
@@ -51,6 +53,10 @@ div#info-area p {
     text-shadow: none;
 }
 
+input {
+    font-family: 'Roboto';
+}
+
 input[type=text], input[type=password] {
     width: 375px;
     height: 46px;
@@ -62,19 +68,19 @@ input[type=text], input[type=password] {
     font-size: 16px;
     font-size: 18px;
     vertical-align: middle;
-    border: none;    
+    border: none;
 }
 
 input[type=text]:focus, input[type=password]:focus {
-  background: #3f55ae;
-  outline: none;
+    background: #3f55ae;
+    outline: none;
 }
 
 input[type=submit] {
     border: none;
     width: 180px;
     height: 40px;
-    border-radius: 5px;    
+    border-radius: 5px;
     font-size: 16px;
     font-weight: bold;
     color: #fff;
@@ -85,7 +91,7 @@ input[type=submit] {
     margin-top: 20px;
     margin-right: 10px;
     margin-bottom: 25px;
-}    
+}
 
 input[type=submit]:hover {
     background-color: #398842;
@@ -99,7 +105,7 @@ div#kc-form-options div {
 
 div#kc-form-options a {
     font-size: 14px;
-    font-family: 'Open Sans';
+    font-family: 'Roboto';
 }
 
 div#kc-form-options div label {
@@ -116,15 +122,15 @@ div#kc-feedback {
 }
 
 .kc-feedback-text {
-  color: #fff;  
-  font-size: 18px;
-  text-align: center;
-  display: block;
-  margin-bottom: 25px;
-  padding: 15px; 
+    color: #fff;
+    font-size: 18px;
+    text-align: left;
+    display: block;
+    margin-bottom: 25px;
+    padding: 15px;
 }
 
-div#kc-feedback-wrapper {    
+div#kc-feedback-wrapper {
     padding: 1em;
 }
 
@@ -164,7 +170,7 @@ div#kc-error-message {
     text-align: center;
     display: inline-block;
     font-size: 16px;
-    padding-left: 15px; 
+    padding-left: 15px;
     padding-right: 15px;
 }
 
@@ -172,16 +178,16 @@ div#kc-header {
     display: none;
 }
 
-div#kc-registration {    
+div#kc-registration {
     font-size: 20px;
     margin-bottom: 20px;
 }
 
 div#social-login {
-	border-left: 1px solid rgba(255, 255, 255, 0.2);
-	float: right;
-	width: 150px;
-	padding: 20px 0 200px 40px;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    float: right;
+    width: 150px;
+    padding: 20px 0 200px 40px;
 }
 
 div.social-login span {
@@ -204,7 +210,7 @@ div#kc-social-providers ul li span {
 }
 
 a.zocial {
-    border: none;            
+    border: none;
     padding-top: 0.2em;
     padding-bottom: 0.2em;
 }
@@ -241,8 +247,7 @@ a.zocial {
 }
 
 .kc-form-title {
-    font-family: 'Open Sans';
-    font-size: 20px;    
+    font-family: 'Roboto';
+    font-size: 20px;
     margin-bottom: 10px;
 }
-
