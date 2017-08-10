@@ -73,6 +73,15 @@ export class StackSelectorSvc extends Observable<any> {
   }
 
   /**
+   * Sets stackId.
+   *
+   * @param {string} stackId
+   */
+  setStackId(stackId: string): void {
+    this.onStackSelected(stackId);
+  }
+
+  /**
    * Callback which is called when stack is selected.
    *
    * @param {string} stackId a stack ID

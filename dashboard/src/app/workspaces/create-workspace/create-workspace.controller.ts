@@ -129,7 +129,7 @@ export class CreateWorkspaceController {
 
     if (!this.stack.workspaceConfig) {
       this.memoryByMachine = {};
-      this.stackMachines = []
+      this.stackMachines = [];
       return;
     }
 

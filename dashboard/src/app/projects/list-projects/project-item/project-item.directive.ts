@@ -35,7 +35,8 @@ export class CheProjectItem {
       isDisplayWorkspace: '=cheDisplayWorkspace',
       isSelectable: '=cheSelectable',
       isSelect: '=?ngModel',
-      onCheckboxClick: '&?cheOnCheckboxClick'
+      onCheckboxClick: '&?cheOnCheckboxClick',
+      hasAction: '=?cheHasAction'
     };
 
     this.templateUrl = 'app/projects/list-projects/project-item/project-item.html';

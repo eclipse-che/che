@@ -148,7 +148,7 @@ export class WidgetConfig {
       .directive('cheListHeaderColumn', CheListHeaderColumn)
       .factory('cheListHelperFactory', CheListHelperFactory)
 
-      .directive('cheListHeaderAdditional', CheListHeaderAdditionalParts)
+      .directive('cheListHeaderAdditionalParts', CheListHeaderAdditionalParts)
       .directive('cheListHeaderAddButton', CheListHeaderAddButton)
       .directive('cheListHeaderImportButton', CheListHeaderImportButton)
       .directive('cheListHeaderDeleteButton', CheListHeaderDeleteButton)

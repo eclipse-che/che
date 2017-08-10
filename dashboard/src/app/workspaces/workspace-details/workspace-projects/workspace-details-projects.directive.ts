@@ -19,10 +19,12 @@
  * @description
  * <workspace-details-project></workspace-details-projects>` for displaying workspace projects entry.
  *
- * @param {Function=} get-workspace-status
+ * @param {expression=} projects-list the list or projects
+ * @param {Function=} projects-on-add the callback which is called when user adds a template or imports a project
  *
  * @usage
- *   <workspace-details-project get-workspace-status="ctrl.getWorkspaceStatus()"></workspace-details-project>
+ *   <workspace-details-project projects-list="ctrl.projects"
+ *                              projects-on-add="ctrl.projectsOnAdd(templates)"></workspace-details-project>
  *
  * @author Ann Shumilova
  */
@@ -45,7 +47,9 @@ export class WorkspaceDetailsProjects implements ng.IDirective {
    */
   constructor () {
     this.scope = {
-      getWorkspaceStatus: '&'
+      workspaceId: '@',
+      workspaceDetails: '=',
+      projectsOnChange: '&'
     };
   }
 }

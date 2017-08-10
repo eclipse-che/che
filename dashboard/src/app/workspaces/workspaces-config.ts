@@ -23,6 +23,7 @@ import {WorkspaceDetailsSsh} from './workspace-details/workspace-ssh/workspace-d
 import {WorkspaceDetailsSshCtrl} from './workspace-details/workspace-ssh/workspace-details-ssh.controller';
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
 import {WorkspaceDetailsProjects} from './workspace-details/workspace-projects/workspace-details-projects.directive';
+import {WorkspaceDetailsProjectsService} from './workspace-details/workspace-projects/workspace-details-projects.service';
 import {AddProjectPopoverController} from './workspace-details/workspace-projects/add-project-popover/add-project-popover.controller';
 import {AddProjectPopover} from './workspace-details/workspace-projects/add-project-popover/add-project-popover.directive';
 import {WorkspaceDetailsService} from './workspace-details/workspace-details.service';
@@ -176,6 +177,7 @@ export class WorkspacesConfig {
 
     register.controller('WorkspaceDetailsProjectsCtrl', WorkspaceDetailsProjectsCtrl);
     register.directive('workspaceDetailsProjects', WorkspaceDetailsProjects);
+    register.service('workspaceDetailsProjectsService', WorkspaceDetailsProjectsService);
     register.controller('AddProjectPopoverController', AddProjectPopoverController);
     register.directive('addProjectPopover', AddProjectPopover);
     register.service('workspaceDetailsService', WorkspaceDetailsService);
@@ -329,7 +331,12 @@ export class WorkspacesConfig {
         reloadOnSearch: false,
         templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
         controller: 'WorkspaceDetailsController',
-        controllerAs: 'workspaceDetailsController'
+        controllerAs: 'workspaceDetailsController',
+        resolve: {
+          initData: ['workspaceConfigService', (workspaceConfigService: WorkspaceConfigService) => {
+            return workspaceConfigService.resolveCreateWorkspaceRoute();
+          }]
+        }
       })
       .accessWhen('/create-workspace', {
         title: 'New Workspace',

@@ -666,4 +666,5 @@ export class CheWorkspace {
 
     this.startUpdateWorkspaceStatus(workspace.id);
   }
+
 }
