@@ -1613,17 +1613,17 @@ public class DarkTheme implements Theme {
 
     @Override
     public String vcsStatusAddedColor() {
-        return "LightGreen";
+        return "#72ad42";
     }
 
     @Override
     public String vcsStatusModifiedColor() {
-        return "CornflowerBlue";
+        return "#3193d4";
     }
 
     @Override
     public String vcsStatusUntrackedColor() {
-        return "LightCoral";
+        return "#e0b91d";
     }
 
     @Override

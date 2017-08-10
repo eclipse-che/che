@@ -112,10 +112,13 @@ public class GitChangesHandler {
                 if (status.getUntracked().contains(nodeLocation) && file.getVcsStatus() != UNTRACKED) {
                     file.setVcsStatus(UNTRACKED);
                     tree.refresh(node);
+                } else if (status.getModified().contains(nodeLocation) || status.getChanged().contains(nodeLocation)) {
+                    file.setVcsStatus(MODIFIED);
+                    tree.refresh(node);
                 } else if (status.getAdded().contains(nodeLocation) && file.getVcsStatus() != ADDED) {
                     file.setVcsStatus(ADDED);
                     tree.refresh(node);
-                } else if (!status.getUntracked().contains(nodeLocation) && file.getVcsStatus() == UNTRACKED) {
+                } else {
                     file.setVcsStatus(VcsStatus.NOT_MODIFIED);
                     tree.refresh(node);
                 }
@@ -126,10 +129,10 @@ public class GitChangesHandler {
                            .forEach(editor -> {
                                EditorTab tab = multiPartStackProvider.get().getTabByPart(editor);
                                String nodeLocation = tab.getFile().getLocation().removeFirstSegments(1).toString();
-                               if (status.getModified().contains(nodeLocation) || status.getChanged().contains(nodeLocation)) {
-                                   tab.setTitleColor(MODIFIED.getColor());
-                               } else if (status.getUntracked().contains(nodeLocation)) {
+                               if (status.getUntracked().contains(nodeLocation)) {
                                    tab.setTitleColor(UNTRACKED.getColor());
+                               } else if (status.getModified().contains(nodeLocation) || status.getChanged().contains(nodeLocation)) {
+                                   tab.setTitleColor(MODIFIED.getColor());
                                } else if (status.getAdded().contains(nodeLocation)) {
                                    tab.setTitleColor(ADDED.getColor());
                                } else {

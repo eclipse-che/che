@@ -161,8 +161,9 @@ div[maximized="true"] svg[name="workBenchIconMaximize"] {
     width: auto;
     overflow: visible;
 
-    text-decoration: underline;
-    color: red;
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: red;
 }
 
 /*@sprite .ide-PartStack-Tab-Line-Warning {*/
@@ -176,6 +177,7 @@ div[maximized="true"] svg[name="workBenchIconMaximize"] {
     width: auto;
     overflow: visible;
 
-    text-decoration: underline;
-    color: #FFD31E;
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: #FFD31E;
 }

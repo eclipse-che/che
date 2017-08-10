@@ -1589,17 +1589,17 @@ public class LightTheme implements Theme {
 
     @Override
     public String vcsStatusAddedColor() {
-        return "#1bb199";
+        return "#0a7700";
     }
 
     @Override
     public String vcsStatusModifiedColor() {
-        return "#1a68af";
+        return "#0768B0";
     }
 
     @Override
     public String vcsStatusUntrackedColor() {
-        return "LightCoral";
+        return "#ab8900";
     }
 
     @Override
