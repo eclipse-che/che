@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -33,7 +32,6 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
@@ -49,7 +47,6 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
     private final RevisionListView        view;
     private final GitServiceClient        service;
     private final GitLocalizationConstant locale;
-    private final AppContext              appContext;
     private final NotificationManager     notificationManager;
 
     private Revision selectedRevision;
@@ -62,14 +59,12 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
                                  GitServiceClient service,
                                  GitLocalizationConstant locale,
                                  NotificationManager notificationManager,
-                                 DialogFactory dialogFactory,
-                                 AppContext appContext) {
+                                 DialogFactory dialogFactory) {
         this.view = view;
         this.comparePresenter = comparePresenter;
         this.dialogFactory = dialogFactory;
         this.service = service;
         this.locale = locale;
-        this.appContext = appContext;
         this.notificationManager = notificationManager;
 
         this.view.setDelegate(this);
