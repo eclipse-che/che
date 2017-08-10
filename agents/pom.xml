@@ -31,6 +31,7 @@
         <module>ssh</module>
         <module>unison</module>
         <module>ls-json</module>
+        <module>ls-java</module>
         <module>git-credentials</module>
         <module>ls-php</module>
         <module>ls-python</module>
