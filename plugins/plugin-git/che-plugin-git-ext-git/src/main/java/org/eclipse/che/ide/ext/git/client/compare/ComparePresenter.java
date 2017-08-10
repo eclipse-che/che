@@ -156,37 +156,43 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                     });
     }
 
-    private void showCompareBetweenRevisionsForFile(File file, Status status) {
-        final Path pathToFile = file.getLocation();
+    private void showCompareBetweenRevisionsForFile(final File file, final Status status) {
+        // Get project/module in which git repository is located.
+        final Container rootProject = GitUtil.getRootProject(file);
+        if (rootProject == null) {
+            return;
+        }
 
-        view.setTitle(pathToFile.toString());
+        final Path relPath = file.getLocation().removeFirstSegments(rootProject.getLocation().segmentCount());
+
+        view.setTitle(relPath.toString());
         if (status == Status.ADDED) {
-            service.showFileContent(projectLocation, pathToFile, revisionB)
+            service.showFileContent(projectLocation, relPath, revisionB)
                    .then(response -> {
                        view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
                                             revisionA == null ? "" : revisionA + locale.compareReadOnlyTitle());
-                       view.show("", response.getContent(), pathToFile.toString(), true);
+                       view.show("", response.getContent(), relPath.toString(), true);
                    })
                    .catchError(error -> {
                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else if (status == Status.DELETED) {
-            service.showFileContent(projectLocation, pathToFile, revisionA)
+            service.showFileContent(projectLocation, relPath, revisionA)
                    .then(response -> {
                        view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(), revisionA + locale.compareReadOnlyTitle());
-                       view.show(response.getContent(), "", pathToFile.toString(), true);
+                       view.show(response.getContent(), "", relPath.toString(), true);
                    })
                    .catchError(error -> {
                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else {
-            service.showFileContent(projectLocation, pathToFile, revisionA)
+            service.showFileContent(projectLocation, relPath, revisionA)
                    .then(contentAResponse -> {
-                       service.showFileContent(projectLocation, pathToFile, revisionB)
+                       service.showFileContent(projectLocation, relPath, revisionB)
                               .then(contentBResponse -> {
                                   view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
                                                        revisionA + locale.compareReadOnlyTitle());
-                                  view.show(contentAResponse.getContent(), contentBResponse.getContent(), pathToFile.toString(), true);
+                                  view.show(contentAResponse.getContent(), contentBResponse.getContent(), relPath.toString(), true);
                               })
                               .catchError(error -> {
                                   notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
@@ -195,7 +201,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         }
     }
 
-    private void showCompareWithLatestForFile(File file, Status status) {
+    private void showCompareWithLatestForFile(final File file, final Status status) {
         this.comparedFile = file;
 
         if (status.equals(ADDED)) {
