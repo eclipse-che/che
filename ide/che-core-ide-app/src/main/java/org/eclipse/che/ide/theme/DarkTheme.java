@@ -1383,7 +1383,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String projectExplorerVcsHead() {
-        return "#7A8088";
+        return "#a7a0a0";
     }
 
     @Override
