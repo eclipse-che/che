@@ -25,9 +25,9 @@ import org.eclipse.che.ide.context.QueryParameters;
 @Singleton
 public class WorkspaceComponentProvider implements Provider<WorkspaceComponent> {
 
-    private final Provider<DefaultWorkspaceComponent> workspaceComponentProvider;
-    private final Provider<FactoryWorkspaceComponent> factoryComponentProvider;
-    private final QueryParameters                     queryParameters;
+    private final Provider<DefaultWorkspaceComponent>       workspaceComponentProvider;
+    private final Provider<FactoryWorkspaceComponent>       factoryComponentProvider;
+    private final QueryParameters                           queryParameters;
 
     @Inject
     public WorkspaceComponentProvider(Provider<DefaultWorkspaceComponent> workspaceComponentProvider,
@@ -40,7 +40,11 @@ public class WorkspaceComponentProvider implements Provider<WorkspaceComponent> 
 
     @Override
     public WorkspaceComponent get() {
-        final String factoryParams = queryParameters.getByName("factory");
-        return factoryParams.isEmpty() ? workspaceComponentProvider.get() : factoryComponentProvider.get();
+        if (!queryParameters.getByName("factory").isEmpty()) {
+            return factoryComponentProvider.get();
+        }
+
+        return workspaceComponentProvider.get();
     }
+
 }

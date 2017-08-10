@@ -405,7 +405,7 @@
     "id": "dotnet-default",
     "creator": "ide",
     "name": ".NET",
-    "description": "Default .NET Stack with .NET Core SDK",
+    "description": "Default .NET 2.0 Stack with .NET Core SDK",
     "scope": "general",
     "tags": [
       "Ubuntu",
@@ -415,11 +415,11 @@
     "components": [
       {
         "name": "Ubuntu",
-        "version": "14.04"
+        "version": "16.04"
       },
       {
         "name": ".NET Core SDK",
-        "version": "1.0.0-preview1-002702"
+        "version": "2.0.0-preview2-006497"
       }
     ],
     "source": {
@@ -2364,7 +2364,7 @@
           "goal": "Build"
         }
       }, {
-        "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
+        "commandLine": "scl enable rh-maven33 'mvn compile vertx:run -f ${current.project.path}'",
         "name": "run",
         "type": "custom",
         "attributes": {
@@ -2441,7 +2441,7 @@
           "type": "mvn"
         },
         {
-          "commandLine": "java -jar ${current.project.path}/target/*.jar",
+          "commandLine": "scl enable rh-maven33 'mvn compile spring-boot:run -f ${current.project.path}'",
           "name": "run",
           "type": "custom",
           "attributes": {

@@ -55,7 +55,5 @@ public final class Constants {
     public static final String COMMAND_PREVIEW_URL_ATTRIBUTE_NAME = "previewUrl";
     public static final String COMMAND_GOAL_ATTRIBUTE_NAME        = "goal";
 
-    public static final String ACTIVITY_CHECKER     = "activity-checker";
-
     private Constants() {}
 }

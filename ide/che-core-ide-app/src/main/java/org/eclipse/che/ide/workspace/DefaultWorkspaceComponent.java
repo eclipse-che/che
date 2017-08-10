@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -20,15 +21,21 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.factory.utils.InitialProjectImporter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Performs default start of IDE - creates new or starts latest workspace.
@@ -38,6 +45,8 @@ import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
  */
 @Singleton
 public class DefaultWorkspaceComponent extends WorkspaceComponent {
+
+    private InitialProjectImporter initialProjectImporter;
 
     @Inject
     public DefaultWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
@@ -54,6 +63,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
                                      DtoFactory dtoFactory,
                                      LoaderPresenter loader,
                                      RequestTransmitter transmitter,
+                                     InitialProjectImporter initialProjectImporter,
                                      WorkspaceEventsHandler handler) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
@@ -69,6 +79,8 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
               dtoFactory,
               loader,
               transmitter);
+
+        this.initialProjectImporter = initialProjectImporter;
     }
 
     /** {@inheritDoc} */
@@ -88,6 +100,30 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
     }
 
     @Override
-    public void tryStartWorkspace() {
+    public void onWsAgentStarted(WsAgentStateEvent event) {
+        super.onWsAgentStarted(event);
+
+        Scheduler.get().scheduleDeferred(() -> {
+            importProjects();
+        });
     }
+
+    /**
+     * Imports all projects described in workspace configuration but not existed on file system.
+     */
+    private void importProjects() {
+        final Project[] projects = appContext.getProjects();
+
+        List<Project> importProjects = new ArrayList<>();
+        for (Project project : projects) {
+            if (project.getSource() == null || project.getSource().getLocation() == null || project.exists()) {
+                continue;
+            }
+
+            importProjects.add(project);
+        }
+
+        initialProjectImporter.importProjects(importProjects);
+    }
+
 }

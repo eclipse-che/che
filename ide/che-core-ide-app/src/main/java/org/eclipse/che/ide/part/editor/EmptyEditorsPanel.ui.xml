@@ -65,7 +65,7 @@
             border: 1px solid fontColor;
             color: fontColor;
             border-radius: 2px;
-            margin-left: 50px;
+            margin-left: 30px;
         }
 
         .actionLabel {

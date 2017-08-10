@@ -12,6 +12,7 @@ package org.eclipse.che.ide.part.explorer.project;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -46,13 +47,17 @@ public class EmptyTreePanel extends EmptyEditorsPanel {
         super(actionManager, perspectiveManagerProvider, keyBindingAgent, appContext, localizationConstant, newFileAction,
               createProjectAction, importProjectAction);
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
+
         root.getStyle().setTop(46, Style.Unit.PX);
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+        //Sometimes initialization of Create/Import Project actions are completed after the Empty editor page is rendered.
+        //In this case we need to wait when actions will be initialized.
+        new Timer() {
             @Override
-            public void execute() {
+            public void run() {
                 renderNoProjects();
             }
-        });
+        }.schedule(500);
     }
 
     @Override
@@ -66,4 +71,5 @@ public class EmptyTreePanel extends EmptyEditorsPanel {
             }
         });
     }
+
 }
