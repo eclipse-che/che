@@ -164,7 +164,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
 
             String packagePath = packageRootPath.toOSString();
             if (!packagePath.endsWith("/")) {
-                packagePath += "/";
+                packagePath += '/';
             }
 
             String pathToClass = filePath.substring(packagePath.length());

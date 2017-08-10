@@ -149,6 +149,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
         switch (context.getContextType()) {
             case FILE:
             case FOLDER:
+            case SET:
             case PROJECT:
                 return createContainerSuite(tests);
             case CURSOR_POSITION:
