@@ -88,6 +88,9 @@ public interface GitLocalizationConstant extends Messages {
     String buttonScroll();
 
     // MESSAGES
+    @Key("messages.file_is_not_under_git")
+    String messageFileIsNotUnderGit(String file);
+
     @Key("messages.unableGetSshKey")
     String messagesUnableGetSshKey();
 

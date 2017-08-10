@@ -28,8 +28,10 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.resource.Path;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.DELETED;
 
@@ -78,7 +80,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     }
 
     /**
-     * Show compare window for given set of files between given revision and latest code version.
+     * Show compare window for given set of files between given revision and HEAD.
      *
      * @param changedItems
      *         ordered touched files
@@ -96,7 +98,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         this.compareWithLatest = true;
         view.setEnableSaveChangesButton(true);
 
-        setupCurrentFile(currentFile);
+        findCurrentFile(currentFile);
         showCompareForCurrentFile();
     }
 
@@ -125,7 +127,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         this.compareWithLatest = false;
         view.setEnableSaveChangesButton(false);
 
-        setupCurrentFile(currentFile);
+        findCurrentFile(currentFile);
         showCompareForCurrentFile();
     }
 
@@ -162,6 +164,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
         final Container gitDir = getGitDir(file);
         if (gitDir == null) {
+            notificationManager.notify(locale.messageFileIsNotUnderGit(file.toString()), WARNING, EMERGE_MODE);
             return;
         }
         final Path relPath = getRelPath(gitDir, file);
@@ -190,6 +193,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     private void showCompareBetweenRevisionsForFile(final File file, final Status status) {
         final Container gitDir = getGitDir(file);
         if (gitDir == null) {
+            notificationManager.notify(locale.messageFileIsNotUnderGit(file.toString()), WARNING, EMERGE_MODE);
             return;
         }
         final Path relPath = getRelPath(gitDir, file);
@@ -299,14 +303,19 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      * @param currentFile
      *         name of file to set up as current; if null or invalid, the first one will be chosen.
      */
-    private void setupCurrentFile(@Nullable String currentFile) {
+    private void findCurrentFile(@Nullable String currentFile) {
+        if (currentFile == null) {
+            currentItemIndex = 0;
+            return;
+        }
+
         currentItemIndex = changedItems.getChangedItemsList().indexOf(currentFile);
         if (currentItemIndex == -1) {
             currentItemIndex = 0;
         }
     }
 
-    /** @return true if user edited content in the compare widget i.e. initial and current isn't equal. */
+    /** Returns true if user edited content in the compare widget i.e. initial and current isn't equal. */
     private boolean isEdited(final String newContent) {
         return compareWithLatest && this.localContent != null && !newContent.equals(localContent);
     }
@@ -330,7 +339,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                     });
     }
 
-    /** @return relative path of given file from specified project */
+    /** Returns relative path of given file from specified project */
     private Path getRelPath(final Container project, final File file) {
         return file.getLocation().removeFirstSegments(project.getLocation().segmentCount());
     }

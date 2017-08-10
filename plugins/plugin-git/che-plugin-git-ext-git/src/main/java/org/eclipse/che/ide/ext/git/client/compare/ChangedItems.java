@@ -31,10 +31,9 @@ public class ChangedItems {
     private final Project                       project;
     private final LinkedHashMap<String, Status> changedFilesStatuses;
     private final List<String>                  changedFilesList;
-    private final int                           length;
 
     /**
-     * Creates user-friendly representation of git diff.
+     * Git diff representation.
      *
      * @param project
      *         the project under diff operation
@@ -50,8 +49,6 @@ public class ChangedItems {
         }
 
         changedFilesList = new ArrayList<>(changedFilesStatuses.keySet());
-
-        length = changedFilesList.size();
     }
 
     public Project getProject() {
@@ -59,14 +56,14 @@ public class ChangedItems {
     }
 
     /**
-     * @return number of files in the diff
+     * Returns number of files in the diff.
      */
     public int getFilesQuantity() {
-        return length;
+        return changedFilesList.size();
     }
 
     public boolean isEmpty() {
-        return 0 == length;
+        return 0 == changedFilesList.size();
     }
 
     public Map<String, Status> getChangedItemsMap() {
