@@ -17,7 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -44,7 +43,6 @@ import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.DELET
 @Singleton
 public class ComparePresenter implements CompareView.ActionDelegate {
 
-    private final AppContext              appContext;
     private final EventBus                eventBus;
     private final DialogFactory           dialogFactory;
     private final CompareView             view;
@@ -60,19 +58,16 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     private String  revision;
     private String  localContent;
 
-    private Path   projectLocation;
     private String revisionA;
     private String revisionB;
 
     @Inject
-    public ComparePresenter(AppContext appContext,
-                            EventBus eventBus,
+    public ComparePresenter(EventBus eventBus,
                             DialogFactory dialogFactory,
                             CompareView view,
                             GitServiceClient service,
                             GitLocalizationConstant locale,
                             NotificationManager notificationManager) {
-        this.appContext = appContext;
         this.eventBus = eventBus;
         this.dialogFactory = dialogFactory;
         this.view = view;
@@ -127,7 +122,6 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         this.revisionB = revisionB;
 
         this.compareWithLatest = false;
-        this.projectLocation = appContext.getRootProject().getLocation();
 
         setupCurrentFile(currentFile);
         showCompareForCurrentFile();
@@ -156,18 +150,51 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                     });
     }
 
-    private void showCompareBetweenRevisionsForFile(final File file, final Status status) {
-        // Get project/module in which git repository is located.
-        final Container rootProject = GitUtil.getRootProject(file);
-        if (rootProject == null) {
+    private void showCompareWithLatestForFile(final File file, final Status status) {
+        this.comparedFile = file;
+
+        if (status.equals(ADDED)) {
+            showCompare("");
             return;
         }
 
-        final Path relPath = file.getLocation().removeFirstSegments(rootProject.getLocation().segmentCount());
+        final Container gitDir = getGitDir(file);
+        if (gitDir == null) {
+            return;
+        }
+        final Path relPath = getRelPath(gitDir, file);
+
+        if (status.equals(DELETED)) {
+            service.showFileContent(gitDir.getLocation(), relPath, revision)
+                   .then(content -> {
+                       view.setTitle(relPath.toString());
+                       view.setColumnTitles(locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
+                       view.show(content.getContent(), "", relPath.toString(), false);
+                   })
+                   .catchError(error -> {
+                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                   });
+        } else {
+            service.showFileContent(gitDir.getLocation(), relPath, revision)
+                   .then(content -> {
+                       showCompare(content.getContent());
+                   })
+                   .catchError(error -> {
+                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                   });
+        }
+    }
+
+    private void showCompareBetweenRevisionsForFile(final File file, final Status status) {
+        final Container gitDir = getGitDir(file);
+        if (gitDir == null) {
+            return;
+        }
+        final Path relPath = getRelPath(gitDir, file);
 
         view.setTitle(relPath.toString());
         if (status == Status.ADDED) {
-            service.showFileContent(projectLocation, relPath, revisionB)
+            service.showFileContent(gitDir.getLocation(), relPath, revisionB)
                    .then(response -> {
                        view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
                                             revisionA == null ? "" : revisionA + locale.compareReadOnlyTitle());
@@ -177,7 +204,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else if (status == Status.DELETED) {
-            service.showFileContent(projectLocation, relPath, revisionA)
+            service.showFileContent(gitDir.getLocation(), relPath, revisionA)
                    .then(response -> {
                        view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(), revisionA + locale.compareReadOnlyTitle());
                        view.show(response.getContent(), "", relPath.toString(), true);
@@ -186,9 +213,9 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else {
-            service.showFileContent(projectLocation, relPath, revisionA)
+            service.showFileContent(gitDir.getLocation(), relPath, revisionA)
                    .then(contentAResponse -> {
-                       service.showFileContent(projectLocation, relPath, revisionB)
+                       service.showFileContent(gitDir.getLocation(), relPath, revisionB)
                               .then(contentBResponse -> {
                                   view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
                                                        revisionA + locale.compareReadOnlyTitle());
@@ -197,43 +224,6 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                               .catchError(error -> {
                                   notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                               });
-                   });
-        }
-    }
-
-    private void showCompareWithLatestForFile(final File file, final Status status) {
-        this.comparedFile = file;
-
-        if (status.equals(ADDED)) {
-            showCompare("");
-            return;
-        }
-
-        // Get project/module in which git repository is located.
-        final Container rootProject = GitUtil.getRootProject(file);
-        if (rootProject == null) {
-            return;
-        }
-
-        final Path relPath = file.getLocation().removeFirstSegments(rootProject.getLocation().segmentCount());
-
-        if (status.equals(DELETED)) {
-            service.showFileContent(rootProject.getLocation(), relPath, revision)
-                   .then(content -> {
-                       view.setTitle(file.getLocation().toString());
-                       view.setColumnTitles(locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
-                       view.show(content.getContent(), "", file.getLocation().toString(), false);
-                   })
-                   .catchError(error -> {
-                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                   });
-        } else {
-            service.showFileContent(rootProject.getLocation(), relPath, revision)
-                   .then(content -> {
-                       showCompare(content.getContent());
-                   })
-                   .catchError(error -> {
-                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         }
     }
@@ -305,7 +295,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      * @param currentFile
      *         name of file to set up as current; if null or invalid, the first one will be chosen.
      */
-    private void setupCurrentFile(@Nullable  String currentFile) {
+    private void setupCurrentFile(@Nullable String currentFile) {
         currentItemIndex = changedItems.getChangedItemsList().indexOf(currentFile);
         if (currentItemIndex == -1) {
             currentItemIndex = 0;
@@ -313,12 +303,12 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     }
 
     /** @return true if user edited content in the compare widget i.e. initial and current isn't equal. */
-    private boolean isEdited(String newContent) {
+    private boolean isEdited(final String newContent) {
         return compareWithLatest && this.localContent != null && !newContent.equals(localContent);
     }
 
     /** Saves given contents into file under edit. */
-    private void saveContent(String content) {
+    private void saveContent(final String content) {
         comparedFile.updateContent(content)
                     .then(ignored -> {
                         final Container parent = comparedFile.getParent();
@@ -335,4 +325,17 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                     });
     }
 
+    /** @return relative path of given file from specified project */
+    private Path getRelPath(final Container project, final File file) {
+        return file.getLocation().removeFirstSegments(project.getLocation().segmentCount());
+    }
+
+    /**
+     * Searches for project with git repository to which given file belongs.
+     */
+    @Nullable
+    private Container getGitDir(final File file) {
+        // For now we have support only for git repository in the root project
+        return GitUtil.getRootProject(file);
+    }
 }
