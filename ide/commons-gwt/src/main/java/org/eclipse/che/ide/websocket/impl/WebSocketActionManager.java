@@ -45,7 +45,7 @@ public class WebSocketActionManager {
      *         url of a connection
      * @return set of actions
      */
-    public Set<Runnable> getOnEstablishActions(String url) {
+    public Set<Runnable> getOnOpenActions(String url) {
         return establishActions.getOrDefault(url, emptySet());
     }
 

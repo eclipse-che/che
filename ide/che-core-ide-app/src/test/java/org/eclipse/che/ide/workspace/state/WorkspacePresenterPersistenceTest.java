@@ -11,10 +11,13 @@
 package org.eclipse.che.ide.workspace.state;
 
 import com.google.inject.Provider;
+
 import elemental.json.Json;
 import elemental.json.JsonObject;
+import elemental.util.ArrayOf;
 
-import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.menu.MainMenuPresenter;
@@ -32,15 +35,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
+ * Unit tests for the {@link WorkspacePresenter}.
+ *
  * @author Evgen Vidolob
+ * @author Vlad Zhukovskyi
  */
 @RunWith(MockitoJUnitRunner.class)
 public class WorkspacePresenterPersistenceTest {
-
 
     @Mock
     private WorkspaceView             workspaceView;
@@ -55,12 +62,12 @@ public class WorkspacePresenterPersistenceTest {
     @Mock
     private ToolbarPresenter          toolbarPresenter;
     @Mock
-    private PartPresenter             part1;
+    private PromiseProvider           promiseProvider;
 
     private WorkspacePresenter presenter;
 
     @Mock
-    private Provider<PerspectiveManager>    perspectiveManagerProvider;
+    private Provider<PerspectiveManager> perspectiveManagerProvider;
 
     private PerspectiveManager perspectiveManager;
 
@@ -78,7 +85,8 @@ public class WorkspacePresenterPersistenceTest {
                                            mainMenuPresenter,
                                            statusPanelGroupPresenter,
                                            toolbarPresenter,
-                                           "perspective1");
+                                           "perspective1",
+                                           promiseProvider);
 
     }
 
@@ -101,6 +109,8 @@ public class WorkspacePresenterPersistenceTest {
         state.put("perspectives", perspectives);
         JsonObject perspective1State = Json.createObject();
         perspectives.put("perspective1", perspective1State);
+
+        when(promiseProvider.all2(any(ArrayOf.class))).thenReturn(mock(Promise.class));
 
         presenter.loadState(state);
 

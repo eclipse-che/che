@@ -14,13 +14,13 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.project.ProjectImportersServiceClient;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterData;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
+import org.eclipse.che.ide.api.project.ProjectImportersServiceClient;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.projectimport.wizard.presenter.ImportProjectWizardView;
@@ -29,7 +29,7 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.util.NameUtils;
 
-import java.util.Iterator;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -134,16 +134,7 @@ public class MainPagePresenter extends AbstractWizardPage<MutableProjectConfig> 
                     protected void onSuccess(ProjectImporterData data) {
                         List<ProjectImporterDescriptor> result = data.getImporters();
                         String defaultImporterId = data.getConfiguration().get(DEFAULT_PROJECT_IMPORTER);
-                        Iterator<ProjectImporterDescriptor> itr = result.iterator();
-                        while (itr.hasNext()) {
-                            ProjectImporterDescriptor importer = itr.next();
-                            if (importer.getId().equals(defaultImporterId)) {
-                                Set<ProjectImporterDescriptor> importersSet = new LinkedHashSet<>();
-                                importersSet.add(importer);
-                                importersByCategory.put(importer.getCategory(), importersSet);
-                                itr.remove();
-                            }
-                        }
+                        result.sort(getProjectImporterComparator(defaultImporterId));
 
                         ProjectImporterDescriptor defaultImporter = null;
                         for (ProjectImporterDescriptor importer : result) {
@@ -188,6 +179,20 @@ public class MainPagePresenter extends AbstractWizardPage<MutableProjectConfig> 
                 };
 
         projectImportersService.getProjectImporters(appContext.getDevMachine(), callback);
+    }
+
+    private Comparator<ProjectImporterDescriptor> getProjectImporterComparator(String defaultImporterId) {
+        return (o1, o2) -> {
+            if (o1.getId().equals(defaultImporterId)) {
+                return -1;
+            }
+
+            if (o2.getId().equals(defaultImporterId)) {
+                return 1;
+            }
+
+            return 0;
+        };
     }
 
     /** {@inheritDoc} */

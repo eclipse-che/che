@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.websocket.impl;
 
-import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.websocket.Session;
 import java.util.Random;
 
 /**
@@ -29,18 +27,10 @@ import java.util.Random;
  */
 @Singleton
 public class WebsocketIdService {
-    private static final String ERROR_MESSAGE = "No session is associated with provided endpoint id";
     private static final String SEPARATOR     = "<-:->";
     private static final Random GENERATOR     = new Random();
 
-    private final WebSocketSessionRegistry registry;
-
-    @Inject
-    public WebsocketIdService(WebSocketSessionRegistry registry) {
-        this.registry = registry;
-    }
-
-    private static String clientId() {
+    public static String randomClientId() {
         return String.valueOf(GENERATOR.nextInt(Integer.MAX_VALUE));
     }
 
@@ -51,23 +41,6 @@ public class WebsocketIdService {
                                   .noParams()
                                   .resultAsString()
                                   .withFunction(this::extractClientId);
-
-        requestHandlerConfigurator.newConfiguration()
-                                  .methodName("websocketIdService/setId")
-                                  .paramsAsString()
-                                  .noResult()
-                                  .withBiConsumer((oldCombinedId, newClientId) -> {
-                                      String endpointId = extractEndpointId(oldCombinedId);
-                                      String newCombinedId = getCombinedId(endpointId, newClientId);
-                                      Session session = registry.remove(oldCombinedId)
-                                                                .orElseThrow(() -> new JsonRpcException(-27000, ERROR_MESSAGE));
-
-                                      registry.add(newCombinedId, session);
-                                  });
-    }
-
-    public String getCombinedId(String endpointId) {
-        return clientId() + SEPARATOR + endpointId;
     }
 
     public String getCombinedId(String endpointId, String clientId) {

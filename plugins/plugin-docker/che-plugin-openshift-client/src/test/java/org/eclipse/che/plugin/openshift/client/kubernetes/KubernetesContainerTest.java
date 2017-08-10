@@ -34,9 +34,12 @@ public class KubernetesContainerTest {
         exposedPorts.add("22/tcp");
         exposedPorts.add("4401/tcp");
         exposedPorts.add("4403/tcp");
+        Map<String, String> portsToRefName = new HashMap<>();
+        portsToRefName.put("8080/tcp", "tomcat");
+
 
         // When
-        List<ContainerPort> containerPorts = KubernetesContainer.getContainerPortsFrom(exposedPorts);
+        List<ContainerPort> containerPorts = KubernetesContainer.getContainerPortsFrom(exposedPorts, portsToRefName);
 
         // Then
         List<String> portsAndProtocols = containerPorts.stream().
@@ -51,9 +54,11 @@ public class KubernetesContainerTest {
         // Given
         Map<String, ExposedPort> imageExposedPorts = new HashMap<>();
         imageExposedPorts.put("8080/tcp",new ExposedPort());
+        Map<String, String> portsToRefName = new HashMap<>();
+        portsToRefName.put("8080/tcp", "tomcat");
 
         // When
-        List<ContainerPort> containerPorts = KubernetesContainer.getContainerPortsFrom(imageExposedPorts.keySet());
+        List<ContainerPort> containerPorts = KubernetesContainer.getContainerPortsFrom(imageExposedPorts.keySet(), portsToRefName);
 
         // Then
         List<String> portsAndProtocols = containerPorts.stream().

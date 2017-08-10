@@ -32,6 +32,8 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.CreateProjectAction;
 import org.eclipse.che.ide.actions.ImportProjectAction;
+import org.eclipse.che.ide.actions.NavigateToFileAction;
+import org.eclipse.che.ide.actions.find.FindActionAction;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -63,7 +65,10 @@ import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
  */
 public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent.ResourceChangedHandler {
 
-    private static EmptyEditorsPanelUiBinder ourUiBinder = GWT.create(EmptyEditorsPanelUiBinder.class);
+    interface EmptyEditorsPanelUiBinder extends UiBinder<Widget, EmptyEditorsPanel> {}
+
+    private static EmptyEditorsPanelUiBinder uiBinder = GWT.create(EmptyEditorsPanelUiBinder.class);
+
     protected final AppContext                   appContext;
     private final   ActionManager                actionManager;
     private final   Provider<PerspectiveManager> perspectiveManagerProvider;
@@ -72,7 +77,11 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
     private final   CoreLocalizationConstant     localizationConstant;
 
     private final Map<String, Action> noFiles = new HashMap<>();
+
     private final Map<String, Action> noProjects = new HashMap<>();
+
+    private final Map<String, Action> factoryActions = new HashMap<>();
+
     @UiField
     protected       DivElement                   title;
     @UiField
@@ -94,22 +103,28 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
                              CoreLocalizationConstant localizationConstant,
                              NewFileAction newFileAction,
                              CreateProjectAction createProjectAction,
-                             ImportProjectAction importProjectAction) {
+                             ImportProjectAction importProjectAction,
+                             FindActionAction findActionAction,
+                             NavigateToFileAction navigateToFileAction
+                             ) {
         this(actionManager, perspectiveManagerProvider, keyBindingAgent, appContext, localizationConstant, newFileAction,
              createProjectAction, importProjectAction);
-
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
         final SVGResource logo = productInfoDataProvider.getWaterMarkLogo();
         if (nonNull(logo)) {
             this.logo.appendChild(new SVGImage(logo).getSvgElement().getElement());
         }
+
+        factoryActions.put(findActionAction.getTemplatePresentation().getText(), findActionAction);
+        factoryActions.put(navigateToFileAction.getTemplatePresentation().getText(), navigateToFileAction);
+
         //Sometimes initialization of Create/Import Project actions are completed after the Empty editor page is rendered.
         //In this case we need to wait when actions will be initialized.
         Timer hoverToRenderTimer = new Timer() {
             @Override
             public void run() {
-                renderNoProjects();
+                render();
             }
         };
         hoverToRenderTimer.schedule(500);
@@ -137,8 +152,7 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
 
         presentationFactory = new PresentationFactory();
 
-        Widget rootElement = ourUiBinder.createAndBindUi(this);
-        initWidget(rootElement);
+        initWidget(uiBinder.createAndBindUi(this));
     }
 
     @Override
@@ -153,18 +167,23 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                updateOnProjectsChange();
+                render();
             }
         });
-
     }
 
-    private void updateOnProjectsChange() {
-        if (appContext.getProjects().length != 0) {
-            renderNoFiles();
-        } else {
+    protected void render() {
+        if (appContext.getProjects() != null && appContext.getProjects().length == 0) {
             renderNoProjects();
+            return;
         }
+
+        if (appContext.getWorkspace().getAttributes().containsKey("factoryId")) {
+            renderFactoryActions();
+            return;
+        }
+
+        renderNoFiles();
     }
 
     protected void renderNoProjects() {
@@ -175,11 +194,14 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
         render(localizationConstant.emptyStateNoFiles(), noFiles);
     }
 
+    protected void renderFactoryActions() {
+        render(localizationConstant.emptyStateNoFiles(), factoryActions);
+    }
+
     private void render(String title, Map<String, Action> actions) {
         this.title.setInnerText(title);
         container.removeAllChildren();
         Element listElement = Elements.createElement("ul", new String[] {style.list()});
-
 
         for (Map.Entry<String, Action> pair : actions.entrySet()) {
             LIElement liElement = Elements.createLiElement();
@@ -237,5 +259,4 @@ public class EmptyEditorsPanel extends Composite implements ResourceChangedEvent
         String actionLabel();
     }
 
-    interface EmptyEditorsPanelUiBinder extends UiBinder<Widget, EmptyEditorsPanel> {}
 }

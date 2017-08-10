@@ -11,66 +11,76 @@
 package org.eclipse.che.junit.junit4;
 
 import org.junit.runner.Request;
+import org.junit.runner.Runner;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 /**
  * Utility class for building test executing request.
  */
 public class TestRunnerUtil {
     /**
-     * Creates a request which contains all tests to be executed.
+     * Build list of {@clink JUnit4TestReference}.
      *
-     * @param args
-     *         array of test classes or test method (if args.length == 1) to be executed
-     * @return an abstract description of tests to be run
+     * @param suites
+     *         array of test classes or test method (if args.length == 1) to execute
+     * @return list of {@link JUnit4TestReference}
      */
-    public static Request buildRequest(String[] args) {
-        if (args.length == 0) {
-            return null;
-        }
-        if (args.length == 1) {
-            String suite = args[0];
+    public static List<JUnit4TestReference> createTestReferences(String[] suites) {
+        if (suites.length == 0) {
+            return emptyList();
+        } else if (suites.length == 1) {
+            String suite = suites[0];
             int separatorIndex = suite.indexOf('#');
             return separatorIndex == -1 ? getRequestForClass(suite) : getRequestForOneMethod(suite, separatorIndex);
         }
 
-        return getRequestForClasses(args);
+        return getRequestForClasses(suites);
     }
 
-    private static Request getRequestForOneMethod(String suite, int separatorIndex) {
+    private static List<JUnit4TestReference> getRequestForOneMethod(String suite, int separatorIndex) {
         try {
             Class suiteClass = Class.forName(suite.substring(0, separatorIndex));
             String method = suite.substring(separatorIndex + 1);
-            return Request.method(suiteClass, method);
+            Request request = Request.method(suiteClass, method);
+            Runner runner = request.getRunner();
+            return singletonList(new JUnit4TestReference(runner, runner.getDescription()));
         } catch (ClassNotFoundException e) {
-            System.err.print("No test found to run. Args is 0");
-            return null;
+            System.err.print("No test found to run.");
+            return emptyList();
         }
     }
 
-    private static Request getRequestForClass(String suite) {
+    private static List<JUnit4TestReference> getRequestForClass(String suite) {
         try {
-            return Request.aClass(Class.forName(suite));
+            Request request = Request.aClass(Class.forName(suite));
+            Runner runner = request.getRunner();
+            return singletonList(new JUnit4TestReference(runner, runner.getDescription()));
         } catch (ClassNotFoundException e) {
-            System.err.print("No test found to run. Args is 0");
-            return null;
+            System.err.print("No test found to run.");
+            return emptyList();
         }
     }
 
-    private static Request getRequestForClasses(String[] args) {
-        List<Class<?>> suites = new LinkedList<>();
+    private static List<JUnit4TestReference> getRequestForClasses(String[] args) {
+        List<JUnit4TestReference> suites = new LinkedList<>();
         for (String classFqn : args) {
             try {
                 Class<?> aClass = Class.forName(classFqn);
-                suites.add(aClass);
+                Request request = Request.aClass(aClass);
+                Runner runner = request.getRunner();
+                suites.add(new JUnit4TestReference(runner, runner.getDescription()));
             } catch (ClassNotFoundException ignored) {
             }
         }
         if (suites.isEmpty()) {
-            return null;
+            System.err.print("No test found to run.");
+            return emptyList();
         }
-        return Request.classes(suites.toArray(new Class[suites.size()]));
+        return suites;
     }
 }

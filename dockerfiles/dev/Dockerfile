@@ -21,6 +21,7 @@
 #                  -Dfindbugs.skip=true
 #                  -Dgwt.compiler.localWorkers=2 -T 1C
 #                  -Dskip-validate-sources
+#                  -Pnative
 #              clean install
 #
 # For Windows, replace $HOME with maven repo directory.
