@@ -227,7 +227,7 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
 
         delegate.onRequestFocus();
 
-        ensureActiveTabVisible();
+        Scheduler.get().scheduleDeferred(this::ensureActiveTabVisible);
     }
 
     /** {@inheritDoc} */
