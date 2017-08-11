@@ -17,7 +17,7 @@ import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
@@ -27,7 +27,6 @@ import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -71,8 +70,6 @@ public class ImportProjectIntoSpecifiedBranchTest {
     private TestGitHubServiceClient   gitHubClientService;
     @Inject
     private TestProjectServiceClient  projectServiceClient;
-    @Inject
-    private DefaultTestUser           testUser;
 
     @BeforeClass
     public void prepare() throws Exception {
@@ -87,7 +84,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
 
     @AfterMethod
     public void tearDown() throws Exception {
-        projectServiceClient.deleteResource(ws.getId(), testUser.getAuthToken(), PROJECT_NAME);
+        projectServiceClient.deleteResource(ws.getId(), PROJECT_NAME);
     }
 
     @Test

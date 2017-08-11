@@ -17,7 +17,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -43,8 +42,6 @@ public class ImportRecursiveSubmoduleTest {
     private TestWorkspace             ws;
     @Inject
     private Ide                       ide;
-    @Inject
-    private DefaultTestUser           productUser;
     @Inject
     @Named("github.username")
     private String                    gitHubUsername;
@@ -83,7 +80,7 @@ public class ImportRecursiveSubmoduleTest {
 
     @AfterMethod
     public void tearDown() throws Exception {
-        testProjectServiceClient.deleteResource(ws.getId(), productUser.getAuthToken(), PROJECT_NAME);
+        testProjectServiceClient.deleteResource(ws.getId(), PROJECT_NAME);
     }
 
     @Test

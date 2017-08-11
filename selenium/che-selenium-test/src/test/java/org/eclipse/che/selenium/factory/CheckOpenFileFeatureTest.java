@@ -10,7 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.factory;
 
+import com.google.inject.Inject;
+
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.LoadingBehaviorPage;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -18,22 +25,15 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import com.google.inject.Inject;
-
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
-import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory.AddAction.OPEN_FILE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory.AddAction.OPEN_FILE;
 
 /**
  * @author Andrey Chizhikov
@@ -79,7 +79,7 @@ public class CheckOpenFileFeatureTest {
     @AfterClass
     public void tearDown() throws Exception {
         if (factoryWsName != null) {
-            workspaceServiceClient.delete(factoryWsName, user.getName(), user.getAuthToken());
+            workspaceServiceClient.delete(factoryWsName, user.getName());
         }
     }
 

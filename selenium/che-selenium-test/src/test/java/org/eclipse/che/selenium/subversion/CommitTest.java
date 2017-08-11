@@ -10,23 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.subversion;
 
-import org.eclipse.che.selenium.pageobject.Ide;
+import com.google.inject.Inject;
+
+import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
+import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
+import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.pageobject.subversion.Subversion;
-import com.google.inject.Inject;
-
-import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
-import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
-import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.testng.annotations.Test;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;

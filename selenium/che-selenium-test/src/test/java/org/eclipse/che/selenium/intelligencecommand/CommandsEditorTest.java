@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -31,11 +30,11 @@ import org.testng.annotations.Test;
 import java.net.URL;
 import java.nio.file.Paths;
 
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.NEW_COMMAND_GOAL;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.NEW_COMMAND_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
 
 /**
  * @author Aleksandr Shmaraiev
@@ -49,9 +48,7 @@ public class CommandsEditorTest {
             "java -classpath ${project.java.classpath}${project.java.output.dir} com.company.nba.MainClass";
 
     @Inject
-    private TestWorkspace        testWorkspace;
-    @Inject
-    private DefaultTestUser      defaultTestUser;
+    private TestWorkspace            testWorkspace;
     @Inject
     private Ide                      ide;
     @Inject
@@ -74,7 +71,7 @@ public class CommandsEditorTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/java-project-for-commands");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.PLAIN_JAVA
         );

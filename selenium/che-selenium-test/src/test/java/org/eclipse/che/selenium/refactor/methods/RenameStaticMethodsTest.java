@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -63,8 +62,6 @@ public class RenameStaticMethodsTest {
     @Inject
     private TestWorkspace            workspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -86,7 +83,7 @@ public class RenameStaticMethodsTest {
     @BeforeClass
     public void setup() throws Exception {
         URL resource = getClass().getResource("/projects/RenameStaticMethods");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                nameOfProject,
                                                ProjectTemplates.MAVEN_SIMPLE
         );

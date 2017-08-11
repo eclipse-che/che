@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
@@ -52,9 +51,6 @@ public class CppProjectDebuggingTest {
     private TestWorkspace   ws;
     @Inject
     private Ide             ide;
-    @Inject
-    private DefaultTestUser user;
-
 
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -80,7 +76,7 @@ public class CppProjectDebuggingTest {
     @BeforeClass
     public void setup() throws Exception {
         URL resource = CppProjectDebuggingTest.this.getClass().getResource("/projects/plugins/DebuggerPlugin/cpp-tests");
-        testProjectServiceClient.importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()),
                                                PROJECT,
                                                ProjectTemplates.CPP
         );

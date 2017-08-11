@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.miscellaneous;
 
+import com.google.inject.Inject;
+
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import com.google.inject.Inject;
-
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

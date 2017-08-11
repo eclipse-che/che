@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -30,9 +29,9 @@ import org.testng.annotations.Test;
 import java.net.URL;
 import java.nio.file.Paths;
 
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
 import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorType.COMMAND_LINE_EDITOR;
 import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorType.PREVIEW_URL_EDITOR;
 import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsMacrosLinkType.EDITOR_MACROS_LINK;
@@ -47,8 +46,6 @@ public class MacrosCommandsEditorTest {
 
     @Inject
     private TestWorkspace            ws;
-    @Inject
-    private DefaultTestUser          defaultTestUser;
     @Inject
     private Ide                      ide;
     @Inject
@@ -68,7 +65,6 @@ public class MacrosCommandsEditorTest {
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/java-project-with-additional-source-folder");
         testProjectServiceClient.importProject(ws.getId(),
-                                               defaultTestUser.getAuthToken(),
                                                Paths.get(resource.toURI()),
                                                PROJ_NAME,
                                                ProjectTemplates.PLAIN_JAVA);

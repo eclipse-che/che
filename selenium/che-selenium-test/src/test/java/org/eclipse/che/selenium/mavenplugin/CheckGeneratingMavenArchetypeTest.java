@@ -11,15 +11,14 @@
 package org.eclipse.che.selenium.mavenplugin;
 
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
-import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;

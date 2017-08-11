@@ -73,7 +73,7 @@ public class GitCompareTest {
 
     @BeforeClass
     public void prepare() throws Exception {
-        testUserPreferencesServiceClient.addGitCommitter(productUser.getAuthToken(), gitHubUsername, productUser.getEmail());
+        testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
         ide.open(ws);
         projectExplorer.waitProjectExplorer();
         String repoUrl = "https://github.com/" + gitHubUsername + "/spring-project-for-compare.git";

@@ -21,7 +21,6 @@ import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -41,7 +40,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.COMMON;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -68,8 +66,6 @@ public class ChangeVariableWithEvaluatingTest {
     private TestWorkspace   ws;
     @Inject
     private Ide             ide;
-    @Inject
-    private DefaultTestUser user;
 
     @Inject
     private ProjectExplorer            projectExplorer;
@@ -98,7 +94,6 @@ public class ChangeVariableWithEvaluatingTest {
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/debug-spring-project");
         testProjectServiceClient.importProject(ws.getId(),
-                                               user.getAuthToken(),
                                                Paths.get(resource.toURI()),
                                                PROJECT_NAME_CHANGE_VARIABLE,
                                                ProjectTemplates.MAVEN_SPRING);
@@ -106,30 +101,30 @@ public class ChangeVariableWithEvaluatingTest {
         testCommandServiceClient.createCommand(COMMAND_LAUNCHING_TOMCAT_IN_JPDA,
                                                START_DEBUG_COMMAND_NAME,
                                                TestCommandsConstants.CUSTOM,
-                                               ws.getId(),
-                                               user.getAuthToken());
+                                               ws.getId()
+        );
 
         testCommandServiceClient.createCommand(MAVEN_BUILD_COMMAND,
                                                BUILD_COMMAND_NAME,
                                                TestCommandsConstants.CUSTOM,
-                                               ws.getId(),
-                                               user.getAuthToken());
+                                               ws.getId()
+        );
 
         String stopTomcatAndCleanWebAppDir = "/home/user/tomcat8/bin/shutdown.sh && rm -rf /home/user/tomcat8/webapps/*";
         testCommandServiceClient.createCommand(stopTomcatAndCleanWebAppDir,
                                                CLEAN_TOMCAT_COMMAND_NAME,
                                                TestCommandsConstants.CUSTOM,
-                                               ws.getId(),
-                                               user.getAuthToken());
+                                               ws.getId()
+        );
         ide.open(ws);
     }
 
     @AfterMethod
     public void shutDownTomCatAndCleanWebApp() throws Exception {
         debugPanel.stopDebuggerWithUiAndCleanUpTomcat(CLEAN_TOMCAT_COMMAND_NAME);
-        testCommandServiceClient.deleteCommand(START_DEBUG_COMMAND_NAME, ws.getId(), user.getAuthToken());
-        testCommandServiceClient.deleteCommand(CLEAN_TOMCAT_COMMAND_NAME, ws.getId(), user.getAuthToken());
-        testCommandServiceClient.deleteCommand(BUILD_COMMAND_NAME, ws.getId(), user.getAuthToken());
+        testCommandServiceClient.deleteCommand(START_DEBUG_COMMAND_NAME, ws.getId());
+        testCommandServiceClient.deleteCommand(CLEAN_TOMCAT_COMMAND_NAME, ws.getId());
+        testCommandServiceClient.deleteCommand(BUILD_COMMAND_NAME, ws.getId());
     }
 
     @Test
@@ -146,7 +141,7 @@ public class ChangeVariableWithEvaluatingTest {
                         TestMenuCommandsConstants.Run.DEBUG,
                         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT_NAME_CHANGE_VARIABLE);
         String appUrl =
-                "http" + "://" + workspaceServiceClient.getServerAddressByPort(ws.getId(), user.getAuthToken(), 8080) + "/spring/guess";
+                "http" + "://" + workspaceServiceClient.getServerAddressByPort(ws.getId(), 8080) + "/spring/guess";
         String requestMess = "11";
         editor.waitBreakPointWithActiveState(34);
         CompletableFuture<String> instToRequestThread = debuggerUtils.gotoDebugAppAndSendRequest(appUrl, requestMess);

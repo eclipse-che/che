@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.ConfigureClasspath;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -41,8 +40,6 @@ public class ConfigureClasspathBaseTest {
     @Inject
     private Ide                      ide;
     @Inject
-    private DefaultTestUser          productUser;
-    @Inject
     private ProjectExplorer          projectExplorer;
     @Inject
     private ConfigureClasspath       configureClasspath;
@@ -54,7 +51,7 @@ public class ConfigureClasspathBaseTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/java-multimodule");
-        testProjectServiceClient.importProject(ws.getId(), productUser.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_JAVA_MULTIMODULE
         );
         ide.open(ws);

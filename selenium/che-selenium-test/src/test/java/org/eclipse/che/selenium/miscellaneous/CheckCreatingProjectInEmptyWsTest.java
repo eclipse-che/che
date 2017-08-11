@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.miscellaneous;
 
+import com.google.inject.Inject;
+
+import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import com.google.inject.Inject;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.support.ui.ExpectedConditions;

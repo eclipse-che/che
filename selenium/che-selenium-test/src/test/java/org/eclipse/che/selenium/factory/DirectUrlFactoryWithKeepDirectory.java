@@ -80,14 +80,14 @@ public class DirectUrlFactoryWithKeepDirectory {
 
 
         String wsId = workspaceServiceClient.getByName(seleniumWebDriver.getWorkspaceNameFromBrowserUrl(),
-                                                       testUser.getName(),
-                                                       testUser.getAuthToken())
+                                                       testUser.getName()
+        )
                                             .getId();
 
         List<String> visibleItems = projectExplorer.getNamesOfAllOpenItems();
         assertTrue(visibleItems.containsAll(ImmutableList.of("gitPullTest", "my-lib", "src", "pom.xml")));
 
-        String projectType = projectServiceClient.getFirstProject(wsId, testUser.getAuthToken()).getType();
+        String projectType = projectServiceClient.getFirstProject(wsId).getType();
         assertTrue(projectType.equals("blank"));
     }
 }

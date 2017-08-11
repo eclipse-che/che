@@ -10,25 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.git;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
+import org.eclipse.che.selenium.core.client.TestSshServiceClient;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Events;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
-
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -53,8 +51,6 @@ public class CheckoutReferenceTest {
     private TestWorkspace             ws;
     @Inject
     private Ide                       ide;
-    @Inject
-    private DefaultTestUser           productUser;
     @Inject
     @Named("github.username")
     private String                    gitHubUsername;
@@ -83,7 +79,7 @@ public class CheckoutReferenceTest {
     @BeforeClass
     public void prepare() throws Exception {
         try {
-            String publicKey = testSshServiceClient.generateSshKeys(productUser.getAuthToken());
+            String publicKey = testSshServiceClient.generateGithubKey();
             gitHubClientService.uploadPublicKey(gitHubUsername, gitHubPassword, publicKey);
         } catch (ConflictException ignored) {
             // already generated

@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
+import org.eclipse.che.selenium.core.requestfactory.TestAdminHttpJsonRequestFactory;
 
 import java.net.URLEncoder;
 
@@ -30,15 +30,12 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 @Singleton
 public class TestUserServiceClient {
     private final String                 apiEndpoint;
-    private final AdminTestUser          adminTestUser;
     private final HttpJsonRequestFactory requestFactory;
 
     @Inject
     public TestUserServiceClient(TestApiEndpointUrlProvider apiEndpointProvider,
-                                 AdminTestUser adminTestUser,
-                                 HttpJsonRequestFactory requestFactory) {
+                                 TestAdminHttpJsonRequestFactory requestFactory) {
         this.apiEndpoint = apiEndpointProvider.get().toString();
-        this.adminTestUser = adminTestUser;
         this.requestFactory = requestFactory;
     }
 
@@ -46,7 +43,6 @@ public class TestUserServiceClient {
         String url = apiEndpoint + "user/find?email=" + URLEncoder.encode(email, "UTF-8");
         HttpJsonResponse response = requestFactory.fromUrl(url)
                                                   .useGetMethod()
-                                                  .setAuthorizationHeader(adminTestUser.getAuthToken())
                                                   .request();
 
         return response.asDto(UserDto.class);
@@ -56,7 +52,6 @@ public class TestUserServiceClient {
         String url = apiEndpoint + "user/" + getByEmail(email).getId();
         requestFactory.fromUrl(url)
                       .useDeleteMethod()
-                      .setAuthorizationHeader(adminTestUser.getAuthToken())
                       .request();
     }
 
@@ -64,7 +59,6 @@ public class TestUserServiceClient {
         String url = apiEndpoint + "user";
         return requestFactory.fromUrl(url)
                              .usePostMethod()
-                             .setAuthorizationHeader(adminTestUser.getAuthToken())
                              .setBody(newDto(UserDto.class).withName(email.split("@")[0]).withPassword(password).withEmail(email))
                              .request()
                              .asDto(UserDto.class);

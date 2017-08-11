@@ -17,7 +17,6 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -88,8 +87,6 @@ public class FindTextFeatureTest {
             "(/" + PROJECT_NAME + "/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp)";
 
     @Inject
-    private DefaultTestUser            defaultTestUser;
-    @Inject
     private TestWorkspace              workspace;
     @Inject
     private Ide                        ide;
@@ -115,7 +112,7 @@ public class FindTextFeatureTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/java-multimodule");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING);
         ide.open(workspace);
     }
@@ -315,10 +312,7 @@ public class FindTextFeatureTest {
     }
 
     private void createFileFromAPI(String path, String fileName, String content) throws Exception {
-        String userToken = defaultTestUser.getAuthToken();
-        String wsID =
-                workspaceServiceClient.getByName(workspace.getName(), defaultTestUser.getName(), defaultTestUser.getAuthToken()).getId();
-        testProjectServiceClient.createFileInProject(wsID, userToken, path, fileName, content);
+        testProjectServiceClient.createFileInProject(workspace.getId(), path, fileName, content);
     }
 
     private void createFileInTerminal(String fileName) {

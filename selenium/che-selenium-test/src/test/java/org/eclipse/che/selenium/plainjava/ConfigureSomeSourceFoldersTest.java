@@ -16,7 +16,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -54,8 +53,6 @@ public class ConfigureSomeSourceFoldersTest {
     @Inject
     private Ide                      ide;
     @Inject
-    private DefaultTestUser          productUser;
-    @Inject
     private ProjectExplorer          projectExplorer;
     @Inject
     private CodenvyEditor            codenvyEditor;
@@ -75,7 +72,7 @@ public class ConfigureSomeSourceFoldersTest {
     @BeforeClass
     public void prepare() throws Exception {
         URL resource = getClass().getResource("/projects/java-project-with-additional-source-folder");
-        testProjectServiceClient.importProject(ws.getId(), productUser.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.PLAIN_JAVA
         );
         ide.open(ws);

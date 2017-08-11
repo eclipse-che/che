@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.miscellaneous;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.constant.TestBuildConstants;
+import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -28,9 +29,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
-import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -47,8 +46,6 @@ public class WorkingWithSplitPanelTest {
     private static final String   BUILD_COMM      = "newMaven";
     private static final String[] checkMcTerminal = {"Left", "File", "Command", "Options", "Right"};
 
-    @Inject
-    private DefaultTestUser          defaultTestUser;
     @Inject
     private TestWorkspace            workspace;
     @Inject
@@ -79,7 +76,7 @@ public class WorkingWithSplitPanelTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/guess-project");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(),
+        testProjectServiceClient.importProject(workspace.getId(),
                                                Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING

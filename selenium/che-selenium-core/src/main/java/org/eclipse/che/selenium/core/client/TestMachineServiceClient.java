@@ -18,12 +18,12 @@ public interface TestMachineServiceClient {
     /**
      * Returns machine token for current workspace
      *
-     * @param workspaceId
-     *         the workspace id
      * @param authToken
      *         the authorization token
+     * @param workspaceId
+     *         the workspace id
      * @return the machine token for current workspace
      */
-    String getMachineApiToken(String workspaceId, String authToken) throws Exception;
+    String getMachineApiToken(String workspaceId) throws Exception;
 }
 

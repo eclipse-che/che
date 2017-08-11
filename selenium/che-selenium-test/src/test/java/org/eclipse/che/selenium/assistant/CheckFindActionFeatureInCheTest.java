@@ -16,7 +16,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.FindAction;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -89,8 +88,6 @@ public class CheckFindActionFeatureInCheTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private FindAction               findAction;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -105,7 +102,7 @@ public class CheckFindActionFeatureInCheTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = CheckFindActionFeatureInCheTest.this.getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(),
+        testProjectServiceClient.importProject(testWorkspace.getId(),
                                                Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING

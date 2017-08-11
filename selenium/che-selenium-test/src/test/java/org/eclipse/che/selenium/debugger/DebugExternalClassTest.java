@@ -19,7 +19,6 @@ import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -51,8 +50,6 @@ public class DebugExternalClassTest {
     private TestWorkspace   ws;
     @Inject
     private Ide             ide;
-    @Inject
-    private DefaultTestUser user;
 
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -80,7 +77,6 @@ public class DebugExternalClassTest {
     @BeforeClass
     public void setup() throws Exception {
         testProjectServiceClient.importProject(ws.getId(),
-                                               user.getAuthToken(),
                                                Paths.get(getClass().getResource("/projects/plugins/DebuggerPlugin/java-with-external-libs")
                                                                    .toURI()),
                                                PROJECT,
@@ -92,8 +88,8 @@ public class DebugExternalClassTest {
                                                "${current.project.path}/target/java-with-external-libs-1.0-SNAPSHOT-jar-with-dependencies.jar",
                                                BUILD_AND_DEBUG_COMMAND_NAME,
                                                TestCommandsConstants.CUSTOM,
-                                               ws.getId(),
-                                               user.getAuthToken());
+                                               ws.getId()
+        );
 
         // open IDE
         ide.open(ws);

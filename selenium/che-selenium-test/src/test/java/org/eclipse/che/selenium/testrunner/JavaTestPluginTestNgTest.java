@@ -109,8 +109,8 @@ public class JavaTestPluginTestNgTest {
         URL resource = getClass().getResource("/projects/plugins/JavaTestRunnerPlugin/testng-tests");
 
         CompileCommand compileCommand = new CompileCommand();
-        testCommandServiceClient.createCommand(DtoConverter.asDto(compileCommand), ws.getId(), user.getAuthToken());
-        testProjectServiceClient.importProject(ws.getId(), user.getAuthToken(), Paths.get(resource.toURI()), PROJECT,
+        testCommandServiceClient.createCommand(DtoConverter.asDto(compileCommand), ws.getId());
+        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT,
                                                ProjectTemplates.CONSOLE_JAVA_SIMPLE);
 
         ide.open(ws);

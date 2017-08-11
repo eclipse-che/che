@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.projectexplorer;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -22,7 +22,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -36,7 +35,6 @@ import java.nio.file.Paths;
 public class OpenFileWithHelpContextMenuTest {
 
     private static final String PROJECT_NAME        = OpenFileWithHelpContextMenuTest.class.getSimpleName();
-    private static final String PROJECT_PATH        = "src/test/resources/projects/defaultSpringProjectWithDifferentTypeOfFiles";
     private static final String NAME_JSP            = "index.jsp";
     private static final String NAME_LESS           = "LessFile.less";
     private static final String NAME_CSS            = "cssFile.css";
@@ -153,8 +151,6 @@ public class OpenFileWithHelpContextMenuTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private Ide                      ide;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -172,7 +168,7 @@ public class OpenFileWithHelpContextMenuTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = getClass().getResource("/projects/defaultSpringProjectWithDifferentTypeOfFiles");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
         );

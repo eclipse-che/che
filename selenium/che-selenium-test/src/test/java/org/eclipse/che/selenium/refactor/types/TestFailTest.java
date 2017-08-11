@@ -79,7 +79,7 @@ public class TestFailTest {
         services = new Services(projectExplorer, notificationsPopupPanel, refactor);
 
         URL resource = TestFailTest.this.getClass().getResource("/projects/RenameType");
-        testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                nameOfProject,
                                                ProjectTemplates.MAVEN_SIMPLE
         );

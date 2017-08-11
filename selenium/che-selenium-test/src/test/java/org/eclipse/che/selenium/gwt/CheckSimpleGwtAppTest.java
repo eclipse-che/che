@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.gwt;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -54,8 +53,6 @@ public class CheckSimpleGwtAppTest {
     private ToastLoader                toastLoader;
     @Inject
     private Consoles                   consoles;
-    @Inject
-    private DefaultTestUser            defaultTestUser;
     @InjectTestWorkspace(memoryGb = 4)
     private TestWorkspace              testWorkspace;
     @Inject
@@ -72,7 +69,7 @@ public class CheckSimpleGwtAppTest {
         projectName = NameGenerator.generate("project", 4);
 
         URL resource = getClass().getResource("/projects/web-gwt-java-simple");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(),
+        testProjectServiceClient.importProject(testWorkspace.getId(),
                                                Paths.get(resource.toURI()),
                                                projectName,
                                                ProjectTemplates.MAVEN_SPRING
@@ -80,14 +77,14 @@ public class CheckSimpleGwtAppTest {
         testCommandServiceClient.createCommand("cd /projects/" + projectName + " && mvn clean install -DskipTests",
                                                BUILD_COMMAND,
                                                CUSTOM,
-                                               testWorkspace.getId(),
-                                               defaultTestUser.getAuthToken());
+                                               testWorkspace.getId()
+        );
 
         testCommandServiceClient.createCommand("mvn clean gwt:run-codeserver -f ${current.project.path} -Dgwt.bindAddress=0.0.0.0",
                                                RUN_GWT_COMMAND,
                                                CUSTOM,
-                                               testWorkspace.getId(),
-                                               defaultTestUser.getAuthToken());
+                                               testWorkspace.getId()
+        );
     }
 
     @Test
@@ -109,7 +106,7 @@ public class CheckSimpleGwtAppTest {
         projectExplorer.invokeCommandWithContextMenu(COMMON, projectName, RUN_GWT_COMMAND);
         consoles.waitExpectedTextIntoConsole("The code server is ready", APPLICATION_START_TIMEOUT_SEC);
 
-        String url = workspaceServiceClient.getServerByExposedPort(testWorkspace.getId(), defaultTestUser.getAuthToken(), "9876/tcp").getUrl();
+        String url = workspaceServiceClient.getServerByExposedPort(testWorkspace.getId(), "9876/tcp").getUrl();
         ide.driver().get(url);
 
         new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)

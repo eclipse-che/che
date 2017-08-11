@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.intelligencecommand;
 
+import com.google.inject.Inject;
+
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
-import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
@@ -22,11 +27,6 @@ import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
-import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import com.google.inject.Inject;
-
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

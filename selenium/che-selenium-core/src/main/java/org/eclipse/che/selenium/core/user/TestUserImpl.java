@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PreDestroy;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,18 +101,16 @@ public class TestUserImpl implements TestUser {
     @Override
     @PreDestroy
     public void delete() {
-        String auth = getAuthToken();
-
         List<String> workspaces = new ArrayList<>();
         try {
-            workspaces = workspaceServiceClient.getAll(auth);
+            workspaces = workspaceServiceClient.getAll();
         } catch (Exception e) {
             LOG.error("Failed to get all workspaces.", e);
         }
 
         for (String workspace : workspaces) {
             try {
-                workspaceServiceClient.delete(workspace, name, auth);
+                workspaceServiceClient.delete(workspace, name);
             } catch (Exception e) {
                 LOG.error(format("User name='%s' failed to remove workspace name='%s'", workspace, name), e);
             }

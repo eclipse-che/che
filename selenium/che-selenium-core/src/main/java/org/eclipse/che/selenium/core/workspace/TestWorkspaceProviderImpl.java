@@ -89,8 +89,8 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
             // insure workspace is running
             TestWorkspace testWorkspace = testWorkspaceQueue.take();
             WorkspaceStatus testWorkspaceStatus =
-                    workspaceServiceClient.getById(testWorkspace.getId(),
-                                                   testWorkspace.getOwner().getAuthToken())
+                    workspaceServiceClient.getById(testWorkspace.getId()
+                    )
                                           .getStatus();
 
             if (testWorkspaceStatus != WorkspaceStatus.RUNNING) {

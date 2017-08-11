@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -33,8 +32,6 @@ public class CheckDeletingProjectByApiTest {
 
     @Inject
     private TestWorkspace            testWorkspace;
-    @Inject
-    private DefaultTestUser          defaultUser;
     @Inject
     private TestProjectServiceClient projectServiceClient;
     @Inject
@@ -63,14 +60,13 @@ public class CheckDeletingProjectByApiTest {
 
     private void createProject(String projectName) throws Exception {
         projectServiceClient.importProject(testWorkspace.getId(),
-                                           defaultUser.getAuthToken(),
                                            Paths.get(getClass().getResource("/projects/default-spring-project").toURI()),
                                            projectName,
                                            ProjectTemplates.MAVEN_SPRING);
     }
 
     private void deleteAndWaitProjectNotExistByApi(String projectName) throws Exception {
-        projectServiceClient.deleteResource(projectName, testWorkspace.getName(), defaultUser.getAuthToken());
+        projectServiceClient.deleteResource(projectName, testWorkspace.getName());
         projectExplorer.waitItemIsNotPresentVisibleArea(projectName);
         events.waitExpectedMessage(String.format("Project '%s' is removed", projectName));
     }

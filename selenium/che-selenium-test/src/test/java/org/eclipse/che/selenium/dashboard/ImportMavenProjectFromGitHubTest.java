@@ -66,7 +66,7 @@ public class ImportMavenProjectFromGitHubTest {
 
     @AfterClass
     public void tearDown() throws Exception {
-        workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName(), defaultTestUser.getAuthToken());
+        workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
     }
 
     @Test

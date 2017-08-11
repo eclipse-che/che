@@ -37,6 +37,7 @@ public class SeleniumClassModule extends AbstractModule {
     @Override
     public void configure() {
         bind(SeleniumWebDriver.class);
+
         bindListener(Matchers.any(), new UserTypeListener(binder().getProvider(Injector.class)));
         bindListener(Matchers.any(), new WorkspaceTypeListener(binder().getProvider(Injector.class)));
     }

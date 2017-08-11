@@ -15,6 +15,7 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
@@ -38,6 +39,7 @@ import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestDefaultUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.CheAdminTestUser;
 import org.eclipse.che.selenium.core.user.CheTestUserNamespaceResolver;
@@ -77,6 +79,9 @@ public class CheSeleniumSuiteModule extends AbstractModule {
         bind(TestApiEndpointUrlProvider.class).to(CheTestApiEndpointUrlProvider.class);
         bind(TestIdeUrlProvider.class).to(CheTestIdeUrlProvider.class);
         bind(TestDashboardUrlProvider.class).to(CheTestDashboardUrlProvider.class);
+
+        bind(HttpJsonRequestFactory.class).to(TestDefaultUserHttpJsonRequestFactory.class);
+
         bind(AdminTestUser.class).to(CheAdminTestUser.class);
 
         bind(TestAuthServiceClient.class).to(CheTestAuthServiceClient.class);

@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.workspaces;
 
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
-import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
-import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import com.google.inject.Inject;
 
+import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
+import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
+import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.testng.annotations.Test;
 
 /**

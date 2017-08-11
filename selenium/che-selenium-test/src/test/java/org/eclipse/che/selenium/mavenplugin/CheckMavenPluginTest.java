@@ -14,9 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -28,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,8 +43,6 @@ public class CheckMavenPluginTest {
 
     @Inject
     private TestWorkspace            workspace;
-    @Inject
-    private DefaultTestUser          defaultTestUser;
     @Inject
     private Ide                      ide;
     @Inject
@@ -75,8 +72,8 @@ public class CheckMavenPluginTest {
         commandServiceClient.createCommand("cd /projects/" + PROJECT_NAME + " && git checkout contrib-12042015",
                                            CHECKOUT_COMMAND,
                                            TestCommandsConstants.CUSTOM,
-                                           workspace.getId(),
-                                           defaultTestUser.getAuthToken());
+                                           workspace.getId()
+        );
 
         ide.open(workspace);
         projectExplorer.waitProjectExplorer();

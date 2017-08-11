@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.projectexplorer;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -23,8 +24,6 @@ import org.eclipse.che.selenium.pageobject.IdeMainDockPanel;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.openqa.selenium.TimeoutException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -48,9 +47,7 @@ public class DeleteProjectsTest {
                                                                     "DeleteProjectTest5");
 
     @Inject
-    private TestWorkspace        workspace;
-    @Inject
-    private DefaultTestUser      defaultTestUser;
+    private TestWorkspace            workspace;
     @Inject
     private Ide                      ide;
     @Inject
@@ -72,7 +69,7 @@ public class DeleteProjectsTest {
     public void setUp() throws Exception {
         for (String projectName : PROJECT_NAMES) {
             URL resource = getClass().getResource("/projects/ProjectWithDifferentTypeOfFiles");
-            testProjectServiceClient.importProject(workspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+            testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
                                                    projectName,
                                                    ProjectTemplates.MAVEN_SPRING
             );

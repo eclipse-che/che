@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.dashboard;
 
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import com.google.inject.Inject;
 
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

@@ -86,11 +86,11 @@ public class DirectUrlFactoryWithRootFolder {
         projectExplorer.openItemByPath(expectedProject);
 
         String currentWsId = workspaceServiceClient.getByName(seleniumWebDriver.getWorkspaceNameFromBrowserUrl(),
-                                                              testUser.getName(),
-                                                              testUser.getAuthToken()).getId();
+                                                              testUser.getName()
+        ).getId();
         List<String> visibleItems = projectExplorer.getNamesOfAllOpenItems();
         assertTrue(visibleItems.containsAll(expectedItemsAfterClonning));
-        String currentTypeOfProject = projectServiceClient.getFirstProject(currentWsId, testUser.getAuthToken())
+        String currentTypeOfProject = projectServiceClient.getFirstProject(currentWsId)
                                                           .getType();
         assertTrue(currentTypeOfProject.equals("blank"));
     }

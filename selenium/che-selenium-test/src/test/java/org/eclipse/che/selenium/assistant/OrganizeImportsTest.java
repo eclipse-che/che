@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.selenium.assistant;
 
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -25,7 +25,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.OrganizeImports;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -63,8 +62,6 @@ public class OrganizeImportsTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private ProjectExplorer          projectExplorer;
     @Inject
     private Menu                     menu;
@@ -86,7 +83,7 @@ public class OrganizeImportsTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = OrganizeImportsTest.this.getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING
                                               );
@@ -159,11 +156,11 @@ public class OrganizeImportsTest {
     }
 
     private void createNewStructure() throws Exception {
-        testProjectServiceClient.createFolder(testWorkspace.getId(), defaultTestUser.getAuthToken(), PATH_TO_A_PACKAGE);
-        testProjectServiceClient.createFolder(testWorkspace.getId(), defaultTestUser.getAuthToken(), PATH_TO_B_PACKAGE);
+        testProjectServiceClient.createFolder(testWorkspace.getId(), PATH_TO_A_PACKAGE);
+        testProjectServiceClient.createFolder(testWorkspace.getId(), PATH_TO_B_PACKAGE);
         testProjectServiceClient
-                .createFileInProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), PATH_TO_A_PACKAGE, TEST_FILE_NAME, TEST_METHOD);
+                .createFileInProject(testWorkspace.getId(), PATH_TO_A_PACKAGE, TEST_FILE_NAME, TEST_METHOD);
         testProjectServiceClient
-                .createFileInProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), PATH_TO_B_PACKAGE, TEST_FILE_NAME, TEST_METHOD);
+                .createFileInProject(testWorkspace.getId(), PATH_TO_B_PACKAGE, TEST_FILE_NAME, TEST_METHOD);
     }
 }
