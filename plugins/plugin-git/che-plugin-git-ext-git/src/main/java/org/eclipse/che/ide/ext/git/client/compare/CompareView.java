@@ -81,7 +81,7 @@ interface CompareView extends View<CompareView.ActionDelegate> {
      * @param file
      *         changed file name with its full path
      * @param readOnly
-     *         read only state of the right column
+     *         read only state of the left column
      */
     void show(String oldContent, String newContent, String file, boolean readOnly);
 

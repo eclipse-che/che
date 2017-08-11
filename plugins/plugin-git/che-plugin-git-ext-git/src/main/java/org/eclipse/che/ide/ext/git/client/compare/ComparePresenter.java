@@ -54,7 +54,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     private boolean      compareWithLatest;
     private AlteredFiles alteredFiles;
-    private int          currentItemIndex;
+    private int          currentFileIndex;
 
     private File    comparedFile;
     private String  revision;
@@ -96,7 +96,6 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         this.revision = revision;
 
         this.compareWithLatest = true;
-        view.setEnableSaveChangesButton(true);
 
         findCurrentFile(currentFile);
         showCompareForCurrentFile();
@@ -125,7 +124,6 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         this.revisionB = revisionB;
 
         this.compareWithLatest = false;
-        view.setEnableSaveChangesButton(false);
 
         findCurrentFile(currentFile);
         showCompareForCurrentFile();
@@ -136,53 +134,75 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      * Type of comparison to show depends on {@code compareWithLatest} field.
      */
     private void showCompareForCurrentFile() {
-        view.setEnableNextDiffButton(currentItemIndex != (alteredFiles.getFilesQuantity() - 1));
-        view.setEnablePreviousDiffButton(currentItemIndex != 0);
+        view.setEnableNextDiffButton(currentFileIndex != (alteredFiles.getFilesQuantity() - 1));
+        view.setEnablePreviousDiffButton(currentFileIndex != 0);
 
         alteredFiles.getProject()
-                    .getFile(alteredFiles.getItemByIndex(currentItemIndex))
+                    .getFile(alteredFiles.getItemByIndex(currentFileIndex))
                     .then(file -> {
                         if (file.isPresent()) {
-                            if (compareWithLatest) {
-                                showCompareWithLatestForFile(file.get(), alteredFiles.getStatusByIndex(currentItemIndex));
-                            } else {
-                                showCompareBetweenRevisionsForFile(file.get(), alteredFiles.getStatusByIndex(currentItemIndex));
+
+                            view.setEnableSaveChangesButton(true);
+
+                            final Container gitDir = getGitDir(file.get());
+                            if (gitDir == null) {
+                                notificationManager.notify(locale.messageFileIsNotUnderGit(file.toString()), WARNING, EMERGE_MODE);
+                                return;
                             }
+                            final Path relPath = getRelPath(gitDir, file.get());
+
+                            if (compareWithLatest) {
+                                this.comparedFile = file.get();
+
+                                showCompareWithLatestForFile(gitDir.getLocation(),
+                                                             relPath,
+                                                             alteredFiles.getStatusByIndex(currentFileIndex));
+                            } else {
+                                showCompareBetweenRevisionsForFile(gitDir.getLocation(),
+                                                                   relPath,
+                                                                   alteredFiles.getStatusByIndex(currentFileIndex));
+                            }
+
                         } else { // file is deleted
-                            // TODO implement (is broken in master too)
+
+                            view.setEnableSaveChangesButton(false);
+
+                            // For now git repository supported only in project root folder
+                            final Path gitDir = alteredFiles.getProject().getLocation();
+                            final Path relPath = Path.valueOf(alteredFiles.getItemByIndex(currentFileIndex));
+
+                            if (compareWithLatest) {
+                                this.comparedFile = null;
+
+                                showCompareWithLatestForFile(gitDir, relPath, alteredFiles.getStatusByIndex(currentFileIndex));
+                            } else {
+                                showCompareBetweenRevisionsForFile(gitDir, relPath, alteredFiles.getStatusByIndex(currentFileIndex));
+                            }
+
                         }
                     }).catchError(error -> {
                         notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                     });
     }
 
-    private void showCompareWithLatestForFile(final File file, final Status status) {
-        this.comparedFile = file;
-
+    private void showCompareWithLatestForFile(final Path gitDir, final Path relPath, final Status status) {
         if (status.equals(ADDED)) {
             showCompare("");
             return;
         }
 
-        final Container gitDir = getGitDir(file);
-        if (gitDir == null) {
-            notificationManager.notify(locale.messageFileIsNotUnderGit(file.toString()), WARNING, EMERGE_MODE);
-            return;
-        }
-        final Path relPath = getRelPath(gitDir, file);
-
         if (status.equals(DELETED)) {
-            service.showFileContent(gitDir.getLocation(), relPath, revision)
+            service.showFileContent(gitDir, relPath, revision)
                    .then(content -> {
                        view.setTitle(relPath.toString());
                        view.setColumnTitles(locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
-                       view.show(content.getContent(), "", relPath.toString(), false);
+                       view.show(content.getContent(), "", relPath.toString(), true);
                    })
                    .catchError(error -> {
                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else {
-            service.showFileContent(gitDir.getLocation(), relPath, revision)
+            service.showFileContent(gitDir, relPath, revision)
                    .then(content -> {
                        showCompare(content.getContent());
                    })
@@ -192,17 +212,11 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         }
     }
 
-    private void showCompareBetweenRevisionsForFile(final File file, final Status status) {
-        final Container gitDir = getGitDir(file);
-        if (gitDir == null) {
-            notificationManager.notify(locale.messageFileIsNotUnderGit(file.toString()), WARNING, EMERGE_MODE);
-            return;
-        }
-        final Path relPath = getRelPath(gitDir, file);
-
+    private void showCompareBetweenRevisionsForFile(final Path gitDir, final Path relPath, final Status status) {
         view.setTitle(relPath.toString());
+
         if (status == Status.ADDED) {
-            service.showFileContent(gitDir.getLocation(), relPath, revisionB)
+            service.showFileContent(gitDir, relPath, revisionB)
                    .then(response -> {
                        view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
                                             revisionA == null ? "" : revisionA + locale.compareReadOnlyTitle());
@@ -212,7 +226,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else if (status == Status.DELETED) {
-            service.showFileContent(gitDir.getLocation(), relPath, revisionA)
+            service.showFileContent(gitDir, relPath, revisionA)
                    .then(response -> {
                        view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(), revisionA + locale.compareReadOnlyTitle());
                        view.show(response.getContent(), "", relPath.toString(), true);
@@ -221,9 +235,9 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else {
-            service.showFileContent(gitDir.getLocation(), relPath, revisionA)
+            service.showFileContent(gitDir, relPath, revisionA)
                    .then(contentAResponse -> {
-                       service.showFileContent(gitDir.getLocation(), relPath, revisionB)
+                       service.showFileContent(gitDir, relPath, revisionB)
                               .then(contentBResponse -> {
                                   view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
                                                        revisionA + locale.compareReadOnlyTitle());
@@ -272,7 +286,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                 saveContent(content);
             }
 
-            currentItemIndex++;
+            currentFileIndex++;
             showCompareForCurrentFile();
         });
     }
@@ -284,7 +298,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                 saveContent(content);
             }
 
-            currentItemIndex--;
+            currentFileIndex--;
             showCompareForCurrentFile();
         });
     }
@@ -307,19 +321,19 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      */
     private void findCurrentFile(@Nullable String currentFile) {
         if (currentFile == null) {
-            currentItemIndex = 0;
+            currentFileIndex = 0;
             return;
         }
 
-        currentItemIndex = alteredFiles.getChangedItemsList().indexOf(currentFile);
-        if (currentItemIndex == -1) {
-            currentItemIndex = 0;
+        currentFileIndex = alteredFiles.getChangedItemsList().indexOf(currentFile);
+        if (currentFileIndex == -1) {
+            currentFileIndex = 0;
         }
     }
 
     /** Returns true if user edited content in the compare widget i.e. initial and current isn't equal. */
     private boolean isEdited(final String newContent) {
-        return compareWithLatest && this.localContent != null && !newContent.equals(localContent);
+        return compareWithLatest && comparedFile != null && this.localContent != null && !newContent.equals(localContent);
     }
 
     /** Saves given contents into file under edit. */
