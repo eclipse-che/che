@@ -36,11 +36,11 @@ public class Version implements Comparable<Version> {
     private static final String BETA_VERSION_SUFFIX      = "-beta-";
 
     private static final Pattern VERSION =
-            compile("^(0|[1-9]+[0-9]*)\\.(0|[1-9]+[0-9]*)\\.(0|[1-9]+[0-9]*)(\\.0|\\.[1-9]+[0-9]*|)" +
-                    "(" + MILESTONE_VERSION_SUFFIX + "[1-9]+[0-9]*|)" +
-                    "(" + BETA_VERSION_SUFFIX + "[1-9]+[0-9]*|)" +
-                    "(-RC|)" +
-                    "(-SNAPSHOT|)$");
+            compile("^(?<major>0|[1-9]+[0-9]*)\\.(?<minor>0|[1-9]+[0-9]*)\\.(?<bugfix>0|[1-9]+[0-9]*)(?<hotfix>\\.0|\\.[1-9]+[0-9]*)?" +
+                    "(?<milestone>" + MILESTONE_VERSION_SUFFIX + "[1-9]+[0-9]*)?" +
+                    "(?<beta>" + BETA_VERSION_SUFFIX + "[1-9]+[0-9]*)?" +
+                    "(?<rc>-RC)?" +
+                    "(?<snapshot>-SNAPSHOT)?$");
 
     private final int     major;
     private final int     minor;
@@ -75,7 +75,7 @@ public class Version implements Comparable<Version> {
      * @throws IllegalArgumentException
      *      if {@code version} format is wrong
      */
-    public static void validate(@NotNull String version) {
+    public static void validate(@NotNull String version) throws IllegalArgumentException {
         if (!VERSION.matcher(version).matches()) {
             throw new IllegalArgumentException(format("Illegal version '%s' format.", version));
         }
@@ -97,29 +97,29 @@ public class Version implements Comparable<Version> {
         int milestone = 0;
         int beta = 0;
 
-        String hotFixGroup = matcher.group(4);
-        if (!hotFixGroup.isEmpty()) {
+        String hotFixGroup = matcher.group("hotfix");
+        if (hotFixGroup != null) {
             hotFix = parseInt(hotFixGroup.substring(1));
         }
 
-        String milestoneGroup = matcher.group(5);
-        if (!milestoneGroup.isEmpty()) {
+        String milestoneGroup = matcher.group("milestone");
+        if (milestoneGroup != null) {
             milestone = parseInt(milestoneGroup.substring(MILESTONE_VERSION_SUFFIX.length()));
         }
 
-        String betaGroup = matcher.group(6);
-        if (!betaGroup.isEmpty()) {
+        String betaGroup = matcher.group("beta");
+        if (betaGroup != null) {
             beta = parseInt(betaGroup.substring(BETA_VERSION_SUFFIX.length()));
         }
 
-        return new Version(parseInt(matcher.group(1)),
-                           parseInt(matcher.group(2)),
-                           parseInt(matcher.group(3)),
+        return new Version(parseInt(matcher.group("major")),
+                           parseInt(matcher.group("minor")),
+                           parseInt(matcher.group("bugfix")),
                            hotFix,
                            milestone,
                            beta,
-                           !matcher.group(7).isEmpty(),
-                           !matcher.group(8).isEmpty());
+                           matcher.group("rc") != null,
+                           matcher.group("snapshot") != null);
     }
 
     /**

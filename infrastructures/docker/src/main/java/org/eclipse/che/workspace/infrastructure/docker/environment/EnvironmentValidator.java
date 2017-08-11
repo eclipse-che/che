@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -88,11 +89,9 @@ public class EnvironmentValidator {
         List<String> devMachines = env.getMachines()
                                       .entrySet()
                                       .stream()
-                                      .filter(entry -> entry.getValue().getInstallers() != null &&
-                                                       entry.getValue().getInstallers()
-                                                            .contains("org.eclipse.che.ws-agent"))
+                                      .filter(entry -> new InstallerFqn("org.eclipse.che.ws-agent").in(entry.getValue().getInstallers()))
                                       .map(Map.Entry::getKey)
-                                      .collect(toList());
+                .collect(toList());
 
         checkArgument(devMachines.size() == 1,
                       "Environment should contain exactly 1 machine with agent 'org.eclipse.che.ws-agent', but contains '%s'. " +

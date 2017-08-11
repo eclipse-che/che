@@ -109,10 +109,13 @@ public interface InstallerRegistry {
 
     /**
      * Traverses dependencies of all listed installers and
-     * returns properly ordered list of non-duplicated installer descriptions
+     * returns properly ordered list of non-duplicated installer descriptions.
+     *
+     * If any of {@code installerKeys} contains only id then the latest version of this installer
+     * will be used to fetch dependencies.
      *
      * @param installerKeys
-     *         installers to fetch dependencies and order
+     *         installers keys to fetch dependencies and order
      * @return list of installers
      * @throws IllegalInstallerKeyException
      *         if specified installer key has wrong format

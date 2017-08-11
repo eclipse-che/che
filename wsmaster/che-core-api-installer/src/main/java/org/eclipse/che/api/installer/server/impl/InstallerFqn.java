@@ -15,6 +15,9 @@ import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -27,6 +30,10 @@ public class InstallerFqn implements Serializable {
     private String version;
 
     public InstallerFqn() {
+    }
+
+    public InstallerFqn(String id) {
+        this(id, null);
     }
 
     public InstallerFqn(String id, @Nullable String version) {
@@ -74,6 +81,50 @@ public class InstallerFqn implements Serializable {
 
     public boolean hasLatestTag() {
         return LATEST_VERSION_TAG.equals(version);
+    }
+
+    /**
+     * Indicates if installer is contained in the giving list of FQNs.
+     * If installer hasn't specified version {@link #hasLatestTag()} then
+     * any versions in the list will suite.
+     */
+    public boolean in(@Nullable List<String> installerKeys) {
+        if (installerKeys == null) {
+            return false;
+        }
+
+        List<InstallerFqn> installerFqns = new LinkedList<>();
+        for (String installerKey : installerKeys) {
+            try {
+                installerFqns.add(InstallerFqn.parse(installerKey));
+            } catch (IllegalInstallerKeyException ignore) {
+            }
+        }
+
+        return in(installerFqns);
+    }
+
+    /**
+     * Indicates if installer is contained in the giving list of FQNs.
+     * If installer hasn't specified version {@link #hasLatestTag()} then
+     * any versions in the list will suite.
+     */
+    public boolean in(@Nullable Collection<InstallerFqn> installerFqns) {
+        if (installerFqns == null) {
+            return false;
+        }
+
+        if (!hasLatestTag()) {
+            return installerFqns.contains(this);
+        }
+
+        for (InstallerFqn installerFqn : installerFqns) {
+            if (installerFqn.getId().equals(getId())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

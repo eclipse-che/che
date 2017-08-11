@@ -251,4 +251,16 @@ public class LocalInstallerRegistryTest {
 
         registry.getOrderedInstallers(asList("installer1:1.0.0", "installer2:1.0.0", "installer3:1.0.0"));
     }
+
+    @Test(expectedExceptions = InstallerException.class,
+          expectedExceptionsMessageRegExp = "Installers dependencies conflict. Several version '2.0.0' and '1.0.0' of the some id 'installer1")
+    public void shouldNotReturnOrderedSeveralInstallersDifferentVersions() throws Exception {
+        when(installer2v1.getDependencies()).thenReturn(singletonList("installer1:1.0.0"));
+        when(installer3v1.getDependencies()).thenReturn(singletonList("installer1:2.0.0"));
+
+        installerDao.update(new InstallerImpl(installer2v1));
+        installerDao.update(new InstallerImpl(installer3v1));
+
+        registry.getOrderedInstallers(asList("installer2:1.0.0", "installer3:1.0.0"));
+    }
 }

@@ -16,8 +16,10 @@ import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -35,10 +37,10 @@ import static java.util.Collections.unmodifiableMap;
  *
  * @author Anatolii Bazko
  */
-public abstract class BasicInstaller implements Installer {
+public class BasicInstaller implements Installer {
     private final Installer internal;
 
-    public BasicInstaller(String installerDescriptor, String installerScript) throws IOException {
+    public BasicInstaller(Path installerDescriptor, Path installerScript) throws IOException {
         internal = readInstallerDescriptor(installerDescriptor, installerScript);
     }
 
@@ -82,21 +84,21 @@ public abstract class BasicInstaller implements Installer {
         return unmodifiableMap(internal.getServers());
     }
 
-    private Installer readInstallerDescriptor(String installerDescriptor, String installerScript) throws IOException {
+    private Installer readInstallerDescriptor(Path installerDescriptor, Path installerScript) throws IOException {
         InputStream inputStream = readResource(installerDescriptor);
         InstallerDto installer = DtoFactory.getInstance().createDtoFromJson(inputStream, InstallerDto.class);
         return installer.withScript(readInstallerScript(installerScript));
     }
 
-    private String readInstallerScript(String installerScript) throws IOException {
+    private String readInstallerScript(Path installerScript) throws IOException {
         InputStream inputStream = readResource(installerScript);
         return IoUtil.readStream(inputStream);
     }
 
-    private InputStream readResource(String resource) throws IOException {
-        InputStream inputStream = getClass().getResourceAsStream("/" + resource);
+    private InputStream readResource(Path resource) throws IOException {
+        InputStream inputStream = getClass().getResourceAsStream(resource.toString());
         if (inputStream == null) {
-            throw new IOException(format("Can't initialize installer. Resource %s not found", resource));
+            throw new FileNotFoundException(format("Can't initialize installer. Resource %s not found", resource));
         }
         return inputStream;
     }

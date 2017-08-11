@@ -60,7 +60,9 @@ public class RemoteInstallerRegistryTest {
         installerKey = InstallerFqn.of(installer).toKey();
 
         LocalInstallerRegistry localInstallerRegistry =
-                new LocalInstallerRegistry(Collections.singleton(installer), new MapBasedInstallerDao());
+                new LocalInstallerRegistry(Collections.singleton(installer),
+                                           new MapBasedInstallerDao());
+
         registryService = new InstallerRegistryService(localInstallerRegistry);
 
         Integer port = (Integer)context.getAttribute(EverrestJetty.JETTY_PORT);

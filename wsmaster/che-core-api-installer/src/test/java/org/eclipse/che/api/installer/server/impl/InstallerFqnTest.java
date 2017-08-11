@@ -10,10 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.api.installer.server.impl;
 
+import com.google.common.collect.ImmutableList;
+
 import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.List;
+
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Test for {@link InstallerFqn}.
@@ -41,4 +48,33 @@ public class InstallerFqnTest {
     public void testParseInstallerFqnFails() throws Exception {
         InstallerFqn.parse("id:1:2");
     }
+
+    @Test(dataProvider = "inListData")
+    public void shouldBeInList(String key, List<String> installerIds) throws Exception {
+        InstallerFqn installerFqn = InstallerFqn.parse(key);
+
+        assertTrue(installerFqn.in(installerIds));
+    }
+
+    @Test(dataProvider = "notInListData")
+    public void shouldNotBeInList(String key, List<String> installerIds) throws Exception {
+        InstallerFqn installerFqn = InstallerFqn.parse(key);
+
+        assertFalse(installerFqn.in(installerIds));
+    }
+
+
+    @DataProvider(name = "inListData")
+    public static Object[][] getInListData() {
+        return new Object[][] {{"a", ImmutableList.of("a")},
+                               {"a", ImmutableList.of("a:1.0.0")},
+                               {"a:1.0.0", ImmutableList.of("a:1.0.0")}};
+    }
+
+    @DataProvider(name = "notInListData")
+    public static Object[][] getNotInListData() {
+        return new Object[][] {{"a", ImmutableList.of("b")},
+                               {"a:1.0.0", ImmutableList.of("a:1.0.1")}};
+    }
+
 }
