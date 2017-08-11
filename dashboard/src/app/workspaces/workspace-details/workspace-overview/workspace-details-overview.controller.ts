@@ -9,16 +9,15 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheUser} from '../../../../components/api/che-user.factory';
-import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
+import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/che-workspace.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 import {NamespaceSelectorSvc} from '../../create-workspace/namespace-selector/namespace-selector.service';
 import {WorkspaceDetailsService} from '../workspace-details.service';
 
-const STARTING = 'STARTING';
-const RUNNING = 'RUNNING';
-const STOPPED = 'STOPPED';
+const STARTING = WorkspaceStatus[WorkspaceStatus.STARTING];
+const RUNNING = WorkspaceStatus[WorkspaceStatus.RUNNING];
+const STOPPED = WorkspaceStatus[WorkspaceStatus.STOPPED];
 
 /**
  * @ngdoc controller
@@ -248,7 +247,10 @@ export class WorkspaceDetailsOverviewController {
    * @param {string} namespaceId
    */
   namespaceOnClick(namespaceId: string): void {
-    let namespace = this.getNamespace(namespaceId);
+    const namespace = this.getNamespace(namespaceId);
+    if (!namespace) {
+      return;
+    }
     this.$location.path(namespace.location);
   }
 
@@ -276,7 +278,14 @@ export class WorkspaceDetailsOverviewController {
    * @return {string}
    */
   getNamespaceLink(): string {
-    return this.getNamespace(this.namespaceId).location;
+    if (this.namespaceId) {
+      return null;
+    }
+    const namespace = this.getNamespace(this.namespaceId);
+    if (!this.namespaceId) {
+      return null;
+    }
+    return namespace.location;
   }
 
   /**

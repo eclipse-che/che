@@ -61,7 +61,7 @@ export class CheInput {
     var template = '<div class="che-input">'
       + '<md-input-container hide-gt-xs ng-class="{\'che-input-mobile-no-label\': !labelName}">'
       + '<label ng-if="labelName">' + labelName + '</label>'
-      + '<input type="text" name="' + inputName + '"';
+      + '<input aria-label="input {{inputName}}" type="text" name="' + inputName + '"';
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
     }
@@ -83,7 +83,10 @@ export class CheInput {
       + '<label flex="15" class="che-input-desktop-label" ng-if="labelName">' + labelName + ': </label>'
       + ''
       + '<div layout="column" class="che-input-desktop-value-column" flex="{{labelName ? 85 : \'none\'}}">'
-      + '<input type="text" placeholder="' + placeHolder + '" ng-trim="false" name="desk' + inputName + '" style="{{labelName ? \'width: 100%\' : \'\'}}"';
+      + '<input aria-label="input {{inputName}}" type="text" placeholder="' + placeHolder + '" ng-trim="false" name="desk' + inputName;
+    if (!labelName) {
+      template = template + ' style="width: 100%"';
+    }
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
     }
