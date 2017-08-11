@@ -14,7 +14,6 @@ import com.google.common.collect.Maps;
 
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.keycloak.shared.KeycloakSettings;
 
 import javax.inject.Inject;
 import javax.inject.Named;

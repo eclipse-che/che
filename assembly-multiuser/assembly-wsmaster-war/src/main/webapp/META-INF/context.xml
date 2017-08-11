@@ -11,7 +11,7 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<Context allowCasualMultipartParsing="true">
+<Context allowCasualMultipartParsing="true" sessionCookiePath="/api">
     <ResourceLink global="jdbc/che"
                   name="jdbc/che"
                   type="javax.sql.DataSource"/>

@@ -8,9 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.keycloak.shared;
+package org.eclipse.che.keycloak.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.eclipse.che.keycloak.shared.KeycloakConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,14 +22,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
 public class KeycloakSettings {
-    private static final Logger LOG = Logger.getLogger(KeycloakSettings.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(KeycloakSettings.class);
 
     private static Map<String, String> settings = null;
 
@@ -47,7 +49,7 @@ public class KeycloakSettings {
                     settings = new ObjectMapper().readValue(in, Map.class);
                 }
             } catch (IOException e) {
-                LOG.log(Level.SEVERE, "Exception during Keycloak settings retrieval", e);
+                LOG.error("Exception during Keycloak settings retrieval", e);
             }
         }
     }

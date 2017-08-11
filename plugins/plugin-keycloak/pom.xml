@@ -25,7 +25,6 @@
     <modules>
         <module>che-plugin-keycloak-ide</module>
         <module>che-plugin-keycloak-shared</module>
-        <module>che-plugin-keycloak-valve</module>
         <module>che-plugin-keycloak-server</module>
         <module>che-plugin-keycloak-token-provider</module>
     </modules>

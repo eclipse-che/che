@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.keycloak.server;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwt;
+
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
@@ -23,10 +26,6 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.adapters.OidcKeycloakAccount;
-import org.keycloak.adapters.spi.KeycloakAccount;
-import org.keycloak.representations.IDToken;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,7 +41,6 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Principal;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.util.Collections.emptyList;
 
 /**
@@ -53,14 +51,17 @@ import static java.util.Collections.emptyList;
 @Singleton
 public class KeycloakEnvironmentInitalizationFilter implements Filter {
 
-    @Inject
-    private UserManager userManager;
+    private final UserManager userManager;
+    private final AccountManager accountManager;
+    private final RequestTokenExtractor tokenExtractor;
 
     @Inject
-    private AccountManager accountManager;
-
-    @Inject
-    private RequestTokenExtractor tokenExtractor;
+    public KeycloakEnvironmentInitalizationFilter(UserManager userManager, AccountManager accountManager,
+                                                  RequestTokenExtractor tokenExtractor) {
+        this.userManager = userManager;
+        this.accountManager = accountManager;
+        this.tokenExtractor = tokenExtractor;
+    }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -71,7 +72,8 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
             throws IOException, ServletException {
 
         final HttpServletRequest httpRequest = (HttpServletRequest)request;
-        if (request.getScheme().startsWith("ws") || (tokenExtractor.getToken(httpRequest) != null && tokenExtractor.getToken(httpRequest).startsWith("machine"))) {
+        final String token = tokenExtractor.getToken(httpRequest);
+        if (request.getScheme().startsWith("ws") || (token != null && token.startsWith("machine"))) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -79,23 +81,15 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
         final HttpSession session = httpRequest.getSession();
         Subject subject = (Subject)session.getAttribute("che_subject");
         if (subject == null) {
-            KeycloakSecurityContext context = (KeycloakSecurityContext)httpRequest.getAttribute(KeycloakSecurityContext.class.getName());
-            // In case of bearer token login, there is another object in session
-            if (context == null) {
-                OidcKeycloakAccount keycloakAccount = (OidcKeycloakAccount)httpRequest.getAttribute(KeycloakAccount.class.getName());
-                if (keycloakAccount != null) {
-                    context = keycloakAccount.getKeycloakSecurityContext();
-                }
-            }
-            if (context == null) {
+            Jwt jwtToken = (Jwt)httpRequest.getAttribute("token");
+            if (jwtToken == null) {
                 throw new ServletException("Cannot detect or instantiate user.");
             }
-            final IDToken token = firstNonNull(context.getIdToken(),context.getToken());
-            final String tokenString = context.getTokenString();
-            User user = getOrCreateUser(token.getSubject(), token.getEmail(), token.getPreferredUsername());
-            getOrCreateAccount(token.getPreferredUsername(), token.getPreferredUsername());
+            Claims claims = (Claims)jwtToken.getBody();
+            User user = getOrCreateUser(claims.getSubject(), claims.get("email", String.class), claims.get("preferred_username", String.class));
+            getOrCreateAccount(claims.get("preferred_username", String.class), claims.get("preferred_username", String.class));
 
-            subject = new SubjectImpl(user.getName(), user.getId(), tokenString, false);
+            subject = new SubjectImpl(user.getName(), user.getId(), token, false);
             session.setAttribute("che_subject", subject);
         }
 

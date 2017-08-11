@@ -21,8 +21,9 @@ public class HeaderRequestTokenExtractor implements RequestTokenExtractor {
         if (req.getHeader(HttpHeaders.AUTHORIZATION) == null) {
             return null;
         }
-        return req.getHeader(HttpHeaders.AUTHORIZATION).startsWith("bearer") ? req.getHeader(HttpHeaders.AUTHORIZATION).split(" ")[1]
-                                                                             : req.getHeader(HttpHeaders.AUTHORIZATION);
+        return req.getHeader(HttpHeaders.AUTHORIZATION).toLowerCase().startsWith("bearer") ? req.getHeader(HttpHeaders.AUTHORIZATION)
+                                                                                                .split(" ")[1]
+                                                                                           : req.getHeader(HttpHeaders.AUTHORIZATION);
     }
 
 }

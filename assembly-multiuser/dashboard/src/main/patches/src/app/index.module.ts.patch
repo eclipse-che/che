@@ -1,10 +1,9 @@
 --- src/app/index.module.ts
 +++ src/app/index.module.ts
-@@ -36,12 +36,53 @@
+@@ -36,12 +36,66 @@
  import {CheBranding} from '../components/branding/che-branding.factory';
  import {ChePreferences} from '../components/api/che-preferences.factory';
 -
-+import * as Keycloak from '../components/keycloak/keycloak';
 +
 +
 +function buildKeycloakConfig(keycloakSettings) {
@@ -28,14 +27,28 @@
 +
 +  function keycloakInit(keycloakSettings) {
 +        keycloakConfig = buildKeycloakConfig(keycloakSettings);
-+        window['_keycloak'] = Keycloak(keycloakConfig);
-+        window['_keycloak']
-+          .init({
-+             onLoad: 'check-sso', checkLoginIframe: false, responseMode: 'query'
++        new Promise((resolve, reject) => {
++          const script = document.createElement('script');
++          script.async = true;
++          script.src = keycloakSettings['che.keycloak.auth-server-url'] + '/js/keycloak.js';
++          script.addEventListener('load', resolve);
++          script.addEventListener('error', () => reject('Error loading script.'));
++          script.addEventListener('abort', () => reject('Script loading aborted.'));
++          document.head.appendChild(script);
++        })
++        .then(() => {
++          console.log('Keycloak script loaded in Dashboard');
++          window['_keycloak'] = Keycloak(keycloakConfig);
++          window['_keycloak'].init({
++            onLoad: 'login-required', checkLoginIframe: false
 +          })
 +          .success(() => {
-+            angular.bootstrap(document, ['userDashboard'], {strictDi:true}); // manually bootstrap Angular
-+          });
++             angular.bootstrap(document, ['userDashboard'], {strictDi:true}); // manually bootstrap Angular
++            });
++         })
++        .catch(error => {
++           console.log('Keycloak script not loaded in Dashboard: ', error);
++        })
 +  }
 +
 +  promise.then((keycloakSettings) => {

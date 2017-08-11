@@ -28,22 +28,18 @@
     <name>Fabric8 IDE :: Compiling GWT Application</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
-        <gwt.log.enable>false</gwt.log.enable>
-        <original-project-basedir>assembly/${original-project-name}</original-project-basedir>
-        <original-project-name>assembly-ide-war</original-project-name>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-ide-war</artifactId>
-            <type>pom</type>
-            <exclusions>
-                <exclusion>
-                    <artifactId>che-plugin-svn-ext-ide</artifactId>
-                    <groupId>org.eclipse.che.plugin</groupId>
-                </exclusion>
-            </exclusions>
+            <classifier>classes</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>assembly-ide-war</artifactId>
+            <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -57,29 +53,11 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/keycloak.js</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>copy-web-resources</id>
                         <phase>process-sources</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-patch-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>patch-sources</id>
                     </execution>
                 </executions>
             </plugin>
@@ -217,26 +195,6 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>prepare-patch-files</id>
-                        <phase>generate-sources</phase>
-                    </execution>
-                    <execution>
-                        <id>copy-all-files</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target name="copy all original Che files">
-                                <copy todir="${project.build.directory}/patched" verbose="true">
-                                    <fileset dir="${basedir}/../../${original-project-basedir}">
-                                        <include name="src/**" />
-                                    </fileset>
-                                </copy>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>buildnumber</id>
                         <phase>compile</phase>
                         <goals>
@@ -257,22 +215,30 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
+                    <overlays>
+                        <overlay>
+                            <groupId>org.eclipse.che</groupId>
+                            <artifactId>assembly-ide-war</artifactId>
+                            <type>war</type>
+                            <includes>
+                                <include>_app/browserNotSupported.js</include>
+                                <include>_app/favicon.ico</include>
+                                <include>META-INF/context.xml</include>
+                                <include>WEB-INF/rewrite.config</include>
+                                <include>WEB-INF/web.xml</include>
+                                <include>WEB-INF/classes/org/eclipse/che/*.class</include>
+                                <include>IDE.jsp</include>
+                            </includes>
+                        </overlay>
+                        <overlay></overlay>
+                    </overlays>
                     <packagingExcludes>%regex[WEB-INF\\lib\\(?!.*j2ee).*.jar]</packagingExcludes>
-                    <attachClasses>true</attachClasses>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>add-source-for-patched-files</id>
-                        <phase>generate-sources</phase>
-                    </execution>
-                    <execution>
-                        <id>add-resource-for-patched-files</id>
-                        <phase>generate-sources</phase>
-                    </execution>
                     <execution>
                         <id>add-source</id>
                         <phase>generate-sources</phase>

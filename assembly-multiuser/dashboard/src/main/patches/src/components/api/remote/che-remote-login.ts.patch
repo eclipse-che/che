@@ -1,13 +1,5 @@
 --- src/components/api/remote/che-remote-login.ts
 +++ src/components/api/remote/che-remote-login.ts
-@@ -9,6 +9,7 @@
-  *   Codenvy, S.A. - initial API and implementation
-  */
- 'use strict';
-+import * as Keycloak from '../../keycloak/keycloak';
- 
- /**
-  * This class is handling the call to remote API to login
 @@ -21,9 +22,10 @@
     * @param $resource the angular $resource object
     * @param url the remote server URL
