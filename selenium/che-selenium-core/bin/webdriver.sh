@@ -65,7 +65,7 @@ trap cleanUpEnvironment EXIT
 unset TMP_DIR
 
 readonly FAILSAFE_DIR="target/failsafe-reports"
-readonly TESTNG_FAILED_SUITE=${FAILSAFE_DIR}"/testng-failed.xml"
+readonly TESTNG_FAILS_SUITE=${FAILSAFE_DIR}"/testng-failed.xml"
 readonly FAILSAFE_REPORT="target/site/failsafe-report.html"
 
 # CALLER variable contains parent caller script name
@@ -95,8 +95,8 @@ readonly TEST_INCLUSION_STABLE_AND_UNSTABLE="STABLE_AND_UNSTABLE"
 readonly TEST_INCLUSION_SINGLE_TEST="SINGLE_TEST"
 
 readonly STABLE_MSG="stable tests"
-readonly UNSTABLE_MSG="unstable/failed tests"
-readonly STABLE_AND_UNSTABLE_MSG="stable and unstable/failed tests"
+readonly UNSTABLE_MSG="unstable tests"
+readonly STABLE_AND_UNSTABLE_MSG="stable and unstable tests"
 readonly SINGLE_TEST_MSG="single test/package"
 
 PRODUCT_PROTOCOL="http"
@@ -368,6 +368,13 @@ prepareTestSuite() {
     fi
 }
 
+# returns 0 if suite does have "<exclude" section, or 1 otherwise
+doesSuiteHaveUnstableTests() {
+    local suitePath=${ORIGIN_TESTS_SCOPE:11}
+    grep -oe "<exclude" ${suitePath}  > /dev/null
+    echo $?
+}
+
 printHelp() {
     local usage="
 Usage: ./${CALLER} [-Mmode] [options] [tests scope]
@@ -560,7 +567,7 @@ analyseTestsResults() {
     if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
         echo -e "[TEST] "${YELLOW}"STABLE TESTS EXECUTION RESULTS ANALYSE:"${NO_COLOUR}
     elif [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
-        echo -e "[TEST] "${YELLOW}"STABLE/UNSTABLE/FAILED TESTS EXECUTION RESULTS ANALYSE:"${NO_COLOUR}
+        echo -e "[TEST] "${YELLOW}"STABLE/UNSTABLE TESTS EXECUTION RESULTS ANALYSE:"${NO_COLOUR}
     else
         echo -e "[TEST] "${YELLOW}"RESULTS ANALYSE:"${NO_COLOUR}
     fi
@@ -787,7 +794,7 @@ generateFailSafeReport () {
         ${TEST_INCLUSION_STABLE} )
             echo -e "[TEST] ${YELLOW}STABLE TESTS EXECUTION REPORT:${NO_COLOUR}" ;;
         ${TEST_INCLUSION_UNSTABLE} )
-            echo -e "[TEST] ${YELLOW}UNSTABLE/FAILED TESTS EXECUTION REPORT:${NO_COLOUR}" ;;
+            echo -e "[TEST] ${YELLOW}UNSTABLE TESTS EXECUTION REPORT:${NO_COLOUR}" ;;
         ${TEST_INCLUSION_STABLE_AND_UNSTABLE} | ${TEST_INCLUSION_SINGLE_TEST} )
             echo -e "[TEST] ${YELLOW}REPORT:${NO_COLOUR}" ;;
     esac
@@ -834,9 +841,9 @@ generateFailSafeReport () {
 # preserves all generated reports
 preserveAllReports() {
     if [[ -n $1 ]] && [[ $1 == "combine" ]]; then
-        # pack stable and unstable/failed tests execution results into the one archive in "stable" and "unstable-and-failed" directories respectively
+        # pack stable and unstable tests execution results into the one archive in "stable" and "unstable" directories respectively
         local stableTestReportTmp=${TMP_DIR}/webdriver/tmp/stable
-        local unstableTestReportTmp=${TMP_DIR}/webdriver/tmp/unstable-and-failed
+        local unstableTestReportTmp=${TMP_DIR}/webdriver/tmp/unstable
 
         mkdir -p ${unstableTestReportTmp}
         mkdir -p ${stableTestReportTmp}
@@ -851,11 +858,11 @@ preserveAllReports() {
         rm -f ${FINAL_REPORT}
 
         cd ${stableTestReportTmp}/..
-        zip -qr ${FINAL_REPORT} stable unstable-and-failed
+        zip -qr ${FINAL_REPORT} stable unstable
 
         rm -rf ${TMP_DIR}/webdriver/tmp
 
-        echo -e "[TEST] Stable/Unstable/Failed tests execution report: ${BLUE}${FINAL_REPORT}${NO_COLOUR}"
+        echo -e "[TEST] Stable/Unstable tests execution report: ${BLUE}${FINAL_REPORT}${NO_COLOUR}"
         echo "[TEST]"
     else
         mkdir -p ${TMP_DIR}/webdriver
@@ -933,14 +940,25 @@ printProposals $@
 preserveAllReports
 printElapsedTime
 
-if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] && [[ $(fetchFailedTestsNumber) == 0 ]] && [[ ${COMPARE_WITH_CI} == false ]] && [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
+if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
+      && [[ $(fetchFailedTestsNumber) == 0 ]] \
+      && [[ ${COMPARE_WITH_CI} == false ]] \
+      && [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
+
+    if [[ $(doesSuiteHaveUnstableTests) != 0 ]]; then
+        echo "[TEST]"
+        echo "[TEST] Test suite '${ORIGIN_TESTS_SCOPE:11}' doesn't have tests which are marked as unstable."
+        echo "[TEST]"
+        exit
+    fi
+
     TEST_INCLUSION=${TEST_INCLUSION_UNSTABLE}
     START_TIME=$(date +%s)
 
     echo "[TEST]"
     echo "[TEST]"
     echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-    echo -e "[TEST] ${YELLOW} RUN UNSTABLE/FAILED TESTS${NO_COLOUR}"
+    echo -e "[TEST] ${YELLOW} RUN UNSTABLE TESTS${NO_COLOUR}"
     echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
     echo "[TEST]"
 
