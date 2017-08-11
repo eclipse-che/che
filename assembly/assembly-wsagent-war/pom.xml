@@ -73,6 +73,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-json-server</artifactId>
         </dependency>
         <dependency>
