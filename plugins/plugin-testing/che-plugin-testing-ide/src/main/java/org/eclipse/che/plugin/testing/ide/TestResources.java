@@ -21,7 +21,6 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 public interface TestResources extends ClientBundle {
     
     @Source("org/eclipse/che/plugin/testing/ide/svg/test.svg")
-    @Deprecated
     SVGResource testIcon();
 
     @Source("org/eclipse/che/plugin/testing/ide/svg/test_all.svg")

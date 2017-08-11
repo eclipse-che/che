@@ -58,6 +58,10 @@ public class OpenShiftConnectorTest {
     private EventService                       eventService;
     @Mock
     private OpenShiftPvcHelper                 openShiftPvcHelper;
+    @Mock
+    private OpenShiftRouteCreator              openShiftRouteCreator;
+    @Mock
+    private OpenShiftDeploymentCleaner         openShiftDeploymentCleaner;
 
     private OpenShiftConnector                 openShiftConnector;
 
@@ -76,6 +80,8 @@ public class OpenShiftConnectorTest {
                                                     authManager,
                                                     dockerApiVersionPathPrefixProvider,
                                                     openShiftPvcHelper,
+                                                    openShiftRouteCreator,
+                                                    openShiftDeploymentCleaner,
                                                     eventService,
                                                     CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS,
                                                     CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,

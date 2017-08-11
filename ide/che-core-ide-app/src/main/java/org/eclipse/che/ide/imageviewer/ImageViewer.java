@@ -164,6 +164,7 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
     /** {@inheritDoc} */
     @Override
     protected void initializeEditor(OpenEditorCallback callback) {
+        callback.onEditorOpened(this);
     }
 
     /** {@inheritDoc} */

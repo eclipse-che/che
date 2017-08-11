@@ -335,6 +335,7 @@ public class GitService {
         try (GitConnection gitConnection = getGitConnection()) {
             return gitConnection.pull(PullParams.create(request.getRemote())
                                                 .withRefSpec(request.getRefSpec())
+                                                .withRebase(request.getRebase())
                                                 .withTimeout(request.getTimeout())
                                                 .withUsername(request.getUsername())
                                                 .withPassword(request.getPassword()));

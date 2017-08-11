@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,6 +56,7 @@ import static org.eclipse.che.plugin.openshift.client.OpenShiftConnector.WORKSPA
  *
  * @author amisevsk
  */
+@Singleton
 public class OpenShiftPvcHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenShiftPvcHelper.class);

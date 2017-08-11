@@ -11,6 +11,9 @@
 package org.eclipse.che.ide.ext.git.client;
 
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 
 import java.util.List;
@@ -20,6 +23,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author Vlad Zhukovskiy
+ * @author Mykola Morhun
  */
 public class GitUtil {
 
@@ -37,4 +41,21 @@ public class GitUtil {
 
         return values != null && values.contains("git");
     }
+
+    /**
+     * Returns the root project for the given file resource or null if the file isn't in a project.
+     */
+    @Nullable
+    public static Container getRootProject(final File file) {
+        Container project = file.getProject();
+        Container parentProject = file.getParent();
+
+        while (parentProject != null) {
+            project = parentProject;
+            parentProject = parentProject.getParent();
+        }
+
+        return project;
+    }
+
 }

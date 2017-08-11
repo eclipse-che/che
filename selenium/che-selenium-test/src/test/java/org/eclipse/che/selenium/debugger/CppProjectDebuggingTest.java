@@ -111,7 +111,7 @@ public class CppProjectDebuggingTest {
     public void shouldDebugCppProject() {
         // when
         projectExplorer.openItemByPath(PATH_TO_PROGRAM);
-        editor.setBreakPointAndWaitInactiveState(12);
+        editor.setBreakPointAndWaitInactiveState(22);
         editor.closeAllTabs();
         commandsPalette.openCommandPalette();
         commandsPalette.startCommandByDoubleClick(MAKE_AND_DEBUG_COMMAND_NAME);

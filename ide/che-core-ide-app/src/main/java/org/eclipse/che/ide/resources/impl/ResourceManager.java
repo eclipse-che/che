@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.resources.impl;
 
+import elemental.util.ArrayOf;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
@@ -984,25 +986,24 @@ public final class ResourceManager {
     }
 
     protected Promise<ResourceDelta[]> synchronize(final ResourceDelta[] deltas) {
-
-        Promise<Void> promise = promises.resolve(null);
-
+        List<Promise<Void>> promisesToResolve = new ArrayList<>(deltas.length);
         for (final ResourceDelta delta : deltas) {
             if (delta.getKind() == ADDED) {
                 if (delta.getFlags() == (MOVED_FROM | MOVED_TO)) {
-                    promise.thenPromise(ignored -> onExternalDeltaMoved(delta));
+                    promisesToResolve.add(onExternalDeltaMoved(delta));
                 } else {
-                    promise.thenPromise(ignored -> onExternalDeltaAdded(delta));
+                    promisesToResolve.add(onExternalDeltaAdded(delta));
                 }
             } else if (delta.getKind() == REMOVED) {
-                promise.thenPromise(ignored -> onExternalDeltaRemoved(delta));
+                promisesToResolve.add(onExternalDeltaRemoved(delta));
 
             } else if (delta.getKind() == UPDATED) {
-                promise.thenPromise(ignored -> onExternalDeltaUpdated(delta));
+                promisesToResolve.add(onExternalDeltaUpdated(delta));
             }
         }
 
-        return promise.thenPromise(ignored -> promises.resolve(deltas));
+        Promise<ArrayOf<?>> promise = promises.all2(promisesToResolve.toArray(new Promise[promisesToResolve.size()]));
+        return promise.then((Function<ArrayOf<?>, ResourceDelta[]>)arg -> deltas);
     }
 
     private Promise<Void> onExternalDeltaMoved(final ResourceDelta delta) {
@@ -1064,7 +1065,7 @@ public final class ResourceManager {
         if (delta.getToPath().segmentCount() == 0) {
             workspaceRoot.synchronize();
 
-            return null;
+            return promises.resolve(null);
         }
 
         return findResourceForExternalOperation(delta.getToPath(), true).thenPromise(resource -> {

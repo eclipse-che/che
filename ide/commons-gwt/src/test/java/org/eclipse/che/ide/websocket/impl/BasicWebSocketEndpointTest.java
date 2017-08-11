@@ -26,11 +26,14 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class BasicWebSocketEndpointTest {
     @Mock
-    private  WebSocketConnectionSustainer sustainer;
+    private WebSocketConnectionSustainer sustainer;
     @Mock
-    private  MessagesReSender             reSender;
+    private MessagesReSender             reSender;
     @Mock
-    private  WebSocketDispatcher          dispatcher;
+    private WebSocketDispatcher          dispatcher;
+    @Mock
+    private WebSocketActionManager       actionManager;
+
     @InjectMocks
     private BasicWebSocketEndpoint        endpoint;
 
@@ -46,6 +49,20 @@ public class BasicWebSocketEndpointTest {
         endpoint.onOpen("url");
 
         verify(reSender).reSend("url");
+    }
+
+    @Test
+    public void shouldOnOpenActionsOnOpen(){
+        endpoint.onOpen("url");
+
+        verify(actionManager).getOnOpenActions("url");
+    }
+
+    @Test
+    public void shouldOnCloseActionsOnClose(){
+        endpoint.onClose("url");
+
+        verify(actionManager).getOnCloseActions("url");
     }
 
     @Test

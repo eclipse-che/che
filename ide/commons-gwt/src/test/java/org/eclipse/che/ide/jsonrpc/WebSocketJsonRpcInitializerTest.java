@@ -19,6 +19,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Collections;
 
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -35,15 +37,15 @@ public class WebSocketJsonRpcInitializerTest {
 
     @Test
     public void shouldRunInitializeOnInitialize() {
-        jsonRpcInitializer.initialize("id", Collections.singletonMap("url", "url"));
+        jsonRpcInitializer.initialize("id", singletonMap("url", "url"));
 
-        verify(webSocketInitializer).initialize("id", "url");
+        verify(webSocketInitializer).initialize("id", "url", emptySet());
     }
 
     @Test
     public void shouldRunTerminateOnTerminate() {
         jsonRpcInitializer.terminate("id");
 
-        verify(webSocketInitializer).terminate("id");
+        verify(webSocketInitializer).terminate("id", emptySet());
     }
 }

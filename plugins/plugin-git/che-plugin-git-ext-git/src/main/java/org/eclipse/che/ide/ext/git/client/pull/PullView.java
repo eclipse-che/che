@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.git.client.pull;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.ide.api.mvp.View;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -23,13 +22,13 @@ import java.util.List;
  */
 public interface PullView extends View<PullView.ActionDelegate> {
     /** Needs for delegate some function into Pull view. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
         /** Performs any actions appropriate in response to the user having pressed the Pull button. */
         void onPullClicked();
 
         /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
         void onCancelClicked();
-        
+
         /** Performs any actions appropriate in response to the remote branch value changed. */
         void onRemoteBranchChanged();
 
@@ -42,7 +41,6 @@ public interface PullView extends View<PullView.ActionDelegate> {
      *
      * @return repository name.
      */
-    @NotNull
     String getRepositoryName();
 
     /**
@@ -50,7 +48,6 @@ public interface PullView extends View<PullView.ActionDelegate> {
      *
      * @return repository url.
      */
-    @NotNull
     String getRepositoryUrl();
 
     /**
@@ -59,25 +56,26 @@ public interface PullView extends View<PullView.ActionDelegate> {
      * @param repositories
      *         available repositories
      */
-    void setRepositories(@NotNull List<Remote> repositories);
+    void setRepositories(List<Remote> repositories);
 
     /** @return local branch */
-    @NotNull
     String getLocalBranch();
-    
-    /** 
+
+    /**
      * Selects pointed local branch
-     * 
-     * @param branch local branch to select
+     *
+     * @param branch
+     *         local branch to select
      */
-    void selectLocalBranch(@NotNull String branch);
-    
-    /** 
+    void selectLocalBranch(String branch);
+
+    /**
      * Selects pointed remote branch
-     * 
-     * @param branch remote branch to select
+     *
+     * @param branch
+     *         remote branch to select
      */
-    void selectRemoteBranch(@NotNull String branch);
+    void selectRemoteBranch(String branch);
 
     /**
      * Set local branches into view.
@@ -85,10 +83,9 @@ public interface PullView extends View<PullView.ActionDelegate> {
      * @param branches
      *         local branches
      */
-    void setLocalBranches(@NotNull List<String> branches);
+    void setLocalBranches(List<String> branches);
 
     /** @return remote branches */
-    @NotNull
     String getRemoteBranch();
 
     /**
@@ -97,7 +94,12 @@ public interface PullView extends View<PullView.ActionDelegate> {
      * @param branches
      *         remote branches
      */
-    void setRemoteBranches(@NotNull List<String> branches);
+    void setRemoteBranches(List<String> branches);
+
+    /**
+     * Returns the value of 'pull with rebase' flag.
+     */
+    boolean getRebase();
 
     /**
      * Change the enable state of the push button.
