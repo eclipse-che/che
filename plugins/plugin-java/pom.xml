@@ -28,6 +28,7 @@
         <module>che-plugin-java-ext-lang-server</module>
         <module>che-plugin-java-ext-lang-client</module>
         <module>che-plugin-java-plain</module>
+        <module>che-plugin-java-server</module>
     </modules>
     <build>
         <pluginManagement>

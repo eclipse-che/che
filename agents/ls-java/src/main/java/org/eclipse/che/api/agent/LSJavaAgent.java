@@ -27,7 +27,7 @@ import java.io.IOException;
  */
 @Singleton
 public class LSJavaAgent extends BasicAgent {
-    private static final String AGENT_DESCRIPTOR = "org.eclipse.che.ls.json.java";
+    private static final String AGENT_DESCRIPTOR = "org.eclipse.che.ls.java.json";
     private static final String AGENT_SCRIPT     = "org.eclipse.che.ls.java.script.sh";
 
     @Inject
