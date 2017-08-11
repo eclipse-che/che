@@ -2371,6 +2371,14 @@
           "previewUrl": "http://${server.port.8080}",
           "goal": "Run"
         }
+      }, {
+        "commandLine": "scl enable rh-maven33 'mvn vertx:debug -f ${current.project.path}'",
+        "name": "debug",
+        "type": "custom",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}",
+          "goal": "Debug"
+        }
       }]
     },
     "stackIcon": {
@@ -2447,6 +2455,15 @@
           "attributes": {
             "previewUrl": "http://${server.port.8080}",
             "goal": "Run"
+          }
+        },
+        {
+          "commandLine": "scl enable rh-maven33 'mvn spring-boot:run -Drun.jvmArguments=\"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005\" -f ${current.project.path}'",
+          "name": "debug",
+          "type": "custom",
+          "attributes": {
+            "previewUrl": "http://${server.port.8080}",
+            "goal": "Debug"
           }
         }
       ]
