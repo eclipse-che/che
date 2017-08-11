@@ -62,7 +62,7 @@
     </div>
   </che-list-header>
 
-  <che-list flex ng-show="workspaceDetailsProjectsCtrl.cheListHelper.visibleItemsNumber > 0">
+  <che-list class="workspace-details-projects-list" flex ng-show="workspaceDetailsProjectsCtrl.cheListHelper.visibleItemsNumber > 0">
     <che-project-item
             ng-repeat="project in workspaceDetailsProjectsCtrl.cheListHelper.getVisibleItems() | orderBy:workspaceDetailsProjectsCtrl.projectOrderBy"
             che-project-item-workspace="workspaceDetailsProjectsCtrl.workspace"
