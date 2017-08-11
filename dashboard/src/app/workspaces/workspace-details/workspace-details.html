@@ -25,6 +25,8 @@
     <!-- Overview tab -->
     <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Overview);">
       <md-tab-label>
+        <i ng-show="workspaceDetailsController.checkFormsNotValid(workspaceDetailsController.tab.Overview)"
+           class="error-state fa fa-exclamation-circle" aria-hidden="true"></i>
         <span class="che-tab-label-title">Overview</span>
       </md-tab-label>
       <md-tab-body>
@@ -111,6 +113,8 @@
     <!-- Config tab -->
     <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Config);">
       <md-tab-label>
+        <i ng-show="workspaceDetailsController.checkFormsNotValid(workspaceDetailsController.tab.Config)"
+           class="error-state fa fa-exclamation-circle" aria-hidden="true"></i>
         <span class="che-tab-label-title">Config</span>
       </md-tab-label>
       <md-tab-body>
@@ -141,7 +145,7 @@
 </md-content>
 
 <workspace-edit-mode-overlay ng-if="workspaceDetailsController.editMode"
-                             workspace-edit-mode-message="{{workspaceDetailsController.isSaveButtonDisabled() ? '' : 'Changes will be applied and workspace restarted'}}"
+                             workspace-edit-mode-message="{{!workspaceDetailsController.isSaveButtonDisabled() ? '' : 'Changes will be applied and workspace restarted'}}"
                              workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
                              workspace-edit-disable-save-button="workspaceDetailsController.isSaveButtonDisabled()"
                              workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"

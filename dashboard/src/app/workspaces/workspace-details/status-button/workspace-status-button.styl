@@ -27,15 +27,14 @@
       md-icon
         width 100%
         &:before
-          color $white-color
           font-size 15px
       .fa-caret-down:before
         position relative
         top 4px
     button[disabled] md-icon:before
-     color $disabled-color !important
-
-
+     color #9F9F9F !important
+    button:not([disabled]) md-icon:before
+      color $white-color !important
 
   .area-drop-down
     background $white-color
