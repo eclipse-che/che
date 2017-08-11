@@ -1,7 +1,7 @@
-<div class="workspace-environment-config" flex="100" layout="row" layout-align="start stretch">
+<div class="che-machine-selector" flex="100" layout="row" layout-align="start stretch">
   <!-- Machine selector -->
-  <div class="machine-selector">
-    <div class="machine-selector-label">Mashines</div>
+  <div class="machines-list">
+    <div class="machine-selector-label">Machines</div>
     <div ng-repeat="machine in machineSelectorController.machinesList">
       <toggle-single-button ng-class="{'dev-machine' : machine.isDev}"
                             id="workspace-machine-{{machine.name}}"
@@ -17,5 +17,4 @@
     <div class="machine-selector-label">{{machineSelectorController.contentTitle}}</div>
     <div ng-transclude class="transclude"></div>
   </div>
-</div>
 </div>
