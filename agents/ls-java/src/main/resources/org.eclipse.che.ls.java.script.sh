@@ -124,8 +124,8 @@ fi
 ### Install Json LS ###
 #######################
 
-curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
+curl -sL ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
-echo "java -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4 -Declipse.product=org.eclipse.jdt.ls.core.product -noverify -Xmx1G -jar ${LS_DIR}/plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar -configuration ./config_linux -data /path/to/data" > ${LS_LAUNCHER}
+echo "java -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4 -Declipse.product=org.eclipse.jdt.ls.core.product -noverify -Xmx1G -jar ${LS_DIR}/plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar -configuration ./config_linux -data ${LS_DIR}/data" > ${LS_LAUNCHER}
