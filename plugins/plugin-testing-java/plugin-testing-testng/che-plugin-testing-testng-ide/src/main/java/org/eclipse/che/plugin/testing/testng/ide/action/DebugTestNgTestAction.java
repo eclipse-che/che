@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -26,8 +25,6 @@ import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.view2.TestResultPresenter;
 import org.eclipse.che.plugin.testing.testng.ide.TestNgLocalizationConstant;
 import org.eclipse.che.plugin.testing.testng.ide.TestNgResources;
-
-import javax.validation.constraints.NotNull;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
@@ -67,13 +64,4 @@ public class DebugTestNgTestAction extends RunDebugTestAbstractAction {
         actionPerformed(frameworkAndTestName, true);
     }
 
-    @Override
-    public void updateInPerspective(@NotNull ActionEvent e) {
-        Presentation presentation = e.getPresentation();
-        presentation.setVisible(!isEditorInFocus);
-        if (!isEditorInFocus) {
-            analyzeProjectTreeSelection();
-        }
-        presentation.setEnabled(isEnable);
-    }
 }
