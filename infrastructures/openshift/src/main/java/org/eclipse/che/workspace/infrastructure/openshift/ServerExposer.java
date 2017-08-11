@@ -31,6 +31,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.lang.Integer.parseInt;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_POD_NAME_LABEL;
 
 /**
@@ -82,7 +84,11 @@ import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_P
  *     targetPort: [8080|web-app]     ---->> Service.spec.ports[0].[port|name]
  * </pre>
  *
+ * <p>For accessing to server user will use route host. Information about
+ * servers that are exposed by route are stored in its annotations.
+ *
  * @author Sergii Leshchenko
+ * @see RoutesAnnotations
  */
 public class ServerExposer {
 
@@ -109,7 +115,7 @@ public class ServerExposer {
     public void expose(String namePrefix, Map<String, ? extends ServerConfig> servers) {
         Map<String, ServicePort> portToServicePort = exposePort(servers.values());
 
-        Service service = new ServiceBuilder().withName(namePrefix + machineName)
+        Service service = new ServiceBuilder().withName(namePrefix + '-' + machineName)
                                               .withSelectorEntry(CHE_POD_NAME_LABEL, machineName.split("/")[0])
                                               .withPorts(new ArrayList<>(portToServicePort.values()))
                                               .build();
@@ -118,15 +124,13 @@ public class ServerExposer {
 
 
         for (ServicePort servicePort : portToServicePort.values()) {
-            Map<String, ? extends ServerConfig> routesServers = servers.entrySet()
-                                                                       .stream()
-                                                                       .filter(e -> {
-                                                                           String port = e.getValue().getPort();
-                                                                           return Integer.parseInt(port.split("/")[0]) == servicePort.getTargetPort().getIntVal();
-                                                                       })
-                                                                       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            int port = servicePort.getTargetPort().getIntVal();
+            Map<String, ServerConfig> routesServers = servers.entrySet()
+                                                             .stream()
+                                                             .filter(e -> parseInt(e.getValue().getPort().split("/")[0]) == port)
+                                                             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            Route route = new RouteBuilder().withName(namePrefix + "-" + machineName + "-" + servicePort.getName())
+            Route route = new RouteBuilder().withName(namePrefix + '-' + machineName + '-' + servicePort.getName())
                                             .withTargetPort(servicePort.getName())
                                             .withServers(routesServers)
                                             .withTo(service.getMetadata().getName())
@@ -143,12 +147,12 @@ public class ServerExposer {
 
         for (String portToExpose : portsToExpose) {
             String[] portProtocol = portToExpose.split("/");
-            int port = Integer.parseInt(portProtocol[0]);
-            String protocol = portProtocol.length > 1 ? portProtocol[1].toUpperCase() : null;
+            int port = parseInt(portProtocol[0]);
+            String protocol = portProtocol.length > 1 ? portProtocol[1].toUpperCase() : "TCP";
             Optional<ContainerPort> exposedOpt = container.getPorts()
                                                           .stream()
                                                           .filter(p -> p.getContainerPort().equals(port) &&
-                                                                       p.getProtocol().equals(protocol))
+                                                                       protocol.equals(p.getProtocol()))
                                                           .findAny();
             ContainerPort containerPort;
 
@@ -193,22 +197,20 @@ public class ServerExposer {
         private Service build() {
             io.fabric8.kubernetes.api.model.ServiceBuilder builder = new io.fabric8.kubernetes.api.model.ServiceBuilder();
             return builder.withNewMetadata()
-                          .withName(name.replace("/", "-"))
+                              .withName(name.replace("/", "-"))
                           .endMetadata()
                           .withNewSpec()
-                          .withSelector(selector)
-                          .withPorts(ports)
+                              .withSelector(selector)
+                              .withPorts(ports)
                           .endSpec()
                           .build();
         }
     }
 
     private static class RouteBuilder {
-        private String                    name;
-        private String                    serviceName;
-        private IntOrString               targetPort;
-        private String                    serverName;
-        private ServerConfig              serverConfig;
+        private String                              name;
+        private String                              serviceName;
+        private IntOrString                         targetPort;
         private Map<String, ? extends ServerConfig> serversConfigs;
 
         private RouteBuilder withName(String name) {
@@ -226,17 +228,6 @@ public class ServerExposer {
             return this;
         }
 
-        private RouteBuilder withTargetPort(int targetPortName) {
-            this.targetPort = new IntOrString(targetPortName);
-            return this;
-        }
-
-        private RouteBuilder withServer(String serverName, ServerConfig serverConfig) {
-            this.serverName = serverName;
-            this.serverConfig = serverConfig;
-            return this;
-        }
-
         private RouteBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
             this.serversConfigs = serversConfigs;
             return this;
@@ -246,18 +237,18 @@ public class ServerExposer {
             io.fabric8.openshift.api.model.RouteBuilder builder = new io.fabric8.openshift.api.model.RouteBuilder();
 
             return builder.withNewMetadata()
-                          .withName(name.replace("/", "-"))
+                              .withName(name.replace("/", "-"))
                           .withAnnotations(RoutesAnnotations.newSerializer()
                                                             .servers(serversConfigs)
                                                             .annotations())
                           .endMetadata()
                           .withNewSpec()
-                          .withNewTo()
-                          .withName(serviceName)
-                          .endTo()
-                          .withNewPort()
-                          .withTargetPort(targetPort)
-                          .endPort()
+                              .withNewTo()
+                                  .withName(serviceName)
+                              .endTo()
+                              .withNewPort()
+                                  .withTargetPort(targetPort)
+                              .endPort()
                           .endSpec()
                           .build();
         }

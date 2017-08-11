@@ -1,7 +1,18 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import io.fabric8.openshift.api.model.Route;
+
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 
 import java.util.HashMap;
@@ -12,6 +23,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Helps to convert {@link Route} related OpenShift infrastructure entities
+ * to annotations and vise-versa.
+ *
  * @author Sergii Leshchenko
  */
 public class RoutesAnnotations {
@@ -24,14 +38,18 @@ public class RoutesAnnotations {
     /** Pattern that matches server annotations e.g. "org.eclipse.che.server.exec-agent.port". */
     private static final Pattern SERVER_ANNOTATION_PATTERN = Pattern.compile("org\\.eclipse\\.che\\.server\\.(?<ref>[\\w-/]+)\\..+");
 
+    /** Creates new annotations serializer. */
     public static Serializer newSerializer() { return new Serializer(); }
 
-    public static class Serializer {
+    /** Creates new label deserializer from given annotations. */
+    public static Deserializer newDeserializer(Map<String, String> annotations) { return new Deserializer(annotations); }
 
+    /** Helps to serialize known route related entities to OpenShift annotations. */
+    public static class Serializer {
         private final Map<String, String> annotations = new LinkedHashMap<>();
 
         /**
-         * Serializes server configuration as docker container annotations.
+         * Serializes server configuration as OpenShift Route annotations.
          * Appends serialization result to this aggregate.
          *
          * @param ref
@@ -54,11 +72,12 @@ public class RoutesAnnotations {
             return this;
         }
 
-        public Map<String, String> annotations() { return annotations; }
+        public Map<String, String> annotations() {
+            return annotations;
+        }
     }
 
-    public static Deserializer newDeserializer(Map<String, String> annotations) { return new Deserializer(annotations); }
-
+    /** Helps to deserialize OpenShift annotations to known route related entities. */
     public static class Deserializer {
         private final Map<String, String> annotations;
 
