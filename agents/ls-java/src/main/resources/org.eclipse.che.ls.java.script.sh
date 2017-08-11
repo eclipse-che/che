@@ -59,11 +59,6 @@ if echo ${LINUX_TYPE} | grep -qi "rhel"; then
         ${SUDO} yum install ${PACKAGES};
     }
 
-    command -v nodejs >/dev/null 2>&1 || {
-        curl --silent --location https://rpm.nodesource.com/setup_6.x | ${SUDO} bash -;
-        ${SUDO} yum -y install nodejs;
-    }
-
 # Red Hat Enterprise Linux 6
 ############################
 elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
@@ -71,27 +66,12 @@ elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
         ${SUDO} yum install ${PACKAGES};
     }
 
-    command -v nodejs >/dev/null 2>&1 || {
-        curl --silent --location https://rpm.nodesource.com/setup_6.x | ${SUDO} bash -;
-        ${SUDO} yum -y install nodejs;
-    }
-
-
 # Ubuntu 14.04 16.04 / Linux Mint 17
 ####################################
 elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
     test "${PACKAGES}" = "" || {
         ${SUDO} apt-get update;
         ${SUDO} apt-get -y install ${PACKAGES};
-    }
-
-    command -v nodejs >/dev/null 2>&1 || {
-        {
-            curl -sL https://deb.nodesource.com/setup_6.x | ${SUDO} bash -;
-        };
-
-        ${SUDO} apt-get update;
-        ${SUDO} apt-get install -y nodejs;
     }
 
 
@@ -103,15 +83,6 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
         ${SUDO} apt-get -y install ${PACKAGES};
     }
 
-    command -v nodejs >/dev/null 2>&1 || {
-        {
-            curl -sL https://deb.nodesource.com/setup_6.x | ${SUDO} bash -;
-        };
-
-        ${SUDO} apt-get update;
-        ${SUDO} apt-get install -y nodejs;
-    }
-
 # Fedora 23
 ###########
 elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
@@ -120,22 +91,11 @@ elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
         ${SUDO} dnf -y install ${PACKAGES};
     }
 
-    command -v nodejs >/dev/null 2>&1 || {
-        curl --silent --location https://rpm.nodesource.com/setup_6.x | ${SUDO} bash -;
-        ${SUDO} dnf -y install nodejs;
-    }
-
-
 # CentOS 7.1 & Oracle Linux 7.1
 ###############################
 elif echo ${LINUX_TYPE} | grep -qi "centos"; then
     test "${PACKAGES}" = "" || {
         ${SUDO} yum -y install ${PACKAGES};
-    }
-
-    command -v nodejs >/dev/null 2>&1 || {
-        curl --silent --location https://rpm.nodesource.com/setup_6.x | ${SUDO} bash -;
-        ${SUDO} yum -y install nodejs;
     }
 
 # openSUSE 13.2
@@ -145,22 +105,12 @@ elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
         ${SUDO} zypper install -y ${PACKAGES};
     }
 
-    command -v nodejs >/dev/null 2>&1 || {
-        ${SUDO} zypper ar http://download.opensuse.org/repositories/devel:/languages:/nodejs/openSUSE_13.1/ Node.js
-        ${SUDO} zypper in nodejs
-    }
-
 # Alpine 3.3
 ############
 elif echo ${LINUX_TYPE} | grep -qi "alpine"; then
     test "${PACKAGES}" = "" || {
         ${SUDO} apk update
         ${SUDO} apk add ${PACKAGES};
-    }
-
-    command -v nodejs >/dev/null 2>&1 || {
-        ${SUDO} apk update
-        ${SUDO} apk add nodejs;
     }
 
 else
