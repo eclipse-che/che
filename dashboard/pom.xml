@@ -67,6 +67,37 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                      <id>add-resource</id>
+                      <phase>generate-resources</phase>
+                      <goals>
+                        <goal>add-resource</goal>
+                      </goals>
+                      <configuration>
+                        <resources>
+                          <resource>
+                            <directory>.</directory>
+                            <targetPath></targetPath>
+                            <excludes>
+                              <exclude>coverage/**</exclude>
+                              <exclude>bower_components/**</exclude>
+                              <exclude>node_modules/**</exclude>
+                              <exclude>dist/**</exclude>
+                              <exclude>target/**</exclude>
+                              <exclude>typings/**</exclude>
+                              <exclude>.che/**</exclude>
+                              <exclude>.tmp/**</exclude>
+                            </excludes>
+                          </resource>
+                         </resources>
+                      </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>
