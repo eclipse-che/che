@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFolderNode;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
@@ -37,7 +37,7 @@ public class ChangesListPresenter implements ChangesListView.ActionDelegate {
     private final ChangesPanelPresenter changesPanelPresenter;
     private final ComparePresenter      comparePresenter;
 
-    private ChangedItems changedItems;
+    private AlteredFiles alteredFiles;
     private String       file;
     private String       revisionA;
     private String       revisionB;
@@ -73,7 +73,7 @@ public class ChangesListPresenter implements ChangesListView.ActionDelegate {
     /**
      * Shows window with changed files.
      *
-     * @param changedItems
+     * @param alteredFiles
      *         files and their status
      * @param revisionA
      *         hash of the first revision or branch.
@@ -82,15 +82,15 @@ public class ChangesListPresenter implements ChangesListView.ActionDelegate {
      *         hash of the second revision or branch.
      *         If it is set to {@code null}, compare with latest repository state will be performed
      */
-    public void show(ChangedItems changedItems, @Nullable String revisionA, @Nullable String revisionB) {
-        this.changedItems = changedItems;
+    public void show(AlteredFiles alteredFiles, @Nullable String revisionA, @Nullable String revisionB) {
+        this.alteredFiles = alteredFiles;
         this.revisionA = revisionA;
         this.revisionB = revisionB;
 
         view.setEnableCompareButton(false);
         view.showDialog();
 
-        changesPanelPresenter.show(changedItems);
+        changesPanelPresenter.show(alteredFiles);
     }
 
     @Override
@@ -101,9 +101,9 @@ public class ChangesListPresenter implements ChangesListView.ActionDelegate {
     @Override
     public void onCompareClicked() {
         if (revisionB == null) {
-            comparePresenter.showCompareWithLatest(changedItems, file, revisionA);
+            comparePresenter.showCompareWithLatest(alteredFiles, file, revisionA);
         } else {
-            comparePresenter.showCompareBetweenRevisions(changedItems, file, revisionA, revisionB);
+            comparePresenter.showCompareBetweenRevisions(alteredFiles, file, revisionA, revisionB);
         }
     }
 }

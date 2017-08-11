@@ -23,7 +23,7 @@ import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
-import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
@@ -108,7 +108,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
     }
 
     @Override
-    public void viewChangedFiles(ChangedItems files, ViewMode viewMode) {
+    public void viewChangedFiles(AlteredFiles files, ViewMode viewMode) {
         NodeStorage nodeStorage = tree.getNodeStorage();
         nodeStorage.clear();
         if (viewMode == TREE) {

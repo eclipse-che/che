@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 
@@ -33,7 +33,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
     private final ChangesPanelView view;
     private final GitLocalizationConstant locale;
 
-    private ChangedItems changedFiles;
+    private AlteredFiles changedFiles;
     private ViewMode     viewMode;
 
     private FileNodeDoubleClickHandler fileNodeDoubleClickHandler;
@@ -56,7 +56,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
      * @param changedFiles
      *         Map with files and their status
      */
-    public void show(ChangedItems changedFiles) {
+    public void show(AlteredFiles changedFiles) {
         this.changedFiles = changedFiles;
         if (changedFiles.isEmpty()) {
             view.setTextToChangeViewModeButton(locale.changeListRowListViewButtonText());

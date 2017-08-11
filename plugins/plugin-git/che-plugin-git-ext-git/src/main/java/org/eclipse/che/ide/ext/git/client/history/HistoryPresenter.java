@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.resource.Path;
@@ -169,11 +169,11 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
                        return;
                    }
 
-                   ChangedItems changedItems = new ChangedItems(project, diff);
-                   if (changedItems.getFilesQuantity() == 1) {
-                       comparePresenter.showCompareBetweenRevisions(changedItems, null, revisionA, revisionB);
+                   AlteredFiles alteredFiles = new AlteredFiles(project, diff);
+                   if (alteredFiles.getFilesQuantity() == 1) {
+                       comparePresenter.showCompareBetweenRevisions(alteredFiles, null, revisionA, revisionB);
                    } else {
-                       changesListPresenter.show(changedItems, revisionA, revisionB);
+                       changesListPresenter.show(alteredFiles, revisionA, revisionB);
                    }
                })
                .catchError(error -> {

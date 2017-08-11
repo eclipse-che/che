@@ -26,19 +26,16 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
-import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
 import org.mockito.Mock;
 
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.MODIFIED;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -145,7 +142,7 @@ public class CommitPresenterTest extends BaseTest {
     @Test
     public void shouldShowDialog() throws Exception {
         final String diff = "M file";
-        final ChangedItems changedItems = new ChangedItems(project, diff);
+        final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
 
         ConfirmDialog dialog = mock(ConfirmDialog.class);
         when(dialogFactory.createConfirmDialog(anyString(),
@@ -163,7 +160,7 @@ public class CommitPresenterTest extends BaseTest {
 
         verify(view).setEnableAmendCheckBox(true);
         verify(view).setEnablePushAfterCommitCheckBox(true);
-        verify(changesPanelPresenter).show(eq(changedItems));
+        verify(changesPanelPresenter).show(eq(alteredFiles));
         verify(view).focusInMessageField();
         verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
         verify(view).getMessage();
@@ -174,7 +171,7 @@ public class CommitPresenterTest extends BaseTest {
     @Test
     public void shouldShowUntrackedFilesOnInitialCommit() throws Exception {
         final String diff = "A file";
-        final ChangedItems changedItems = new ChangedItems(project, diff);
+        final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
 
         PromiseError error = mock(PromiseError.class);
         ServerException exception = mock(ServerException.class);
@@ -193,7 +190,7 @@ public class CommitPresenterTest extends BaseTest {
 
         verify(view).setEnableAmendCheckBox(false);
         verify(view).setEnablePushAfterCommitCheckBox(false);
-        verify(changesPanelPresenter).show(eq(changedItems));
+        verify(changesPanelPresenter).show(eq(alteredFiles));
         verify(view).focusInMessageField();
         verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
         verify(view).getMessage();

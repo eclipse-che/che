@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
-import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.resource.Path;
@@ -138,7 +138,7 @@ public class HistoryPresenterTest extends BaseTest {
     @Test
     public void shouldShowCompareWhenOneFileChangedInCurrentRevision() throws Exception {
         final String diff = "M file";
-        final ChangedItems changedItems = new ChangedItems(project, diff);
+        final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
 
         Revision parentRevision = mock(Revision.class);
         Revision selectedRevision = mock(Revision.class);
@@ -158,13 +158,13 @@ public class HistoryPresenterTest extends BaseTest {
         verify(stringPromise).then(stringCaptor.capture());
         stringCaptor.getValue().apply(diff);
 
-        verify(comparePresenter).showCompareBetweenRevisions(eq(changedItems), anyString(), eq("commitA"), eq("commitB"));
+        verify(comparePresenter).showCompareBetweenRevisions(eq(alteredFiles), anyString(), eq("commitA"), eq("commitB"));
     }
 
     @Test
     public void shouldShowChangedListWhenSeveralFilesChangedInSelectedRevision() throws Exception {
         final String diff = "M file1\nM file2";
-        final ChangedItems changedItems = new ChangedItems(project, diff);
+        final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
 
         Revision revisionA = mock(Revision.class);
         Revision revisionB = mock(Revision.class);
@@ -184,7 +184,7 @@ public class HistoryPresenterTest extends BaseTest {
         verify(stringPromise).then(stringCaptor.capture());
         stringCaptor.getValue().apply(diff);
 
-        verify(changesListPresenter).show(eq(changedItems), eq("commitB"), eq("commitA"));
+        verify(changesListPresenter).show(eq(alteredFiles), eq("commitB"), eq("commitA"));
     }
 
     @Test

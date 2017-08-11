@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
@@ -121,11 +121,11 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                        dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
                                                          locale.compareMessageIdenticalContentText(), null).show();
                    } else {
-                       ChangedItems changedItems = new ChangedItems(project, diff);
-                       if (changedItems.getFilesQuantity() == 1) {
-                           comparePresenter.showCompareWithLatest(changedItems, null, selectedBranch.getName());
+                       AlteredFiles alteredFiles = new AlteredFiles(project, diff);
+                       if (alteredFiles.getFilesQuantity() == 1) {
+                           comparePresenter.showCompareWithLatest(alteredFiles, null, selectedBranch.getName());
                        } else {
-                           changesListPresenter.show(changedItems, selectedBranch.getName(), null);
+                           changesListPresenter.show(alteredFiles, selectedBranch.getName(), null);
                        }
                    }
                })

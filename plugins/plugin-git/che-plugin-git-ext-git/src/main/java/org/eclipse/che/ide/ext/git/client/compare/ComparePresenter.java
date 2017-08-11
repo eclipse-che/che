@@ -53,7 +53,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     private final NotificationManager     notificationManager;
 
     private boolean      compareWithLatest;
-    private ChangedItems changedItems;
+    private AlteredFiles alteredFiles;
     private int          currentItemIndex;
 
     private File    comparedFile;
@@ -82,17 +82,17 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     /**
      * Show compare window for given set of files between given revision and HEAD.
      *
-     * @param changedItems
+     * @param alteredFiles
      *         ordered touched files
      * @param currentFile
      *         file which will be shown first, if null then the first from the list will be shown
      * @param revision
      *         hash of revision or branch
      */
-    public void showCompareWithLatest(final ChangedItems changedItems,
+    public void showCompareWithLatest(final AlteredFiles alteredFiles,
                                       @Nullable final String currentFile,
                                       final String revision) {
-        this.changedItems = changedItems;
+        this.alteredFiles = alteredFiles;
         this.revision = revision;
 
         this.compareWithLatest = true;
@@ -105,7 +105,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     /**
      * Shows compare window for given set of files between specified revisions.
      *
-     * @param changedItems
+     * @param alteredFiles
      *         ordered touched files
      * @param currentFile
      *         file which will be shown first, if null then the first from the list will be shown
@@ -116,11 +116,11 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      *         hash of the second revision or branch.
      *         If it is set to {@code null}, compare with latest repository state will be performed
      */
-    public void showCompareBetweenRevisions(final ChangedItems changedItems,
+    public void showCompareBetweenRevisions(final AlteredFiles alteredFiles,
                                             @Nullable final String currentFile,
                                             @Nullable final String revisionA,
                                             @Nullable final String revisionB) {
-        this.changedItems = changedItems;
+        this.alteredFiles = alteredFiles;
         this.revisionA = revisionA;
         this.revisionB = revisionB;
 
@@ -136,18 +136,20 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      * Type of comparison to show depends on {@code compareWithLatest} field.
      */
     private void showCompareForCurrentFile() {
-        view.setEnableNextDiffButton(currentItemIndex != (changedItems.getFilesQuantity() - 1));
+        view.setEnableNextDiffButton(currentItemIndex != (alteredFiles.getFilesQuantity() - 1));
         view.setEnablePreviousDiffButton(currentItemIndex != 0);
 
-        changedItems.getProject()
-                    .getFile(changedItems.getItemByIndex(currentItemIndex))
+        alteredFiles.getProject()
+                    .getFile(alteredFiles.getItemByIndex(currentItemIndex))
                     .then(file -> {
                         if (file.isPresent()) {
                             if (compareWithLatest) {
-                                showCompareWithLatestForFile(file.get(), changedItems.getStatusByIndex(currentItemIndex));
+                                showCompareWithLatestForFile(file.get(), alteredFiles.getStatusByIndex(currentItemIndex));
                             } else {
-                                showCompareBetweenRevisionsForFile(file.get(), changedItems.getStatusByIndex(currentItemIndex));
+                                showCompareBetweenRevisionsForFile(file.get(), alteredFiles.getStatusByIndex(currentItemIndex));
                             }
+                        } else { // file is deleted
+                            // TODO implement (is broken in master too)
                         }
                     }).catchError(error -> {
                         notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
@@ -309,7 +311,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             return;
         }
 
-        currentItemIndex = changedItems.getChangedItemsList().indexOf(currentFile);
+        currentItemIndex = alteredFiles.getChangedItemsList().indexOf(currentFile);
         if (currentItemIndex == -1) {
             currentItemIndex = 0;
         }

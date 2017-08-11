@@ -22,11 +22,11 @@ import java.util.Objects;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 
 /**
- * Describes changed files in git comparison process.
+ * Describes changed in any way files in git comparison process.
  *
  * @author Mykola Morhun
  */
-public class ChangedItems {
+public class AlteredFiles {
 
     private final Project                       project;
     private final LinkedHashMap<String, Status> changedFilesStatuses;
@@ -40,7 +40,7 @@ public class ChangedItems {
      * @param diff
      *         plain result of git diff operation
      */
-    public ChangedItems(Project project, String diff) {
+    public AlteredFiles(Project project, String diff) {
         this.project = project;
 
         changedFilesStatuses = new LinkedHashMap<>();
@@ -90,7 +90,7 @@ public class ChangedItems {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ChangedItems that = (ChangedItems)o;
+        AlteredFiles that = (AlteredFiles)o;
         return Objects.equals(project, that.project) &&
                Objects.equals(changedFilesStatuses, that.changedFilesStatuses) &&
                Objects.equals(changedFilesList, that.changedFilesList);

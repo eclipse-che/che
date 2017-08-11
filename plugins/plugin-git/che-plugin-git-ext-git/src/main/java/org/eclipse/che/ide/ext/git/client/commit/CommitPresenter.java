@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.ide.ext.git.client.compare.ChangedItems;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
@@ -160,14 +160,14 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     }
 
     private void show(@Nullable String diff) {
-        ChangedItems changedItems = new ChangedItems(project, diff);
+        AlteredFiles alteredFiles = new AlteredFiles(project, diff);
         filesToCommit.clear();
-        allFiles = changedItems.getChangedItemsList();
+        allFiles = alteredFiles.getChangedItemsList();
 
         view.setEnableCommitButton(!view.getMessage().isEmpty());
         view.focusInMessageField();
         view.showDialog();
-        changesPanelPresenter.show(changedItems);
+        changesPanelPresenter.show(alteredFiles);
         view.setMarkedCheckBoxes(stream(appContext.getResources()).map(resource -> resource.getLocation().removeFirstSegments(1))
                                                                   .collect(Collectors.toSet()));
     }
