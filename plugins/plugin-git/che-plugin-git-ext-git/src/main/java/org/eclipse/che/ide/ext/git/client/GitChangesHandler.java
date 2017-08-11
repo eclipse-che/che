@@ -44,8 +44,8 @@ import static org.eclipse.che.ide.api.vcs.VcsStatus.UNTRACKED;
 @Singleton
 public class GitChangesHandler {
 
-    private final AppContext appContext;
-    private final Provider<EditorAgent> editorAgentProvider;
+    private final AppContext                         appContext;
+    private final Provider<EditorAgent>              editorAgentProvider;
     private final Provider<ProjectExplorerPresenter> projectExplorerPresenterProvider;
     private final Provider<EditorMultiPartStack>     multiPartStackProvider;
 
@@ -124,7 +124,7 @@ public class GitChangesHandler {
                 } else if (status.getAdded().contains(nodeLocation) && file.getVcsStatus() != ADDED) {
                     file.setVcsStatus(ADDED);
                     tree.refresh(node);
-                } else if (!status.getUntracked().contains(nodeLocation) && file.getVcsStatus() == UNTRACKED) {
+                } else if (file.getVcsStatus() != NOT_MODIFIED) {
                     file.setVcsStatus(VcsStatus.NOT_MODIFIED);
                     tree.refresh(node);
                 }
@@ -141,7 +141,7 @@ public class GitChangesHandler {
                                    tab.setTitleColor(MODIFIED.getColor());
                                } else if (status.getAdded().contains(nodeLocation)) {
                                    tab.setTitleColor(ADDED.getColor());
-                               } else if (!status.getUntracked().contains(nodeLocation) && ((File)tab.getFile()).getVcsStatus() == UNTRACKED){
+                               } else if (((File)tab.getFile()).getVcsStatus() != NOT_MODIFIED) {
                                    tab.setTitleColor(NOT_MODIFIED.getColor());
                                }
                            });

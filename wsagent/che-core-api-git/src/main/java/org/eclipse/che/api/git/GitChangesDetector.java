@@ -116,9 +116,7 @@ public class GitChangesDetector {
                     type = ADDED;
                 } else if (status.getUntracked().contains(itemPath)) {
                     type = UNTRACKED;
-                } else if (status.getModified().contains(itemPath)) {
-                    type = MODIFIED;
-                } else if (status.getChanged().contains(itemPath)) {
+                } else if (status.getModified().contains(itemPath) || status.getChanged().contains(itemPath)) {
                     type = MODIFIED;
                 } else {
                     type = GitChangeEventDto.Type.NOT_MODIFIED;
