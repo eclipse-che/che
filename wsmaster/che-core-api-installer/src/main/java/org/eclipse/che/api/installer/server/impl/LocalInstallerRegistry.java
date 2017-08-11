@@ -72,10 +72,12 @@ public class LocalInstallerRegistry implements InstallerRegistry {
     }
 
     private void doInit(InstallerDao installerDao, Installer i) throws InstallerException {
+        String installerKey = InstallerFqn.of(i).toKey();
         try {
             installerDao.create(new InstallerImpl(i));
+            LOG.info(format("Installer '%s' added.", installerKey));
         } catch (InstallerAlreadyExistsException e) {
-            // ignore
+            LOG.info(format("Installer '%s' already exists.", installerKey));
         }
     }
 

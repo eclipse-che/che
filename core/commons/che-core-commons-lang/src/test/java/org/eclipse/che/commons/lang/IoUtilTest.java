@@ -22,7 +22,7 @@ import static org.testng.Assert.assertTrue;
  */
 public class IoUtilTest {
     @Test
-    public void shouldIterateResources() throws Exception {
+    public void shouldListResources() throws Exception {
         List<String> resources = new ArrayList<>();
         IoUtil.listResources(getClass().getResource("/").toURI(), path -> resources.add(path.getFileName().toString()));
 

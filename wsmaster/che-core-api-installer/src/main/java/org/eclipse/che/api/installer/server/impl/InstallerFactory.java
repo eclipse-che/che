@@ -13,8 +13,6 @@ package org.eclipse.che.api.installer.server.impl;
 import org.eclipse.che.api.installer.server.model.impl.BasicInstaller;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -30,7 +28,7 @@ import java.util.stream.Collectors;
 import static java.nio.file.Files.isDirectory;
 
 /**
- * Scans resources to create {@link Installer} about them.
+ * Scans resources to create {@link Installer} based upon them.
  * To be able to find appropriate resources the structure has to be the follow:
  *
  *     installers
@@ -45,8 +43,6 @@ import static java.nio.file.Files.isDirectory;
  * @author Anatolii Bazko
  */
 public class InstallerFactory {
-
-    private static final Logger LOG = LoggerFactory.getLogger(InstallerFactory.class);
 
     /**
      * Finds resources and initializes installers based upon them.
@@ -66,12 +62,12 @@ public class InstallerFactory {
         while (installerResources.hasMoreElements()) {
             URL installerResource = installerResources.nextElement();
 
-            IoUtil.listResources(installerResource.toURI(), versionDir -> {
-                if (!isDirectory(versionDir)) {
+            IoUtil.listResources(installerResource.toURI(), dir -> {
+                if (!isDirectory(dir)) {
                     return;
                 }
 
-                List<Path> descriptors = findInstallersDescriptors(versionDir);
+                List<Path> descriptors = findInstallersDescriptors(dir);
                 for (Path descriptor : descriptors) {
                     Optional<Path> script = findInstallerScript(descriptor);
                     script.ifPresent(path -> {
@@ -97,7 +93,7 @@ public class InstallerFactory {
     }
 
     private static Optional<Path> findInstallerScript(Path descriptor) {
-        String scriptFileName = descriptor.getFileName().toString().replace("json", "script.sh");
+        String scriptFileName = descriptor.getFileName().toString().replaceAll("[.]json$", ".script.sh");
         try {
             return Files.find(descriptor.getParent(),
                               1,
@@ -111,11 +107,9 @@ public class InstallerFactory {
 
     private static Installer init(Path descriptor, Path script) {
         try {
-            BasicInstaller installer = new BasicInstaller(descriptor, script);
-            LOG.info(String.format("Installer '%s' found", InstallerFqn.of(installer).toKey()));
-            return installer;
+            return new BasicInstaller(descriptor, script);
         } catch (IOException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 }
