@@ -37,6 +37,8 @@ public class DatasourceExtension {
     @Inject
     public DatasourceExtension(
             ActionManager actionManager,
+            ConnectorsInitializer connectorsInitializer,
+            AvailableJdbcDriversService availableJdbcDrivers,
             NewDatasourceWizardAction newDatasourceWizardAction) {
 
         actionManager.registerAction("New Datasource", newDatasourceWizardAction);
@@ -51,6 +53,12 @@ public class DatasourceExtension {
         // add HelloWorldAction to context menu as last entry
         DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction("resourceOperation");
         mainContextMenuGroup.add(newDatasourceWizardAction, Constraints.LAST);
+
+        // do after adding new datasource page provider to keep page order
+        connectorsInitializer.initConnectors();
+
+        // fetching available drivers list from the server
+        availableJdbcDrivers.fetch();
 
     }
 }

@@ -13,6 +13,7 @@ package org.eclipse.che.datasource.ide.newDatasource;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.datasource.ide.AvailableJdbcDriversService;
 import org.eclipse.che.datasource.ide.newDatasource.presenter.NewDatasourceWizardPresenter;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -29,14 +30,16 @@ public class NewDatasourceWizardAction extends Action {
     protected NotificationManager   notificationManager;
 
     private final NewDatasourceWizardPresenter wizard;
-
+    private final AvailableJdbcDriversService availableJdbcDrivers;
 
     @Inject
     public NewDatasourceWizardAction(@NotNull NewDatasourceWizardPresenter wizard,
-                                     @NotNull final NotificationManager notificationManager) {
+                                     @NotNull final NotificationManager notificationManager,
+                                     AvailableJdbcDriversService availableJdbcDrivers) {
         super("New Datasource", "Create a New Datasource");
         this.wizard = wizard;
         this.notificationManager = notificationManager;
+        this.availableJdbcDrivers=availableJdbcDrivers;
     }
 
     @Override
@@ -49,6 +52,8 @@ public class NewDatasourceWizardAction extends Action {
      */
     public void actionPerformed() {
         try {
+
+            availableJdbcDrivers.fetch();
             wizard.show();
         } catch (final Exception exception) {
             notificationManager.notify(exception.getLocalizedMessage(), StatusNotification.Status.FAIL,StatusNotification.DisplayMode.FLOAT_MODE );

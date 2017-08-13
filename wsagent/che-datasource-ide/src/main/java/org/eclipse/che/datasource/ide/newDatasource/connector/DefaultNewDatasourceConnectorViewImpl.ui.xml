@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='res' type='org.eclipse.che.ide.Resources' />
+    <ui:with field="datasourceUiResources" type="org.eclipse.che.datasource.ide.DatasourceUiResources" />
+    <ui:style>
+    
+    .mainPanel{
+        margin: 14px;
+        /*border: none !important;*/
+        height: 412px;
+    }
+    .spacing {
+    	margin-bottom: 6px;
+    }
+    
+    .textboxBackground{
+		background-color: #313131;
+	}
+
+    .testButtonText{
+		background-color: #313131;
+		font-weight: normal;	
+	}
+	
+	.testErrorText{
+		text-align:center;
+		font-size:small;
+	}
+	
+	.projectsList{
+		margin-left: 2px;
+	}
+	 
+    </ui:style>
+
+    <g:DockLayoutPanel unit="PCT" width="100%" height="100%" addStyleNames="{style.mainPanel}">
+        <g:center>
+
+            <g:DockLayoutPanel unit="PX" addStyleNames="{style.mainPanel}">
+                <g:north size="40.0">
+                    <g:Label ui:field="configureTitleCaption" height="100%" addStyleNames="{res.coreCss.mainBoldFont}" />
+                </g:north>
+                <g:north size="40.0">
+                    <g:DockLayoutPanel unit="PX" width="100%" height="100%" addStyleNames="{res.coreCss.mainText} {style.spacing}">
+                        <g:west size="90.0">
+                            <g:Label text="Database:" height="18px" addStyleNames="{res.coreCss.mainFont}" />
+                        </g:west>
+                        <g:center>
+                            <g:TextBox ui:field="dbName" width="80%" height="16px" addStyleNames="{style.textboxBackground},{res.coreCss.mainBoldFont}" />
+                        </g:center>
+                    </g:DockLayoutPanel>
+                </g:north>
+                <g:north size="40.0">
+                    <g:DockLayoutPanel unit="PX" width="100%" addStyleNames="{res.coreCss.mainText} {style.spacing}">
+                        <g:west size="90.0">
+                            <g:Label text="Host:" height="18px" addStyleNames="{res.coreCss.mainFont}" />
+                        </g:west>
+                        <g:center>
+                            <g:TextBox ui:field="hostField" width="80%" height="16px" addStyleNames="{style.textboxBackground},{res.coreCss.mainBoldFont}" />
+                        </g:center>
+                    </g:DockLayoutPanel>
+                </g:north>
+                <g:north size="40.0">
+                    <g:DockLayoutPanel unit="PX" width="100%" addStyleNames="{res.coreCss.mainText} {style.spacing}">
+                        <g:west size="90.0">
+                            <g:Label text="Port:" height="18px" addStyleNames="{res.coreCss.mainFont}" />
+                        </g:west>
+                        <g:center>
+                            <g:TextBox ui:field="portField" width="80%" height="16px" addStyleNames="{style.textboxBackground},{res.coreCss.mainBoldFont}" />
+                        </g:center>
+                    </g:DockLayoutPanel>
+                </g:north>
+                <g:north size="40.0">
+                    <g:DockLayoutPanel unit="PX" width="100%" addStyleNames="{res.coreCss.mainText} {style.spacing}">
+                        <g:west size="90.0">
+                            <g:Label text="Username:" height="18px" addStyleNames="{res.coreCss.mainFont}" />
+                        </g:west>
+                        <g:center>
+                            <g:TextBox ui:field="usernameField" width="80%" height="16px" addStyleNames="{style.textboxBackground},{res.coreCss.mainBoldFont}" />
+                        </g:center>
+                    </g:DockLayoutPanel>
+                </g:north>
+                <g:north size="40.0">
+                    <g:DockLayoutPanel unit="PX" width="100%" addStyleNames="{res.coreCss.mainText} {style.spacing}">
+                        <g:west size="90.0">
+                            <g:Label text="Password:" height="18px" addStyleNames="{res.coreCss.mainFont}" />
+                        </g:west>
+                        <g:center>
+                            <g:PasswordTextBox ui:field="passwordField" width="80%" height="16px" addStyleNames="{style.textboxBackground},{res.coreCss.mainBoldFont}" />
+                        </g:center>
+                    </g:DockLayoutPanel>
+                </g:north>
+                <g:north size="22.0">
+                    <g:DockLayoutPanel unit="PX" width="100%" addStyleNames="{res.coreCss.mainText} {style.spacing}">
+                        <g:west size="90.0">
+                            <g:Label text="Storage in:" height="18px" />
+                        </g:west>
+                        <g:center>
+                            <g:RadioButton ui:field="radioUserPref" name="radioUserPref" text="user preferences"/>
+                        </g:center>
+                    </g:DockLayoutPanel>
+                </g:north>
+                <g:north size="35.0">
+                    <g:DockLayoutPanel unit="PX" width="100%" addStyleNames="{res.coreCss.mainText} {style.spacing}">
+                        <g:west size="90.0">
+                            <g:Label text="" height="18px" />
+                        </g:west>
+                        <g:center>
+                            <g:RadioButton ui:field="radioProject" name="radioProject" text="a project"/>
+                        </g:center>
+                        <g:east size="150.0">
+                            <g:ListBox ui:field="projectsList" height="18px" addStyleNames="{style.projectsList}"/>
+                        </g:east>
+                    </g:DockLayoutPanel>
+                </g:north>
+                <g:north size="22.0">
+                    <g:DockLayoutPanel unit="PX" width="100%" addStyleNames="{res.coreCss.mainText} {style.spacing}">
+                        <g:west size="90.0">
+                            <g:Label text="" height="18px" />
+                        </g:west>
+                        <g:center>
+                            <g:CheckBox ui:field="useSSL" text="Use SSL"></g:CheckBox>
+                        </g:center>
+                    </g:DockLayoutPanel>
+                </g:north>
+                <g:north size="22.0">
+                    <g:DockLayoutPanel unit="PX" width="100%" addStyleNames="{res.coreCss.mainText} {style.spacing}">
+                        <g:west size="90.0">
+                            <g:Label text="" height="18px" />
+                        </g:west>
+                        <g:center>
+                            <g:CheckBox ui:field="verifyServerCertificate" text="Verify Server Certificate"></g:CheckBox>
+                        </g:center>
+                    </g:DockLayoutPanel>
+                </g:north>
+            </g:DockLayoutPanel>
+        </g:center>
+        
+        <g:south size="25">
+            <g:DockLayoutPanel unit="PCT" width="100%" addStyleNames="{res.coreCss.mainText} {style.spacing}">
+                <g:north size="28.0">
+                  <g:DockLayoutPanel unit="PCT">
+	                  <g:west size="35">
+	                  	<g:Label text="" />
+	                  </g:west>
+	                  <g:center>
+	                  	<g:Button ui:field="testConnectionButton" text="Test Connection" addStyleNames="{datasourceUiResources.datasourceUiCSS.datasourceWizardTestConnection},{style.testButtonText}" />
+	                  </g:center>
+                  </g:DockLayoutPanel>  
+                </g:north>
+                <g:center>
+                    <g:Label text="" />
+                </g:center>
+                <g:south size="58">
+                	<g:Label ui:field="testConnectionErrorMessage" width="95%" addStyleNames="{style.testErrorText}" />
+                </g:south>
+            </g:DockLayoutPanel>
+        </g:south>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

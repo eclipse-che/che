@@ -13,9 +13,18 @@ package org.eclipse.che.datasource.ide.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.datasource.ide.AvailableJdbcDriversService;
+import org.eclipse.che.datasource.ide.AvailableJdbcDriversServiceRestImpl;
+import org.eclipse.che.datasource.ide.DatasourceClientService;
+import org.eclipse.che.datasource.ide.DatasourceClientServiceImpl;
 import org.eclipse.che.datasource.ide.newDatasource.NewDatasourceWizardFactory;
+import org.eclipse.che.datasource.ide.newDatasource.connector.DefaultNewDatasourceConnectorView;
+import org.eclipse.che.datasource.ide.newDatasource.connector.DefaultNewDatasourceConnectorViewImpl;
+import org.eclipse.che.datasource.ide.newDatasource.connector.NewDatasourceConnectorAgent;
+import org.eclipse.che.datasource.ide.newDatasource.connector.NewDatasourceConnectorAgentImpl;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 
 @ExtensionGinModule
@@ -31,14 +40,14 @@ public class DatasourceGinModule extends AbstractGinModule {
 
 //        bind(DatasourceExplorerView.class).to(DatasourceExplorerViewImpl.class)
 //                                          .in(Singleton.class);
-//        bind(DatasourceClientService.class).to(DatasourceClientServiceImpl.class)
-//                                           .in(Singleton.class);
+        bind(DatasourceClientService.class).to(DatasourceClientServiceImpl.class)
+                                           .in(Singleton.class);
 
         install(new GinFactoryModuleBuilder().build(NewDatasourceWizardFactory.class));
 //        install(new GinFactoryModuleBuilder().build(EditDatasourceWizardFactory.class));
 
-//        bind(NewDatasourceConnectorAgent.class).to(NewDatasourceConnectorAgentImpl.class).in(Singleton.class);
-//        bind(DefaultNewDatasourceConnectorView.class).to(DefaultNewDatasourceConnectorViewImpl.class);
+        bind(NewDatasourceConnectorAgent.class).to(NewDatasourceConnectorAgentImpl.class).in(Singleton.class);
+        bind(DefaultNewDatasourceConnectorView.class).to(DefaultNewDatasourceConnectorViewImpl.class);
 //
 //        bind(DataEntityPropertiesView.class).to(DataEntityPropertiesViewImpl.class);
 //
@@ -47,7 +56,7 @@ public class DatasourceGinModule extends AbstractGinModule {
 //        install(new GinFactoryModuleBuilder().implement(SqlRequestLauncherView.class, SqlRequestLauncherViewImpl.class)
 //                                             .build(SqlRequestLauncherFactory.class));
 
-//        bind(AvailableJdbcDriversService.class).to(AvailableJdbcDriversServiceRestImpl.class).in(Singleton.class);
+        bind(AvailableJdbcDriversService.class).to(AvailableJdbcDriversServiceRestImpl.class).in(Singleton.class);
 //
 //        bind(FetchMetadataService.class).to(FetchMetadataServiceImpl.class).in(Singleton.class);
 //

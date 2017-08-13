@@ -12,24 +12,27 @@ package org.eclipse.che.datasource.ide.newDatasource.view;
 
 import com.google.inject.ImplementedBy;
 
+import org.eclipse.che.datasource.ide.newDatasource.connector.NewDatasourceConnector;
 import org.eclipse.che.ide.api.mvp.View;
+
+import java.util.Collection;
 
 @ImplementedBy(NewDatasourceWizardMainPageViewImpl.class)
 public interface NewDatasourceWizardMainPageView extends View<NewDatasourceWizardMainPageView.ActionDelegate> {
 
     void reset();
 
-//    void setConnectors(Collection<NewDatasourceConnector> connectors);
+    void setConnectors(Collection<NewDatasourceConnector> connectors);
     
-//    void selectConnector(NewDatasourceConnector data);
+    void selectConnector(NewDatasourceConnector data);
 
     /** Required for delegating functions in view. */
     public interface ActionDelegate {
 
-//        void onConnectorSelected(String id);
+        void onConnectorSelected(String id);
 
-//        void onCategorySelected();
+        void onCategorySelected();
 
-//        boolean connectorEnabled(String id);
+        boolean connectorEnabled(String id);
     }
 }

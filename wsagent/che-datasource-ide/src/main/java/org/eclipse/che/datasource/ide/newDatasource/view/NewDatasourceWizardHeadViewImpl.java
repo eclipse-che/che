@@ -41,7 +41,7 @@ public class NewDatasourceWizardHeadViewImpl extends Window implements NewDataso
     Style       style;
     @UiField
     Button      saveButton;
-    private ActionDelegate                                 delegate;
+    private ActionDelegate delegate;
     private Map<Presenter, Widget> pageCache = new HashMap<>();
 
     @Inject
