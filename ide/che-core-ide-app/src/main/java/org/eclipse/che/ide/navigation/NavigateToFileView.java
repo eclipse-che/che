@@ -12,7 +12,7 @@ package org.eclipse.che.ide.navigation;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.api.project.shared.dto.SearchResultDto;
+import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.resource.Path;
 
@@ -67,6 +67,6 @@ public interface NavigateToFileView extends View<NavigateToFileView.ActionDelega
      * @param items
      *      items of suggestions
      */
-    void showItems(List<SearchResultDto> items);
+    void showItems(List<ItemReference> items);
 
 }

@@ -18,11 +18,9 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.SearchResult;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.search.presentation.FindResultPresenter;
-
-import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -76,9 +74,9 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
                 }
 
                 final Container container = optionalContainer.get();
-                container.search(view.getFileMask(), prepareQuery(text)).then(new Operation<List<SearchResult>> () {
+                container.search(view.getFileMask(), prepareQuery(text)).then(new Operation<Resource[]>() {
                     @Override
-                    public void apply(List<SearchResult> result) throws OperationException {
+                    public void apply(Resource[] result) throws OperationException {
                         view.close();
                         findResultPresenter.handleResponse(result, text);
                     }

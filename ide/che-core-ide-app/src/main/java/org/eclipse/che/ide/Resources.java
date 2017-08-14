@@ -182,9 +182,6 @@ public interface Resources extends Tree.Resources,
     @Source("part/che-logo.svg")
     SVGResource cheLogo();
 
-    @Source("searchMatch.svg")
-    SVGResource searchMatch();
-
     /** Interface for css resources. */
     interface CoreCss extends CssResource {
         String editorPaneMenuDelimiter();
@@ -216,10 +213,7 @@ public interface Resources extends Tree.Resources,
 
         String tagsPanel();
 
-        @ClassName("found-highlight")
-        String foundPhraseHighlight();
-
-        @ClassName("search-match")
-        String searchMatch();
+        @ClassName("codeassistant-highlight")
+        String codeassistantHighlight();
     }
 }

@@ -10,13 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.search.factory;
 
-import org.eclipse.che.api.project.shared.SearchOccurrence;
-import org.eclipse.che.ide.api.resources.SearchResult;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.search.presentation.FindResultGroupNode;
-import org.eclipse.che.ide.search.presentation.FoundItemNode;
-import org.eclipse.che.ide.search.presentation.FoundOccurrenceNode;
-
-import java.util.List;
 
 /**
  * Factory for creating tree element for the result of searching.
@@ -33,9 +28,5 @@ public interface FindResultNodeFactory {
      *         requested text to search
      * @return new instance of {@link FindResultGroupNode}
      */
-    FindResultGroupNode newResultNode(List<SearchResult> result, String request);
-
-    FoundItemNode newFoundItemNode(SearchResult searchResult, String request);
-
-    FoundOccurrenceNode newFoundOccurrenceNode(SearchOccurrence searchOccurrence, String itemPath);
+    FindResultGroupNode newResultNode(Resource[] result, String request);
 }

@@ -19,7 +19,6 @@ import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
 import org.eclipse.che.ide.project.shared.NodesResources;
 
@@ -50,7 +49,6 @@ public class FileNode extends ResourceNode<File> implements HasAction {
         this.nodeIconProvider = nodeIconProvider;
         this.editorAgent = editorAgent;
     }
-
 
     /** {@inheritDoc} */
     @Override
