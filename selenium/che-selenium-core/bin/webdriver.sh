@@ -368,7 +368,7 @@ prepareTestSuite() {
 }
 
 # returns 0 if suite does have "<exclude" section, or 1 otherwise
-doesSuiteHaveUnstableTests() {
+suiteContainsUnstableTests() {
     local suitePath=${ORIGIN_TESTS_SCOPE:11}
     grep -oe "<exclude" ${suitePath}  > /dev/null
     echo $?
@@ -718,7 +718,7 @@ rerunTests() {
         analyseTestsResults $@
         generateFailSafeReport
         printProposals $@
-        packTestReport
+        storeTestReport
         printElapsedTime
 
         echo "[TEST]"
@@ -837,21 +837,21 @@ generateFailSafeReport () {
     echo "[TEST]"
 }
 
-packTestReport() {
+storeTestReport() {
     mkdir -p ${TMP_DIR}/webdriver
-    local package="${TMP_DIR}/webdriver/report$(date +%s).zip"
+    local report="${TMP_DIR}/webdriver/report$(date +%s).zip"
 
     rm -rf ${TMP_DIR}/webdriver/tmp
     mkdir target/suite
     if [[ -f ${TMP_SUITE_PATH} ]]; then
         cp ${TMP_SUITE_PATH} target/suite;
     fi
-    zip -qr ${package} target/screenshots target/site target/failsafe-reports target/log target/bin target/suite
+    zip -qr ${report} target/screenshots target/site target/failsafe-reports target/log target/bin target/suite
 
-    echo -e "[TEST] Tests results and reports are saved to ${BLUE}${package}${NO_COLOUR}"
+    echo -e "[TEST] Tests results and reports are saved to ${BLUE}${report}${NO_COLOUR}"
     echo "[TEST]"
     echo "[TEST] If target directory is accidentally cleaned it is possible to restore it: "
-    echo -e "[TEST] \t${BLUE}rm -rf ${CUR_DIR}/target && unzip -q ${package} -d ${CUR_DIR}${NO_COLOUR}"
+    echo -e "[TEST] \t${BLUE}rm -rf ${CUR_DIR}/target && unzip -q ${report} -d ${CUR_DIR}${NO_COLOUR}"
     echo "[TEST]"
 }
 
@@ -910,7 +910,7 @@ fi
 analyseTestsResults $@
 generateFailSafeReport
 printProposals $@
-packTestReport
+storeTestReport
 printElapsedTime
 
 if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
@@ -918,9 +918,10 @@ if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
       && [[ ${COMPARE_WITH_CI} == false ]] \
       && [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
 
-    if [[ $(doesSuiteHaveUnstableTests) != 0 ]]; then
+    if [[ $(suiteContainsUnstableTests) != 0 ]]; then
         echo "[TEST]"
         echo "[TEST] Test suite '${ORIGIN_TESTS_SCOPE:11}' doesn't have tests which are marked as unstable."
+        echo "[TEST] No more tests will be run."
         echo "[TEST]"
         exit
     fi
@@ -937,6 +938,6 @@ if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
 
     testProduct $@
     generateFailSafeReport
-    packTestReport
+    storeTestReport
     printElapsedTime
 fi
