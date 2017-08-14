@@ -89,7 +89,7 @@ class MacroCompletionProposal implements CompletionProposal {
     }
 
     private void appendHighlighted(SafeHtmlBuilder builder, String text) {
-        builder.appendHtmlConstant("<span class=\"" + resources.coreCss().codeassistantHighlight() + "\">");
+        builder.appendHtmlConstant("<span class=\"" + resources.coreCss().foundPhraseHighlight() + "\">");
         builder.appendEscaped(text);
         builder.appendHtmlConstant("</span>");
     }

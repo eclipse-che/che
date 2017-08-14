@@ -1,75 +1,56 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Red Hat, Inc. - initial API and implementation
+ *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.search.presentation;
 
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.project.shared.SearchOccurrence;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
-import org.eclipse.che.ide.ui.smartTree.compare.NameComparator;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Tree node represent search result.
+ * Instance describe file node where found given text
  *
- * @author Valeriy Svydenko
- * @author Vlad Zhukovskyi
+ * @author Vitalii Parfonov
  */
-public class FindResultGroupNode extends AbstractTreeNode implements HasPresentation {
 
-    private final CoreLocalizationConstant locale;
+public class FoundItemNode extends AbstractTreeNode implements HasPresentation {
 
     private NodePresentation      nodePresentation;
     private FindResultNodeFactory nodeFactory;
     private PromiseProvider       promiseProvider;
-    private List<SearchResult>    findResults;
+    private SearchResult          searchResult;
     private String                request;
 
     @Inject
-    public FindResultGroupNode(CoreLocalizationConstant locale,
-                               FindResultNodeFactory nodeFactory,
-                               PromiseProvider promiseProvider,
-                               @Assisted List<SearchResult> findResult,
-                               @Assisted String request) {
-        this.locale = locale;
+    public FoundItemNode(FindResultNodeFactory nodeFactory,
+                         PromiseProvider promiseProvider,
+                         @Assisted SearchResult searchResult,
+                         @Assisted String request) {
         this.nodeFactory = nodeFactory;
         this.promiseProvider = promiseProvider;
-        this.findResults = findResult;
+        this.searchResult = searchResult;
         this.request = request;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected Promise<List<Node>> getChildrenImpl() {
-        List<Node> fileNodes = new ArrayList<>();
-        for (SearchResult searchResult : findResults) {
-            FoundItemNode foundItemNode = nodeFactory.newFoundItemNode(searchResult, request);
-            fileNodes.add(foundItemNode);
-        }
-        //sort nodes by file name
-        Collections.sort(fileNodes, new NameComparator());
-
-        return promiseProvider.resolve(fileNodes);
     }
 
     /** {@inheritDoc} */
@@ -89,7 +70,7 @@ public class FindResultGroupNode extends AbstractTreeNode implements HasPresenta
     /** {@inheritDoc} */
     @Override
     public String getName() {
-        return locale.actionFullTextSearch();
+        return searchResult.getName();
     }
 
     /** {@inheritDoc} */
@@ -101,17 +82,27 @@ public class FindResultGroupNode extends AbstractTreeNode implements HasPresenta
     /** {@inheritDoc} */
     @Override
     public void updatePresentation(@NotNull NodePresentation presentation) {
-        int total = 0;
-        for (SearchResult searchResult : findResults) {
-            total += searchResult.getOccurrences().size();
+        StringBuilder resultTitle = new StringBuilder(searchResult.getPath());
+        resultTitle.append(" (");
+        resultTitle.append(searchResult.getOccurrences().size());
+        resultTitle.append(" occurrence");
+        if (searchResult.getOccurrences().size() > 1) {
+            resultTitle.append('s');
         }
-        StringBuilder resultTitle = new StringBuilder("Found occurrences of '" + request + "\'  (" + total + " occurrence");
-        if (total > 1) {
-            resultTitle.append("s)");
-        } else {
-            resultTitle.append(")");
-        }
+        resultTitle.append(" of '");
+        resultTitle.append(request);
+        resultTitle.append('\'');
+        resultTitle.append(" found)");
         presentation.setPresentableText(resultTitle.toString());
     }
 
+    @Override
+    protected Promise<List<Node>> getChildrenImpl() {
+        List<Node> fileNodes;
+        List<SearchOccurrence> occurrences = searchResult.getOccurrences();
+        occurrences.sort(Comparator.comparingInt((SearchOccurrence searchOccurrence) -> searchOccurrence.getLineNumber()));
+        fileNodes = occurrences.stream().map(occurrence -> nodeFactory
+                .newFoundOccurrenceNode(occurrence, searchResult.getPath())).collect(Collectors.toList());
+        return promiseProvider.resolve(fileNodes);
+    }
 }
