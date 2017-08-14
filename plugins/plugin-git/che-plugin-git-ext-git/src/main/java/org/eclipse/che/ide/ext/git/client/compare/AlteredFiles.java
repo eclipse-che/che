@@ -47,6 +47,9 @@ public class AlteredFiles {
         alteredFilesStatuses = new LinkedHashMap<>();
         if (!isNullOrEmpty(diff)) {
             for (String item : diff.split("\n")) {
+                if (item.length() < 3 || item.charAt(1) != ' ') {
+                    throw new IllegalArgumentException("Invalid git diff format.");
+                }
                 alteredFilesStatuses.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
             }
         }

@@ -97,7 +97,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
         this.compareWithLatest = true;
 
-        findCurrentFile(currentFile);
+        findFileIndexOrFirst(currentFile);
         showCompareForCurrentFile();
     }
 
@@ -125,7 +125,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
         this.compareWithLatest = false;
 
-        findCurrentFile(currentFile);
+        findFileIndexOrFirst(currentFile);
         showCompareForCurrentFile();
     }
 
@@ -315,7 +315,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      * @param currentFile
      *         name of file to set up as current; if null or invalid, the first one will be chosen.
      */
-    private void findCurrentFile(@Nullable String currentFile) {
+    private void findFileIndexOrFirst(@Nullable String currentFile) {
         if (currentFile == null) {
             currentFileIndex = 0;
             return;

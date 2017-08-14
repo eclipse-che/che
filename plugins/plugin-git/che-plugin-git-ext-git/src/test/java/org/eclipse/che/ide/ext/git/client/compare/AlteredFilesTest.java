@@ -12,9 +12,11 @@ package org.eclipse.che.ide.ext.git.client.compare;
 
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -102,4 +104,18 @@ public class AlteredFilesTest {
         }
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class, dataProvider = "invalidDiffFileData")
+    public void shouldThrowIllegalArgumentExceptionIfDiffFileDescriptionIsInvalid(String invalidDiffFileData) {
+        alteredFiles = new AlteredFiles(project, diff + '\n' + invalidDiffFileData);
+    }
+
+    @DataProvider(name = "invalidDiffFileData")
+    private Object[][] getInvalidDiffFileData() {
+        return new Object[][] {
+                {"M "},
+                {"M_Test.java"},
+                {"Test.java"},
+                {" "}
+        };
+    }
 }
