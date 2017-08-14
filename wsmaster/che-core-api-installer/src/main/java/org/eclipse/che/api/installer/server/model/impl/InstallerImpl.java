@@ -103,8 +103,6 @@ public class InstallerImpl implements Installer {
                          Map<String, String> properties,
                          String script,
                          Map<String, ? extends ServerConfig> servers) {
-        Version.validate(version);
-
         this.id = id;
         this.name = name;
         this.version = version;

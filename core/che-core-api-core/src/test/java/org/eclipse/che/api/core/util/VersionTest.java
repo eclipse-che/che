@@ -163,29 +163,4 @@ public class VersionTest {
                 {"1.0.2-M20", "1.0.2", -1},
                 {"1.0.2-beta-2", "1.0.2", -1}};
     }
-
-    @Test(dataProvider = "testIsSuitedFor")
-    public void testIsSuitedFor(String version, String pattern, boolean expected) throws Exception {
-        boolean actual = Version.parse(version).isSuitedFor(pattern);
-
-        assertEquals(actual, expected, pattern);
-    }
-
-    @DataProvider(name = "testIsSuitedFor")
-    public static Object[][] testIsSuitedFor() {
-        return new Object[][] {
-                {"1.0.1", "1\\.0\\.1", true},
-                {"1.0.1", "1\\.0\\.(.*)", true},
-                {"1.0.1", "1\\.(.*)\\.1", true},
-                {"1.0.1", "(.*)\\.0\\.1", true},
-                {"1.0.1", "(.*)\\.(.*)\\.1", true},
-                {"1.0.1", "(.*)\\.(.*)\\.(.*)", true},
-                {"1.1.1-SNAPSHOT", "1\\.1\\.0|1\\.1\\.1\\-SNAPSHOT", true},
-                {"1.1.1-beta-1", "1\\.1\\.(.*)", true},
-                {"1.1.1-M1", "1\\.1\\.(.*)", true},
-                {"1.1.0", "1\\.1\\.0|1\\.\\1\\.1-SNAPSHOT", true},
-                {"1.0.1", "1\\.0\\.2", false},
-                {"1.0.1", "1\\.1\\.(.*)", false}
-        };
-    }
 }

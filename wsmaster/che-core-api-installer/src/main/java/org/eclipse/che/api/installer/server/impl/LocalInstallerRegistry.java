@@ -64,6 +64,7 @@ public class LocalInstallerRegistry implements InstallerRegistry {
     private void doInit(InstallerDao installerDao, Installer i) throws InstallerException {
         String installerKey = InstallerFqn.of(i).toKey();
         try {
+            Version.validate(i.getVersion());
             installerDao.create(new InstallerImpl(i));
             LOG.info(format("Installer '%s' added to the registry.", installerKey));
         } catch (InstallerAlreadyExistsException e) {
@@ -73,11 +74,13 @@ public class LocalInstallerRegistry implements InstallerRegistry {
 
     @Override
     public void add(Installer installer) throws InstallerException {
+        Version.validate(installer.getVersion());
         installerDao.create(new InstallerImpl(installer));
     }
 
     @Override
     public void update(Installer installer) throws InstallerException {
+        Version.validate(installer.getVersion());
         installerDao.update(new InstallerImpl(installer));
     }
 

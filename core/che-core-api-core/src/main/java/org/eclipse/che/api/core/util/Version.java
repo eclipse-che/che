@@ -36,9 +36,10 @@ public class Version implements Comparable<Version> {
     private static final String BETA_VERSION_SUFFIX      = "-beta-";
 
     private static final Pattern VERSION =
-            compile("^(?<major>0|[1-9]+[0-9]*)\\.(?<minor>0|[1-9]+[0-9]*)\\.(?<bugfix>0|[1-9]+[0-9]*)(?<hotfix>\\.0|\\.[1-9]+[0-9]*)?" +
-                    "(?<milestone>" + MILESTONE_VERSION_SUFFIX + "[1-9]+[0-9]*)?" +
-                    "(?<beta>" + BETA_VERSION_SUFFIX + "[1-9]+[0-9]*)?" +
+            compile("^(?<major>0|[1-9]+[0-9]*)\\.(?<minor>0|[1-9]+[0-9]*)\\.(?<bugfix>0|[1-9]+[0-9]*)" +
+                    "((?<hotfix>[.])(?<hotfixVersion>0|[1-9]+[0-9]*))?" +
+                    "((?<milestone>" + MILESTONE_VERSION_SUFFIX + ")(?<milestoneVersion>[1-9]+[0-9]*))?" +
+                    "((?<beta>" + BETA_VERSION_SUFFIX + ")(?<betaVersion>[1-9]+[0-9]*))?" +
                     "(?<rc>-RC)?" +
                     "(?<snapshot>-SNAPSHOT)?$");
 
@@ -99,17 +100,17 @@ public class Version implements Comparable<Version> {
 
         String hotFixGroup = matcher.group("hotfix");
         if (hotFixGroup != null) {
-            hotFix = parseInt(hotFixGroup.substring(1));
+            hotFix = parseInt(matcher.group("hotfixVersion"));
         }
 
         String milestoneGroup = matcher.group("milestone");
         if (milestoneGroup != null) {
-            milestone = parseInt(milestoneGroup.substring(MILESTONE_VERSION_SUFFIX.length()));
+            milestone = parseInt(matcher.group("milestoneVersion"));
         }
 
         String betaGroup = matcher.group("beta");
         if (betaGroup != null) {
-            beta = parseInt(betaGroup.substring(BETA_VERSION_SUFFIX.length()));
+            beta = parseInt(matcher.group("betaVersion"));
         }
 
         return new Version(parseInt(matcher.group("major")),
@@ -120,15 +121,6 @@ public class Version implements Comparable<Version> {
                            beta,
                            matcher.group("rc") != null,
                            matcher.group("snapshot") != null);
-    }
-
-    /**
-     * Checks if version suites for pattern.
-     * For example 3.1.0 version is suited for 3.1.* or 3.*.0
-     */
-    public boolean isSuitedFor(String versionRegex) {
-        Pattern pattern = compile(versionRegex);
-        return pattern.matcher(toString()).matches();
     }
 
     @Override
