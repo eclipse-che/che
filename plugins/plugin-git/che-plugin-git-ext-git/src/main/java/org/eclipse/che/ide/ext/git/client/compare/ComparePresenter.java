@@ -138,7 +138,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         view.setEnablePreviousDiffButton(currentFileIndex != 0);
 
         alteredFiles.getProject()
-                    .getFile(alteredFiles.getItemByIndex(currentFileIndex))
+                    .getFile(alteredFiles.getFileByIndex(currentFileIndex))
                     .then(file -> {
                         if (file.isPresent()) {
 
@@ -169,7 +169,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
                             // For now git repository supported only in project root folder
                             final Path gitDir = alteredFiles.getProject().getLocation();
-                            final Path relPath = Path.valueOf(alteredFiles.getItemByIndex(currentFileIndex));
+                            final Path relPath = Path.valueOf(alteredFiles.getFileByIndex(currentFileIndex));
 
                             if (compareWithLatest) {
                                 this.comparedFile = null;
@@ -325,7 +325,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             return;
         }
 
-        currentFileIndex = alteredFiles.getChangedItemsList().indexOf(currentFile);
+        currentFileIndex = alteredFiles.getChangedFilesList().indexOf(currentFile);
         if (currentFileIndex == -1) {
             currentFileIndex = 0;
         }

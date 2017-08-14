@@ -44,8 +44,10 @@ public class AlteredFiles {
         this.project = project;
 
         changedFilesStatuses = new LinkedHashMap<>();
-        for (String item : diff.split("\n")) {
-            changedFilesStatuses.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
+        if (!"".equals(diff)) {
+            for (String item : diff.split("\n")) {
+                changedFilesStatuses.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
+            }
         }
 
         changedFilesList = new ArrayList<>(changedFilesStatuses.keySet());
@@ -66,15 +68,15 @@ public class AlteredFiles {
         return 0 == changedFilesList.size();
     }
 
-    public Map<String, Status> getChangedItemsMap() {
+    public Map<String, Status> getChangedFilesMap() {
         return changedFilesStatuses;
     }
 
-    public List<String> getChangedItemsList() {
+    public List<String> getChangedFilesList() {
         return changedFilesList;
     }
 
-    public Status getStatusByPath(String pathToChangedItem) {
+    public Status getStatusByFilePath(String pathToChangedItem) {
         return changedFilesStatuses.get(pathToChangedItem);
     }
 
@@ -82,7 +84,7 @@ public class AlteredFiles {
         return changedFilesStatuses.get(changedFilesList.get(index));
     }
 
-    public String getItemByIndex(int index) {
+    public String getFileByIndex(int index) {
         return changedFilesList.get(index);
     }
 

@@ -112,11 +112,11 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
         NodeStorage nodeStorage = tree.getNodeStorage();
         nodeStorage.clear();
         if (viewMode == TREE) {
-            getGroupedNodes(files.getChangedItemsMap()).forEach(nodeStorage::add);
+            getGroupedNodes(files.getChangedFilesMap()).forEach(nodeStorage::add);
             tree.expandAll();
         } else {
-            files.getChangedItemsList().forEach(
-                    file -> nodeStorage.add(new ChangedFileNode(file, files.getStatusByPath(file), nodesResources, delegate, false)));
+            files.getChangedFilesList().forEach(
+                    file -> nodeStorage.add(new ChangedFileNode(file, files.getStatusByFilePath(file), nodesResources, delegate, false)));
         }
     }
 

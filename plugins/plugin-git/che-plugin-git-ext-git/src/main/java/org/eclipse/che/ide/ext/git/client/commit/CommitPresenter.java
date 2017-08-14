@@ -162,7 +162,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     private void show(@Nullable String diff) {
         AlteredFiles alteredFiles = new AlteredFiles(project, diff);
         filesToCommit.clear();
-        allFiles = alteredFiles.getChangedItemsList();
+        allFiles = alteredFiles.getChangedFilesList();
 
         view.setEnableCommitButton(!view.getMessage().isEmpty());
         view.focusInMessageField();
