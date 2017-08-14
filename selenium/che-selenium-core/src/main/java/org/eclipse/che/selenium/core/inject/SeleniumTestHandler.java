@@ -131,11 +131,15 @@ public abstract class SeleniumTestHandler implements ITestListener, ISuiteListen
      * Check if webdriver session can be created without errors.
      */
     private void checkWebDriverSessionCreation() {
-        try (SeleniumWebDriver seleniumWebDriver
-                     = new SeleniumWebDriver(browser,
-                                             webDriverPort,
-                                             gridMode,
-                                             webDriverVersion)) {
+        SeleniumWebDriver seleniumWebDriver = null;
+        try {
+            seleniumWebDriver = new SeleniumWebDriver(browser,
+                                                      webDriverPort,
+                                                      gridMode,
+                                                      webDriverVersion);
+        } finally {
+            Optional.ofNullable(seleniumWebDriver)
+                    .ifPresent(SeleniumWebDriver::quit);  // finish webdriver session
         }
     }
 
