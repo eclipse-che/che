@@ -157,7 +157,7 @@ export class StackValidationService {
     let devMachines: string[] = [];
     keys.forEach((key: string) => {
       let machine: che.IEnvironmentMachine = environment.machines[key];
-      if (machine.agents && machine.agents.indexOf(wsAgent) > -1) {
+      if (machine.installers && machine.installers.indexOf(wsAgent) > -1) {
         devMachines.push(key);
       }
     });
@@ -186,7 +186,7 @@ export class StackValidationService {
    */
   getMachineValidation(machine: che.IEnvironmentMachine): che.IValidation {
     let mandatoryKeys: Array<string> = ['attributes'];
-    let additionalKeys: Array<string> = ['agents', 'servers', 'source'];
+    let additionalKeys: Array<string> = ['installers', 'servers', 'source'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;

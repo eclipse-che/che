@@ -33,8 +33,7 @@
         <module>plugins</module>
         <module>ide/che-ide-core</module>
         <module>samples</module>
-        <!-- FIXME: spi -->
-        <!--<module>dashboard</module>-->
+        <module>dashboard</module>
         <module>assembly</module>
     </modules>
     <scm>

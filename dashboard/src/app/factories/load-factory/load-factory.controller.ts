@@ -347,11 +347,11 @@ export class LoadFactoryController {
   subscribeOnEvents(data: any, bus: any): void {
     // get channels
     let statusLink = this.lodash.find(data.links, (link: any) => {
-      return link.rel === 'environment.status_channel';
+      return link.rel === 'environment/statusChannel';
     });
 
     let outputLink = this.lodash.find(data.links, (link: any) => {
-      return link.rel === 'environment.output_channel';
+      return link.rel === 'environment/outputChannel';
     });
 
     let workspaceId = data.id;
