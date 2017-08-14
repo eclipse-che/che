@@ -65,7 +65,7 @@ trap cleanUpEnvironment EXIT
 unset TMP_DIR
 
 readonly FAILSAFE_DIR="target/failsafe-reports"
-readonly TESTNG_FAILS_SUITE=${FAILSAFE_DIR}"/testng-failed.xml"
+readonly TESTNG_FAILED_SUITE=${FAILSAFE_DIR}"/testng-failed.xml"
 readonly FAILSAFE_REPORT="target/site/failsafe-report.html"
 
 # CALLER variable contains parent caller script name
@@ -105,7 +105,6 @@ PRODUCT_HOST=$(detectDockerInterfaceIp)
 unset TEST_INCLUSION
 unset DEBUG_OPTIONS
 unset MAVEN_OPTIONS
-unset FINAL_REPORT
 unset TMP_SUITE_PATH
 unset ORIGIN_TESTS_SCOPE
 
@@ -719,7 +718,7 @@ rerunTests() {
         analyseTestsResults $@
         generateFailSafeReport
         printProposals $@
-        preserveAllReports
+        packTestReport
         printElapsedTime
 
         echo "[TEST]"
@@ -838,48 +837,22 @@ generateFailSafeReport () {
     echo "[TEST]"
 }
 
-# preserves all generated reports
-preserveAllReports() {
-    if [[ -n $1 ]] && [[ $1 == "combine" ]]; then
-        # pack stable and unstable tests execution results into the one archive in "stable" and "unstable" directories respectively
-        local stableTestReportTmp=${TMP_DIR}/webdriver/tmp/stable
-        local unstableTestReportTmp=${TMP_DIR}/webdriver/tmp/unstable
+packTestReport() {
+    mkdir -p ${TMP_DIR}/webdriver
+    local package="${TMP_DIR}/webdriver/report$(date +%s).zip"
 
-        mkdir -p ${unstableTestReportTmp}
-        mkdir -p ${stableTestReportTmp}
-
-        [[ -a target/screenshots ]] && cp -r target/screenshots ${unstableTestReportTmp}
-        [[ -a target/site ]] && cp -r target/site ${unstableTestReportTmp}
-        cp -r target/failsafe-reports ${unstableTestReportTmp}
-        cp target/log ${unstableTestReportTmp}
-        mkdir ${unstableTestReportTmp}/suite && cp ${TMP_SUITE_PATH} ${unstableTestReportTmp}/suite
-
-        unzip -q ${FINAL_REPORT} -d ${stableTestReportTmp}
-        rm -f ${FINAL_REPORT}
-
-        cd ${stableTestReportTmp}/..
-        zip -qr ${FINAL_REPORT} stable unstable
-
-        rm -rf ${TMP_DIR}/webdriver/tmp
-
-        echo -e "[TEST] Stable/Unstable tests execution report: ${BLUE}${FINAL_REPORT}${NO_COLOUR}"
-        echo "[TEST]"
-    else
-        mkdir -p ${TMP_DIR}/webdriver
-        FINAL_REPORT="${TMP_DIR}/webdriver/report$(date +%s).zip"
-
-        rm -rf ${TMP_DIR}/webdriver/tmp
-        mkdir target/suite
-        if [[ -f ${TMP_SUITE_PATH} ]]; then
-            cp ${TMP_SUITE_PATH} target/suite;
-        fi
-        zip -qr ${FINAL_REPORT} target/screenshots target/site target/failsafe-reports target/log target/bin target/suite
-        echo -e "[TEST] Tests results and reports are saved to ${BLUE}${FINAL_REPORT}${NO_COLOUR}"
-        echo "[TEST]"
-        echo "[TEST] If target directory is accidentally cleaned it is possible to restore it: "
-        echo -e "[TEST] \t${BLUE}rm -rf ${CUR_DIR}/target && unzip -q ${FINAL_REPORT} -d ${CUR_DIR}${NO_COLOUR}"
-        echo "[TEST]"
+    rm -rf ${TMP_DIR}/webdriver/tmp
+    mkdir target/suite
+    if [[ -f ${TMP_SUITE_PATH} ]]; then
+        cp ${TMP_SUITE_PATH} target/suite;
     fi
+    zip -qr ${package} target/screenshots target/site target/failsafe-reports target/log target/bin target/suite
+
+    echo -e "[TEST] Tests results and reports are saved to ${BLUE}${package}${NO_COLOUR}"
+    echo "[TEST]"
+    echo "[TEST] If target directory is accidentally cleaned it is possible to restore it: "
+    echo -e "[TEST] \t${BLUE}rm -rf ${CUR_DIR}/target && unzip -q ${package} -d ${CUR_DIR}${NO_COLOUR}"
+    echo "[TEST]"
 }
 
 checkBuild() {
@@ -937,7 +910,7 @@ fi
 analyseTestsResults $@
 generateFailSafeReport
 printProposals $@
-preserveAllReports
+packTestReport
 printElapsedTime
 
 if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
@@ -964,6 +937,6 @@ if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
 
     testProduct $@
     generateFailSafeReport
-    preserveAllReports combine
+    packTestReport
     printElapsedTime
 fi
