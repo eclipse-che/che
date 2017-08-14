@@ -34,8 +34,7 @@ import com.google.inject.Singleton;
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
 import elemental.html.TableElement;
-
-import org.eclipse.che.api.project.shared.dto.SearchResultDto;
+import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
@@ -70,7 +69,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
     private final Resources resources;
 
-    private SimpleList<SearchResultDto> list;
+    private SimpleList<ItemReference> list;
 
     @UiField
     FlowPanel suggestionsPanel;
@@ -141,14 +140,14 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         }
     }
 
-    private final SimpleList.ListItemRenderer<SearchResultDto> listItemRenderer =
-            new SimpleList.ListItemRenderer<SearchResultDto>() {
+    private final SimpleList.ListItemRenderer<ItemReference> listItemRenderer =
+            new SimpleList.ListItemRenderer<ItemReference>() {
                 @Override
-                public void render(Element itemElement, SearchResultDto itemData) {
+                public void render(Element itemElement, ItemReference itemData) {
                     TableCellElement label = Elements.createTDElement();
                     TableCellElement path = Elements.createTDElement();
 
-                    Path itemPath = Path.valueOf(itemData.getItemReference().getPath());
+                    Path itemPath = Path.valueOf(itemData.getPath());
 
                     label.setInnerHTML(itemPath.lastSegment());
                     path.setInnerHTML("(" + itemPath.parent() + ")");
@@ -182,7 +181,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
     }
 
     @Override
-    public void showItems(List<SearchResultDto> items) {
+    public void showItems(List<ItemReference> items) {
         // Hide popup if it is nothing to show
         if (items.isEmpty()) {
             suggestionsContainer.getElement().setInnerHTML("");
@@ -202,11 +201,11 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         final TableElement itemHolder = Elements.createTableElement();
         suggestionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
         list = SimpleList.create((SimpleList.View) suggestionsContainer.getElement().cast(),
-                                 (Element)suggestionsContainer.getElement(),
-                                 itemHolder,
-                                 resources.defaultSimpleListCss(),
-                                 listItemRenderer,
-                                 eventDelegate);
+                (Element)suggestionsContainer.getElement(),
+                itemHolder,
+                resources.defaultSimpleListCss(),
+                listItemRenderer,
+                eventDelegate);
         list.render(items);
         list.getSelectionModel().setSelectedItem(0);
 
@@ -248,15 +247,15 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         suggestionsPanel.getElement().getStyle().setHeight(newHeight, Style.Unit.PX);
     }
 
-    private final SimpleList.ListEventDelegate<SearchResultDto> eventDelegate = new SimpleList.ListEventDelegate<SearchResultDto>() {
+    private final SimpleList.ListEventDelegate<ItemReference> eventDelegate = new SimpleList.ListEventDelegate<ItemReference>() {
         @Override
-        public void onListItemClicked(Element listItemBase, SearchResultDto itemData) {
+        public void onListItemClicked(Element listItemBase, ItemReference itemData) {
             list.getSelectionModel().setSelectedItem(itemData);
         }
 
         @Override
-        public void onListItemDoubleClicked(Element listItemBase, SearchResultDto itemData) {
-            delegate.onFileSelected(Path.valueOf(itemData.getItemReference().getPath()));
+        public void onListItemDoubleClicked(Element listItemBase, ItemReference itemData) {
+            delegate.onFileSelected(Path.valueOf(itemData.getPath()));;
         }
     };
 
@@ -298,9 +297,9 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
             case KeyCodes.KEY_ENTER:
                 event.stopPropagation();
                 event.preventDefault();
-                SearchResultDto selectedItem = list.getSelectionModel().getSelectedItem();
+                ItemReference selectedItem = list.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
-                    delegate.onFileSelected(Path.valueOf(selectedItem.getItemReference().getPath()));
+                    delegate.onFileSelected(Path.valueOf(selectedItem.getPath()));;
                 }
                 return;
 

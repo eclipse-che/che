@@ -44,8 +44,6 @@ import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
-import org.eclipse.che.api.project.shared.dto.SearchOccurrenceDto;
-import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.vfs.VirtualFile;
@@ -53,7 +51,6 @@ import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.api.vfs.search.SearchResultEntry;
 import org.eclipse.che.api.vfs.search.Searcher;
-import org.eclipse.che.api.vfs.search.impl.LuceneSearcher;
 import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -82,7 +79,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -99,8 +95,6 @@ import static org.eclipse.che.api.project.server.DtoConverter.asDto;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_BATCH_PROJECTS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_PROJECTS;
-import static org.eclipse.che.api.vfs.util.ReadFileUtils.Line;
-import static org.eclipse.che.api.vfs.util.ReadFileUtils.getLine;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -881,22 +875,22 @@ public class ProjectService extends Service {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Search for resources",
                   notes = "Search for resources applying a number of search filters as query parameters",
-                  response = SearchResult.class,
+                  response = ItemReference.class,
                   responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 409, message = "Conflict error"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public List<SearchResultDto> search(@ApiParam(value = "Path to resource, i.e. where to search?", required = true)
+    public List<ItemReference> search(@ApiParam(value = "Path to resource, i.e. where to search?", required = true)
                                       @PathParam("path") String path,
-                                        @ApiParam(value = "Resource name")
+                                      @ApiParam(value = "Resource name")
                                       @QueryParam("name") String name,
-                                        @ApiParam(value = "Search keywords")
+                                      @ApiParam(value = "Search keywords")
                                       @QueryParam("text") String text,
-                                        @ApiParam(value = "Maximum items to display. If this parameter is dropped, there are no limits")
+                                      @ApiParam(value = "Maximum items to display. If this parameter is dropped, there are no limits")
                                       @QueryParam("maxItems") @DefaultValue("-1") int maxItems,
-                                        @ApiParam(value = "Skip count")
+                                      @ApiParam(value = "Skip count")
                                       @QueryParam("skipCount") int skipCount) throws NotFoundException,
                                                                                      ForbiddenException,
                                                                                      ConflictException,
@@ -918,52 +912,22 @@ public class ProjectService extends Service {
                 .setName(name)
                 .setText(text)
                 .setMaxItems(maxItems)
-                .setSkipCount(skipCount)
-                .setIncludePositions(true);
+                .setSkipCount(skipCount);
 
         final SearchResult result = searcher.search(expr);
         final List<SearchResultEntry> searchResultEntries = result.getResults();
-        return prepareResults(searchResultEntries);
-    }
-
-
-    /**
-     * Prepare result for client, add additional information like line number and line content where found given text
-     * @param searchResultEntries
-     * @return
-     * @throws ServerException
-     */
-    private List<SearchResultDto> prepareResults(List<SearchResultEntry> searchResultEntries) throws ServerException {
-        List<SearchResultDto> results = new ArrayList<>(searchResultEntries.size());
-        FolderEntry root = projectManager.getProjectsRoot();
+        final List<ItemReference> items = new ArrayList<>(searchResultEntries.size());
+        final FolderEntry root = projectManager.getProjectsRoot();
 
         for (SearchResultEntry searchResultEntry : searchResultEntries) {
-            VirtualFileEntry child = root.getChild(searchResultEntry.getFilePath());
+            final VirtualFileEntry child = root.getChild(searchResultEntry.getFilePath());
+
             if (child != null && child.isFile()) {
-                ItemReference itemReference = injectFileLinks(asDto((FileEntry)child));
-                File file = child.getVirtualFile().toIoFile();
-                List<LuceneSearcher.OffsetData> datas = searchResultEntry.getData();
-                List<SearchOccurrenceDto> searchOccurrences = new ArrayList<>(datas.size());
-                for (LuceneSearcher.OffsetData data : datas) {
-                    try {
-                        Line line = getLine(file, data.startOffset);
-                        SearchOccurrenceDto searchOccurrenceDto = DtoFactory.getInstance().createDto(SearchOccurrenceDto.class)
-                                                                            .withPhrase(data.phrase)
-                                                                            .withScore(data.score)
-                                                                            .withStartOffset(data.startOffset)
-                                                                            .withEndOffset(data.endOffset)
-                                                                            .withLineNumber(line.getLineNumber())
-                                                                            .withLineContent(line.getLineContent());
-                        searchOccurrences.add(searchOccurrenceDto);
-                    } catch (IOException e) {
-                        throw new ServerException(e);
-                    }
-                }
-                SearchResultDto searchResultDto = DtoFactory.getInstance().createDto(SearchResultDto.class);
-                results.add(searchResultDto.withItemReference(itemReference).withSearchOccurrences(searchOccurrences));
+                items.add(injectFileLinks(asDto((FileEntry)child)));
             }
         }
-        return results;
+
+        return items;
     }
 
     @Inject

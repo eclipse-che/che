@@ -10,27 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.search;
 
-import org.eclipse.che.api.vfs.search.impl.LuceneSearcher.OffsetData;
-
-import java.util.List;
-
 /**
  * Single item in {@code SearchResult}.
  */
 public class SearchResultEntry {
     private final String filePath;
 
-    private final List<OffsetData> data;
-
-
-    public SearchResultEntry(String filePath, List<OffsetData> data) {
+    public SearchResultEntry(String filePath) {
         this.filePath = filePath;
-        this.data = data;
-    }
-
-
-    public List<OffsetData> getData() {
-        return data;
     }
 
     /** Path of file that matches the search criteria. */

@@ -17,7 +17,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -28,10 +27,7 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-
-import java.util.List;
 
 /**
  * @author Anatoliy Bazko
@@ -167,15 +163,15 @@ public class BasicActiveFileHandler implements ActiveFileHandler {
     }
 
     protected void searchSource(final Location location, final AsyncCallback<VirtualFile> callback) {
-        appContext.getWorkspaceRoot().search(getPath(location), "").then(new Operation<List<SearchResult>>() {
+        appContext.getWorkspaceRoot().search(getPath(location), "").then(new Operation<Resource[]>() {
             @Override
-            public void apply(List<SearchResult> resources) throws OperationException {
-                if (resources.isEmpty()) {
-                    callback.onFailure(new IllegalArgumentException(location.getTarget() + " not found."));
+            public void apply(Resource[] resources) throws OperationException {
+                if (resources.length == 0) {
+                    callback.onFailure(new IllegalArgumentException(location + " not found."));
                     return;
                 }
 
-                appContext.getWorkspaceRoot().getFile(resources.get(0).getPath()).then(new Operation<Optional<File>>() {
+                appContext.getWorkspaceRoot().getFile(resources[0].getLocation()).then(new Operation<Optional<File>>() {
                     @Override
                     public void apply(Optional<File> file) throws OperationException {
                         if (file.isPresent()) {

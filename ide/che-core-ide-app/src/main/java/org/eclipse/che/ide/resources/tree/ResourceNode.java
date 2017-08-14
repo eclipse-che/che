@@ -28,7 +28,6 @@ import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
 import org.eclipse.che.ide.api.resources.marker.PresentableTextMarker;
 import org.eclipse.che.ide.api.resources.marker.Marker;

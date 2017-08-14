@@ -17,7 +17,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.ide.api.resources.SearchResult;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
@@ -25,7 +25,6 @@ import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Implementation for FindResult view.
@@ -70,7 +69,7 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
 
     /** {@inheritDoc} */
     @Override
-    public void showResults(List<SearchResult> resources, String request) {
+    public void showResults(Resource[] resources, String request) {
         tree.getNodeStorage().clear();
         tree.getNodeStorage().add(findResultNodeFactory.newResultNode(resources, request));
         tree.expandAll();

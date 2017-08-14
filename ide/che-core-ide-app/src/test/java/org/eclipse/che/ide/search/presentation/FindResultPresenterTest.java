@@ -18,6 +18,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -79,10 +80,10 @@ public class FindResultPresenterTest {
 
     @Test
     public void responseShouldBeHandled() throws Exception {
-        findResultPresenter.handleResponse(Matchers.any(), anyString());
+        findResultPresenter.handleResponse(Matchers.<Resource[]>any(), anyString());
 
         verify(workspaceAgent).openPart(findResultPresenter, PartStackType.INFORMATION);
         verify(workspaceAgent).setActivePart(findResultPresenter);
-        verify(view).showResults(Matchers.any(), anyString());
+        verify(view).showResults(Matchers.<Resource[]>any(), anyString());
     }
 }
