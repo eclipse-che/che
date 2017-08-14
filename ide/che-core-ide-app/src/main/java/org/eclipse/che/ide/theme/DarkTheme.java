@@ -1382,6 +1382,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String projectExplorerVcsHead() {
+        return "#c3bfbf";
+    }
+
+    @Override
     public String loaderExpanderColor() {
         return "#e3e3e3";
     }

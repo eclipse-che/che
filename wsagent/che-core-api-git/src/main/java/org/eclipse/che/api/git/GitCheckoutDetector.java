@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.git;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
 import org.eclipse.che.api.vfs.Path;
@@ -51,16 +54,21 @@ public class GitCheckoutDetector {
     private final VirtualFileSystemProvider vfsProvider;
     private final RequestTransmitter        transmitter;
     private final FileWatcherManager        manager;
+    private final ProjectRegistry           projectRegistry;
 
     private final Set<String> endpointIds = newConcurrentHashSet();
 
     private int id;
 
     @Inject
-    public GitCheckoutDetector(VirtualFileSystemProvider vfsProvider, RequestTransmitter transmitter, FileWatcherManager manager) {
+    public GitCheckoutDetector(VirtualFileSystemProvider vfsProvider,
+                               RequestTransmitter transmitter,
+                               FileWatcherManager manager,
+                               ProjectRegistry projectRegistry) {
         this.vfsProvider = vfsProvider;
         this.transmitter = transmitter;
         this.manager = manager;
+        this.projectRegistry = projectRegistry;
     }
 
     @Inject
@@ -111,10 +119,15 @@ public class GitCheckoutDetector {
                 Type type = content.contains("ref:") ? BRANCH : REVISION;
                 String name = type == REVISION ? content : PATTERN.split(content)[1];
 
+                //Update project attributes with new git values
+                projectRegistry.setProjectType(it.split("/")[1], GitProjectType.TYPE_ID, true);
+
                 endpointIds.forEach(transmitConsumer(type, name));
 
             } catch (ServerException | ForbiddenException e) {
                 LOG.error("Error trying to read {} file and broadcast it", it, e);
+            } catch (NotFoundException | ConflictException e) {
+                LOG.error("Error trying to update project attributes", it, e);
             }
         };
     }

@@ -1520,6 +1520,8 @@ public interface Theme {
 
     String projectExplorerHoverRowBorder();
 
+    String projectExplorerVcsHead();
+
     /********************************************************************************************
      *
      * Loader
