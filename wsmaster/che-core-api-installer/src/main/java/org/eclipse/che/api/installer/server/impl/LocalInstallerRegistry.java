@@ -65,9 +65,9 @@ public class LocalInstallerRegistry implements InstallerRegistry {
         String installerKey = InstallerFqn.of(i).toKey();
         try {
             installerDao.create(new InstallerImpl(i));
-            LOG.info(format("Installer '%s' added.", installerKey));
+            LOG.info(format("Installer '%s' added to the registry.", installerKey));
         } catch (InstallerAlreadyExistsException e) {
-            LOG.info(format("Installer '%s' already exists.", installerKey));
+            LOG.info(format("Installer '%s' already exists in the registry.", installerKey));
         }
     }
 
