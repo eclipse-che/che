@@ -86,7 +86,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <!-- Apache license -->
+                        <!-- MIT license -->
                         <exclude>src/main/emulation/**</exclude>
                     </excludes>
                 </configuration>

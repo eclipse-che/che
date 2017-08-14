@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -34,10 +35,10 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class NavigateToFileAction extends AbstractPerspectiveAction {
 
-    private final NavigateToFilePresenter  presenter;
+    private final Provider<NavigateToFilePresenter> navigateToFilePresenterProvider;
 
     @Inject
-    public NavigateToFileAction(NavigateToFilePresenter presenter,
+    public NavigateToFileAction(Provider<NavigateToFilePresenter> navigateToFilePresenterProvider,
                                 Resources resources,
                                 CoreLocalizationConstant localizationConstant) {
         super(singletonList(PROJECT_PERSPECTIVE_ID),
@@ -45,16 +46,17 @@ public class NavigateToFileAction extends AbstractPerspectiveAction {
               localizationConstant.actionNavigateToFileDescription(),
               null,
               resources.navigateToFile());
-        this.presenter = presenter;
+        this.navigateToFilePresenterProvider = navigateToFilePresenterProvider;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        presenter.showDialog();
+        navigateToFilePresenterProvider.get().showDialog();
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
         event.getPresentation().setEnabledAndVisible(true);
     }
+
 }

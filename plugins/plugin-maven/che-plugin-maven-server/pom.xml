@@ -314,7 +314,6 @@
                     <excludes>
                         <exclude>**/test-pom.xml</exclude>
                         <exclude>**/multimoduleProject/**</exclude>
-                        <exclude>src/main/java/org/eclipse/che/plugin/maven/lsp/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

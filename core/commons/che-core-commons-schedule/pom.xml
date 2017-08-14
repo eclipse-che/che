@@ -72,6 +72,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
+                        <!-- Apache License -->
                         <exclude>**/**/CronExpression*.java</exclude>
                     </excludes>
                 </configuration>

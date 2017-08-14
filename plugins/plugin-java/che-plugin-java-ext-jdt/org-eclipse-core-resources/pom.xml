@@ -98,7 +98,11 @@
                         <exclude>**/*.rsc</exclude>
                         <exclude>**/*.json</exclude>
                         <exclude>**/org/eclipse/core/**</exclude>
-                        <exclude>**/org/eclipse/che/core/**</exclude>
+                        <exclude>**/org/eclipse/che/core/internal/resources/ChePreferences.java</exclude>
+                        <exclude>**/org/eclipse/che/core/internal/resources/FileUtil.java</exclude>
+                        <exclude>**/org/eclipse/che/core/internal/resources/ResourceStatus.java</exclude>
+                        <exclude>**/org/eclipse/che/core/internal/resources/Rules.java</exclude>
+                        <exclude>**/org/eclipse/che/core/internal/utils/Policy.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

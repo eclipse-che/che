@@ -67,4 +67,11 @@ public interface MavenLocalizationConstant extends Messages {
 
     @Key("maven.page.errorDialog.title")
     String mavenPageErrorDialogTitle();
+
+    /* Preferences page*/
+    @Key("maven.preferences.title")
+    String mavenPreferencesTitle();
+
+    @Key("maven.preferences.show.artifact.id.checkbox.text")
+    String mavenPreferencesShowArtifactIdCheckboxText();
 }

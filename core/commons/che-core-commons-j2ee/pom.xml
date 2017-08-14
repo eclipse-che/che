@@ -60,6 +60,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
+                        <!-- Apache License -->
                         <exclude>**/xemantic/**/*.java</exclude>
                     </excludes>
                 </configuration>

@@ -25,6 +25,5 @@ public class WsAgentServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         getServletContext().addListener(new WSConnectionTracker());
-        filter("/*").through(org.eclipse.che.api.activity.LastAccessTimeFilter.class);
     }
 }

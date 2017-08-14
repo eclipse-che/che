@@ -55,6 +55,7 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
+import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
@@ -74,6 +75,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
+import static java.util.Arrays.stream;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.COPIED_FROM;
@@ -84,6 +86,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.SYNCHRONIZED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 import static org.eclipse.che.ide.util.Arrays.add;
+import static org.eclipse.che.ide.util.Arrays.contains;
 import static org.eclipse.che.ide.util.Arrays.removeAll;
 import static org.eclipse.che.ide.util.NameUtils.checkFileName;
 import static org.eclipse.che.ide.util.NameUtils.checkFolderName;
@@ -551,8 +554,9 @@ public final class ResourceManager {
         checkArgument(!source.getLocation().isRoot(), "Workspace root is not allowed to be copied");
 
         return findResource(destination, true).thenPromise(resource -> {
-            if (resource.isPresent() && !force){
-                return promises.reject(new IllegalStateException("Cannot create '" + destination.toString() + "'. Resource already exists."));
+            if (resource.isPresent() && !force) {
+                return promises
+                        .reject(new IllegalStateException("Cannot create '" + destination.toString() + "'. Resource already exists."));
             }
 
             return ps.copy(source.getLocation(), destination.parent(), destination.lastSegment(), force)
@@ -681,7 +685,7 @@ public final class ResourceManager {
                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource, REMOVED)));
                 }
 
-                final Resource[] updated = removeAll(outdated, reloaded, true);
+                final Resource[] updated = stream(reloaded).filter(resource -> contains(outdated, resource)).toArray(Resource[]::new);
                 for (Resource resource : updated) {
                     store.register(resource);
 
@@ -902,8 +906,12 @@ public final class ResourceManager {
         switch (reference.getType()) {
             case "file":
                 final Link link = reference.getLink(GET_CONTENT_REL);
-
-                return resourceFactory.newFileImpl(path, link.getHref(), this);
+                String vcsStatusAttribute = reference.getAttributes().get("vcs.status");
+                return resourceFactory.newFileImpl(path,
+                                                   link.getHref(),
+                                                   this,
+                                                   vcsStatusAttribute == null ? VcsStatus.NOT_MODIFIED
+                                                                              : VcsStatus.from(vcsStatusAttribute));
             case "folder":
                 return resourceFactory.newFolderImpl(path, this);
             case "project":
@@ -1193,7 +1201,7 @@ public final class ResourceManager {
 
         FolderImpl newFolderImpl(Path path, ResourceManager resourceManager);
 
-        FileImpl newFileImpl(Path path, String contentUrl, ResourceManager resourceManager);
+        FileImpl newFileImpl(Path path, String contentUrl, ResourceManager resourceManager, VcsStatus vcsStatus);
     }
 
     public interface ResourceManagerFactory {

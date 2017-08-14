@@ -17,20 +17,24 @@ import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.actions.EditorActions;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.Presentation;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
 import org.eclipse.che.ide.api.parts.PropertyListener;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.menu.PartMenu;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
@@ -84,6 +88,8 @@ public class EditorPartStackPresenterTest {
     //constructor mocks
     @Mock
     private EditorPartStackView       view;
+    @Mock
+    private AppContext                appContext;
     @Mock
     private PartMenu                  partMenu;
     @Mock
@@ -197,7 +203,15 @@ public class EditorPartStackPresenterTest {
         when(editorPaneMenuItemFactory.createMenuItem((Action)anyObject())).thenReturn(editorPaneActionMenuItem);
         when(editorPaneMenuItemFactory.createMenuItem((TabItem)anyObject())).thenReturn(editorPaneTabMenuItem);
 
+        Container container = mock(Container.class);
+        Promise promise = mock(Promise.class);
+        when(appContext.getWorkspaceRoot()).thenReturn(container);
+        when(container.getFile(any(Path.class))).thenReturn(promise);
+
+        when(appContext.getDevMachine()).thenReturn(mock(DevMachine.class));
+
         presenter = new EditorPartStackPresenter(view,
+                                                 appContext,
                                                  partMenu,
                                                  partsComparator,
                                                  editorPaneMenuItemFactory,

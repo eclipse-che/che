@@ -61,8 +61,8 @@ if echo ${LINUX_TYPE} | grep -qi "rhel"; then
 
      command -v dotnet >/dev/null 2>&1 || {
         ${SUDO} subscription-manager repos --enable=rhel-7-server-dotnet-rpms;
-        ${SUDO} yum install scl-utils rh-dotnetcore10;
-        ${SUDO} scl enable rh-dotnetcore10 bash;
+        ${SUDO} yum install scl-utils rh-dotnetcore20;
+        ${SUDO} scl enable rh-dotnetcore20 bash;
     }
 
     command -v nodejs >/dev/null 2>&1 || {
@@ -79,8 +79,8 @@ elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
 
      command -v dotnet >/dev/null 2>&1 || {
         ${SUDO} subscription-manager repos --enable=rhel-7-server-dotnet-rpms;
-        ${SUDO} yum install scl-utils rh-dotnetcore10;
-        ${SUDO} scl enable rh-dotnetcore10 bash;
+        ${SUDO} yum install scl-utils rh-dotnetcore20;
+        ${SUDO} scl enable rh-dotnetcore20 bash;
     }
 
     command -v nodejs >/dev/null 2>&1 || {
@@ -91,7 +91,7 @@ elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
 
 
 
-# Ubuntu 14.04 16.04 / Linux Mint 17
+# Install for Ubuntu 14.04, 16.04, 16.10 & Linux Mint 17, 18 (64 bit)
 ####################################
 elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
     test "${PACKAGES}" = "" || {
@@ -99,22 +99,28 @@ elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
         ${SUDO} apt-get -y install ${PACKAGES};
     }
 
+    let RELEASE_NAME="trusty"
+    {
+        if echo ${LINUX_VERSION} | grep -qi "14.04"; then
+            RELEASE_NAME="trusty"
+        fi
+        if echo ${LINUX_VERSION} | grep -qi "16.04"; then
+            RELEASE_NAME="xenial"
+        fi
+        if echo ${LINUX_VERSION} | grep -qi "16.10"; then
+            RELEASE_NAME="yakkety"
+        fi
+    };
+
     command -v dotnet >/dev/null 2>&1 || {
         ${SUDO} apt-get update;
         ${SUDO} apt-get -y install apt-transport-https;
 
-        {
-            if echo ${LINUX_VERSION} | grep -qi "16.04"; then
-                ${SUDO} sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
-                ${SUDO} apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-            else
-                ${SUDO} sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
-                ${SUDO} apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-            fi
-        };
+        ${SUDO} sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet-release/ '${RELEASE_NAME}' main" > /etc/apt/sources.list.d/dotnetdev.list'
+        ${SUDO} apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 417A0893
 
         ${SUDO} apt-get update
-        ${SUDO} apt-get -y install dotnet-dev-1.0.0-preview2-003121
+        ${SUDO} apt-get -y install dotnet-sdk-2.0.0-preview2-006497
     }
 
     command -v nodejs >/dev/null 2>&1 || {
@@ -136,7 +142,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
     }
 
     command -v dotnet >/dev/null 2>&1 || {
-        curl -L -o dotnet.tar.gz https://go.microsoft.com/fwlink/?LinkID=809130;
+        curl -L -o dotnet.tar.gz https://aka.ms/dotnet-sdk-2.0.0-preview2-linux-x64-bin;
         ${SUDO} apt-get update;
         ${SUDO} apt-get -y install libunwind8 gettext;
         ${SUDO} mkdir -p /opt/dotnet;
@@ -154,7 +160,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
         ${SUDO} apt-get install -y nodejs;
     }
 
-# Fedora 23
+# Fedora 24, 25, 26
 ###########
 elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
     PACKAGES=${PACKAGES}" procps-ng"
@@ -163,7 +169,7 @@ elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
     }
 
     command -v dotnet >/dev/null 2>&1 || {
-        curl -L -o dotnet.tar.gz https://go.microsoft.com/fwlink/?LinkID=816869;
+        curl -L -o dotnet.tar.gz https://aka.ms/dotnet-sdk-2.0.0-preview2-linux-x64-bin;
         ${SUDO} dnf -y install libunwind libicu;
         ${SUDO} mkdir -p /opt/dotnet;
         ${SUDO} tar zxf dotnet.tar.gz -C /opt/dotnet;
@@ -177,8 +183,7 @@ elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
     }
 
 
-
-# CentOS 7.1 & Oracle Linux 7.1
+# CentOS 7.1 (64 bit) & Oracle Linux 7.1 (64 bit)
 ###############################
 elif echo ${LINUX_TYPE} | grep -qi "centos"; then
     test "${PACKAGES}" = "" || {
@@ -186,7 +191,7 @@ elif echo ${LINUX_TYPE} | grep -qi "centos"; then
     }
 
     command -v dotnet >/dev/null 2>&1 || {
-        curl -L -o dotnet.tar.gz https://go.microsoft.com/fwlink/?LinkID=809131;
+        curl -L -o dotnet.tar.gz https://aka.ms/dotnet-sdk-2.0.0-preview2-linux-x64-bin;
         ${SUDO} yum -y install libunwind libicu;
         ${SUDO} mkdir -p /opt/dotnet;
         ${SUDO} tar zxf dotnet.tar.gz -C /opt/dotnet;
@@ -200,7 +205,7 @@ elif echo ${LINUX_TYPE} | grep -qi "centos"; then
     }
 
 
-# openSUSE 13.2
+# SUSE Linux Enterprise Server (64 bit), openSUSE (64 bit)
 ###############
 elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
     test "${PACKAGES}" = "" || {
@@ -208,7 +213,7 @@ elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
     }
 
      command -v dotnet >/dev/null 2>&1 || {
-        curl -L -o dotnet.tar.gz https://go.microsoft.com/fwlink/?LinkID=816867;
+        curl -L -o dotnet.tar.gz https://aka.ms/dotnet-sdk-2.0.0-preview2-linux-x64-bin
         ${SUDO} zypper install -y libunwind libicu;
         ${SUDO} mkdir -p /opt/dotnet;
         ${SUDO} tar zxf dotnet.tar.gz -C /opt/dotnet;

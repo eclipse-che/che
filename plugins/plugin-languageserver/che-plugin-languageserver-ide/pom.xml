@@ -139,15 +139,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/codeassist/LatestCompletionResult.java</exclude>
-                        <exclude>**/Lsp4j.gwt.xml</exclude>
                         <exclude>**/Either.java</exclude>
-                        <exclude>**/EitherUtil.java</exclude>
-                        <exclude>**/JsonUtil.java</exclude>
-                        <exclude>**/JsonSerializable.java</exclude>
-                        <exclude>**/ApplyTextEditAction.java</exclude>
-                        <exclude>**/QuickassistActionEvent.java</exclude>
-                        <exclude>**/LanguageServerQuickAssistProcessorFactory.java</exclude>
-                        <exclude>**/LanguageServerQuickAssistProcessor.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

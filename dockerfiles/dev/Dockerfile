@@ -1,12 +1,11 @@
-# Copyright (c) 2012-2016 Codenvy, S.A., Red Hat, Inc.
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-#   Codenvy, S.A. - initial API and implementation
-#   Mario Loriedo
+#   Red Hat, Inc.- initial API and implementation
 #
 # build:
 #   docker build -t eclipse/che-dev .
@@ -21,6 +20,7 @@
 #                  -Dfindbugs.skip=true
 #                  -Dgwt.compiler.localWorkers=2 -T 1C
 #                  -Dskip-validate-sources
+#                  -Pnative
 #              clean install
 #
 # For Windows, replace $HOME with maven repo directory.
