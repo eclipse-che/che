@@ -798,7 +798,13 @@ a {
     background-color: scrollbarHoverBackgroundColor;
 }
 
-.codeassistant-highlight {
+.found-highlight {
     color: completionPopupItemHighlightTextColor;
 }
+
+.search-match {
+    background: linear-gradient(to bottom, #c1be9e 6%, #B89C07 64%);
+    border-radius: 2px;
+    padding-right: 2px;
+    padding-left: 2px;
 
