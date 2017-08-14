@@ -1593,6 +1593,21 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String vcsStatusAddedColor() {
+        return "#0a7700";
+    }
+
+    @Override
+    public String vcsStatusModifiedColor() {
+        return "#0768B0";
+    }
+
+    @Override
+    public String vcsStatusUntrackedColor() {
+        return "#ab8900";
+    }
+
+    @Override
     public String editorPreferenceCategoryBackgroundColor() {
         return "rgba(27, 27, 27, 0.10)";
     }

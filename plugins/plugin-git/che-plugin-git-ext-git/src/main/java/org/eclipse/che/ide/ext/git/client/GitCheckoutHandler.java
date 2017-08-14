@@ -50,7 +50,7 @@ public class GitCheckoutHandler {
 
     private void configureHandler(RequestHandlerConfigurator configurator) {
         configurator.newConfiguration()
-                    .methodName("event:git-checkout")
+                    .methodName("event/git-checkout")
                     .paramsAsDto(GitCheckoutEventDto.class)
                     .noResult()
                     .withBiConsumer(this::apply);

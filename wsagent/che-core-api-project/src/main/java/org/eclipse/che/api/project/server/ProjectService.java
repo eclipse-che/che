@@ -116,6 +116,7 @@ public class ProjectService extends Service {
     private final ProjectManager                      projectManager;
     private final EventService                        eventService;
     private final ProjectServiceLinksInjector         projectServiceLinksInjector;
+    private final ProjectServiceVcsStatusInjector     vcsStatusInjector;
     private final RequestTransmitter                  transmitter;
     private final ProjectImportOutputJsonRpcRegistrar projectImportHandlerRegistrar;
     private final String                              workspace;
@@ -124,11 +125,13 @@ public class ProjectService extends Service {
     public ProjectService(ProjectManager projectManager,
                           EventService eventService,
                           ProjectServiceLinksInjector projectServiceLinksInjector,
+                          ProjectServiceVcsStatusInjector vcsStatusInjector,
                           RequestTransmitter transmitter,
                           ProjectImportOutputJsonRpcRegistrar projectImportHandlerRegistrar) {
         this.projectManager = projectManager;
         this.eventService = eventService;
         this.projectServiceLinksInjector = projectServiceLinksInjector;
+        this.vcsStatusInjector = vcsStatusInjector;
         this.transmitter = transmitter;
         this.projectImportHandlerRegistrar = projectImportHandlerRegistrar;
         this.workspace = WorkspaceIdProvider.getWorkspaceId();
@@ -190,7 +193,7 @@ public class ProjectService extends Service {
                                                                                                                        NotFoundException {
         Map<String, String> options = new HashMap<>();
         MultivaluedMap<String, String> map = uriInfo.getQueryParameters();
-        for(String key: map.keySet()) {
+        for (String key : map.keySet()) {
             options.put(key, map.get(key).get(0));
         }
         String pathToProject = projectConfig.getPath();
@@ -238,7 +241,8 @@ public class ProjectService extends Service {
         List<ProjectConfigDto> result = new ArrayList<>(projectConfigList.size());
         final ProjectOutputLineConsumerFactory outputOutputConsumerFactory = new ProjectOutputLineConsumerFactory(workspace, 300);
 
-        for (RegisteredProject registeredProject : projectManager.createBatchProjects(projectConfigList, rewrite, outputOutputConsumerFactory)) {
+        for (RegisteredProject registeredProject : projectManager
+                .createBatchProjects(projectConfigList, rewrite, outputOutputConsumerFactory)) {
 
             ProjectConfigDto projectConfig = injectProjectLinks(asDto(registeredProject));
             result.add(projectConfig);
@@ -411,7 +415,7 @@ public class ProjectService extends Service {
                                                 .path(getClass(), "getFile")
                                                 .build(new String[]{newFile.getPath().toString().substring(1)}, false);
         return Response.created(location)
-                       .entity(injectFileLinks(asDto(newFile)))
+                       .entity(injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto(newFile))))
                        .build();
     }
 
@@ -802,7 +806,7 @@ public class ProjectService extends Service {
         final ArrayList<ItemReference> result = new ArrayList<>(children.size());
         for (VirtualFileEntry child : children) {
             if (child.isFile()) {
-                result.add(injectFileLinks(asDto((FileEntry)child)));
+                result.add(injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto((FileEntry)child))));
             } else {
                 result.add(injectFolderLinks(asDto((FolderEntry)child)));
             }
@@ -860,7 +864,7 @@ public class ProjectService extends Service {
         }
 
         if (entry.isFile()) {
-            return injectFileLinks(asDto((FileEntry)entry));
+            return injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto((FileEntry)entry)));
         } else {
             return injectFolderLinks(asDto((FolderEntry)entry));
         }
@@ -927,7 +931,7 @@ public class ProjectService extends Service {
     }
 
     @Inject
-    private void configureProjectSearchRequestHandler(RequestHandlerConfigurator requestHandlerConfigurator){
+    private void configureProjectSearchRequestHandler(RequestHandlerConfigurator requestHandlerConfigurator) {
         requestHandlerConfigurator.newConfiguration()
                                   .methodName("project/search")
                                   .paramsAsDto(ProjectSearchRequestDto.class)
@@ -999,7 +1003,7 @@ public class ProjectService extends Service {
                                   .withNode(injectFolderLinks(asDto((FolderEntry)child)))
                                   .withChildren(getTree((FolderEntry)child, depth - 1, includeFiles)));
             } else {
-                nodes.add(newDto(TreeElement.class).withNode(injectFileLinks(asDto((FileEntry)child))));
+                nodes.add(newDto(TreeElement.class).withNode(injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto((FileEntry)child)))));
             }
         }
 

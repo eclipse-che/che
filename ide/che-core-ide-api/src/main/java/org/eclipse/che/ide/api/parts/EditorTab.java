@@ -46,6 +46,22 @@ public interface EditorTab extends View<EditorTab.ActionDelegate>, TabItem {
     void setFile(VirtualFile file);
 
     /**
+     * Set color to the label of editor's tab.
+     *
+     * @param color
+     *         CSS color to set. Supported CSS color values:
+     *         <ul>
+     *         <li>Hexadecimal colors e.g. #ff0000</li>
+     *         <li>RGB colors e.g. rgb(255, 0, 0)</li>
+     *         <li>RGBA colors e.g. rgba(255, 0, 0, 0.3)</li>
+     *         <li>HSL colors e.g. hsl(120, 60%, 70%)</li>
+     *         <li>HSLA colors e.g. hsla(120, 100%, 25%, 0.3)</li>
+     *         <li>Predefined/Cross-browser color names e.g. green</li>
+     *         <ul/>
+     */
+    void setTitleColor(String color);
+
+    /**
      * Get editor part which associated with given tab
      *
      * @return editor part which associated with given tab

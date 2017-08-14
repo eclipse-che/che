@@ -48,8 +48,8 @@ public class GitCheckoutDetector {
     private static final String  GIT_DIR         = ".git";
     private static final String  HEAD_FILE       = "HEAD";
     private static final Pattern PATTERN         = compile("ref: refs/heads/");
-    private static final String  INCOMING_METHOD = "track:git-checkout";
-    private static final String  OUTGOING_METHOD = "event:git-checkout";
+    private static final String  INCOMING_METHOD = "track/git-checkout";
+    private static final String  OUTGOING_METHOD = "event/git-checkout";
 
     private final VirtualFileSystemProvider vfsProvider;
     private final RequestTransmitter        transmitter;
