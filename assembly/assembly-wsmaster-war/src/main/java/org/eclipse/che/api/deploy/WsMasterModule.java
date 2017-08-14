@@ -11,6 +11,7 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
@@ -23,6 +24,7 @@ import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.installer.server.InstallerModule;
+import org.eclipse.che.api.installer.server.impl.InstallersProvider;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.recipe.JpaRecipeDao;
 import org.eclipse.che.api.recipe.RecipeDao;
@@ -47,6 +49,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 import javax.sql.DataSource;
+import java.util.Set;
 
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
@@ -150,8 +153,7 @@ public class WsMasterModule extends AbstractModule {
 
         // installers
         install(new InstallerModule());
-        Multibinder<Installer> installers = Multibinder.newSetBinder(binder(), Installer.class);
-
+        binder().bind(new TypeLiteral<Set<Installer>>() {}).toProvider(InstallersProvider.class);
 
         bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 

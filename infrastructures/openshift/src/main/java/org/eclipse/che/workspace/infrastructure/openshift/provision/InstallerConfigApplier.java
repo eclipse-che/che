@@ -19,7 +19,6 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.shared.model.Installer;
@@ -93,7 +92,7 @@ public class InstallerConfigApplier {
                 container.getEnv().add(new EnvVar("CHE_API", cheServerEndpoint, null));
 
                 // WORKSPACE_ID is required only by workspace agent
-                if (new InstallerFqn("org.eclipse.che.ws-agent").in(installers)) {
+                if (InstallerFqn.idInKeyList("org.eclipse.che.ws-agent", installers)) {
                     container.getEnv().removeIf(env -> "CHE_WORKSPACE_ID".equals(env.getName()));
                     container.getEnv().add(new EnvVar("CHE_WORKSPACE_ID", identity.getWorkspaceId(), null));
                 }

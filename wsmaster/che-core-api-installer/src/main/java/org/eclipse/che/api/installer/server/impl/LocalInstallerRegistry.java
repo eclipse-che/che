@@ -25,8 +25,6 @@ import org.eclipse.che.api.installer.shared.model.Installer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -60,14 +58,6 @@ public class LocalInstallerRegistry implements InstallerRegistry {
 
         for (Installer i : installers) {
             doInit(installerDao, i);
-        }
-
-        try {
-            for (Installer i : InstallerFactory.find()) {
-                doInit(installerDao, i);
-            }
-        } catch (IOException | URISyntaxException e) {
-            throw new InstallerException(e.getMessage(), e);
         }
     }
 
@@ -128,7 +118,7 @@ public class LocalInstallerRegistry implements InstallerRegistry {
     private void doSort(InstallerFqn installerFqn,
                         LinkedHashMap<InstallerFqn, Installer> sorted,
                         Set<InstallerFqn> pending) throws InstallerException {
-        if (installerFqn.in(sorted.keySet())) {
+        if (sorted.keySet().contains(installerFqn)) {
             return;
         }
         pending.add(installerFqn);
@@ -145,7 +135,7 @@ public class LocalInstallerRegistry implements InstallerRegistry {
             doSort(dependencyFqn, sorted, pending);
         }
 
-        if (new InstallerFqn(installerFqn.getId()).in(sorted.keySet())) {
+        if (InstallerFqn.idInFqnList(installerFqn.getId(), sorted.keySet())) {
             throw new InstallerException(format("Installers dependencies conflict. Several version '%s' and '%s' of the some id '%s",
                                                 installerFqn.getVersion(),
                                                 sorted.keySet()

@@ -89,9 +89,9 @@ public class EnvironmentValidator {
         List<String> devMachines = env.getMachines()
                                       .entrySet()
                                       .stream()
-                                      .filter(entry -> new InstallerFqn("org.eclipse.che.ws-agent").in(entry.getValue().getInstallers()))
+                                      .filter(entry -> InstallerFqn.idInKeyList("org.eclipse.che.ws-agent", entry.getValue().getInstallers()))
                                       .map(Map.Entry::getKey)
-                .collect(toList());
+                                      .collect(toList());
 
         checkArgument(devMachines.size() == 1,
                       "Environment should contain exactly 1 machine with agent 'org.eclipse.che.ws-agent', but contains '%s'. " +

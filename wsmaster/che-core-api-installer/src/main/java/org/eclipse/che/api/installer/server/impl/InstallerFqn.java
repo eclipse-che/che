@@ -16,8 +16,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -84,48 +82,41 @@ public class InstallerFqn implements Serializable {
     }
 
     /**
-     * Indicates if installer is contained in the giving list of FQNs.
-     * If installer hasn't specified version {@link #hasLatestTag()} then
-     * any versions in the list will suite.
+     * Indicates if installer id is contained in the giving list of keys.
      */
-    public boolean in(@Nullable List<String> installerKeys) {
+    public static boolean idInKeyList(String installerId, @Nullable Collection<String> installerKeys) {
+        Objects.requireNonNull(installerId, "Installer ID is null");
         if (installerKeys == null) {
             return false;
         }
 
-        List<InstallerFqn> installerFqns = new LinkedList<>();
         for (String installerKey : installerKeys) {
-            try {
-                installerFqns.add(InstallerFqn.parse(installerKey));
-            } catch (IllegalInstallerKeyException ignore) {
-            }
-        }
-
-        return in(installerFqns);
-    }
-
-    /**
-     * Indicates if installer is contained in the giving list of FQNs.
-     * If installer hasn't specified version {@link #hasLatestTag()} then
-     * any versions in the list will suite.
-     */
-    public boolean in(@Nullable Collection<InstallerFqn> installerFqns) {
-        if (installerFqns == null) {
-            return false;
-        }
-
-        if (!hasLatestTag()) {
-            return installerFqns.contains(this);
-        }
-
-        for (InstallerFqn installerFqn : installerFqns) {
-            if (installerFqn.getId().equals(getId())) {
+            if (installerKey.equals(installerId) || installerKey.startsWith(installerId + ":")) {
                 return true;
             }
         }
 
         return false;
     }
+
+    /**
+     * Indicates if installer id is contained in the giving list of FQNs.
+     */
+    public static boolean idInFqnList(String installerId, @Nullable Collection<InstallerFqn> installerFqns) {
+        Objects.requireNonNull(installerId, "Installer ID is null");
+        if (installerFqns == null) {
+            return false;
+        }
+
+        for (InstallerFqn fqn : installerFqns) {
+            if (fqn.getId().equals(installerId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 
     @Override
     public boolean equals(Object o) {

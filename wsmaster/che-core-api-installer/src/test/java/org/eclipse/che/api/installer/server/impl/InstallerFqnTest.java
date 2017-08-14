@@ -50,25 +50,20 @@ public class InstallerFqnTest {
     }
 
     @Test(dataProvider = "inListData")
-    public void shouldBeInList(String key, List<String> installerIds) throws Exception {
-        InstallerFqn installerFqn = InstallerFqn.parse(key);
-
-        assertTrue(installerFqn.in(installerIds));
+    public void shouldBeInList(String id, List<String> installerIds) throws Exception {
+        assertTrue(InstallerFqn.idInKeyList(id, installerIds));
     }
 
     @Test(dataProvider = "notInListData")
-    public void shouldNotBeInList(String key, List<String> installerIds) throws Exception {
-        InstallerFqn installerFqn = InstallerFqn.parse(key);
-
-        assertFalse(installerFqn.in(installerIds));
+    public void shouldNotBeInList(String id, List<String> installerIds) throws Exception {
+        assertFalse(InstallerFqn.idInKeyList(id, installerIds));
     }
 
 
     @DataProvider(name = "inListData")
     public static Object[][] getInListData() {
         return new Object[][] {{"a", ImmutableList.of("a")},
-                               {"a", ImmutableList.of("a:1.0.0")},
-                               {"a:1.0.0", ImmutableList.of("a:1.0.0")}};
+                               {"a", ImmutableList.of("a:1.0.0")}};
     }
 
     @DataProvider(name = "notInListData")

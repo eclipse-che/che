@@ -34,8 +34,7 @@ public class AddExecInstallerInEnvironmentUtil {
                         for (MachineConfigDto machine : environment.getMachines().values()) {
                             if (machine.getInstallers() != null) {
 
-                                if (machine.getInstallers().contains("org.eclipse.che.terminal") &&
-                                    !machine.getInstallers().contains("org.eclipse.che.exec")) {
+                                if (containsTerminalInstallerWithoutExec(machine.getInstallers())) {
                                     ArrayList<String> updatedInstallers = new ArrayList<>(machine.getInstallers());
                                     updatedInstallers.add("org.eclipse.che.exec");
                                     machine.setInstallers(updatedInstallers);
@@ -48,8 +47,8 @@ public class AddExecInstallerInEnvironmentUtil {
         }
     }
 
-    public static boolean containsTerminalInstallerWithoutExec(List<String> installers) {
-        return new InstallerFqn("org.eclipse.che.terminal").in(installers) &&
-               !(new InstallerFqn("org.eclipse.che.exec").in(installers));
+    private static boolean containsTerminalInstallerWithoutExec(List<String> installers) {
+        return InstallerFqn.idInKeyList("org.eclipse.che.terminal", installers) &&
+               !(InstallerFqn.idInKeyList("org.eclipse.che.exec", installers));
     }
 }

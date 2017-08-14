@@ -35,7 +35,7 @@ public class Utils {
     public static String getDevMachineName(Environment envConfig) {
         for (Map.Entry<String, ? extends MachineConfig> entry : envConfig.getMachines().entrySet()) {
             List<String> installers = entry.getValue().getInstallers();
-            if (new InstallerFqn("org.eclipse.che.ws-agent").in(installers)) {
+            if (InstallerFqn.idInKeyList("org.eclipse.che.ws-agent", installers)) {
                 return entry.getKey();
             }
         }
