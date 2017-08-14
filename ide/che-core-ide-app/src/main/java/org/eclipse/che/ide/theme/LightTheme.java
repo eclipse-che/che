@@ -1358,6 +1358,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String projectExplorerVcsHead() {
+        return "#7A8088";
+    }
+
+    @Override
     public String loaderExpanderColor() {
         return "#555555";
     }

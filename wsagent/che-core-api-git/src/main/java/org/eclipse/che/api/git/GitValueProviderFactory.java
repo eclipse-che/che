@@ -13,6 +13,7 @@ package org.eclipse.che.api.git;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
@@ -25,7 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.eclipse.che.api.git.GitProjectType.GIT_CURRENT_BRANCH_NAME;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.git.GitProjectType.GIT_CURRENT_HEAD_NAME;
 import static org.eclipse.che.api.git.GitProjectType.GIT_REPOSITORY_REMOTES;
 import static org.eclipse.che.api.git.GitProjectType.VCS_PROVIDER_NAME;
 
@@ -54,9 +56,14 @@ public class GitValueProviderFactory implements ValueProviderFactory {
 
                     switch (attributeName) {
                         case VCS_PROVIDER_NAME:
-                            return Collections.singletonList("git");
-                        case GIT_CURRENT_BRANCH_NAME:
-                            return Collections.singletonList(gitConnection.getCurrentBranch());
+                            return singletonList("git");
+                        case GIT_CURRENT_HEAD_NAME:
+                            String currentBranch = gitConnection.getCurrentBranch();
+                            return singletonList("HEAD".equals(currentBranch) ? gitConnection.log(LogParams.create().withMaxCount(1))
+                                                                                             .getCommits()
+                                                                                             .get(0)
+                                                                                             .getId()
+                                                                              : currentBranch);
                         case GIT_REPOSITORY_REMOTES:
                             return gitConnection.remoteList(null, false)
                                                 .stream()

@@ -16,6 +16,7 @@
 @eval projectExplorerSelectedRowBorder org.eclipse.che.ide.api.theme.Style.theme.projectExplorerSelectedRowBorder();
 @eval projectExplorerHoverRowBackground org.eclipse.che.ide.api.theme.Style.theme.projectExplorerHoverRowBackground();
 @eval projectExplorerHoverRowBorder org.eclipse.che.ide.api.theme.Style.theme.projectExplorerHoverRowBorder();
+@eval projectExplorerVcsHead org.eclipse.che.ide.api.theme.Style.theme.projectExplorerVcsHead();
 
 
 .noFocusOutline {
@@ -60,6 +61,18 @@
     padding-right: 10px;
     font-size: 0.8em;
     text-shadow: projectExplorerInfoTextShadow;
+}
+
+.vcsHeadContainer {
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
+    margin-top: -10px;
+    font-size: 1em;
+    font-style: italic;
+    padding-left: 2px;
+    text-shadow: projectExplorerPresentableTextShadow;
+    color: projectExplorerVcsHead;
 }
 
 .nodeContainer {
