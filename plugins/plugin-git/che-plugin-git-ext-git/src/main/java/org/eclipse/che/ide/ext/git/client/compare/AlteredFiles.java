@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 
 /**
@@ -29,11 +30,11 @@ import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus
 public class AlteredFiles {
 
     private final Project                       project;
-    private final LinkedHashMap<String, Status> changedFilesStatuses;
-    private final List<String>                  changedFilesList;
+    private final LinkedHashMap<String, Status> alteredFilesStatuses;
+    private final List<String>                  alteredFilesList;
 
     /**
-     * Git diff representation.
+     * Parses raw git diff string and creates advanced representation.
      *
      * @param project
      *         the project under diff operation
@@ -43,16 +44,19 @@ public class AlteredFiles {
     public AlteredFiles(Project project, String diff) {
         this.project = project;
 
-        changedFilesStatuses = new LinkedHashMap<>();
-        if (!"".equals(diff)) {
+        alteredFilesStatuses = new LinkedHashMap<>();
+        if (!isNullOrEmpty(diff)) {
             for (String item : diff.split("\n")) {
-                changedFilesStatuses.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
+                alteredFilesStatuses.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
             }
         }
 
-        changedFilesList = new ArrayList<>(changedFilesStatuses.keySet());
+        alteredFilesList = new ArrayList<>(alteredFilesStatuses.keySet());
     }
 
+    /**
+     * Returns project in which git repository is located.
+     */
     public Project getProject() {
         return project;
     }
@@ -61,31 +65,37 @@ public class AlteredFiles {
      * Returns number of files in the diff.
      */
     public int getFilesQuantity() {
-        return changedFilesList.size();
+        return alteredFilesList.size();
     }
 
     public boolean isEmpty() {
-        return 0 == changedFilesList.size();
+        return 0 == alteredFilesList.size();
     }
 
+    /**
+     * Returns this diff in map representation: altered file to its git status.
+     */
     public Map<String, Status> getChangedFilesMap() {
-        return changedFilesStatuses;
+        return alteredFilesStatuses;
     }
 
-    public List<String> getChangedFilesList() {
-        return changedFilesList;
+    /**
+     * Returns list of altered files in this git diff.
+     */
+    public List<String> getAlteredFilesList() {
+        return alteredFilesList;
     }
 
-    public Status getStatusByFilePath(String pathToChangedItem) {
-        return changedFilesStatuses.get(pathToChangedItem);
+    public Status getStatusByFilePath(String relativePathToChangedFile) {
+        return alteredFilesStatuses.get(relativePathToChangedFile);
     }
 
     public Status getStatusByIndex(int index) {
-        return changedFilesStatuses.get(changedFilesList.get(index));
+        return alteredFilesStatuses.get(alteredFilesList.get(index));
     }
 
     public String getFileByIndex(int index) {
-        return changedFilesList.get(index);
+        return alteredFilesList.get(index);
     }
 
     @Override
@@ -94,13 +104,13 @@ public class AlteredFiles {
         if (o == null || getClass() != o.getClass()) return false;
         AlteredFiles that = (AlteredFiles)o;
         return Objects.equals(project, that.project) &&
-               Objects.equals(changedFilesStatuses, that.changedFilesStatuses) &&
-               Objects.equals(changedFilesList, that.changedFilesList);
+               Objects.equals(alteredFilesStatuses, that.alteredFilesStatuses) &&
+               Objects.equals(alteredFilesList, that.alteredFilesList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(project, changedFilesStatuses, changedFilesList);
+        return Objects.hash(project, alteredFilesStatuses, alteredFilesList);
     }
 
 }

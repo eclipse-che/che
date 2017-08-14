@@ -141,7 +141,6 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                     .getFile(alteredFiles.getFileByIndex(currentFileIndex))
                     .then(file -> {
                         if (file.isPresent()) {
-
                             view.setEnableSaveChangesButton(true);
 
                             final Container gitDir = getGitDir(file.get());
@@ -162,9 +161,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                                                                    relPath,
                                                                    alteredFiles.getStatusByIndex(currentFileIndex));
                             }
-
                         } else { // file is deleted
-
                             view.setEnableSaveChangesButton(false);
 
                             // For now git repository supported only in project root folder
@@ -178,7 +175,6 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                             } else {
                                 showCompareBetweenRevisionsForFile(gitDir, relPath, alteredFiles.getStatusByIndex(currentFileIndex));
                             }
-
                         }
                     }).catchError(error -> {
                         notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
@@ -325,7 +321,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             return;
         }
 
-        currentFileIndex = alteredFiles.getChangedFilesList().indexOf(currentFile);
+        currentFileIndex = alteredFiles.getAlteredFilesList().indexOf(currentFile);
         if (currentFileIndex == -1) {
             currentFileIndex = 0;
         }

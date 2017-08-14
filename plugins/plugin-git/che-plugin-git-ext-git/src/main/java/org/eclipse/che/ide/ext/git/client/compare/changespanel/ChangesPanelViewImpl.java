@@ -115,7 +115,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
             getGroupedNodes(files.getChangedFilesMap()).forEach(nodeStorage::add);
             tree.expandAll();
         } else {
-            files.getChangedFilesList().forEach(
+            files.getAlteredFilesList().forEach(
                     file -> nodeStorage.add(new ChangedFileNode(file, files.getStatusByFilePath(file), nodesResources, delegate, false)));
         }
     }
