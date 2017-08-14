@@ -34,14 +34,22 @@ public class Version implements Comparable<Version> {
 
     private static final String MILESTONE_VERSION_SUFFIX = "-M";
     private static final String BETA_VERSION_SUFFIX      = "-beta-";
+    private static final String RELEASE_CANDIDATE_SUFFIX = "-RC";
+    private static final String SNAPSHOT_SUFFIX          = "-SNAPSHOT";
 
-    private static final Pattern VERSION =
-            compile("^(?<major>0|[1-9]+[0-9]*)\\.(?<minor>0|[1-9]+[0-9]*)\\.(?<bugfix>0|[1-9]+[0-9]*)" +
-                    "([.](?<hotfix>0|[1-9]+[0-9]*))?" +
-                    "(" + MILESTONE_VERSION_SUFFIX + "(?<milestone>[1-9]+[0-9]*))?" +
-                    "(" + BETA_VERSION_SUFFIX + "(?<beta>[1-9]+[0-9]*))?" +
-                    "(?<rc>-RC)?" +
-                    "(?<snapshot>-SNAPSHOT)?$");
+    private static final String POSITIVE_NUMBER        = "[1-9]+[0-9]*";
+    private static final String ZERO_OR_GREATER_NUMBER = "0|" + POSITIVE_NUMBER;
+
+    private static final String MAJOR     = "^(?<major>" + ZERO_OR_GREATER_NUMBER + ")";
+    private static final String MINOR     = "(?<minor>" + ZERO_OR_GREATER_NUMBER + ")";
+    private static final String BUGFIX    = "(?<bugfix>" + ZERO_OR_GREATER_NUMBER + ")";
+    private static final String HOTFIX    = "(\\.(?<hotfix>" + ZERO_OR_GREATER_NUMBER + "))?";
+    private static final String MILESTONE = "(" + MILESTONE_VERSION_SUFFIX + "(?<milestone>" + POSITIVE_NUMBER + "))?";
+    private static final String BETA      = "(" + BETA_VERSION_SUFFIX + "(?<beta>" + POSITIVE_NUMBER + "))?";
+    private static final String RC        = "(?<rc>" + RELEASE_CANDIDATE_SUFFIX + ")?";
+    private static final String SNAPSHOT  = "(?<snapshot>" + SNAPSHOT_SUFFIX + ")?$";
+
+    private static final Pattern VERSION = compile(MAJOR + "\\." + MINOR + "\\." + BUGFIX + HOTFIX + MILESTONE + BETA + RC + SNAPSHOT);
 
     private final int     major;
     private final int     minor;
@@ -100,17 +108,17 @@ public class Version implements Comparable<Version> {
 
         String hotFixGroup = matcher.group("hotfix");
         if (hotFixGroup != null) {
-            hotFix = parseInt(matcher.group("hotfix"));
+            hotFix = parseInt(hotFixGroup);
         }
 
         String milestoneGroup = matcher.group("milestone");
         if (milestoneGroup != null) {
-            milestone = parseInt(matcher.group("milestone"));
+            milestone = parseInt(milestoneGroup);
         }
 
         String betaGroup = matcher.group("beta");
         if (betaGroup != null) {
-            beta = parseInt(matcher.group("beta"));
+            beta = parseInt(betaGroup);
         }
 
         return new Version(parseInt(matcher.group("major")),
@@ -224,8 +232,8 @@ public class Version implements Comparable<Version> {
                + (hotFix > 0 ? "." + hotFix : "")
                + (milestone > 0 ? MILESTONE_VERSION_SUFFIX + milestone : "")
                + (beta > 0 ? BETA_VERSION_SUFFIX + beta : "")
-               + (rc ? "-RC" : "")
-               + (snapshot ? "-SNAPSHOT" : "");
+               + (rc ? RELEASE_CANDIDATE_SUFFIX : "")
+               + (snapshot ? SNAPSHOT_SUFFIX : "");
 
     }
 

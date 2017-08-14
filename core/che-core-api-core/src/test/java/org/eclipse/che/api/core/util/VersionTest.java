@@ -45,7 +45,8 @@ public class VersionTest {
                                {"1.0.1.2-M1-SNAPSHOT"},
                                {"1.0.1.2-beta-1-SNAPSHOT"},
                                {"1.0.1.2-M1-beta-1-SNAPSHOT"},
-                               {"1.0.1.2-M1-RC-SNAPSHOT"}};
+                               {"1.0.1.2-M1-RC-SNAPSHOT"},
+                               {"1.0.1.2-M1-beta-1-RC-SNAPSHOT"}};
     }
 
     @Test(dataProvider = "testInvalidVersion", expectedExceptions = IllegalArgumentException.class)
