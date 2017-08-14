@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.resources.tree;
 
@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
 import org.eclipse.che.ide.api.resources.marker.PresentableTextMarker;
 import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.api.resources.modification.CutResourceMarker;
+import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
@@ -51,6 +52,7 @@ import static java.util.Collections.unmodifiableList;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
+import static org.eclipse.che.ide.api.vcs.VcsStatus.NOT_MODIFIED;
 
 /**
  * Abstract based implementation for all resource based nodes in the IDE.
@@ -192,6 +194,13 @@ public abstract class ResourceNode<R extends Resource> extends AbstractTreeNode 
         }
 
         presentation.setPresentableTextCss(cssBuilder.toString());
+
+        if (getData().isFile() && getData().asFile().getVcsStatus() != null) {
+            VcsStatus vcsStatus = getData().asFile().getVcsStatus();
+            if (vcsStatus != NOT_MODIFIED) {
+                presentation.setPresentableTextCss("color: " + vcsStatus.getColor() + ";");
+            }
+        }
     }
 
     @Override
