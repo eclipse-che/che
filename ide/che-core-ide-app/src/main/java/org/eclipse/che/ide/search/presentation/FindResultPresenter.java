@@ -22,10 +22,10 @@ import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
-import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -98,7 +98,7 @@ public class FindResultPresenter extends BasePresenter implements FindResultView
      * @param request
      *         requested text
      */
-    public void handleResponse(List<SearchResult> resources, String request) {
+    public void handleResponse(Resource[] resources, String request) {
         workspaceAgent.openPart(this, PartStackType.INFORMATION);
         workspaceAgent.setActivePart(this);
         view.showResults(resources, request);

@@ -46,9 +46,8 @@ public class FSLuceneSearcherTest {
     private static final String[] TEST_CONTENT = {
             "Apollo set several major human spaceflight milestones",
             "Maybe you should think twice",
-            "To be or not to be beeeee lambergeeene",
-            "In early 1961, direct ascent was generally the mission mode in favor at NASA",
-            "Time to think"
+            "To be or not to be",
+            "In early 1961, direct ascent was generally the mission mode in favor at NASA"
     };
 
     private File                                         indexDirectory;
@@ -192,37 +191,6 @@ public class FSLuceneSearcherTest {
         assertEquals(newArrayList("/folder/xxx.txt"), paths);
     }
 
-    @Test
-    public void searchesByFullTextAndFileName() throws Exception {
-        VirtualFileSystem virtualFileSystem = virtualFileSystem();
-        VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
-        folder.createFile("xxx.txt", TEST_CONTENT[2]);
-        folder.createFile("zzz.txt", TEST_CONTENT[2]);
-        searcher.init(virtualFileSystem);
-
-        SearchResult result = searcher.search(new QueryExpression().setText("*be*").setName("xxx.txt").setIncludePositions(true));
-        List<String> paths = result.getFilePaths();
-        assertEquals(newArrayList("/folder/xxx.txt"), paths);
-        assertEquals(result.getResults().get(0).getData().size(), 4);
-
-    }
-
-
-    @Test
-    public void searchesByFullTextAndFileName2() throws Exception {
-        VirtualFileSystem virtualFileSystem = virtualFileSystem();
-        VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
-        folder.createFile("xxx.txt", TEST_CONTENT[2]);
-        folder.createFile("zzz.txt", TEST_CONTENT[4]);
-        searcher.init(virtualFileSystem);
-
-        SearchResult result = searcher.search(new QueryExpression().setText("*to*").setIncludePositions(true));
-        List<String> paths = result.getFilePaths();
-        assertEquals(paths.size(), 2);
-        assertEquals(result.getResults().get(0).getData().size(), 2);
-
-    }
-
     @DataProvider
     public Object[][] searchByName() {
         return new Object[][]{
@@ -232,7 +200,7 @@ public class FSLuceneSearcherTest {
                 {"file name.txt", "file name"},
                 {"prefixFileName.txt", "prefixF*"},
                 {"name.with.dot.txt", "name.With.Dot.txt"},
-                };
+        };
     }
 
     @Test(dataProvider = "searchByName")
@@ -240,11 +208,11 @@ public class FSLuceneSearcherTest {
         VirtualFileSystem virtualFileSystem = virtualFileSystem();
         VirtualFile folder = virtualFileSystem.getRoot().createFolder("parent/child");
         VirtualFile folder2 = virtualFileSystem.getRoot().createFolder("folder2");
-        folder.createFile(NameGenerator.generate(null, 10), TEST_CONTENT[3]);
+        folder.createFile(NameGenerator.generate(null,10), TEST_CONTENT[3]);
         folder.createFile(fileName, TEST_CONTENT[2]);
-        folder.createFile(NameGenerator.generate(null, 10), TEST_CONTENT[1]);
-        folder2.createFile(NameGenerator.generate(null, 10), TEST_CONTENT[2]);
-        folder2.createFile(NameGenerator.generate(null, 10), TEST_CONTENT[2]);
+        folder.createFile(NameGenerator.generate(null,10), TEST_CONTENT[1]);
+        folder2.createFile(NameGenerator.generate(null,10), TEST_CONTENT[2]);
+        folder2.createFile(NameGenerator.generate(null,10), TEST_CONTENT[2]);
         searcher.init(virtualFileSystem);
 
         List<String> paths = searcher.search(new QueryExpression().setName(searchedFileName)).getFilePaths();
@@ -316,7 +284,7 @@ public class FSLuceneSearcherTest {
     @Test
     public void limitsNumberOfSearchResultsWhenMaxItemIsSet() throws Exception {
         VirtualFileSystem virtualFileSystem = virtualFileSystem();
-        for (int i = 0; i < 125; i++) {
+        for (int i = 0; i < 100; i++) {
             virtualFileSystem.getRoot().createFile(String.format("file%02d", i), TEST_CONTENT[i % TEST_CONTENT.length]);
         }
         searcher.init(virtualFileSystem);
@@ -330,17 +298,18 @@ public class FSLuceneSearcherTest {
     @Test
     public void generatesQueryExpressionForRetrievingNextPageOfResults() throws Exception {
         VirtualFileSystem virtualFileSystem = virtualFileSystem();
-        for (int i = 0; i < 125; i++) {
+        for (int i = 0; i < 100; i++) {
             virtualFileSystem.getRoot().createFile(String.format("file%02d", i), TEST_CONTENT[i % TEST_CONTENT.length]);
         }
         searcher.init(virtualFileSystem);
 
         SearchResult result = searcher.search(new QueryExpression().setText("spaceflight").setMaxItems(7));
 
-        assertEquals(result.getTotalHits(), 25);
+        assertEquals(25, result.getTotalHits());
 
         Optional<QueryExpression> optionalNextPageQueryExpression = result.getNextPageQueryExpression();
         assertTrue(optionalNextPageQueryExpression.isPresent());
+
         QueryExpression nextPageQueryExpression = optionalNextPageQueryExpression.get();
         assertEquals("spaceflight", nextPageQueryExpression.getText());
         assertEquals(7, nextPageQueryExpression.getSkipCount());
@@ -350,19 +319,19 @@ public class FSLuceneSearcherTest {
     @Test
     public void retrievesSearchResultWithPages() throws Exception {
         VirtualFileSystem virtualFileSystem = virtualFileSystem();
-        for (int i = 0; i < 125; i++) {
+        for (int i = 0; i < 100; i++) {
             virtualFileSystem.getRoot().createFile(String.format("file%02d", i), TEST_CONTENT[i % TEST_CONTENT.length]);
         }
         searcher.init(virtualFileSystem);
 
         SearchResult firstPage = searcher.search(new QueryExpression().setText("spaceflight").setMaxItems(8));
-        assertEquals(firstPage.getFilePaths().size(),8);
+        assertEquals(8, firstPage.getFilePaths().size());
 
         QueryExpression nextPageQueryExpression = firstPage.getNextPageQueryExpression().get();
         nextPageQueryExpression.setMaxItems(100);
 
         SearchResult lastPage = searcher.search(nextPageQueryExpression);
-        assertEquals(lastPage.getFilePaths().size(), 17);
+        assertEquals(17, lastPage.getFilePaths().size());
 
         assertTrue(Collections.disjoint(firstPage.getFilePaths(), lastPage.getFilePaths()));
     }
