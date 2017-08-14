@@ -443,11 +443,11 @@ export class CreateProjectController {
     this.createProjectSvc.setCurrentProgressStep(1);
 
     let statusLink = this.lodash.find(workspace.links, (link: any) => {
-      return link.rel === 'environment.status_channel';
+      return link.rel === 'environment/statusChannel';
     });
 
     let outputLink = this.lodash.find(workspace.links, (link: any) => {
-      return link.rel === 'environment.output_channel';
+      return link.rel === 'environment/outputChannel';
     });
 
     let workspaceId = workspace.id;
