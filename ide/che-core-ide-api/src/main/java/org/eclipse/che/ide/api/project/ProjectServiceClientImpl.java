@@ -163,11 +163,11 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
                          .header(ACCEPT, MimeType.APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Searching..."))
                          .send(unmarshaller.newListUnmarshaller(SearchResultDto.class)).then(
-                        (Function<List<SearchResultDto>, List<SearchResult>>)arg -> {
-                            if (arg.isEmpty()) {
+                        (Function<List<SearchResultDto>, List<SearchResult>>)searchResultDtos -> {
+                            if (searchResultDtos.isEmpty()) {
                                 return Collections.emptyList();
                             }
-                            return arg.stream().map(SearchResult::new).collect(Collectors.toList());
+                            return searchResultDtos.stream().map(SearchResult::new).collect(Collectors.toList());
                         });
     }
 
