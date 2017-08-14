@@ -128,13 +128,12 @@ public class KeycloakAuthenticationFilter implements Filter {
                     realmSettings = mapper.readValue(in, Map.class);
                 }
                 String encodedPublicKey = realmSettings.get("public_key");
-                LOG.info("Encoded realm public key = {}", encodedPublicKey);
                 byte[] decoded = Base64.getDecoder().decode(encodedPublicKey);
                 X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
                 KeyFactory kf = KeyFactory.getInstance("RSA");
                 publicKey = kf.generatePublic(keySpec);
             } catch (IOException e) {
-                LOG.error("Exception during retrieval of the Keycloak realm pyublic key", e);
+                LOG.error("Exception during retrieval of the Keycloak realm public key", e);
             }
         }
         return publicKey;

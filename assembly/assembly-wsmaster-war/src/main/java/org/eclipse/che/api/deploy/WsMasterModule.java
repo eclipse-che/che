@@ -57,7 +57,6 @@ public class WsMasterModule extends AbstractModule {
         // db related components modules
         install(new com.google.inject.persist.jpa.JpaPersistModule("main"));
         install(new org.eclipse.che.account.api.AccountModule());
-        install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
         install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
         install(new org.eclipse.che.api.machine.server.jpa.MachineJpaModule());
         install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());

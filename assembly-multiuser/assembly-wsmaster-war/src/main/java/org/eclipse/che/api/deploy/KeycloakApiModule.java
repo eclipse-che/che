@@ -12,8 +12,14 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
 
+import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
+import org.eclipse.che.api.user.server.jpa.JpaUserDao;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.keycloak.server.deploy.KeycloakModule;
+import org.eclipse.che.security.PBKDF2PasswordEncryptor;
+import org.eclipse.che.security.PasswordEncryptor;
 
 /**
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
@@ -23,5 +29,10 @@ public class KeycloakApiModule extends AbstractModule {
     @Override
     protected void configure() {
         install(new KeycloakModule());
+
+        //User and profile - use profile from keycloak and other stuff is JPA
+        bind(PasswordEncryptor.class).to(PBKDF2PasswordEncryptor.class);
+        bind(UserDao.class).to(JpaUserDao.class);
+        bind(PreferenceDao.class).to(JpaPreferenceDao.class);
     }
 }
