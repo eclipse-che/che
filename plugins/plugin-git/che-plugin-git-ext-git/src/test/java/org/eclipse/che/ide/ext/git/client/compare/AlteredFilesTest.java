@@ -47,7 +47,7 @@ public class AlteredFilesTest {
 
         for (int i = 0; i < FILES_LEN; i++) {
             diffBuilder.append(STATUSES_STRINGS[i])
-                       .append(" ")
+                       .append("\t")
                        .append(FILES[i])
                        .append("\n");
         }

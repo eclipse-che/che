@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.git.client.compare;
 
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -47,7 +48,7 @@ public class AlteredFiles {
         alteredFilesStatuses = new LinkedHashMap<>();
         if (!isNullOrEmpty(diff)) {
             for (String item : diff.split("\n")) {
-                if (item.length() < 3 || item.charAt(1) != ' ') {
+                if (item.length() < 3 || item.charAt(1) != '\t') {
                     throw new IllegalArgumentException("Invalid git diff format.");
                 }
                 alteredFilesStatuses.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
