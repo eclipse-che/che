@@ -37,9 +37,9 @@ public class Version implements Comparable<Version> {
 
     private static final Pattern VERSION =
             compile("^(?<major>0|[1-9]+[0-9]*)\\.(?<minor>0|[1-9]+[0-9]*)\\.(?<bugfix>0|[1-9]+[0-9]*)" +
-                    "((?<hotfix>[.])(?<hotfixVersion>0|[1-9]+[0-9]*))?" +
-                    "((?<milestone>" + MILESTONE_VERSION_SUFFIX + ")(?<milestoneVersion>[1-9]+[0-9]*))?" +
-                    "((?<beta>" + BETA_VERSION_SUFFIX + ")(?<betaVersion>[1-9]+[0-9]*))?" +
+                    "([.](?<hotfix>0|[1-9]+[0-9]*))?" +
+                    "(" + MILESTONE_VERSION_SUFFIX + "(?<milestone>[1-9]+[0-9]*))?" +
+                    "(" + BETA_VERSION_SUFFIX + "(?<beta>[1-9]+[0-9]*))?" +
                     "(?<rc>-RC)?" +
                     "(?<snapshot>-SNAPSHOT)?$");
 
@@ -100,17 +100,17 @@ public class Version implements Comparable<Version> {
 
         String hotFixGroup = matcher.group("hotfix");
         if (hotFixGroup != null) {
-            hotFix = parseInt(matcher.group("hotfixVersion"));
+            hotFix = parseInt(matcher.group("hotfix"));
         }
 
         String milestoneGroup = matcher.group("milestone");
         if (milestoneGroup != null) {
-            milestone = parseInt(matcher.group("milestoneVersion"));
+            milestone = parseInt(matcher.group("milestone"));
         }
 
         String betaGroup = matcher.group("beta");
         if (betaGroup != null) {
-            beta = parseInt(matcher.group("betaVersion"));
+            beta = parseInt(matcher.group("beta"));
         }
 
         return new Version(parseInt(matcher.group("major")),
