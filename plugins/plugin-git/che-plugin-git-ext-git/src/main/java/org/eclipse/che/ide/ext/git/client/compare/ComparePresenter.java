@@ -94,7 +94,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
         this.compareWithLatest = true;
 
-        findFileIndexOrFirst(currentFile);
+        currentFileIndex = findFileIndexOrFirst(currentFile);
         showCompareForCurrentFile();
     }
 
@@ -122,7 +122,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
         this.compareWithLatest = false;
 
-        findFileIndexOrFirst(currentFile);
+        currentFileIndex = findFileIndexOrFirst(currentFile);
         showCompareForCurrentFile();
     }
 
@@ -292,17 +292,18 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      *
      * @param currentFile
      *         name of file to set up as current; if null or invalid, the first one will be chosen.
+     * @return given file index or first index if specified file isn't found.
      */
-    private void findFileIndexOrFirst(@Nullable String currentFile) {
+    private int findFileIndexOrFirst(@Nullable String currentFile) {
         if (currentFile == null) {
-            currentFileIndex = 0;
-            return;
+            return 0;
         }
 
-        currentFileIndex = alteredFiles.getAlteredFilesList().indexOf(currentFile);
-        if (currentFileIndex == -1) {
-            currentFileIndex = 0;
+        int fileIndex = alteredFiles.getAlteredFilesList().indexOf(currentFile);
+        if (fileIndex == -1) {
+            return 0;
         }
+        return fileIndex;
     }
 
     /** Returns true if is required to save new content. */
