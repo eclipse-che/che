@@ -82,8 +82,6 @@ public class WsMasterModule extends AbstractModule {
 
         install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
 
-        bind(org.eclipse.che.api.user.server.CheUserCreator.class);
-
         bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
         bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class).asEagerSingleton();
         bind(org.eclipse.che.api.project.server.template.ProjectTemplateRegistry.class);

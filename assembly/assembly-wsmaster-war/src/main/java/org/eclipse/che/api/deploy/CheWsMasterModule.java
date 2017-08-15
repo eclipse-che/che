@@ -38,5 +38,6 @@ public class CheWsMasterModule extends AbstractModule {
 
         bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
         install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
+        bind(org.eclipse.che.api.user.server.CheUserCreator.class);
     }
 }
