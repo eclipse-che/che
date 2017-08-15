@@ -99,8 +99,6 @@ import static org.eclipse.che.api.project.server.DtoConverter.asDto;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_BATCH_PROJECTS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_PROJECTS;
-import static org.eclipse.che.api.vfs.util.ReadFileUtils.Line;
-import static org.eclipse.che.api.vfs.util.ReadFileUtils.getLine;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -945,19 +943,14 @@ public class ProjectService extends Service {
                 List<LuceneSearcher.OffsetData> datas = searchResultEntry.getData();
                 List<SearchOccurrenceDto> searchOccurrences = new ArrayList<>(datas.size());
                 for (LuceneSearcher.OffsetData data : datas) {
-                    try {
-                        Line line = getLine(file, data.startOffset);
-                        SearchOccurrenceDto searchOccurrenceDto = DtoFactory.getInstance().createDto(SearchOccurrenceDto.class)
-                                                                            .withPhrase(data.phrase)
-                                                                            .withScore(data.score)
-                                                                            .withStartOffset(data.startOffset)
-                                                                            .withEndOffset(data.endOffset)
-                                                                            .withLineNumber(line.getLineNumber())
-                                                                            .withLineContent(line.getLineContent());
-                        searchOccurrences.add(searchOccurrenceDto);
-                    } catch (IOException e) {
-                        throw new ServerException(e);
-                    }
+                    SearchOccurrenceDto searchOccurrenceDto = DtoFactory.getInstance().createDto(SearchOccurrenceDto.class)
+                                                                        .withPhrase(data.phrase)
+                                                                        .withScore(data.score)
+                                                                        .withStartOffset(data.startOffset)
+                                                                        .withEndOffset(data.endOffset)
+                                                                        .withLineNumber(data.lineNum)
+                                                                        .withLineContent(data.line);
+                    searchOccurrences.add(searchOccurrenceDto);
                 }
                 SearchResultDto searchResultDto = DtoFactory.getInstance().createDto(SearchResultDto.class);
                 results.add(searchResultDto.withItemReference(itemReference).withSearchOccurrences(searchOccurrences));

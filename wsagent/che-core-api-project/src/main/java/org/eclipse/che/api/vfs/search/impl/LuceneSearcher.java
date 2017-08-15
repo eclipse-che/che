@@ -261,7 +261,19 @@ public abstract class LuceneSearcher implements Searcher {
                             float res = queryScorer.getTokenScore();
                             if (res > 0.0F && startOffset <= endOffset) {
                                 String tokenText = txt.substring(startOffset, endOffset);
-                                offsetData.add(new OffsetData(tokenText, startOffset, endOffset, docId, res));
+                                String[] lines = txt.split("\r\n|\r|\n");
+                                long len = 0;
+                                int lineNum = 0;
+                                String foundLine = "";
+                                for (String line : lines) {
+                                    lineNum++;
+                                    len+=lines.length;
+                                    if (len > startOffset) {
+                                        foundLine = line;
+                                        break;
+                                    }
+                                }
+                                offsetData.add(new OffsetData(tokenText, startOffset, endOffset, docId, res, lineNum, foundLine));
                             }
                         }
                     }
@@ -467,14 +479,17 @@ public abstract class LuceneSearcher implements Searcher {
         public int    endOffset;
         public int    docId;
         public float  score;
+        public int    lineNum;
+        public String line;
 
-        public OffsetData(String phrase, int startOffset, int endOffset, int docId, float score) {
-            super();
+        public OffsetData(String phrase, int startOffset, int endOffset, int docId, float score, int lineNum, String line) {
             this.phrase = phrase;
             this.startOffset = startOffset;
             this.endOffset = endOffset;
             this.docId = docId;
             this.score = score;
+            this.lineNum = lineNum;
+            this.line = line;
         }
 
     }
