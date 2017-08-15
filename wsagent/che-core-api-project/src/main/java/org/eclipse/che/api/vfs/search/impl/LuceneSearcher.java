@@ -64,6 +64,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
@@ -261,15 +262,15 @@ public abstract class LuceneSearcher implements Searcher {
                             float res = queryScorer.getTokenScore();
                             if (res > 0.0F && startOffset <= endOffset) {
                                 String tokenText = txt.substring(startOffset, endOffset);
-                                String[] lines = txt.split("\r\n|\r|\n");
-                                long len = 0;
+                                Scanner sc = new Scanner(txt);
                                 int lineNum = 0;
+                                long len = 0;
                                 String foundLine = "";
-                                for (String line : lines) {
+                                while (sc.hasNextLine()){
+                                    foundLine = sc.nextLine();
                                     lineNum++;
-                                    len+=lines.length;
+                                    len+=foundLine.length();
                                     if (len > startOffset) {
-                                        foundLine = line;
                                         break;
                                     }
                                 }
