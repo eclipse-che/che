@@ -73,11 +73,13 @@ public class KeycloakProfileDao implements ProfileDao {
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Authorization", "bearer " + EnvironmentContext.getCurrent().getSubject().getToken());
-            LOG.info("Pulling profile from URL : {}", url);
             try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
                 ObjectMapper mapper = new ObjectMapper();
                 //noinspection unchecked
                 Map<String, String> profileAttributes =  mapper.readValue(in, Map.class);
+                if (!userId.equals(profileAttributes.get("sub"))) {
+                    throw new ServerException("Requested user id does not match with actual.");
+                }
                 return new ProfileImpl(userId, profileAttributes);
             }
         } catch (IOException e) {
