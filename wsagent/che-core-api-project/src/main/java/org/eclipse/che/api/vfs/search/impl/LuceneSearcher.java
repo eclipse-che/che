@@ -266,10 +266,10 @@ public abstract class LuceneSearcher implements Searcher {
                                 int lineNum = 0;
                                 long len = 0;
                                 String foundLine = "";
-                                while (sc.hasNextLine()){
+                                while (sc.hasNextLine()) {
                                     foundLine = sc.nextLine();
                                     lineNum++;
-                                    len+=foundLine.length();
+                                    len += foundLine.length();
                                     if (len > startOffset) {
                                         break;
                                     }
