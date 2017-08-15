@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.api.parts;
 
@@ -44,6 +44,22 @@ public interface EditorTab extends View<EditorTab.ActionDelegate>, TabItem {
      *         associated file
      */
     void setFile(VirtualFile file);
+
+    /**
+     * Set color to the label of editor's tab.
+     *
+     * @param color
+     *         CSS color to set. Supported CSS color values:
+     *         <ul>
+     *         <li>Hexadecimal colors e.g. #ff0000</li>
+     *         <li>RGB colors e.g. rgb(255, 0, 0)</li>
+     *         <li>RGBA colors e.g. rgba(255, 0, 0, 0.3)</li>
+     *         <li>HSL colors e.g. hsl(120, 60%, 70%)</li>
+     *         <li>HSLA colors e.g. hsla(120, 100%, 25%, 0.3)</li>
+     *         <li>Predefined/Cross-browser color names e.g. green</li>
+     *         <ul/>
+     */
+    void setTitleColor(String color);
 
     /**
      * Get editor part which associated with given tab

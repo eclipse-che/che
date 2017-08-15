@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.branch;
 
@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -29,7 +30,6 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
 
-import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
@@ -160,8 +160,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
         service.checkout(project.getLocation(), checkoutRequest)
                .then(ignored -> {
-                   getBranches();
-                   project.synchronize();
+                   view.close();
                })
                .catchError(error -> {
                    handleError(error.getCause(), BRANCH_CHECKOUT_COMMAND_NAME);
@@ -170,7 +169,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
     /** Get the list of branches. */
     private void getBranches() {
-        service.branchList(project.getLocation(), LIST_ALL)
+        service.branchList(project.getLocation(), BranchListMode.from(view.getFilterValue()))
                .then(branches -> {
                    if (branches.isEmpty()) {
                        dialogFactory.createMessageDialog(constant.branchTitle(),
@@ -210,6 +209,11 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         view.setEnableCheckoutButton(false);
         view.setEnableRenameButton(false);
         view.setEnableDeleteButton(false);
+    }
+
+    @Override
+    public void onFilterValueChanged() {
+        getBranches();
     }
 
     @Override

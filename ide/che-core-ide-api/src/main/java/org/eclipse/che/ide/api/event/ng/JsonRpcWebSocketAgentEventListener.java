@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.api.event.ng;
 
@@ -70,6 +70,8 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
         initializeJsonRpc();
         initializeTreeExplorerFileWatcher();
         initializeGitCheckoutWatcher();
+        initializeGitChangeWatcher();
+        initializeGitIndexWatcher();
     }
 
     private void initializeJsonRpc() {
@@ -138,7 +140,7 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
 
         requestTransmitter.newRequest()
                           .endpointId("ws-agent")
-                          .methodName("track:project-tree")
+                          .methodName("track/project-tree")
                           .paramsAsDto(params)
                           .sendAndSkipResult();
 
@@ -147,7 +149,23 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     private void initializeGitCheckoutWatcher() {
         requestTransmitter.newRequest()
                           .endpointId("ws-agent")
-                          .methodName("track:git-checkout")
+                          .methodName("track/git-checkout")
+                          .noParams()
+                          .sendAndSkipResult();
+    }
+
+    private void initializeGitChangeWatcher() {
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track/git-change")
+                          .noParams()
+                          .sendAndSkipResult();
+    }
+
+    private void initializeGitIndexWatcher() {
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track/git-index")
                           .noParams()
                           .sendAndSkipResult();
     }

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
@@ -114,6 +114,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static javax.ws.rs.HttpMethod.DELETE;
 import static javax.ws.rs.HttpMethod.GET;
@@ -157,10 +158,11 @@ public class ProjectServiceTest {
 
     private static final String EXCLUDE_SEARCH_PATH = ".codenvy";
 
-    private ProjectManager              pm;
-    private ResourceLauncher            launcher;
-    private ProjectHandlerRegistry      phRegistry;
-    private ProjectServiceLinksInjector projectServiceLinksInjector;
+    private ProjectManager                  pm;
+    private ResourceLauncher                launcher;
+    private ProjectHandlerRegistry          phRegistry;
+    private ProjectServiceLinksInjector     projectServiceLinksInjector;
+    private ProjectServiceVcsStatusInjector vcsStatusInjector;
 
     private org.eclipse.che.commons.env.EnvironmentContext env;
 
@@ -243,6 +245,7 @@ public class ProjectServiceTest {
         importerRegistry = new ProjectImporterRegistry(Collections.<ProjectImporter>emptySet());
 
         projectServiceLinksInjector = new ProjectServiceLinksInjector();
+        vcsStatusInjector = new ProjectServiceVcsStatusInjector(pm, emptySet());
 
         projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry, phRegistry, eventService);
         projectRegistry.initProjects();
@@ -282,6 +285,7 @@ public class ProjectServiceTest {
         dependencies.addInstance(ProjectHandlerRegistry.class, phRegistry);
         dependencies.addInstance(EventService.class, eventService);
         dependencies.addInstance(ProjectServiceLinksInjector.class, projectServiceLinksInjector);
+        dependencies.addInstance(ProjectServiceVcsStatusInjector.class, vcsStatusInjector);
         dependencies.addInstance(RequestTransmitter.class, mock(RequestTransmitter.class));
         dependencies.addInstance(ProjectImportOutputJsonRpcRegistrar.class, new ProjectImportOutputJsonRpcRegistrar());
 

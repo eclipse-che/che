@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
@@ -42,8 +42,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class ProjectTreeTracker {
     private static final Logger LOG = getLogger(ProjectTreeTracker.class);
 
-    private static final String OUTGOING_METHOD = "event:project-tree-state-changed";
-    private static final String INCOMING_METHOD = "track:project-tree";
+    private static final String OUTGOING_METHOD = "event/project-tree-state-changed";
+    private static final String INCOMING_METHOD = "track/project-tree";
 
     private final Map<String, Integer> watchIdRegistry = new HashMap<>();
     private final Set<String>          timers          = newConcurrentHashSet();
