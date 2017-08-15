@@ -137,7 +137,7 @@ public class HistoryPresenterTest extends BaseTest {
 
     @Test
     public void shouldShowCompareWhenOneFileChangedInCurrentRevision() throws Exception {
-        final String diff = "M file";
+        final String diff = "M\tfile";
         final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
 
         Revision parentRevision = mock(Revision.class);
@@ -163,7 +163,7 @@ public class HistoryPresenterTest extends BaseTest {
 
     @Test
     public void shouldShowChangedListWhenSeveralFilesChangedInSelectedRevision() throws Exception {
-        final String diff = "M file1\nM file2";
+        final String diff = "M\tfile1\nM\tfile2";
         final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
 
         Revision revisionA = mock(Revision.class);

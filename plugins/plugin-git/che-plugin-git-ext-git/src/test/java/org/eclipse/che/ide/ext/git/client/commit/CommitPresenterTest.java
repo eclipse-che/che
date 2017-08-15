@@ -141,7 +141,7 @@ public class CommitPresenterTest extends BaseTest {
 
     @Test
     public void shouldShowDialog() throws Exception {
-        final String diff = "M file";
+        final String diff = "M\tfile";
         final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
 
         ConfirmDialog dialog = mock(ConfirmDialog.class);
@@ -154,7 +154,7 @@ public class CommitPresenterTest extends BaseTest {
 
         presenter.showDialog(project);
         verify(stringPromise).then(stringCaptor.capture());
-        stringCaptor.getValue().apply("M file");
+        stringCaptor.getValue().apply("M\tfile");
         verify(logPromise).then(logCaptor.capture());
         logCaptor.getValue().apply(null);
 
@@ -170,7 +170,7 @@ public class CommitPresenterTest extends BaseTest {
 
     @Test
     public void shouldShowUntrackedFilesOnInitialCommit() throws Exception {
-        final String diff = "A file";
+        final String diff = "A\tfile";
         final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
 
         PromiseError error = mock(PromiseError.class);
@@ -204,7 +204,7 @@ public class CommitPresenterTest extends BaseTest {
 
         presenter.showDialog(project);
         verify(stringPromise).then(stringCaptor.capture());
-        stringCaptor.getValue().apply("M file");
+        stringCaptor.getValue().apply("M\tfile");
         verify(logPromise).then(logCaptor.capture());
         logCaptor.getValue().apply(null);
 

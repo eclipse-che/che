@@ -21,17 +21,14 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.ide.ext.git.client.GitUtil;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.resource.Path;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.DELETED;
 
@@ -141,54 +138,35 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                     .getFile(alteredFiles.getFileByIndex(currentFileIndex))
                     .then(file -> {
                         if (file.isPresent()) {
+                            this.comparedFile = file.get();
                             view.setEnableSaveChangesButton(true);
-
-                            final Container gitDir = getGitDir(file.get());
-                            if (gitDir == null) {
-                                notificationManager.notify(locale.messageFileIsNotUnderGit(file.toString()), WARNING, EMERGE_MODE);
-                                return;
-                            }
-                            final Path relPath = getRelPath(gitDir, file.get());
-
-                            if (compareWithLatest) {
-                                this.comparedFile = file.get();
-
-                                showCompareWithLatestForFile(gitDir.getLocation(),
-                                                             relPath,
-                                                             alteredFiles.getStatusByIndex(currentFileIndex));
-                            } else {
-                                showCompareBetweenRevisionsForFile(gitDir.getLocation(),
-                                                                   relPath,
-                                                                   alteredFiles.getStatusByIndex(currentFileIndex));
-                            }
                         } else { // file is deleted
+                            this.comparedFile = null;
                             view.setEnableSaveChangesButton(false);
+                        }
 
-                            // For now git repository supported only in project root folder
-                            final Path gitDir = alteredFiles.getProject().getLocation();
-                            final Path relPath = Path.valueOf(alteredFiles.getFileByIndex(currentFileIndex));
+                        // For now git repository supported only in project root folder
+                        final Path gitDirLocation = alteredFiles.getProject().getLocation();
+                        final Path relPath = Path.valueOf(alteredFiles.getFileByIndex(currentFileIndex));
 
-                            if (compareWithLatest) {
-                                this.comparedFile = null;
-
-                                showCompareWithLatestForFile(gitDir, relPath, alteredFiles.getStatusByIndex(currentFileIndex));
-                            } else {
-                                showCompareBetweenRevisionsForFile(gitDir, relPath, alteredFiles.getStatusByIndex(currentFileIndex));
-                            }
+                        if (compareWithLatest) {
+                            showCompareWithLatestForFile(gitDirLocation, relPath, alteredFiles.getStatusByIndex(currentFileIndex));
+                        } else {
+                            showCompareBetweenRevisionsForFile(gitDirLocation, relPath, alteredFiles.getStatusByIndex(currentFileIndex));
                         }
                     }).catchError(error -> {
-                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                    });
+            notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+        });
     }
 
-    private void showCompareWithLatestForFile(final Path gitDir, final Path relPath, final Status status) {
+    private void showCompareWithLatestForFile(final Path gitDirLocation, final Path relPath, final Status status) {
         if (status.equals(ADDED)) {
             showCompare("");
             return;
         }
 
         if (status.equals(DELETED)) {
-            service.showFileContent(gitDir, relPath, revision)
+            service.showFileContent(gitDirLocation, relPath, revision)
                    .then(content -> {
                        view.setTitle(relPath.toString());
                        view.setColumnTitles(locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
@@ -198,7 +176,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                        notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
                    });
         } else {
-            service.showFileContent(gitDir, relPath, revision)
+            service.showFileContent(gitDirLocation, relPath, revision)
                    .then(content -> {
                        showCompare(content.getContent());
                    })
@@ -248,7 +226,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     @Override
     public void onClose(final String newContent) {
-        if (!isEdited(newContent)) {
+        if (!isDirty(newContent)) {
             view.hide();
             return;
         }
@@ -268,7 +246,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     public void onSaveChangesClicked() {
         if (compareWithLatest) {
             view.getEditableContent(content -> {
-                if (isEdited(content)) {
+                if (isDirty(content)) {
                     saveContent(content);
                 }
             });
@@ -278,7 +256,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     @Override
     public void onNextDiffClicked() {
         view.getEditableContent(content -> {
-            if (isEdited(content)) {
+            if (isDirty(content)) {
                 saveContent(content);
             }
 
@@ -290,7 +268,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     @Override
     public void onPreviousDiffClicked() {
         view.getEditableContent(content -> {
-            if (isEdited(content)) {
+            if (isDirty(content)) {
                 saveContent(content);
             }
 
@@ -327,8 +305,8 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         }
     }
 
-    /** Returns true if user edited content in the compare widget i.e. initial and current isn't equal. */
-    private boolean isEdited(final String newContent) {
+    /** Returns true if is required to save new content. */
+    private boolean isDirty(final String newContent) {
         return compareWithLatest && comparedFile != null && this.localContent != null && !newContent.equals(localContent);
     }
 
@@ -351,17 +329,4 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                     });
     }
 
-    /** Returns relative path of given file from specified project */
-    private Path getRelPath(final Container project, final File file) {
-        return file.getLocation().removeFirstSegments(project.getLocation().segmentCount());
-    }
-
-    /**
-     * Searches for project with git repository to which given file belongs.
-     */
-    @Nullable
-    private Container getGitDir(final File file) {
-        // For now we have support only for git repository in the root project
-        return GitUtil.getRootProject(file);
-    }
 }

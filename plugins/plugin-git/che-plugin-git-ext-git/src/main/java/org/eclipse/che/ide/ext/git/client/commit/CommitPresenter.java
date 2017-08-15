@@ -128,7 +128,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                                               List<String> newFiles = new ArrayList<>();
                                               newFiles.addAll(status.getAdded());
                                               newFiles.addAll(status.getUntracked());
-                                              show(newFiles.stream().collect(joining("\nA ", "A ", "")));
+                                              show(newFiles.stream().collect(joining("\nA\t", "A\t", "")));
                                           });
                               }
                           });

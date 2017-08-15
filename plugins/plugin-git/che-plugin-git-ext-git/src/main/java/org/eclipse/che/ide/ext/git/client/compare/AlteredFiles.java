@@ -49,7 +49,7 @@ public class AlteredFiles {
         if (!isNullOrEmpty(diff)) {
             for (String item : diff.split("\n")) {
                 if (item.length() < 3 || item.charAt(1) != '\t') {
-                    throw new IllegalArgumentException("Invalid git diff format.");
+                    throw new IllegalArgumentException("Invalid git diff format. Invalid record: " + item);
                 }
                 alteredFilesStatuses.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
             }
