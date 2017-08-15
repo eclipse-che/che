@@ -12,21 +12,15 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
-import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
@@ -55,6 +49,7 @@ import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
+import org.eclipse.che.workspace.infrastructure.docker.logs.MachineLoggersFactory;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
@@ -85,10 +80,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.CHE_WORKSPACE_ID;
 import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.LATEST_TAG;
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.USER_TOKEN;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /*
@@ -126,6 +118,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 */
 
 /**
+ * Starts container described in {@link DockerContainerConfig}.
+ *
+ * </p> Includes building/pulling images, networks creation, etc.
+ *
  * @author Alexander Garagatyi
  */
 public class DockerMachineStarter {
@@ -166,25 +162,7 @@ public class DockerMachineStarter {
     private final ExecutorService                               executor;
     private final DockerMachineStopDetector                     dockerInstanceStopDetector;
     private final boolean                                       doForcePullImage;
-    private final boolean                                       privilegedMode;
-    private final int                                           pidsLimit;
-    private final List<String>                                  devMachinePortsToExpose;
-    private final List<String>                                  commonMachinePortsToExpose;
-    private final List<String>                                  devMachineSystemVolumes;
-    private final List<String>                                  commonMachineSystemVolumes;
-    private final Map<String, String>                           devMachineEnvVariables;
-    private final Map<String, String>                           commonMachineEnvVariables;
-    private final String[]                                      allMachinesExtraHosts;
     private final boolean                                       snapshotUseRegistry;
-    private final double                                        memorySwapMultiplier;
-    private final Set<String>                                   additionalNetworks;
-    private final String                                        parentCgroup;
-    private final String                                        cpusetCpus;
-    private final long                                          cpuPeriod;
-    private final long                                          cpuQuota;
-    private final WindowsPathEscaper                            windowsPathEscaper;
-    private final String[]                                      dnsResolvers;
-    private final Map<String, String>                           buildArgs;
     private final MachineLoggersFactory                         machineLoggerFactory;
     private final DockerMachineCreator                          machineCreator;
 
@@ -192,26 +170,8 @@ public class DockerMachineStarter {
     public DockerMachineStarter(DockerConnector docker,
                                 UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                 DockerMachineStopDetector dockerMachineStopDetector,
-                                @Named("machine.docker.dev_machine.machine_servers") Set<ServerConfig> devMachineServers,
-                                @Named("machine.docker.machine_servers") Set<ServerConfig> allMachinesServers,
-                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
-                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
                                 @Named("che.docker.always_pull_image") boolean doForcePullImage,
-                                @Named("che.docker.privileged") boolean privilegedMode,
-                                @Named("che.docker.pids_limit") int pidsLimit,
-                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
-                                @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
                                 @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
-                                @Named("che.docker.swap") double memorySwapMultiplier,
-                                @Named("machine.docker.networks") Set<Set<String>> additionalNetworks,
-                                @Nullable @Named("che.docker.parent_cgroup") String parentCgroup,
-                                @Nullable @Named("che.docker.cpuset_cpus") String cpusetCpus,
-                                @Named("che.docker.cpu_period") long cpuPeriod,
-                                @Named("che.docker.cpu_quota") long cpuQuota,
-                                WindowsPathEscaper windowsPathEscaper,
-                                @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
-                                @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
-                                @Named("che.docker.build_args") Map<String, String> buildArgs,
                                 MachineLoggersFactory machineLogger,
                                 DockerMachineCreator machineCreator) {
         this.machineCreator = machineCreator;
@@ -220,85 +180,8 @@ public class DockerMachineStarter {
         this.dockerCredentials = dockerCredentials;
         this.dockerInstanceStopDetector = dockerMachineStopDetector;
         this.doForcePullImage = doForcePullImage;
-        this.privilegedMode = privilegedMode;
         this.snapshotUseRegistry = snapshotUseRegistry;
-        // use-cases:
-        //  -1  enable unlimited swap
-        //  0   disable swap
-        //  0.5 enable swap with size equal to half of current memory size
-        //  1   enable swap with size equal to current memory size
-        //
-        //  according to docker docs field  memorySwap should be equal to memory+swap
-        //  we calculate this field as memorySwap=memory * (1 + multiplier) so we just add 1 to multiplier
-        this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
-        this.parentCgroup = parentCgroup;
-        this.cpusetCpus = cpusetCpus;
-        this.cpuPeriod = cpuPeriod;
-        this.cpuQuota = cpuQuota;
-        this.windowsPathEscaper = windowsPathEscaper;
-        this.pidsLimit = pidsLimit;
-        this.dnsResolvers = dnsResolvers;
-        this.buildArgs = buildArgs;
         this.machineLoggerFactory = machineLogger;
-
-        allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
-        devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
-
-        allMachinesSystemVolumes = allMachinesSystemVolumes.stream()
-                                                           .map(line -> line.split(";"))
-                                                           .flatMap(Arrays::stream)
-                                                           .distinct()
-                                                           .collect(toSet());
-
-        devMachineSystemVolumes = devMachineSystemVolumes.stream()
-                                                         .map(line -> line.split(";"))
-                                                         .flatMap(Arrays::stream)
-                                                         .distinct()
-                                                         .collect(toSet());
-
-        if (SystemInfo.isWindows()) {
-            allMachinesSystemVolumes = escapePaths(allMachinesSystemVolumes);
-            devMachineSystemVolumes = escapePaths(devMachineSystemVolumes);
-        }
-        this.commonMachineSystemVolumes = new ArrayList<>(allMachinesSystemVolumes);
-        List<String> devMachineVolumes = new ArrayList<>(allMachinesSystemVolumes.size()
-                                                         + devMachineSystemVolumes.size());
-        devMachineVolumes.addAll(allMachinesSystemVolumes);
-        devMachineVolumes.addAll(devMachineSystemVolumes);
-        this.devMachineSystemVolumes = devMachineVolumes;
-
-        this.devMachinePortsToExpose = new ArrayList<>(allMachinesServers.size() + devMachineServers.size());
-        this.commonMachinePortsToExpose = new ArrayList<>(allMachinesServers.size());
-        for (ServerConfig serverConf : devMachineServers) {
-            devMachinePortsToExpose.add(serverConf.getPort());
-        }
-        for (ServerConfig serverConf : allMachinesServers) {
-            commonMachinePortsToExpose.add(serverConf.getPort());
-            devMachinePortsToExpose.add(serverConf.getPort());
-        }
-
-        allMachinesEnvVariables = removeEmptyAndNullValues(allMachinesEnvVariables);
-        devMachineEnvVariables = removeEmptyAndNullValues(devMachineEnvVariables);
-        this.commonMachineEnvVariables = new HashMap<>();
-        this.devMachineEnvVariables = new HashMap<>();
-        allMachinesEnvVariables.forEach(envVar -> {
-            String[] split = envVar.split("=", 2);
-            this.commonMachineEnvVariables.put(split[0], split[1]);
-            this.devMachineEnvVariables.put(split[0], split[1]);
-        });
-        devMachineEnvVariables.forEach(envVar -> {
-            String[] split = envVar.split("=", 2);
-            this.devMachineEnvVariables.put(split[0], split[1]);
-        });
-
-        this.allMachinesExtraHosts = additionalHosts.stream()
-                                                    .flatMap(Set::stream)
-                                                    .toArray(String[]::new);
-
-        this.additionalNetworks = additionalNetworks.stream()
-                                                    .flatMap(Set::stream)
-                                                    .collect(toSet());
-
         // single point of failure in case of highly loaded system
         executor = Executors.newCachedThreadPool(
                 new ThreadFactoryBuilder().setNameFormat("MachineLogsStreamer-%d")
@@ -318,8 +201,6 @@ public class DockerMachineStarter {
      *         configuration of container to start
      * @param identity
      *         identity of user that starts machine
-     * @param isDev
-     *         whether machine is dev or not
      * @return {@link DockerMachine} instance that represents started container
      * @throws InternalInfrastructureException
      *         if internal error occurs
@@ -332,7 +213,6 @@ public class DockerMachineStarter {
                                         String machineName,
                                         DockerContainerConfig containerConfig,
                                         RuntimeIdentity identity,
-                                        boolean isDev,
                                         AbnormalMachineStopHandler abnormalMachineStopHandler)
             throws InfrastructureException {
         String workspaceId = identity.getWorkspaceId();
@@ -344,9 +224,7 @@ public class DockerMachineStarter {
         try {
             String image = prepareImage(machineName, containerConfig, progressMonitor);
 
-            container = createContainer(workspaceId,
-                                        machineName,
-                                        isDev,
+            container = createContainer(machineName,
                                         image,
                                         networkName,
                                         containerConfig);
@@ -437,23 +315,13 @@ public class DockerMachineStarter {
                 buildImageParams = BuildImageParams.create(containerConfig.getBuild().getContext())
                                                    .withDockerfile(containerConfig.getBuild().getDockerfilePath());
             }
-            Map<String, String> buildArgs;
-            if (containerConfig.getBuild().getArgs() == null || containerConfig.getBuild().getArgs().isEmpty()) {
-                buildArgs = this.buildArgs;
-            } else {
-                buildArgs = new HashMap<>(this.buildArgs);
-                buildArgs.putAll(containerConfig.getBuild().getArgs());
-            }
             buildImageParams.withForceRemoveIntermediateContainers(true)
                             .withRepository(machineImageName)
                             .withAuthConfigs(dockerCredentials.getCredentials())
                             .withDoForcePull(doForcePullOnBuild)
                             .withMemoryLimit(containerConfig.getMemLimit())
                             .withMemorySwapLimit(-1)
-                            .withCpusetCpus(cpusetCpus)
-                            .withCpuPeriod(cpuPeriod)
-                            .withCpuQuota(cpuQuota)
-                            .withBuildArgs(buildArgs);
+                            .withBuildArgs(containerConfig.getBuild().getArgs());
 
             docker.buildImage(buildImageParams, progressMonitor);
         } catch (IOException e) {
@@ -533,21 +401,11 @@ public class DockerMachineStarter {
         }
     }
 
-    private String createContainer(String workspaceId,
-                                   String machineName,
-                                   boolean isDev,
+    private String createContainer(String machineName,
                                    String image,
                                    String networkName,
                                    DockerContainerConfig containerConfig)
             throws IOException, InternalInfrastructureException {
-
-        long machineMemorySwap = memorySwapMultiplier == -1 ?
-                                 -1 :
-                                 (long)(containerConfig.getMemLimit() * memorySwapMultiplier);
-
-        addSystemWideContainerSettings(workspaceId,
-                                       isDev,
-                                       containerConfig);
 
         EndpointConfig endpointConfig = new EndpointConfig().withAliases(machineName)
                                                             .withLinks(toArrayIfNotNull(containerConfig.getLinks()));
@@ -555,8 +413,18 @@ public class DockerMachineStarter {
                                                                                                     endpointConfig));
 
         HostConfig hostConfig = new HostConfig();
-        hostConfig.withMemorySwap(machineMemorySwap)
-                  .withMemory(containerConfig.getMemLimit())
+        hostConfig.withMemory(containerConfig.getMemLimit())
+                  .withMemorySwap(containerConfig.getMemSwapLimit())
+                  .withPidsLimit(containerConfig.getPidsLimit())
+                  .withPidMode(containerConfig.getPidMode())
+                  .withExtraHosts(
+                          containerConfig.getExtraHosts().toArray(new String[containerConfig.getExtraHosts().size()]))
+                  .withPrivileged(containerConfig.getPrivileged())
+                  .withDns(containerConfig.getDns().toArray(new String[containerConfig.getDns().size()]))
+                  .withCpusetCpus(containerConfig.getCpuSet())
+                  .withCpuQuota(containerConfig.getCpuQuota())
+                  .withCpuPeriod(containerConfig.getCpuPeriod())
+                  .withCgroupParent(containerConfig.getCgroupParent())
                   .withNetworkMode(networkName)
                   .withLinks(toArrayIfNotNull(containerConfig.getLinks()))
                   .withPortBindings(convertPortBindings(containerConfig.getPorts(), machineName))
@@ -592,7 +460,7 @@ public class DockerMachineStarter {
         hostConfig.setBinds(bindMountVolumes.toArray(new String[bindMountVolumes.size()]));
         config.setVolumes(nonBindMountVolumes);
 
-        addStaticDockerConfiguration(config);
+        config.getHostConfig().withPublishAllPorts(true);
 
         setNonExitingContainerCommandIfNeeded(config);
 
@@ -613,51 +481,6 @@ public class DockerMachineStarter {
             portsBindings.put(portMapping[0], new PortBinding[] {new PortBinding().withHostPort(portMapping[1])});
         }
         return portsBindings;
-    }
-
-    private void addStaticDockerConfiguration(ContainerConfig config) {
-        config.getHostConfig()
-              .withPidsLimit(pidsLimit)
-              .withExtraHosts(allMachinesExtraHosts)
-              .withPrivileged(privilegedMode)
-              .withPublishAllPorts(true)
-              .withDns(dnsResolvers);
-        // CPU limits
-        config.getHostConfig()
-              .withCpusetCpus(cpusetCpus)
-              .withCpuQuota(cpuQuota)
-              .withCpuPeriod(cpuPeriod);
-        // Cgroup parent for custom limits
-        config.getHostConfig().setCgroupParent(parentCgroup);
-    }
-
-    private void addSystemWideContainerSettings(String workspaceId,
-                                                boolean isDev,
-                                                DockerContainerConfig containerConfig) {
-        List<String> portsToExpose;
-        List<String> volumes;
-        Map<String, String> env;
-        if (isDev) {
-            portsToExpose = devMachinePortsToExpose;
-            volumes = devMachineSystemVolumes;
-            env = new HashMap<>(devMachineEnvVariables);
-            env.put(CHE_WORKSPACE_ID, workspaceId);
-            env.put(USER_TOKEN, getUserToken(workspaceId));
-        } else {
-            portsToExpose = commonMachinePortsToExpose;
-            env = commonMachineEnvVariables;
-            volumes = commonMachineSystemVolumes;
-        }
-        // register workspace ID and Machine Name
-        env.put(CHE_WORKSPACE_ID, workspaceId);
-        // FIXME: spi
-//        env.put(DockerInstanceRuntimeInfo.CHE_MACHINE_NAME, machineName);
-//        env.put(DockerInstanceRuntimeInfo.CHE_IS_DEV_MACHINE, Boolean.toString(isDev));
-
-        containerConfig.getExpose().addAll(portsToExpose);
-        containerConfig.getEnvironment().putAll(env);
-        containerConfig.getVolumes().addAll(volumes);
-        containerConfig.getNetworks().addAll(additionalNetworks);
     }
 
     // We can detect certain situation when container exited right after start.
@@ -768,35 +591,6 @@ public class DockerMachineStarter {
             return null;
         }
         return list.toArray(new String[list.size()]);
-    }
-
-    /**
-     * Returns set that contains all non empty and non nullable values from specified set
-     */
-    protected Set<String> removeEmptyAndNullValues(Set<String> paths) {
-        return paths.stream()
-                    .filter(path -> !Strings.isNullOrEmpty(path))
-                    .collect(toSet());
-    }
-
-    // workspaceId parameter is required, because in case of separate storage for tokens
-    // you need to know exactly which workspace and which user to apply the token.
-    protected String getUserToken(String wsId) {
-        return EnvironmentContext.getCurrent().getSubject().getToken();
-    }
-
-    /**
-     * Escape paths for Windows system with boot@docker according to rules given here :
-     * https://github.com/boot2docker/boot2docker/blob/master/README.md#virtualbox-guest-additions
-     *
-     * @param paths
-     *         set of paths to escape
-     * @return set of escaped path
-     */
-    private Set<String> escapePaths(Set<String> paths) {
-        return paths.stream()
-                    .map(windowsPathEscaper::escapePath)
-                    .collect(toSet());
     }
 
     // TODO spi should we move it into network lifecycle?

@@ -22,7 +22,6 @@
     <packaging>pom</packaging>
     <name>Che IDE :: Assemblies Tomcat</name>
     <dependencies>
-        <!-- FIXME: spi -->
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-ide-war</artifactId>
@@ -66,12 +65,11 @@
             <artifactId>che-core-ide-templates</artifactId>
             <type>jar</type>
         </dependency>
-        <!-- FIXME: spi -->
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.dashboard</groupId>-->
-        <!--<artifactId>che-dashboard-war</artifactId>-->
-        <!--<type>war</type>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.eclipse.che.dashboard</groupId>
+            <artifactId>che-dashboard-war</artifactId>
+            <type>war</type>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.che.docs</groupId>
             <artifactId>che-docs</artifactId>

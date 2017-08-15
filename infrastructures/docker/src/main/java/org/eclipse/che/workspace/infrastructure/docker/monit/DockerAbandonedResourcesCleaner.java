@@ -20,28 +20,24 @@ import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.network.GetNetworksParams;
-import org.eclipse.che.workspace.infrastructure.docker.ContainerNameGenerator;
+import org.eclipse.che.workspace.infrastructure.docker.container.ContainerNameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Named;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toSet;
 
 /**
  * Job for periodically clean up abandoned docker containers and networks created by CHE.
@@ -65,21 +61,16 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
     private final DockerConnector        dockerConnector;
     private final ContainerNameGenerator nameGenerator;
     private final WorkspaceRuntimes      runtimes;
-    private final Set<String>            additionalNetworks;
 
     @Inject
     public DockerAbandonedResourcesCleaner(WorkspaceManager workspaceManager,
-                                           DockerConnectorProvider dockerConnectorProvider,
+                                           DockerConnector dockerConnector,
                                            ContainerNameGenerator nameGenerator,
-                                           WorkspaceRuntimes workspaceRuntimes,
-                                           @Named("machine.docker.networks") Set<Set<String>> additionalNetworks) {
+                                           WorkspaceRuntimes workspaceRuntimes) {
         this.workspaceManager = workspaceManager;
-        this.dockerConnector = dockerConnectorProvider.get();
+        this.dockerConnector = dockerConnector;
         this.nameGenerator = nameGenerator;
         this.runtimes = workspaceRuntimes;
-        this.additionalNetworks = additionalNetworks.stream()
-                                                    .flatMap(Set::stream)
-                                                    .collect(toSet());
     }
 
     @ScheduleRate(periodParameterName = "che.docker.cleanup_period_min",
@@ -175,8 +166,10 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
 
             for (Network network : customNetworks) {
                 Matcher cheNetworkMatcher = CHE_NETWORK_PATTERN.matcher(network.getName());
-                if (cheNetworkMatcher.matches() && network.getContainers().isEmpty() && !additionalNetworks.contains(network.getName()) &&
+                if (cheNetworkMatcher.matches() &&
+                    network.getContainers().isEmpty() &&
                     !runtimes.hasRuntime(cheNetworkMatcher.group(WORKSPACE_ID_REGEX_GROUP))) {
+
                     try {
                         dockerConnector.removeNetwork(network.getId());
                     } catch (IOException e) {

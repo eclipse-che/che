@@ -24,68 +24,90 @@ import java.util.Objects;
  * @author Alexander Garagatyi
  */
 public class DockerContainerConfig {
-    private String              id;
-    private String              containerName;
+    private DockerBuildContext  build;
+    private String              cgroupParent;
     private List<String>        command;
-    private List<String>        entrypoint;
-    private String              image;
+    private String              containerName;
+    private Long                cpuPeriod;
+    private Long                cpuQuota;
+    private String              cpuSet;
     private List<String>        dependsOn;
+    private List<String>        dns;
+    private List<String>        entrypoint;
     private Map<String, String> environment;
     private List<String>        expose;
-    private List<String>        ports;
+    private List<String>        extraHosts;
+    private String              id;
+    private String              image;
     private Map<String, String> labels;
     private List<String>        links;
+    private Long                memLimit;
+    private Long                memSwapLimit;
+    private List<String>        networks;
+    private List<String>        ports;
     private List<String>        volumes;
     private List<String>        volumesFrom;
-    private Long                memLimit;
-    private DockerBuildContext  build;
-    private List<String>        networks;
     private String              pidMode;
+    private Integer             pidsLimit;
+    private Boolean             privileged;
 
     public DockerContainerConfig() {}
 
     public DockerContainerConfig(DockerContainerConfig container) {
-        id = container.getId();
-        image = container.getImage();
         if (container.getBuild() != null) {
             build = new DockerBuildContext(container.getBuild());
+        }
+        cgroupParent = container.getCgroupParent();
+        if (container.getCommand() != null) {
+            command = new ArrayList<>(container.getCommand());
+        }
+        containerName = container.getContainerName();
+        cpuPeriod = container.getCpuPeriod();
+        cpuQuota = container.getCpuQuota();
+        cpuSet = container.getCpuSet();
+        if (container.getDependsOn() != null) {
+            dependsOn = new ArrayList<>(container.getDependsOn());
+        }
+        if (container.getDns() != null) {
+            dns = new ArrayList<>(container.getDns());
         }
         if (container.getEntrypoint() != null) {
             entrypoint = new ArrayList<>(container.getEntrypoint());
         }
-        if (container.getCommand() != null) {
-            command = new ArrayList<>(container.getCommand());
-        }
         if (container.getEnvironment() != null) {
             environment = new HashMap<>(container.getEnvironment());
-        }
-        if (container.getDependsOn() != null) {
-            dependsOn = new ArrayList<>(container.getDependsOn());
-        }
-        containerName = container.getContainerName();
-        if (container.getLinks() != null) {
-            links = new ArrayList<>(container.getLinks());
-        }
-        if (container.getLabels() != null) {
-            labels = new HashMap<>(container.getLabels());
         }
         if (container.getExpose() != null) {
             expose = new ArrayList<>(container.getExpose());
         }
+        if (container.getExtraHosts() != null) {
+            extraHosts = new ArrayList<>(container.getExtraHosts());
+        }
+        id = container.getId();
+        image = container.getImage();
+        if (container.getLabels() != null) {
+            labels = new HashMap<>(container.getLabels());
+        }
+        if (container.getLinks() != null) {
+            links = new ArrayList<>(container.getLinks());
+        }
+        memLimit = container.getMemLimit();
+        memSwapLimit = container.getMemSwapLimit();
+        if (container.getNetworks() != null) {
+            networks = new ArrayList<>(container.getNetworks());
+        }
         if (container.getPorts() != null) {
             ports = new ArrayList<>(container.getPorts());
-        }
-        if (container.getVolumesFrom() != null) {
-            volumesFrom = new ArrayList<>(container.getVolumesFrom());
         }
         if (container.getVolumes() != null) {
             volumes = new ArrayList<>(container.getVolumes());
         }
-        memLimit = container.getMemLimit();
-        if (container.getNetworks() != null) {
-            networks = new ArrayList<>(container.getNetworks());
+        if (container.getVolumesFrom() != null) {
+            volumesFrom = new ArrayList<>(container.getVolumesFrom());
         }
         pidMode = container.getPidMode();
+        pidsLimit = container.getPidsLimit();
+        privileged = container.getPrivileged();
     }
 
     /**
@@ -95,11 +117,7 @@ public class DockerContainerConfig {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public DockerContainerConfig withId(String id) {
+    public DockerContainerConfig setId(String id) {
         this.id = id;
         return this;
     }
@@ -111,11 +129,7 @@ public class DockerContainerConfig {
         return image;
     }
 
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public DockerContainerConfig withImage(String image) {
+    public DockerContainerConfig setImage(String image) {
         this.image = image;
         return this;
     }
@@ -127,11 +141,10 @@ public class DockerContainerConfig {
         return build;
     }
 
-    public void setBuild(DockerBuildContext build) {
-        this.build = build;
-    }
-
-    public DockerContainerConfig withBuild(DockerBuildContext build) {
+    public DockerContainerConfig setBuild(DockerBuildContext build) {
+        if (build != null) {
+            build = new DockerBuildContext(build);
+        }
         this.build = build;
         return this;
     }
@@ -144,11 +157,10 @@ public class DockerContainerConfig {
         return entrypoint;
     }
 
-    public void setEntrypoint(List<String> entrypoint) {
-        this.entrypoint = entrypoint;
-    }
-
-    public DockerContainerConfig withEntrypoint(List<String> entrypoint) {
+    public DockerContainerConfig setEntrypoint(List<String> entrypoint) {
+        if (entrypoint != null) {
+            entrypoint = new ArrayList<>(entrypoint);
+        }
         this.entrypoint = entrypoint;
         return this;
     }
@@ -161,11 +173,10 @@ public class DockerContainerConfig {
         return command;
     }
 
-    public void setCommand(List<String> command) {
-        this.command = command;
-    }
-
-    public DockerContainerConfig withCommand(List<String> command) {
+    public DockerContainerConfig setCommand(List<String> command) {
+        if (command != null) {
+            command = new ArrayList<>(command);
+        }
         this.command = command;
         return this;
     }
@@ -180,11 +191,10 @@ public class DockerContainerConfig {
         return environment;
     }
 
-    public void setEnvironment(Map<String, String> environment) {
-        this.environment = environment;
-    }
-
-    public DockerContainerConfig withEnvironment(Map<String, String> environment) {
+    public DockerContainerConfig setEnvironment(Map<String, String> environment) {
+        if (environment != null) {
+            environment = new HashMap<>(environment);
+        }
         this.environment = environment;
         return this;
     }
@@ -202,11 +212,10 @@ public class DockerContainerConfig {
         return dependsOn;
     }
 
-    public void setDependsOn(List<String> dependsOn) {
-        this.dependsOn = dependsOn;
-    }
-
-    public DockerContainerConfig withDependsOn(List<String> dependsOn) {
+    public DockerContainerConfig setDependsOn(List<String> dependsOn) {
+        if (dependsOn != null) {
+            dependsOn = new ArrayList<>(dependsOn);
+        }
         this.dependsOn = dependsOn;
         return this;
     }
@@ -218,11 +227,7 @@ public class DockerContainerConfig {
         return containerName;
     }
 
-    public void setContainerName(String containerName) {
-        this.containerName = containerName;
-    }
-
-    public DockerContainerConfig withContainerName(String containerName) {
+    public DockerContainerConfig setContainerName(String containerName) {
         this.containerName = containerName;
         return this;
     }
@@ -244,11 +249,10 @@ public class DockerContainerConfig {
         return links;
     }
 
-    public void setLinks(List<String> links) {
-        this.links = links;
-    }
-
-    public DockerContainerConfig withLinks(List<String> links) {
+    public DockerContainerConfig setLinks(List<String> links) {
+        if (links != null) {
+            links = new ArrayList<>(links);
+        }
         this.links = links;
         return this;
     }
@@ -263,11 +267,10 @@ public class DockerContainerConfig {
         return labels;
     }
 
-    public void setLabels(Map<String, String> labels) {
-        this.labels = labels;
-    }
-
-    public DockerContainerConfig withLabels(Map<String, String> labels) {
+    public DockerContainerConfig setLabels(Map<String, String> labels) {
+        if (labels != null) {
+            labels = new HashMap<>(labels);
+        }
         this.labels = labels;
         return this;
     }
@@ -289,11 +292,10 @@ public class DockerContainerConfig {
         return expose;
     }
 
-    public void setExpose(List<String> expose) {
-        this.expose = expose;
-    }
-
-    public DockerContainerConfig withExpose(List<String> expose) {
+    public DockerContainerConfig setExpose(List<String> expose) {
+        if (expose != null) {
+            expose = new ArrayList<>(expose);
+        }
         this.expose = expose;
         return this;
     }
@@ -319,11 +321,10 @@ public class DockerContainerConfig {
         return ports;
     }
 
-    public void setPorts(List<String> ports) {
-        this.ports = ports;
-    }
-
-    public DockerContainerConfig withPorts(List<String> ports) {
+    public DockerContainerConfig setPorts(List<String> ports) {
+        if (ports != null) {
+            ports = new ArrayList<>(ports);
+        }
         this.ports = ports;
         return this;
     }
@@ -345,11 +346,10 @@ public class DockerContainerConfig {
         return volumes;
     }
 
-    public void setVolumes(List<String> volumes) {
-        this.volumes = volumes;
-    }
-
-    public DockerContainerConfig withVolumes(List<String> volumes) {
+    public DockerContainerConfig setVolumes(List<String> volumes) {
+        if (volumes != null) {
+            volumes = new ArrayList<>(volumes);
+        }
         this.volumes = volumes;
         return this;
     }
@@ -373,11 +373,10 @@ public class DockerContainerConfig {
         return volumesFrom;
     }
 
-    public void setVolumesFrom(List<String> volumesFrom) {
-        this.volumesFrom = volumesFrom;
-    }
-
-    public DockerContainerConfig withVolumesFrom(List<String> volumesFrom) {
+    public DockerContainerConfig setVolumesFrom(List<String> volumesFrom) {
+        if (volumesFrom != null) {
+            volumesFrom = new ArrayList<>(volumesFrom);
+        }
         this.volumesFrom = volumesFrom;
         return this;
     }
@@ -389,11 +388,7 @@ public class DockerContainerConfig {
         return memLimit;
     }
 
-    public void setMemLimit(Long memLimit) {
-        this.memLimit = memLimit;
-    }
-
-    public DockerContainerConfig withMemLimit(Long memLimit) {
+    public DockerContainerConfig setMemLimit(Long memLimit) {
         this.memLimit = memLimit;
         return this;
     }
@@ -408,11 +403,10 @@ public class DockerContainerConfig {
         return networks;
     }
 
-    public void setNetworks(List<String> networks) {
-        this.networks = networks;
-    }
-
-    public DockerContainerConfig withNetworks(List<String> networks) {
+    public DockerContainerConfig setNetworks(List<String> networks) {
+        if (networks != null) {
+            networks = new ArrayList<>(networks);
+        }
         this.networks = networks;
         return this;
     }
@@ -421,12 +415,101 @@ public class DockerContainerConfig {
         return pidMode;
     }
 
-    public void setPidMode(String pidMode) {
+    public DockerContainerConfig setPidMode(String pidMode) {
         this.pidMode = pidMode;
+        return this;
     }
 
-    public DockerContainerConfig withPidMode(String pidMode) {
-        this.pidMode = pidMode;
+    public List<String> getDns() {
+        if (dns == null) {
+            dns = new ArrayList<>();
+        }
+        return dns;
+    }
+
+    public DockerContainerConfig setDns(List<String> dns) {
+        if (dns != null) {
+            dns = new ArrayList<>(dns);
+        }
+        this.dns = dns;
+        return this;
+    }
+
+    public List<String> getExtraHosts() {
+        if (extraHosts == null) {
+            extraHosts = new ArrayList<>();
+        }
+        return extraHosts;
+    }
+
+    public DockerContainerConfig setExtraHosts(List<String> extraHosts) {
+        if (extraHosts != null) {
+            extraHosts = new ArrayList<>(extraHosts);
+        }
+        this.extraHosts = extraHosts;
+        return this;
+    }
+
+    public Long getMemSwapLimit() {
+        return memSwapLimit;
+    }
+
+    public DockerContainerConfig setMemSwapLimit(Long memSwapLimit) {
+        this.memSwapLimit = memSwapLimit;
+        return this;
+    }
+
+    public Integer getPidsLimit() {
+        return pidsLimit;
+    }
+
+    public DockerContainerConfig setPidsLimit(Integer pidsLimit) {
+        this.pidsLimit = pidsLimit;
+        return this;
+    }
+
+    public String getCgroupParent() {
+        return cgroupParent;
+    }
+
+    public DockerContainerConfig setCgroupParent(String cgroupParent) {
+        this.cgroupParent = cgroupParent;
+        return this;
+    }
+
+    public Long getCpuPeriod() {
+        return cpuPeriod;
+    }
+
+    public DockerContainerConfig setCpuPeriod(Long cpuPeriod) {
+        this.cpuPeriod = cpuPeriod;
+        return this;
+    }
+
+    public Long getCpuQuota() {
+        return cpuQuota;
+    }
+
+    public DockerContainerConfig setCpuQuota(Long cpuQuota) {
+        this.cpuQuota = cpuQuota;
+        return this;
+    }
+
+    public String getCpuSet() {
+        return cpuSet;
+    }
+
+    public DockerContainerConfig setCpuSet(String cpuSet) {
+        this.cpuSet = cpuSet;
+        return this;
+    }
+
+    public Boolean getPrivileged() {
+        return privileged;
+    }
+
+    public DockerContainerConfig setPrivileged(Boolean privileged) {
+        this.privileged = privileged;
         return this;
     }
 
@@ -435,52 +518,73 @@ public class DockerContainerConfig {
         if (this == o) return true;
         if (!(o instanceof DockerContainerConfig)) return false;
         DockerContainerConfig that = (DockerContainerConfig)o;
-        return Objects.equals(getId(), that.getId()) &&
-               Objects.equals(getContainerName(), that.getContainerName()) &&
+        return Objects.equals(getBuild(), that.getBuild()) &&
+               Objects.equals(getCgroupParent(), that.getCgroupParent()) &&
                Objects.equals(getCommand(), that.getCommand()) &&
-               Objects.equals(getEntrypoint(), that.getEntrypoint()) &&
-               Objects.equals(getImage(), that.getImage()) &&
+               Objects.equals(getContainerName(), that.getContainerName()) &&
+               Objects.equals(getCpuPeriod(), that.getCpuPeriod()) &&
+               Objects.equals(getCpuQuota(), that.getCpuQuota()) &&
+               Objects.equals(getCpuSet(), that.getCpuSet()) &&
                Objects.equals(getDependsOn(), that.getDependsOn()) &&
+               Objects.equals(getDns(), that.getDns()) &&
+               Objects.equals(getEntrypoint(), that.getEntrypoint()) &&
                Objects.equals(getEnvironment(), that.getEnvironment()) &&
                Objects.equals(getExpose(), that.getExpose()) &&
-               Objects.equals(getPorts(), that.getPorts()) &&
+               Objects.equals(getExtraHosts(), that.getExtraHosts()) &&
+               Objects.equals(getId(), that.getId()) &&
+               Objects.equals(getImage(), that.getImage()) &&
                Objects.equals(getLabels(), that.getLabels()) &&
                Objects.equals(getLinks(), that.getLinks()) &&
+               Objects.equals(getMemLimit(), that.getMemLimit()) &&
+               Objects.equals(getMemSwapLimit(), that.getMemSwapLimit()) &&
+               Objects.equals(getNetworks(), that.getNetworks()) &&
+               Objects.equals(getPorts(), that.getPorts()) &&
                Objects.equals(getVolumes(), that.getVolumes()) &&
                Objects.equals(getVolumesFrom(), that.getVolumesFrom()) &&
-               Objects.equals(getMemLimit(), that.getMemLimit()) &&
-               Objects.equals(getBuild(), that.getBuild()) &&
-               Objects.equals(getNetworks(), that.getNetworks()) &&
-               Objects.equals(getPidMode(), that.getPidMode());
+               Objects.equals(getPidMode(), that.getPidMode()) &&
+               Objects.equals(getPidsLimit(), that.getPidsLimit()) &&
+               Objects.equals(getPrivileged(), that.getPrivileged());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getContainerName(), getCommand(), getEntrypoint(), getImage(), getDependsOn(),
-                            getEnvironment(), getExpose(), getPorts(), getLabels(), getLinks(), getVolumes(),
-                            getVolumesFrom(), getMemLimit(), getBuild(), getNetworks(), getPidMode());
+        return Objects
+                .hash(getBuild(), getCgroupParent(), getCommand(), getContainerName(), getCpuPeriod(), getCpuQuota(),
+                      getCpuSet(), getDependsOn(), getDns(), getEntrypoint(), getEnvironment(), getExpose(),
+                      getExtraHosts(), getId(), getImage(), getLabels(), getLinks(), getMemLimit(), getMemSwapLimit(),
+                      getNetworks(), getPorts(), getVolumes(), getVolumesFrom(), getPidMode(), getPidsLimit(),
+                      getPrivileged());
     }
 
     @Override
     public String toString() {
         return "DockerContainerConfig{" +
-               "id='" + id + '\'' +
-               ", containerName='" + containerName + '\'' +
+               "build=" + build +
+               ", cgroupParent='" + cgroupParent + '\'' +
                ", command=" + command +
-               ", entrypoint=" + entrypoint +
-               ", image='" + image + '\'' +
+               ", containerName='" + containerName + '\'' +
+               ", cpuPeriod=" + cpuPeriod +
+               ", cpuQuota=" + cpuQuota +
+               ", cpuSet='" + cpuSet + '\'' +
                ", dependsOn=" + dependsOn +
+               ", dns=" + dns +
+               ", entrypoint=" + entrypoint +
                ", environment=" + environment +
                ", expose=" + expose +
-               ", ports=" + ports +
+               ", extraHosts=" + extraHosts +
+               ", id='" + id + '\'' +
+               ", image='" + image + '\'' +
                ", labels=" + labels +
                ", links=" + links +
+               ", memLimit=" + memLimit +
+               ", memSwapLimit=" + memSwapLimit +
+               ", networks=" + networks +
+               ", ports=" + ports +
                ", volumes=" + volumes +
                ", volumesFrom=" + volumesFrom +
-               ", memLimit=" + memLimit +
-               ", build=" + build +
-               ", networks=" + networks +
                ", pidMode='" + pidMode + '\'' +
+               ", pidsLimit=" + pidsLimit +
+               ", privileged=" + privileged +
                '}';
     }
 }

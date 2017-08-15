@@ -43,7 +43,6 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
     private static final String BOOTSTRAPPER_FILE     = "bootstrapper";
     private static final String CONFIG_FILE           = "config.json";
 
-    private final String              machineName;
     private final RuntimeIdentity     runtimeIdentity;
     private final List<InstallerImpl> installers;
     private final int                 serverCheckPeriodSeconds;
@@ -52,8 +51,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
     private final String              bootstrapperBinaryUrl;
 
     @Inject
-    public OpenShiftBootstrapper(@Assisted String machineName,
-                                 @Assisted RuntimeIdentity runtimeIdentity,
+    public OpenShiftBootstrapper(@Assisted RuntimeIdentity runtimeIdentity,
                                  @Assisted List<InstallerImpl> installers,
                                  @Assisted OpenShiftMachine openShiftMachine,
                                  @Named("che.infra.openshift.che_server_websocket_endpoint_base") String websocketBaseEndpoint,
@@ -62,9 +60,8 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
                                  @Named("che.infra.openshift.bootstrapper.installer_timeout_sec") int installerTimeoutSeconds,
                                  @Named("che.infra.openshift.bootstrapper.server_check_period_sec") int serverCheckPeriodSeconds,
                                  EventService eventService) {
-        super(machineName, runtimeIdentity, bootstrappingTimeoutMinutes, websocketBaseEndpoint, eventService);
+        super(openShiftMachine.getName(), runtimeIdentity, bootstrappingTimeoutMinutes, websocketBaseEndpoint, eventService);
         this.bootstrapperBinaryUrl = bootstrapperBinaryUrl;
-        this.machineName = machineName;
         this.runtimeIdentity = runtimeIdentity;
         this.installers = installers;
         this.serverCheckPeriodSeconds = serverCheckPeriodSeconds;
@@ -78,8 +75,9 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
         injectBootstrapper();
 
         openShiftMachine.exec("sh", "-c", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE +
-                                          " -machine-name " + machineName +
-                                          " -runtime-id " + String.format("%s:%s:%s", runtimeIdentity.getWorkspaceId(),
+                                          " -machine-name " + openShiftMachine.getName() +
+                                          " -runtime-id " + String.format("%s:%s:%s",
+                                                                          runtimeIdentity.getWorkspaceId(),
                                                                           runtimeIdentity.getEnvName(),
                                                                           runtimeIdentity.getOwner()) +
                                           " -push-endpoint " + installerWebsocketEndpoint +

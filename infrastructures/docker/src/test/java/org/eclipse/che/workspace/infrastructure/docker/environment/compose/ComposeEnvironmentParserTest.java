@@ -164,9 +164,9 @@ public class ComposeEnvironmentParserTest {
 
         DockerContainerConfig cheContainer1 = new DockerContainerConfig();
         String buildContext = "http://host.com:port/location/of/dockerfile/or/git/repo/";
-        cheContainer1.setBuild(new DockerBuildContext().withContext(buildContext)
-                                                       .withDockerfilePath("dockerfile/Dockerfile_alternate")
-                                                       .withArgs(emptyMap()));
+        cheContainer1.setBuild(new DockerBuildContext().setContext(buildContext)
+                                                       .setDockerfilePath("dockerfile/Dockerfile_alternate")
+                                                       .setArgs(emptyMap()));
         cheContainer1.setCommand(asList("tail", "-f", "/dev/null"));
         cheContainer1.setContainerName("some_name");
         cheContainer1.setDependsOn(asList("machine2", "machine3"));

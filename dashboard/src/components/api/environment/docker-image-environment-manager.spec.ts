@@ -34,7 +34,7 @@ describe('DockerImageEnvironmentManager', () => {
               'protocol': 'http',
               'port': '10240'
             }
-          }, 'agents': ['ws-agent', 'org.eclipse.che.ws-agent'], 'attributes': {'memoryLimitBytes': '16642998272'}
+          }, 'installers': ['ws-agent', 'org.eclipse.che.ws-agent'], 'attributes': {'memoryLimitBytes': '16642998272'}
         }
       }, 'recipe': {'location': 'codenvy/ubuntu_jdk8', 'type': 'dockerimage'}
     };

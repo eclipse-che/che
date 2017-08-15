@@ -352,7 +352,7 @@ export class CheWorkspace {
     }
 
     let devMachine = this.lodash.find(defaultEnvironment.machines, (machine: any) => {
-      return machine.agents.indexOf('org.eclipse.che.ws-agent') >= 0;
+      return machine.installers.indexOf('org.eclipse.che.ws-agent') >= 0;
     });
 
     // check dev machine is provided and add if there is no:
@@ -575,26 +575,17 @@ export class CheWorkspace {
       this.subscribedWorkspacesIds.push(workspaceId);
 
       bus.subscribe('workspace:' + workspaceId, (message: any) => {
+        this.getWorkspaceById(workspaceId).status = message.status;
 
-        // filter workspace events, which really indicate the status change:
-        if (this.workspaceStatuses.indexOf(message.eventType) >= 0) {
-          this.getWorkspaceById(workspaceId).status = message.eventType;
-        } else if (message.eventType === 'SNAPSHOT_CREATING') {
-          this.getWorkspaceById(workspaceId).status = 'SNAPSHOTTING';
-        } else if (message.eventType === 'SNAPSHOT_CREATED') {
-          // snapshot can be created for RUNNING workspace only.
-          this.getWorkspaceById(workspaceId).status = 'RUNNING';
-        }
-
-        if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][message.eventType]) {
+        if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][message.status]) {
           return;
         }
 
-        this.statusDefers[workspaceId][message.eventType].forEach((defer: any) => {
+        this.statusDefers[workspaceId][message.status].forEach((defer: any) => {
           defer.resolve(message);
         });
 
-        this.statusDefers[workspaceId][message.eventType].length = 0;
+        this.statusDefers[workspaceId][message.status].length = 0;
       });
     }
   }

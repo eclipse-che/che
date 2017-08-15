@@ -22,6 +22,8 @@ import java.util.Map;
  * @author Alexander Garagatyi
  */
 public class Utils {
+    public static final String WSAGENT_INSTALLER = "org.eclipse.che.ws-agent";
+
     private Utils() {}
 
     /**
@@ -33,10 +35,11 @@ public class Utils {
      */
     public static String getDevMachineName(Environment envConfig) {
         for (Map.Entry<String, ? extends MachineConfig> entry : envConfig.getMachines().entrySet()) {
+            // TODO should we use server ref instead of installers?
             List<String> installers = entry.getValue().getInstallers();
             if (installers != null) {
                 for (String installerKey : installers) {
-                    if (installerKey.equals("org.eclipse.che.ws-agent") || installerKey.startsWith("org.eclipse.che.ws-agent:")) {
+                    if (installerKey.equals(WSAGENT_INSTALLER) || installerKey.startsWith(WSAGENT_INSTALLER + ":")) {
                         return entry.getKey();
                     }
                 }

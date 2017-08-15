@@ -18,7 +18,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
-import org.eclipse.che.workspace.infrastructure.docker.strategy.ServersMapper;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ServersMapper;
 
 import javax.inject.Inject;
 import javax.inject.Named;

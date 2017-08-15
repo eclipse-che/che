@@ -16,7 +16,6 @@ import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +40,12 @@ public class KeysInjector {
 
     @Inject
     public KeysInjector(EventService eventService,
-                        DockerConnectorProvider provider,
+                        DockerConnector dockerConnector,
                         SshManager sshManager
 //                        CheEnvironmentEngine environmentEngine
     ) {
         this.eventService = eventService;
-        this.docker = provider.get();
+        this.docker = dockerConnector;
         this.sshManager = sshManager;
 //        this.environmentEngine = environmentEngine;
     }
