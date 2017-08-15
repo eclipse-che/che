@@ -46,15 +46,18 @@ import static java.lang.String.format;
 public class LocalInstallerRegistry implements InstallerRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(LocalInstallerRegistry.class);
 
-    private final InstallerDao installerDao;
+    private final InstallerDao       installerDao;
+    private final InstallerValidator installerValidator;
 
     /**
      * Primary registry initialization with shipped installers.
      */
     @Inject
     public LocalInstallerRegistry(Set<Installer> installers,
-                                  InstallerDao installerDao) throws InstallerException {
+                                  InstallerDao installerDao,
+                                  InstallerValidator installerValidator) throws InstallerException {
         this.installerDao = installerDao;
+        this.installerValidator = installerValidator;
 
         for (Installer i : installers) {
             doInit(installerDao, i);
@@ -63,12 +66,7 @@ public class LocalInstallerRegistry implements InstallerRegistry {
 
     private void doInit(InstallerDao installerDao, Installer i) throws InstallerException {
         String installerKey = InstallerFqn.of(i).toKey();
-
-        try {
-            Version.validate(i.getVersion());
-        } catch (IllegalArgumentException e) {
-            throw new InstallerException(format("Illegal version format '%s' for installer '%s'", i.getVersion(), installerKey));
-        }
+        installerValidator.validate(i);
 
         try {
             installerDao.create(new InstallerImpl(i));
@@ -80,28 +78,13 @@ public class LocalInstallerRegistry implements InstallerRegistry {
 
     @Override
     public void add(Installer installer) throws InstallerException {
-        try {
-            Version.validate(installer.getVersion());
-        } catch (IllegalArgumentException e) {
-            throw new InstallerException(format("Illegal version format '%s' for installer '%s'",
-                                                installer.getVersion(),
-                                                InstallerFqn.of(installer).toKey()));
-        }
-
-
+        installerValidator.validate(installer);
         installerDao.create(new InstallerImpl(installer));
     }
 
     @Override
     public void update(Installer installer) throws InstallerException {
-        try {
-            Version.validate(installer.getVersion());
-        } catch (IllegalArgumentException e) {
-            throw new InstallerException(format("Illegal version format '%s' for installer '%s'",
-                                                installer.getVersion(),
-                                                InstallerFqn.of(installer).toKey()));
-        }
-
+        installerValidator.validate(installer);
         installerDao.update(new InstallerImpl(installer));
     }
 

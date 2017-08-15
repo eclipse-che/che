@@ -61,7 +61,8 @@ public class RemoteInstallerRegistryTest {
 
         LocalInstallerRegistry localInstallerRegistry =
                 new LocalInstallerRegistry(Collections.singleton(installer),
-                                           new MapBasedInstallerDao());
+                                           new MapBasedInstallerDao(),
+                                           new InstallerValidator());
 
         registryService = new InstallerRegistryService(localInstallerRegistry);
 

@@ -47,13 +47,15 @@ public class LocalInstallerRegistryTest {
     private LocalInstallerRegistry registry;
 
     @Mock
-    private Installer installer1v1;
+    private Installer          installer1v1;
     @Mock
-    private Installer installer1v2;
+    private Installer          installer1v2;
     @Mock
-    private Installer installer2v1;
+    private Installer          installer2v1;
     @Mock
-    private Installer installer3v1;
+    private Installer          installer3v1;
+    @Mock
+    private InstallerValidator installerValidator;
 
     private MapBasedInstallerDao installerDao;
 
@@ -78,7 +80,8 @@ public class LocalInstallerRegistryTest {
                                                               installer1v2,
                                                               installer2v1,
                                                               installer3v1),
-                                              installerDao);
+                                              installerDao,
+                                              installerValidator);
     }
 
     @Test(dataProvider = "versions")
