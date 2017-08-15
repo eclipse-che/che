@@ -110,7 +110,7 @@ public interface InstallerRegistry {
     /**
      * Traverses dependencies of all listed installers and
      * returns properly ordered list of non-duplicated installer descriptions.
-     *
+     * </p>
      * If any of {@code installerKeys} contains only id then the latest version of this installer
      * will be used to fetch dependencies.
      *

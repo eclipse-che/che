@@ -8,11 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api;
+package org.eclipse.che.api.workspace.shared;
 
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 
 import java.util.List;
 import java.util.Map;
@@ -35,8 +34,12 @@ public class Utils {
     public static String getDevMachineName(Environment envConfig) {
         for (Map.Entry<String, ? extends MachineConfig> entry : envConfig.getMachines().entrySet()) {
             List<String> installers = entry.getValue().getInstallers();
-            if (InstallerFqn.idInKeyList("org.eclipse.che.ws-agent", installers)) {
-                return entry.getKey();
+            if (installers != null) {
+                for (String installerKey : installers) {
+                    if (installerKey.equals("org.eclipse.che.ws-agent") || installerKey.startsWith("org.eclipse.che.ws-agent:")) {
+                        return entry.getKey();
+                    }
+                }
             }
         }
         return null;

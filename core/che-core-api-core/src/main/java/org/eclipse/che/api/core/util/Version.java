@@ -11,7 +11,6 @@
 package org.eclipse.che.api.core.util;
 
 import javax.validation.constraints.NotNull;
-import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -235,12 +234,5 @@ public class Version implements Comparable<Version> {
                + (rc ? RELEASE_CANDIDATE_SUFFIX : "")
                + (snapshot ? SNAPSHOT_SUFFIX : "");
 
-    }
-
-    public static class ReverseOrderComparator implements Comparator<Version> {
-        @Override
-        public int compare(Version v1, Version v2) {
-            return v2.compareTo(v1);
-        }
     }
 }

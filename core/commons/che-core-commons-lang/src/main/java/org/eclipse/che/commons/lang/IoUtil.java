@@ -148,6 +148,8 @@ public class IoUtil {
      *
      * @param parent
      *      the root path represented in {@link URI} format
+     * @param consumer
+     *      consumer for children resources
      * @throws java.io.IOException
      *      if any i/o error occur
      * @throws ProviderNotFoundException
@@ -156,7 +158,7 @@ public class IoUtil {
     public static void listResources(URI parent, Consumer<Path> consumer) throws IOException {
         FileSystem fileSystem = null;
         try {
-            if (!parent.getScheme().equals("file")) {
+            if (!"file".equals(parent.getScheme())) {
                 try {
                     fileSystem = FileSystems.newFileSystem(parent, Collections.emptyMap());
                 } catch (FileSystemAlreadyExistsException ignore) {

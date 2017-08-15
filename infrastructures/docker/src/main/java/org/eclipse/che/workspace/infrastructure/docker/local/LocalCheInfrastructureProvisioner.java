@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.Utils.getDevMachineName;
+import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
 
 /**
  * Infrastructure provisioner that uses volumes for workspaces projects storing because it relies on local Che usage.
