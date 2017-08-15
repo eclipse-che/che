@@ -90,7 +90,12 @@ public class FontAwesome {
     /**
      * http://fortawesome.github.io/Font-Awesome/icon/plus-circle/
      */
-    public static final String PLUS = "<i class=\"fa fa-plus-circle\"></i>";
+    public static final String PLUS_CIRCLE = "<i class=\"fa fa-plus-circle\"></i>";
+
+    /**
+     * http://fortawesome.github.io/Font-Awesome/icon/plus/
+     */
+    public static final String PLUS = "<i class=\"fa fa-plus\"></i>";
 
     /**
      * http://fortawesome.github.io/Font-Awesome/icon/refresh/

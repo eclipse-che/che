@@ -74,4 +74,5 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
         /** Called when the {@code widget} is going to be removed from the panel. */
         void onWidgetRemoving(IsWidget widget, SubPanel.RemoveCallback removeCallback);
     }
+
 }

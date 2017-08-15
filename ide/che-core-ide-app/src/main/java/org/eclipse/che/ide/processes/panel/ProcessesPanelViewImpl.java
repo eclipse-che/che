@@ -498,6 +498,12 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
                 ((RequiresResize)widget).onResize();
             }
         }
+
+        for (SubPanel panel : widget2Panels.values()) {
+            if (panel.getView() instanceof RequiresResize) {
+                ((RequiresResize)panel.getView()).onResize();
+            }
+        }
     }
 
     @Override
