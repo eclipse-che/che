@@ -226,7 +226,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     @Override
     public void onClose(final String newContent) {
-        if (!isDirty(newContent)) {
+        if (!isSaveNeeded(newContent)) {
             view.hide();
             return;
         }
@@ -246,7 +246,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     public void onSaveChangesClicked() {
         if (compareWithLatest) {
             view.getEditableContent(content -> {
-                if (isDirty(content)) {
+                if (isSaveNeeded(content)) {
                     saveContent(content);
                 }
             });
@@ -256,7 +256,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     @Override
     public void onNextDiffClicked() {
         view.getEditableContent(content -> {
-            if (isDirty(content)) {
+            if (isSaveNeeded(content)) {
                 saveContent(content);
             }
 
@@ -268,7 +268,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     @Override
     public void onPreviousDiffClicked() {
         view.getEditableContent(content -> {
-            if (isDirty(content)) {
+            if (isSaveNeeded(content)) {
                 saveContent(content);
             }
 
@@ -306,7 +306,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     }
 
     /** Returns true if is required to save new content. */
-    private boolean isDirty(final String newContent) {
+    private boolean isSaveNeeded(final String newContent) {
         return compareWithLatest && comparedFile != null && this.localContent != null && !newContent.equals(localContent);
     }
 
