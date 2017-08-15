@@ -12,7 +12,8 @@
 
 -->
 <Context allowCasualMultipartParsing="true" sessionCookiePath="/api">
-    <ResourceLink global="jdbc/che"
-                  name="jdbc/che"
-                  type="javax.sql.DataSource"/>
+
+    <Resource name="jdbc/che" auth="Container"
+              type="javax.sql.DataSource"
+              factory="org.eclipse.che.core.db.postgresql.PostgreSQLJndiDataSourceFactory"/>
 </Context>

@@ -68,6 +68,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-dbcp</artifactId>
+                <version>${org.apache.tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
                 <artifactId>tomcat-servlet-api</artifactId>
                 <version>${org.apache.tomcat.version}</version>
             </dependency>
