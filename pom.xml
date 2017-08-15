@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2017 Codenvy, S.A.
+    Copyright (c) 2012-2017 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.16.0-SNAPSHOT</version>
+        <version>5.17.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>5.16.0-SNAPSHOT</version>
+    <version>5.17.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -43,9 +43,9 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.docs.version>5.16.0-SNAPSHOT</che.docs.version>
-        <che.lib.version>5.16.0-SNAPSHOT</che.lib.version>
-        <che.version>5.16.0-SNAPSHOT</che.version>
+        <che.docs.version>5.17.0-SNAPSHOT</che.docs.version>
+        <che.lib.version>5.17.0-SNAPSHOT</che.lib.version>
+        <che.version>5.17.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -168,11 +168,6 @@
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>unison-agent</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>activity</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -571,6 +566,26 @@
                 <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>org-eclipse-jdt-core-repack</artifactId>
                 <version>${che.lib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-activity-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-activity-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-activity-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-activity-wsmaster</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
