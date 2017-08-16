@@ -10,17 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.search.presentation;
 
+import elemental.html.SpanElement;
+
+import com.google.gwt.dom.client.Element;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.project.shared.SearchOccurrence;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
+import org.eclipse.che.ide.util.dom.Elements;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -39,16 +44,19 @@ public class FoundItemNode extends AbstractTreeNode implements HasPresentation {
     private NodePresentation      nodePresentation;
     private FindResultNodeFactory nodeFactory;
     private PromiseProvider       promiseProvider;
-    private SearchResult          searchResult;
+    private Resources resources;
+    private SearchResult searchResult;
     private String                request;
 
     @Inject
     public FoundItemNode(FindResultNodeFactory nodeFactory,
                          PromiseProvider promiseProvider,
+                         Resources resources,
                          @Assisted SearchResult searchResult,
                          @Assisted String request) {
         this.nodeFactory = nodeFactory;
         this.promiseProvider = promiseProvider;
+        this.resources = resources;
         this.searchResult = searchResult;
         this.request = request;
     }
@@ -82,7 +90,7 @@ public class FoundItemNode extends AbstractTreeNode implements HasPresentation {
     /** {@inheritDoc} */
     @Override
     public void updatePresentation(@NotNull NodePresentation presentation) {
-        StringBuilder resultTitle = new StringBuilder(searchResult.getPath());
+        StringBuilder resultTitle = new StringBuilder();
         resultTitle.append(" (");
         resultTitle.append(searchResult.getOccurrences().size());
         resultTitle.append(" occurrence");
@@ -94,6 +102,10 @@ public class FoundItemNode extends AbstractTreeNode implements HasPresentation {
         resultTitle.append('\'');
         resultTitle.append(" found)");
         presentation.setPresentableText(resultTitle.toString());
+        SpanElement spanElement = Elements.createSpanElement(resources.coreCss().foundItem());
+        spanElement.setId(searchResult.getPath());
+        spanElement.setInnerText(searchResult.getPath());
+        presentation.setUserElement((Element)spanElement);
     }
 
     @Override

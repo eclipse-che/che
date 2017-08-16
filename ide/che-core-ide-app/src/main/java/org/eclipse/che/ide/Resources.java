@@ -219,6 +219,9 @@ public interface Resources extends Tree.Resources,
         @ClassName("found-highlight")
         String foundPhraseHighlight();
 
+        @ClassName("found-item")
+        String foundItem();
+
         @ClassName("search-match")
         String searchMatch();
     }
