@@ -80,7 +80,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      * Show compare window for given set of files between given revision and HEAD.
      *
      * @param alteredFiles
-     *         ordered touched files
+     *         ordered changed files
      * @param currentFile
      *         file which will be shown first, if null then the first from the list will be shown
      * @param revision
@@ -102,7 +102,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      * Shows compare window for given set of files between specified revisions.
      *
      * @param alteredFiles
-     *         ordered touched files
+     *         ordered changed files
      * @param currentFile
      *         file which will be shown first, if null then the first from the list will be shown
      * @param revisionA
