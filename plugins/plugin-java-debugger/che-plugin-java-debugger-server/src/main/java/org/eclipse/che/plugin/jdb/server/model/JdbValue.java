@@ -17,6 +17,7 @@ import com.sun.jdi.Value;
 
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -32,10 +33,12 @@ import java.util.stream.Collectors;
 public class JdbValue implements SimpleValue {
     private final Value                           jdiValue;
     private final AtomicReference<List<Variable>> variables;
+    private final VariablePath                    variablePath;
 
-    public JdbValue(Value jdiValue) {
+    public JdbValue(Value jdiValue, VariablePath variablePath) {
         this.jdiValue = jdiValue;
         this.variables = new AtomicReference<>();
+        this.variablePath = variablePath;
     }
 
     @Override
@@ -55,14 +58,14 @@ public class JdbValue implements SimpleValue {
 
                         ArrayReference array = (ArrayReference)jdiValue;
                         for (int i = 0; i < array.length(); i++) {
-                            variables.get().add(new JdbArrayElement(array.getValue(i), i));
+                            variables.get().add(new JdbArrayElement(array.getValue(i), i, variablePath));
                         }
                     } else {
                         ObjectReference object = (ObjectReference)jdiValue;
                         variables.set(object.referenceType()
                                             .allFields()
                                             .stream()
-                                            .map(f -> new JdbField(f, object))
+                                            .map(f -> new JdbField(f, object, variablePath))
                                             .sorted(new JdbFieldComparator())
                                             .collect(Collectors.toList()));
                     }

@@ -174,6 +174,10 @@ public class DebuggerService {
     public StackFrameDumpDto getStackFrameDump(@PathParam("id") String sessionId,
                                                @QueryParam("threadId") @DefaultValue("-1") long threadId,
                                                @QueryParam("frameIndex") @DefaultValue("-1") int frameIndex) throws DebuggerException {
+        if (threadId == -1) {
+            return asDto(debuggerManager.getDebugger(sessionId).dumpStackFrame());
+
+        }
         return asDto(debuggerManager.getDebugger(sessionId).getStackFrameDump(threadId, frameIndex));
     }
 
@@ -205,6 +209,10 @@ public class DebuggerService {
         }
 
         VariablePath variablePath = new VariablePathImpl(path);
+        if (threadId == -1) {
+            return asDto(debuggerManager.getDebugger(sessionId).getValue(variablePath));
+        }
+
         return asDto(debuggerManager.getDebugger(sessionId).getValue(variablePath, threadId, frameIndex));
     }
 
@@ -215,7 +223,11 @@ public class DebuggerService {
                          @QueryParam("threadId") @DefaultValue("-1") long threadId,
                          @QueryParam("frameIndex") @DefaultValue("-1") int frameIndex,
                          VariableDto variable) throws DebuggerException {
-        debuggerManager.getDebugger(sessionId).setValue(variable, threadId, frameIndex);
+        if (threadId == -1) {
+            debuggerManager.getDebugger(sessionId).setValue(variable);
+        } else {
+            debuggerManager.getDebugger(sessionId).setValue(variable, threadId, frameIndex);
+        }
     }
 
     @GET
@@ -225,6 +237,10 @@ public class DebuggerService {
                              @QueryParam("threadId") @DefaultValue("-1") long threadId,
                              @QueryParam("frameIndex") @DefaultValue("-1") int frameIndex,
                              @QueryParam("expression") String expression) throws DebuggerException {
+        if (threadId == -1) {
+            return debuggerManager.getDebugger(sessionId).evaluate(expression);
+        }
+
         return debuggerManager.getDebugger(sessionId).evaluate(expression, threadId, frameIndex);
     }
 }

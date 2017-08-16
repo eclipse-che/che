@@ -32,7 +32,7 @@ public class JdbVariable implements Variable {
         Value jdiValue = jdiStackFrame.getValue(jdiVariable);
 
         this.jdiVariable = jdiVariable;
-        this.value = jdiValue == null ? new JdbNullValue() : new JdbValue(jdiValue);
+        this.value = jdiValue == null ? new JdbNullValue() : new JdbValue(jdiValue, getVariablePath());
     }
 
     public JdbVariable(SimpleValue value, LocalVariable jdiVariable) {

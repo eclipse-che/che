@@ -11,18 +11,22 @@
 package org.eclipse.che.plugin.jdb.server.util;
 
 import com.google.common.collect.ImmutableMap;
+import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.jdb.server.JavaDebugger;
 import org.eclipse.che.plugin.jdb.server.JavaDebuggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 
 import static java.lang.System.getProperty;
@@ -80,5 +84,15 @@ public class JavaDebuggerUtils {
         } catch (Exception ignored) {
             // quietly ignore exception, if VM has been already terminated
         }
+    }
+
+    /**
+     * Iterates threads until main is found and returns its id.
+     * @see ThreadReference#uniqueID()
+     */
+    public static long findMainThreadId(JavaDebugger javaDebugger) throws DebuggerException {
+        Optional<ThreadDump> main = javaDebugger.getThreadDumps().stream().filter(t -> t.getName().equals("main")).findAny();
+        main.orElseThrow(() -> new DebuggerException("Main thread not found"));
+        return main.get().getId();
     }
 }

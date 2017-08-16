@@ -18,6 +18,7 @@ import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 
 import java.util.Collections;
 import java.util.List;
@@ -68,14 +69,14 @@ public class JdbStackFrame implements StackFrameDump {
                                                     .declaringType()
                                                     .allFields()
                                                     .stream()
-                                                    .map(f -> new JdbField(f, type))
+                                                    .map(f -> new JdbField(f, type, new VariablePathImpl(Collections.emptyList())))
                                                     .sorted(new JdbFieldComparator())
                                                     .collect(Collectors.toList()));
                         } else {
                             fields.set(object.referenceType()
                                              .allFields()
                                              .stream()
-                                             .map(f -> new JdbField(f, object))
+                                             .map(f -> new JdbField(f, object, new VariablePathImpl(Collections.emptyList())))
                                              .sorted(new JdbFieldComparator())
                                              .collect(Collectors.toList()));
                         }

@@ -149,10 +149,6 @@ public interface Debugger {
      *      if any error occur
      */
     default SimpleValue getValue(VariablePath variablePath, long threadId, int frameIndex) throws DebuggerException {
-        if (threadId == -1 || frameIndex == -1) {
-            return getValue(variablePath);
-        }
-
         throw new DebuggerException("Unsupported operation for current debugger implementation.");
     }
 
@@ -183,11 +179,6 @@ public interface Debugger {
      *      if any error occur
      */
     default void setValue(Variable variable, long threadId, int frameIndex) throws DebuggerException {
-        if (threadId == -1 || frameIndex == -1) {
-            setValue(variable);
-            return;
-        }
-
         throw new DebuggerException("Unsupported operation for current debugger implementation.");
     }
 
@@ -220,10 +211,6 @@ public interface Debugger {
      *      if any error occur
      */
     default String evaluate(String expression, long threadId, int frameIndex) throws DebuggerException {
-        if (threadId == -1 || frameIndex == -1) {
-            return evaluate(expression);
-        }
-
         throw new DebuggerException("Unsupported operation for current debugger implementation.");
     }
 
@@ -292,10 +279,6 @@ public interface Debugger {
      *      if any error occur
      */
     default StackFrameDump getStackFrameDump(long threadId, int frameIndex) throws DebuggerException {
-        if (threadId == -1 || frameIndex == -1) {
-            return dumpStackFrame();
-        }
-
         throw new DebuggerException("Unsupported operation for current debugger implementation.");
     }
 

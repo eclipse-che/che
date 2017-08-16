@@ -18,20 +18,25 @@ import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * @author andrew00x
  * @author Anatolii Bazko
  */
 public class JdbArrayElement implements Variable {
-    private final Value       jdiValue;
-    private final SimpleValue value;
-    private final String      name;
-    private final String      type;
+    private final Value        jdiValue;
+    private final SimpleValue  value;
+    private final String       name;
+    private final String       type;
+    private final VariablePath parentPath;
 
-    public JdbArrayElement(Value jdiValue, int index) {
+    public JdbArrayElement(Value jdiValue, int index, VariablePath parentPath) {
         this.jdiValue = jdiValue;
         this.name = "[" + index + "]";
-        this.value = jdiValue == null ? new JdbNullValue() : new JdbValue(jdiValue);
+        this.parentPath = parentPath;
+        this.value = jdiValue == null ? new JdbNullValue() : new JdbValue(jdiValue, getVariablePath());
         this.type = jdiValue == null ? "null" : jdiValue.type().name();
     }
 
@@ -57,6 +62,8 @@ public class JdbArrayElement implements Variable {
 
     @Override
     public VariablePath getVariablePath() {
-        return new VariablePathImpl(getName());
+        List<String> pathEntries = new LinkedList<>(parentPath.getPath());
+        pathEntries.add(getName());
+        return new VariablePathImpl(pathEntries);
     }
 }
