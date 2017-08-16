@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client;
 
@@ -1615,6 +1615,19 @@ public class DockerConnectorTest {
         List<ContainerListEntry> containers = dockerConnector.parseResponseStreamAndClose(new ByteArrayInputStream(response.getBytes()),
                                                                                           new TypeToken<List<ContainerListEntry>>() {});
         assertEquals(containers.size(), 0);
+    }
+
+    @Test(expectedExceptions = IOException.class,
+          expectedExceptionsMessageRegExp = "Internal server error. Unexpected response body received from Docker.")
+    public void shouldThrowIOExceptionWhenParseEmptyResponseStringByClass() throws IOException {
+        dockerConnector.parseResponseStreamAndClose(new ByteArrayInputStream("".getBytes()), Version.class);
+    }
+
+    @Test(expectedExceptions = IOException.class,
+          expectedExceptionsMessageRegExp = "Internal server error. Unexpected response body received from Docker.")
+    public void shouldThrowIOExceptionWhenParseEmptyResponseStringByTypeToken() throws IOException {
+        dockerConnector.parseResponseStreamAndClose(new ByteArrayInputStream("".getBytes()),
+                                                    new TypeToken<List<ContainerListEntry>>() {});
     }
 
     @Test

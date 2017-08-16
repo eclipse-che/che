@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.maven.server;
 
@@ -388,6 +388,9 @@ public class MavenModelUtil {
         convertToMavenBuildBase(modelBuild, result.getBuild(), projectDir);
         result.getBuild().setSourceDirectory(relativize(projectDir, modelBuild.getSources().get(0)));
         result.getBuild().setTestSourceDirectory(relativize(projectDir, modelBuild.getTestSources().get(0)));
+
+        result.getBuild().setOutputDirectory(modelBuild.getOutputDirectory());
+        result.getBuild().setTestOutputDirectory(modelBuild.getTestOutputDirectory());
 
         result.setProfiles(convertToMavenProfiles(model.getProfiles(), projectDir));
         return result;

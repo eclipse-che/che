@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.dto.server;
 
@@ -41,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static java.lang.String.format;
 
 /**
  * Provides implementations of DTO interfaces.
@@ -386,9 +388,39 @@ public final class DtoFactory {
     private <T> DtoProvider<T> getDtoProvider(Class<T> dtoInterface) {
         DtoProvider<?> dtoProvider = dtoInterface2Providers.get(dtoInterface);
         if (dtoProvider == null) {
-            throw new IllegalArgumentException("Unknown DTO type " + dtoInterface);
+            if (!dtoInterface.isInterface()) {
+                throw new IllegalArgumentException(format("Only interfaces can be DTO, but %s is not", dtoInterface));
+            }
+
+            if (hasDtoAnnotation(dtoInterface)) {
+                throw new IllegalArgumentException(format("Provider of implementation for DTO type %s isn't found", dtoInterface));
+            } else {
+                throw new IllegalArgumentException(dtoInterface + " is not a DTO type");
+            }
         }
+
         return (DtoProvider<T>)dtoProvider;
+    }
+
+    /**
+     * Checks if dtoInterface or its parent have DTO annotation.
+     *
+     * @param dtoInterface
+     *          DTO interface
+     * @return true if only dtoInterface or one of its parent have DTO annotation.
+     */
+    private boolean hasDtoAnnotation(Class dtoInterface) {
+        if (dtoInterface.isAnnotationPresent(DTO.class)) {
+            return true;
+        }
+
+        for (Class parent: dtoInterface.getInterfaces()) {
+            if (hasDtoAnnotation(parent)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

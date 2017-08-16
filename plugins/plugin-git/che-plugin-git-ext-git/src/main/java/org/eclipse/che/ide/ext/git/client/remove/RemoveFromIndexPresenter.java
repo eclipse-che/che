@@ -1,20 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.remove;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -99,22 +96,18 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
 
         checkState(!isNullOrEmpty(resources));
 
-        service.remove(appContext.getDevMachine(), project.getLocation(), toRelativePaths(resources), view.isRemoved()).then(new Operation<Void>() {
-            @Override
-            public void apply(Void ignored) throws OperationException {
-                console.print(constant.removeFilesSuccessfull());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.removeFilesSuccessfull());
+        service.remove(project.getLocation(), toRelativePaths(resources), view.isRemoved())
+               .then(ignored -> {
+                   console.print(constant.removeFilesSuccessfull());
+                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notificationManager.notify(constant.removeFilesSuccessfull());
 
-                project.synchronize();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                handleError(error.getCause(), console);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-            }
-        });
+                   project.synchronize();
+               })
+               .catchError(error -> {
+                   handleError(error.getCause(), console);
+                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+               });
 
         view.close();
     }

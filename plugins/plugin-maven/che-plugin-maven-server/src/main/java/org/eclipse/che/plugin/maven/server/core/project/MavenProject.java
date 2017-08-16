@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.server.core.project;
 
@@ -97,6 +97,10 @@ public class MavenProject {
 
     public String getOutputDirectory() {
         return info.outputDirectory;
+    }
+
+    public String getTestOutputDirectory(){
+        return info.testOutputDirectory;
     }
 
     public String getName() {
@@ -212,6 +216,7 @@ public class MavenProject {
         newInfo.filters = model.getBuild().getFilters();
 
         newInfo.outputDirectory = model.getBuild().getOutputDirectory();
+        newInfo.testOutputDirectory = model.getBuild().getTestOutputDirectory();
 
         Set<MavenRemoteRepository> remoteRepositories = new HashSet<>();
         Set<MavenArtifact> extensions = new HashSet<>();
@@ -401,8 +406,6 @@ public class MavenProject {
         public List<MavenResource> resources;
         public List<MavenResource> testResources;
 
-        public String outputDirectory;
-
         public List<String> profilesIds;
         public List<String> activeProfiles;
         public List<String> inactiveProfiles;
@@ -418,6 +421,9 @@ public class MavenProject {
 
         public Set<MavenKey>             unresolvedArtifacts;
         public List<MavenProjectProblem> problemsCache;
+
+        public String testOutputDirectory;
+        public String outputDirectory;
 
         public Info clone() {
             try {

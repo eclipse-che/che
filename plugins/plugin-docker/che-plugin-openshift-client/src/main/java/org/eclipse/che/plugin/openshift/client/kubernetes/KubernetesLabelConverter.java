@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client.kubernetes;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Converter of labels defined in {@link ContainerConfig} for matching to Kubernetes
@@ -64,6 +64,9 @@ public final class KubernetesLabelConverter {
      */
     public static Map<String, String> labelsToNames(Map<String, String> labels) {
         Map<String, String> names = new HashMap<>();
+        if (labels == null) {
+            return names;
+        }
         for (Map.Entry<String, String> label : labels.entrySet()) {
 
             if (!hasConversionProblems(label)) {
@@ -103,6 +106,9 @@ public final class KubernetesLabelConverter {
      */
     public static Map<String, String> namesToLabels(Map<String, String> names) {
         Map<String, String> labels = new HashMap<>();
+        if (names == null) {
+            return labels;
+        }
         for (Map.Entry<String, String> entry: names.entrySet()){
             String key = entry.getKey();
             String value = entry.getValue();

@@ -1,20 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2017 RedHat, Inc.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   RedHat, Inc. - initial commit
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.testing.server.listener;
-
-import static org.eclipse.che.api.testing.shared.Constants.TESTING_OUTPUT_CHANNEL_NAME;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.testing.server.handler.TestingOutputImpl;
@@ -23,11 +17,18 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import static org.eclipse.che.api.testing.shared.Constants.TESTING_OUTPUT_CHANNEL_NAME;
+
 /**
  * Listener for the testing services to report their progress to the Che output view.
  *
  * @author David Festal
  */
+@Deprecated
 public class OutputTestListener extends AbstractTestListener implements AutoCloseable {
     private static final Logger                     LOG                 = LoggerFactory.getLogger(AbstractTestListener.class);
     private static final String                     consumeErrorMessage = "An exception occured while trying to send a 'TestingOutput' "

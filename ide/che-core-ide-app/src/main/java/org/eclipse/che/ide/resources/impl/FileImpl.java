@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.resources.impl;
 
@@ -20,6 +20,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.api.resources.marker.PresentableTextMarker;
+import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.TextUtils;
 
@@ -34,17 +35,20 @@ import org.eclipse.che.ide.util.TextUtils;
 @Beta
 class FileImpl extends ResourceImpl implements File {
 
-    private final String contentUrl;
+    private final String    contentUrl;
+    private       VcsStatus vcsStatus;
 
     private String modificationStamp;
 
     @Inject
     protected FileImpl(@Assisted Path path,
                        @Assisted String contentUrl,
-                       @Assisted ResourceManager resourceManager) {
+                       @Assisted ResourceManager resourceManager,
+                       @Assisted VcsStatus vcsStatus) {
         super(path, resourceManager);
 
         this.contentUrl = contentUrl;
+        this.vcsStatus = vcsStatus;
     }
 
     /** {@inheritDoc} */
@@ -110,7 +114,7 @@ class FileImpl extends ResourceImpl implements File {
     /** {@inheritDoc} */
     @Override
     public Promise<Void> updateContent(String content) {
-        setModificationStamp(TextUtils.md5(content));
+        updateModificationStamp(content);
 
         return resourceManager.write(this, content);
     }
@@ -139,5 +143,20 @@ class FileImpl extends ResourceImpl implements File {
     @Override
     public String getModificationStamp() {
         return modificationStamp;
+    }
+
+    @Override
+    public void updateModificationStamp(String content) {
+        this.modificationStamp = TextUtils.md5(content);
+    }
+
+    @Override
+    public VcsStatus getVcsStatus() {
+        return vcsStatus;
+    }
+
+    @Override
+    public void setVcsStatus(VcsStatus vcsStatus) {
+        this.vcsStatus = vcsStatus;
     }
 }

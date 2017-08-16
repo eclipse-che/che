@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.jdb.server.util;
 
@@ -22,16 +22,48 @@ import org.eclipse.che.plugin.jdb.server.JavaDebugger;
 import org.eclipse.che.plugin.jdb.server.JavaDebuggerFactory;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import static java.lang.System.getProperty;
+import static java.util.Collections.singletonList;
 
 /**
  * @author Anatolii Bazko
  */
 public class JavaDebuggerUtils {
+
+    /**
+     * Connects to process and starts debug.
+     */
+    public static JavaDebugger startJavaDebugger(Breakpoint breakpoint, BlockingQueue<DebuggerEvent> debuggerEvents) throws Exception {
+        Map<String, String> connectionProperties = ImmutableMap.of("host", "localhost",
+                                                                   "port", getProperty("debug.port"));
+
+        JavaDebuggerFactory factory = new JavaDebuggerFactory();
+        JavaDebugger debugger = (JavaDebugger)factory.create(connectionProperties, debuggerEvents::add);
+
+        debugger.start(new StartActionImpl(singletonList(breakpoint)));
+
+        return debugger;
+    }
+
+    public static void ensureSuspendAtDesiredLocation(Location desiredLocation,
+                                                      BlockingQueue<DebuggerEvent> debuggerEvents) throws InterruptedException {
+        for (; ; ) {
+            DebuggerEvent event = debuggerEvents.take();
+            if (event instanceof SuspendEvent) {
+                SuspendEvent suspendEvent = (SuspendEvent)event;
+                Location location = suspendEvent.getLocation();
+
+                if (location.getTarget().equals(desiredLocation.getTarget())
+                    && location.getLineNumber() == desiredLocation.getLineNumber()) {
+
+                    return;
+                }
+            }
+        }
+    }
 
     /**
      * Terminates Virtual Machine.
@@ -47,38 +79,6 @@ public class JavaDebuggerUtils {
             vm.exit(0);
         } catch (Exception ignored) {
             // quietly ignore exception, if VM has been already terminated
-        }
-    }
-
-    /**
-     * Connects to process and starts debug.
-     */
-    public static JavaDebugger startJavaDebugger(Breakpoint breakpoint, BlockingQueue<DebuggerEvent> callback) throws Exception {
-        Map<String, String> connectionProperties = ImmutableMap.of("host", "localhost",
-                                                                   "port", getProperty("debug.port"));
-
-        JavaDebuggerFactory factory = new JavaDebuggerFactory();
-        JavaDebugger debugger = (JavaDebugger)factory.create(connectionProperties, callback::add);
-
-        debugger.start(new StartActionImpl(Collections.singletonList(breakpoint)));
-
-        return debugger;
-    }
-
-    public static void ensureSuspendAtDesiredLocation(Location desiredLocation,
-                                                      BlockingQueue<DebuggerEvent> callback) throws InterruptedException {
-        for (; ; ) {
-            DebuggerEvent event = callback.take();
-            if (event instanceof SuspendEvent) {
-                SuspendEvent suspendEvent = (SuspendEvent)event;
-                Location location = suspendEvent.getLocation();
-
-                if (location.getTarget().equals(desiredLocation.getTarget())
-                    && location.getLineNumber() == desiredLocation.getLineNumber()) {
-
-                    return;
-                }
-            }
         }
     }
 }

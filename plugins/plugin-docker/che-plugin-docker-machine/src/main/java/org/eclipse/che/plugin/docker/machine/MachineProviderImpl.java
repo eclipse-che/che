@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
@@ -70,11 +70,11 @@ import org.eclipse.che.plugin.docker.client.params.ListImagesParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
-import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.slf4j.Logger;
 
@@ -554,7 +554,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                       .withFilters(new Filters().withFilter("reference", imageName)))
                           .isEmpty();
         } catch (IOException e) {
-            LOG.warn("Failed to check image {} availability. Cause: {}", imageName, e.getMessage(), e);
+            LOG.warn("Failed to check image {} availability. Cause: {}", imageName, e.getMessage());
             return false; // consider that image doesn't exist locally
         }
     }
@@ -666,6 +666,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         // register workspace ID and Machine Name
         env.put(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID, workspaceId);
         env.put(DockerInstanceRuntimeInfo.CHE_MACHINE_NAME, machineName);
+        env.put(DockerInstanceRuntimeInfo.CHE_IS_DEV_MACHINE, Boolean.toString(isDev));
 
         composeService.getExpose().addAll(portsToExpose);
         composeService.getEnvironment().putAll(env);
@@ -712,10 +713,11 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         }
     }
 
-    private void readContainerLogsInSeparateThread(String container,
-                                                   String workspaceId,
-                                                   String machineId,
-                                                   LineConsumer outputConsumer) {
+    @VisibleForTesting
+    void readContainerLogsInSeparateThread(String container,
+                                           String workspaceId,
+                                           String machineId,
+                                           LineConsumer outputConsumer) {
         executor.execute(() -> {
             long lastProcessedLogDate = 0;
             boolean isContainerRunning = true;

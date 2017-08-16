@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.model.impl;
 
@@ -25,14 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.stream.Collectors.toList;
+import static javax.persistence.CascadeType.ALL;
+
 /**
  * Data object for {@link OnAppLoaded}.
  *
  * @author Anton Korneta
  */
-import static java.util.stream.Collectors.toList;
-import static javax.persistence.CascadeType.ALL;
-
 @Entity(name = "OnAppLoaded")
 @Table(name = "che_factory_on_app_loaded_action")
 public class OnAppLoadedImpl implements OnAppLoaded {

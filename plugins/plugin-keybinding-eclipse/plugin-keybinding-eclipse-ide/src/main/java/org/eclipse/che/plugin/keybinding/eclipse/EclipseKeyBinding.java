@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.keybinding.eclipse;
 
@@ -49,8 +49,6 @@ import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.RESUME_EXECU
 import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.STEP_INTO_ID;
 import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.STEP_OUT_ID;
 import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.STEP_OVER_ID;
-import static org.eclipse.che.plugin.testing.junit.ide.JUnitTestAction.TEST_ACTION_RUN_ALL;
-import static org.eclipse.che.plugin.testing.junit.ide.JUnitTestAction.TEST_ACTION_RUN_CLASS;
 
 @Extension(title = "Key Binding Eclipse")
 public class EclipseKeyBinding {
@@ -98,15 +96,6 @@ public class EclipseKeyBinding {
         } else {
             keys.put(JAVA_RENAME_REFACTORING, new KeyBuilder().alt().charCode('R').build());
             keys.put(JAVA_MOVE_REFACTORING, new KeyBuilder().alt().charCode('V').build());
-        }
-
-        // JUnit Keys
-        if (UserAgent.isMac()) {
-            keys.put(TEST_ACTION_RUN_ALL, new KeyBuilder().control().alt().charCode('z').build());
-            keys.put(TEST_ACTION_RUN_CLASS, new KeyBuilder().control().shift().charCode('z').build());
-        } else {
-            keys.put(TEST_ACTION_RUN_ALL, new KeyBuilder().action().alt().charCode('z').build());
-            keys.put(TEST_ACTION_RUN_CLASS, new KeyBuilder().action().shift().charCode('z').build());
         }
 
         // Git keys

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.push;
 
@@ -23,6 +23,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -50,6 +51,8 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
     ListBox localBranch;
     @UiField
     ListBox remoteBranch;
+    @UiField
+    CheckBox forcePush;
     Button btnPush;
     Button btnCancel;
     @UiField(provided = true)
@@ -175,6 +178,16 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
                 btnPush.setFocus(enabled);
             }
         });
+    }
+
+    @Override
+    public void setSelectedForcePushCheckBox(boolean isSelected) {
+        forcePush.setValue(isSelected);
+    }
+
+    @Override
+    public boolean isForcePushSelected() {
+        return forcePush.getValue();
     }
 
     /** {@inheritDoc} */

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.debugger.server;
 
@@ -159,15 +159,43 @@ public interface Debugger {
     /**
      * Sets the new value {@link Variable#getValue()} of the variable {@link Variable#getVariablePath()}.
      *
+     * @deprecated
+     * @see #setValue(Variable, long, int)
+     *
      * @param variable
      *      the variable to update
      * @throws DebuggerException
      *      if any error occur
      */
+    @Deprecated
     void setValue(Variable variable) throws DebuggerException;
 
     /**
+     * Sets the new value {@link Variable#getValue()} of the variable {@link Variable#getVariablePath()}.
+     *
+     * @param variable
+     *      the variable to update
+     * @param threadId
+     *      the unique thread id
+     * @param frameIndex
+     *      the frame index inside thread
+     * @throws DebuggerException
+     *      if any error occur
+     */
+    default void setValue(Variable variable, long threadId, int frameIndex) throws DebuggerException {
+        if (threadId == -1 || frameIndex == -1) {
+            setValue(variable);
+            return;
+        }
+
+        throw new DebuggerException("Unsupported operation for current debugger implementation.");
+    }
+
+    /**
      * Evaluates the given expression.
+     *
+     * @deprecated
+     * @see #evaluate(String, long, int)
      *
      * @param expression
      *      the expression to evaluate
@@ -175,7 +203,30 @@ public interface Debugger {
      * @throws DebuggerException
      *      if any error occur
      */
+    @Deprecated
     String evaluate(String expression) throws DebuggerException;
+
+    /**
+     * Evaluates the given expression.
+     *
+     * @param expression
+     *      the expression to evaluate
+     * @param threadId
+     *      the unique thread id
+     * @param frameIndex
+     *      the frame index inside thread
+     * @return the result
+     * @throws DebuggerException
+     *      if any error occur
+     */
+    default String evaluate(String expression, long threadId, int frameIndex) throws DebuggerException {
+        if (threadId == -1 || frameIndex == -1) {
+            return evaluate(expression);
+        }
+
+        throw new DebuggerException("Unsupported operation for current debugger implementation.");
+    }
+
 
     /**
      * Performs step over action.

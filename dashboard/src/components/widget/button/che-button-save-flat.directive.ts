@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -29,12 +29,12 @@ import {CheButton} from './che-button.directive';
  *   <che-button-save-flat che-button-title="save"></che-button-save-flat>
  *
  * @example
- <example module="userDashboard">
- <file name="index.html">
- <che-button-save-flat che-button-title="Save"></che-button-save-flat>
- <che-button-save-flat che-button-title="Save" che-button-icon="fa fa-floppy-o"></che-button-save-flat>
- </file>
- </example>
+ * <example module="userDashboard">
+ * <file name="index.html">
+ * <che-button-save-flat che-button-title="Save"></che-button-save-flat>
+ * <che-button-save-flat che-button-title="Save" che-button-icon="fa fa-floppy-o"></che-button-save-flat>
+ * </file>
+ * </example>
  * @author Oleksii Kurinnyi
  */
 export class CheButtonSaveFlat extends CheButton {
@@ -51,7 +51,7 @@ export class CheButtonSaveFlat extends CheButton {
   /**
    * Template for the buttons
    */
-  getTemplateStart() {
+  getTemplateStart(): string {
     return '<md-button md-theme=\"chesave\" class=\"che-button md-accent md-raised md-hue-1\"';
   }
 

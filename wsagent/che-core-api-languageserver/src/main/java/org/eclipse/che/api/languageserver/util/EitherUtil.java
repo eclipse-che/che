@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Red Hat - Initial Contribution
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.util;
 
@@ -36,15 +36,19 @@ public class EitherUtil {
         if (decision == JsonDecision.LIST) {
             return element.isJsonArray();
         }
-        if (decision == JsonDecision.BOOLEAN) {
-            return element.isJsonPrimitive() && ((JsonPrimitive)element).isBoolean();
+        if (element.isJsonPrimitive()) {
+            JsonPrimitive jsonPrimitive = element.getAsJsonPrimitive();
+            if (decision == JsonDecision.BOOLEAN) {
+                return jsonPrimitive.isBoolean();
+            }
+            if (decision == JsonDecision.NUMBER) {
+                return jsonPrimitive.isNumber();
+            }
+            if (decision == JsonDecision.STRING) {
+                return jsonPrimitive.isString();
+            }
         }
-        if (decision == JsonDecision.NUMBER) {
-            return element.isJsonPrimitive() && ((JsonPrimitive)element).isNumber();
-        }
-        if (decision == JsonDecision.STRING) {
-            return element.isJsonPrimitive() && ((JsonPrimitive)element).isString();
-        }
+
         return element.isJsonObject();
     }
 }

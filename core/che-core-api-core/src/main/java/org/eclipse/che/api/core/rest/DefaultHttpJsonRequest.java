@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.core.rest;
 
@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 import org.eclipse.che.dto.server.JsonSerializable;
@@ -281,7 +280,9 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
                                                     UriBuilder.fromUri(url).replaceQuery("token").build(), method, responseCode, str));
             }
             final String contentType = conn.getContentType();
-            if (contentType != null && !contentType.startsWith(MediaType.APPLICATION_JSON)) {
+            if (responseCode != HttpURLConnection.HTTP_NO_CONTENT
+                && contentType != null
+                && !contentType.startsWith(MediaType.APPLICATION_JSON)) {
                 throw new IOException(conn.getResponseMessage());
             }
 

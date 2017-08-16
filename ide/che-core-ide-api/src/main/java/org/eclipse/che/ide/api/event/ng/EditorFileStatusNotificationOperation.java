@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.api.event.ng;
 
@@ -29,10 +29,9 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.List;
-
 import java.util.function.BiConsumer;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 
@@ -97,7 +96,7 @@ public class EditorFileStatusNotificationOperation implements BiConsumer<String,
                 final Path path = Path.valueOf(stringPath);
                 appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(path, path, REMOVED));
                 if (notificationManager != null && !deletedFilesController.remove(stringPath)) {
-                    notificationManager.notify("External operation", "File '" + name + "' is removed", SUCCESS, EMERGE_MODE);
+                    notificationManager.notify("External operation", "File '" + name + "' is removed", SUCCESS, NOT_EMERGE_MODE);
                     closeOpenedEditor(path);
                 }
 

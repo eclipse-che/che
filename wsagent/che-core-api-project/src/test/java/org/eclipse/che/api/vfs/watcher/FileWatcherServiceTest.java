@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.vfs.watcher;
 
@@ -23,15 +23,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.WatchService;
-import java.util.Set;
 
 import static java.nio.file.Files.createDirectory;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-import static java.util.Collections.emptySet;
 import static org.apache.commons.io.FileUtils.write;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -52,8 +49,9 @@ public class FileWatcherServiceTest {
     public TemporaryFolder rootFolder = new TemporaryFolder();
 
     @Mock
-    FileWatcherEventHandler handler;
-    Set<PathMatcher> excludes     = emptySet();
+    FileWatcherEventHandler            handler;
+    @Mock
+    FileWatcherExcludePatternsRegistry fileWatcherExcludePatternsRegistry;
     WatchService     watchService = FileSystems.getDefault().newWatchService();
 
     FileWatcherService service;
@@ -63,7 +61,7 @@ public class FileWatcherServiceTest {
 
     @BeforeClass
     public void setUp() throws Exception {
-        service = new FileWatcherService(excludes, handler, watchService);
+        service = new FileWatcherService(fileWatcherExcludePatternsRegistry, handler, watchService);
 
         service.start();
     }

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016-2017 Red Hat Inc.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Red Hat Inc. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
@@ -31,42 +31,11 @@ import java.util.Map;
  * @author Alexander Garagatyi
  * @see ServerEvaluationStrategy
  */
-public class DefaultServerEvaluationStrategy extends ServerEvaluationStrategy {
-
-    /**
-     * Used to store the address set by property {@code che.docker.ip}, if applicable.
-     */
-    protected String internalAddressProperty;
-
-    /**
-     * Used to store the address set by property {@code che.docker.ip.external}. if applicable.
-     */
-    protected String externalAddressProperty;
+public class DefaultServerEvaluationStrategy extends BaseServerEvaluationStrategy {
 
     @Inject
     public DefaultServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
                                            @Nullable @Named("che.docker.ip.external") String externalAddress) {
-        this.internalAddressProperty = internalAddress;
-        this.externalAddressProperty = externalAddress;
-    }
-
-    @Override
-    protected Map<String, String> getInternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
-        String internalAddress = internalAddressProperty != null ?
-                                 internalAddressProperty :
-                                 internalHost;
-
-        return getExposedPortsToAddressPorts(internalAddress, containerInfo.getNetworkSettings().getPorts());
-    }
-
-    @Override
-    protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
-        String externalAddress = externalAddressProperty != null ?
-                                 externalAddressProperty :
-                                 internalAddressProperty != null ?
-                                 internalAddressProperty :
-                                 internalHost;
-
-        return super.getExposedPortsToAddressPorts(externalAddress, containerInfo.getNetworkSettings().getPorts());
+        super(internalAddress, externalAddress, null, null, null, false);
     }
 }

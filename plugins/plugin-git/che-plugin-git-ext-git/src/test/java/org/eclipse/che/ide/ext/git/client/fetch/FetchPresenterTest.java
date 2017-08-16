@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.fetch;
 
@@ -64,11 +64,11 @@ public class FetchPresenterTest extends BaseTest {
                                        gitOutputConsoleFactory,
                                        processesPanelPresenter);
 
-        when(service.remoteList(anyObject(), any(Path.class), anyString(), anyBoolean())).thenReturn(remoteListPromise);
+        when(service.remoteList(any(Path.class), anyString(), anyBoolean())).thenReturn(remoteListPromise);
         when(remoteListPromise.then(any(Operation.class))).thenReturn(remoteListPromise);
         when(remoteListPromise.catchError(any(Operation.class))).thenReturn(remoteListPromise);
 
-        when(service.branchList(anyObject(), any(Path.class), anyObject())).thenReturn(branchListPromise);
+        when(service.branchList(any(Path.class), anyObject())).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
 

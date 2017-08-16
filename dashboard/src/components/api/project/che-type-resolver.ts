@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -70,21 +70,11 @@ export class CheTypeResolver {
    * @returns {ng.IPromise<any>}
    */
   resolveProjectType(projectDetails: che.IProject): ng.IPromise<any> {
-    let deferredResolve = this.$q.defer();
-    this.fetchTypes().then(() => {
-      this.autoCheckType(projectDetails, this.typesIds).then((projectDetails: che.IProject) => {
-        this.cheProject.updateProjectDetails(projectDetails).then(() => {
-          deferredResolve.resolve();
-        }, (error: any) => {
-          deferredResolve.reject(error);
-        });
-      }, (error: any) => {
-        deferredResolve.reject(error);
-      });
-    }, (error: any) => {
-      deferredResolve.reject(error);
+    return this.fetchTypes().then(() => {
+      return this.autoCheckType(projectDetails, this.typesIds);
+    }).then((projectDetails: che.IProject) => {
+      return this.cheProject.updateProjectDetails(projectDetails);
     });
-    return deferredResolve.promise;
   }
 
   /**

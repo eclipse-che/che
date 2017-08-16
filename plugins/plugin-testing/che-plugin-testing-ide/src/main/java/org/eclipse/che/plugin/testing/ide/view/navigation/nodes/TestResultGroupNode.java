@@ -1,21 +1,22 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view.navigation.nodes;
 
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
-import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
+import elemental.events.Event;
+import elemental.events.EventListener;
+import elemental.html.SpanElement;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
+import com.google.gwt.dom.client.Element;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -31,19 +32,18 @@ import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import com.google.gwt.dom.client.Element;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
-import elemental.events.Event;
-import elemental.events.EventListener;
-import elemental.html.SpanElement;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /**
  * Tree node for display the failing class.
- * 
+ *
  * @author Mirage Abeysekara
  */
+@Deprecated
 public class TestResultGroupNode extends AbstractTreeNode implements HasPresentation {
 
     private NodePresentation    nodePresentation;

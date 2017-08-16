@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.remote.add;
 
@@ -87,11 +87,11 @@ public class AddRemoteRepositoryPresenterTest extends BaseTest {
         when(appContext.getRootProject()).thenReturn(mock(Project.class));
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
-        when(service.remoteAdd(anyObject(), anyObject(), anyString(), anyString())).thenReturn(voidPromise);
+        when(service.remoteAdd(anyObject(), anyString(), anyString())).thenReturn(voidPromise);
         when(view.getUrl()).thenReturn(" " + REMOTE_URI + " ");
 
         presenter.onOkClicked();
 
-        verify(service).remoteAdd(anyObject(), anyObject(), anyString(), eq(REMOTE_URI));
+        verify(service).remoteAdd(anyObject(), anyString(), eq(REMOTE_URI));
     }
 }

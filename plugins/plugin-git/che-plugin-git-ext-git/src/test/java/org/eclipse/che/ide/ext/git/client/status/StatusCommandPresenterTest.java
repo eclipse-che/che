@@ -1,19 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.status;
 
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -40,9 +39,6 @@ public class StatusCommandPresenterTest extends BaseTest {
     private StatusCommandPresenter presenter;
 
     @Mock
-    private WorkspaceAgent workspaceAgent;
-
-    @Mock
     private GitOutputConsoleFactory gitOutputConsoleFactory;
 
     @Mock
@@ -59,7 +55,7 @@ public class StatusCommandPresenterTest extends BaseTest {
                                                constant,
                                                notificationManager);
 
-        when(service.statusText(anyObject(), any(Path.class), any(StatusFormat.class))).thenReturn(stringPromise);
+        when(service.statusText(any(Path.class), any(StatusFormat.class))).thenReturn(stringPromise);
         when(stringPromise.then(any(Operation.class))).thenReturn(stringPromise);
         when(stringPromise.catchError(any(Operation.class))).thenReturn(stringPromise);
     }

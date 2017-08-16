@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.console;
 
@@ -25,8 +25,10 @@ import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEvent
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
@@ -66,6 +68,8 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private boolean followOutput = true;
 
     private final List<ActionDelegate> actionDelegates = new ArrayList<>();
+    
+    private OutputCustomizer outputCustomizer = null;
 
     @Inject
     public CommandOutputConsolePresenter(final OutputConsoleView view,
@@ -75,7 +79,9 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                                          EventBus eventBus,
                                          ExecAgentCommandManager execAgentCommandManager,
                                          @Assisted CommandImpl command,
-                                         @Assisted Machine machine) {
+                                         @Assisted Machine machine,
+                                         AppContext appContext,
+                                         EditorAgent editorAgent) {
         this.view = view;
         this.resources = resources;
         this.execAgentCommandManager = execAgentCommandManager;
@@ -84,6 +90,11 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         this.eventBus = eventBus;
         this.commandExecutor = commandExecutor;
 
+        setCustomizer(new CompoundOutputCustomizer(
+                new JavaOutputCustomizer(appContext, editorAgent),
+                new CSharpOutputCustomizer(appContext, editorAgent),
+                new CPPOutputCustomizer(appContext, editorAgent)));
+        
         view.setDelegate(this);
 
         final String previewUrl = command.getAttributes().get(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME);
@@ -275,4 +286,13 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         return view.getText();
     }
 
+    @Override
+    public OutputCustomizer getCustomizer() {
+        return outputCustomizer;
+    }
+
+    /** Sets up the text output customizer */
+    public void setCustomizer(OutputCustomizer customizer) {
+        this.outputCustomizer = customizer;
+    }
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.history;
 
@@ -18,7 +18,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
@@ -69,15 +68,13 @@ public class HistoryPresenterTest extends BaseTest {
         when(appContext.getResource()).thenReturn(resource);
         when(appContext.getRootProject()).thenReturn(project);
 
-        when(service.log(any(DevMachine.class),
-                         any(Path.class),
+        when(service.log(any(Path.class),
                          any(Path[].class),
                          anyInt(),
                          anyInt(),
                          anyBoolean()))
                 .thenReturn(logPromise);
-        when(service.diff(any(DevMachine.class),
-                          any(Path.class),
+        when(service.diff(any(Path.class),
                           anyList(),
                           any(DiffType.class),
                           anyBoolean(),
@@ -85,8 +82,7 @@ public class HistoryPresenterTest extends BaseTest {
                           anyString(),
                           anyString()))
                 .thenReturn(stringPromise);
-        when(service.showFileContent(any(DevMachine.class),
-                                     any(Path.class),
+        when(service.showFileContent(any(Path.class),
                                      any(Path.class),
                                      anyString()))
                 .thenReturn(showPromise);

@@ -1,20 +1,23 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Is responsible to start new {@link LanguageServer}.
@@ -24,11 +27,8 @@ import java.util.Map;
 public interface ServerInitializer extends ServerInitializerObservable {
     /**
      * Initialize new {@link LanguageServer} with given project path.
+     * @return 
      */
-    LanguageServer initialize(LanguageServerLauncher launcher, String projectPath) throws LanguageServerException;
+    CompletableFuture<Pair<LanguageServer, InitializeResult>> initialize(LanguageServerLauncher launcher, LanguageClient client, String projectPath) throws LanguageServerException;
 
-    /**
-     * Returns initialized servers.
-     */
-    Map<LanguageServer, LanguageServerDescription> getInitializedServers();
 }

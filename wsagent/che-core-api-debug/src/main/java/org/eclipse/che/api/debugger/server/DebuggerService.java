@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.debugger.server;
 
@@ -211,15 +211,20 @@ public class DebuggerService {
     @PUT
     @Path("{id}/value")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void setValue(@PathParam("id") String sessionId, VariableDto variable) throws DebuggerException {
-        debuggerManager.getDebugger(sessionId).setValue(variable);
+    public void setValue(@PathParam("id") String sessionId,
+                         @QueryParam("threadId") @DefaultValue("-1") long threadId,
+                         @QueryParam("frameIndex") @DefaultValue("-1") int frameIndex,
+                         VariableDto variable) throws DebuggerException {
+        debuggerManager.getDebugger(sessionId).setValue(variable, threadId, frameIndex);
     }
 
     @GET
     @Path("{id}/evaluation")
     @Produces(MediaType.TEXT_PLAIN)
     public String expression(@PathParam("id") String sessionId,
+                             @QueryParam("threadId") @DefaultValue("-1") long threadId,
+                             @QueryParam("frameIndex") @DefaultValue("-1") int frameIndex,
                              @QueryParam("expression") String expression) throws DebuggerException {
-        return debuggerManager.getDebugger(sessionId).evaluate(expression);
+        return debuggerManager.getDebugger(sessionId).evaluate(expression, threadId, frameIndex);
     }
 }

@@ -1,18 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Red Hat - Initial Contribution
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.quickassist;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
-
+import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.CodeActionParamsDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -135,10 +135,9 @@ public class LanguageServerQuickAssistProcessor implements QuickAssistProcessor 
                 rangeParam.setEnd(rangeEnd);
 
                 TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(document.getFile().getLocation().toString());
-
                 CodeActionParams params = new CodeActionParams(textDocumentIdentifier, rangeParam, context);
 
-                Promise<List<Command>> codeAction = textDocumentService.codeAction(params);
+                Promise<List<Command>> codeAction = textDocumentService.codeAction(new CodeActionParamsDto(params));
                 List<CompletionProposal> proposals = new ArrayList<>();
                 codeAction.then((commands) -> {
                     for (Command command : commands) {

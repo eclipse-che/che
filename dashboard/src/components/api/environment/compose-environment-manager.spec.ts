@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -135,7 +135,7 @@ describe('ComposeEnvironmentManager', () => {
 
       // machine's attributes are more preferable than recipe to get memory limit
       let expectedMemoryLimit = environment.machines[testMachine.name].attributes.memoryLimitBytes;
-      expect(memoryLimit).toEqual(expectedMemoryLimit);
+      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit);
     });
 
     it('from recipe', () => {
@@ -205,7 +205,7 @@ describe('ComposeEnvironmentManager', () => {
       let memoryLimit = envManager.getMemoryLimit(machines[0]);
 
       let expectedMemoryLimit = environment.machines['dev-machine'].attributes.memoryLimitBytes;
-      expect(memoryLimit).toEqual(expectedMemoryLimit);
+      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit);
     });
 
   });

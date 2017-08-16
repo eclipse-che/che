@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.checkout;
 
@@ -14,14 +14,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
@@ -87,30 +83,22 @@ public class CheckoutReferencePresenter implements CheckoutReferenceView.ActionD
     @Override
     public void onCheckoutClicked(final String reference) {
 
-        service.checkout(appContext.getDevMachine(), project.getLocation(), dtoFactory.createDto(CheckoutRequest.class).withName(reference))
-               .then(new Operation<Void>() {
-                   @Override
-                   public void apply(Void arg) throws OperationException {
-                       project.synchronize().then(new Operation<Resource[]>() {
-                           @Override
-                           public void apply(Resource[] arg) throws OperationException {
-                               view.close();
-                           }
-                       });
-                   }
+        service.checkout(project.getLocation(), dtoFactory.createDto(CheckoutRequest.class).withName(reference))
+               .then(branchName -> {
+                   appContext.getRootProject().synchronize()
+                             .then(arg -> {
+                                 view.close();
+                             });
                })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       final String errorMessage = (error.getMessage() != null)
-                                                   ? error.getMessage()
-                                                   : constant.checkoutFailed();
-                       GitOutputConsole console = gitOutputConsoleFactory.create(CHECKOUT_COMMAND_NAME);
-                       console.printError(errorMessage);
-                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                       notificationManager.notify(constant.checkoutFailed(), FAIL, FLOAT_MODE);
-                       view.close();
-                   }
+               .catchError(error -> {
+                   final String errorMessage = (error.getMessage() != null)
+                                               ? error.getMessage()
+                                               : constant.checkoutFailed();
+                   GitOutputConsole console = gitOutputConsoleFactory.create(CHECKOUT_COMMAND_NAME);
+                   console.printError(errorMessage);
+                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notificationManager.notify(constant.checkoutFailed(), FAIL, FLOAT_MODE);
+                   view.close();
                });
     }
 

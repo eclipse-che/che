@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.reset.commit;
 
@@ -14,12 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
-import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.git.GitServiceClient;
@@ -32,6 +28,10 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.eclipse.che.api.git.shared.Constants.DEFAULT_PAGE_SIZE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
@@ -56,8 +56,10 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
     private final GitLocalizationConstant constant;
     private final NotificationManager     notificationManager;
 
-    private Revision selectedRevision;
-    private Project  project;
+    private Revision       selectedRevision;
+    private List<Revision> revisions;
+    private Project        project;
+    private int            skip;
 
     @Inject
     public ResetToCommitPresenter(ResetToCommitView view,
@@ -81,33 +83,12 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
 
     public void showDialog(final Project project) {
         this.project = project;
+        this.skip = 0;
+        this.revisions = new ArrayList<>();
+        this.selectedRevision = null;
+        this.view.resetRevisionSelection();
 
-        service.log(appContext.getDevMachine(), project.getLocation(), null, false).then(new Operation<LogResponse>() {
-            @Override
-            public void apply(LogResponse log) throws OperationException {
-                view.setRevisions(log.getCommits());
-                view.setMixMode(true);
-                view.setEnableResetButton(selectedRevision != null);
-                view.showDialog();
-
-                project.synchronize();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
-                    dialogFactory.createMessageDialog(constant.resetCommitViewTitle(),
-                                                      constant.initCommitWasNotPerformed(),
-                                                      null).show();
-                    return;
-                }
-                String errorMessage = (error.getMessage() != null) ? error.getMessage() : constant.logFailed();
-                GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
-                console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.logFailed(), FAIL, FLOAT_MODE);
-            }
-        });
+        fetchAndAddNextRevisions();
     }
 
     /**
@@ -136,6 +117,41 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
         view.setEnableResetButton(selectedRevision != null);
     }
 
+    @Override
+    public void onScrolledToBottom() {
+        fetchAndAddNextRevisions();
+    }
+
+    private void fetchAndAddNextRevisions() {
+        service.log(project.getLocation(), null, skip, DEFAULT_PAGE_SIZE, false)
+               .then(log -> {
+                   List<Revision> commits = log.getCommits();
+                   if (!commits.isEmpty()) {
+                       skip += commits.size();
+                       revisions.addAll(commits);
+                       view.setEnableResetButton(selectedRevision != null);
+                       view.setRevisions(revisions);
+                       view.setMixMode(true);
+                       view.showDialog();
+
+                       project.synchronize();
+                   }
+               })
+               .catchError(error -> {
+                   if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                       dialogFactory.createMessageDialog(constant.resetCommitViewTitle(),
+                               constant.initCommitWasNotPerformed(),
+                               null).show();
+                       return;
+                   }
+                   String errorMessage = (error.getMessage() != null) ? error.getMessage() : constant.logFailed();
+                   GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
+                   console.printError(errorMessage);
+                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notificationManager.notify(constant.logFailed(), FAIL, FLOAT_MODE);
+               });
+    }
+
     /**
      * Reset current HEAD to the specified state and refresh project in the success case.
      */
@@ -146,24 +162,20 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
 
         final GitOutputConsole console = gitOutputConsoleFactory.create(RESET_COMMAND_NAME);
 
-        service.reset(appContext.getDevMachine(), project.getLocation(), selectedRevision.getId(), type, null).then(new Operation<Void>() {
-            @Override
-            public void apply(Void ignored) throws OperationException {
-                console.print(constant.resetSuccessfully());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.resetSuccessfully());
+        service.reset(project.getLocation(), selectedRevision.getId(), type, null)
+               .then(ignored -> {
+                   console.print(constant.resetSuccessfully());
+                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notificationManager.notify(constant.resetSuccessfully());
 
-                project.synchronize();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                String errorMessage = (error.getMessage() != null) ? error.getMessage() : constant.resetFail();
-                console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.resetFail(), FAIL, FLOAT_MODE);
-            }
-        });
+                   project.synchronize();
+               })
+               .catchError(error -> {
+                   String errorMessage = (error.getMessage() != null) ? error.getMessage() : constant.resetFail();
+                   console.printError(errorMessage);
+                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                   notificationManager.notify(constant.resetFail(), FAIL, FLOAT_MODE);
+               });
     }
 }
 

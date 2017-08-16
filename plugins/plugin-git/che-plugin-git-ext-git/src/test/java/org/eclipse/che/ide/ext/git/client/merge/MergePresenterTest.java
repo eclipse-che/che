@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.merge;
 
@@ -81,11 +81,11 @@ public class MergePresenterTest extends BaseTest {
         when(mergeResult.getMergeStatus()).thenReturn(ALREADY_UP_TO_DATE);
         when(selectedReference.getDisplayName()).thenReturn(DISPLAY_NAME);
 
-        when(service.branchList(anyObject(), any(Path.class), eq(LIST_LOCAL))).thenReturn(branchListPromise);
+        when(service.branchList(any(Path.class), eq(LIST_LOCAL))).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
 
-        when(service.branchList(anyObject(), any(Path.class), eq(LIST_REMOTE))).thenReturn(remoteListBranchPromise);
+        when(service.branchList(any(Path.class), eq(LIST_REMOTE))).thenReturn(remoteListBranchPromise);
         when(remoteListBranchPromise.then(any(Operation.class))).thenReturn(remoteListBranchPromise);
         when(remoteListBranchPromise.catchError(any(Operation.class))).thenReturn(remoteListBranchPromise);
     }

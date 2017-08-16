@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.console;
 
@@ -14,6 +14,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -39,14 +41,23 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     /** Follow output when printing text */
     private boolean followOutput = true;
 
+    private OutputCustomizer customizer = null;
+    
     @Inject
     public DefaultOutputConsole(OutputConsoleView view,
                                 MachineResources resources,
+                                AppContext appContext,
+                                EditorAgent editorAgent,
                                 @Assisted String title) {
         this.view = view;
         this.title = title;
         this.resources = resources;
         this.view.enableAutoScroll(true);
+
+        setCustomizer(new CompoundOutputCustomizer(
+                new JavaOutputCustomizer(appContext, editorAgent),
+                new CSharpOutputCustomizer(appContext, editorAgent),
+                new CPPOutputCustomizer(appContext, editorAgent)));
 
         view.setDelegate(this);
 
@@ -180,6 +191,16 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     public void onOutputScrolled(boolean bottomReached) {
         followOutput = bottomReached;
         view.toggleScrollToEndButton(bottomReached);
+    }
+
+    @Override
+    public OutputCustomizer getCustomizer() {
+        return customizer;
+    }
+
+    /** Sets up the text output customizer */
+    public void setCustomizer(OutputCustomizer customizer) {
+        this.customizer = customizer;
     }
 
 }

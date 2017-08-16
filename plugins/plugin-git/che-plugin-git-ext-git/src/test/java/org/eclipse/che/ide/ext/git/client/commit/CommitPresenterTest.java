@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.commit;
 
@@ -106,21 +106,20 @@ public class CommitPresenterTest extends BaseTest {
         when(logPromise.then(any(Operation.class))).thenReturn(logPromise);
         when(logPromise.catchError(any(Operation.class))).thenReturn(logPromise);
         when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
-        when(service.add(any(DevMachine.class), any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
-        when(service.commit(any(DevMachine.class), any(Path.class), anyString(), anyBoolean(), any(Path[].class), anyBoolean()))
+        when(service.add(any(Path.class), anyBoolean(), any(Path[].class))).thenReturn(voidPromise);
+        when(service.commit(any(Path.class), anyString(), anyBoolean(), any(Path[].class)))
                 .thenReturn(revisionPromise);
-        when(service.diff(any(DevMachine.class),
-                          any(Path.class),
+        when(service.diff(any(Path.class),
                           eq(null),
                           any(DiffType.class),
                           anyBoolean(),
                           anyInt(),
                           anyString(),
                           anyBoolean())).thenReturn(stringPromise);
-        when(service.branchList(any(DevMachine.class), any(Path.class), any(BranchListMode.class))).thenReturn(branchListPromise);
-        when(service.push(any(DevMachine.class), any(Path.class), anyList(), anyString(), anyBoolean())).thenReturn(pushPromise);
-        when(service.log(any(DevMachine.class), any(Path.class), eq(null), anyInt(), anyInt(), anyBoolean())).thenReturn(logPromise);
-        when(service.getStatus(any(DevMachine.class), any(Path.class))).thenReturn(statusPromise);
+        when(service.branchList(any(Path.class), any(BranchListMode.class))).thenReturn(branchListPromise);
+        when(service.push(any(Path.class), anyList(), anyString(), anyBoolean())).thenReturn(pushPromise);
+        when(service.log(any(Path.class), eq(null), anyInt(), anyInt(), anyBoolean())).thenReturn(logPromise);
+        when(service.getStatus(any(Path.class))).thenReturn(statusPromise);
     }
 
     @Test

@@ -1,21 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.status;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -70,17 +67,13 @@ public class StatusCommandPresenter {
 
     /** Show status. */
     public void showStatus(Project project) {
-        service.statusText(appContext.getDevMachine(), project.getLocation(), LONG).then(new Operation<String>() {
-            @Override
-            public void apply(String status) throws OperationException {
-                printGitStatus(status);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(constant.statusFailed(), FAIL, FLOAT_MODE);
-            }
-        });
+        service.statusText(project.getLocation(), LONG)
+               .then(status -> {
+                   printGitStatus(status);
+               })
+               .catchError(error -> {
+                   notificationManager.notify(constant.statusFailed(), FAIL, FLOAT_MODE);
+               });
     }
 
     /**

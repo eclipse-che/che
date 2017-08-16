@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.git.params;
 
@@ -19,11 +19,12 @@ import org.eclipse.che.api.git.shared.PullRequest;
  */
 public class PullParams {
 
-    private String refSpec;
-    private String remote;
-    private String username;
-    private String password;
-    private int    timeout;
+    private String  refSpec;
+    private String  remote;
+    private String  username;
+    private String  password;
+    private int     timeout;
+    private boolean rebase;
 
     private PullParams() {
     }
@@ -90,6 +91,24 @@ public class PullParams {
     /** Returns {@link PullParams} with specified password for authentication. */
     public PullParams withPassword(String password) {
         this.password = password;
+        return this;
+    }
+
+    /**
+     * Returns the value of 'Pull with rebase' flag.
+     */
+    public boolean getRebase() {
+        return rebase;
+    }
+
+    /**
+     * Set value of 'Pull with rebase' flag.
+     *
+     * @param rebase
+     *         {@code true} if need to perform rebase instead of merge after fetch operation.
+     */
+    public PullParams withRebase(boolean rebase) {
+        this.rebase = rebase;
         return this;
     }
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
@@ -14,10 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
-import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
@@ -81,17 +77,11 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             // no need to send new completion request
             computeProposals(currentWord, offset - latestCompletionResult.getOffset(), callback);
         } else {
-            documentServiceClient.completion(documentPosition).then(new Operation<ExtendedCompletionList>() {
-                @Override
-                public void apply(ExtendedCompletionList list) throws OperationException {
-                    latestCompletionResult.update(documentId, offset, currentWord, list);
-                    computeProposals(currentWord, 0, callback);
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError error) throws OperationException {
-                    lastErrorMessage = error.getMessage();
-                }
+            documentServiceClient.completion(documentPosition).then(list -> {
+                latestCompletionResult.update(documentId, offset, currentWord, list);
+                computeProposals(currentWord, 0, callback);
+            }).catchError(error -> {
+                lastErrorMessage = error.getMessage();
             });
         }
     }
@@ -133,7 +123,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             // return the highlights based on the label
             List<Match> highlights = fuzzyMatches.fuzzyMatch(word, label);
             // return empty list of highlights if nothing matches the label
-            return (highlights == null) ? new ArrayList<Match>() : highlights;
+            return (highlights == null) ? new ArrayList<>() : highlights;
         }
 
         return null;
@@ -142,14 +132,13 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     private void computeProposals(String currentWord, int offset, CodeAssistCallback callback) {
         List<CompletionProposal> proposals = newArrayList();
         for (ExtendedCompletionItem item : latestCompletionResult.getCompletionList().getItems()) {
-            List<Match> highlights = filter(currentWord, item);
+            List<Match> highlights = filter(currentWord, item.getItem());
             if (highlights != null) {
                 proposals.add(new CompletionItemBasedCompletionProposal(item,
                                                                         currentWord,
                                                                         documentServiceClient,
-                                                                        latestCompletionResult.getDocumentId(),
                                                                         resources,
-                                                                        imageProvider.getIcon(item.getKind()),
+                                                                        imageProvider.getIcon(item.getItem().getKind()),
                                                                         serverCapabilities,
                                                                         highlights,
                                                                         offset));

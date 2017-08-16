@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -386,9 +386,9 @@ export class CheWorkspace {
       return item[0] + ':' + item[1];
     });
     let promise = namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, data).$promise :
+        namespace: namespace,
+        attribute: attrs
+      }, data).$promise :
       this.remoteWorkspaceAPI.create({attribute: attrs}, data).$promise;
     return promise;
   }
@@ -398,9 +398,9 @@ export class CheWorkspace {
       return item[0] + ':' + item[1];
     });
     return namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, workspaceConfig).$promise :
+        namespace: namespace,
+        attribute: attrs
+      }, workspaceConfig).$promise :
       this.remoteWorkspaceAPI.create({attribute: attrs}, workspaceConfig).$promise;
   }
 

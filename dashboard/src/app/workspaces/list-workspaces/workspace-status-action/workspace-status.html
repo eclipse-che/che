@@ -15,10 +15,10 @@
         ng-click="workspaceStatusController.startWorkspace()"
         ng-show="workspaceStatusController.isShowRun()"
         ng-class="{'disabled' : workspaceStatusController.getWorkspaceStatus() === 'STARTING'}"
-        tooltip="Run workspace"></span>
+        uib-tooltip="Run workspace"></span>
   <span class="fa fa-stop"
         ng-click="workspaceStatusController.stopWorkspace()"
         ng-show="!workspaceStatusController.isShowRun()"
         ng-class="{'disabled' : workspaceStatusController.isStopDisabled()}"
-        tooltip="Stop workspace"></span>
+        uib-tooltip="Stop workspace"></span>
 </div>

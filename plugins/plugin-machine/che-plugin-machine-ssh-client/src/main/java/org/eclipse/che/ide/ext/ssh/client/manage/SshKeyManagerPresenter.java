@@ -1,17 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.ssh.client.manage;
 
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
@@ -25,6 +24,7 @@ import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.ext.ssh.client.SshLocalizationConstant;
 import org.eclipse.che.ide.ext.ssh.client.upload.UploadSshKeyPresenter;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 
 import javax.validation.constraints.NotNull;
 
@@ -120,8 +120,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
     private void downloadPrivateKey(final String privateKey) {
         dialogFactory.createConfirmDialog(constant.downloadPrivateKeyTitle(),
                                           constant.downloadPrivateKeyMessage(),
-                                          () -> Window.open("data:application/x-pem-key," + URL.encodePathSegment(privateKey), "_blank",
-                                                            null),
+                                          () -> BrowserUtils.openInNewTab("data:application/x-pem-key," + URL.encodePathSegment(privateKey)),
                                           getCancelCallback()).show();
     }
 

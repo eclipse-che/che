@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.editor.orion.client;
 
@@ -76,6 +76,8 @@ import org.eclipse.che.ide.editor.orion.client.events.ScrollHandler;
 import org.eclipse.che.ide.editor.orion.client.incremental.find.IncrementalFindReportStatusObserver;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationTypeOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationsOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionContentAssistOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOptionsOverlay;
@@ -87,7 +89,6 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionInputChangedEventOverlay
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyBindingsRelationOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyModeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyStrokeOverlay;
-import org.eclipse.che.ide.editor.orion.client.jso.OrionProblemOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionRulerClickEventOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
@@ -101,6 +102,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.requirejs.ModuleHolder;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -132,7 +134,10 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     private final ContentAssistWidgetFactory contentAssistWidgetFactory;
     private final DialogFactory              dialogFactory;
     private final PreferencesManager         preferencesManager;
-    private final OrionSettingsController orionSettingsController;
+    private final OrionSettingsController    orionSettingsController;
+    private final OrionAnnotationTypeOverlay annotationType;
+
+    private final List<OrionAnnotationOverlay> problems = new ArrayList<>();
 
     @UiField
     SimplePanel        panel;
@@ -147,8 +152,8 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     /** Component that handles undo/redo. */
     private HandlesUndoRedo        undoRedo;
 
-    private OrionDocument           embeddedDocument;
-    private OrionKeyModeOverlay     cheContentAssistMode;
+    private OrionDocument       embeddedDocument;
+    private OrionKeyModeOverlay cheContentAssistMode;
 
     private Keymap              keymap;
     private ContentAssistWidget assistWidget;
@@ -188,6 +193,7 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
         initWidget(UIBINDER.createAndBindUi(this));
 
         this.uiUtilsOverlay = moduleHolder.getModule("UiUtils");
+        this.annotationType = moduleHolder.getModule("OrionAnnotations").<OrionAnnotationsOverlay>cast().getAnnotationType();
 
         // just first choice for the moment
         if (editorModes != null && !editorModes.isEmpty()) {
@@ -300,6 +306,11 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     @Override
     public void markClean() {
         this.editorOverlay.setDirty(false);
+    }
+
+    @Override
+    public void markDirty() {
+        this.editorOverlay.setDirty(true);
     }
 
     private void selectKeyMode(Keymap keymap) {
@@ -682,37 +693,46 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     }
 
     public void showErrors(AnnotationModelEvent event) {
-        List<Annotation> addedAnnotations = event.getAddedAnnotations();
-        JsArray<OrionProblemOverlay> jsArray = JsArray.createArray().cast();
         AnnotationModel annotationModel = event.getAnnotationModel();
         OrionAnnotationSeverityProvider severityProvider = null;
         if (annotationModel instanceof OrionAnnotationSeverityProvider) {
             severityProvider = (OrionAnnotationSeverityProvider)annotationModel;
         }
-        for (Annotation annotation : addedAnnotations) {
-            Position position = annotationModel.getPosition(annotation);
 
-            OrionProblemOverlay problem = JavaScriptObject.createObject().cast();
-            problem.setDescription(annotation.getText());
-            problem.setStart(position.getOffset());
-            problem.setEnd(position.getOffset() + position.getLength());
-            problem.setId("che-annotation");
-            problem.setSeverity(getSeverity(annotation.getType(), severityProvider));
-            jsArray.push(problem);
+        for (OrionAnnotationOverlay annotationOverlay : problems) {
+            editorOverlay.getAnnotationModel().removeAnnotation(annotationOverlay);
         }
-        editorOverlay.showProblems(jsArray);
+
+        Iterator<Annotation> annotationIterator = annotationModel.getAnnotationIterator();
+        while (annotationIterator.hasNext()) {
+            Annotation annotation = annotationIterator.next();
+            OrionAnnotationOverlay problem = getOrionAnnotationOverlay(annotationModel, severityProvider, annotation);
+            editorOverlay.getAnnotationModel().addAnnotation(problem);
+            problems.add(problem);
+        }
     }
 
+    private OrionAnnotationOverlay getOrionAnnotationOverlay(AnnotationModel annotationModel,
+                                                             OrionAnnotationSeverityProvider severityProvider, Annotation annotation) {
+        Position position = annotationModel.getPosition(annotation);
+
+        return annotationType.createAnnotation(getSeverity(annotation.getType(), severityProvider),
+                                               position.getOffset(),
+                                               position.getOffset() + position.getLength(),
+                                               annotation.getText());
+    }
     private String getSeverity(String type, OrionAnnotationSeverityProvider provider) {
         if (provider != null) {
             return provider.getSeverity(type);
         } else {
-            return "error";
+            return "orion.annotation.error";
         }
     }
 
     public void clearErrors() {
-        editorOverlay.showProblems(JavaScriptObject.createArray().<JsArray<OrionProblemOverlay>>cast());
+        OrionAnnotationModelOverlay annotationModelOverlay = editorOverlay.getAnnotationModel();
+        problems.forEach(annotationModelOverlay::removeAnnotation);
+        problems.clear();
     }
 
     public OrionTextViewOverlay getTextView() {

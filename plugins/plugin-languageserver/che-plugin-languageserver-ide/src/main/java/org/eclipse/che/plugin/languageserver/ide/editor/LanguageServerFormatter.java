@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
@@ -18,8 +18,8 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
 import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
@@ -89,9 +89,9 @@ public class LanguageServerFormatter implements ContentFormatter {
         this.editor = editor;
         if (capabilities.getDocumentOnTypeFormattingProvider() != null &&
             capabilities.getDocumentOnTypeFormattingProvider().getFirstTriggerCharacter() != null) {
-            editor.getDocument().getDocumentHandle().getDocEventBus().addHandler(DocumentChangeEvent.TYPE, new DocumentChangeHandler() {
+            editor.getDocument().getDocumentHandle().getDocEventBus().addHandler(DocumentChangedEvent.TYPE, new DocumentChangedHandler() {
                 @Override
-                public void onDocumentChange(DocumentChangeEvent event) {
+                public void onDocumentChanged(DocumentChangedEvent event) {
                     if (capabilities.getDocumentOnTypeFormattingProvider().getFirstTriggerCharacter().equals(event.getText())) {
                         Document document = event.getDocument().getDocument();
 

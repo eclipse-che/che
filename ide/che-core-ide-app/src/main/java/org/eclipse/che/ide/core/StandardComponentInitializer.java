@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.core;
 
@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.actions.AddToFileWatcherExcludesAction;
 import org.eclipse.che.ide.actions.CloseActiveEditorAction;
 import org.eclipse.che.ide.actions.CollapseAllAction;
 import org.eclipse.che.ide.actions.CompleteAction;
@@ -38,6 +39,7 @@ import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
 import org.eclipse.che.ide.actions.RedoAction;
 import org.eclipse.che.ide.actions.RefreshPathAction;
+import org.eclipse.che.ide.actions.RemoveFromFileWatcherExcludesAction;
 import org.eclipse.che.ide.actions.RenameItemAction;
 import org.eclipse.che.ide.actions.RunCommandAction;
 import org.eclipse.che.ide.actions.SaveAction;
@@ -74,7 +76,6 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
-import org.eclipse.che.ide.connection.WsConnectionListener;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.imageviewer.PreviewImageAction;
 import org.eclipse.che.ide.machine.MachineResources;
@@ -167,6 +168,8 @@ public class StandardComponentInitializer {
     public static final String COPY                  = "copy";
     public static final String CUT                   = "cut";
     public static final String PASTE                 = "paste";
+    public static final String UNDO                  = "undo";
+    public static final String REDO                  = "redo";
     public static final String SWITCH_LEFT_TAB       = "switchLeftTab";
     public static final String SWITCH_RIGHT_TAB      = "switchRightTab";
     public static final String OPEN_RECENT_FILES     = "openRecentFiles";
@@ -414,6 +417,12 @@ public class StandardComponentInitializer {
     private ShowConsoleTreeAction showConsoleTreeAction;
 
     @Inject
+    private AddToFileWatcherExcludesAction addToFileWatcherExcludesAction;
+
+    @Inject
+    private RemoveFromFileWatcherExcludesAction removeFromFileWatcherExcludesAction;
+
+    @Inject
     private PerspectiveManager perspectiveManager;
 
     @Inject
@@ -469,8 +478,6 @@ public class StandardComponentInitializer {
     @Inject
     @Named("CommandFileType")
     private FileType              commandFileType;
-    @Inject
-    private WsConnectionListener  wsConnectionListener;
 
     @Inject
     private ProjectConfigSynchronized projectConfigSynchronized;
@@ -628,10 +635,10 @@ public class StandardComponentInitializer {
 
         editGroup.add(saveAction);
 
-        actionManager.registerAction("undo", undoAction);
+        actionManager.registerAction(UNDO, undoAction);
         editGroup.add(undoAction);
 
-        actionManager.registerAction("redo", redoAction);
+        actionManager.registerAction(REDO, redoAction);
         editGroup.add(redoAction);
 
         actionManager.registerAction(SOFT_WRAP, softWrapAction);
@@ -721,6 +728,10 @@ public class StandardComponentInitializer {
         resourceOperation.add(linkWithEditorAction);
         resourceOperation.addSeparator();
         resourceOperation.add(convertFolderToProjectAction);
+        resourceOperation.addSeparator();
+        resourceOperation.addSeparator();
+        resourceOperation.add(addToFileWatcherExcludesAction);
+        resourceOperation.add(removeFromFileWatcherExcludesAction);
         resourceOperation.addSeparator();
 
         DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
@@ -842,6 +853,9 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F10).build(), SHOW_COMMANDS_PALETTE);
 
         keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('s').build(), SAVE);
+
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('z').build(), UNDO);
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('y').build(), REDO);
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), CLOSE_ACTIVE_EDITOR);

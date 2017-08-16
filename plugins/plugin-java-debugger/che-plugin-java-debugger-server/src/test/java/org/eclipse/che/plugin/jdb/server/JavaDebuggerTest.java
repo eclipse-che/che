@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.jdb.server;
 
@@ -15,17 +15,12 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
-import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
-import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
-import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepIntoActionImpl;
@@ -38,10 +33,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
@@ -219,29 +212,6 @@ public class JavaDebuggerTest {
         location = ((SuspendEvent)debuggerEvent).getLocation();
         assertEquals(location.getTarget(), "com.HelloWorld");
         assertEquals(location.getLineNumber(), 24);
-    }
-
-    @Test(priority = 100)
-    public void testEvaluateExpression() throws Exception {
-        assertEquals(debugger.evaluate("2+2"), "4");
-        assertEquals(debugger.evaluate("\"hello\""), "\"hello\"");
-        assertEquals(debugger.evaluate("test"), "\"hello\"");
-    }
-
-    @Test(priority = 110)
-    public void testSetAndGetValue() throws Exception {
-        assertEquals(debugger.getValue(new VariablePathImpl("test")).getString(), "\"hello\"");
-        assertEquals(debugger.getValue(new VariablePathImpl("msg")).getString(), "\"Hello, debugger!\"");
-
-        debugger.setValue(new VariableImpl(new SimpleValueImpl("\"new hello\""), (new VariablePathImpl("test"))));
-
-        assertEquals(debugger.getValue(new VariablePathImpl("test")).getString(), "\"new hello\"");
-
-        StackFrameDump stackFrameDump = debugger.dumpStackFrame();
-        Set<String> vars = stackFrameDump.getVariables().stream().map(Variable::getName).collect(Collectors.toSet());
-        assertTrue(vars.contains("args"));
-        assertTrue(vars.contains("msg"));
-        assertTrue(vars.contains("test"));
     }
 
     @Test(priority = 120)

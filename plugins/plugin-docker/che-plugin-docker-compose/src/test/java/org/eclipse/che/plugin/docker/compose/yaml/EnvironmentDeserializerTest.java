@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.compose.yaml;
 
@@ -68,8 +68,8 @@ public class EnvironmentDeserializerTest {
                  + " dev-machine: \n"
                  + "  image: codenvy/ubuntu_jdk8\n"
                  + "  environment:\n"
-                 + "   MYSQL_ROOT_PASSWORD: ",
-                 ImmutableMap.of("MYSQL_ROOT_PASSWORD", null)
+                 + "   MYSQL_ROOT_PASSWORD: \"\"",
+                 ImmutableMap.of("MYSQL_ROOT_PASSWORD", "")
                 },
 
                 // dictionary format, value of variable contains colon sign

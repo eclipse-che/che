@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016-2017 Red Hat Inc.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Red Hat Inc. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
@@ -83,7 +83,7 @@ public class ServerEvaluationStrategyTest {
         expected.put("9090/udp", DEFAULT_HOSTNAME + ":" + "32101");
 
         // when
-        Map<String, String> actual = strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports);
+        Map<String, String> actual = strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports, false);
 
         // then
         assertEquals(actual, expected);
@@ -108,7 +108,7 @@ public class ServerEvaluationStrategyTest {
         expected.put("9090/udp", DEFAULT_HOSTNAME + ":" + "32101");
 
         // when
-        Map<String, String> actual = strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports);
+        Map<String, String> actual = strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports, false);
 
         // then
         assertEquals(actual, expected);
@@ -375,7 +375,7 @@ public class ServerEvaluationStrategyTest {
                                                                          .withHostPort("32101")));
         when(networkSettings.getPorts()).thenReturn(ports);
         Map<String, String> exposedPortsToAddressPorts =
-                strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports);
+                strategy.getExposedPortsToAddressPorts(DEFAULT_HOSTNAME, ports, false);
         when(strategy.getExternalAddressesAndPorts(containerInfo, DEFAULT_HOSTNAME))
                 .thenReturn(exposedPortsToAddressPorts);
         when(strategy.getInternalAddressesAndPorts(containerInfo, DEFAULT_HOSTNAME))
@@ -395,6 +395,11 @@ public class ServerEvaluationStrategyTest {
         protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo,
                                                                    String internalAddress) {
             return null;
+        }
+
+        @Override
+        protected boolean useHttpsForExternalUrls() {
+            return false;
         }
     }
 }

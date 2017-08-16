@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.branch;
 
@@ -40,7 +40,7 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
         void onCreateClicked();
 
         /**
-         * Performs any action in response to the user having select branch.
+         * Performs any action in response to the user having selected branch.
          *
          * @param branch
          *         selected revision
@@ -49,6 +49,11 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
 
         /** Performs any action in response to the user do not have any selected branch. */
         void onBranchUnselected();
+
+        /**
+         * Performs any action in response to the user having selected branch filter.
+         */
+        void onFilterValueChanged();
     }
 
     /**
@@ -82,6 +87,11 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
      *         <code>true</code> to enable the button, <code>false</code> to disable it
      */
     void setEnableRenameButton(boolean enabled);
+
+    /**
+     * Returns selected branch filter.
+     */
+    String getFilterValue();
 
     /** Close dialog. */
     void close();

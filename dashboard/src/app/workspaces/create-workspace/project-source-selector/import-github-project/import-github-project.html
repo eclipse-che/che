@@ -1,0 +1,64 @@
+<div class="import-github-project">
+  <form name="importGithubProjectForm">
+
+    <!-- load error -->
+    <p ng-if="importGithubProjectController.state == importGithubProjectController.loadingState.LOAD_ERROR" class="alert alert-danger import-github-project-auth-error">
+      We have a problem authenticating you with GitHub.
+    </p>
+
+    <!-- no repo -->
+    <div layout="column" layout-align="space-around flex-start"
+         ng-show="importGithubProjectController.state == importGithubProjectController.loadingState.NO_REPO">
+      <div class="import-github-project-warningempty">Your GitHub repositories will appear here</div>
+      <div class="import-github-project-prompt">GitHub repositories can easily be imported in {{importGithubProjectController.productName}}</div>
+      <che-button-default class="import-github-project-button"
+                          che-button-icon="fa fa-github"
+                          che-button-title="Connect your github account"
+                          ng-click="importGithubProjectController.authenticateWithGitHub()">
+      </che-button-default>
+    </div>
+
+    <!-- loading -->
+    <div ng-show="importGithubProjectController.state === importGithubProjectController.loadingState.LOADING">
+      <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+    </div>
+
+    <!-- loaded -->
+    <div ng-if="importGithubProjectController.state == importGithubProjectController.loadingState.LOADED">
+      <div layout="row" layout-align="start flex-start" class="import-github-project-filters">
+
+        <!-- search field -->
+        <div layout="row"
+             flex="45"
+             class="import-github-project-search-component">
+          <search-input flex search-placeholder="Search"
+                        ng-model="importGithubProjectController.repositoryName"
+                        search-on-change="importGithubProjectController.onSearchChanged(search)"></search-input>
+        </div>
+
+        <!-- organizations select -->
+        <div layout="row"
+             flex="45" flex-offset="10"
+             class="import-github-project-dropdown-component">
+          <select flex id="organizationFilter"
+                  class="import-github-project-select"
+                  ng-model="importGithubProjectController.organization"
+                  ng-change="importGithubProjectController.onOrganizationSelect()"
+                  ng-options="importGithubProjectController.resolveOrganizationName(organization) group by importGithubProjectController.resolveOrganizationType(organization) for organization in importGithubProjectController.organizationsList">
+            <option value="">All Organizations</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- repositories list -->
+      <che-list class="import-github-project-repositories-list">
+        <github-repository-item ng-repeat="gitHubRepository in importGithubProjectController.cheListHelper.getVisibleItems() | orderBy:'name'"
+                                flex-gt-sm="100" flex="33"
+                                git-hub-repository="gitHubRepository"
+                                checked-repositories="importGithubProjectController.cheListHelper.itemsSelectionStatus"
+                                on-repository-click="importGithubProjectController.onRepositorySelected()"></github-repository-item>
+      </che-list>
+    </div>
+
+  </form>
+</div>

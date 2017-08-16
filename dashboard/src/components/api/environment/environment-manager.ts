@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './environment-manager-machine';
@@ -233,10 +233,13 @@ export abstract class EnvironmentManager {
    * Returns memory limit from machine's attributes
    *
    * @param {IEnvironmentManagerMachine} machine
-   * @returns {number|string} memory limit in bytes
+   * @returns {number} memory limit in bytes
    */
-  getMemoryLimit(machine: IEnvironmentManagerMachine): number|string {
+  getMemoryLimit(machine: IEnvironmentManagerMachine): number {
     if (machine && machine.attributes && machine.attributes.memoryLimitBytes) {
+      if (angular.isString(machine.attributes.memoryLimitBytes)) {
+        return parseInt(machine.attributes.memoryLimitBytes, 10);
+      }
       return machine.attributes.memoryLimitBytes;
     }
 

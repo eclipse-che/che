@@ -1,16 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.jsonrpc;
 
-import org.eclipse.che.ide.jsonrpc.WebSocketJsonRpcInitializer;
 import org.eclipse.che.ide.websocket.impl.WebSocketInitializer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +19,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Collections;
 
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -36,15 +37,15 @@ public class WebSocketJsonRpcInitializerTest {
 
     @Test
     public void shouldRunInitializeOnInitialize() {
-        jsonRpcInitializer.initialize("id", Collections.singletonMap("url", "url"));
+        jsonRpcInitializer.initialize("id", singletonMap("url", "url"));
 
-        verify(webSocketInitializer).initialize("id", "url");
+        verify(webSocketInitializer).initialize("id", "url", emptySet());
     }
 
     @Test
     public void shouldRunTerminateOnTerminate() {
         jsonRpcInitializer.terminate("id");
 
-        verify(webSocketInitializer).terminate("id");
+        verify(webSocketInitializer).terminate("id", emptySet());
     }
 }

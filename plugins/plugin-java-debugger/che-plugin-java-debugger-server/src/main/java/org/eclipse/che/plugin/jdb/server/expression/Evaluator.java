@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.jdb.server.expression;
 
@@ -37,7 +37,6 @@ import com.sun.jdi.PrimitiveValue;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.StringReference;
-import com.sun.jdi.ThreadReference;
 import com.sun.jdi.Type;
 import com.sun.jdi.Value;
 import com.sun.jdi.VirtualMachine;
@@ -67,20 +66,16 @@ public class Evaluator {
         PRIMITIVE_TYPES.add("double");
     }
 
-    private final VirtualMachine  vm;
-    private final ThreadReference thread;
+    private final VirtualMachine vm;
+    private final StackFrame     stackFrame;
 
-    public Evaluator(VirtualMachine vm, ThreadReference thread) {
+    public Evaluator(VirtualMachine vm, StackFrame stackFrame) {
         this.vm = vm;
-        this.thread = thread;
+        this.stackFrame = stackFrame;
     }
 
     private static boolean isPrimitive(Type type) {
         return PRIMITIVE_TYPES.contains(type.name());
-    }
-
-    public ThreadReference getThread() {
-        return thread;
     }
 
     public ExpressionValue booleanValue(String text) {
@@ -227,11 +222,7 @@ public class Evaluator {
     }
 
     public ExpressionValue getThisObject() {
-        try {
-            return new ReadOnlyValue(thread.frame(0).thisObject());
-        } catch (IncompatibleThreadStateException e) {
-            throw new ExpressionException(e.getMessage(), e);
-        }
+        return new ReadOnlyValue(stackFrame.thisObject());
     }
 
     public ExpressionValue getField(Value parent, String name) {
@@ -255,12 +246,11 @@ public class Evaluator {
     public ExpressionValue getLocalVariable(String text) {
         ExpressionValue value = null;
         try {
-            StackFrame frame = thread.frame(0);
-            LocalVariable var = frame.visibleVariableByName(text);
+            LocalVariable var = stackFrame.visibleVariableByName(text);
             if (var != null) {
-                value = new LocalValue(thread, var);
+                value = new LocalValue(stackFrame, var);
             }
-        } catch (IncompatibleThreadStateException | AbsentInformationException | InvalidStackFrameException | NativeMethodException e) {
+        } catch (AbsentInformationException | InvalidStackFrameException | NativeMethodException e) {
             throw new ExpressionException(e.getMessage(), e);
         }
         LOG.debug("GET local variable {} {} ", text, value);
@@ -397,7 +387,7 @@ public class Evaluator {
             throw new ExpressionException("No method with name " + name + " matched to specified arguments for " + type.name());
         }
         try {
-            return new ReadOnlyValue(object.invokeMethod(thread, method, arguments, 0));
+            return new ReadOnlyValue(object.invokeMethod(stackFrame.thread(), method, arguments, 0));
         } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException e) {
             throw new ExpressionException(e.getMessage(), e);
         }

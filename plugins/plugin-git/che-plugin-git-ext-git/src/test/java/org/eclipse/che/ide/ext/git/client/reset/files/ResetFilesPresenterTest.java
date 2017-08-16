@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.reset.files;
 
@@ -67,7 +67,7 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(indexFile.withIndexed(anyBoolean())).thenReturn(indexFile);
         when(indexFile.withPath(anyString())).thenReturn(indexFile);
         when(indexFile.getPath()).thenReturn("foo");
-        when(service.getStatus(anyObject(), any(Path.class))).thenReturn(statusPromise);
+        when(service.getStatus(any(Path.class))).thenReturn(statusPromise);
         when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
         when(statusPromise.catchError(any(Operation.class))).thenReturn(statusPromise);
         when(appContext.getResources()).thenReturn(new Resource[]{});
@@ -163,7 +163,7 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(status.getChanged()).thenReturn(changes);
         when(status.getRemoved()).thenReturn(changes);
 
-        when(service.reset(anyObject(), any(Path.class), anyString(), any(ResetRequest.ResetType.class), anyObject())).thenReturn(voidPromise);
+        when(service.reset(any(Path.class), anyString(), any(ResetRequest.ResetType.class), anyObject())).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 
@@ -192,7 +192,7 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(status.getChanged()).thenReturn(changes);
         when(status.getRemoved()).thenReturn(changes);
 
-        when(service.reset(anyObject(), any(Path.class), anyString(), any(ResetRequest.ResetType.class), anyObject())).thenReturn(voidPromise);
+        when(service.reset(any(Path.class), anyString(), any(ResetRequest.ResetType.class), anyObject())).thenReturn(voidPromise);
         when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
         when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 

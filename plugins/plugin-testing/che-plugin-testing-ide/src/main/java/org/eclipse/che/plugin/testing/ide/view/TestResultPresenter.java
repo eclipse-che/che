@@ -1,16 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.view;
 
 import org.eclipse.che.api.testing.shared.TestResult;
+import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -36,7 +37,7 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
     private final TestResultView view;
 
     @Inject
-    public TestResultPresenter(WorkspaceAgent workspaceAgent, 
+    public TestResultPresenter(WorkspaceAgent workspaceAgent,
                                TestLocalizationConstant localizationConstant,
                                TestResources resources,
                                TestResultView view) {
@@ -78,9 +79,26 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
      * @param response
      *            result of the test runner
      */
+    @Deprecated
     public void handleResponse(TestResult response) {
         workspaceAgent.openPart(this, PartStackType.INFORMATION);
         workspaceAgent.setActivePart(this);
         view.showResults(response);
+    }
+
+    /**
+     * Activates test results part and shows the results.
+     *
+     * @param response
+     *            result root of the test runner
+     */
+    public void handleResponse(TestResultRootDto response) {
+        workspaceAgent.openPart(this, PartStackType.INFORMATION);
+        workspaceAgent.setActivePart(this);
+        view.showResults(response);
+    }
+
+    public void clear() {
+        view.clear();
     }
 }

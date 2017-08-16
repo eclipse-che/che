@@ -1,38 +1,46 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.lsp4j.services.LanguageServer;
+import org.eclipse.lsp4j.ServerCapabilities;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Anatoliy Bazko
  */
 public interface LanguageServerRegistry {
     /**
-     * Finds appropriate language server according to file name.
+     * Finds appropriate language servers according to file uri.
+     * @throws LanguageServerException 
      */
-    @Nullable
-    LanguageServer findServer(String fileUri) throws LanguageServerException;
+    List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri) throws LanguageServerException;
 
     /**
      * Returns all available servers.
      */
     List<LanguageDescription> getSupportedLanguages();
+    
+    /**
+     * Initialize the language servers that apply to this file
+     * @param fileUri
+     * @return 
+     * @throws LanguageServerException 
+     */
+    ServerCapabilities initialize(String fileUri) throws LanguageServerException;
 
-    Map<ProjectExtensionKey, LanguageServerDescription> getInitializedLanguages();
+    ServerCapabilities getCapabilities(String fileUri) throws LanguageServerException;
+    
+    InitializedLanguageServer getServer(String id);
 }

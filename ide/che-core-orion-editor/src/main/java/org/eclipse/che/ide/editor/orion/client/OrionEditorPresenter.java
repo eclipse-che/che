@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.editor.orion.client;
 
@@ -42,6 +42,7 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
@@ -257,7 +258,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     @Override
-    protected void initializeEditor(final EditorAgent.OpenEditorCallback callback) {
+    protected void initializeEditor(final OpenEditorCallback callback) {
         QuickAssistProcessor processor = configuration.getQuickAssistProcessor();
         if (quickAssistantFactory != null && processor != null) {
             quickAssistant = quickAssistantFactory.createQuickAssistant(this);
@@ -285,7 +286,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         }).then(new Operation<String>() {
             @Override
             public void apply(String content) throws OperationException {
-                createEditor(content);
+                createEditor(content, callback);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -297,9 +298,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     }
 
-    private void createEditor(final String content) {
+    private void createEditor(final String content, OpenEditorCallback openEditorCallback) {
         this.fileTypes = detectFileType(getEditorInput().getFile());
-        editorWidgetFactory.createEditorWidget(fileTypes, new EditorWidgetInitializedCallback(content));
+        editorWidgetFactory.createEditorWidget(fileTypes, new EditorWidgetInitializedCallback(content, openEditorCallback));
     }
 
     private void setupEventHandlers() {
@@ -694,6 +695,13 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     @Override
+    public void setCursorPosition(TextPosition textPosition) {
+        if (document != null) {
+            document.setCursorPosition(textPosition);
+        }
+    }
+
+    @Override
     public int getCursorOffset() {
         final TextPosition textPosition = getDocument().getCursorPosition();
         return getDocument().getIndexFromPosition(textPosition);
@@ -999,12 +1007,13 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     private class EditorWidgetInitializedCallback implements EditorWidget.WidgetInitializedCallback {
-        private final String content;
+        private final String             content;
+        private       boolean            isInitialized;
+        private       OpenEditorCallback openEditorCallback;
 
-        private boolean isInitialized;
-
-        private EditorWidgetInitializedCallback(String content) {
+        private EditorWidgetInitializedCallback(String content, OpenEditorCallback openEditorCallback) {
             this.content = content;
+            this.openEditorCallback = openEditorCallback;
         }
 
         @Override
@@ -1014,7 +1023,13 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             editorView.setEditorWidget(editorWidget);
 
             document = editorWidget.getDocument();
-            document.setFile(input.getFile());
+            final VirtualFile file = input.getFile();
+            document.setFile(file);
+
+            if (file instanceof File) {
+                ((File)file).updateModificationStamp(content);
+            }
+
             cursorModel = new OrionCursorModel(document);
 
             editorWidget.setTabSize(configuration.getTabWidth());
@@ -1031,7 +1046,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             if (delayedFocus) {
                 editorWidget.refresh();
                 editorWidget.setFocus();
-                setSelection(new Selection<>(input.getFile()));
+                setSelection(new Selection<>(file));
                 delayedFocus = false;
             }
 
@@ -1051,6 +1066,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                     setupFileContentUpdateHandler();
 
                     isInitialized = true;
+                    openEditorCallback.onEditorOpened(OrionEditorPresenter.this);
                 }
             });
 
@@ -1060,6 +1076,11 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                     contextMenu.show(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
                 }
             }, ContextMenuEvent.getType());
+
+            getUndoRedo().addUndoRedoOperationsListener(() -> Scheduler.get().scheduleDeferred(() -> {
+                editorWidget.markDirty();
+                updateDirtyState(true);
+            }));
         }
     }
 

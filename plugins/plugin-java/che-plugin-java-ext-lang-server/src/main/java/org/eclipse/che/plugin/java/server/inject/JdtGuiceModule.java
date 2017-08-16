@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.java.server.inject;
 
@@ -29,7 +29,7 @@ import org.eclipse.che.plugin.java.server.rest.JavadocService;
 import org.eclipse.che.plugin.java.server.rest.JavadocUrlProviderImpl;
 import org.eclipse.che.plugin.java.server.rest.JdtExceptionMapper;
 import org.eclipse.che.plugin.java.server.rest.RefactoringService;
-import org.eclipse.che.plugin.java.server.rest.SearchService;
+import org.eclipse.che.plugin.java.server.rest.SearchJsonRpcService;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -56,7 +56,7 @@ public class JdtGuiceModule extends AbstractModule {
         bind(ProjectListeners.class).asEagerSingleton();
         bind(RefactoringManager.class).asEagerSingleton();
         bind(RefactoringService.class);
-        bind(SearchService.class);
+        bind(SearchJsonRpcService.class).asEagerSingleton();
 
         bind(JavaReconcileRequestHandler.class).asEagerSingleton();
 

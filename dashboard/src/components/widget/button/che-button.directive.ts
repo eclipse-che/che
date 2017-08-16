@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -15,16 +15,15 @@
  * Defines the super class for for all buttons
  * @author Florent Benoit
  */
-export class CheButton {
+export abstract class CheButton {
+  restrict: string = 'E';
+  bindToController: boolean = true;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
-    this.restrict = 'E';
-    this.bindToController = true;
-  }
+  constructor () {}
 
   /**
    * Template for the current toolbar
@@ -32,8 +31,8 @@ export class CheButton {
    * @param attrs
    * @returns {string} the template
    */
-  template(element, attrs) {
-    var template = this.getTemplateStart();
+  template(element: ng.IAugmentedJQuery, attrs: any) {
+    let template: string = this.getTemplateStart();
 
     if (attrs.href) {
       template = template + ` href="${attrs.href}"`;
@@ -62,11 +61,13 @@ export class CheButton {
     }
 
 
-    template = template + attrs['cheButtonTitle'] + '</md-button>';
+    template = template + attrs.cheButtonTitle + '</md-button>';
     return template;
   }
 
-  compile(element, attrs) {
+  abstract getTemplateStart(): string;
+
+  compile(element: ng.IAugmentedJQuery, attrs: any) {
     let button = element.find('button');
     if (attrs && attrs.tabindex) {
       button.attr('tabindex', attrs.tabindex);
@@ -82,8 +83,8 @@ export class CheButton {
   /**
    * Re-apply ng-disabled on child
    */
-  link($scope, element, attrs) {
-    $scope.$watch(attrs.ngDisabled, function (isDisabled) {
+  link($scope: ng.IScope, element: ng.IAugmentedJQuery, attrs: any) {
+    $scope.$watch(attrs.ngDisabled, function (isDisabled: boolean) {
       element.find('button').prop('disabled', isDisabled);
     });
 

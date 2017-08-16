@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.pull;
 
@@ -24,6 +24,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -45,11 +46,13 @@ public class PullViewImpl extends Window implements PullView {
     private static PullViewImplUiBinder ourUiBinder = GWT.create(PullViewImplUiBinder.class);
 
     @UiField
-    ListBox repository;
+    ListBox  repository;
     @UiField
-    ListBox localBranch;
+    ListBox  localBranch;
     @UiField
-    ListBox remoteBranch;
+    ListBox  remoteBranch;
+    @UiField
+    CheckBox rebase;
     Button btnPull;
     Button btnCancel;
     @UiField(provided = true)
@@ -163,6 +166,11 @@ public class PullViewImpl extends Window implements PullView {
         for (String branch : branches) {
             this.remoteBranch.addItem(branch);
         }
+    }
+
+    @Override
+    public boolean getRebase() {
+        return rebase.getValue();
     }
 
     /** {@inheritDoc} */

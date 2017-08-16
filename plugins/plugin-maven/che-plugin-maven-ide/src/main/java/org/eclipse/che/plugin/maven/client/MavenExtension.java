@@ -1,18 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.client;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.constraints.Constraints;
@@ -26,7 +25,6 @@ import org.eclipse.che.plugin.maven.client.actions.ReimportMavenDependenciesActi
 import org.eclipse.che.plugin.maven.client.comunnication.MavenMessagesHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.DependencyResolverAction;
 import org.eclipse.che.plugin.maven.client.editor.ClassFileSourcesDownloader;
-import org.eclipse.che.plugin.maven.client.editor.PomEditorProvider;
 import org.eclipse.che.plugin.maven.client.project.MavenModelImporter;
 import org.eclipse.che.plugin.maven.client.project.ResolvingMavenProjectStateHolder;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
@@ -105,11 +103,9 @@ public class MavenExtension {
     @Inject
     private void registerFileType(FileTypeRegistry fileTypeRegistry,
                                   MavenResources mavenResources,
-                                  EditorRegistry editorRegistry,
-                                  PomEditorProvider editorProvider) {
-        FileType pomFile = new FileType(mavenResources.maven(), "pom.xml", "pom\\.xml");
+                                  EditorRegistry editorRegistry) {
+        FileType pomFile = new FileType(mavenResources.maven(), null, "pom\\.xml");
         fileTypeRegistry.registerFileType(pomFile);
-        editorRegistry.register(pomFile, editorProvider);
     }
 
 }

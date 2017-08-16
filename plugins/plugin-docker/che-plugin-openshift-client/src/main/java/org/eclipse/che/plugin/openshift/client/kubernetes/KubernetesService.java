@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.openshift.client.kubernetes;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.ServicePort;
 
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ImageConfig;
-import org.eclipse.che.plugin.openshift.client.CheServicePorts;
 
-import io.fabric8.kubernetes.api.model.IntOrString;
-import io.fabric8.kubernetes.api.model.ServicePort;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Provides API for managing Kubernetes {@link ServicePort}
@@ -38,7 +38,7 @@ public final class KubernetesService {
      * @param exposedPorts
      * @return list of {@link ServicePort}
      */
-    public static List<ServicePort> getServicePortsFrom(Set<String> exposedPorts) {
+    public static List<ServicePort> getServicePortsFrom(Set<String> exposedPorts, Map<String, String> portsToRefName) {
         List<ServicePort> servicePorts = new ArrayList<>(exposedPorts.size());
         for (String exposedPort : exposedPorts) {
             String[] portAndProtocol = exposedPort.split("/", 2);
@@ -46,8 +46,8 @@ public final class KubernetesService {
             String protocol = portAndProtocol[1];
 
             int portNumber = Integer.parseInt(port);
-            String portName = CheServicePorts.get().get(portNumber);
-            portName = isNullOrEmpty(portName) ? exposedPort.replace("/", "-") : portName;
+            String portName = portsToRefName.get(exposedPort);
+            portName = isNullOrEmpty(portName) ? "server-" + exposedPort.replace("/", "-") : portName;
 
             int targetPortNumber = portNumber;
             ServicePort servicePort = new ServicePort();

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.local;
 
@@ -23,6 +23,7 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
+import org.eclipse.che.plugin.docker.machine.LocalDockerCustomServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.openshift.client.OpenShiftConnector;
@@ -56,6 +57,8 @@ public class LocalDockerModule extends AbstractModule {
                   .to(org.eclipse.che.plugin.docker.machine.DefaultServerEvaluationStrategy.class);
         strategies.addBinding("docker-local")
                   .to(org.eclipse.che.plugin.docker.machine.LocalDockerServerEvaluationStrategy.class);
+        strategies.addBinding("docker-local-custom")
+                  .to(LocalDockerCustomServerEvaluationStrategy.class);
         strategies.addBinding("custom")
                   .to(org.eclipse.che.plugin.docker.machine.CustomServerEvaluationStrategy.class);
 

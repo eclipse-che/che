@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client;
 
@@ -1346,7 +1346,12 @@ public class DockerConnector {
 
     protected <T> T parseResponseStreamAndClose(InputStream inputStream, Class<T> clazz) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-            return GSON.fromJson(reader, clazz);
+            T objectFromJson = GSON.fromJson(reader, clazz);
+            if (objectFromJson == null) {
+                LOG.error("Docker response doesn't contain any data, though it was expected to contain some.");
+                throw new IOException("Internal server error. Unexpected response body received from Docker.");
+            }
+            return objectFromJson;
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
@@ -1354,7 +1359,12 @@ public class DockerConnector {
 
     protected <T> T parseResponseStreamAndClose(InputStream inputStream, TypeToken<T> tt) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-            return GSON.fromJson(reader, tt.getType());
+            T objectFromJson = GSON.fromJson(reader, tt.getType());
+            if (objectFromJson == null) {
+                LOG.error("Docker response doesn't contain any data, though it was expected to contain some.");
+                throw new IOException("Internal server error. Unexpected response body received from Docker.");
+            }
+            return objectFromJson;
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }

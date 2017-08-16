@@ -1,18 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -71,7 +70,7 @@ public class TextDocumentServiceClient {
      * @param completionItem
      * @return
      */
-    public Promise<ExtendedCompletionItem> resolveCompletionItem(CompletionItem completionItem) {
+    public Promise<ExtendedCompletionItem> resolveCompletionItem(ExtendedCompletionItem completionItem) {
         return transmitDtoAndReceiveDto(completionItem, "textDocument/completionItem/resolve", ExtendedCompletionItem.class);
 
     }
@@ -204,10 +203,9 @@ public class TextDocumentServiceClient {
      * @param params
      * @return a {@link Promise} of an array of {@link DocumentHighlight} which will be computed by the language server.
      */
-    public Promise<DocumentHighlight> documentHighlight(TextDocumentPositionParams params) {
-        return transmitDtoAndReceiveDto(params, "textDocument/documentHighlight", DocumentHighlight.class);
+    public Promise<List<DocumentHighlight>> documentHighlight(TextDocumentPositionParams params) {
+        return transmitDtoAndReceiveDtoList(params, "textDocument/documentHighlight", DocumentHighlight.class);
     }
-
 
     public Promise<List<Command>> codeAction(CodeActionParams params) {
         return transmitDtoAndReceiveDtoList(params, "textDocument/codeAction", Command.class);

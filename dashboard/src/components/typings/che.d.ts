@@ -1,16 +1,18 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
-import che = _che;
+declare module 'che' {
+  export = che;
+}
 
-declare namespace _che {
+declare namespace che {
 
   export interface IRootScopeService extends ng.IRootScopeService {
     hideLoader: boolean;
@@ -29,6 +31,14 @@ declare namespace _che {
       tabName: string;
     }
 
+    export interface IRoute extends ng.route.IRoute {
+      title: string | {(...args: any[]) : string};
+    }
+
+    export interface IRouteProvider extends ng.route.IRouteProvider {
+      accessWhen?: (path: string, route: IRoute) => IRouteProvider;
+      accessOtherWise?: (route: IRoute) => IRouteProvider;
+    }
   }
 
   export namespace widget {
@@ -89,9 +99,15 @@ declare namespace _che {
     workspaceConfig: IWorkspaceConfig;
   }
 
+  export interface IStackLink {
+    href: string;
+    method: string;
+    rel: string;
+    parameters: any[];
+  }
+
   export interface IWorkspace {
     id?: string;
-    name: string;
     projects?: any;
     links?: Array<any>;
     temporary?: boolean;
@@ -186,7 +202,7 @@ declare namespace _che {
   export interface IProjectSource {
     location: string;
     parameters?: {
-      [paramName: string]: string
+      [paramName: string]: any
     };
     type?: string;
   }
@@ -197,10 +213,14 @@ declare namespace _che {
     description: string;
     source?: IProjectSource;
     path?: string;
-    commands?: Array<any>;
+    commands?: Array<IWorkspaceCommand>;
+    mixins: Array<any>;
+    modules: Array<any>;
+    problems: Array<any>;
     projectType?: string;
     type?: string;
     tags?: Array<string>;
+    category?: string;
     attributes?: any;
     options?: Array<any>;
     workspaceId?: string;

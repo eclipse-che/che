@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.texteditor;
 
@@ -17,7 +17,7 @@ import com.google.gwt.event.dom.client.HasFocusHandlers;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RequiresResize;
 
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.editor.codeassist.AdditionalInfoCallback;
@@ -56,7 +56,7 @@ public interface EditorWidget extends IsWidget,
 
     /**
      * Sets the content of the editor.<br>
-     * The operation <em>must</em> send a {@link DocumentChangeEvent} on the document private event bus.
+     * The operation <em>must</em> send a {@link DocumentChangedEvent} on the document private event bus.
      *
      * @param newValue
      *         the new contents
@@ -107,6 +107,9 @@ public interface EditorWidget extends IsWidget,
 
     /** Marks the editor as clean i.e change the dirty state to false. */
     void markClean();
+
+    /** Marks the editor as dirty i.e change the dirty state to true. */
+    void markDirty();
 
     /**
      * Returns the tab size (equivalent number of spaces).

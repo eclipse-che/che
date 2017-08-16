@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -110,7 +110,7 @@ export class ChePanel {
 
     template = template + '{{chePanelCtrl.title}}</div>';
     if (attrs['cheTooltip']) {
-      template = template + '<div><i class="fa fa-info-circle che-panel-title-tooltip-icon" tooltip-placement="right" tooltip="{{chePanelCtrl.tooltip}}"></i></div>';
+      template = template + '<div><i class="fa fa-info-circle che-panel-title-tooltip-icon" tooltip-placement="right" uib-tooltip="{{chePanelCtrl.tooltip}}"></i></div>';
     }
 
     template = template + '<div flex layout="column"><div class="che-panel-title-top">&nbsp;</div><div class="che-panel-title-bottom">&nbsp;</div></div>';

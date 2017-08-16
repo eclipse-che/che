@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.compose.yaml;
 
@@ -70,7 +70,8 @@ public class CommandDeserializerTest {
         assertEquals(environment.get("MYSQL_PASSWORD"), "password");
         assertTrue(service.getExpose().containsAll(asList("4403", "5502")));
 
-        assertEquals(service.getCommand(), commandWords);
+        assertTrue(service.getCommand().containsAll(commandWords));
+        assertEquals(service.getCommand().size(), commandNumberOfWords);
     }
 
     @DataProvider(name = "validCommand")
@@ -137,7 +138,7 @@ public class CommandDeserializerTest {
                 {"\"echo ${PWD}\"", asList("echo", "${PWD}"), 2},
                 {"\"(Test)\"", singletonList("(Test)"), 1},
 
-                {"", null, 1},
+                {"\"\"", singletonList(""), 1},
         };
     }
 

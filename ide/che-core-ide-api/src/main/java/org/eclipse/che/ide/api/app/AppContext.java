@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.api.app;
 
@@ -25,6 +25,7 @@ import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Represents current context of the IDE application.
@@ -219,7 +220,13 @@ public interface AppContext {
      *
      * @return identifier
      */
-    String getAppId();
+    Optional<String> getApplicationWebsocketId();
+
+    /**
+     * Sets web application identifier. Most obvious use - to distinguish web applications
+     * on server side (e.g. connected via websocket)
+     */
+    void setApplicationWebsocketId(String id);
 
     /**
      * Returns context properties, key-value storage that allows to store

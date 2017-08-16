@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.export;
 
@@ -26,6 +26,7 @@ import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -167,7 +168,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
             url.append(separator).append("revision").append('=').append(revision);
         }
 
-        Window.open(url.toString(), "_self", "");
+        BrowserUtils.openHere(url.toString());
         notification.setTitle(constants.exportSuccessful(exportPath.toString()));
         notification.setStatus(SUCCESS);
     }
