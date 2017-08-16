@@ -254,29 +254,29 @@ public class RenameItemAction extends AbstractPerspectiveAction {
         }
     }
 
-	private class ProjectNameValidator extends AbstractNameValidator {
+    private class ProjectNameValidator extends AbstractNameValidator {
 
-		public ProjectNameValidator(String selfName) {
-			super(selfName);
-		}
+        public ProjectNameValidator(String selfName) {
+            super(selfName);
+        }
 
-		@Override
-		public Violation isValidName(String value) {
-			return new Violation() {
-				@Override
-				public String getMessage() {
-					return localization.invalidName();
-				}
+        @Override
+        public Violation isValidName(String value) {
+            return new Violation() {
+                @Override
+                public String getMessage() {
+                    return localization.invalidName();
+                }
 
-				@Nullable
-				@Override
-				public String getCorrectedValue() {
-					if (NameUtils.checkProjectName(value)) {
-						return value.contains(" ") ? value.replaceAll(" ", "-") : value;
-					}
-					return null;
-				}
-			};
-		}
-	}
+                @Nullable
+                @Override
+                public String getCorrectedValue() {
+                    if (NameUtils.checkProjectName(value)) {
+                        return value.contains(" ") ? value.replaceAll(" ", "-") : value;
+                    }
+                    return null;
+                }
+            };
+        }
+    }
 }
