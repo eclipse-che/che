@@ -376,7 +376,7 @@ suiteContainsUnstableTests() {
 
 printHelp() {
     local usage="
-Usage: ./${CALLER} [-Mmode] [options] [tests scope]
+Usage: ${CALLER} [-Mmode] [options] [tests scope]
 
 Options:
     --http                              Use 'http' protocol to connect to product
@@ -419,26 +419,26 @@ Other options:
 
 HOW TO of usage:
     Test Eclipse Che assembly:
-        ./${CALLER}
+        ${CALLER}
 
     Test Eclipse Che assembly and automatically rerun failing tests:
-        ./${CALLER} --rerun
+        ${CALLER} --rerun
 
     Run single test or package of tests:
-        ./${CALLER} <...> --test=<TEST>
+        ${CALLER} <...> --test=<TEST>
 
     Run suite:
-        ./${CALLER} <...> --suite=<PATH_TO_SUITE>
+        ${CALLER} <...> --suite=<PATH_TO_SUITE>
 
     Rerun failed tests:
-        ./${CALLER} <...> --failed-tests
-        ./${CALLER} <...> --failed-tests --rerun
+        ${CALLER} <...> --failed-tests
+        ${CALLER} <...> --failed-tests --rerun
 
     Debug selenium test:
-        ./${CALLER} -Mlocal --test=<TEST> --debug
+        ${CALLER} -Mlocal --test=<TEST> --debug
 
     Analyse tests results:
-        ./${CALLER} --compare-with-ci [CI job number]
+        ${CALLER} --compare-with-ci [CI job number]
 "
 
     printf "%s" "${usage}"
@@ -572,7 +572,7 @@ analyseTestsResults() {
     fi
 
     echo "[TEST]"
-    echo -e "[TEST] Command line: ${BLUE}./${CALLER} $@${NO_COLOUR}"
+    echo -e "[TEST] Command line: ${BLUE}${CUR_DIR}/${CALLER} $@${NO_COLOUR}"
     echo "[TEST]"
 
     if [[ ${COMPARE_WITH_CI} == true ]]; then
@@ -655,15 +655,15 @@ printProposals() {
     if [[ ! ${total} -eq 0 ]]; then
         echo "[TEST]"
         echo "[TEST] Try rerun all tests:"
-        echo -e "[TEST] \t${BLUE}./${CALLER} ${cmd} --threads=${THREADS} -Mlocal --failed-tests${NO_COLOUR}"
-        echo -e "[TEST] \t${BLUE}./${CALLER} ${cmd} --threads=${THREADS} -Mgrid --failed-tests${NO_COLOUR}"
+        echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --threads=${THREADS} -Mlocal --failed-tests${NO_COLOUR}"
+        echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --threads=${THREADS} -Mgrid --failed-tests${NO_COLOUR}"
 
         echo "[TEST]"
         if [[  ${total} -lt 50 ]]; then
             echo "[TEST] Or run them one by one:"
             for r in $(echo ${regressions[@]} | tr ' ' '\n' | sed  's/\(.*\)[.][^.]*/\1/' | sort | uniq)
             do
-                echo -e "[TEST] \t${BLUE}./${CALLER} ${cmd} -Mlocal --test=${r}${NO_COLOUR}"
+                echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} -Mlocal --test=${r}${NO_COLOUR}"
             done
             echo "[TEST]"
             echo -e "[TEST] You might need add ${BLUE}--debug${NO_COLOUR} option for debugging purpose."
@@ -672,10 +672,10 @@ printProposals() {
 
     echo "[TEST]"
     echo "[TEST] To compare tests results with the latest CI job"
-    echo -e "[TEST] \t${BLUE}./${CALLER} ${cmd} --compare-with-ci${NO_COLOUR}"
+    echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci${NO_COLOUR}"
     echo "[TEST]"
     echo "[TEST] To compare tests results with results of the specific CI job"
-    echo -e "[TEST] \t${BLUE}./${CALLER} ${cmd} --compare-with-ci CI_JOB_NUMBER${NO_COLOUR}"
+    echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci CI_JOB_NUMBER${NO_COLOUR}"
     echo "[TEST]"
     echo "[TEST]"
 }
@@ -803,7 +803,7 @@ generateFailSafeReport () {
         echo "[TEST] Either maven surefire report plugin failed or tests haven't been run at all."
         echo "[TEST]"
         echo "[TEST] To regenerate report manually use the command below:"
-        echo -e "[TEST] \t${BLUE}./${CALLER} --compare-with-ci${NO_COLOUR}"
+        echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} --compare-with-ci${NO_COLOUR}"
         echo "[TEST]"
         echo "[TEST]"
         exit 1
