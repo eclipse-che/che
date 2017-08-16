@@ -47,17 +47,6 @@ public class OpenShiftDeploymentCleaner {
         List<ReplicaSet> replicaSets = KubernetesResourceUtil.getReplicaSetByLabel(OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, deploymentName, namespace);
 
         try (OpenShiftClient openShiftClient = new DefaultOpenShiftClient()) {
-
-            if (deployment != null) {
-                LOG.info("Removing OpenShift Deployment {}", deployment.getMetadata().getName());
-                openShiftClient.resource(deployment).delete();
-            }
-
-            if (replicaSets != null && replicaSets.size() > 0) {
-                LOG.info("Removing OpenShift ReplicaSets for deployment {}", deploymentName);
-                replicaSets.forEach(rs -> openShiftClient.resource(rs).delete());
-            }
-
             if (routes != null) {
                 for (Route route: routes) {
                     LOG.info("Removing OpenShift Route {}", route.getMetadata().getName());
@@ -69,6 +58,17 @@ public class OpenShiftDeploymentCleaner {
                 LOG.info("Removing OpenShift Service {}", service.getMetadata().getName());
                 openShiftClient.resource(service).delete();
             }
+
+            if (deployment != null) {
+                LOG.info("Removing OpenShift Deployment {}", deployment.getMetadata().getName());
+                openShiftClient.resource(deployment).delete();
+            }
+
+            if (replicaSets != null && replicaSets.size() > 0) {
+                LOG.info("Removing OpenShift ReplicaSets for deployment {}", deploymentName);
+                replicaSets.forEach(rs -> openShiftClient.resource(rs).delete());
+            }
+
         }
     }
 
