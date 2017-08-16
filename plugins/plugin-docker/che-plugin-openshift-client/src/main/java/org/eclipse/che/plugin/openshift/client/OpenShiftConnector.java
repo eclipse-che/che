@@ -558,24 +558,39 @@ public class OpenShiftConnector extends DockerConnector {
             return null;
         }
 
-        List<Container> podContainers = pod.getSpec().getContainers();
-        if (podContainers.size() > 1) {
+        String deploymentName = pod.getMetadata().getLabels().get(OPENSHIFT_DEPLOYMENT_LABEL);
+        if (deploymentName == null ) {
+            LOG.warn("No label {} found for Pod {}", OPENSHIFT_DEPLOYMENT_LABEL, pod.getMetadata().getName());
+            return null;
+        }
+
+        Deployment deployment;
+        try (OpenShiftClient client = new DefaultOpenShiftClient()) {
+            deployment = client.extensions().deployments().withName(deploymentName).get();
+            if (deployment == null) {
+                LOG.warn("No deployment matching label {}={} found", OPENSHIFT_DEPLOYMENT_LABEL,
+                                                                     deploymentName);
+                return null;
+            }
+        }
+
+        List<Container> deploymentContainers = deployment.getSpec()
+                                                         .getTemplate()
+                                                         .getSpec()
+                                                         .getContainers();
+        if (deploymentContainers.size() > 1) {
             throw new OpenShiftException("Multiple Containers found in Pod.");
-        } else if (podContainers.size() < 1 || isNullOrEmpty(podContainers.get(0).getImage())) {
+        } else if (deploymentContainers.size() < 1 || isNullOrEmpty(deploymentContainers.get(0).getImage())) {
             throw new OpenShiftException(String.format("Container %s not found", containerId));
         }
-        String podPullSpec = podContainers.get(0).getImage();
+        String podPullSpec = deploymentContainers.get(0).getImage();
 
         String tagName = KubernetesStringUtils.getTagNameFromPullSpec(podPullSpec);
 
         ImageStreamTag tag = getImageStreamTagFromRepo(tagName);
         ImageInfo imageInfo = getImageInfoFromTag(tag);
 
-        String deploymentName = pod.getMetadata().getLabels().get(OPENSHIFT_DEPLOYMENT_LABEL);
-        if (deploymentName == null ) {
-            LOG.warn("No label {} found for Pod {}", OPENSHIFT_DEPLOYMENT_LABEL, pod.getMetadata().getName());
-            return null;
-        }
+
 
         Service svc = getCheServiceBySelector(OPENSHIFT_DEPLOYMENT_LABEL, deploymentName);
         if (svc == null) {
