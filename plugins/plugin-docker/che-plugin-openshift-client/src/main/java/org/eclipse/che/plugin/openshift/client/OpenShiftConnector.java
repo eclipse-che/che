@@ -433,6 +433,9 @@ public class OpenShiftConnector extends DockerConnector {
                                                           openShiftCheProjectName,
                                                           imageStreamTagPullSpec);
 
+        // Workaround for ImageStreamTags issue
+        dockerPullSpec = imageStreamTag.getTag().getFrom().getName();
+
         ContainerConfig containerConfig = createContainerParams.getContainerConfig();
         ImageConfig imageConfig = inspectImage(InspectImageParams.create(imageForDocker)).getConfig();
 
