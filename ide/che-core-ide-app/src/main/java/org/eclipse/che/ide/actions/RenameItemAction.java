@@ -254,31 +254,29 @@ public class RenameItemAction extends AbstractPerspectiveAction {
         }
     }
 
-    private class ProjectNameValidator extends AbstractNameValidator {
+	private class ProjectNameValidator extends AbstractNameValidator {
 
-        public ProjectNameValidator(String selfName) {
-            super(selfName);
-        }
+		public ProjectNameValidator(String selfName) {
+			super(selfName);
+		}
 
-        @Override
-        public Violation isValidName(String value) {
-            final String correctValue = value.contains(" ") ? value.replaceAll(" ", "-") : null;
-            final String errormessage = !NameUtils.checkFileName(value) ? localization.invalidName() : null;
-            if (correctValue != null || errormessage != null) {
-                return new Violation() {
-                    @Override
-                    public String getMessage() {
-                        return errormessage;
-                    }
+		@Override
+		public Violation isValidName(String value) {
+			return new Violation() {
+				@Override
+				public String getMessage() {
+					return localization.invalidName();
+				}
 
-                    @Nullable
-                    @Override
-                    public String getCorrectedValue() {
-                        return correctValue;
-                    }
-                };
-            }
-            return null;
-        }
-    }
+				@Nullable
+				@Override
+				public String getCorrectedValue() {
+					if (NameUtils.checkProjectName(value)) {
+						return value.contains(" ") ? value.replaceAll(" ", "-") : value;
+					}
+					return null;
+				}
+			};
+		}
+	}
 }
