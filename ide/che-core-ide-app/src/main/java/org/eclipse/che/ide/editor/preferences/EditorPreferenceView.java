@@ -10,10 +10,10 @@
  */
 package org.eclipse.che.ide.editor.preferences;
 
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 
 /** View interface for the preference page for the editor preferences. */
 public interface EditorPreferenceView extends IsWidget {
-  AcceptsOneWidget getEditorPreferencesContainer();
+  FlowPanel getEditorPreferencesContainer();
 }
