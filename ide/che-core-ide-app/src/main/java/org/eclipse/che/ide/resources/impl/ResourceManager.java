@@ -988,7 +988,7 @@ public final class ResourceManager {
 
             return getRemoteResources(holder[0], maxDepth, true).then((Function<Resource[], Resource[]>)resources -> {
                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(holder[0], SYNCHRONIZED | DERIVED)));
-
+                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(holder[0], UPDATED)));
                 return resources;
             });
         });
