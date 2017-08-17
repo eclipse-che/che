@@ -69,27 +69,27 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
     private final MenuItem                          closePaneMenuItem;
 
     @UiField(provided = true)
-    SplitLayoutPanel splitLayoutPanel;
+    SplitLayoutPanel           splitLayoutPanel;
 
     @UiField
-    DockLayoutPanel mainPanel;
+    DockLayoutPanel            mainPanel;
 
     @UiField
-    FlowPanel tabsPanel;
+    FlowPanel                  tabsPanel;
 
     @UiField
-    FlowPanel menuPanel;
+    FlowPanel                  plusPanel;
 
     @UiField
-    DeckLayoutPanel widgetsPanel;
+    FlowPanel                  menuPanel;
+
+    @UiField
+    DeckLayoutPanel            widgetsPanel;
 
     private ActionDelegate     delegate;
     private SubPanelView       parentPanel;
     private List<SubPanelView> eastSubPanels;
     private List<SubPanelView> southSubPanels;
-
-    @UiField
-    FlowPanel                  plusPanel;
 
     private Tab                selectedTab;
     private int                tabsPanelWidth = 0;
