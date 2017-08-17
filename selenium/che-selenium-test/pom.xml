@@ -128,14 +128,6 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/resources/**/projects/**</exclude>
-                        <exclude>**/resources/**/templates/**</exclude>
-                        <exclude>**/resources/**/*.zip</exclude>
-                        <exclude>**/resources/**/org/eclipse/che/selenium/**</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
