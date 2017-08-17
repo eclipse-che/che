@@ -140,6 +140,7 @@ declare namespace che {
       [machineName: string]: IEnvironmentMachine
     };
     recipe: IRecipe;
+    warnings: IWorkspaceWarning[];
   }
 
   export interface IRecipe {
@@ -150,7 +151,7 @@ declare namespace che {
   }
 
   export interface IEnvironmentMachine {
-    agents?: string[];
+    installers?: string[];
     attributes?: {
       memoryLimitBytes?: string|number;
       [attrName: string]: string|number;
@@ -163,40 +164,31 @@ declare namespace che {
   export interface IEnvironmentMachineServer {
     port: string|number;
     protocol: string;
-    properties?: {
-      [propName: string]: string
-    };
+    path: string;
   }
 
   export interface IWorkspaceRuntime {
     activeEnv: string;
-    devMachine: IWorkspaceRuntimeMachine;
     links: any[];
-    machines: IWorkspaceRuntimeMachine[];
-    rootFolder: string;
+    machines: {
+      [machineName: string]: IWorkspaceRuntimeMachine
+    };
+    owner: string;
+    warnings: IWorkspaceWarning[];
+  }
+
+  export interface IWorkspaceWarning {
+    code: number;
+    message: string;
   }
 
   export interface IWorkspaceRuntimeMachine {
-    config: any;
-    envName: string;
-    id: string;
-    links: any[];
-    owner: string;
-    runtime: {
-      envVariables: { [envVarName: string]: string };
-      properties: { [propName: string]: string };
-      servers: { [serverName: string]: IWorkspaceRuntimeMachineServer };
-    };
-    status: string;
-    workspaceId: string;
+    properties: { [propName: string]: string };
+    servers: { [serverName: string]: IWorkspaceRuntimeMachineServer };
   }
 
   export interface IWorkspaceRuntimeMachineServer {
-    address: string;
-    properties: { [propName: string]: string; };
-    protocol: string;
-    port: string;
-    ref: string;
+    status: string;
     url: string;
   }
 

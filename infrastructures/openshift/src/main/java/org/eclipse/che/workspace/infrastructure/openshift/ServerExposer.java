@@ -31,7 +31,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Strings.nullToEmpty;
+import static java.lang.Integer.parseInt;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_POD_NAME_LABEL;
 
 /**
@@ -83,7 +84,11 @@ import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_P
  *     targetPort: [8080|web-app]     ---->> Service.spec.ports[0].[port|name]
  * </pre>
  *
+ * <p>For accessing to server user will use route host. Information about
+ * servers that are exposed by route are stored in its annotations.
+ *
  * @author Sergii Leshchenko
+ * @see RoutesAnnotations
  */
 public class ServerExposer {
 
@@ -110,22 +115,24 @@ public class ServerExposer {
     public void expose(String namePrefix, Map<String, ? extends ServerConfig> servers) {
         Map<String, ServicePort> portToServicePort = exposePort(servers.values());
 
-        Service service = new ServiceBuilder().withName(namePrefix + machineName)
+        Service service = new ServiceBuilder().withName(namePrefix + '-' + machineName)
                                               .withSelectorEntry(CHE_POD_NAME_LABEL, machineName.split("/")[0])
                                               .withPorts(new ArrayList<>(portToServicePort.values()))
                                               .build();
 
         openShiftEnvironment.getServices().put(service.getMetadata().getName(), service);
 
-        for (Map.Entry<String, ? extends ServerConfig> serverEntry : servers.entrySet()) {
-            String serverName = serverEntry.getKey();
-            ServerConfig serverConfig = serverEntry.getValue();
-            ServicePort servicePort = portToServicePort.get(serverConfig.getPort());
 
-            //TODO 1 route for 1 service port could be enough. Implement it in scope of //TODO https://github.com/eclipse/che/issues/5688
-            Route route = new RouteBuilder().withName(namePrefix + "-" + machineName + "-" + serverName)
+        for (ServicePort servicePort : portToServicePort.values()) {
+            int port = servicePort.getTargetPort().getIntVal();
+            Map<String, ServerConfig> routesServers = servers.entrySet()
+                                                             .stream()
+                                                             .filter(e -> parseInt(e.getValue().getPort().split("/")[0]) == port)
+                                                             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            Route route = new RouteBuilder().withName(namePrefix + '-' + machineName + '-' + servicePort.getName())
                                             .withTargetPort(servicePort.getName())
-                                            .withServer(serverName, serverConfig)
+                                            .withServers(routesServers)
                                             .withTo(service.getMetadata().getName())
                                             .build();
             openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
@@ -140,12 +147,12 @@ public class ServerExposer {
 
         for (String portToExpose : portsToExpose) {
             String[] portProtocol = portToExpose.split("/");
-            int port = Integer.parseInt(portProtocol[0]);
-            String protocol = portProtocol.length > 1 ? portProtocol[1].toUpperCase() : null;
+            int port = parseInt(portProtocol[0]);
+            String protocol = portProtocol.length > 1 ? portProtocol[1].toUpperCase() : "TCP";
             Optional<ContainerPort> exposedOpt = container.getPorts()
                                                           .stream()
                                                           .filter(p -> p.getContainerPort().equals(port) &&
-                                                                       p.getProtocol().equals(protocol))
+                                                                       protocol.equals(p.getProtocol()))
                                                           .findAny();
             ContainerPort containerPort;
 
@@ -201,11 +208,10 @@ public class ServerExposer {
     }
 
     private static class RouteBuilder {
-        private String       name;
-        private String       serviceName;
-        private IntOrString  targetPort;
-        private String       serverName;
-        private ServerConfig serverConfig;
+        private String                              name;
+        private String                              serviceName;
+        private IntOrString                         targetPort;
+        private Map<String, ? extends ServerConfig> serversConfigs;
 
         private RouteBuilder withName(String name) {
             this.name = name;
@@ -222,27 +228,19 @@ public class ServerExposer {
             return this;
         }
 
-        private RouteBuilder withTargetPort(int targetPortName) {
-            this.targetPort = new IntOrString(targetPortName);
-            return this;
-        }
-
-        private RouteBuilder withServer(String serverName, ServerConfig serverConfig) {
-            this.serverName = serverName;
-            this.serverConfig = serverConfig;
+        private RouteBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
+            this.serversConfigs = serversConfigs;
             return this;
         }
 
         private Route build() {
             io.fabric8.openshift.api.model.RouteBuilder builder = new io.fabric8.openshift.api.model.RouteBuilder();
-            HashMap<String, String> annotations = new HashMap<>();
-            annotations.put(Constants.CHE_SERVER_NAME_ANNOTATION, serverName);
-            annotations.put(Constants.CHE_SERVER_PROTOCOL_ANNOTATION, serverConfig.getProtocol());
-            annotations.put(Constants.CHE_SERVER_PATH_ANNOTATION, nullToEmpty(serverConfig.getPath()));
 
             return builder.withNewMetadata()
                               .withName(name.replace("/", "-"))
-                              .withAnnotations(annotations)
+                          .withAnnotations(RoutesAnnotations.newSerializer()
+                                                            .servers(serversConfigs)
+                                                            .annotations())
                           .endMetadata()
                           .withNewSpec()
                               .withNewTo()

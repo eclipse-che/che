@@ -34,14 +34,14 @@ describe('ComposeEnvironmentManager', () => {
             'servers': {},
             'agents': []
           },
-          'db': {'attributes': {}, 'servers': {}, 'agents': []},
+          'db': {'attributes': {}, 'servers': {}, 'installers': []},
           'dev-machine': {
             'attributes': {'memoryLimitBytes': '5368709120'},
             'servers': {
               '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http'},
               '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http'}
             },
-            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
         },
         'recipe': {

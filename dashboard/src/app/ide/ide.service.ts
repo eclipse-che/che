@@ -151,7 +151,7 @@ class IdeSvc {
 
     startWorkspacePromise.then((data: any) => {
       let statusLink = this.lodash.find(data.links, (link: any) => {
-        return link.rel === 'environment.status_channel';
+        return link.rel === 'environment/statusChannel';
       });
 
       let workspaceId = data.id;

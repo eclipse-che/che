@@ -40,7 +40,7 @@
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>bootstrapper</artifactId>
-            <type>tar.gz</type>
+            <type>zip</type>
             <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
@@ -65,12 +65,11 @@
             <artifactId>che-core-ide-templates</artifactId>
             <type>jar</type>
         </dependency>
-        <!-- FIXME: spi -->
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.dashboard</groupId>-->
-        <!--<artifactId>che-dashboard-war</artifactId>-->
-        <!--<type>war</type>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.eclipse.che.dashboard</groupId>
+            <artifactId>che-dashboard-war</artifactId>
+            <type>war</type>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.che.docs</groupId>
             <artifactId>che-docs</artifactId>

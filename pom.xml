@@ -16,7 +16,7 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.16.0-SNAPSHOT</version>
+        <version>5.16.0</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
@@ -33,8 +33,7 @@
         <module>plugins</module>
         <module>ide/che-ide-core</module>
         <module>samples</module>
-        <!-- FIXME: spi -->
-        <!--<module>dashboard</module>-->
+        <module>dashboard</module>
         <module>assembly</module>
     </modules>
     <scm>
@@ -45,7 +44,7 @@
     </scm>
     <properties>
         <che.docs.version>5.16.0-SNAPSHOT</che.docs.version>
-        <che.lib.version>5.16.0-SNAPSHOT</che.lib.version>
+        <che.lib.version>5.16.0</che.lib.version>
         <che.version>5.16.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
@@ -117,6 +116,13 @@
                 <artifactId>bootstrapper</artifactId>
                 <version>${che.version}</version>
                 <type>tar.gz</type>
+                <classifier>linux_amd64</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>bootstrapper</artifactId>
+                <version>${che.version}</version>
+                <type>zip</type>
                 <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>

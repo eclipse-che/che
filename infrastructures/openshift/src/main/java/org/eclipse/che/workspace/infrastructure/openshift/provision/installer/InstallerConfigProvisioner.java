@@ -8,22 +8,24 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.workspace.infrastructure.openshift.provision;
+package org.eclipse.che.workspace.infrastructure.openshift.provision.installer;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 
-import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.shared.Utils;
 import org.eclipse.che.workspace.infrastructure.openshift.ServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -50,40 +52,40 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * @author Sergii Leshchenko
  */
-public class InstallerConfigApplier {
-    private static final Logger LOG = getLogger(InstallerConfigApplier.class);
+public class InstallerConfigProvisioner implements ConfigurationProvisioner {
+    private static final Logger LOG = getLogger(InstallerConfigProvisioner.class);
 
     private static final String ENVIRONMENT_PROPERTY = "environment";
 
     private final InstallerRegistry installerRegistry;
     private final String            cheServerEndpoint;
 
+
     @Inject
-    public InstallerConfigApplier(InstallerRegistry installerRegistry,
-                                  @Named("che.infra.openshift.che_server_endpoint") String cheServerEndpoint) {
+    public InstallerConfigProvisioner(InstallerRegistry installerRegistry,
+                                      @Named("che.infra.openshift.che_server_endpoint") String cheServerEndpoint) {
         this.installerRegistry = installerRegistry;
         this.cheServerEndpoint = cheServerEndpoint;
     }
 
-    public void apply(RuntimeIdentity identity,
-                      Environment envConfig,
-                      OpenShiftEnvironment environment) throws InfrastructureException {
-        for (Pod pod : environment.getPods().values()) {
+    @Override
+    public void provision(EnvironmentImpl environment,
+                          OpenShiftEnvironment osEnv,
+                          RuntimeIdentity identity) throws InfrastructureException {
+        for (Pod pod : osEnv.getPods().values()) {
             String podName = pod.getMetadata().getName();
             for (Container container : pod.getSpec().getContainers()) {
                 String containerName = container.getName();
                 String machineName = podName + "/" + containerName;
-                MachineConfig machineConf = envConfig.getMachines().get(machineName);
+                MachineConfig machineConf = environment.getMachines().get(machineName);
 
                 List<String> installers = machineConf.getInstallers();
                 Map<String, ServerConfig> name2Server = new HashMap<>();
-                for (String installerId : installers) {
-                    Installer installer = getInstaller(installerId);
+                for (Installer installer : getInstallers(installers)) {
                     provisionEnv(container, installer.getProperties());
                     name2Server.putAll(installer.getServers());
                 }
-
-                ServerExposer serverExposer = new ServerExposer(machineName, container, environment);
+                ServerExposer serverExposer = new ServerExposer(machineName, container, osEnv);
                 serverExposer.expose("agents", name2Server);
 
                 // CHE_API is used by installers for agent binary downloading
@@ -91,7 +93,7 @@ public class InstallerConfigApplier {
                 container.getEnv().add(new EnvVar("CHE_API", cheServerEndpoint, null));
 
                 // WORKSPACE_ID is required only by workspace agent
-                if (installers.contains("org.eclipse.che.ws-agent")) {
+                if (Utils.isDev(machineConf)) {
                     container.getEnv().removeIf(env -> "CHE_WORKSPACE_ID".equals(env.getName()));
                     container.getEnv().add(new EnvVar("CHE_WORKSPACE_ID", identity.getWorkspaceId(), null));
                 }
@@ -99,9 +101,9 @@ public class InstallerConfigApplier {
         }
     }
 
-    private Installer getInstaller(String installerId) throws InfrastructureException {
+    private List<Installer> getInstallers(List<String> installerIds) throws InfrastructureException {
         try {
-            return installerRegistry.getInstaller(installerId);
+            return installerRegistry.getOrderedInstallers(installerIds);
         } catch (InstallerException e) {
             throw new InfrastructureException(e.getMessage(), e);
         }
