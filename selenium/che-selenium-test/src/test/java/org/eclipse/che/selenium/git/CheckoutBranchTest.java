@@ -276,6 +276,7 @@ public class CheckoutBranchTest {
         git.waitBranchInTheList(TEST_BRANCH);
         git.selectBranchAndClickCheckoutBtn(TEST_BRANCH);
         loader.waitOnClosed();
+        menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
         git.waitBranchInTheListWithCoState(TEST_BRANCH);
         git.closeBranchesForm();
         loader.waitOnClosed();
@@ -301,6 +302,7 @@ public class CheckoutBranchTest {
         git.waitBranchInTheList(TEST_BRANCH);
         git.selectBranchAndClickCheckoutBtn(MASTER_BRANCH);
         loader.waitOnClosed();
+        menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
         git.waitBranchInTheListWithCoState(MASTER_BRANCH);
         git.closeBranchesForm();
         loader.waitOnClosed();

@@ -132,6 +132,7 @@ public class CheckoutReferenceTest {
         menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
         git.waitBranchInTheListWithCoState(BRANCH_DETACHED_HASH);
         git.selectBranchAndClickCheckoutBtn(DEFAULT_BRANCH);
+        menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
         git.waitBranchInTheListWithCoState(DEFAULT_BRANCH);
         git.closeBranchesForm();
 
@@ -170,6 +171,7 @@ public class CheckoutReferenceTest {
                         TestMenuCommandsConstants.Git.BRANCHES);
         git.waitBranchInTheListWithCoState(BRANCH_DETACHED_TAG_2);
         git.selectBranchAndClickCheckoutBtn(DEFAULT_BRANCH);
+        menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
         git.waitBranchInTheListWithCoState(DEFAULT_BRANCH);
         git.closeBranchesForm();
 
