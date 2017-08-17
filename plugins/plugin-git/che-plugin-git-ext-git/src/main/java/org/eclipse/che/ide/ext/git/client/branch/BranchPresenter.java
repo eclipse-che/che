@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -29,7 +30,6 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
 
-import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
@@ -170,7 +170,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
     /** Get the list of branches. */
     private void getBranches() {
-        service.branchList(project.getLocation(), LIST_ALL)
+        service.branchList(project.getLocation(), BranchListMode.from(view.getFilterValue()))
                .then(branches -> {
                    if (branches.isEmpty()) {
                        dialogFactory.createMessageDialog(constant.branchTitle(),
@@ -210,6 +210,11 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         view.setEnableCheckoutButton(false);
         view.setEnableRenameButton(false);
         view.setEnableDeleteButton(false);
+    }
+
+    @Override
+    public void onFilterValueChanged() {
+        getBranches();
     }
 
     @Override

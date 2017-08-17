@@ -177,8 +177,11 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
 
         final Document document = documentHandle.getDocument();
         final String oldContent = document.getContents();
-        final TextPosition cursorPosition = document.getCursorPosition();
+        if (Objects.equals(newContent, oldContent)) {
+            return;
+        }
 
+        final TextPosition cursorPosition = document.getCursorPosition();
         if (!(virtualFile instanceof File)) {
             replaceContent(document, newContent, oldContent, cursorPosition);
             return;
@@ -187,7 +190,7 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
         final File file = (File)virtualFile;
         final String currentStamp = file.getModificationStamp();
 
-        if (eventModificationStamp == null && !Objects.equals(newContent, oldContent)) {
+        if (eventModificationStamp == null) {
             replaceContent(document, newContent, oldContent, cursorPosition);
             return;
         }

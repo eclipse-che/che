@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.16.0-SNAPSHOT</version>
+        <version>5.17.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-ide-war</artifactId>
     <packaging>war</packaging>
@@ -30,6 +30,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-ide-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-activity-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -413,8 +417,24 @@
                         <configuration>
                             <sources>
                                 <source>${generated.sources.directory}</source>
+                                <source>src/main/java</source>
                             </sources>
                         </configuration>
+                    </execution>
+                    <execution>
+                      <id>add-resource</id>
+                      <phase>generate-resources</phase>
+                      <goals>
+                        <goal>add-resource</goal>
+                      </goals>
+                      <configuration>
+                        <resources>
+                          <resource>
+                            <directory>src/main/webapp</directory>
+                            <targetPath></targetPath>
+                          </resource>
+                        </resources>
+                      </configuration>
                     </execution>
                 </executions>
             </plugin>

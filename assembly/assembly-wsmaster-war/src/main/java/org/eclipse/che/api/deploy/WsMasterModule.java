@@ -165,7 +165,7 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
-        install(new org.eclipse.che.api.workspace.server.activity.inject.WorkspaceActivityModule());
+        install(new org.eclipse.che.plugin.activity.inject.WorkspaceActivityModule());
 
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());

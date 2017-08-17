@@ -15,22 +15,33 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentEventBus;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.document.DocumentStorage;
+import org.eclipse.che.ide.api.editor.document.DocumentStorage.DocumentCallback;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.resource.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -46,29 +57,39 @@ import static org.mockito.Mockito.withSettings;
 /** @author Roman Nikitenko */
 @RunWith(MockitoJUnitRunner.class)
 public class EditorGroupSynchronizationImplTest {
+    private static final String FILE_CONTENT     = "some content";
+    private static final String FILE_NEW_CONTENT = "some content to update";
+    private static final String FILE_LOCATION    = "testProject/src/main/java/org/eclipse/che/examples/someFile";
 
     @Mock
-    private EventBus            eventBus;
+    private EventBus                         eventBus;
     @Mock
-    private EditorAgent         editorAgent;
+    private EditorAgent                      editorAgent;
     @Mock
-    private Document            document;
+    private Document                         document;
     @Mock
-    private DocumentHandle      documentHandle;
+    private DocumentHandle                   documentHandle;
     @Mock
-    private DocumentEventBus    documentEventBus;
+    private DocumentEventBus                 documentEventBus;
     @Mock
-    private DocumentStorage     documentStorage;
+    private DocumentStorage                  documentStorage;
     @Mock
-    private NotificationManager notificationManager;
+    private NotificationManager              notificationManager;
     @Mock
-    private HandlerRegistration handlerRegistration;
+    private HandlerRegistration              handlerRegistration;
     @Mock
-    private DocumentChangedEvent documentChangeEvent;
+    private DocumentChangedEvent             documentChangeEvent;
+    @Mock
+    private FileContentUpdateEvent           fileContentUpdateEvent;
+    @Mock
+    private EditorInput                      editorInput;
+    @Captor
+    private ArgumentCaptor<DocumentCallback> documentCallbackCaptor;
 
     private EditorPartPresenter            activeEditor;
     private EditorPartPresenter            openedEditor1;
     private EditorPartPresenter            openedEditor2;
+    private VirtualFile                    virtualFile;
     private EditorGroupSynchronizationImpl editorGroupSynchronization;
 
     @Before
@@ -76,6 +97,7 @@ public class EditorGroupSynchronizationImplTest {
         activeEditor = mock(EditorPartPresenter.class, withSettings().extraInterfaces(TextEditor.class, EditorWithAutoSave.class));
         openedEditor1 = mock(EditorPartPresenter.class, withSettings().extraInterfaces(TextEditor.class, EditorWithAutoSave.class));
         openedEditor2 = mock(EditorPartPresenter.class, withSettings().extraInterfaces(TextEditor.class, EditorWithAutoSave.class));
+        virtualFile = mock(VirtualFile.class, withSettings().extraInterfaces(File.class));
 
         when(((EditorWithAutoSave)openedEditor1).isAutoSaveEnabled()).thenReturn(true);
         when(((EditorWithAutoSave)openedEditor2).isAutoSaveEnabled()).thenReturn(true);
@@ -89,11 +111,59 @@ public class EditorGroupSynchronizationImplTest {
         when(((TextEditor)openedEditor1).getDocument()).thenReturn(document);
         when(((TextEditor)openedEditor2).getDocument()).thenReturn(document);
 
-        when(document.getContents()).thenReturn("some content");
+        when(document.getContents()).thenReturn(FILE_CONTENT);
+        when(openedEditor1.getEditorInput()).thenReturn(editorInput);
+        when(editorInput.getFile()).thenReturn(virtualFile);
+        when(virtualFile.getLocation()).thenReturn(new Path(FILE_LOCATION));
 
         when(documentEventBus.addHandler((Event.Type<Object>)anyObject(), anyObject())).thenReturn(handlerRegistration);
 
         editorGroupSynchronization = new EditorGroupSynchronizationImpl(eventBus, documentStorage, notificationManager);
+    }
+
+    @Test
+    public void shouldUpdateContentOnFileContentUpdateEvent() {
+        editorGroupSynchronization.addEditor(openedEditor1);
+        reset(documentEventBus);
+        when(fileContentUpdateEvent.getFilePath()).thenReturn(FILE_LOCATION);
+
+        editorGroupSynchronization.onFileContentUpdate(fileContentUpdateEvent);
+
+        verify(documentStorage).getDocument(anyObject(), documentCallbackCaptor.capture());
+        documentCallbackCaptor.getValue().onDocumentReceived(FILE_NEW_CONTENT);
+
+        verify(document).replace(anyInt(), anyInt(), eq(FILE_NEW_CONTENT));
+        verify(notificationManager, never()).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
+    }
+
+    @Test
+    public void shouldSkipUpdateContentOnFileContentUpdateEventWhenContentTheSame() {
+        editorGroupSynchronization.addEditor(openedEditor1);
+        reset(documentEventBus);
+        when(fileContentUpdateEvent.getFilePath()).thenReturn(FILE_LOCATION);
+
+        editorGroupSynchronization.onFileContentUpdate(fileContentUpdateEvent);
+
+        verify(documentStorage).getDocument(anyObject(), documentCallbackCaptor.capture());
+        documentCallbackCaptor.getValue().onDocumentReceived(FILE_CONTENT);
+
+        verify(document, never()).replace(anyInt(), anyInt(), anyString());
+        verify(notificationManager, never()).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
+    }
+
+    @Test
+    public void shouldNotifyAboutExternalOperationAtUpdateContentWhenStampIsDifferent() {
+        editorGroupSynchronization.addEditor(openedEditor1);
+        reset(documentEventBus);
+        when(fileContentUpdateEvent.getFilePath()).thenReturn(FILE_LOCATION);
+        when(fileContentUpdateEvent.getModificationStamp()).thenReturn("some stamp");
+
+        editorGroupSynchronization.onFileContentUpdate(fileContentUpdateEvent);
+
+        verify(documentStorage).getDocument(anyObject(), documentCallbackCaptor.capture());
+        documentCallbackCaptor.getValue().onDocumentReceived(FILE_NEW_CONTENT);
+
+        verify(notificationManager).notify(anyString(), anyString(), eq(SUCCESS), eq(NOT_EMERGE_MODE));
     }
 
     @Test
@@ -109,7 +179,6 @@ public class EditorGroupSynchronizationImplTest {
     public void shouldUpdateContentAtAddingEditorWhenGroupHasUnsavedData() {
         editorGroupSynchronization.addEditor(openedEditor1);
         reset(documentEventBus);
-        when(((TextEditor)openedEditor1).getDocument()).thenReturn(document);
         when(((EditorWithAutoSave)openedEditor1).isAutoSaveEnabled()).thenReturn(false);
 
         editorGroupSynchronization.addEditor(activeEditor);

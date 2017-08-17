@@ -18,24 +18,26 @@ import elemental.json.JsonObject;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.statepersistance.StateComponent;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.WindowActionEvent;
 import org.eclipse.che.ide.api.WindowActionHandler;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Responsible for persisting and restoring IDE state across sessions.
@@ -43,6 +45,7 @@ import java.util.Map;
  *
  * @author Artem Zatsarynnyi
  * @author Yevhen Vydolob
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class AppStateManager {
@@ -52,21 +55,30 @@ public class AppStateManager {
 
     private static final String WORKSPACE = "workspace";
 
-    private final Map<String, Provider<StateComponent>> persistenceComponents;
-    private final PreferencesManager                    preferencesManager;
-    private final JsonFactory                           jsonFactory;
-    private final AppContext                            appContext;
-    private       JsonObject                            allWsState;
+    /**
+     * Sorted by execution priority list of persistence state components.
+     */
+    private final List<StateComponent> persistenceComponents;
+
+    private final PreferencesManager preferencesManager;
+    private final JsonFactory        jsonFactory;
+    private final PromiseProvider    promises;
+    private final AppContext         appContext;
+    private       JsonObject         allWsState;
 
     @Inject
-    public AppStateManager(Map<String, Provider<StateComponent>> persistenceComponents,
+    public AppStateManager(Set<StateComponent> persistenceComponents,
                            PreferencesManager preferencesManager,
                            JsonFactory jsonFactory,
+                           PromiseProvider promises,
                            EventBus eventBus,
                            AppContext appContext) {
-        this.persistenceComponents = persistenceComponents;
+        this.persistenceComponents = persistenceComponents.stream()
+                                                          .sorted(comparingInt(StateComponent::getPriority).reversed())
+                                                          .collect(toList());
         this.preferencesManager = preferencesManager;
         this.jsonFactory = jsonFactory;
+        this.promises = promises;
         this.appContext = appContext;
 
         // delay is required because we need to wait some time while different components initialized
@@ -123,10 +135,15 @@ public class AppStateManager {
         try {
             if (settings.hasKey(WORKSPACE)) {
                 JsonObject workspace = settings.getObject(WORKSPACE);
+                Promise<Void> sequentialRestore = promises.resolve(null);
                 for (String key : workspace.keys()) {
-                    if (persistenceComponents.containsKey(key)) {
-                        StateComponent component = persistenceComponents.get(key).get();
-                        component.loadState(workspace.getObject(key));
+                    Optional<StateComponent> stateComponent = persistenceComponents.stream()
+                                                                                   .filter(component -> component.getId().equals(key))
+                                                                                   .findAny();
+                    if (stateComponent.isPresent()) {
+                        StateComponent component = stateComponent.get();
+                        Log.debug(getClass(), "Restore state for the component ID: " + component.getId());
+                        sequentialRestore = sequentialRestore.thenPromise(ignored -> component.loadState(workspace.getObject(key)));
                     }
                 }
             }
@@ -136,14 +153,15 @@ public class AppStateManager {
     }
 
     public Promise<Void> persistWorkspaceState() {
-        final String wsId = appContext.getWorkspace().getId();
-        final JsonObject settings = Json.createObject();
+        String wsId = appContext.getWorkspace().getId();
+        JsonObject settings = Json.createObject();
         JsonObject workspace = Json.createObject();
         settings.put(WORKSPACE, workspace);
-        for (Map.Entry<String, Provider<StateComponent>> entry : persistenceComponents.entrySet()) {
+
+        for (StateComponent entry : persistenceComponents) {
             try {
-                String key = entry.getKey();
-                workspace.put(key, entry.getValue().get().getState());
+                Log.debug(getClass(), "Persist state for the component ID: " + entry.getId());
+                workspace.put(entry.getId(), entry.getState());
             } catch (Exception e) {
                 Log.error(getClass(), e);
             }
@@ -155,14 +173,12 @@ public class AppStateManager {
     private Promise<Void> writeStateToPreferences(JsonObject state) {
         final String json = state.toJson();
         preferencesManager.setValue(PREFERENCE_PROPERTY_NAME, json);
-        return preferencesManager.flushPreferences().catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                Log.error(AppStateManager.class, "Failed to store app's state to user's preferences");
-            }
+        return preferencesManager.flushPreferences().catchError(error -> {
+            Log.error(AppStateManager.class, "Failed to store app's state to user's preferences: " + error.getMessage());
         });
     }
 
+    @Deprecated
     public boolean hasStateForWorkspace(String wsId) {
         return allWsState.hasKey(wsId);
     }

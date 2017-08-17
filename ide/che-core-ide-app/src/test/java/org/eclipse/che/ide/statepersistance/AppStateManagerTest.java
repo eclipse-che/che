@@ -18,10 +18,12 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,10 +32,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -45,6 +48,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Artem Zatsarynnyi
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class AppStateManagerTest {
@@ -52,27 +56,35 @@ public class AppStateManagerTest {
     private static final String WS_ID = "ws_id";
 
     @Mock
-    private StateComponent           component1;
+    private StateComponent component1;
     @Mock
-    private StateComponent           component2;
+    private StateComponent component2;
     @Mock
     private Provider<StateComponent> component1Provider;
     @Mock
     private Provider<StateComponent> component2Provider;
     @Mock
-    private Promise<Void>            promise;
+    private Promise<Void> promise;
     @Mock
     private Promise<String>          contentPromise;
     @Mock
     private PreferencesManager       preferencesManager;
     @Mock
-    private JsonFactory              jsonFactory;
+    private JsonFactory jsonFactory;
     @Mock
     private EventBus                 eventBus;
     @Mock
     private AppContext               appContext;
     @Mock
-    private JsonObject               pref;
+    private JsonObject pref;
+    @Mock
+    private PromiseProvider    promiseProvider;
+
+    @Mock
+    private Promise<Void> sequentialRestore;
+
+    @Captor
+    private ArgumentCaptor<Function<Void, Promise<Void>>> sequentialRestoreThenFunction;
 
     @Captor
     private ArgumentCaptor<String> preferenceArgumentCaptor;
@@ -88,17 +100,24 @@ public class AppStateManagerTest {
         when(workspace.getId()).thenReturn(WS_ID);
         when(appContext.getWorkspace()).thenReturn(workspace);
 
-        Map<String, Provider<StateComponent>> components = new HashMap<>();
-        components.put("component1", component1Provider);
-        components.put("component2", component2Provider);
+//        Map<String, Provider<StateComponent>> components = new HashMap<>();
+//        components.put("component1", component1Provider);
+//        components.put("component2", component2Provider);
 
         when(component1Provider.get()).thenReturn(component1);
         when(component2Provider.get()).thenReturn(component2);
 
+
+        Set<StateComponent> components = new HashSet<>();
+        components.add(component1);
+        components.add(component2);
+
+        when(component1.getId()).thenReturn("component1");
+        when(component2.getId()).thenReturn("component2");
         when(preferencesManager.flushPreferences()).thenReturn(promise);
         when(preferencesManager.getValue(AppStateManager.PREFERENCE_PROPERTY_NAME)).thenReturn("");
         when(jsonFactory.parse(anyString())).thenReturn(pref = Json.createObject());
-        appStateManager = new AppStateManager(components, preferencesManager, jsonFactory, eventBus, appContext);
+        appStateManager = new AppStateManager(components, preferencesManager, jsonFactory, promiseProvider, eventBus, appContext);
         appStateManager.readStateFromPreferences();
     }
 
@@ -165,7 +184,12 @@ public class AppStateManagerTest {
         workspace.put("component1", comp1);
         comp1.put("key1", "value1");
 
+        when(promiseProvider.resolve(any(Void.class))).thenReturn(sequentialRestore);
+
         appStateManager.restoreWorkspaceState();
+
+        verify(sequentialRestore).thenPromise(sequentialRestoreThenFunction.capture());
+        sequentialRestoreThenFunction.getValue().apply(null);
 
         ArgumentCaptor<JsonObject> stateCaptor = ArgumentCaptor.forClass(JsonObject.class);
         verify(component1).loadState(stateCaptor.capture());

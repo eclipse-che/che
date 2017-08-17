@@ -16,16 +16,15 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.16.0-SNAPSHOT</version>
+        <version>5.17.0-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-agent-parent</artifactId>
-    <version>5.16.0-SNAPSHOT</version>
+    <version>5.17.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Agent Parent</name>
     <modules>
-        <module>activity</module>
         <module>che-core-api-project-shared</module>
         <module>che-core-api-project</module>
         <module>che-core-ssh-key-ide</module>

@@ -138,14 +138,14 @@ public class MutableProjectConfig implements ProjectConfig {
     public void setOptions(Map<String, String> options) {
         this.options = options;
     }
-    
+
     public List<CommandDto> getCommands() {
         if (commands == null) {
             commands = newArrayList();
         }
         return commands;
     }
-    
+
     public void setCommands(List<CommandDto> commands) {
         this.commands = commands;
     }
