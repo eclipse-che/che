@@ -37,11 +37,24 @@ public class Utils {
     public static String getDevMachineName(Environment envConfig) {
         for (Map.Entry<String, ? extends MachineConfig> entry : envConfig.getMachines().entrySet()) {
             // TODO should we use server ref instead of installers?
-            List<String> installers = entry.getValue().getInstallers();
-            if (InstallerFqn.idInKeyList(WSAGENT_INSTALLER, installers)) {
+            if (isDev(entry.getValue())) {
                 return entry.getKey();
             }
         }
         return null;
     }
+
+    /**
+     * Checks whether given machine installers contains 'ws-agent' installer.
+     *
+     * @param machineConf
+     *         given machine config
+     * @return true if given machine config contains ws-agent installer
+     * otherwise false will be returned
+     */
+    public static boolean isDev(MachineConfig machineConf) {
+        final List<String> installers = machineConf.getInstallers();
+        return InstallerFqn.idInKeyList(WSAGENT_INSTALLER, installers);
+    }
+
 }

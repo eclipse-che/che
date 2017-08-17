@@ -86,9 +86,8 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
             <outputDirectory>lib/linux_amd64</outputDirectory>
-            <outputFileNameMapping>bootstrapper-linux_amd64</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che:bootstrapper:tar.gz:linux_amd64</include>
+                <include>org.eclipse.che:bootstrapper:zip:linux_amd64</include>
             </includes>
         </dependencySet>
         <dependencySet>

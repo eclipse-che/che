@@ -14,6 +14,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.DeploymentConfig;
@@ -91,6 +92,7 @@ public class OpenShiftEnvironmentParser {
         Map<String, Pod> pods = new HashMap<>();
         Map<String, Service> services = new HashMap<>();
         Map<String, Route> routes = new HashMap<>();
+        Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
         for (HasMetadata object : list.getItems()) {
             if (object instanceof DeploymentConfig) {
                 throw new ValidationException("Supporting of deployment configs is not implemented yet.");
@@ -103,6 +105,9 @@ public class OpenShiftEnvironmentParser {
             } else if (object instanceof Route) {
                 Route route = (Route)object;
                 routes.put(route.getMetadata().getName(), route);
+            } else if (object instanceof PersistentVolumeClaim) {
+                PersistentVolumeClaim pvc = (PersistentVolumeClaim)object;
+                pvcs.put(pvc.getMetadata().getName(), pvc);
             } else {
                 throw new ValidationException(String.format("Found unknown object type '%s'", object.getMetadata()));
             }
@@ -110,7 +115,8 @@ public class OpenShiftEnvironmentParser {
 
         OpenShiftEnvironment openShiftEnvironment = new OpenShiftEnvironment().withPods(pods)
                                                                               .withServices(services)
-                                                                              .withRoutes(routes);
+                                                                              .withRoutes(routes)
+                                                                              .withPersistentVolumeClaims(pvcs);
         normalizeEnvironment(openShiftEnvironment, environment);
 
         return openShiftEnvironment;

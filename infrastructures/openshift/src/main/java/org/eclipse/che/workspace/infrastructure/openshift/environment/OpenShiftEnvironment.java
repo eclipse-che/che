@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
@@ -21,9 +22,10 @@ import java.util.Map;
  * @author Sergii Leshchenko
  */
 public class OpenShiftEnvironment {
-    private Map<String, Pod>     pods;
-    private Map<String, Service> services;
-    private Map<String, Route>   routes;
+    private Map<String, Pod>                   pods;
+    private Map<String, Service>               services;
+    private Map<String, Route>                 routes;
+    private Map<String, PersistentVolumeClaim> persistentVolumeClaims;
 
     public OpenShiftEnvironment() {
     }
@@ -73,6 +75,22 @@ public class OpenShiftEnvironment {
 
     public OpenShiftEnvironment withRoutes(Map<String, Route> routes) {
         this.routes = routes;
+        return this;
+    }
+
+    public Map<String, PersistentVolumeClaim> getPersistentVolumeClaims() {
+        if (persistentVolumeClaims == null) {
+            persistentVolumeClaims = new HashMap<>();
+        }
+        return persistentVolumeClaims;
+    }
+
+    public void setPersistentVolumeClaims(Map<String, PersistentVolumeClaim> persistentVolumeClaims) {
+        this.persistentVolumeClaims = persistentVolumeClaims;
+    }
+
+    public OpenShiftEnvironment withPersistentVolumeClaims(Map<String, PersistentVolumeClaim> persistentVolumeClaims) {
+        this.persistentVolumeClaims = persistentVolumeClaims;
         return this;
     }
 }

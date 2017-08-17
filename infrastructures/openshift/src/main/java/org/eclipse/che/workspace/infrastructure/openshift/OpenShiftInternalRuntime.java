@@ -39,6 +39,7 @@ import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,12 +48,14 @@ import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author Sergii Leshchenko
@@ -89,9 +92,9 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
         String projectName = getContext().getIdentity().getWorkspaceId();
 
-        // TODO Add Persistent Volumes claims for projects
         try (OpenShiftClient client = clientFactory.create()) {
             prepareOpenShiftProject(projectName);
+            prepareOpenShiftPVCs(getContext().getOpenShiftEnvironment(), projectName);
 
             LOG.info("Creating pods from environment");
             for (Pod toCreate : getContext().getOpenShiftEnvironment().getPods().values()) {
@@ -197,6 +200,27 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
             LOG.info("Created new project for workspace {}", getContext().getIdentity().getWorkspaceId());
         } catch (KubernetesClientException e) {
             throw new InfrastructureException(e.getMessage(), e);
+        }
+    }
+
+    private void prepareOpenShiftPVCs(OpenShiftEnvironment osEnv, String namespace) throws InfrastructureException {
+        try (OpenShiftClient client = clientFactory.create()) {
+            final Set<String> existing =
+                    client.persistentVolumeClaims()
+                          .inNamespace(namespace)
+                          .list()
+                          .getItems()
+                          .stream()
+                          .map(p -> p.getMetadata().getName())
+                          .collect(toSet());
+            osEnv.getPersistentVolumeClaims()
+                 .entrySet()
+                 .stream()
+                 .filter(e -> !existing.contains(e.getKey()))
+                 .map(Map.Entry::getValue)
+                 .forEach(e -> client.persistentVolumeClaims().inNamespace(namespace).create(e));
+        } catch (KubernetesClientException ex) {
+            throw new InfrastructureException(ex.getMessage(), ex);
         }
     }
 
