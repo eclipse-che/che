@@ -1373,6 +1373,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String projectExplorerVcsHead() {
+        return "#7A8088";
+    }
+
+    @Override
     public String loaderExpanderColor() {
         return "#555555";
     }
@@ -1600,6 +1605,21 @@ public class LightTheme implements Theme {
     @Override
     public String vcsConsoleChangesLineNumbersColor() {
         return "#66CCFF";
+    }
+
+    @Override
+    public String vcsStatusAddedColor() {
+        return "#0a7700";
+    }
+
+    @Override
+    public String vcsStatusModifiedColor() {
+        return "#0768B0";
+    }
+
+    @Override
+    public String vcsStatusUntrackedColor() {
+        return "#ab8900";
     }
 
     @Override

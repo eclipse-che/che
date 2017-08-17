@@ -36,6 +36,8 @@ public interface TreeStyles extends ClientBundle {
 
         String infoTextContainer();
 
+        String vcsHeadContainer();
+
         String descendantsContainer();
 
         String selected();

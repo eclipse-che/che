@@ -202,6 +202,9 @@ public interface Resources extends Window.Resources,
     @Source("panel/panel-selector-right.svg")
     SVGResource panelSelectorRight();
 
+    @Source("searchMatch.svg")
+    SVGResource searchMatch();
+
     /** Interface for css resources. */
     interface CoreCss extends CssResource {
         String editorPaneMenuDelimiter();
@@ -233,5 +236,14 @@ public interface Resources extends Window.Resources,
 
         @ClassName("codeassistant-highlight")
         String codeassistantHighlight();
+
+        @ClassName("found-highlight")
+        String foundPhraseHighlight();
+
+        @ClassName("found-item")
+        String foundItem();
+
+        @ClassName("search-match")
+        String searchMatch();
     }
 }

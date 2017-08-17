@@ -160,8 +160,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
         service.checkout(project.getLocation(), checkoutRequest)
                .then(ignored -> {
-                   getBranches();
-                   project.synchronize();
+                   view.close();
                })
                .catchError(error -> {
                    handleError(error.getCause(), BRANCH_CHECKOUT_COMMAND_NAME);

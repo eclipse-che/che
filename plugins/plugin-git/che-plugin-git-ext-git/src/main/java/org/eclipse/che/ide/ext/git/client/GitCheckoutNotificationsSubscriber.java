@@ -51,7 +51,27 @@ public class GitCheckoutNotificationsSubscriber {
     private void subscribe() {
         requestTransmitter.newRequest()
                           .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                          .methodName("track:git-checkout")
+                          .methodName("track/git-checkout")
+                          .noParams()
+                          .sendAndSkipResult();
+
+        // TODO (spi ide)
+        initializeGitChangeWatcher();
+        initializeGitIndexWatcher();
+    }
+
+    private void initializeGitChangeWatcher() {
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track/git-change")
+                          .noParams()
+                          .sendAndSkipResult();
+    }
+
+    private void initializeGitIndexWatcher() {
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track/git-index")
                           .noParams()
                           .sendAndSkipResult();
     }

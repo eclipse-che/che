@@ -22,6 +22,7 @@ import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
@@ -37,6 +38,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.editor.JavaReconsilerEvent;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
@@ -74,6 +76,7 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
     private NotificationManager              notificationManager;
     private TestExecutionContext.ContextType contextType;
     private String                           selectedNodePath;
+    private PartPresenter                    activePart;
 
     protected boolean isEnable;
     protected boolean isEditorInFocus;
@@ -103,7 +106,7 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
 
         eventBus.addHandler(JavaReconsilerEvent.TYPE, event -> detectTests(event.getEditor()));
         eventBus.addHandler(ActivePartChangedEvent.TYPE, event -> {
-            PartPresenter activePart = event.getActivePart();
+            activePart = event.getActivePart();
             if (activePart instanceof TextEditor) {
                 isEditorInFocus = true;
                 contextType = CURSOR_POSITION;
@@ -120,7 +123,18 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
     }
 
     @Override
-    public abstract void updateInPerspective(@NotNull ActionEvent event);
+    public void updateInPerspective(@NotNull ActionEvent event) {
+        Presentation presentation = event.getPresentation();
+        boolean isProjectExplorerActive = activePart instanceof ProjectExplorerPresenter;
+        presentation.setVisible(isProjectExplorerActive);
+        if (!isProjectExplorerActive) {
+            return;
+        }
+        if (!isEditorInFocus) {
+            analyzeProjectTreeSelection();
+        }
+        presentation.setEnabled(isEnable);
+    }
 
     @Override
     public abstract void actionPerformed(ActionEvent e);

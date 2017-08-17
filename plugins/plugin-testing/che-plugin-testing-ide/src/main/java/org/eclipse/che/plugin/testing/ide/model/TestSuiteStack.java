@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.testing.ide.model;
 
-import org.eclipse.che.ide.util.loging.Log;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -69,7 +67,6 @@ public class TestSuiteStack {
      */
     public TestState pop(String suiteName) {
         if (stack.isEmpty()) {
-            Log.error(getClass(), "Test suite stack is empty, unexpected suite name: " + suiteName);
             return null;
         }
 

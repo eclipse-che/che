@@ -21,6 +21,7 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
+import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
@@ -50,8 +51,10 @@ import org.eclipse.che.ide.api.resources.Project.ProjectRequest;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
+import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
+import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.project.ProjectServiceClient;
@@ -70,8 +73,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
+import static java.util.Arrays.stream;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.COPIED_FROM;
@@ -82,6 +85,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.SYNCHRONIZED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 import static org.eclipse.che.ide.util.Arrays.add;
+import static org.eclipse.che.ide.util.Arrays.contains;
 import static org.eclipse.che.ide.util.Arrays.removeAll;
 import static org.eclipse.che.ide.util.NameUtils.checkFileName;
 import static org.eclipse.che.ide.util.NameUtils.checkFolderName;
@@ -549,8 +553,9 @@ public final class ResourceManager {
         checkArgument(!source.getLocation().isRoot(), "Workspace root is not allowed to be copied");
 
         return findResource(destination, true).thenPromise(resource -> {
-            if (resource.isPresent() && !force){
-                return promises.reject(new IllegalStateException("Cannot create '" + destination.toString() + "'. Resource already exists."));
+            if (resource.isPresent() && !force) {
+                return promises
+                        .reject(new IllegalStateException("Cannot create '" + destination.toString() + "'. Resource already exists."));
             }
 
             return ps.copy(source.getLocation(), destination.parent(), destination.lastSegment(), force)
@@ -679,7 +684,7 @@ public final class ResourceManager {
                     eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(resource, REMOVED)));
                 }
 
-                final Resource[] updated = removeAll(outdated, reloaded, true);
+                final Resource[] updated = stream(reloaded).filter(resource -> contains(outdated, resource)).toArray(Resource[]::new);
                 for (Resource resource : updated) {
                     store.register(resource);
 
@@ -900,8 +905,12 @@ public final class ResourceManager {
         switch (reference.getType()) {
             case "file":
                 final Link link = reference.getLink(GET_CONTENT_REL);
-
-                return resourceFactory.newFileImpl(path, link.getHref(), this);
+                String vcsStatusAttribute = reference.getAttributes().get("vcs.status");
+                return resourceFactory.newFileImpl(path,
+                                                   link.getHref(),
+                                                   this,
+                                                   vcsStatusAttribute == null ? VcsStatus.NOT_MODIFIED
+                                                                              : VcsStatus.from(vcsStatusAttribute));
             case "folder":
                 return resourceFactory.newFolderImpl(path, this);
             case "project":
@@ -977,7 +986,7 @@ public final class ResourceManager {
 
             return getRemoteResources(holder[0], maxDepth, true).then((Function<Resource[], Resource[]>)resources -> {
                 eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(holder[0], SYNCHRONIZED | DERIVED)));
-
+                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(holder[0], UPDATED)));
                 return resources;
             });
         });
@@ -1088,7 +1097,7 @@ public final class ResourceManager {
         return promises.resolve(null);
     }
 
-    protected Promise<Resource[]> search(final Container container, String fileMask, String contentMask) {
+    protected Promise<List<SearchResult>> search(final Container container, String fileMask, String contentMask) {
         QueryExpression queryExpression = new QueryExpression();
         if (!isNullOrEmpty(contentMask)) {
             queryExpression.setText(contentMask);
@@ -1100,58 +1109,7 @@ public final class ResourceManager {
             queryExpression.setPath(container.getLocation().toString());
         }
 
-        return ps.search(queryExpression).thenPromise(references -> {
-            if (references.isEmpty()) {
-                return promises.resolve(NO_RESOURCES);
-            }
-
-            int maxDepth = 0;
-
-            final Path[] paths = new Path[references.size()];
-
-            for (int i = 0; i < paths.length; i++) {
-                final Path path = Path.valueOf(references.get(i).getPath());
-                paths[i] = path;
-
-                if (path.segmentCount() > maxDepth) {
-                    maxDepth = path.segmentCount();
-                }
-            }
-
-            return getRemoteResources(container, maxDepth, true).then((Function<Resource[], Resource[]>)resources -> {
-                Resource[] filtered = NO_RESOURCES;
-                Path[] mutablePaths = paths;
-
-                outer:
-                for (Resource resource : resources) {
-                    if (resource.getResourceType() != FILE) {
-                        continue;
-                    }
-
-                    for (int i = 0; i < mutablePaths.length; i++) {
-                        Path path = mutablePaths[i];
-
-                        if (path.segmentCount() == resource.getLocation().segmentCount() && path.equals(resource.getLocation())) {
-                            Resource[] tmpFiltered = copyOf(filtered, filtered.length + 1);
-                            tmpFiltered[filtered.length] = resource;
-                            filtered = tmpFiltered;
-
-                            //reduce the size of mutablePaths by removing already checked item
-                            int size = mutablePaths.length;
-                            int numMoved = mutablePaths.length - i - 1;
-                            if (numMoved > 0) {
-                                arraycopy(mutablePaths, i + 1, mutablePaths, i, numMoved);
-                            }
-                            mutablePaths = copyOf(mutablePaths, --size);
-
-                            continue outer;
-                        }
-                    }
-                }
-
-                return filtered;
-            });
-        });
+        return ps.search(queryExpression);
     }
 
     Promise<SourceEstimation> estimate(Container container, String projectType) {
@@ -1191,7 +1149,7 @@ public final class ResourceManager {
 
         FolderImpl newFolderImpl(Path path, ResourceManager resourceManager);
 
-        FileImpl newFileImpl(Path path, String contentUrl, ResourceManager resourceManager);
+        FileImpl newFileImpl(Path path, String contentUrl, ResourceManager resourceManager, VcsStatus vcsStatus);
     }
 
     public interface ResourceManagerFactory {

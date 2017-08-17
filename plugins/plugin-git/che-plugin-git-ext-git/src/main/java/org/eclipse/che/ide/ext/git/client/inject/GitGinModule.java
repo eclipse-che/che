@@ -20,7 +20,8 @@ import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.GitServiceClientImpl;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.ext.git.client.GitCheckoutStatusNotificationHandler;
+import org.eclipse.che.ide.ext.git.client.GitChangesHandler;
+import org.eclipse.che.ide.ext.git.client.GitCheckoutHandler;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
@@ -96,6 +97,7 @@ public class GitGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().implement(GitOutputConsole.class, GitOutputConsolePresenter.class)
                                              .build(GitOutputConsoleFactory.class));
 
-        bind(GitCheckoutStatusNotificationHandler.class).asEagerSingleton();
+        bind(GitCheckoutHandler.class).asEagerSingleton();
+        bind(GitChangesHandler.class).asEagerSingleton();
     }
 }

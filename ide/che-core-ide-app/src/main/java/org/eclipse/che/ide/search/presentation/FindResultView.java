@@ -15,7 +15,7 @@ import com.google.inject.ImplementedBy;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
-import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 
 import java.util.List;
@@ -43,7 +43,7 @@ public interface FindResultView extends View<FindResultView.ActionDelegate> {
      * @param request
      *         requested text
      */
-    void showResults(Resource[] resources, String request);
+    void showResults(List<SearchResult> resources, String request);
 
     Tree getTree();
 

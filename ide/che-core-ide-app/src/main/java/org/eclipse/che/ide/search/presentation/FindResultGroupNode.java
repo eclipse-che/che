@@ -14,26 +14,20 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.ui.smartTree.data.AbstractTreeNode;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.resources.tree.FileNode;
-import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.api.resources.SearchResult;
+import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.ui.smartTree.compare.NameComparator;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
-import org.eclipse.che.ide.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static org.eclipse.che.ide.api.resources.Resource.FILE;
-import static org.eclipse.che.ide.api.theme.Style.getEditorInfoTextColor;
 
 /**
  * Tree node represent search result.
@@ -44,19 +38,22 @@ import static org.eclipse.che.ide.api.theme.Style.getEditorInfoTextColor;
 public class FindResultGroupNode extends AbstractTreeNode implements HasPresentation {
 
     private final CoreLocalizationConstant locale;
-    private final ResourceNode.NodeFactory nodeFactory;
 
-    private NodePresentation nodePresentation;
-    private Resource[]       findResults;
-    private String           request;
+    private NodePresentation      nodePresentation;
+    private FindResultNodeFactory nodeFactory;
+    private PromiseProvider       promiseProvider;
+    private List<SearchResult>    findResults;
+    private String                request;
 
     @Inject
     public FindResultGroupNode(CoreLocalizationConstant locale,
-                               ResourceNode.NodeFactory nodeFactory,
-                               @Assisted Resource[] findResult,
+                               FindResultNodeFactory nodeFactory,
+                               PromiseProvider promiseProvider,
+                               @Assisted List<SearchResult> findResult,
                                @Assisted String request) {
         this.locale = locale;
         this.nodeFactory = nodeFactory;
+        this.promiseProvider = promiseProvider;
         this.findResults = findResult;
         this.request = request;
     }
@@ -65,25 +62,14 @@ public class FindResultGroupNode extends AbstractTreeNode implements HasPresenta
     @Override
     protected Promise<List<Node>> getChildrenImpl() {
         List<Node> fileNodes = new ArrayList<>();
-        for (Resource resource : findResults) {
-            if (resource.getResourceType() != FILE) {
-                continue;
-            }
-
-            FileNode node = nodeFactory.newFileNode((File)resource, null);
-
-            NodePresentation presentation = node.getPresentation(true);
-            presentation.setInfoText(resource.getLocation().toString());
-            presentation.setInfoTextWrapper(Pair.of("(", ")"));
-            presentation.setInfoTextCss("color:" + getEditorInfoTextColor() + ";font-size: 11px");
-
-            fileNodes.add(node);
+        for (SearchResult searchResult : findResults) {
+            FoundItemNode foundItemNode = nodeFactory.newFoundItemNode(searchResult, request);
+            fileNodes.add(foundItemNode);
         }
-
         //sort nodes by file name
         Collections.sort(fileNodes, new NameComparator());
 
-        return Promises.resolve(fileNodes);
+        return promiseProvider.resolve(fileNodes);
     }
 
     /** {@inheritDoc} */
@@ -115,8 +101,12 @@ public class FindResultGroupNode extends AbstractTreeNode implements HasPresenta
     /** {@inheritDoc} */
     @Override
     public void updatePresentation(@NotNull NodePresentation presentation) {
-        StringBuilder resultTitle = new StringBuilder("Find Occurrences of '" + request + "\'  (" + findResults.length + " occurrence");
-        if (findResults.length > 1) {
+        int total = 0;
+        for (SearchResult searchResult : findResults) {
+            total += searchResult.getOccurrences().size();
+        }
+        StringBuilder resultTitle = new StringBuilder("Found occurrences of '" + request + "\'  (" + total + " occurrence");
+        if (total > 1) {
             resultTitle.append("s)");
         } else {
             resultTitle.append(")");

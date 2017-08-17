@@ -57,7 +57,7 @@ public class ProjectTreeNotificationsSubscriber {
 
         requestTransmitter.newRequest()
                           .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                          .methodName("track:project-tree")
+                          .methodName("track/project-tree")
                           .paramsAsDto(params)
                           .sendAndSkipResult();
     }

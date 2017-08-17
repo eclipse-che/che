@@ -1397,6 +1397,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String projectExplorerVcsHead() {
+        return "#c3bfbf";
+    }
+
+    @Override
     public String loaderExpanderColor() {
         return "#e3e3e3";
     }
@@ -1624,6 +1629,21 @@ public class DarkTheme implements Theme {
     @Override
     public String vcsConsoleChangesLineNumbersColor() {
         return "#00FFFF";
+    }
+
+    @Override
+    public String vcsStatusAddedColor() {
+        return "#72ad42";
+    }
+
+    @Override
+    public String vcsStatusModifiedColor() {
+        return "#3193d4";
+    }
+
+    @Override
+    public String vcsStatusUntrackedColor() {
+        return "#e0b91d";
     }
 
     @Override
