@@ -12,11 +12,21 @@
 export CUR_DIR=$(cd "$(dirname "$0")"; pwd)
 export CALLER=$(basename $0)
 
+cd $CUR_DIR
+
 mvn dependency:unpack-dependencies \
     -DincludeArtifactIds=che-selenium-core \
     -DincludeGroupIds=org.eclipse.che.selenium \
     -Dmdep.unpack.includes=webdriver.sh \
     -DoutputDirectory=${CUR_DIR}/target/bin
-chmod +x ${CUR_DIR}/target/bin/webdriver.sh
+chmod +x target/bin/webdriver.sh
 
-(target/bin/webdriver.sh --suite=CheSuite.xml $@)
+TESTS_SCOPE="--suite=CheSuite.xml"
+for var in "$@"; do
+    if [[ "$var" =~ --test=.* ]] || [[ "$var" =~ --suite=.* ]]; then
+        TESTS_SCOPE=
+        break
+    fi
+done
+
+(target/bin/webdriver.sh "$TESTS_SCOPE" $@)
