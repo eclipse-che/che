@@ -58,10 +58,12 @@ public final class Keycloak extends JavaScriptObject {
                     .error(function () {
                         console.log('[Keycloak] Failed updating Keycloak token');
                         reject();
+                        theKeycloak.login();
                     });
             } catch (ex) {
                 console.log('[Keycloak] Failed updating Keycloak token with exception: ', ex);
                 reject();
+                theKeycloak.login();
             }
         });
 

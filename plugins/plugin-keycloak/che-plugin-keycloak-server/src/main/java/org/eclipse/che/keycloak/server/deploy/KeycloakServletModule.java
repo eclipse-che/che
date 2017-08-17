@@ -16,17 +16,15 @@ import org.eclipse.che.keycloak.server.KeycloakAuthenticationFilter;
 import org.eclipse.che.keycloak.server.KeycloakEnvironmentInitalizationFilter;
 
 import javax.inject.Singleton;
-import java.util.regex.Pattern;
 
 
 public class KeycloakServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         bind(KeycloakAuthenticationFilter.class).in(Singleton.class);
-        Pattern compile = Pattern.compile("^(?!.*(/websocket/|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?)$).*");
 
-        // Not contains '/websocket' and not ends with '/ws' or '/eventbus' or '/settings/'
-        filterRegex("^(?!.*(/websocket/|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?)$).*").through(KeycloakAuthenticationFilter.class);
-        filterRegex("^(?!.*(/websocket/|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?)$).*").through(KeycloakEnvironmentInitalizationFilter.class);
+        // Not contains '/websocket', /docs/ (for swagger) and not ends with '/ws' or '/eventbus' or '/settings/'
+        filterRegex("^(?!.*(/websocket/?|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?)$).*").through(KeycloakAuthenticationFilter.class);
+        filterRegex("^(?!.*(/websocket/?|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?)$).*").through(KeycloakEnvironmentInitalizationFilter.class);
     }
 }

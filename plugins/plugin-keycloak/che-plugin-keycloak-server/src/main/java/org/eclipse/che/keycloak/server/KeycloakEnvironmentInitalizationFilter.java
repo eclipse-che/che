@@ -80,7 +80,7 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
 
         final HttpSession session = httpRequest.getSession();
         Subject subject = (Subject)session.getAttribute("che_subject");
-        if (subject == null) {
+        if (subject == null || !subject.getToken().equals(token)) {
             Jwt jwtToken = (Jwt)httpRequest.getAttribute("token");
             if (jwtToken == null) {
                 throw new ServletException("Cannot detect or instantiate user.");
