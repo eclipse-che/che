@@ -29,4 +29,4 @@ for var in "$@"; do
     fi
 done
 
-(target/bin/webdriver.sh "$TESTS_SCOPE" $@ "$ADDITIONAL_ARGS")
+(target/bin/webdriver.sh "$TESTS_SCOPE" $@)
