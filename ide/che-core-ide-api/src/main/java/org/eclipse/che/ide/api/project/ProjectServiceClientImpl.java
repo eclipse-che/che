@@ -103,7 +103,6 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
 
         return reqFactory.createGetRequest(url)
                          .header(ACCEPT, MimeType.APPLICATION_JSON)
-                         .loader(loaderFactory.newLoader("Getting projects..."))
                          .send(unmarshaller.newListUnmarshaller(ProjectConfigDto.class));
     }
 
@@ -211,7 +210,6 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
         final String url = encodeAllowEscapes(getBaseUrl() + FILE + path(path.toString()));
 
         return reqFactory.createGetRequest(url)
-                         .loader(loaderFactory.newLoader("Loading file content..."))
                          .send(new StringUnmarshaller());
     }
 
@@ -222,7 +220,6 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
 
         return reqFactory.createRequest(PUT, url, null, false)
                          .data(content)
-                         .loader(loaderFactory.newLoader("Updating file..."))
                          .send();
     }
 
