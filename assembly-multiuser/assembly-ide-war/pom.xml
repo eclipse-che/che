@@ -230,7 +230,7 @@
                                 <include>IDE.jsp</include>
                             </includes>
                         </overlay>
-                        <overlay></overlay>
+                        <overlay />
                     </overlays>
                     <packagingExcludes>%regex[WEB-INF\\lib\\(?!.*j2ee).*.jar]</packagingExcludes>
                 </configuration>
