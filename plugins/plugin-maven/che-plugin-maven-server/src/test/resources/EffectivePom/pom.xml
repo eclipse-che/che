@@ -23,7 +23,7 @@
     <url>${site.url}</url>
     <inceptionYear>2012</inceptionYear>
     <organization>
-        <name>Codenvy, S.A.</name>
+        <name>Red Hat, Inc.</name>
         <url>http://www.codenvy.com</url>
     </organization>
     <licenses>
