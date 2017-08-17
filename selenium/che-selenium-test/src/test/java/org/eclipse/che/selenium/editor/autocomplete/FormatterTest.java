@@ -37,14 +37,14 @@ import java.nio.file.Paths;
 public class FormatterTest {
     private static final String PROJECT_NAME   = NameGenerator.generate(FormatterTest.class.getSimpleName(), 4);
     private static final String FORMATTED_TEXT = "/*******************************************************************************\n" +
-                                                 " * Copyright (c) 2012-2017 Codenvy, S.A.\n" +
+                                                 " * Copyright (c) 2012-2017 Red Hat, Inc.\n" +
                                                  " * All rights reserved. This program and the accompanying materials\n" +
                                                  " * are made available under the terms of the Eclipse Public License v1.0\n" +
                                                  " * which accompanies this distribution, and is available at\n" +
                                                  " * http://www.eclipse.org/legal/epl-v10.html\n" +
                                                  " *\n" +
                                                  " * Contributors:\n" +
-                                                 " *   Codenvy, S.A. - initial API and implementation\n" +
+                                                 " *   Red Hat, Inc. - initial API and implementation\n" +
                                                  " *******************************************************************************/\n" +
                                                  "package org.eclipse.qa.examples;\n" +
                                                  "\n" +
