@@ -26,4 +26,8 @@ public interface MySimpleDTO {
 
     double getDouble();
     MySimpleDTO withDouble(double d);
+
+    float getFloat();
+    MySimpleDTO withFloat(float f);
+
 }
