@@ -47,7 +47,8 @@
       </md-tab-label>
       <md-tab-body>
         <workspace-details-projects
-          get-workspace-status="workspaceDetailsController.getWorkspaceStatus()"></workspace-details-projects>
+          workspace-details="workspaceDetailsController.workspaceDetails"
+          projects-on-change="workspaceDetailsController.switchEditMode()"></workspace-details-projects>
       </md-tab-body>
     </md-tab>
 
@@ -145,7 +146,7 @@
 </md-content>
 
 <workspace-edit-mode-overlay ng-if="workspaceDetailsController.editMode"
-                             workspace-edit-mode-message="{{!workspaceDetailsController.isSaveButtonDisabled() ? '' : 'Changes will be applied and workspace restarted'}}"
+                             workspace-edit-mode-message="{{workspaceDetailsController.editModeMessage}}"
                              workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
                              workspace-edit-disable-save-button="workspaceDetailsController.isSaveButtonDisabled()"
                              workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"

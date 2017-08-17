@@ -30,7 +30,7 @@ const STOP_WITHOUT_SNAPSHOT = 'Stop without snapshot';
  * Test of the WorkspaceStatusButton directive.
  * @author Oleksii Orel
  */
-fdescribe('WorkspaceStatusButton >', () => {
+describe('WorkspaceStatusButton >', () => {
 
   let $rootScope: ITestScope,
     $timeout: ng.ITimeoutService,

@@ -22,11 +22,14 @@ import {WorkspaceEditModeToolbarButton} from './workspace-edit-mode/workspace-ed
 import {WorkspaceDetailsSsh} from './workspace-details/workspace-ssh/workspace-details-ssh.directive';
 import {WorkspaceDetailsSshCtrl} from './workspace-details/workspace-ssh/workspace-details-ssh.controller';
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
+import {WorkspaceDetailsProjects} from './workspace-details/workspace-projects/workspace-details-projects.directive';
+import {WorkspaceDetailsProjectsService} from './workspace-details/workspace-projects/workspace-details-projects.service';
+import {AddProjectPopoverController} from './workspace-details/workspace-projects/add-project-popover/add-project-popover.controller';
+import {AddProjectPopover} from './workspace-details/workspace-projects/add-project-popover/add-project-popover.directive';
 import {WorkspaceDetailsService} from './workspace-details/workspace-details.service';
 import {ExportWorkspaceController} from './workspace-details/export-workspace/export-workspace.controller';
 import {ExportWorkspace} from './workspace-details/export-workspace/export-workspace.directive';
 import {ExportWorkspaceDialogController} from  './workspace-details/export-workspace/dialog/export-workspace-dialog.controller';
-import {WorkspaceDetailsProjects} from './workspace-details/workspace-projects/workspace-details-projects.directive';
 import {ReadyToGoStacksController} from './workspace-details/select-stack/ready-to-go-stacks/ready-to-go-stacks.controller';
 import {ReadyToGoStacks} from './workspace-details/select-stack/ready-to-go-stacks/ready-to-go-stacks.directive';
 import {WorkspaceRecipeImportController} from './workspace-details/select-stack/recipe-import/workspace-recipe-import.controller';
@@ -56,26 +59,32 @@ import {NamespaceSelector} from './create-workspace/namespace-selector/namespace
 import {ProjectSourceSelectorController} from './create-workspace/project-source-selector/project-source-selector.controller';
 import {ProjectSourceSelectorService} from './create-workspace/project-source-selector/project-source-selector.service';
 import {ProjectSourceSelector} from './create-workspace/project-source-selector/project-source-selector.directive';
-import {ImportBlankProjectController} from './create-workspace/project-source-selector/import-blank-project/import-blank-project.controller';
-import {ImportBlankProjectService} from './create-workspace/project-source-selector/import-blank-project/import-blank-project.service';
-import {ImportBlankProject} from './create-workspace/project-source-selector/import-blank-project/import-blank-project.directive';
-import {ImportGitProjectController} from './create-workspace/project-source-selector/import-git-project/import-git-project.controller';
-import {ImportGitProjectService} from './create-workspace/project-source-selector/import-git-project/import-git-project.service';
-import {ImportGitProject} from './create-workspace/project-source-selector/import-git-project/import-git-project.directive';
-import {ImportZipProjectController} from './create-workspace/project-source-selector/import-zip-project/import-zip-project.controller';
-import {ImportZipProjectService} from './create-workspace/project-source-selector/import-zip-project/import-zip-project.service';
-import {ImportZipProject} from './create-workspace/project-source-selector/import-zip-project/import-zip-project.directive';
-import {ImportGithubProjectController} from './create-workspace/project-source-selector/import-github-project/import-github-project.controller';
-import {ImportGithubProjectService} from './create-workspace/project-source-selector/import-github-project/import-github-project.service';
-import {ImportGithubProject} from './create-workspace/project-source-selector/import-github-project/import-github-project.directive';
-import {GithubRepositoryItem} from './create-workspace/project-source-selector/import-github-project/github-repository-item/github-repository-item.directive';
-import {TemplateSelectorController} from './create-workspace/project-source-selector/template-selector/template-selector.controller';
-import {TemplateSelectorSvc} from './create-workspace/project-source-selector/template-selector/template-selector.service';
-import {TemplateSelector} from './create-workspace/project-source-selector/template-selector/template-selector.directive';
-import {TemplateSelectorItem} from './create-workspace/project-source-selector/template-selector/template-selector-item/template-selector-item.directive';
-import {ProjectMetadataController} from './create-workspace/project-source-selector/project-metadata/project-metadata.controller';
-import {ProjectMetadataService} from './create-workspace/project-source-selector/project-metadata/project-metadata.service';
-import {ProjectMetadata} from './create-workspace/project-source-selector/project-metadata/project-metadata.directive';
+import {AddImportProjectController} from './create-workspace/project-source-selector/add-import-project/add-import-project.controller';
+import {AddImportProjectService} from './create-workspace/project-source-selector/add-import-project/add-import-project.service';
+import {AddImportProject} from './create-workspace/project-source-selector/add-import-project/add-import-project.directive';
+import {ImportBlankProjectController} from './create-workspace/project-source-selector/add-import-project/import-blank-project/import-blank-project.controller';
+import {ImportBlankProjectService} from './create-workspace/project-source-selector/add-import-project/import-blank-project/import-blank-project.service';
+import {ImportBlankProject} from './create-workspace/project-source-selector/add-import-project/import-blank-project/import-blank-project.directive';
+import {ImportGitProjectController} from './create-workspace/project-source-selector/add-import-project/import-git-project/import-git-project.controller';
+import {ImportGitProjectService} from './create-workspace/project-source-selector/add-import-project/import-git-project/import-git-project.service';
+import {ImportGitProject} from './create-workspace/project-source-selector/add-import-project/import-git-project/import-git-project.directive';
+import {ImportZipProjectController} from './create-workspace/project-source-selector/add-import-project/import-zip-project/import-zip-project.controller';
+import {ImportZipProjectService} from './create-workspace/project-source-selector/add-import-project/import-zip-project/import-zip-project.service';
+import {ImportZipProject} from './create-workspace/project-source-selector/add-import-project/import-zip-project/import-zip-project.directive';
+import {ImportGithubProjectController} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.controller';
+import {ImportGithubProjectService} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.service';
+import {ImportGithubProject} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.directive';
+import {GithubRepositoryItem} from './create-workspace/project-source-selector/add-import-project/import-github-project/github-repository-item/github-repository-item.directive';
+import {TemplateSelectorController} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector.controller';
+import {TemplateSelectorSvc} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector.service';
+import {TemplateSelector} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector.directive';
+import {TemplateSelectorItem} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector-item/template-selector-item.directive';
+import {EditProjectController} from './create-workspace/project-source-selector/edit-project/edit-project.controller';
+import {EditProject} from './create-workspace/project-source-selector/edit-project/edit-project.directive';
+import {EditProjectService} from './create-workspace/project-source-selector/edit-project/edit-project.service';
+import {ProjectMetadataController} from './create-workspace/project-source-selector/edit-project/project-metadata/project-metadata.controller';
+import {ProjectMetadataService} from './create-workspace/project-source-selector/edit-project/project-metadata/project-metadata.service';
+import {ProjectMetadata} from './create-workspace/project-source-selector/edit-project/project-metadata/project-metadata.directive';
 
 import {CheWorkspaceRamAllocationSliderController} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
@@ -168,6 +177,9 @@ export class WorkspacesConfig {
 
     register.controller('WorkspaceDetailsProjectsCtrl', WorkspaceDetailsProjectsCtrl);
     register.directive('workspaceDetailsProjects', WorkspaceDetailsProjects);
+    register.service('workspaceDetailsProjectsService', WorkspaceDetailsProjectsService);
+    register.controller('AddProjectPopoverController', AddProjectPopoverController);
+    register.directive('addProjectPopover', AddProjectPopover);
     register.service('workspaceDetailsService', WorkspaceDetailsService);
 
     register.controller('ExportWorkspaceDialogController', ExportWorkspaceDialogController);
@@ -217,6 +229,9 @@ export class WorkspacesConfig {
     register.controller('ProjectSourceSelectorController', ProjectSourceSelectorController);
     register.service('projectSourceSelectorService', ProjectSourceSelectorService);
     register.directive('projectSourceSelector', ProjectSourceSelector);
+    register.controller('AddImportProjectController', AddImportProjectController);
+    register.service('addImportProjectService', AddImportProjectService);
+    register.directive('addImportProject', AddImportProject);
     register.controller('ImportBlankProjectController', ImportBlankProjectController);
     register.service('importBlankProjectService', ImportBlankProjectService);
     register.directive('importBlankProject', ImportBlankProject);
@@ -234,6 +249,9 @@ export class WorkspacesConfig {
     register.service('templateSelectorSvc', TemplateSelectorSvc);
     register.directive('templateSelector', TemplateSelector);
     register.directive('templateSelectorItem', TemplateSelectorItem);
+    register.controller('EditProjectController', EditProjectController);
+    register.directive('editProject', EditProject);
+    register.service('editProjectService', EditProjectService);
     register.controller('ProjectMetadataController', ProjectMetadataController);
     register.service('projectMetadataService', ProjectMetadataService);
     register.directive('projectMetadata', ProjectMetadata);
@@ -313,7 +331,12 @@ export class WorkspacesConfig {
         reloadOnSearch: false,
         templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
         controller: 'WorkspaceDetailsController',
-        controllerAs: 'workspaceDetailsController'
+        controllerAs: 'workspaceDetailsController',
+        resolve: {
+          initData: ['workspaceConfigService', (workspaceConfigService: WorkspaceConfigService) => {
+            return workspaceConfigService.resolveCreateWorkspaceRoute();
+          }]
+        }
       })
       .accessWhen('/create-workspace', {
         title: 'New Workspace',
