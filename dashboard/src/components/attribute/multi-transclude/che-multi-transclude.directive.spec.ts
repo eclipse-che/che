@@ -51,24 +51,24 @@ describe('CheMultiTransclude >', () => {
     $timeout.verifyNoPendingTasks();
   });
 
-  const part1 = '<button type="button" name="my-button">Click</button>';
-  const part2 = '<div><span>My text.</span></div>';
+  const part1 = '<span id="my-text">My text</span>';
+  const part2 = '<che-button-default che-button-title="Click" name="myButton"></che-button-default>';
 
   function getCompiledElement() {
     const element = $compile(
       angular.element(
         `<div>
           <div che-multi-transclude>
-            <div target="one"></div>
-            <div target="two"></div>
+            <div che-multi-transclude-target="one"></div>
+            <div che-multi-transclude-target="two"></div>
           </div>
         </div>`
       ), function($scope: ng.IScope, cloneAttachFn: ng.ICloneAttachFunction): ng.IAugmentedJQuery {
         const transcludingContent: ng.IAugmentedJQuery = angular.element(
-          `<div part="one">${part1}</div>
-           <div part="two">${part2}</div>`
+          `<div che-multi-transclude-part="one">${part1}</div>
+           <div che-multi-transclude-part="two">${part2}</div>`
         );
-        cloneAttachFn(transcludingContent);
+        cloneAttachFn(transcludingContent, $scope);
         return transcludingContent;
       }
     )($rootScope);
@@ -80,11 +80,26 @@ describe('CheMultiTransclude >', () => {
     compiledDirective = getCompiledElement();
   });
 
-  it('should transclude multiple parts >', () => {
-    $timeout.flush();
+  describe('first part, span >', () => {
 
-    expect(compiledDirective.html()).toContain(part1);
-    expect(compiledDirective.html()).toContain(part2);
+    it('span with text should be transcluded >', () => {
+      $timeout.flush();
+
+      expect(compiledDirective.find('span#my-text').length).toEqual(1);
+      expect(compiledDirective.html()).toContain('My text');
+    });
+
+  });
+
+  describe('second part, directive >', () => {
+
+    it('directive should be transcluded and compiled >', () => {
+      $timeout.flush();
+
+      expect(compiledDirective.find('button.md-button').length).toBeTruthy();
+      expect(compiledDirective.html()).toContain('Click');
+    });
+
   });
 
 });

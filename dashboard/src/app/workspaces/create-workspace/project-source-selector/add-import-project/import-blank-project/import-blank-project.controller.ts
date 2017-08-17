@@ -50,15 +50,20 @@ export class ImportBlankProjectController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(addImportProjectService: AddImportProjectService, importBlankProjectService: ImportBlankProjectService) {
+  constructor($scope: ng.IScope, addImportProjectService: AddImportProjectService, importBlankProjectService: ImportBlankProjectService) {
     this.addImportProjectService = addImportProjectService;
     this.importBlankProjectService = importBlankProjectService;
 
     this.name = this.importBlankProjectService.name;
     this.description = this.importBlankProjectService.description;
 
-    this.addImportProjectService.subscribe((source: ProjectSource) => {
+    const actionOnPublish = (source: ProjectSource) => {
       this.onAddImportProjectServicePublish(source);
+    };
+    this.addImportProjectService.subscribe(actionOnPublish);
+
+    $scope.$on('$destroy', () => {
+      this.addImportProjectService.unsubscribe(actionOnPublish);
     });
   }
 

@@ -13,16 +13,16 @@
 <md-content flex class="workspace-projects-content">
 
   <che-list-header-additional-parts>
-    <div part="che-list-add-button">
+    <div che-multi-transclude-part="che-list-add-button">
       <add-project-popover is-project-name-unique="workspaceDetailsProjectsCtrl.isProjectNameUnique(name)"
                            project-on-add="workspaceDetailsProjectsCtrl.projectTemplateOnAdd(templates)"></add-project-popover>
     </div>
-    <div part="che-list-delete-button">
+    <div che-multi-transclude-part="che-list-delete-button">
       <che-list-header-delete-button ng-if="workspaceDetailsProjectsCtrl.cheListHelper.isNoItemSelected === false"
                                      title="Delete"
                                      on-delete="workspaceDetailsProjectsCtrl.deleteSelectedProjects()"></che-list-header-delete-button>
     </div>
-    <div part="che-list-search">
+    <div che-multi-transclude-part="che-list-search">
       <che-list-header-search placeholder="Search"
                               query="workspaceDetailsProjectsCtrl.projectFilter.name"
                               on-change="workspaceDetailsProjectsCtrl.onSearchChanged(query)"></che-list-header-search>

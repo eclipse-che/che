@@ -38,15 +38,16 @@ interface INumberSpinnerScope extends ng.IScope {
  * @param {number} ng-model the model
  * @param {number=} che-tofixed number of digits after decimal point
  * @param {string=} unit measure unit
- * @param {number=} step step of increment/decrement
- * @param {number=} minvalue minimal value
- * @param {number=} maxvalue maximal value
+ * @param {number=} che-step step of increment/decrement
+ * @param {number=} che-minvalue minimal value
+ * @param {number=} che-maxvalue maximal value
  * @param {Function=} isChanged callback
  *
  * @usage
  * <che-number-spinner che-form="myForm"
  *                     che-name="myName"
  *                     ng-model="value"
+ *                     che-step="1"
  *                     che-tofixed="2"
  *                     che-minvalue="0"
  *                     che-maxvalue="10"></che-number-spinner>
@@ -58,6 +59,7 @@ interface INumberSpinnerScope extends ng.IScope {
  *       <che-number-spinner che-form="myForm"
  *                           che-name="myName"
  *                           ng-model="value"
+ *                           che-step="1"
  *                           che-tofixed="2"
  *                           che-minvalue="0"
  *                           che-maxvalue="10"></che-number-spinner>
@@ -101,7 +103,7 @@ export class CheNumberSpinner {
   }
 
   template(element: ng.IAugmentedJQuery, attrs: any) {
-    let step = attrs.cheStep ? `step="${attrs.cheStep}"` : '',
+    let step = attrs.cheStep ? `step="${attrs.cheStep}"` : `step="1"`,
         minvalue = attrs.cheMinvalue ? `min="${attrs.cheMinvalue}" ng-min="${attrs.cheMinvalue}"` : '',
         maxvalue = attrs.cheMaxvalue ? `max="${attrs.cheMaxvalue}" ng-max="${attrs.cheMaxvalue}"` : '';
     return `<div layout="row" layout-align="start center"
@@ -186,6 +188,7 @@ export class CheNumberSpinner {
   }
 
   link($scope: INumberSpinnerScope, $element: ng.IAugmentedJQuery) {
+    $scope.step = isNaN($scope.step) ? 1 : $scope.step;
     $scope.value = isNaN($scope.value) ? 0 : $scope.value;
     $scope.tofixed = $scope.tofixed ? $scope.tofixed : 0;
 

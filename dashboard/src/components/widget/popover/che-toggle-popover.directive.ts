@@ -66,13 +66,15 @@ export class CheTogglePopover implements ng.IDirective {
     triggerOutsideClick: '=?'
   };
 
+  private $compile: ng.ICompileService;
   private $timeout: ng.ITimeoutService;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout: ng.ITimeoutService) {
+  constructor($compile: ng.ICompileService, $timeout: ng.ITimeoutService) {
+    this.$compile = $compile;
     this.$timeout = $timeout;
   }
 
@@ -88,8 +90,10 @@ export class CheTogglePopover implements ng.IDirective {
              popover-is-open="isPopoverOpen"
              popover-trigger="{{triggerOutsideClick ? 'outsideClick' : 'none'}}"
              uib-popover-html="'<div class=\\'che-transclude\\'></div>'">
-          <div target="button"
-               ng-click="isOpen=!isOpen; stateOnChange(isOpen);"
+          <div che-multi-transclude-target="button"
+                is-open="{{isOpen}}"
+               ng-click="isOpen=!isOpen;"
+               class="test-class"
                ng-class="{'che-toggle-popover-button-disabled': isOpen===false}"></div>
         </div>
       </div>
@@ -101,7 +105,6 @@ export class CheTogglePopover implements ng.IDirective {
     const watchers: Array<Function> = [];
     watchers.push(
       $scope.$watch(() => { return $scope.isOpen; }, (newVal: boolean, oldVal: boolean) => {
-        // $scope.isOpen = newVal;
         if (newVal === oldVal) {
           return;
         }
@@ -127,6 +130,7 @@ export class CheTogglePopover implements ng.IDirective {
       });
     });
 
+    let childScope: ng.IScope;
     $scope.stateOnChange = (isOpen: boolean) => {
       this.$timeout(() => {
         $scope.isPopoverOpen = isOpen;
@@ -136,11 +140,16 @@ export class CheTogglePopover implements ng.IDirective {
           $scope.onChange({isOpen: isOpen});
         }
         if (isOpen) {
-
-          $transclude((clonedElement: ng.IAugmentedJQuery) => {
-            const popoverContent = angular.element('<div></div>').append(clonedElement).find('[part="popover"]');
-            $element.find('.che-transclude').replaceWith(popoverContent);
+          $transclude(($clonedElement: ng.IAugmentedJQuery, $clonedScope: ng.IScope) => {
+            childScope = $clonedScope;
+            const popover = angular.element('<div></div>').append($clonedElement).find('[che-multi-transclude-part="popover"]'),
+                  popoverCompiled = this.$compile(angular.element(popover.html()))($clonedScope);
+            $element.find('.che-transclude').replaceWith(popoverCompiled);
           });
+        } else {
+          if (childScope) {
+            childScope.$destroy();
+          }
         }
       });
     };
@@ -153,7 +162,6 @@ export class CheTogglePopover implements ng.IDirective {
         // on press 'esc'
         $scope.$apply(() => {
           $scope.isOpen = false;
-          // $scope.stateOnChange($scope.isOpen);
         });
       }
     });

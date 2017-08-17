@@ -81,11 +81,20 @@ export class TemplateSelectorController {
     this.allTemplates = this.$filter('orderBy')(this.templateSelectorSvc.getAllTemplates(), ['projectType', 'displayName']);
     this.filterAndSortTemplates();
 
+    const actionOnStackChanged = () => {
+      this.onStackChanged();
+    };
+    this.stackSelectorSvc.subscribe(actionOnStackChanged);
     this.onStackChanged();
-    this.stackSelectorSvc.subscribe(this.onStackChanged.bind(this));
 
-    this.addImportProjectService.subscribe((source: ProjectSource) => {
+    const actionOnPublish = (source: ProjectSource) => {
       this.onAddImportProjectServicePublish(source);
+    };
+    this.addImportProjectService.subscribe(actionOnPublish);
+
+    $scope.$on('$destroy', () => {
+      this.addImportProjectService.unsubscribe(actionOnPublish);
+      this.stackSelectorSvc.unsubscribe(actionOnStackChanged);
     });
   }
 

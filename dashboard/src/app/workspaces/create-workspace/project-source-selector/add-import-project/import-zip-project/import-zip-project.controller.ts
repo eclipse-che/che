@@ -45,15 +45,20 @@ export class ImportZipProjectController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(importZipProjectService: ImportZipProjectService, addImportProjectService: AddImportProjectService) {
+  constructor($scope: ng.IScope, importZipProjectService: ImportZipProjectService, addImportProjectService: AddImportProjectService) {
     this.importZipProjectService = importZipProjectService;
     this.addImportProjectService = addImportProjectService;
 
     this.location = this.importZipProjectService.location;
     this.skipFirstLevel = this.importZipProjectService.skipFirstLevel;
 
-    this.addImportProjectService.subscribe((source: ProjectSource) => {
+    const actionOnPublish = (source: ProjectSource) => {
       this.onAddImportProjectServicePublish(source);
+    };
+    this.addImportProjectService.subscribe(actionOnPublish);
+
+    $scope.$on('$destroy', () => {
+      this.addImportProjectService.unsubscribe(actionOnPublish);
     });
   }
 

@@ -41,14 +41,19 @@ export class ImportGitProjectController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(importGitProjectService: ImportGitProjectService, addImportProjectService: AddImportProjectService) {
+  constructor($scope: ng.IScope, importGitProjectService: ImportGitProjectService, addImportProjectService: AddImportProjectService) {
     this.importGitProjectService = importGitProjectService;
     this.addImportProjectService = addImportProjectService;
 
     this.location = this.importGitProjectService.location;
 
-    this.addImportProjectService.subscribe((source: ProjectSource) => {
+    const actionOnPublish = (source: ProjectSource) => {
       this.onAddImportProjectServicePublish(source);
+    };
+    this.addImportProjectService.subscribe(actionOnPublish);
+
+    $scope.$on('$destroy', () => {
+      this.addImportProjectService.unsubscribe(actionOnPublish);
     });
   }
 

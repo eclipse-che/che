@@ -12,7 +12,13 @@
 import {CheHttpBackend} from '../../api/test/che-http-backend';
 
 interface ITestScope extends ng.IRootScopeService {
-  model?: any;
+  model: {
+    buttonTitle: string;
+    popoverTitle: string;
+    isOpen: boolean;
+    content: string;
+    onChange: (isOpen: boolean) => void;
+  };
 }
 
 /**
@@ -40,7 +46,7 @@ describe('CheTogglePopover >', () => {
                      _$compile_: ng.ICompileService,
                      _$rootScope_: ng.IRootScopeService,
                      cheHttpBackend: CheHttpBackend) => {
-    $rootScope = _$rootScope_.$new();
+    $rootScope = _$rootScope_.$new() as ITestScope;
     $timeout = _$timeout_;
     $compile = _$compile_;
 
@@ -74,10 +80,10 @@ describe('CheTogglePopover >', () => {
                                 placement="right-top"
                                 is-open="model.isOpen"
                                 on-change="model.onChange(isOpen)">
-        <div part="button">
+        <div che-multi-transclude-part="button">
           <che-button-primary che-button-title="{{model.buttonTitle}}"></che-button-primary>
         </div>
-        <div part="popover">
+        <div che-multi-transclude-part="popover">
           <div>{{model.content}}</div>
         </div>
       </che-toggle-popover></div>`
@@ -92,7 +98,7 @@ describe('CheTogglePopover >', () => {
 
     beforeEach(() => {
       compiledDirective = getCompiledElement();
-      toggleButtonWrapper = compiledDirective.find('[target="button"]');
+      toggleButtonWrapper = compiledDirective.find('[che-multi-transclude-target="button"]');
 
       // timeout should be flashed
       $timeout.flush();
@@ -193,7 +199,7 @@ describe('CheTogglePopover >', () => {
       $rootScope.model.isOpen = true;
 
       compiledDirective = getCompiledElement();
-      toggleButtonWrapper = compiledDirective.find('[target="button"]');
+      toggleButtonWrapper = compiledDirective.find('[che-multi-transclude-target="button"]');
 
       // timeout should be flashed
       $timeout.flush();

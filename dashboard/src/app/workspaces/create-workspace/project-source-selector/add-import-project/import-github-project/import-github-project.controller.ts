@@ -145,11 +145,16 @@ export class ImportGithubProjectController {
     this.organizationsList = this.importGithubProjectService.getOrganizations();
     this.cheListHelper.setList(this.githubRepositoriesList, 'clone_url');
 
-    this.selectedRepositories = this.importGithubProjectService.getSelectedRepositories();
-    this.addImportProjectService.subscribe((source: ProjectSource) => {
+    const actionOnPublish = (source: ProjectSource) => {
       this.onAddImportProjectServicePublish(source);
+    };
+    this.addImportProjectService.subscribe(actionOnPublish);
+
+    $scope.$on('$destroy', () => {
+      this.addImportProjectService.unsubscribe(actionOnPublish);
     });
 
+    this.selectedRepositories = this.importGithubProjectService.getSelectedRepositories();
     this.selectedRepositories.forEach((repository: IGithubRepository) => {
       this.cheListHelper.itemsSelectionStatus[repository.clone_url] = true;
     });

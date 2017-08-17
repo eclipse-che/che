@@ -20,6 +20,7 @@ import {CheOnRightClick} from './click/che-on-right-click.directive';
 import {CheTypeNumber} from './input-type/input-number.directive';
 import {CheTypeCity} from './input-type/input-city.directive';
 import {CheMultiTransclude} from './multi-transclude/che-multi-transclude.directive';
+import {CheMultiTranscludePart} from './multi-transclude/che-multi-transclude-part.directive';
 
 export class AttributeConfig {
 
@@ -43,5 +44,6 @@ export class AttributeConfig {
     register.directive('cheTypeCity', CheTypeCity);
 
     register.directive('cheMultiTransclude', CheMultiTransclude);
+    register.directive('cheMultiTranscludePart', CheMultiTranscludePart);
   }
 }

@@ -15,7 +15,7 @@
  *
  * @author Oleksii Kurinnyi
  */
-export class EditProject {
+export class EditProject implements ng.IDirective {
   restrict: string = 'E';
   templateUrl: string = 'app/workspaces/create-workspace/project-source-selector/edit-project/edit-project.html';
 
