@@ -29,7 +29,6 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
@@ -207,8 +206,6 @@ public class EditorPartStackPresenterTest {
         Promise promise = mock(Promise.class);
         when(appContext.getWorkspaceRoot()).thenReturn(container);
         when(container.getFile(any(Path.class))).thenReturn(promise);
-
-        when(appContext.getDevMachine()).thenReturn(mock(DevMachine.class));
 
         presenter = new EditorPartStackPresenter(view,
                                                  appContext,

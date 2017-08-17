@@ -17,23 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.actions.LinkWithEditorAction;
-import org.eclipse.che.ide.actions.RefreshPathAction;
-import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.action.ActionManager;
-import org.eclipse.che.ide.api.action.Presentation;
-import org.eclipse.che.ide.api.data.tree.HasAction;
-import org.eclipse.che.ide.api.data.tree.HasAttributes;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
-import org.eclipse.che.ide.ui.smartTree.data.HasAction;
-import org.eclipse.che.ide.ui.smartTree.data.HasAttributes;
-import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.ide.api.parts.base.ToolButton;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -49,6 +33,10 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage.StoreSortInfo;
 import org.eclipse.che.ide.ui.smartTree.SortDir;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
+import org.eclipse.che.ide.ui.smartTree.data.HasAction;
+import org.eclipse.che.ide.ui.smartTree.data.HasAttributes;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
 import org.eclipse.che.ide.ui.status.StatusWidget;
 
@@ -65,8 +53,7 @@ import static org.eclipse.che.ide.project.node.SyntheticNode.CUSTOM_BACKGROUND_F
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.ActionDelegate> implements ProjectExplorerView,
-                                                                                                     GoIntoStateHandler {
+public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.ActionDelegate> implements ProjectExplorerView {
     private final Tree                       tree;
     private final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor;
 
