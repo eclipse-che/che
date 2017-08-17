@@ -262,23 +262,21 @@ public class RenameItemAction extends AbstractPerspectiveAction {
 
         @Override
         public Violation isValidName(String value) {
-            final String correctValue = value.contains(" ") ? value.replaceAll(" ", "-") : null;
-            final String errormessage = !NameUtils.checkFileName(value) ? localization.invalidName() : null;
-            if (correctValue != null || errormessage != null) {
-                return new Violation() {
-                    @Override
-                    public String getMessage() {
-                        return errormessage;
-                    }
+            return new Violation() {
+                @Override
+                public String getMessage() {
+                    return localization.invalidName();
+                }
 
-                    @Nullable
-                    @Override
-                    public String getCorrectedValue() {
-                        return correctValue;
+                @Nullable
+                @Override
+                public String getCorrectedValue() {
+                    if (NameUtils.checkProjectName(value)) {
+                        return value.contains(" ") ? value.replaceAll(" ", "-") : value;
                     }
-                };
-            }
-            return null;
+                    return null;
+                }
+            };
         }
     }
 }
