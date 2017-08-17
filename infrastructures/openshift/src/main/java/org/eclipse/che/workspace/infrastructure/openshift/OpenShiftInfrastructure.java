@@ -60,7 +60,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
 
         infrastructureProvisioner.provision(environment, openShiftEnvironment, id);
 
-        return runtimeContextFactory.create(originEnv,
+        return runtimeContextFactory.create(environment,
                                             openShiftEnvironment,
                                             id,
                                             this);
