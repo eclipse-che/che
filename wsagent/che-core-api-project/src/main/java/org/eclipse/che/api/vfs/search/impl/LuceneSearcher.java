@@ -10,15 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.search.impl;
 
+import com.google.common.io.CharStreams;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
@@ -33,6 +38,8 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.highlight.QueryScorer;
+import org.apache.lucene.search.highlight.TokenSources;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.IOUtils;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -53,8 +60,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
@@ -206,10 +216,71 @@ public abstract class LuceneSearcher implements Searcher {
             final int totalHitsNum = topDocs.totalHits;
 
             List<SearchResultEntry> results = newArrayList();
+            List<OffsetData> offsetData = Collections.emptyList();
             for (int i = 0; i < topDocs.scoreDocs.length; i++) {
                 ScoreDoc scoreDoc = topDocs.scoreDocs[i];
-                String filePath = luceneSearcher.doc(scoreDoc.doc).getField(PATH_FIELD).stringValue();
-                results.add(new SearchResultEntry(filePath));
+                int docId = scoreDoc.doc;
+                Document doc = luceneSearcher.doc(docId);
+                if (query.isIncludePositions()) {
+                    offsetData = new ArrayList<>();
+                    String txt = doc.get(TEXT_FIELD);
+                    if (txt != null) {
+                        IndexReader reader = luceneSearcher.getIndexReader();
+
+                        TokenStream tokenStream = TokenSources.getTokenStream(TEXT_FIELD,
+                                                                              reader.getTermVectors(docId),
+                                                                              txt,
+                                                                              luceneIndexWriter.getAnalyzer(),
+                                                                              -1);
+
+                        CharTermAttribute termAtt = tokenStream.addAttribute(CharTermAttribute.class);
+                        OffsetAttribute offsetAtt = tokenStream.addAttribute(OffsetAttribute.class);
+
+                        QueryScorer queryScorer = new QueryScorer(luceneQuery);
+                        //TODO think about this constant
+                        queryScorer.setMaxDocCharsToAnalyze(1_000_000);
+                        TokenStream newStream = queryScorer.init(tokenStream);
+                        if (newStream != null) {
+                            tokenStream = newStream;
+                        }
+                        queryScorer.startFragment(null);
+
+                        tokenStream.reset();
+
+                        int startOffset, endOffset;
+                        //TODO think about this constant
+                        for (boolean next = tokenStream.incrementToken(); next && (offsetAtt.startOffset() < 1_000_000);
+                             next = tokenStream.incrementToken()) {
+                            startOffset = offsetAtt.startOffset();
+                            endOffset = offsetAtt.endOffset();
+
+                            if ((endOffset > txt.length()) || (startOffset > txt.length())) {
+                                throw new ServerException(
+                                        "Token " + termAtt.toString() + " exceeds length of provided text size " + txt.length());
+                            }
+
+                            float res = queryScorer.getTokenScore();
+                            if (res > 0.0F && startOffset <= endOffset) {
+                                String tokenText = txt.substring(startOffset, endOffset);
+                                Scanner sc = new Scanner(txt);
+                                int lineNum = 0;
+                                long len = 0;
+                                String foundLine = "";
+                                while (sc.hasNextLine()) {
+                                    foundLine = sc.nextLine();
+                                    lineNum++;
+                                    len += foundLine.length();
+                                    if (len > startOffset) {
+                                        break;
+                                    }
+                                }
+                                offsetData.add(new OffsetData(tokenText, startOffset, endOffset, docId, res, lineNum, foundLine));
+                            }
+                        }
+                    }
+                }
+                String filePath = doc.getField(PATH_FIELD).stringValue();
+                results.add(new SearchResultEntry(filePath, offsetData));
             }
 
             final long elapsedTimeMillis = System.currentTimeMillis() - startTime;
@@ -275,6 +346,7 @@ public abstract class LuceneSearcher implements Searcher {
             int lastScoreDocIndex = topDocs.scoreDocs.length - (retrievedDocs - numSkipDocs);
             scoreDoc = topDocs.scoreDocs[lastScoreDocIndex];
         }
+
 
         return scoreDoc;
     }
@@ -383,7 +455,11 @@ public abstract class LuceneSearcher implements Searcher {
         doc.add(new StringField(PATH_FIELD, virtualFile.getPath().toString(), Field.Store.YES));
         doc.add(new TextField(NAME_FIELD, virtualFile.getName(), Field.Store.YES));
         if (reader != null) {
-            doc.add(new TextField(TEXT_FIELD, reader));
+            try {
+                doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
+            } catch (IOException e) {
+                throw new ServerException(e.getLocalizedMessage(), e);
+            }
         }
         return doc;
     }
@@ -395,5 +471,27 @@ public abstract class LuceneSearcher implements Searcher {
             }
         }
         return true;
+    }
+
+    public static class OffsetData {
+
+        public String phrase;
+        public int    startOffset;
+        public int    endOffset;
+        public int    docId;
+        public float  score;
+        public int    lineNum;
+        public String line;
+
+        public OffsetData(String phrase, int startOffset, int endOffset, int docId, float score, int lineNum, String line) {
+            this.phrase = phrase;
+            this.startOffset = startOffset;
+            this.endOffset = endOffset;
+            this.docId = docId;
+            this.score = score;
+            this.lineNum = lineNum;
+            this.line = line;
+        }
+
     }
 }

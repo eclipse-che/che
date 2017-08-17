@@ -12,8 +12,10 @@ package org.eclipse.che.plugin.testing.ide;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
+import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
@@ -34,7 +36,7 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
 @Singleton
 @Extension(title = "Testing Extension", version = "1.0.0")
 public class TestingExtension {
-    public static final String RUN_TEST = "RunTest";
+    public static final String RUN_TEST   = "RunTest";
     public static final String DEBUG_TEST = "DebugTest";
 
     @Inject
@@ -45,9 +47,8 @@ public class TestingExtension {
                             DebugTestAction debugTestAction,
                             RunTestAction runTestAction) {
 
-        DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
-        DefaultActionGroup testMainMenu = new DefaultActionGroup(localization.actionGroupMenuName(), true,
-                actionManager);
+        DefaultActionGroup runMenu = (DefaultActionGroup)actionManager.getAction(GROUP_RUN);
+        DefaultActionGroup testMainMenu = new DefaultActionGroup(localization.actionGroupMenuName(), true, actionManager);
         actionManager.registerAction("TestingMainGroup", testMainMenu);
 
         for (TestAction testAction : testActions) {
@@ -69,9 +70,9 @@ public class TestingExtension {
         testMainMenu.add(debugTestAction);
         runMenu.addSeparator();
         runMenu.add(testMainMenu);
-        DefaultActionGroup explorerMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
+        DefaultActionGroup explorerMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
         DefaultActionGroup testContextMenu = new DefaultActionGroup(localization.contextActionGroupMenuName(), true,
-                actionManager);
+                                                                    actionManager);
         actionManager.registerAction("TestingContextGroup", testContextMenu);
         for (TestAction testAction : testActions) {
             testAction.addContextMenuItems(testContextMenu);
@@ -81,5 +82,9 @@ public class TestingExtension {
         explorerMenu.addSeparator();
         explorerMenu.add(testContextMenu);
         explorerMenu.addSeparator();
+
+        DefaultActionGroup editorContextMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU);
+        editorContextMenuGroup.addSeparator();
+        editorContextMenuGroup.add(testMainMenu);
     }
 }

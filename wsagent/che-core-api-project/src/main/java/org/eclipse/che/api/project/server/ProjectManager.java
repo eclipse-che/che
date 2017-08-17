@@ -48,6 +48,7 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -64,6 +65,7 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.ErrorCodes.NOT_UPDATED_PROJECT;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 
 /**
  * Facade for all project related operations.
@@ -84,6 +86,8 @@ public class ProjectManager {
     private final ExecutorService                executor;
     private final WorkspaceProjectsSyncer        workspaceProjectsHolder;
     private final FileWatcherManager             fileWatcherManager;
+
+    private int rootProjcetOperationSetId;
 
     @Inject
     public ProjectManager(VirtualFileSystemProvider vfsProvider,
@@ -110,6 +114,24 @@ public class ProjectManager {
                                                                           .setUncaughtExceptionHandler(
                                                                                   LoggingUncaughtExceptionHandler.getInstance())
                                                                           .setDaemon(true).build());
+    }
+
+    @PostConstruct
+    private void postConstruct() {
+        String rootPath = vfs.getRoot().getPath().toString();
+        rootProjcetOperationSetId = fileWatcherManager.registerByPath(rootPath, EMPTY_CONSUMER, EMPTY_CONSUMER, projectPath -> {
+            try {
+                projectRegistry.removeProjects(projectPath);
+                workspaceProjectsHolder.sync(projectRegistry);
+            } catch (ServerException e) {
+                LOG.error("Could not remove or synchronize  project: {}", projectPath);
+            }
+        });
+    }
+
+    @PreDestroy
+    private void preDestroy() {
+        fileWatcherManager.unRegisterByPath(rootProjcetOperationSetId);
     }
 
     void initWatcher() throws IOException {

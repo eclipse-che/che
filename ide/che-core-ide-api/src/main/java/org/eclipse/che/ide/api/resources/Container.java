@@ -21,6 +21,8 @@ import org.eclipse.che.ide.api.resources.Project.ProjectRequest;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.NameUtils;
 
+import java.util.List;
+
 /**
  * Interface for resource which may contain other resources (termed its members).
  * <p/>
@@ -436,7 +438,7 @@ public interface Container extends Resource {
      * @return the {@link Promise} with array of found results
      * @since 4.4.0
      */
-    Promise<Resource[]> search(String fileMask, String contentMask);
+    Promise<List<SearchResult>> search(String fileMask, String contentMask);
 
     /**
      * Returns the plain list of file tree with given {@code depth}.

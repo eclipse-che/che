@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.Presentation;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -86,6 +87,7 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
                                                                             CloseNonPinnedEditorsHandler,
                                                                             ResourceChangedHandler {
     private final PresentationFactory              presentationFactory;
+    private final AppContext                       appContext;
     private final EditorPaneMenuItemFactory        editorPaneMenuItemFactory;
     private final EventBus                         eventBus;
     private final EditorPaneMenu                   editorPaneMenu;
@@ -99,8 +101,8 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
     private final LinkedList<EditorPartPresenter> partsOrder;
     private final LinkedList<EditorPartPresenter> closedParts;
 
-    private HandlerRegistration       closeNonPinnedEditorsHandler;
-    private HandlerRegistration       resourceChangeHandler;
+    private HandlerRegistration closeNonPinnedEditorsHandler;
+    private HandlerRegistration resourceChangeHandler;
 
     @VisibleForTesting
     PaneMenuActionItemHandler paneMenuActionItemHandler;
@@ -109,6 +111,7 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
 
     @Inject
     public EditorPartStackPresenter(EditorPartStackView view,
+                                    AppContext appContext,
                                     PartMenu partMenu,
                                     PartsComparator partsComparator,
                                     EditorPaneMenuItemFactory editorPaneMenuItemFactory,
@@ -122,6 +125,7 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
                                     CloseAllTabsPaneAction closeAllTabsPaneAction,
                                     EditorAgent editorAgent) {
         super(eventBus, partMenu, partStackEventHandler, tabItemFactory, partsComparator, view, null);
+        this.appContext = appContext;
         this.editorPaneMenuItemFactory = editorPaneMenuItemFactory;
         this.eventBus = eventBus;
         this.presentationFactory = presentationFactory;
@@ -210,6 +214,14 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
         editorPart.addPropertyListener(propertyListener);
 
         final EditorTab editorTab = tabItemFactory.createEditorPartButton(editorPart, this);
+
+        appContext.getWorkspaceRoot()
+                  .getFile(file.getLocation())
+                  .then(optional -> {
+                      if (optional.isPresent()) {
+                          editorTab.setTitleColor(optional.get().getVcsStatus().getColor());
+                      }
+                  });
 
         editorPart.addPropertyListener(new PropertyListener() {
             @Override
@@ -493,7 +505,8 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
         }
 
         @Override
-        public void onCloseButtonClicked(@NotNull EditorPaneMenuItem<Action> item) {}
+        public void onCloseButtonClicked(@NotNull EditorPaneMenuItem<Action> item) {
+        }
     }
 
     @VisibleForTesting

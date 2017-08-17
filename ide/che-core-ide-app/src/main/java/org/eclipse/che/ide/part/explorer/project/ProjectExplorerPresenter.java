@@ -159,7 +159,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     @Inject
     public void initFileWatchers() {
         final String endpointId = "ws-agent";
-        final String method = "track:project-tree";
+        final String method = "track/project-tree";
 
         getTree().addExpandHandler(event -> {
             Node node = event.getNode();
