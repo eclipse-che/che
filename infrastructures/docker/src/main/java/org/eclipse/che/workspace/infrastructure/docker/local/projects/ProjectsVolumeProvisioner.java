@@ -29,7 +29,7 @@ import javax.inject.Named;
 import java.io.IOException;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
+import static org.eclipse.che.api.workspace.server.Utils.getDevMachineName;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

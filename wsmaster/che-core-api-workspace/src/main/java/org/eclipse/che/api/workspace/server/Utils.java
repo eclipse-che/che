@@ -8,10 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.shared;
+package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 
 import java.util.List;
 import java.util.Map;
@@ -37,12 +38,8 @@ public class Utils {
         for (Map.Entry<String, ? extends MachineConfig> entry : envConfig.getMachines().entrySet()) {
             // TODO should we use server ref instead of installers?
             List<String> installers = entry.getValue().getInstallers();
-            if (installers != null) {
-                for (String installerKey : installers) {
-                    if (installerKey.equals(WSAGENT_INSTALLER) || installerKey.startsWith(WSAGENT_INSTALLER + ":")) {
-                        return entry.getKey();
-                    }
-                }
+            if (InstallerFqn.idInKeyList(WSAGENT_INSTALLER, installers)) {
+                return entry.getKey();
             }
         }
         return null;

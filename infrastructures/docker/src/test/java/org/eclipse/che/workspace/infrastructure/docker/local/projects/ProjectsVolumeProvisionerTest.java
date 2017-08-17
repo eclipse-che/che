@@ -15,7 +15,7 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
-import org.eclipse.che.api.workspace.shared.Utils;
+import org.eclipse.che.api.workspace.server.Utils;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
