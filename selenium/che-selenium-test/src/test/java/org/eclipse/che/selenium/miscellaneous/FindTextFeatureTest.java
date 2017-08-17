@@ -270,9 +270,9 @@ public class FindTextFeatureTest {
         findText.setAndWaitStateSearchRootCheckbox(true);
         findText.clickSearchDirectoryBtn();
         configureClasspath.waitSelectPathFormIsOpen();
-        configureClasspath.openItemInSelectPathForm(PROJECT_NAME + " [qa-multimodule]");
+        configureClasspath.openItemInSelectPathForm(PROJECT_NAME);
         configureClasspath.waitItemInSelectPathForm("my-lib");
-        configureClasspath.waitItemInSelectPathForm("my-webapp [qa-multimodule]");
+        configureClasspath.waitItemInSelectPathForm("my-webapp");
         configureClasspath.selectItemInSelectPathForm("my-lib");
         configureClasspath.clickOkBtnSelectPathForm();
         findText.waitPathIntoRootField(PR_3_PATH_2);

@@ -19,6 +19,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -49,7 +50,8 @@ public class Preferences {
     private final SeleniumWebDriver seleniumWebDriver;
 
     @Inject
-    public Preferences(SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory, AskDialog askDialog, AskForValueDialog askForValueDialog,
+    public Preferences(SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory, AskDialog askDialog,
+                       AskForValueDialog askForValueDialog,
                        GitHub github) {
         this.seleniumWebDriver = seleniumWebDriver;
         this.loader = loader;
@@ -87,6 +89,8 @@ public class Preferences {
         String EDITOR_INPUT                               = "//div[text()='%s']/following::div[1]//input";
         String GENERATE_SSH_KEY_WIDGET_MAIN_FORM          = "gwt-debug-askValueDialog-window";
         String TITLE_INPUT_GENERATE_WIDGET                = "div#gwt-debug-askValueDialog-window input#gwt-debug-askValueDialog-textBox";
+        String SHOW_ARTIFACT_CHECKBOX                     =
+                "//input[@id='gwt-debug-window-preferences-plugins-maven-showArtifactId-input']";
     }
 
     public interface DropDownListsHeaders {
@@ -165,6 +169,9 @@ public class Preferences {
     @FindBy(css = Locators.TITLE_INPUT_GENERATE_WIDGET)
     private WebElement genrateSShKeyTitleInput;
 
+    @FindBy(xpath = Locators.SHOW_ARTIFACT_CHECKBOX)
+    private WebElement showArtifactCheckBox;
+
 
     /**
      * wait preferences form
@@ -177,7 +184,8 @@ public class Preferences {
      * wait closing of the preferences form
      */
     public void waitPreferencesFormIsClosed() {
-        new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.PREFERENCES_FORM_ID)));
+        new WebDriverWait(seleniumWebDriver, 10)
+                .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.PREFERENCES_FORM_ID)));
     }
 
     /**
@@ -287,7 +295,8 @@ public class Preferences {
      */
     public void waitInputNameCommitter(final String nameCommitter) {
         new WebDriverWait(seleniumWebDriver, 3).until((ExpectedCondition<Boolean>)
-                                                         webDriver -> nameCommitterInput.getAttribute("value").contains(nameCommitter));
+                                                              webDriver -> nameCommitterInput.getAttribute("value")
+                                                                                             .contains(nameCommitter));
     }
 
     /**
@@ -320,7 +329,8 @@ public class Preferences {
      */
     public void waitInputEmailCommitter(final String emailCommitter) {
         new WebDriverWait(seleniumWebDriver, 3).until((ExpectedCondition<Boolean>)
-                                                         webDriver -> emailCommitterInput.getAttribute("value").contains(emailCommitter));
+                                                              webDriver -> emailCommitterInput.getAttribute("value")
+                                                                                              .contains(emailCommitter));
     }
 
     /**
@@ -531,5 +541,10 @@ public class Preferences {
         loader.waitOnClosed();
         clickOnCloseBtn();
         waitPreferencesFormIsClosed();
+    }
+
+    public void clickOnShowArtifactCheckBox() {
+        Actions actions = new Actions(seleniumWebDriver);
+        actions.click(showArtifactCheckBox).build().perform();
     }
 }

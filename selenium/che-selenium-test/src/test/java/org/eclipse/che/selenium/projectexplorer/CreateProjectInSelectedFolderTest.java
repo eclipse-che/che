@@ -96,9 +96,9 @@ public class CreateProjectInSelectedFolderTest {
 
         projectWizard.clickOnSelectPathForParentBtn();
         selectPath.openItemInSelectPathForm("Workspace");
-        selectPath.waitItemInSelectPathForm(PROJECT_NAME_WITH_ARTIFACT_ID);
-        selectPath.selectItemInSelectPathForm(PROJECT_NAME_WITH_ARTIFACT_ID);
-        selectPath.openItemInSelectPathForm(PROJECT_NAME_WITH_ARTIFACT_ID);
+        selectPath.waitItemInSelectPathForm(PROJECT_NAME);
+        selectPath.selectItemInSelectPathForm(PROJECT_NAME);
+        selectPath.openItemInSelectPathForm(PROJECT_NAME);
         selectPath.waitItemInSelectPathForm(FOLDER_NAME);
         selectPath.selectItemInSelectPathForm(FOLDER_NAME);
         selectPath.clickSelectBtnSelectPathForm();

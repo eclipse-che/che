@@ -276,6 +276,7 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.filewatcher.CheckDeletingProjectByApiTest"/>
+            <class name="org.eclipse.che.selenium.filewatcher.CheckFileWatcherExcludeFeatureTest"/>
             <class name="org.eclipse.che.selenium.git.AddFilesToIndexTest">
                 <methods>
                     <!-- https://github.com/eclipse/che/issues/5071 -->
@@ -644,6 +645,7 @@
                     <exclude name="dialogWithPathAndFqnShouldBeDisplayed"/>
                 </methods>
             </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckDisplayingArtifactIdTest"/>
             <class name="org.eclipse.che.selenium.refactor.fields.FailNotPrivateFieldTest"/>
             <class name="org.eclipse.che.selenium.refactor.fields.FailPrivateFieldTest"/>
             <class name="org.eclipse.che.selenium.refactor.fields.RenameNotPrivateFieldTest">

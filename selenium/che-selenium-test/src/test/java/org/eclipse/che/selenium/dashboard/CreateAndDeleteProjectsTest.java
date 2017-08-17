@@ -34,14 +34,14 @@ import org.testng.annotations.Test;
 
 import java.util.concurrent.ExecutionException;
 
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+
 
 /**
  * @author Andrey Chizhikov
  */
 public class CreateAndDeleteProjectsTest {
-    private final        String                    WORKSPACE            = NameGenerator.generate("CreateAndDeletePrj", 2);
-    private static final DashboardProject.Template PROJECT_TEMPLATE_ONE = DashboardProject.Template.WEB_JAVA_SPRING;
-    private static final DashboardProject.Template PROJECT_TEMPLATE_TWO = DashboardProject.Template.CONSOLE_JAVA_SIMPLE;
+    private final String WORKSPACE = NameGenerator.generate("workspace", 4);
 
     @Inject
     private Ide                        ide;
@@ -90,8 +90,8 @@ public class CreateAndDeleteProjectsTest {
 
         projectSourcePage.clickAddOrImportProjectButton();
 
-        projectSourcePage.selectSample(PROJECT_TEMPLATE_ONE.value());
-        projectSourcePage.selectSample(PROJECT_TEMPLATE_TWO.value());
+        projectSourcePage.selectSample(DashboardProject.Template.WEB_JAVA_SPRING.value());
+        projectSourcePage.selectSample(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
         projectSourcePage.clickAdd();
 
         createWorkspace.clickCreate();
@@ -100,23 +100,24 @@ public class CreateAndDeleteProjectsTest {
         seleniumWebDriver.switchFromDashboardIframeToIde();
         loader.waitOnClosed();
         explorer.waitProjectExplorer();
-        explorer.waitItem(PROJECT_TEMPLATE_TWO.value());
+        explorer.waitItem(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
+        explorer.waitFolderDefinedTypeOfFolderByPath(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value(), PROJECT_FOLDER);
         switchToWindow(dashboardWindow);
         dashboard.selectWorkspacesItemOnDashboard();
         WaitUtils.sleepQuietly(10);
 
         dashboardWorkspace.selectWorkspaceItemName(WORKSPACE);
         dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.PROJECTS);
-        dashboardProject.waitProjectIsPresent(PROJECT_TEMPLATE_ONE.value());
-        dashboardProject.waitProjectIsPresent(PROJECT_TEMPLATE_TWO.value());
-        dashboardProject.openSettingsForProjectByName(PROJECT_TEMPLATE_ONE.value());
+        dashboardProject.waitProjectIsPresent(DashboardProject.Template.WEB_JAVA_SPRING.value());
+        dashboardProject.waitProjectIsPresent(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
+        dashboardProject.openSettingsForProjectByName(DashboardProject.Template.WEB_JAVA_SPRING.value());
         dashboardProject.clickOnDeleteProject();
         dashboardProject.clickOnDeleteItInDialogWindow();
-        dashboardProject.waitProjectIsNotPresent(PROJECT_TEMPLATE_ONE.value());
-        dashboardProject.openSettingsForProjectByName(PROJECT_TEMPLATE_TWO.value());
+        dashboardProject.waitProjectIsNotPresent(DashboardProject.Template.WEB_JAVA_SPRING.value());
+        dashboardProject.openSettingsForProjectByName(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
         dashboardProject.clickOnDeleteProject();
         dashboardProject.clickOnDeleteItInDialogWindow();
-        dashboardProject.waitProjectIsNotPresent(PROJECT_TEMPLATE_TWO.value());
+        dashboardProject.waitProjectIsNotPresent(DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value());
     }
 
     private void switchToWindow(String windowHandle) {

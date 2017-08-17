@@ -26,8 +26,6 @@ import org.testng.annotations.Test;
 import java.net.URL;
 import java.nio.file.Paths;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-
 /**
  * @author mmusienko
  * @author Andrey Chizhikov
@@ -108,12 +106,14 @@ public class NavigationByKeyboardTest {
 
         projectExplorer.sendToItemDownArrowKey();
         projectExplorer.sendToItemRightArrowKey();
+        projectExplorer.waitItemInVisibleArea("java");
+        projectExplorer.waitItemInVisibleArea("webapp");
         projectExplorer.sendToItemDownArrowKey();
         projectExplorer.sendToItemEnterKey();
         projectExplorer.waitItemInVisibleArea(nameSecondModule);
         projectExplorer.waitItemInVisibleArea("com.example");
 
-        Thread.sleep(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+
         projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/" + nameSecondModule.replace('.', '/'));
         projectExplorer.sendToItemRightArrowKey();
         checkItemsOfTheSecondModuleIsVisible();
@@ -127,7 +127,6 @@ public class NavigationByKeyboardTest {
         editor.waitTextIntoEditor(EXPECTED_TEXT_IN_JAVA_FILE);
 
         projectExplorer.selectVisibleItem(nameFirstModule);
-        Thread.sleep(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
         projectExplorer.sendToItemEnterKey();
         checkLibrariesIsVisible();
         projectExplorer.sendToItemLeftArrowKey();

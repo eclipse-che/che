@@ -61,7 +61,11 @@ public class ProjectExplorer {
     private final CodenvyEditor     editor;
 
     @Inject
-    public ProjectExplorer(SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory, NavigateToFile navigateToFile, Menu menu,
+    public ProjectExplorer(SeleniumWebDriver seleniumWebDriver,
+                           Loader loader,
+                           ActionsFactory actionsFactory,
+                           NavigateToFile navigateToFile,
+                           Menu menu,
                            CodenvyEditor editor) {
         this.seleniumWebDriver = seleniumWebDriver;
         this.loader = loader;
@@ -80,6 +84,11 @@ public class ProjectExplorer {
 
     public interface PROJECT_EXPLORER_CONTEXT_MENU_MAVEN {
         String REIMPORT = "contextMenu/Maven/Reimport";
+    }
+
+    public interface FileWatcherExcludeOperations {
+        String ADD_TO_FILE_WATCHER_EXCLUDES      = "contextMenu/Add to File Watcher excludes";
+        String REMOVE_FROM_FILE_WATCHER_EXCLUDES = "contextMenu/Remove from File Watcher excludes";
     }
 
     private interface Locators {
@@ -167,7 +176,8 @@ public class ProjectExplorer {
     public void waitItem(String path) {
         String locator = "//div[@path='/%s']";
         loader.waitOnClosed();
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC).until(ExpectedConditions.presenceOfElementLocated(By.xpath(String.format(locator, path))));
+        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC)
+                .until(ExpectedConditions.presenceOfElementLocated(By.xpath(String.format(locator, path))));
         loader.waitOnClosed();
     }
 
@@ -501,7 +511,8 @@ public class ProjectExplorer {
 
     public void waitContextMenuPopUpClosed() {
         new WebDriverWait(seleniumWebDriver, 10).
-                                                   until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.CONTEXT_MENU_ID)));
+                                                        until(ExpectedConditions
+                                                                      .invisibilityOfElementLocated(By.id(Locators.CONTEXT_MENU_ID)));
     }
 
     /**
@@ -657,8 +668,9 @@ public class ProjectExplorer {
         new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.MULTIPLE)
                 .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format(commandNameLocator, commandName)))).click();
         loader.waitOnClosed();
-        new Actions(seleniumWebDriver).doubleClick(seleniumWebDriver.findElement(By.xpath(String.format(machineNameLocator, machineName)))).build()
-                                 .perform();
+        new Actions(seleniumWebDriver).doubleClick(seleniumWebDriver.findElement(By.xpath(String.format(machineNameLocator, machineName))))
+                                      .build()
+                                      .perform();
     }
 
     public void scrollToItemByPath(String path) {
