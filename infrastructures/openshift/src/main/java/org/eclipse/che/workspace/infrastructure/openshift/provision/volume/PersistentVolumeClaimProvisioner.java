@@ -86,6 +86,7 @@ public class PersistentVolumeClaimProvisioner implements ConfigurationProvisione
                         final VolumeMount volumeMount = new VolumeMountBuilder()
                                 .withMountPath(projectFolderPath)
                                 .withName(pvcName)
+                                .withSubPath(runtimeIdentity.getWorkspaceId() + projectFolderPath)
                                 .build();
                         container.getVolumeMounts().add(volumeMount);
                         final PersistentVolumeClaimVolumeSource pvcs = new PersistentVolumeClaimVolumeSourceBuilder()
