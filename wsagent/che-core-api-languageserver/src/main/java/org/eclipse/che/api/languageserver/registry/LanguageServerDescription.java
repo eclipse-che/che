@@ -10,17 +10,31 @@
  *******************************************************************************/
 package org.eclipse.che.api.languageserver.registry;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 public class LanguageServerDescription  {
     private final String id;
     private final List<String> languageIds;
     private final List<DocumentFilter> documentFilters;
 
+    /**
+     * The file name patters, format described there {@link java.nio.file.FileSystem#getPathMatcher(String)}
+     */
+    private List<String> fileWatchPatterns = emptyList();
+
     public LanguageServerDescription(String id, List<String> languageIds, List<DocumentFilter> documentFilters) {
+        this(id, languageIds, documentFilters, Collections.emptyList());
+    }
+
+    public LanguageServerDescription(String id, List<String> languageIds, List<DocumentFilter> documentFilters, List<String> fileWatchPatterns) {
         this.id = id;
         this.languageIds = languageIds;
         this.documentFilters = documentFilters;
+        this.fileWatchPatterns = fileWatchPatterns;
     }
 
     public String getId() {
@@ -34,5 +48,19 @@ public class LanguageServerDescription  {
     public List<DocumentFilter> getDocumentFilters() {
         return documentFilters;
     }
+
+
+    public List<String> getFileWatchPatterns() {
+        return fileWatchPatterns;
+    }
+
+    /**
+     * @param fileWatchPatterns
+     *             must not be null
+     */
+    public void setFileWatchPatterns(List<String> fileWatchPatterns) {
+        this.fileWatchPatterns = new ArrayList<>(fileWatchPatterns);
+    }
+
 
 }

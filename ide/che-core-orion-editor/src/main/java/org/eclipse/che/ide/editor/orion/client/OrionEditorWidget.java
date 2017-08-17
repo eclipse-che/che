@@ -70,6 +70,7 @@ import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.orion.client.events.HasScrollHandlers;
 import org.eclipse.che.ide.editor.orion.client.events.ScrollEvent;
 import org.eclipse.che.ide.editor.orion.client.events.ScrollHandler;
@@ -131,6 +132,7 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     private final EventBus                   eventBus;
     private final KeyModeInstances           keyModeInstances;
     private final JavaScriptObject           uiUtilsOverlay;
+    private       EditorAgentImpl            editorAgent;
     private final ContentAssistWidgetFactory contentAssistWidgetFactory;
     private final DialogFactory              dialogFactory;
     private final PreferencesManager         preferencesManager;
@@ -172,6 +174,7 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
     @AssistedInject
     public OrionEditorWidget(final ModuleHolder moduleHolder,
                              final KeyModeInstances keyModeInstances,
+                             final EditorAgentImpl editorAgent,
                              final EventBus eventBus,
                              final Provider<OrionCodeEditWidgetOverlay> orionCodeEditWidgetProvider,
                              final ContentAssistWidgetFactory contentAssistWidgetFactory,
@@ -183,6 +186,7 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
                              final StatusMessageReporter statusMessageReporter,
                              final IncrementalFindReportStatusObserver incrementalFindObserver,
                              final OrionSettingsController orionSettingsController) {
+        this.editorAgent = editorAgent;
         this.contentAssistWidgetFactory = contentAssistWidgetFactory;
         this.moduleHolder = moduleHolder;
         this.keyModeInstances = keyModeInstances;
@@ -874,7 +878,12 @@ public class OrionEditorWidget extends Composite implements EditorWidget,
         }
 
         @Override
-        public native void accepted(String value) /*-{
+        public void accepted(String value) {
+            acceptedNative(value);
+            editorAgent.activateEditor(editorAgent.getActiveEditor());
+        }
+
+        private native void acceptedNative(String value) /*-{
             var callback = this.@org.eclipse.che.ide.editor.orion.client.OrionEditorWidget.InputCallback::callback;
             callback(value);
         }-*/;

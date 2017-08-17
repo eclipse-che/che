@@ -15,8 +15,10 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
+import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
+import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -24,6 +26,7 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
+import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
@@ -31,23 +34,18 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.ide.websocket.Message;
-import org.eclipse.che.ide.websocket.MessageBuilder;
-import org.eclipse.che.ide.websocket.WebSocketException;
-import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
-import static com.google.gwt.http.client.RequestBuilder.POST;
 import static com.google.gwt.http.client.RequestBuilder.PUT;
 import static com.google.gwt.safehtml.shared.UriUtils.encodeAllowEscapes;
-import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENTTYPE;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 /**
@@ -143,7 +141,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
 
     /** {@inheritDoc} */
     @Override
-    public Promise<List<ItemReference>> search(QueryExpression expression) {
+    public Promise<List<SearchResult>> search(QueryExpression expression) {
         final String url =
                 encodeAllowEscapes(getBaseUrl() + SEARCH + (isNullOrEmpty(expression.getPath()) ? Path.ROOT : path(expression.getPath())));
 
@@ -164,7 +162,13 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
         return reqFactory.createGetRequest(url + queryParameters.toString().replaceFirst("&", "?"))
                          .header(ACCEPT, MimeType.APPLICATION_JSON)
                          .loader(loaderFactory.newLoader("Searching..."))
-                         .send(unmarshaller.newListUnmarshaller(ItemReference.class));
+                         .send(unmarshaller.newListUnmarshaller(SearchResultDto.class)).then(
+                        (Function<List<SearchResultDto>, List<SearchResult>>)searchResultDtos -> {
+                            if (searchResultDtos.isEmpty()) {
+                                return Collections.emptyList();
+                            }
+                            return searchResultDtos.stream().map(SearchResult::new).collect(Collectors.toList());
+                        });
     }
 
     /** {@inheritDoc} */
