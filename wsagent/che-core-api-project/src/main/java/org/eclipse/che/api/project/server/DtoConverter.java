@@ -79,6 +79,7 @@ public class DtoConverter {
     /** Converts {@link FileEntry} to {@link ItemReference}. */
     public static ItemReference asDto(FileEntry file) throws ServerException {
         return newDto(ItemReference.class).withName(file.getName())
+                                          .withProject(file.getProject())
                                           .withPath(file.getPath().toString())
                                           .withType("file")
                                           .withAttributes(file.getAttributes())

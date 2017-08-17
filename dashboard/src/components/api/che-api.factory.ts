@@ -37,7 +37,6 @@ export class CheAPI {
   private cheProfile: CheProfile;
   private chePreferences: ChePreferences;
   private cheProjectTemplate: CheProjectTemplate;
-  private cheWebsocket: CheWebsocket;
   private cheFactory: CheFactory;
   private cheFactoryTemplate: CheFactoryTemplate;
   private cheService: CheService;
@@ -54,7 +53,7 @@ export class CheAPI {
    * @ngInject for Dependency injection
    */
   constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate, cheProfile: CheProfile,
-              chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheWebsocket: CheWebsocket, cheService: CheService,
+              chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheService: CheService,
               cheRecipe: CheRecipe, cheRecipeTemplate: CheRecipeTemplate, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider,
               cheAgent: CheAgent, cheSsh: CheSsh, cheUser: CheUser) {
     this.cheWorkspace = cheWorkspace;
@@ -63,7 +62,6 @@ export class CheAPI {
     this.cheFactoryTemplate = cheFactoryTemplate;
     this.chePreferences = chePreferences;
     this.cheProjectTemplate = cheProjectTemplate;
-    this.cheWebsocket = cheWebsocket;
     this.cheService = cheService;
     this.cheRecipe = cheRecipe;
     this.cheRecipeTemplate = cheRecipeTemplate;
@@ -73,7 +71,6 @@ export class CheAPI {
     this.cheSsh = cheSsh;
     this.cheUser = cheUser;
   }
-
 
   /**
    * The Che Workspace API
@@ -113,14 +110,6 @@ export class CheAPI {
    */
   getProjectTemplate(): CheProjectTemplate {
     return this.cheProjectTemplate;
-  }
-
-  /**
-   * The Che Websocket API
-   * @returns {CheWebsocket}
-   */
-  getWebsocket(): CheWebsocket {
-    return this.cheWebsocket;
   }
 
   /**

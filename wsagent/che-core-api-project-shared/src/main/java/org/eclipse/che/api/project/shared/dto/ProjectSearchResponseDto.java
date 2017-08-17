@@ -16,7 +16,7 @@ import java.util.List;
 
 @DTO
 public interface ProjectSearchResponseDto {
-    List<ItemReference> getItemReferences();
+    List<SearchResultDto> getItemReferences();
 
-    ProjectSearchResponseDto withItemReferences(List<ItemReference> itemReferences);
+    ProjectSearchResponseDto withItemReferences(List<SearchResultDto> itemReferences);
 }

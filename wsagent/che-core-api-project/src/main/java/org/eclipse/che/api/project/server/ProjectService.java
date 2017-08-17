@@ -44,6 +44,8 @@ import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
+import org.eclipse.che.api.project.shared.dto.SearchOccurrenceDto;
+import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.vfs.VirtualFile;
@@ -51,6 +53,7 @@ import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.api.vfs.search.SearchResultEntry;
 import org.eclipse.che.api.vfs.search.Searcher;
+import org.eclipse.che.api.vfs.search.impl.LuceneSearcher;
 import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -79,6 +82,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -116,6 +120,7 @@ public class ProjectService extends Service {
     private final ProjectManager                      projectManager;
     private final EventService                        eventService;
     private final ProjectServiceLinksInjector         projectServiceLinksInjector;
+    private final ProjectServiceVcsStatusInjector     vcsStatusInjector;
     private final RequestTransmitter                  transmitter;
     private final ProjectImportOutputJsonRpcRegistrar projectImportHandlerRegistrar;
     private final String                              workspace;
@@ -124,11 +129,13 @@ public class ProjectService extends Service {
     public ProjectService(ProjectManager projectManager,
                           EventService eventService,
                           ProjectServiceLinksInjector projectServiceLinksInjector,
+                          ProjectServiceVcsStatusInjector vcsStatusInjector,
                           RequestTransmitter transmitter,
                           ProjectImportOutputJsonRpcRegistrar projectImportHandlerRegistrar) {
         this.projectManager = projectManager;
         this.eventService = eventService;
         this.projectServiceLinksInjector = projectServiceLinksInjector;
+        this.vcsStatusInjector = vcsStatusInjector;
         this.transmitter = transmitter;
         this.projectImportHandlerRegistrar = projectImportHandlerRegistrar;
         this.workspace = WorkspaceIdProvider.getWorkspaceId();
@@ -190,7 +197,7 @@ public class ProjectService extends Service {
                                                                                                                        NotFoundException {
         Map<String, String> options = new HashMap<>();
         MultivaluedMap<String, String> map = uriInfo.getQueryParameters();
-        for(String key: map.keySet()) {
+        for (String key : map.keySet()) {
             options.put(key, map.get(key).get(0));
         }
         String pathToProject = projectConfig.getPath();
@@ -238,7 +245,8 @@ public class ProjectService extends Service {
         List<ProjectConfigDto> result = new ArrayList<>(projectConfigList.size());
         final ProjectOutputLineConsumerFactory outputOutputConsumerFactory = new ProjectOutputLineConsumerFactory(workspace, 300);
 
-        for (RegisteredProject registeredProject : projectManager.createBatchProjects(projectConfigList, rewrite, outputOutputConsumerFactory)) {
+        for (RegisteredProject registeredProject : projectManager
+                .createBatchProjects(projectConfigList, rewrite, outputOutputConsumerFactory)) {
 
             ProjectConfigDto projectConfig = injectProjectLinks(asDto(registeredProject));
             result.add(projectConfig);
@@ -411,7 +419,7 @@ public class ProjectService extends Service {
                                                 .path(getClass(), "getFile")
                                                 .build(new String[]{newFile.getPath().toString().substring(1)}, false);
         return Response.created(location)
-                       .entity(injectFileLinks(asDto(newFile)))
+                       .entity(injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto(newFile))))
                        .build();
     }
 
@@ -802,7 +810,7 @@ public class ProjectService extends Service {
         final ArrayList<ItemReference> result = new ArrayList<>(children.size());
         for (VirtualFileEntry child : children) {
             if (child.isFile()) {
-                result.add(injectFileLinks(asDto((FileEntry)child)));
+                result.add(injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto((FileEntry)child))));
             } else {
                 result.add(injectFolderLinks(asDto((FolderEntry)child)));
             }
@@ -860,7 +868,7 @@ public class ProjectService extends Service {
         }
 
         if (entry.isFile()) {
-            return injectFileLinks(asDto((FileEntry)entry));
+            return injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto((FileEntry)entry)));
         } else {
             return injectFolderLinks(asDto((FolderEntry)entry));
         }
@@ -871,22 +879,22 @@ public class ProjectService extends Service {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Search for resources",
                   notes = "Search for resources applying a number of search filters as query parameters",
-                  response = ItemReference.class,
+                  response = SearchResult.class,
                   responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 409, message = "Conflict error"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public List<ItemReference> search(@ApiParam(value = "Path to resource, i.e. where to search?", required = true)
+    public List<SearchResultDto> search(@ApiParam(value = "Path to resource, i.e. where to search?", required = true)
                                       @PathParam("path") String path,
-                                      @ApiParam(value = "Resource name")
+                                        @ApiParam(value = "Resource name")
                                       @QueryParam("name") String name,
-                                      @ApiParam(value = "Search keywords")
+                                        @ApiParam(value = "Search keywords")
                                       @QueryParam("text") String text,
-                                      @ApiParam(value = "Maximum items to display. If this parameter is dropped, there are no limits")
+                                        @ApiParam(value = "Maximum items to display. If this parameter is dropped, there are no limits")
                                       @QueryParam("maxItems") @DefaultValue("-1") int maxItems,
-                                      @ApiParam(value = "Skip count")
+                                        @ApiParam(value = "Skip count")
                                       @QueryParam("skipCount") int skipCount) throws NotFoundException,
                                                                                      ForbiddenException,
                                                                                      ConflictException,
@@ -908,26 +916,51 @@ public class ProjectService extends Service {
                 .setName(name)
                 .setText(text)
                 .setMaxItems(maxItems)
-                .setSkipCount(skipCount);
+                .setSkipCount(skipCount)
+                .setIncludePositions(true);
 
         final SearchResult result = searcher.search(expr);
         final List<SearchResultEntry> searchResultEntries = result.getResults();
-        final List<ItemReference> items = new ArrayList<>(searchResultEntries.size());
-        final FolderEntry root = projectManager.getProjectsRoot();
+        return prepareResults(searchResultEntries);
+    }
+
+
+    /**
+     * Prepare result for client, add additional information like line number and line content where found given text
+     * @param searchResultEntries
+     * @return
+     * @throws ServerException
+     */
+    private List<SearchResultDto> prepareResults(List<SearchResultEntry> searchResultEntries) throws ServerException {
+        List<SearchResultDto> results = new ArrayList<>(searchResultEntries.size());
+        FolderEntry root = projectManager.getProjectsRoot();
 
         for (SearchResultEntry searchResultEntry : searchResultEntries) {
-            final VirtualFileEntry child = root.getChild(searchResultEntry.getFilePath());
-
+            VirtualFileEntry child = root.getChild(searchResultEntry.getFilePath());
             if (child != null && child.isFile()) {
-                items.add(injectFileLinks(asDto((FileEntry)child)));
+                ItemReference itemReference = injectFileLinks(asDto((FileEntry)child));
+                File file = child.getVirtualFile().toIoFile();
+                List<LuceneSearcher.OffsetData> datas = searchResultEntry.getData();
+                List<SearchOccurrenceDto> searchOccurrences = new ArrayList<>(datas.size());
+                for (LuceneSearcher.OffsetData data : datas) {
+                    SearchOccurrenceDto searchOccurrenceDto = DtoFactory.getInstance().createDto(SearchOccurrenceDto.class)
+                                                                        .withPhrase(data.phrase)
+                                                                        .withScore(data.score)
+                                                                        .withStartOffset(data.startOffset)
+                                                                        .withEndOffset(data.endOffset)
+                                                                        .withLineNumber(data.lineNum)
+                                                                        .withLineContent(data.line);
+                    searchOccurrences.add(searchOccurrenceDto);
+                }
+                SearchResultDto searchResultDto = DtoFactory.getInstance().createDto(SearchResultDto.class);
+                results.add(searchResultDto.withItemReference(itemReference).withSearchOccurrences(searchOccurrences));
             }
         }
-
-        return items;
+        return results;
     }
 
     @Inject
-    private void configureProjectSearchRequestHandler(RequestHandlerConfigurator requestHandlerConfigurator){
+    private void configureProjectSearchRequestHandler(RequestHandlerConfigurator requestHandlerConfigurator) {
         requestHandlerConfigurator.newConfiguration()
                                   .methodName("project/search")
                                   .paramsAsDto(ProjectSearchRequestDto.class)
@@ -999,7 +1032,7 @@ public class ProjectService extends Service {
                                   .withNode(injectFolderLinks(asDto((FolderEntry)child)))
                                   .withChildren(getTree((FolderEntry)child, depth - 1, includeFiles)));
             } else {
-                nodes.add(newDto(TreeElement.class).withNode(injectFileLinks(asDto((FileEntry)child))));
+                nodes.add(newDto(TreeElement.class).withNode(injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto((FileEntry)child)))));
             }
         }
 

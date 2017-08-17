@@ -21,18 +21,18 @@ import javax.inject.Singleton;
 @Singleton
 public class GitProjectType extends TransientMixin {
 
-    public static final String TYPE_ID                 = "git";
-    public static final String DISPLAY_NAME            = "git";
-    public static final String VCS_PROVIDER_NAME       = "vcs.provider.name";
-    public static final String GIT_CURRENT_BRANCH_NAME = "git.current.branch.name";
-    public static final String GIT_REPOSITORY_REMOTES  = "git.repository.remotes";
+    public static final String TYPE_ID                = "git";
+    public static final String DISPLAY_NAME           = "git";
+    public static final String VCS_PROVIDER_NAME      = "vcs.provider.name";
+    public static final String GIT_CURRENT_HEAD_NAME  = "git.current.head.name";
+    public static final String GIT_REPOSITORY_REMOTES = "git.repository.remotes";
 
     @Inject
     public GitProjectType(GitValueProviderFactory gitRepositoryValueProviderFactory) {
         super(TYPE_ID, DISPLAY_NAME);
         addVariableDefinition(VCS_PROVIDER_NAME, "Is this git repo or not?", true,
                               gitRepositoryValueProviderFactory);
-        addVariableDefinition(GIT_CURRENT_BRANCH_NAME, "Name of current git branch", false,
+        addVariableDefinition(GIT_CURRENT_HEAD_NAME, "Name of current git branch or revision", false,
                               gitRepositoryValueProviderFactory);
         addVariableDefinition(GIT_REPOSITORY_REMOTES, "List of git repository remote addresses", false,
                               gitRepositoryValueProviderFactory);

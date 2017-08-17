@@ -224,6 +224,7 @@ public abstract class Window implements IsWidget {
         setBlocked(false);
 
         if (isShowing) {
+            setFocusOn(selectAndFocusElement);//the window is displayed but focus for the element may be lost
             return;
         }
 
@@ -247,11 +248,19 @@ public abstract class Window implements IsWidget {
                 public void execute() {
                     // The popup may have been hidden before this timer executes.
                     view.setShowing(true);
-                    if (selectAndFocusElement != null) {
-                        selectAndFocusElement.setFocus(true);
-                    }
+                    setFocusOn(selectAndFocusElement);
                 }
             });
+        }
+    }
+
+    /**
+     * Sets focus on the given element.
+     * If {@code elementToFocus} is {@code null}, no element will be given focus
+     */
+    private void setFocusOn(@Nullable Focusable elementToFocus) {
+        if (elementToFocus != null) {
+            elementToFocus.setFocus(true);
         }
     }
 

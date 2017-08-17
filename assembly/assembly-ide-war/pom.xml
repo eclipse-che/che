@@ -422,6 +422,7 @@
                             <sources>
                                 <source>${generated.sources.directory}</source>
                                 <source>src/main/java</source>
+                                <source>src/main/webapp</source>
                             </sources>
                         </configuration>
                     </execution>

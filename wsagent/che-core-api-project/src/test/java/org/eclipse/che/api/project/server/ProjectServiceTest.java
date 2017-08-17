@@ -43,6 +43,7 @@ import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
+import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.user.server.spi.UserDao;
@@ -52,6 +53,7 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -114,6 +116,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static javax.ws.rs.HttpMethod.DELETE;
 import static javax.ws.rs.HttpMethod.GET;
@@ -157,10 +160,11 @@ public class ProjectServiceTest {
 
     private static final String EXCLUDE_SEARCH_PATH = ".codenvy";
 
-    private ProjectManager              pm;
-    private ResourceLauncher            launcher;
-    private ProjectHandlerRegistry      phRegistry;
-    private ProjectServiceLinksInjector projectServiceLinksInjector;
+    private ProjectManager                  pm;
+    private ResourceLauncher                launcher;
+    private ProjectHandlerRegistry          phRegistry;
+    private ProjectServiceLinksInjector     projectServiceLinksInjector;
+    private ProjectServiceVcsStatusInjector vcsStatusInjector;
 
     private org.eclipse.che.commons.env.EnvironmentContext env;
 
@@ -243,6 +247,7 @@ public class ProjectServiceTest {
         importerRegistry = new ProjectImporterRegistry(Collections.<ProjectImporter>emptySet());
 
         projectServiceLinksInjector = new ProjectServiceLinksInjector();
+        vcsStatusInjector = new ProjectServiceVcsStatusInjector(pm, emptySet());
 
         projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry, phRegistry, eventService);
         projectRegistry.initProjects();
@@ -282,6 +287,7 @@ public class ProjectServiceTest {
         dependencies.addInstance(ProjectHandlerRegistry.class, phRegistry);
         dependencies.addInstance(EventService.class, eventService);
         dependencies.addInstance(ProjectServiceLinksInjector.class, projectServiceLinksInjector);
+        dependencies.addInstance(ProjectServiceVcsStatusInjector.class, vcsStatusInjector);
         dependencies.addInstance(RequestTransmitter.class, mock(RequestTransmitter.class));
         dependencies.addInstance(ProjectImportOutputJsonRpcRegistrar.class, new ProjectImportOutputJsonRpcRegistrar());
 
@@ -1750,11 +1756,11 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project/search/my_project?name=test.txt",
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        List<SearchResultDto> result = (List<SearchResultDto>)response.getEntity();
         assertEquals(result.size(), 2);
         Set<String> paths = new LinkedHashSet<>(2);
-        for (ItemReference itemReference : result) {
-            paths.add(itemReference.getPath());
+        for (SearchResultDto resultDto : result) {
+            paths.add(resultDto.getItemReference().getPath());
         }
         Assert.assertTrue(paths.contains("/my_project/a/b/test.txt"));
         Assert.assertTrue(paths.contains("/my_project/x/y/test.txt"));
@@ -1772,10 +1778,10 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project/search/my_project?text=searchhit",
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        List<SearchResultDto> result = (List<SearchResultDto>)response.getEntity();
         assertEquals(result.size(), 2);
         Set<String> paths = new LinkedHashSet<>(1);
-        paths.addAll(result.stream().map(ItemReference::getPath).collect(Collectors.toList()));
+        paths.addAll(result.stream().map((SearchResultDto t) -> t.getItemReference().getPath()).collect(Collectors.toList()));
         Assert.assertTrue(paths.contains("/my_project/x/y/__test.txt"));
     }
 
@@ -1791,10 +1797,10 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project/search/my_project?text=searchhit",
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        List<SearchResultDto> result = (List<SearchResultDto>)response.getEntity();
         assertEquals(result.size(), 1);
         Set<String> paths = new LinkedHashSet<>(1);
-        paths.addAll(result.stream().map(ItemReference::getPath).collect(Collectors.toList()));
+        paths.addAll(result.stream().map((SearchResultDto t) -> t.getItemReference().getPath()).collect(Collectors.toList()));
         Assert.assertTrue(paths.contains("/my_project/x/y/__test.txt"));
         Assert.assertFalse(paths.contains("/my_project/" + EXCLUDE_SEARCH_PATH + "/_test"));
     }
@@ -1822,10 +1828,10 @@ public class ProjectServiceTest {
                 launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        List<SearchResultDto> result = (List<SearchResultDto>)response.getEntity();
         assertEquals(result.size(), 1);
         Set<String> paths = new LinkedHashSet<>(1);
-        paths.addAll(result.stream().map(ItemReference::getPath).collect(Collectors.toList()));
+        paths.addAll(result.stream().map((SearchResultDto t) -> t.getItemReference().getPath()).collect(Collectors.toList()));
         Assert.assertTrue(paths.contains("/my_project/x/y/containsSearchText.txt"));
     }
 
@@ -1852,10 +1858,10 @@ public class ProjectServiceTest {
                 launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        List<SearchResultDto> result = (List<SearchResultDto>)response.getEntity();
         assertEquals(result.size(), 2);
         Set<String> paths = new LinkedHashSet<>(2);
-        paths.addAll(result.stream().map(ItemReference::getPath).collect(Collectors.toList()));
+        paths.addAll(result.stream().map((SearchResultDto t) -> t.getItemReference().getPath()).collect(Collectors.toList()));
         Assert.assertTrue(paths.contains("/my_project/x/y/containsSearchText.txt"));
         Assert.assertTrue(paths.contains("/my_project/a/b/containsSearchTextAlso.txt"));
         Assert.assertFalse(paths.contains("/my_project/c/notContainsSearchText.txt"));
@@ -1881,10 +1887,10 @@ public class ProjectServiceTest {
                 launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        List<SearchResultDto> result = (List<SearchResultDto>)response.getEntity();
         assertEquals(result.size(), 2);
         Set<String> paths = new LinkedHashSet<>(2);
-        paths.addAll(result.stream().map(ItemReference::getPath).collect(Collectors.toList()));
+        paths.addAll(result.stream().map((SearchResultDto t) -> t.getItemReference().getPath()).collect(Collectors.toList()));
         Assert.assertTrue(paths.contains("/my_project/x/y/containsSearchText.txt"));
         Assert.assertTrue(paths.contains("/my_project/a/b/containsSearchTextAlso.txt"));
         Assert.assertFalse(paths.contains("/my_project/c/notContainsSearchText.txt"));
@@ -1910,10 +1916,10 @@ public class ProjectServiceTest {
                 launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        List<SearchResultDto> result = (List<SearchResultDto>)response.getEntity();
         assertEquals(result.size(), 1);
         Set<String> paths = new LinkedHashSet<>(1);
-        paths.addAll(result.stream().map(ItemReference::getPath).collect(Collectors.toList()));
+        paths.addAll(result.stream().map((SearchResultDto t) -> t.getItemReference().getPath()).collect(Collectors.toList()));
         Assert.assertTrue(paths.contains("/my_project/x/y/containsSearchText.txt"));
         Assert.assertFalse(paths.contains("/my_project/b/notContainsSearchText.txt"));
         Assert.assertFalse(paths.contains("/my_project/c/alsoContainsSearchText"));
@@ -1939,10 +1945,10 @@ public class ProjectServiceTest {
         ContainerResponse response = launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        List<SearchResultDto> result = (List<SearchResultDto>)response.getEntity();
         assertEquals(result.size(), 1);
         Set<String> paths = new LinkedHashSet<>(1);
-        paths.addAll(result.stream().map(ItemReference::getPath).collect(Collectors.toList()));
+        paths.addAll(result.stream().map((SearchResultDto t) -> t.getItemReference().getPath()).collect(Collectors.toList()));
         Assert.assertTrue(paths.contains("/my_project/x/y/test.txt"));
     }
 
@@ -1958,11 +1964,11 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project/search/my_project?text=test&name=test.txt",
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        List<SearchResultDto> result = (List<SearchResultDto>)response.getEntity();
         assertEquals(result.size(), 2);
         assertEqualsNoOrder(new Object[]{
-                                    result.get(0).getPath(),
-                                    result.get(1).getPath()
+                                    result.get(0).getItemReference().getPath(),
+                                    result.get(1).getItemReference().getPath()
                             },
                             new Object[]{
                                     "/my_project/a/b/test.txt",
@@ -1982,9 +1988,9 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api/project/search/?text=test&name=test.txt",
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        List<SearchResultDto> result = (List<SearchResultDto>)response.getEntity();
         assertEquals(result.size(), 1);
-        Assert.assertTrue(result.get(0).getPath().equals("/my_project/c/test.txt"));
+        Assert.assertTrue(result.get(0).getItemReference().getPath().equals("/my_project/c/test.txt"));
     }
 
     private void validateFileLinks(ItemReference item) {

@@ -12,6 +12,8 @@ package org.eclipse.che.api.testing.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
+import java.util.List;
+
 /**
  * Context which provides information about test execution.
  */
@@ -50,7 +52,17 @@ public interface TestExecutionContext {
 
     TestExecutionContext withDebugModeEnable(Boolean enable);
 
+    /**
+     * returns a list with paths of the test files relative to the project.
+     * The list should be initialized when value of {@link ContextType} is {@link ContextType.SET}
+     *
+     * @param listOfTestClasses
+     */
+    void setListOfTestClasses(List<String> listOfTestClasses);
+
+    List<String> getListOfTestClasses();
+
     enum ContextType {
-        FILE, FOLDER, PROJECT, CURSOR_POSITION
+        FILE, FOLDER, PROJECT, CURSOR_POSITION, SET
     }
 }

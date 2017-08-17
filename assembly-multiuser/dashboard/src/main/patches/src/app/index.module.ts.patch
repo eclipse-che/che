@@ -109,7 +109,7 @@
      workspaceDetailsService.addPage('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
      workspaceDetailsService.addPage('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
 
-@@ -166,6 +189,38 @@
+@@ -166,6 +189,39 @@
    }]);
 
 
@@ -128,6 +128,7 @@
 +        }).error(function () {
 +          console.log('token refresh failed :' + config.url);
 +          deferred.reject('Failed to refresh token');
++          keycloak.login();
 +        });
 +        return deferred.promise;
 +      }
