@@ -178,14 +178,14 @@ public class DtoTemplate {
 
     private void emitPreamble(StringBuilder builder) {
         builder.append("/*******************************************************************************\n");
-        builder.append(" * Copyright (c) 2012-2016 Codenvy, S.A.\n");
+        builder.append(" * Copyright (c) 2012-2016 Red Hat, Inc.\n");
         builder.append(" * All rights reserved. This program and the accompanying materials\n");
         builder.append(" * are made available under the terms of the Eclipse Public License v1.0\n");
         builder.append(" * which accompanies this distribution, and is available at\n");
         builder.append(" * http://www.eclipse.org/legal/epl-v10.html\n");
         builder.append(" *\n");
         builder.append(" * Contributors:\n");
-        builder.append(" * Codenvy, S.A. - initial API and implementation\n");
+        builder.append(" * Red Hat, Inc. - initial API and implementation\n");
         builder.append(" *******************************************************************************/\n\n\n");
         builder.append("// GENERATED SOURCE. DO NOT EDIT.\npackage ");
         builder.append(packageName);
