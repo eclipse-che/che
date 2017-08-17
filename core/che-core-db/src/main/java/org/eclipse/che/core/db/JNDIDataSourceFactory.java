@@ -22,7 +22,14 @@ import javax.naming.spi.ObjectFactory;
 import java.util.Hashtable;
 import java.util.Properties;
 
-public class JNDIDataSourceFactory implements ObjectFactory {
+/**
+ * Abstract JNDI factory that constructs {@link BasicDataSource} objects from the given params.
+ * Should not be used directly and must be subclassed to provide instantiation params from needful source.
+ *
+ * @author Sergii Kabashniuk
+ */
+
+public abstract class JNDIDataSourceFactory implements ObjectFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(JNDIDataSourceFactory.class);
 

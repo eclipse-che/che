@@ -14,6 +14,12 @@ import org.eclipse.che.core.db.JNDIDataSourceFactory;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 
+/**
+ * Environment params based JNDI data source factory for H2SQL.
+ *
+ * @author Sergii Kabashniuk
+ */
+
 public class H2SQLJndiDataSourceFactory extends JNDIDataSourceFactory {
 
     private final static String DEFAULT_USERNAME            = "";
