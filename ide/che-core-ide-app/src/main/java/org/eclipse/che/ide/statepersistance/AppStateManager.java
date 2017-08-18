@@ -18,6 +18,7 @@ import elemental.json.JsonObject;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -32,12 +33,7 @@ import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-
-import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Responsible for persisting and restoring IDE state across sessions.
@@ -55,10 +51,7 @@ public class AppStateManager {
 
     private static final String WORKSPACE = "workspace";
 
-    /**
-     * Sorted by execution priority list of persistence state components.
-     */
-    private final List<StateComponent> persistenceComponents;
+    private final Provider<StateComponentRegistry> stateComponentRegistry;
 
     private final PreferencesManager preferencesManager;
     private final JsonFactory        jsonFactory;
@@ -67,15 +60,13 @@ public class AppStateManager {
     private       JsonObject         allWsState;
 
     @Inject
-    public AppStateManager(Set<StateComponent> persistenceComponents,
+    public AppStateManager(Provider<StateComponentRegistry> stateComponentRegistryProvider,
                            PreferencesManager preferencesManager,
                            JsonFactory jsonFactory,
                            PromiseProvider promises,
                            EventBus eventBus,
                            AppContext appContext) {
-        this.persistenceComponents = persistenceComponents.stream()
-                                                          .sorted(comparingInt(StateComponent::getPriority).reversed())
-                                                          .collect(toList());
+        this.stateComponentRegistry = stateComponentRegistryProvider;
         this.preferencesManager = preferencesManager;
         this.jsonFactory = jsonFactory;
         this.promises = promises;
@@ -137,9 +128,7 @@ public class AppStateManager {
                 JsonObject workspace = settings.getObject(WORKSPACE);
                 Promise<Void> sequentialRestore = promises.resolve(null);
                 for (String key : workspace.keys()) {
-                    Optional<StateComponent> stateComponent = persistenceComponents.stream()
-                                                                                   .filter(component -> component.getId().equals(key))
-                                                                                   .findAny();
+                    Optional<StateComponent> stateComponent = stateComponentRegistry.get().getComponentById(key);
                     if (stateComponent.isPresent()) {
                         StateComponent component = stateComponent.get();
                         Log.debug(getClass(), "Restore state for the component ID: " + component.getId());
@@ -158,7 +147,7 @@ public class AppStateManager {
         JsonObject workspace = Json.createObject();
         settings.put(WORKSPACE, workspace);
 
-        for (StateComponent entry : persistenceComponents) {
+        for (StateComponent entry : stateComponentRegistry.get().getComponents()) {
             try {
                 Log.debug(getClass(), "Persist state for the component ID: " + entry.getId());
                 workspace.put(entry.getId(), entry.getState());

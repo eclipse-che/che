@@ -32,8 +32,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -56,6 +57,10 @@ public class AppStateManagerTest {
     private static final String WS_ID = "ws_id";
 
     @Mock
+    private StateComponentRegistry stateComponentRegistry;
+    @Mock
+    private Provider<StateComponentRegistry> stateComponentRegistryProvider;
+    @Mock
     private StateComponent component1;
     @Mock
     private StateComponent component2;
@@ -65,8 +70,6 @@ public class AppStateManagerTest {
     private Provider<StateComponent> component2Provider;
     @Mock
     private Promise<Void> promise;
-    @Mock
-    private Promise<String>          contentPromise;
     @Mock
     private PreferencesManager       preferencesManager;
     @Mock
@@ -100,24 +103,29 @@ public class AppStateManagerTest {
         when(workspace.getId()).thenReturn(WS_ID);
         when(appContext.getWorkspace()).thenReturn(workspace);
 
-//        Map<String, Provider<StateComponent>> components = new HashMap<>();
-//        components.put("component1", component1Provider);
-//        components.put("component2", component2Provider);
+        List<StateComponent> components = new ArrayList<>();
+        components.add(component1);
+        components.add(component2);
+
+        when(stateComponentRegistry.getComponents()).thenReturn(components);
+        when(stateComponentRegistry.getComponentById(anyString())).thenReturn(Optional.of(component1));
+        when(stateComponentRegistryProvider.get()).thenReturn(stateComponentRegistry);
 
         when(component1Provider.get()).thenReturn(component1);
         when(component2Provider.get()).thenReturn(component2);
 
-
-        Set<StateComponent> components = new HashSet<>();
-        components.add(component1);
-        components.add(component2);
 
         when(component1.getId()).thenReturn("component1");
         when(component2.getId()).thenReturn("component2");
         when(preferencesManager.flushPreferences()).thenReturn(promise);
         when(preferencesManager.getValue(AppStateManager.PREFERENCE_PROPERTY_NAME)).thenReturn("");
         when(jsonFactory.parse(anyString())).thenReturn(pref = Json.createObject());
-        appStateManager = new AppStateManager(components, preferencesManager, jsonFactory, promiseProvider, eventBus, appContext);
+        appStateManager = new AppStateManager(stateComponentRegistryProvider,
+                                              preferencesManager,
+                                              jsonFactory,
+                                              promiseProvider,
+                                              eventBus,
+                                              appContext);
         appStateManager.readStateFromPreferences();
     }
 
