@@ -28,13 +28,6 @@ import {CheUserBuilder} from './che-user-builder';
 export class CheAPIBuilder {
 
   /**
-   * Default constructor
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-  }
-
-  /**
    * The Che Workspace builder
    * @returns {CheWorkspaceBuilder}
    */

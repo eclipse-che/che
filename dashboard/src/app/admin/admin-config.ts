@@ -17,7 +17,7 @@ import {AdminsPluginsConfig} from './plugins/plugins-config';
  */
 export class AdminsConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     new AdminsPluginsConfig(register);
 
   }

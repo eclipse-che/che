@@ -12,8 +12,8 @@
 -->
 <div class="left-sidebar-container">
   <md-toolbar class="flex-shrink-none">
-    <md-progress-linear md-mode="indeterminate" ng-hide="navbarCtrl.profile && navbarCtrl.profile.userId"></md-progress-linear>
-    <div ng-show="navbarCtrl.profile && navbarCtrl.profile.userId">
+    <md-progress-linear md-mode="indeterminate" ng-hide="navbarController.profile && navbarController.profile.userId"></md-progress-linear>
+    <div ng-show="navbarController.profile && navbarController.profile.userId">
       <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
       </section>
 
@@ -23,7 +23,7 @@
         <section class="left-sidebar-menu" layout="column" layout-align="center center">
           <md-list layout="column">
             <md-list-item flex class="navbar-subsection-item">
-              <md-button nav-bar-selected flex che-reload-href href="{{navbarCtrl.menuItemUrl.dashboard}}" layout-align="left"
+              <md-button nav-bar-selected flex che-reload-href href="{{navbarController.menuItemUrl.dashboard}}" layout-align="left"
                          target="_self">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-dashboard" aria-label="Dashboard"></md-icon>
@@ -32,17 +32,17 @@
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
-              <md-button nav-bar-selected flex che-reload-href href="{{navbarCtrl.menuItemUrl.workspaces}}" layout-align="left">
+              <md-button nav-bar-selected flex che-reload-href href="{{navbarController.menuItemUrl.workspaces}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-workspace"></md-icon>
                   <span>Workspaces</span>
-                  <span class="navbar-number" ng-show="navbarCtrl.getWorkspacesNumber()">&nbsp;({{navbarCtrl.getWorkspacesNumber()}})</span>
+                  <span class="navbar-number" ng-show="navbarController.getWorkspacesNumber()">&nbsp;({{navbarController.getWorkspacesNumber()}})</span>
                 </div>
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
-                         href="{{navbarCtrl.menuItemUrl.stacks}}" layout-align="left">
+                         href="{{navbarController.menuItemUrl.stacks}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon material-design icon-ic_inbox_24px"></md-icon>
                   <span>Stacks</span>
@@ -51,17 +51,17 @@
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
-                         href="{{navbarCtrl.menuItemUrl.factories}}" layout-align="left">
+                         href="{{navbarController.menuItemUrl.factories}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-factory"></md-icon>
                   <span>Factories</span>
-                  <span class="navbar-number" ng-show="navbarCtrl.getFactoriesNumber()">&nbsp;({{navbarCtrl.getFactoriesNumber()}})</span>
+                  <span class="navbar-number" ng-show="navbarController.getFactoriesNumber()">&nbsp;({{navbarController.getFactoriesNumber()}})</span>
                 </div>
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
-                         href="{{navbarCtrl.menuItemUrl.administration}}" layout-align="left">
+                         href="{{navbarController.menuItemUrl.administration}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon material-design icon-ic_settings_24px"></md-icon>
                   <span>Administration</span>
