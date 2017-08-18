@@ -15,6 +15,7 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.projectimport.wizard.ProjectImportOutputJsonRpcNotifier;
 import org.eclipse.che.ide.resources.ProjectTreeStateNotificationOperation;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
@@ -63,7 +64,7 @@ public class ProjectApiModule extends AbstractGinModule {
 
         bind(ProjectNotificationSubscriber.class).to(ProjectNotificationSubscriberImpl.class).in(Singleton.class);
         install(new GinFactoryModuleBuilder()
-                        .implement(ProjectNotificationSubscriber.class, ProjectNotificationSubscriberImpl.class)
+                        .implement(ProjectNotificationSubscriber.class, ProjectImportOutputJsonRpcNotifier.class)
                         .build(ImportProjectNotificationSubscriberFactory.class));
 
         bind(ProjectImportNotificationSubscriber.class).asEagerSingleton();

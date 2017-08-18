@@ -15,11 +15,16 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 
+import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_SUBSCRIBE;
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /**
@@ -30,17 +35,37 @@ import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOI
 @Singleton
 public class ProjectImportNotificationSubscriber {
 
-    @Inject
-    public ProjectImportNotificationSubscriber(EventBus eventBus, RequestTransmitter transmitter) {
-        eventBus.addHandler(WsAgentServerRunningEvent.TYPE, e -> transmitter.newRequest()
-                                                                            .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                                                                            .methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE).noParams()
-                                                                            .sendAndSkipResult());
+    private RequestTransmitter transmitter;
 
-        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> transmitter.newRequest()
-                                                                            .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                                                                            .methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE).noParams()
-                                                                            .sendAndSkipResult());
+    @Inject
+    public ProjectImportNotificationSubscriber(EventBus eventBus, AppContext appContext, RequestTransmitter transmitter) {
+        this.transmitter = transmitter;
+
+        eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> subscribe());
+        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, event -> unsubscribe());
+
+        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, event -> appContext.getWorkspace()
+                                                                              .getDevMachine()
+                                                                              .flatMap(machine -> machine
+                                                                                      .getServerByName(SERVER_WS_AGENT_HTTP_REFERENCE))
+                                                                              .map(ServerImpl::getStatus)
+                                                                              .filter(RUNNING::equals)
+                                                                              .ifPresent(it -> subscribe()));
     }
 
+    private void subscribe() {
+        transmitter.newRequest()
+                   .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                   .methodName(EVENT_IMPORT_OUTPUT_SUBSCRIBE)
+                   .noParams()
+                   .sendAndSkipResult();
+    }
+
+    private void unsubscribe() {
+        transmitter.newRequest()
+                   .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                   .methodName(EVENT_IMPORT_OUTPUT_UN_SUBSCRIBE)
+                   .noParams()
+                   .sendAndSkipResult();
+    }
 }
