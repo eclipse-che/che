@@ -25,8 +25,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -105,6 +103,7 @@ import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationOperation;
 import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -119,7 +118,6 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
@@ -135,8 +133,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Boolean.parseBoolean;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -191,8 +187,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     private final EditorContextMenu                      contextMenu;
     private final AutoSaveMode                           autoSaveMode;
     private final ClientServerEventService               clientServerEventService;
-    private final RequestTransmitter                     requestTransmitter;
-    private final DtoFactory                             dtoFactory;
+    private final EditorFileStatusNotificationOperation  editorFileStatusNotificationOperation;
 
     private final AnnotationRendering rendering = new AnnotationRendering();
     private HasKeyBindings           keyBindingsManager;
@@ -235,8 +230,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                                 final EditorContextMenu contextMenu,
                                 final AutoSaveMode autoSaveMode,
                                 final ClientServerEventService clientServerEventService,
-                                final RequestTransmitter requestTransmitter,
-                                final DtoFactory dtoFactory) {
+                                final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation) {
         this.codeAssistantFactory = codeAssistantFactory;
         this.deletedFilesController = deletedFilesController;
         this.breakpointManager = breakpointManager;
@@ -259,8 +253,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         this.contextMenu = contextMenu;
         this.autoSaveMode = autoSaveMode;
         this.clientServerEventService = clientServerEventService;
-        this.requestTransmitter = requestTransmitter;
-        this.dtoFactory = dtoFactory;
+        this.editorFileStatusNotificationOperation = editorFileStatusNotificationOperation;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -590,41 +583,18 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     @Override
     public void doSave() {
-        requestTransmitter.newRequest()
-                          .endpointId("ws-agent")
-                          .methodName("track:editor-file")
-                          .paramsAsDto(dtoFactory.createDto(FileTrackingOperationDto.class)
-                                                 .withPath("")
-                                                 .withOldPath("")
-                                                 .withType(SUSPEND))
-                          .sendAndReceiveResultAsEmpty()
-                          .onSuccess(() -> doSave(new AsyncCallback<EditorInput>() {
-                              @Override
-                              public void onSuccess(final EditorInput result) {
-                                  requestTransmitter.newRequest()
-                                                    .endpointId("ws-agent")
-                                                    .methodName("track:editor-file")
-                                                    .paramsAsDto(dtoFactory.createDto(FileTrackingOperationDto.class)
-                                                                           .withPath("")
-                                                                           .withOldPath("")
-                                                                           .withType(RESUME))
-                                                    .sendAndReceiveResultAsEmpty();
-                              }
+        editorFileStatusNotificationOperation.suspend();
+        doSave(new AsyncCallback<EditorInput>() {
+            @Override
+            public void onSuccess(final EditorInput result) {
+                editorFileStatusNotificationOperation.resume();
+            }
 
-                              @Override
-                              public void onFailure(final Throwable caught) {
-                                  requestTransmitter.newRequest()
-                                                    .endpointId("ws-agent")
-                                                    .methodName("track:editor-file")
-                                                    .paramsAsDto(dtoFactory.createDto(FileTrackingOperationDto.class)
-                                                                           .withPath("")
-                                                                           .withOldPath("")
-                                                                           .withType(RESUME))
-                                                    .sendAndReceiveResultAsEmpty();
-                              }
-                          }));
-
-
+            @Override
+            public void onFailure(final Throwable caught) {
+                editorFileStatusNotificationOperation.resume();
+            }
+        });
     }
 
     @Override
@@ -1019,16 +989,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     }
 
-    @Override
-    public boolean isWrapLines() {
-        return editorWidget.getTextView().getOptions().getWrapMode();
-    }
-
-    @Override
-    public void toggleWrapLines() {
-        editorWidget.getTextView().toggleWrapMode();
-    }
-
     private class AnnotationRendering implements AnnotationModelHandler, ClearAnnotationModelHandler {
 
         @Override
@@ -1126,6 +1086,16 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                 updateDirtyState(true);
             }));
         }
+    }
+
+    @Override
+    public boolean isWrapLines() {
+        return editorWidget.getTextView().getOptions().getWrapMode();
+    }
+
+    @Override
+    public void toggleWrapLines() {
+        editorWidget.getTextView().toggleWrapMode();
     }
 
 }
