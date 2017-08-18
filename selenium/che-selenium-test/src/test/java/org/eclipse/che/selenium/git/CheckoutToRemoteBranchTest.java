@@ -263,6 +263,7 @@ public class CheckoutToRemoteBranchTest {
         git.waitBranchInTheList(ORIGIN_SECOND_BRANCH);
         git.selectBranchAndClickCheckoutBtn(ORIGIN_SECOND_BRANCH);
         loader.waitOnClosed();
+        menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
         git.waitBranchInTheListWithCoState(SECOND_BRANCH);
         git.closeBranchesForm();
     }
