@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.websocket.events;
-
 
 /**
  * Handler closing WebSocket connection.
@@ -17,5 +16,5 @@ package org.eclipse.che.ide.websocket.events;
  * @author Artem Zatsarynnyi
  */
 public interface ConnectionClosedHandler {
-    void onClose(WebSocketClosedEvent event);
+  void onClose(WebSocketClosedEvent event);
 }

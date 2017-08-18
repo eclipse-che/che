@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.core;
 
 import com.google.gwt.inject.client.AbstractGinModule;
@@ -72,57 +72,67 @@ import org.eclipse.che.ide.workspace.WorkspaceViewImpl;
  */
 public class UiModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        bind(IconRegistry.class).to(IconRegistryImpl.class).in(Singleton.class);
+  @Override
+  protected void configure() {
+    bind(IconRegistry.class).to(IconRegistryImpl.class).in(Singleton.class);
 
-        GinMapBinder<String, Component> componentsBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
-        componentsBinder.addBinding("DefaultIconsComponent").to(DefaultIconsComponent.class);
-        componentsBinder.addBinding("FontAwesomeInjector").to(FontAwesomeInjector.class);
+    GinMapBinder<String, Component> componentsBinder =
+        GinMapBinder.newMapBinder(binder(), String.class, Component.class);
+    componentsBinder.addBinding("DefaultIconsComponent").to(DefaultIconsComponent.class);
+    componentsBinder.addBinding("FontAwesomeInjector").to(FontAwesomeInjector.class);
 
-        // core UI components
-        install(new GinFactoryModuleBuilder()
-                        .implement(WorkBenchPartController.class, WorkBenchPartControllerImpl.class)
-                        .build(WorkBenchControllerFactory.class));
+    // core UI components
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(WorkBenchPartController.class, WorkBenchPartControllerImpl.class)
+            .build(WorkBenchControllerFactory.class));
 
-        bind(WorkspaceView.class).to(WorkspaceViewImpl.class).in(Singleton.class);
-        bind(MainMenuView.class).to(MainMenuViewImpl.class).in(Singleton.class);
-        bind(ToolbarView.class).to(ToolbarViewImpl.class);
-        bind(ToolbarPresenter.class).annotatedWith(MainToolbar.class).to(ToolbarPresenter.class).in(Singleton.class);
+    bind(WorkspaceView.class).to(WorkspaceViewImpl.class).in(Singleton.class);
+    bind(MainMenuView.class).to(MainMenuViewImpl.class).in(Singleton.class);
+    bind(ToolbarView.class).to(ToolbarViewImpl.class);
+    bind(ToolbarPresenter.class)
+        .annotatedWith(MainToolbar.class)
+        .to(ToolbarPresenter.class)
+        .in(Singleton.class);
 
-        // dialog factory
-        bind(MessageDialogFooter.class);
-        bind(MessageDialogView.class).to(MessageDialogViewImpl.class);
-        bind(ConfirmDialogFooter.class);
-        bind(ConfirmDialogView.class).to(ConfirmDialogViewImpl.class);
-        bind(ChoiceDialogFooter.class);
-        bind(ChoiceDialogView.class).to(ChoiceDialogViewImpl.class);
-        bind(InputDialogFooter.class);
-        bind(InputDialogView.class).to(InputDialogViewImpl.class);
+    // dialog factory
+    bind(MessageDialogFooter.class);
+    bind(MessageDialogView.class).to(MessageDialogViewImpl.class);
+    bind(ConfirmDialogFooter.class);
+    bind(ConfirmDialogView.class).to(ConfirmDialogViewImpl.class);
+    bind(ChoiceDialogFooter.class);
+    bind(ChoiceDialogView.class).to(ChoiceDialogViewImpl.class);
+    bind(InputDialogFooter.class);
+    bind(InputDialogView.class).to(InputDialogViewImpl.class);
 
-        install(new GinFactoryModuleBuilder()
-                        .implement(MessageDialog.class, MessageDialogPresenter.class)
-                        .implement(ConfirmDialog.class, ConfirmDialogPresenter.class)
-                        .implement(ChoiceDialog.class, ChoiceDialogPresenter.class)
-                        .implement(InputDialog.class, InputDialogPresenter.class)
-                        .build(DialogFactory.class));
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(MessageDialog.class, MessageDialogPresenter.class)
+            .implement(ConfirmDialog.class, ConfirmDialogPresenter.class)
+            .implement(ChoiceDialog.class, ChoiceDialogPresenter.class)
+            .implement(InputDialog.class, InputDialogPresenter.class)
+            .build(DialogFactory.class));
 
-        // multi-split panel
-        install(new GinFactoryModuleBuilder()
-                        .implement(SubPanel.class, SubPanelPresenter.class)
-                        .build(SubPanelFactory.class));
-        install(new GinFactoryModuleBuilder()
-                        .implement(SubPanelView.class, SubPanelViewImpl.class)
-                        .build(SubPanelViewFactory.class));
-        install(new GinFactoryModuleBuilder()
-                        .implement(Tab.class, TabWidget.class)
-                        .build(TabItemFactory.class));
+    // multi-split panel
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(SubPanel.class, SubPanelPresenter.class)
+            .build(SubPanelFactory.class));
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(SubPanelView.class, SubPanelViewImpl.class)
+            .build(SubPanelViewFactory.class));
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(Tab.class, TabWidget.class)
+            .build(TabItemFactory.class));
 
-        // miscellaneous UI components
-        install(new GinFactoryModuleBuilder()
-                        .implement(ConsoleButton.class, ConsoleButtonImpl.class)
-                        .build(ConsoleButtonFactory.class));
+    // miscellaneous UI components
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(ConsoleButton.class, ConsoleButtonImpl.class)
+            .build(ConsoleButtonFactory.class));
 
-        bind(StatusPanelGroupView.class).to(StatusPanelGroupViewImpl.class).in(Singleton.class);
-    }
+    bind(StatusPanelGroupView.class).to(StatusPanelGroupViewImpl.class).in(Singleton.class);
+  }
 }

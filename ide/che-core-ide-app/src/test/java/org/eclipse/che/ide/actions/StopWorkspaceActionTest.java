@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -29,63 +34,48 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Dmitry Shnurenko
- */
+/** @author Dmitry Shnurenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class StopWorkspaceActionTest {
 
-    @Mock
-    private CoreLocalizationConstant locale;
-    @Mock
-    private AppContext               appContext;
-    @Mock
-    private WorkspaceServiceClient   workspaceService;
-    @Mock
-    private NotificationManager      notificationManager;
-    @Mock
-    private Workspace                workspace;
+  @Mock private CoreLocalizationConstant locale;
+  @Mock private AppContext appContext;
+  @Mock private WorkspaceServiceClient workspaceService;
+  @Mock private NotificationManager notificationManager;
+  @Mock private Workspace workspace;
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ActionEvent   actionEvent;
-    @Mock
-    private Promise<Void> voidPromise;
+  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+  private ActionEvent actionEvent;
 
-    @Captor
-    private ArgumentCaptor<Operation<Void>> operationCaptor;
+  @Mock private Promise<Void> voidPromise;
 
-    @InjectMocks
-    private StopWorkspaceAction action;
+  @Captor private ArgumentCaptor<Operation<Void>> operationCaptor;
 
-    @Test
-    public void titleAndDescriptionShouldBeSet() {
-        verify(locale).stopWsTitle();
-        verify(locale).stopWsDescription();
-    }
+  @InjectMocks private StopWorkspaceAction action;
 
-    @Test
-    public void actionShouldBeUpdated() {
-        action.updateInPerspective(actionEvent);
+  @Test
+  public void titleAndDescriptionShouldBeSet() {
+    verify(locale).stopWsTitle();
+    verify(locale).stopWsDescription();
+  }
 
-        verify(actionEvent, times(2)).getPresentation();
-    }
+  @Test
+  public void actionShouldBeUpdated() {
+    action.updateInPerspective(actionEvent);
 
-    @Test
-    public void actionShouldBePerformed() throws Exception {
-        when(workspaceService.stop(anyString())).thenReturn(voidPromise);
-        DevMachine devMachine = mock(DevMachine.class);
-        when(devMachine.getId()).thenReturn("id");
-        when(appContext.getWorkspace()).thenReturn(workspace);
-        when(workspace.getId()).thenReturn("id");
+    verify(actionEvent, times(2)).getPresentation();
+  }
 
-        action.actionPerformed(actionEvent);
+  @Test
+  public void actionShouldBePerformed() throws Exception {
+    when(workspaceService.stop(anyString())).thenReturn(voidPromise);
+    DevMachine devMachine = mock(DevMachine.class);
+    when(devMachine.getId()).thenReturn("id");
+    when(appContext.getWorkspace()).thenReturn(workspace);
+    when(workspace.getId()).thenReturn("id");
 
-        verify(workspaceService).stop("id");
-    }
+    action.actionPerformed(actionEvent);
+
+    verify(workspaceService).stop("id");
+  }
 }

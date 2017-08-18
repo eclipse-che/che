@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.menu;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.inject.Provider;
-
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionGroup;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -34,155 +33,154 @@ import org.eclipse.che.ide.ui.toolbar.Utils;
  */
 public class MenuBarItem implements ActionSelectedHandler {
 
-    private final ActionGroup                  group;
-    private final ActionManager                actionManager;
-    private final Provider<PerspectiveManager> managerProvider;
-    private final PresentationFactory          presentationFactory;
-    /**
-     * Working variable:
-     * is need to store pressed state.
-     */
-    boolean pressed = false;
-    /** Visual element which is table cell. */
-    private Element element;
-    /** Enabled or disabled state */
-    private boolean enabled         = true;
-    private boolean hasVisibleItems = true;
-    private ActionSelectedHandler actionSelectedHandler;
-    private KeyBindingAgent       keyBindingAgent;
-    private MenuResources.Css     css;
-    /**
-     * Working variable:
-     * is needs to store opened Popup menu.
-     */
-    private PopupMenu             popupMenu;
+  private final ActionGroup group;
+  private final ActionManager actionManager;
+  private final Provider<PerspectiveManager> managerProvider;
+  private final PresentationFactory presentationFactory;
+  /** Working variable: is need to store pressed state. */
+  boolean pressed = false;
+  /** Visual element which is table cell. */
+  private Element element;
+  /** Enabled or disabled state */
+  private boolean enabled = true;
 
-    /** Title of Menu Bar Item */
-    private String title;
+  private boolean hasVisibleItems = true;
+  private ActionSelectedHandler actionSelectedHandler;
+  private KeyBindingAgent keyBindingAgent;
+  private MenuResources.Css css;
+  /** Working variable: is needs to store opened Popup menu. */
+  private PopupMenu popupMenu;
 
-    public MenuBarItem(ActionGroup group,
-                       ActionManager actionManager,
-                       Provider<PerspectiveManager> managerProvider,
-                       PresentationFactory presentationFactory,
-                       Element element,
-                       ActionSelectedHandler handler,
-                       KeyBindingAgent keyBindingAgent,
-                       MenuResources.Css css) {
-        this.group = group;
-        this.actionManager = actionManager;
-        this.managerProvider = managerProvider;
-        this.presentationFactory = presentationFactory;
-        this.element = element;
-        this.actionSelectedHandler = handler;
-        this.keyBindingAgent = keyBindingAgent;
-        this.css = css;
-        Presentation presentation = presentationFactory.getPresentation(group);
-        title = presentation.getText();
-        element.setInnerText(presentation.getText());
-        setEnabled(Utils.hasVisibleChildren(group, presentationFactory, actionManager, managerProvider.get()));
+  /** Title of Menu Bar Item */
+  private String title;
+
+  public MenuBarItem(
+      ActionGroup group,
+      ActionManager actionManager,
+      Provider<PerspectiveManager> managerProvider,
+      PresentationFactory presentationFactory,
+      Element element,
+      ActionSelectedHandler handler,
+      KeyBindingAgent keyBindingAgent,
+      MenuResources.Css css) {
+    this.group = group;
+    this.actionManager = actionManager;
+    this.managerProvider = managerProvider;
+    this.presentationFactory = presentationFactory;
+    this.element = element;
+    this.actionSelectedHandler = handler;
+    this.keyBindingAgent = keyBindingAgent;
+    this.css = css;
+    Presentation presentation = presentationFactory.getPresentation(group);
+    title = presentation.getText();
+    element.setInnerText(presentation.getText());
+    setEnabled(
+        Utils.hasVisibleChildren(group, presentationFactory, actionManager, managerProvider.get()));
+  }
+
+  /** Close opened Popup Menu. */
+  public void closePopupMenu() {
+    popupMenu.closePopup();
+  }
+
+  /** {@inheritDoc} */
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  /** {@inheritDoc} */
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+    updateEnabledState();
+  }
+
+  /** Mouse Down handler */
+  public boolean onMouseDown() {
+    if (enabled && hasVisibleItems) {
+      element.setClassName(css.menuBarItemSelected());
+      pressed = true;
+      actionSelectedHandler.onActionSelected(group);
+      return true;
     }
 
-    /** Close opened Popup Menu. */
-    public void closePopupMenu() {
-        popupMenu.closePopup();
+    return false;
+  }
+
+  /** Mouse Out Handler */
+  public void onMouseOut() {
+    if (pressed) {
+      return;
     }
 
-    /** {@inheritDoc} */
-    public boolean isEnabled() {
-        return enabled;
+    if (enabled && hasVisibleItems) {
+      element.setClassName(css.menuBarItem());
+    } else {
+      element.setClassName(css.menuBarItemDisabled());
+    }
+  }
+
+  /** Mouse Over Handler */
+  public void onMouseOver() {
+    if (pressed) {
+      return;
     }
 
-    /** {@inheritDoc} */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        updateEnabledState();
+    if (enabled && hasVisibleItems) {
+      element.setClassName(css.menuBarItemOver());
+    }
+  }
+
+  /**
+   * Open sub Popup Menu
+   *
+   * @param menuLockLayer - lock layer which will receive PopupMenu visual component and
+   */
+  public void openPopupMenu(MenuLockLayer menuLockLayer) {
+    int x = element.getAbsoluteLeft();
+    int y = 0;
+    popupMenu =
+        new PopupMenu(
+            group,
+            actionManager,
+            managerProvider,
+            presentationFactory,
+            menuLockLayer,
+            this,
+            keyBindingAgent,
+            "topmenu/" + title);
+    menuLockLayer.add(popupMenu, x, y);
+  }
+
+  /** Reset visual state of Menu Bar Item to default. */
+  public void setNormalState() {
+    pressed = false;
+    element.setClassName(css.menuBarItem());
+  }
+
+  private void updateEnabledState() {
+    pressed = false;
+    if (enabled && hasVisibleItems) {
+      element.setClassName(css.menuBarItem());
+    } else {
+      element.setClassName(css.menuBarItemDisabled());
     }
 
-    /** Mouse Down handler */
-    public boolean onMouseDown() {
-        if (enabled && hasVisibleItems) {
-            element.setClassName(css.menuBarItemSelected());
-            pressed = true;
-            actionSelectedHandler.onActionSelected(group);
-            return true;
-        }
+    UIObject.ensureDebugId(element, "MenuItem/" + actionManager.getId(group) + "-" + enabled);
+  }
 
-        return false;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void onActionSelected(Action action) {
+    setNormalState();
+    actionSelectedHandler.onActionSelected(action);
+  }
 
-    /** Mouse Out Handler */
-    public void onMouseOut() {
-        if (pressed) {
-            return;
-        }
+  public String getTitle() {
+    return title;
+  }
 
-        if (enabled && hasVisibleItems) {
-            element.setClassName(css.menuBarItem());
-        } else {
-            element.setClassName(css.menuBarItemDisabled());
-        }
-    }
-
-    /** Mouse Over Handler */
-    public void onMouseOver() {
-        if (pressed) {
-            return;
-        }
-
-        if (enabled && hasVisibleItems) {
-            element.setClassName(css.menuBarItemOver());
-        }
-    }
-
-    /**
-     * Open sub Popup Menu
-     *
-     * @param menuLockLayer
-     *         - lock layer which will receive PopupMenu visual component and
-     */
-    public void openPopupMenu(MenuLockLayer menuLockLayer) {
-        int x = element.getAbsoluteLeft();
-        int y = 0;
-        popupMenu = new PopupMenu(group,
-                                  actionManager,
-                                  managerProvider,
-                                  presentationFactory,
-                                  menuLockLayer,
-                                  this,
-                                  keyBindingAgent,
-                                  "topmenu/" + title);
-        menuLockLayer.add(popupMenu, x, y);
-    }
-
-    /** Reset visual state of Menu Bar Item to default. */
-    public void setNormalState() {
-        pressed = false;
-        element.setClassName(css.menuBarItem());
-    }
-
-    private void updateEnabledState() {
-        pressed = false;
-        if (enabled && hasVisibleItems) {
-            element.setClassName(css.menuBarItem());
-        } else {
-            element.setClassName(css.menuBarItemDisabled());
-        }
-
-        UIObject.ensureDebugId(element, "MenuItem/" + actionManager.getId(group) + "-" + enabled);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onActionSelected(Action action) {
-        setNormalState();
-        actionSelectedHandler.onActionSelected(action);
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void update() {
-        setEnabled(Utils.hasVisibleChildren(group, presentationFactory, actionManager, managerProvider.get()));
-    }
+  public void update() {
+    setEnabled(
+        Utils.hasVisibleChildren(group, presentationFactory, actionManager, managerProvider.get()));
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.macro;
 
 import com.google.common.annotations.Beta;
@@ -16,21 +16,19 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
-import org.eclipse.che.ide.api.machine.DevMachine;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Macro which is responsible for the retrieving the protocol of the registered server.
- * <p>
- * Macro provided: <code>${server.[port].protocol}</code>
+ *
+ * <p>Macro provided: <code>${server.[port].protocol}</code>
  *
  * @author Vlad Zhukovskyi
  * @see AbstractServerMacro
@@ -42,44 +40,48 @@ import java.util.Set;
 @Singleton
 public class ServerProtocolMacro extends AbstractServerMacro {
 
-    public static final String KEY = "${server.%.protocol}";
+  public static final String KEY = "${server.%.protocol}";
 
-    @Inject
-    public ServerProtocolMacro(MacroRegistry macroRegistry,
-                               EventBus eventBus,
-                               AppContext appContext) {
-        super(macroRegistry, eventBus, appContext);
+  @Inject
+  public ServerProtocolMacro(
+      MacroRegistry macroRegistry, EventBus eventBus, AppContext appContext) {
+    super(macroRegistry, eventBus, appContext);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Set<Macro> getMacros(DevMachine devMachine) {
+    final Set<Macro> macros = Sets.newHashSet();
+
+    for (Map.Entry<String, ? extends Server> entry :
+        devMachine.getDescriptor().getRuntime().getServers().entrySet()) {
+
+      if (Strings.isNullOrEmpty(entry.getValue().getProtocol())) {
+        continue;
+      }
+
+      Macro macro =
+          new BaseMacro(
+              KEY.replace("%", entry.getKey()),
+              entry.getValue().getProtocol(),
+              "Returns protocol of a server registered by name");
+
+      macros.add(macro);
+
+      // register port without "/tcp" suffix
+      if (entry.getKey().endsWith("/tcp")) {
+        final String port = entry.getKey().substring(0, entry.getKey().length() - 4);
+
+        Macro shortMacro =
+            new BaseMacro(
+                KEY.replace("%", port),
+                entry.getValue().getProtocol(),
+                "Returns protocol of a server registered by name");
+
+        macros.add(shortMacro);
+      }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public Set<Macro> getMacros(DevMachine devMachine) {
-        final Set<Macro> macros = Sets.newHashSet();
-
-        for (Map.Entry<String, ? extends Server> entry : devMachine.getDescriptor().getRuntime().getServers().entrySet()) {
-
-            if (Strings.isNullOrEmpty(entry.getValue().getProtocol())) {
-                continue;
-            }
-
-            Macro macro = new BaseMacro(KEY.replace("%", entry.getKey()),
-                                        entry.getValue().getProtocol(),
-                                        "Returns protocol of a server registered by name");
-
-            macros.add(macro);
-
-            // register port without "/tcp" suffix
-            if (entry.getKey().endsWith("/tcp")) {
-                final String port = entry.getKey().substring(0, entry.getKey().length() - 4);
-
-                Macro shortMacro = new BaseMacro(KEY.replace("%", port),
-                                                 entry.getValue().getProtocol(),
-                                                 "Returns protocol of a server registered by name");
-
-                macros.add(shortMacro);
-            }
-        }
-
-        return macros;
-    }
+    return macros;
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.projectimport;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.project.ProjectImportersServiceClient;
 import org.eclipse.che.ide.api.project.ProjectImportersServiceClientImpl;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
@@ -33,20 +32,26 @@ import org.eclipse.che.ide.projectimport.zip.ZipImportWizardRegistrar;
  */
 public class ProjectImportModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        bind(ProjectImportersServiceClient.class).to(ProjectImportersServiceClientImpl.class).in(Singleton.class);
+  @Override
+  protected void configure() {
+    bind(ProjectImportersServiceClient.class)
+        .to(ProjectImportersServiceClientImpl.class)
+        .in(Singleton.class);
 
-        GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class).addBinding().to(ZipImportWizardRegistrar.class);
+    GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class)
+        .addBinding()
+        .to(ZipImportWizardRegistrar.class);
 
-        bind(ImportWizardRegistry.class).to(ImportWizardRegistryImpl.class).in(Singleton.class);
+    bind(ImportWizardRegistry.class).to(ImportWizardRegistryImpl.class).in(Singleton.class);
 
-        install(new GinFactoryModuleBuilder().build(ImportWizardFactory.class));
+    install(new GinFactoryModuleBuilder().build(ImportWizardFactory.class));
 
-        install(new GinFactoryModuleBuilder()
-                        .implement(ProjectNotificationSubscriber.class, ProjectImportOutputJsonRpcNotifier.class)
-                        .build(ImportProjectNotificationSubscriberFactory.class));
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(
+                ProjectNotificationSubscriber.class, ProjectImportOutputJsonRpcNotifier.class)
+            .build(ImportProjectNotificationSubscriberFactory.class));
 
-        bind(ProjectImportNotificationSubscriber.class).asEagerSingleton();
-    }
+    bind(ProjectImportNotificationSubscriber.class).asEagerSingleton();
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.history;
 
 import com.google.gwt.cell.client.TextCell;
@@ -30,14 +30,12 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.List;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ui.window.Window;
-
-import java.util.List;
 
 /**
  * The implementation of {@link HistoryView}.
@@ -46,175 +44,192 @@ import java.util.List;
  */
 @Singleton
 public class HistoryViewImpl extends Window implements HistoryView {
-    interface HistoryListViewImplUiBinder extends UiBinder<Widget, HistoryViewImpl> {
+  interface HistoryListViewImplUiBinder extends UiBinder<Widget, HistoryViewImpl> {}
+
+  private static HistoryListViewImplUiBinder uiBinder =
+      GWT.create(HistoryListViewImplUiBinder.class);
+
+  Button btnClose;
+  Button btnCompare;
+
+  @UiField ScrollPanel revisionsPanel;
+  @UiField TextArea description;
+
+  @UiField(provided = true)
+  final GitLocalizationConstant locale;
+
+  @UiField(provided = true)
+  final GitResources res;
+
+  private ActionDelegate delegate;
+  private CellTable<Revision> revisions;
+  private SingleSelectionModel<Revision> selectionModel;
+
+  private final DateTimeFormatter dateTimeFormatter;
+
+  @Inject
+  protected HistoryViewImpl(
+      GitResources resources,
+      GitLocalizationConstant locale,
+      DateTimeFormatter dateTimeFormatter,
+      org.eclipse.che.ide.Resources coreRes) {
+    this.res = resources;
+    this.locale = locale;
+    this.dateTimeFormatter = dateTimeFormatter;
+    this.ensureDebugId("git-history-window");
+
+    Widget widget = uiBinder.createAndBindUi(this);
+
+    this.setTitle(locale.historyTitle());
+    this.setWidget(widget);
+
+    revisionsPanel.getElement().setTabIndex(-1);
+    description.setReadOnly(true);
+
+    createRevisionsTable(coreRes);
+    createButtons();
+  }
+
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
+
+  @Override
+  public void setRevisions(List<Revision> revisions) {
+    this.revisions.setRowData(revisions);
+    if (selectionModel.getSelectedObject() == null) {
+      delegate.onRevisionUnselected();
     }
+    // if the size of the panel is greater then the size of the loaded list of the history then no scroller has been appeared yet
+    onPanelScrolled(null);
+  }
 
-    private static HistoryListViewImplUiBinder uiBinder = GWT.create(HistoryListViewImplUiBinder.class);
+  @Override
+  public void setEnableCompareButton(boolean enabled) {
+    btnCompare.setEnabled(enabled);
+  }
 
-    Button btnClose;
-    Button btnCompare;
+  @Override
+  public void setDescription(String description) {
+    this.description.setText(description);
+  }
 
-    @UiField
-    ScrollPanel revisionsPanel;
-    @UiField
-    TextArea    description;
+  @Override
+  public void close() {
+    onClose();
+  }
 
-    @UiField(provided = true)
-    final GitLocalizationConstant locale;
-    @UiField(provided = true)
-    final GitResources            res;
+  @Override
+  protected void onClose() {
+    selectionModel.clear();
+    super.onClose();
+  }
 
-    private ActionDelegate                 delegate;
-    private CellTable<Revision>            revisions;
-    private SingleSelectionModel<Revision> selectionModel;
+  @Override
+  public void showDialog() {
+    this.show();
+  }
 
-    private final DateTimeFormatter dateTimeFormatter;
-
-    @Inject
-    protected HistoryViewImpl(GitResources resources,
-                              GitLocalizationConstant locale,
-                              DateTimeFormatter dateTimeFormatter,
-                              org.eclipse.che.ide.Resources coreRes) {
-        this.res = resources;
-        this.locale = locale;
-        this.dateTimeFormatter = dateTimeFormatter;
-        this.ensureDebugId("git-history-window");
-
-        Widget widget = uiBinder.createAndBindUi(this);
-
-        this.setTitle(locale.historyTitle());
-        this.setWidget(widget);
-
-        revisionsPanel.getElement().setTabIndex(-1);
-        description.setReadOnly(true);
-
-        createRevisionsTable(coreRes);
-        createButtons();
-    }
-
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
-
-    @Override
-    public void setRevisions(List<Revision> revisions) {
-        this.revisions.setRowData(revisions);
-        if (selectionModel.getSelectedObject() == null) {
-            delegate.onRevisionUnselected();
-        }
-        // if the size of the panel is greater then the size of the loaded list of the history then no scroller has been appeared yet
-        onPanelScrolled(null);
-    }
-
-    @Override
-    public void setEnableCompareButton(boolean enabled) {
-        btnCompare.setEnabled(enabled);
-    }
-
-    @Override
-    public void setDescription(String description) {
-        this.description.setText(description);
-    }
-
-    @Override
-    public void close() {
-        onClose();
-    }
-
-    @Override
-    protected void onClose() {
-        selectionModel.clear();
-        super.onClose();
-    }
-
-    @Override
-    public void showDialog() {
-        this.show();
-    }
-
-    private void createRevisionsTable(org.eclipse.che.ide.Resources coreRes) {
-        Column<Revision, String> idColumn = new Column<Revision, String>(new TextCell()) {
-            @Override
-            public String getValue(Revision revision) {
-                return revision.getId().substring(0, 8) + "...";
-            }
+  private void createRevisionsTable(org.eclipse.che.ide.Resources coreRes) {
+    Column<Revision, String> idColumn =
+        new Column<Revision, String>(new TextCell()) {
+          @Override
+          public String getValue(Revision revision) {
+            return revision.getId().substring(0, 8) + "...";
+          }
         };
-        Column<Revision, String> timeColumn = new Column<Revision, String>(new TextCell()) {
-            @Override
-            public String getValue(Revision revision) {
-                return dateTimeFormatter.getFormattedDate(revision.getCommitTime());
-            }
+    Column<Revision, String> timeColumn =
+        new Column<Revision, String>(new TextCell()) {
+          @Override
+          public String getValue(Revision revision) {
+            return dateTimeFormatter.getFormattedDate(revision.getCommitTime());
+          }
         };
-        Column<Revision, String> authorColumn = new Column<Revision, String>(new TextCell()) {
-            @Override
-            public String getValue(Revision revision) {
-                return revision.getCommitter().getName();
-            }
+    Column<Revision, String> authorColumn =
+        new Column<Revision, String>(new TextCell()) {
+          @Override
+          public String getValue(Revision revision) {
+            return revision.getCommitter().getName();
+          }
         };
-        Column<Revision, String> titleColumn = new Column<Revision, String>(new TextCell()) {
-            @Override
-            public String getValue(Revision revision) {
-                return revision.getMessage().substring(0, 50);
-            }
+    Column<Revision, String> titleColumn =
+        new Column<Revision, String>(new TextCell()) {
+          @Override
+          public String getValue(Revision revision) {
+            return revision.getMessage().substring(0, 50);
+          }
         };
 
-        revisions = new CellTable<>(15, coreRes);
+    revisions = new CellTable<>(15, coreRes);
 
-        revisions.setWidth("100%");
+    revisions.setWidth("100%");
 
-        revisions.addColumn(idColumn, locale.viewCompareRevisionTableIdTitle());
-        revisions.addColumn(timeColumn, locale.viewCompareRevisionTableTimeTitle());
-        revisions.addColumn(authorColumn, locale.viewCompareRevisionTableAuthorTitle());
-        revisions.addColumn(titleColumn, locale.viewCompareRevisionTableTitleTitle());
+    revisions.addColumn(idColumn, locale.viewCompareRevisionTableIdTitle());
+    revisions.addColumn(timeColumn, locale.viewCompareRevisionTableTimeTitle());
+    revisions.addColumn(authorColumn, locale.viewCompareRevisionTableAuthorTitle());
+    revisions.addColumn(titleColumn, locale.viewCompareRevisionTableTitleTitle());
 
-        selectionModel = new SingleSelectionModel<Revision>();
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                description.setText(selectionModel.getSelectedObject().getMessage());
-                delegate.onRevisionSelected(selectionModel.getSelectedObject());
-            }
+    selectionModel = new SingleSelectionModel<Revision>();
+    selectionModel.addSelectionChangeHandler(
+        new SelectionChangeEvent.Handler() {
+          @Override
+          public void onSelectionChange(SelectionChangeEvent event) {
+            description.setText(selectionModel.getSelectedObject().getMessage());
+            delegate.onRevisionSelected(selectionModel.getSelectedObject());
+          }
         });
-        revisions.setSelectionModel(selectionModel);
+    revisions.setSelectionModel(selectionModel);
 
-        revisions.addDomHandler(new DoubleClickHandler() {
-            @Override
-            public void onDoubleClick(DoubleClickEvent event) {
-                delegate.onRevisionDoubleClicked();
-            }
-        }, DoubleClickEvent.getType());
+    revisions.addDomHandler(
+        new DoubleClickHandler() {
+          @Override
+          public void onDoubleClick(DoubleClickEvent event) {
+            delegate.onRevisionDoubleClicked();
+          }
+        },
+        DoubleClickEvent.getType());
 
-        this.revisionsPanel.add(revisions);
-    }
+    this.revisionsPanel.add(revisions);
+  }
 
-    private void createButtons() {
-        btnClose = createButton(locale.buttonClose(), "git-history-close", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+  private void createButtons() {
+    btnClose =
+        createButton(
+            locale.buttonClose(),
+            "git-history-close",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onCloseClicked();
-            }
-        });
-        addButtonToFooter(btnClose);
+              }
+            });
+    addButtonToFooter(btnClose);
 
-        btnCompare = createButton(locale.buttonCompare(), "git-history-compare", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    btnCompare =
+        createButton(
+            locale.buttonCompare(),
+            "git-history-compare",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onCompareClicked();
-            }
-        });
-        addButtonToFooter(btnCompare);
-    }
+              }
+            });
+    addButtonToFooter(btnCompare);
+  }
 
-    @UiHandler("revisionsPanel")
-    public void onPanelScrolled(ScrollEvent ignored) {
-        // We cannot rely on exact equality of scroll positions because GWT sometimes round such values
-        // and it is possible that the actual max scroll position is a pixel less then declared.
-        if (revisionsPanel.getMaximumVerticalScrollPosition() - revisionsPanel.getVerticalScrollPosition() <= 1) {
-            // to avoid autoscrolling to selected item
-            revisionsPanel.getElement().focus();
+  @UiHandler("revisionsPanel")
+  public void onPanelScrolled(ScrollEvent ignored) {
+    // We cannot rely on exact equality of scroll positions because GWT sometimes round such values
+    // and it is possible that the actual max scroll position is a pixel less then declared.
+    if (revisionsPanel.getMaximumVerticalScrollPosition()
+            - revisionsPanel.getVerticalScrollPosition()
+        <= 1) {
+      // to avoid autoscrolling to selected item
+      revisionsPanel.getElement().focus();
 
-            delegate.onScrolledToButton();
-        }
+      delegate.onScrolledToButton();
     }
+  }
 }

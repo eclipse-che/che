@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.factory.server.model.impl;
 
-import org.eclipse.che.api.core.model.factory.Ide;
-import org.eclipse.che.api.core.model.factory.OnAppClosed;
-import org.eclipse.che.api.core.model.factory.OnAppLoaded;
-import org.eclipse.che.api.core.model.factory.OnProjectsLoaded;
-
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,7 +19,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import java.util.Objects;
+import org.eclipse.che.api.core.model.factory.Ide;
+import org.eclipse.che.api.core.model.factory.OnAppClosed;
+import org.eclipse.che.api.core.model.factory.OnAppLoaded;
+import org.eclipse.che.api.core.model.factory.OnProjectsLoaded;
 
 /**
  * Data object for {@link Ide}.
@@ -34,104 +33,105 @@ import java.util.Objects;
 @Table(name = "che_factory_ide")
 public class IdeImpl implements Ide {
 
-    @Id
-    @GeneratedValue
-    @Column(name = "id")
-    private Long id;
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "on_app_loaded_id")
-    private OnAppLoadedImpl onAppLoaded;
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "on_app_loaded_id")
+  private OnAppLoadedImpl onAppLoaded;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "on_projects_loaded_id")
-    private OnProjectsLoadedImpl onProjectsLoaded;
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "on_projects_loaded_id")
+  private OnProjectsLoadedImpl onProjectsLoaded;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "on_app_closed_id")
-    private OnAppClosedImpl onAppClosed;
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "on_app_closed_id")
+  private OnAppClosedImpl onAppClosed;
 
-    public IdeImpl() {}
+  public IdeImpl() {}
 
-    public IdeImpl(OnAppLoaded onAppLoaded,
-                   OnProjectsLoaded onProjectsLoaded,
-                   OnAppClosed onAppClosed) {
-        if (onAppLoaded != null) {
-            this.onAppLoaded = new OnAppLoadedImpl(onAppLoaded);
-        }
-        if (onProjectsLoaded != null) {
-            this.onProjectsLoaded = new OnProjectsLoadedImpl(onProjectsLoaded);
-        }
-        if (onAppClosed != null) {
-            this.onAppClosed = new OnAppClosedImpl(onAppClosed);
-        }
+  public IdeImpl(
+      OnAppLoaded onAppLoaded, OnProjectsLoaded onProjectsLoaded, OnAppClosed onAppClosed) {
+    if (onAppLoaded != null) {
+      this.onAppLoaded = new OnAppLoadedImpl(onAppLoaded);
     }
-
-    public IdeImpl(Ide ide) {
-        this(ide.getOnAppLoaded(),
-             ide.getOnProjectsLoaded(),
-             ide.getOnAppClosed());
+    if (onProjectsLoaded != null) {
+      this.onProjectsLoaded = new OnProjectsLoadedImpl(onProjectsLoaded);
     }
-
-    @Override
-    public OnAppLoadedImpl getOnAppLoaded() {
-        return onAppLoaded;
+    if (onAppClosed != null) {
+      this.onAppClosed = new OnAppClosedImpl(onAppClosed);
     }
+  }
 
-    public void setOnAppLoaded(OnAppLoadedImpl onAppLoaded) {
-        this.onAppLoaded = onAppLoaded;
-    }
+  public IdeImpl(Ide ide) {
+    this(ide.getOnAppLoaded(), ide.getOnProjectsLoaded(), ide.getOnAppClosed());
+  }
 
-    @Override
-    public OnProjectsLoadedImpl getOnProjectsLoaded() {
-        return onProjectsLoaded;
-    }
+  @Override
+  public OnAppLoadedImpl getOnAppLoaded() {
+    return onAppLoaded;
+  }
 
-    public void setOnProjectsLoaded(OnProjectsLoadedImpl onProjectsLoaded) {
-        this.onProjectsLoaded = onProjectsLoaded;
-    }
+  public void setOnAppLoaded(OnAppLoadedImpl onAppLoaded) {
+    this.onAppLoaded = onAppLoaded;
+  }
 
-    @Override
-    public OnAppClosedImpl getOnAppClosed() {
-        return onAppClosed;
-    }
+  @Override
+  public OnProjectsLoadedImpl getOnProjectsLoaded() {
+    return onProjectsLoaded;
+  }
 
-    public void setOnAppClosed(OnAppClosedImpl onAppClosed) {
-        this.onAppClosed = onAppClosed;
-    }
+  public void setOnProjectsLoaded(OnProjectsLoadedImpl onProjectsLoaded) {
+    this.onProjectsLoaded = onProjectsLoaded;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof IdeImpl)) {
-            return false;
-        }
-        final IdeImpl that = (IdeImpl)obj;
-        return Objects.equals(id, that.id)
-               && Objects.equals(onAppLoaded, that.onAppLoaded)
-               && Objects.equals(onProjectsLoaded, that.onProjectsLoaded)
-               && Objects.equals(onAppClosed, that.onAppClosed);
-    }
+  @Override
+  public OnAppClosedImpl getOnAppClosed() {
+    return onAppClosed;
+  }
 
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(id);
-        hash = 31 * hash + Objects.hashCode(onAppLoaded);
-        hash = 31 * hash + Objects.hashCode(onProjectsLoaded);
-        hash = 31 * hash + Objects.hashCode(onAppClosed);
-        return hash;
-    }
+  public void setOnAppClosed(OnAppClosedImpl onAppClosed) {
+    this.onAppClosed = onAppClosed;
+  }
 
-    @Override
-    public String toString() {
-        return "IdeImpl{" +
-               "id=" + id +
-               ", onAppLoaded=" + onAppLoaded +
-               ", onProjectsLoaded=" + onProjectsLoaded +
-               ", onAppClosed=" + onAppClosed +
-               '}';
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
+    if (!(obj instanceof IdeImpl)) {
+      return false;
+    }
+    final IdeImpl that = (IdeImpl) obj;
+    return Objects.equals(id, that.id)
+        && Objects.equals(onAppLoaded, that.onAppLoaded)
+        && Objects.equals(onProjectsLoaded, that.onProjectsLoaded)
+        && Objects.equals(onAppClosed, that.onAppClosed);
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 31 * hash + Objects.hashCode(id);
+    hash = 31 * hash + Objects.hashCode(onAppLoaded);
+    hash = 31 * hash + Objects.hashCode(onProjectsLoaded);
+    hash = 31 * hash + Objects.hashCode(onAppClosed);
+    return hash;
+  }
+
+  @Override
+  public String toString() {
+    return "IdeImpl{"
+        + "id="
+        + id
+        + ", onAppLoaded="
+        + onAppLoaded
+        + ", onProjectsLoaded="
+        + onProjectsLoaded
+        + ", onAppClosed="
+        + onAppClosed
+        + '}';
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.activity.inject;
 
 import com.google.inject.AbstractModule;
-
 import org.eclipse.che.plugin.activity.WorkspaceActivityManager;
 import org.eclipse.che.plugin.activity.WorkspaceActivityService;
 
 public class WorkspaceActivityModule extends AbstractModule {
 
-    @Override
-    protected void configure() {
-        bind(WorkspaceActivityService.class);
-        bind(WorkspaceActivityManager.class);
-    }
+  @Override
+  protected void configure() {
+    bind(WorkspaceActivityService.class);
+    bind(WorkspaceActivityManager.class);
+  }
 }

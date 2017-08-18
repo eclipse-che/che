@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace.create;
+
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.Callback;
@@ -16,7 +20,8 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -36,13 +41,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.workspace.create.CreateWorkspaceView.HidePopupCallBack;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
-
 /**
  * The class contains business logic which allow to create user workspace if it doesn't exist.
  *
@@ -51,199 +49,216 @@ import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
 @Singleton
 public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDelegate {
 
-    private static final   RegExp FILE_NAME          = RegExp.compile("^[A-Za-z0-9_\\s-\\.]+$");
-    private static final   String URL_PATTERN        = "^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$";
-    private static final   RegExp URL                = RegExp.compile(URL_PATTERN);
-    protected static final String MEMORY_LIMIT_BYTES = Long.toString(2000L * 1024L * 1024L);
+  private static final RegExp FILE_NAME = RegExp.compile("^[A-Za-z0-9_\\s-\\.]+$");
+  private static final String URL_PATTERN =
+      "^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$";
+  private static final RegExp URL = RegExp.compile(URL_PATTERN);
+  protected static final String MEMORY_LIMIT_BYTES = Long.toString(2000L * 1024L * 1024L);
 
-    static final String RECIPE_TYPE     = "docker";
-    static final int    SKIP_COUNT      = 0;
-    static final int    MAX_COUNT       = 100;
-    static final int    MAX_NAME_LENGTH = 20;
-    static final int    MIN_NAME_LENGTH = 3;
+  static final String RECIPE_TYPE = "docker";
+  static final int SKIP_COUNT = 0;
+  static final int MAX_COUNT = 100;
+  static final int MAX_NAME_LENGTH = 20;
+  static final int MIN_NAME_LENGTH = 3;
 
-    private final CreateWorkspaceView                 view;
-    private final DtoFactory                          dtoFactory;
-    private final WorkspaceServiceClient              workspaceClient;
-    private final CoreLocalizationConstant            locale;
-    private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
-    private final RecipeServiceClient                 recipeService;
-    private final BrowserAddress                      browserAddress;
+  private final CreateWorkspaceView view;
+  private final DtoFactory dtoFactory;
+  private final WorkspaceServiceClient workspaceClient;
+  private final CoreLocalizationConstant locale;
+  private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
+  private final RecipeServiceClient recipeService;
+  private final BrowserAddress browserAddress;
 
-    private Callback<Component, Exception> callback;
-    private List<RecipeDescriptor>         recipes;
-    private List<String>                   workspacesNames;
+  private Callback<Component, Exception> callback;
+  private List<RecipeDescriptor> recipes;
+  private List<String> workspacesNames;
 
-    @Inject
-    public CreateWorkspacePresenter(CreateWorkspaceView view,
-                                    DtoFactory dtoFactory,
-                                    WorkspaceServiceClient workspaceClient,
-                                    CoreLocalizationConstant locale,
-                                    Provider<DefaultWorkspaceComponent> wsComponentProvider,
-                                    RecipeServiceClient recipeService,
-                                    BrowserAddress browserAddress) {
-        this.view = view;
-        this.view.setDelegate(this);
+  @Inject
+  public CreateWorkspacePresenter(
+      CreateWorkspaceView view,
+      DtoFactory dtoFactory,
+      WorkspaceServiceClient workspaceClient,
+      CoreLocalizationConstant locale,
+      Provider<DefaultWorkspaceComponent> wsComponentProvider,
+      RecipeServiceClient recipeService,
+      BrowserAddress browserAddress) {
+    this.view = view;
+    this.view.setDelegate(this);
 
-        this.dtoFactory = dtoFactory;
-        this.workspaceClient = workspaceClient;
-        this.locale = locale;
-        this.wsComponentProvider = wsComponentProvider;
-        this.recipeService = recipeService;
-        this.browserAddress = browserAddress;
+    this.dtoFactory = dtoFactory;
+    this.workspaceClient = workspaceClient;
+    this.locale = locale;
+    this.wsComponentProvider = wsComponentProvider;
+    this.recipeService = recipeService;
+    this.browserAddress = browserAddress;
 
-        this.workspacesNames = new ArrayList<>();
+    this.workspacesNames = new ArrayList<>();
+  }
+
+  /**
+   * Shows special dialog window which allows set up workspace which will be created.
+   *
+   * @param workspaces list of existing workspaces
+   */
+  public void show(List<WorkspaceDto> workspaces, final Callback<Component, Exception> callback) {
+    this.callback = callback;
+
+    workspacesNames.clear();
+
+    for (WorkspaceDto workspace : workspaces) {
+      workspacesNames.add(workspace.getConfig().getName());
     }
 
-    /**
-     * Shows special dialog window which allows set up workspace which will be created.
-     *
-     * @param workspaces
-     *         list of existing workspaces
-     */
-    public void show(List<WorkspaceDto> workspaces, final Callback<Component, Exception> callback) {
-        this.callback = callback;
+    Promise<List<RecipeDescriptor>> recipes = recipeService.getAllRecipes();
 
-        workspacesNames.clear();
-
-        for (WorkspaceDto workspace : workspaces) {
-            workspacesNames.add(workspace.getConfig().getName());
-        }
-
-        Promise<List<RecipeDescriptor>> recipes = recipeService.getAllRecipes();
-
-        recipes.then(new Operation<List<RecipeDescriptor>>() {
-            @Override
-            public void apply(List<RecipeDescriptor> recipeDescriptors) throws OperationException {
-                CreateWorkspacePresenter.this.recipes = recipeDescriptors;
-            }
+    recipes.then(
+        new Operation<List<RecipeDescriptor>>() {
+          @Override
+          public void apply(List<RecipeDescriptor> recipeDescriptors) throws OperationException {
+            CreateWorkspacePresenter.this.recipes = recipeDescriptors;
+          }
         });
 
-        String workspaceName = browserAddress.getWorkspaceName();
+    String workspaceName = browserAddress.getWorkspaceName();
 
-        view.setWorkspaceName(workspaceName);
+    view.setWorkspaceName(workspaceName);
 
-        validateCreateWorkspaceForm();
+    validateCreateWorkspaceForm();
 
-        view.show();
+    view.show();
+  }
+
+  private void validateCreateWorkspaceForm() {
+    String workspaceName = view.getWorkspaceName();
+
+    int nameLength = workspaceName.length();
+
+    String errorDescription = "";
+
+    boolean nameLengthIsInCorrect = nameLength < MIN_NAME_LENGTH || nameLength > MAX_NAME_LENGTH;
+
+    if (nameLengthIsInCorrect) {
+      errorDescription = locale.createWsNameLengthIsNotCorrect();
     }
 
-    private void validateCreateWorkspaceForm() {
-        String workspaceName = view.getWorkspaceName();
+    boolean nameIsInCorrect = !FILE_NAME.test(workspaceName);
 
-        int nameLength = workspaceName.length();
-
-        String errorDescription = "";
-
-        boolean nameLengthIsInCorrect = nameLength < MIN_NAME_LENGTH || nameLength > MAX_NAME_LENGTH;
-
-        if (nameLengthIsInCorrect) {
-            errorDescription = locale.createWsNameLengthIsNotCorrect();
-        }
-
-        boolean nameIsInCorrect = !FILE_NAME.test(workspaceName);
-
-        if (nameIsInCorrect) {
-            errorDescription = locale.createWsNameIsNotCorrect();
-        }
-
-        boolean nameAlreadyExist = workspacesNames.contains(workspaceName);
-
-        if (nameAlreadyExist) {
-            errorDescription = locale.createWsNameAlreadyExist();
-        }
-
-        view.showValidationNameError(errorDescription);
-
-        String recipeUrl = view.getRecipeUrl();
-
-        boolean urlIsIncorrect = !Strings.isNullOrEmpty(recipeUrl) && !URL.test(recipeUrl) ;
-
-        view.setVisibleUrlError(urlIsIncorrect);
-
-        view.setEnableCreateButton(!urlIsIncorrect && errorDescription.isEmpty());
+    if (nameIsInCorrect) {
+      errorDescription = locale.createWsNameIsNotCorrect();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onNameChanged() {
-        validateCreateWorkspaceForm();
+    boolean nameAlreadyExist = workspacesNames.contains(workspaceName);
+
+    if (nameAlreadyExist) {
+      errorDescription = locale.createWsNameAlreadyExist();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onRecipeUrlChanged() {
-        validateCreateWorkspaceForm();
-    }
+    view.showValidationNameError(errorDescription);
 
-    /** {@inheritDoc} */
-    @Override
-    public void onTagsChanged(final HidePopupCallBack callBack) {
-        recipeService.searchRecipes(view.getTags(), RECIPE_TYPE, SKIP_COUNT, MAX_COUNT).then(new Operation<List<RecipeDescriptor>>() {
-            @Override
-            public void apply(List<RecipeDescriptor> recipes) throws OperationException {
+    String recipeUrl = view.getRecipeUrl();
+
+    boolean urlIsIncorrect = !Strings.isNullOrEmpty(recipeUrl) && !URL.test(recipeUrl);
+
+    view.setVisibleUrlError(urlIsIncorrect);
+
+    view.setEnableCreateButton(!urlIsIncorrect && errorDescription.isEmpty());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onNameChanged() {
+    validateCreateWorkspaceForm();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onRecipeUrlChanged() {
+    validateCreateWorkspaceForm();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onTagsChanged(final HidePopupCallBack callBack) {
+    recipeService
+        .searchRecipes(view.getTags(), RECIPE_TYPE, SKIP_COUNT, MAX_COUNT)
+        .then(
+            new Operation<List<RecipeDescriptor>>() {
+              @Override
+              public void apply(List<RecipeDescriptor> recipes) throws OperationException {
                 boolean isRecipesEmpty = recipes.isEmpty();
 
                 if (isRecipesEmpty) {
-                    callBack.hidePopup();
+                  callBack.hidePopup();
                 } else {
-                    view.showFoundByTagRecipes(recipes);
+                  view.showFoundByTagRecipes(recipes);
                 }
 
                 view.setVisibleTagsError(isRecipesEmpty);
-            }
-        });
-    }
+              }
+            });
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onPredefinedRecipesClicked() {
-        view.showPredefinedRecipes(recipes);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void onPredefinedRecipesClicked() {
+    view.showPredefinedRecipes(recipes);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onCreateButtonClicked() {
-        view.hide();
+  /** {@inheritDoc} */
+  @Override
+  public void onCreateButtonClicked() {
+    view.hide();
 
-        createWorkspace();
-    }
+    createWorkspace();
+  }
 
-    private void createWorkspace() {
-        WorkspaceConfigDto workspaceConfig = getWorkspaceConfig();
+  private void createWorkspace() {
+    WorkspaceConfigDto workspaceConfig = getWorkspaceConfig();
 
-        workspaceClient.create(workspaceConfig, null).then(new Operation<WorkspaceDto>() {
-            @Override
-            public void apply(WorkspaceDto workspace) throws OperationException {
+    workspaceClient
+        .create(workspaceConfig, null)
+        .then(
+            new Operation<WorkspaceDto>() {
+              @Override
+              public void apply(WorkspaceDto workspace) throws OperationException {
                 DefaultWorkspaceComponent component = wsComponentProvider.get();
                 component.startWorkspace(workspace, callback);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
+              }
+            })
+        .catchError(
+            new Operation<PromiseError>() {
+              @Override
+              public void apply(PromiseError arg) throws OperationException {
                 callback.onFailure(new Exception(arg.getCause()));
-            }
-        });
-    }
+              }
+            });
+  }
 
-    private WorkspaceConfigDto getWorkspaceConfig() {
-        String wsName = view.getWorkspaceName();
+  private WorkspaceConfigDto getWorkspaceConfig() {
+    String wsName = view.getWorkspaceName();
 
-        EnvironmentRecipeDto recipe = dtoFactory.createDto(EnvironmentRecipeDto.class)
-                                                .withType("dockerimage")
-                                                .withLocation(view.getRecipeUrl());
+    EnvironmentRecipeDto recipe =
+        dtoFactory
+            .createDto(EnvironmentRecipeDto.class)
+            .withType("dockerimage")
+            .withLocation(view.getRecipeUrl());
 
-        ExtendedMachineDto machine = dtoFactory.createDto(ExtendedMachineDto.class)
-                                               .withAgents(singletonList("org.eclipse.che.ws-agent"))
-                                               .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
+    ExtendedMachineDto machine =
+        dtoFactory
+            .createDto(ExtendedMachineDto.class)
+            .withAgents(singletonList("org.eclipse.che.ws-agent"))
+            .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
-        EnvironmentDto environment = dtoFactory.createDto(EnvironmentDto.class)
-                                               .withRecipe(recipe)
-                                               .withMachines(singletonMap(WS_MACHINE_NAME, machine));
+    EnvironmentDto environment =
+        dtoFactory
+            .createDto(EnvironmentDto.class)
+            .withRecipe(recipe)
+            .withMachines(singletonMap(WS_MACHINE_NAME, machine));
 
-        return dtoFactory.createDto(WorkspaceConfigDto.class)
-                         .withName(wsName)
-                         .withDefaultEnv(wsName)
-                         .withEnvironments(singletonMap(wsName, environment));
-    }
+    return dtoFactory
+        .createDto(WorkspaceConfigDto.class)
+        .withName(wsName)
+        .withDefaultEnv(wsName)
+        .withEnvironments(singletonMap(wsName, environment));
+  }
 }

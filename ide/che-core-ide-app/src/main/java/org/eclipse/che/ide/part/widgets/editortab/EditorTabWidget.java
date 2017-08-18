@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.part.widgets.editortab;
+
+import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
@@ -28,7 +34,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
@@ -49,296 +55,289 @@ import org.eclipse.che.ide.util.UUID;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import javax.validation.constraints.NotNull;
-
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
-
 /**
- * Editor tab widget. Contains icon, title and close mark.
- * May be pinned. Pin state indicates whether this tab should be skipped during operation "Close All but Pinned".
+ * Editor tab widget. Contains icon, title and close mark. May be pinned. Pin state indicates
+ * whether this tab should be skipped during operation "Close All but Pinned".
  *
  * @author Dmitry Shnurenko
  * @author Valeriy Svydenko
  * @author Vitaliy Guliy
  * @author Vlad Zhukovskyi
  */
-public class EditorTabWidget extends Composite implements EditorTab, ContextMenuHandler, ResourceChangedHandler, FileEventHandler {
+public class EditorTabWidget extends Composite
+    implements EditorTab, ContextMenuHandler, ResourceChangedHandler, FileEventHandler {
 
-    interface EditorTabWidgetUiBinder extends UiBinder<Widget, EditorTabWidget> {
+  interface EditorTabWidgetUiBinder extends UiBinder<Widget, EditorTabWidget> {}
+
+  private static final EditorTabWidgetUiBinder UI_BINDER =
+      GWT.create(EditorTabWidgetUiBinder.class);
+
+  @UiField SimplePanel iconPanel;
+
+  @UiField Label title;
+
+  @UiField FlowPanel closeButton;
+
+  @UiField(provided = true)
+  final PartStackUIResources resources;
+
+  private final EditorTabContextMenuFactory editorTabContextMenu;
+  private final String id;
+  private final EditorPartPresenter relatedEditorPart;
+  private final EditorPartStack relatedEditorPartStack;
+  private final EditorAgent editorAgent;
+
+  private ActionDelegate delegate;
+  private SVGResource icon;
+  private boolean pinned;
+  private VirtualFile file;
+
+  @Inject
+  public EditorTabWidget(
+      @Assisted final EditorPartPresenter relatedEditorPart,
+      @Assisted EditorPartStack relatedEditorPartStack,
+      PartStackUIResources resources,
+      EditorTabContextMenuFactory editorTabContextMenu,
+      final EventBus eventBus,
+      final EditorAgent editorAgent) {
+    this.resources = resources;
+    this.relatedEditorPart = relatedEditorPart;
+    this.relatedEditorPartStack = relatedEditorPartStack;
+    this.editorAgent = editorAgent;
+
+    initWidget(UI_BINDER.createAndBindUi(this));
+
+    this.editorTabContextMenu = editorTabContextMenu;
+    this.file = relatedEditorPart.getEditorInput().getFile();
+    this.icon = relatedEditorPart.getTitleImage();
+    this.title.setText(relatedEditorPart.getTitle());
+    this.id = title + UUID.uuid(4);
+
+    iconPanel.add(getIcon());
+
+    addDomHandler(this, ClickEvent.getType());
+    addDomHandler(this, DoubleClickEvent.getType());
+    addDomHandler(this, ContextMenuEvent.getType());
+
+    eventBus.addHandler(ResourceChangedEvent.getType(), this);
+    eventBus.addHandler(FileEvent.TYPE, this);
+
+    sinkEvents(Event.ONMOUSEDOWN);
+
+    closeButton.addDomHandler(
+        event -> editorAgent.closeEditor(relatedEditorPart), ClickEvent.getType());
+  }
+
+  @Override
+  public void onBrowserEvent(Event event) {
+    if (event.getTypeInt() == Event.ONMOUSEDOWN && event.getButton() == NativeEvent.BUTTON_MIDDLE) {
+      editorAgent.closeEditor(relatedEditorPart);
     }
 
-    private static final EditorTabWidgetUiBinder UI_BINDER = GWT.create(EditorTabWidgetUiBinder.class);
+    super.onBrowserEvent(event);
+  }
 
-    @UiField
-    SimplePanel iconPanel;
+  /** {@inheritDoc} */
+  @Override
+  public Widget getIcon() {
+    return new SVGImage(icon);
+  }
 
-    @UiField
-    Label title;
+  /** {@inheritDoc} */
+  @Override
+  @NotNull
+  public String getTitle() {
+    return title.getText();
+  }
 
-    @UiField
-    FlowPanel closeButton;
+  /** {@inheritDoc} */
+  @NotNull
+  @Override
+  public IsWidget getView() {
+    return this.asWidget();
+  }
 
-    @UiField(provided = true)
-    final PartStackUIResources resources;
+  /** {@inheritDoc} */
+  @Override
+  public void update(@NotNull PartPresenter part) {
+    title.setText(part.getTitle());
 
-    private final EditorTabContextMenuFactory editorTabContextMenu;
-    private final String                      id;
-    private final EditorPartPresenter         relatedEditorPart;
-    private final EditorPartStack             relatedEditorPartStack;
-    private final EditorAgent                 editorAgent;
-
-    private ActionDelegate delegate;
-    private SVGResource    icon;
-    private boolean        pinned;
-    private VirtualFile    file;
-
-    @Inject
-    public EditorTabWidget(@Assisted final EditorPartPresenter relatedEditorPart,
-                           @Assisted EditorPartStack relatedEditorPartStack,
-                           PartStackUIResources resources,
-                           EditorTabContextMenuFactory editorTabContextMenu,
-                           final EventBus eventBus,
-                           final EditorAgent editorAgent) {
-        this.resources = resources;
-        this.relatedEditorPart = relatedEditorPart;
-        this.relatedEditorPartStack = relatedEditorPartStack;
-        this.editorAgent = editorAgent;
-
-        initWidget(UI_BINDER.createAndBindUi(this));
-
-        this.editorTabContextMenu = editorTabContextMenu;
-        this.file = relatedEditorPart.getEditorInput().getFile();
-        this.icon = relatedEditorPart.getTitleImage();
-        this.title.setText(relatedEditorPart.getTitle());
-        this.id = title + UUID.uuid(4);
-
-        iconPanel.add(getIcon());
-
-        addDomHandler(this, ClickEvent.getType());
-        addDomHandler(this, DoubleClickEvent.getType());
-        addDomHandler(this, ContextMenuEvent.getType());
-
-        eventBus.addHandler(ResourceChangedEvent.getType(), this);
-        eventBus.addHandler(FileEvent.TYPE, this);
-
-        sinkEvents(Event.ONMOUSEDOWN);
-
-        closeButton.addDomHandler(event -> editorAgent.closeEditor(relatedEditorPart), ClickEvent.getType());
+    if (part instanceof EditorPartPresenter) {
+      final EditorPartPresenter editorPartPresenter = (EditorPartPresenter) part;
+      file = editorPartPresenter.getEditorInput().getFile();
+      icon = editorPartPresenter.getTitleImage();
+      iconPanel.setWidget(getIcon());
     }
+  }
 
-    @Override
-    public void onBrowserEvent(Event event) {
-        if (event.getTypeInt() == Event.ONMOUSEDOWN && event.getButton() == NativeEvent.BUTTON_MIDDLE) {
-            editorAgent.closeEditor(relatedEditorPart);
-        }
+  /** {@inheritDoc} */
+  @Override
+  public void select() {
+    getElement().setAttribute("focused", "");
+  }
 
-        super.onBrowserEvent(event);
+  /** {@inheritDoc} */
+  @Override
+  public void unSelect() {
+    getElement().removeAttribute("focused");
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setTabPosition(@NotNull TabPosition tabPosition) {
+    throw new UnsupportedOperationException(
+        "This method doesn't allow in this class " + getClass());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setErrorMark(boolean isVisible) {
+    if (isVisible) {
+      title.addStyleName(resources.partStackCss().lineError());
+    } else {
+      title.removeStyleName(resources.partStackCss().lineError());
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Widget getIcon() {
-        return new SVGImage(icon);
+  /** {@inheritDoc} */
+  @Override
+  public void setWarningMark(boolean isVisible) {
+    if (isVisible) {
+      title.addStyleName(resources.partStackCss().lineWarning());
+    } else {
+      title.removeStyleName(resources.partStackCss().lineWarning());
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    @NotNull
-    public String getTitle() {
-        return title.getText();
+  @Override
+  public String getId() {
+    return id;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onClick(@NotNull ClickEvent event) {
+    if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
+      delegate.onTabClicked(this);
     }
+  }
 
-    /** {@inheritDoc} */
-    @NotNull
-    @Override
-    public IsWidget getView() {
-        return this.asWidget();
+  /** {@inheritDoc} */
+  @Override
+  public void onContextMenu(ContextMenuEvent event) {
+    //construct for each editor tab own context menu,
+    //that will have store information about selected virtual file and pin state at first step
+    //in future maybe we should create another mechanism to associate context menu with initial dto's
+    editorTabContextMenu
+        .newContextMenu(this, relatedEditorPart, relatedEditorPartStack)
+        .show(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onDoubleClick(@NotNull DoubleClickEvent event) {
+    delegate.onTabDoubleClicked(this);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setReadOnlyMark(boolean isVisible) {
+    if (isVisible) {
+      getElement().setAttribute("readonly", "");
+    } else {
+      getElement().removeAttribute("readonly");
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void update(@NotNull PartPresenter part) {
-        title.setText(part.getTitle());
+  /** {@inheritDoc} */
+  @Override
+  public VirtualFile getFile() {
+    return file;
+  }
 
-        if (part instanceof EditorPartPresenter) {
-            final EditorPartPresenter editorPartPresenter = (EditorPartPresenter)part;
-            file = editorPartPresenter.getEditorInput().getFile();
-            icon = editorPartPresenter.getTitleImage();
-            iconPanel.setWidget(getIcon());
-        }
+  @Override
+  public void setFile(VirtualFile file) {
+    this.file = file;
+  }
+
+  @Override
+  public void setTitleColor(String color) {
+    this.title.getElement().getStyle().setColor(color);
+  }
+
+  @Override
+  public EditorPartPresenter getRelativeEditorPart() {
+    return relatedEditorPart;
+  }
+
+  @Override
+  public void setUnsavedDataMark(boolean hasUnsavedData) {
+    if (hasUnsavedData) {
+      getElement().setAttribute("unsaved", "");
+    } else {
+      getElement().removeAttribute("unsaved");
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void select() {
-        getElement().setAttribute("focused", "");
+  /** {@inheritDoc} */
+  @Override
+  public void setPinMark(boolean pinned) {
+    this.pinned = pinned;
+
+    if (pinned) {
+      getElement().setAttribute("pinned", "");
+    } else {
+      getElement().removeAttribute("pinned");
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void unSelect() {
-        getElement().removeAttribute("focused");
+  /** {@inheritDoc} */
+  @Override
+  public boolean isPinned() {
+    return pinned;
+  }
+
+  @Override
+  public void onResourceChanged(ResourceChangedEvent event) {
+    final ResourceDelta delta = event.getDelta();
+
+    if (delta.getKind() == ADDED) {
+      if (!delta.getResource().isFile() || (delta.getFlags() & (MOVED_FROM | MOVED_TO)) == 0) {
+        return;
+      }
+
+      final Resource resource = delta.getResource();
+      final Path movedFrom = delta.getFromPath();
+
+      if (file.getLocation().equals(movedFrom)) {
+        file = (VirtualFile) resource;
+        title.setText(file.getDisplayName());
+      }
+    } else if (delta.getKind() == UPDATED) {
+      if (!delta.getResource().isFile()) {
+        return;
+      }
+
+      final Resource resource = delta.getResource();
+
+      if (file.getLocation().equals(resource.getLocation())) {
+        file = (VirtualFile) resource;
+
+        title.setText(file.getDisplayName());
+      }
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setTabPosition(@NotNull TabPosition tabPosition) {
-        throw new UnsupportedOperationException("This method doesn't allow in this class " + getClass());
+  @Override
+  public void onFileOperation(FileEvent event) {
+    if (event.getOperationType() == CLOSE && this.equals(event.getEditorTab())) {
+      delegate.onTabClose(this);
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setErrorMark(boolean isVisible) {
-        if (isVisible) {
-            title.addStyleName(resources.partStackCss().lineError());
-        } else {
-            title.removeStyleName(resources.partStackCss().lineError());
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setWarningMark(boolean isVisible) {
-        if (isVisible) {
-            title.addStyleName(resources.partStackCss().lineWarning());
-        } else {
-            title.removeStyleName(resources.partStackCss().lineWarning());
-        }
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onClick(@NotNull ClickEvent event) {
-        if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
-            delegate.onTabClicked(this);
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onContextMenu(ContextMenuEvent event) {
-        //construct for each editor tab own context menu,
-        //that will have store information about selected virtual file and pin state at first step
-        //in future maybe we should create another mechanism to associate context menu with initial dto's
-        editorTabContextMenu.newContextMenu(this, relatedEditorPart, relatedEditorPartStack)
-                            .show(event.getNativeEvent().getClientX(), event.getNativeEvent().getClientY());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onDoubleClick(@NotNull DoubleClickEvent event) {
-        delegate.onTabDoubleClicked(this);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setReadOnlyMark(boolean isVisible) {
-        if (isVisible) {
-            getElement().setAttribute("readonly", "");
-        } else {
-            getElement().removeAttribute("readonly");
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public VirtualFile getFile() {
-        return file;
-    }
-
-    @Override
-    public void setFile(VirtualFile file) {
-        this.file = file;
-    }
-
-    @Override
-    public void setTitleColor(String color) {
-        this.title.getElement().getStyle().setColor(color);
-    }
-
-    @Override
-    public EditorPartPresenter getRelativeEditorPart() {
-        return relatedEditorPart;
-    }
-
-    @Override
-    public void setUnsavedDataMark(boolean hasUnsavedData) {
-        if (hasUnsavedData) {
-            getElement().setAttribute("unsaved", "");
-        } else {
-            getElement().removeAttribute("unsaved");
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setPinMark(boolean pinned) {
-        this.pinned = pinned;
-
-        if (pinned) {
-            getElement().setAttribute("pinned", "");
-        } else {
-            getElement().removeAttribute("pinned");
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isPinned() {
-        return pinned;
-    }
-
-    @Override
-    public void onResourceChanged(ResourceChangedEvent event) {
-        final ResourceDelta delta = event.getDelta();
-
-        if (delta.getKind() == ADDED) {
-            if (!delta.getResource().isFile() || (delta.getFlags() & (MOVED_FROM | MOVED_TO)) == 0) {
-                return;
-            }
-
-            final Resource resource = delta.getResource();
-            final Path movedFrom = delta.getFromPath();
-
-            if (file.getLocation().equals(movedFrom)) {
-                file = (VirtualFile)resource;
-                title.setText(file.getDisplayName());
-            }
-        } else if (delta.getKind() == UPDATED) {
-            if (!delta.getResource().isFile()) {
-                return;
-            }
-
-            final Resource resource = delta.getResource();
-
-            if (file.getLocation().equals(resource.getLocation())) {
-                file = (VirtualFile)resource;
-
-                title.setText(file.getDisplayName());
-            }
-        }
-    }
-
-    @Override
-    public void onFileOperation(FileEvent event) {
-        if (event.getOperationType() == CLOSE && this.equals(event.getEditorTab())) {
-            delegate.onTabClose(this);
-        }
-    }
-
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.editor.link;
 
 import java.util.List;
 
 /**
- * The model for linked mode, umbrellas several
- * {@link LinkedModelGroup}s. Once installed, the model
- * propagates any changes to a position to all its siblings in the same position
- * group.
+ * The model for linked mode, umbrellas several {@link LinkedModelGroup}s. Once installed, the model
+ * propagates any changes to a position to all its siblings in the same position group.
+ *
  * @author Evgen Vidolob
  */
 public interface LinkedModel {
-    void setGroups(List<LinkedModelGroup> groups);
+  void setGroups(List<LinkedModelGroup> groups);
 
-    void setEscapePosition(int offset);
+  void setEscapePosition(int offset);
 }

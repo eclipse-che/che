@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.machine;
 
+import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent.EventType;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Removes process from {@link DockerInstance} on process destroying
@@ -32,46 +31,42 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Singleton
 public class DockerInstanceProcessesCleaner implements EventSubscriber<MachineProcessEvent> {
-    private final EventService                        eventService;
-    private final ConcurrentHashMap<String, Instance> dockerMachines;
+  private final EventService eventService;
+  private final ConcurrentHashMap<String, Instance> dockerMachines;
 
-    @Inject
-    public DockerInstanceProcessesCleaner(EventService eventService) {
-        this.eventService = eventService;
-        this.dockerMachines = new ConcurrentHashMap<>();
+  @Inject
+  public DockerInstanceProcessesCleaner(EventService eventService) {
+    this.eventService = eventService;
+    this.dockerMachines = new ConcurrentHashMap<>();
+  }
+
+  @Override
+  public void onEvent(MachineProcessEvent event) {
+    final Instance instance = dockerMachines.get(event.getMachineId());
+
+    if (instance != null
+        && (event.getEventType() == EventType.STOPPED || event.getEventType() == EventType.ERROR)) {
+      ((DockerInstance) instance).removeProcess(event.getProcessId());
     }
+  }
 
-    @Override
-    public void onEvent(MachineProcessEvent event) {
-        final Instance instance = dockerMachines.get(event.getMachineId());
+  /** Follows process events of provided instance */
+  void trackProcesses(Instance instance) {
+    dockerMachines.put(instance.getId(), instance);
+  }
 
-        if (instance != null && (event.getEventType() == EventType.STOPPED ||
-                                 event.getEventType() == EventType.ERROR)) {
-            ((DockerInstance)instance).removeProcess(event.getProcessId());
-        }
-    }
+  /** Stops following process events of instance with provided ID */
+  void untrackProcesses(String instanceId) {
+    dockerMachines.remove(instanceId);
+  }
 
-    /**
-     * Follows process events of provided instance
-     */
-    void trackProcesses(Instance instance) {
-        dockerMachines.put(instance.getId(), instance);
-    }
+  @PostConstruct
+  private void subscribe() {
+    eventService.subscribe(this);
+  }
 
-    /**
-     * Stops following process events of instance with provided ID
-     */
-    void untrackProcesses(String instanceId) {
-        dockerMachines.remove(instanceId);
-    }
-
-    @PostConstruct
-    private void subscribe() {
-        eventService.subscribe(this);
-    }
-
-    @PreDestroy
-    private void unsubscribe() {
-        eventService.unsubscribe(this);
-    }
+  @PreDestroy
+  private void unsubscribe() {
+    eventService.unsubscribe(this);
+  }
 }

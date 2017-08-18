@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.server.event;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.DESTROYED;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -21,14 +28,6 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.DESTROYED;
-
 /**
  * The class listens changing of machine status and perform some actions when status is changed.
  *
@@ -36,43 +35,43 @@ import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.Ev
  */
 @Singleton
 public class MachineStateListener implements EventSubscriber<MachineStatusEvent> {
-    private static final Logger LOG = LoggerFactory.getLogger(MachineStateListener.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MachineStateListener.class);
 
-    private final WorkspaceManager workspaceManager;
-    private final EventService     eventService;
+  private final WorkspaceManager workspaceManager;
+  private final EventService eventService;
 
-    @Inject
-    public MachineStateListener(WorkspaceManager workspaceManager, EventService eventService) {
-        this.workspaceManager = workspaceManager;
-        this.eventService = eventService;
-    }
+  @Inject
+  public MachineStateListener(WorkspaceManager workspaceManager, EventService eventService) {
+    this.workspaceManager = workspaceManager;
+    this.eventService = eventService;
+  }
 
-    @Override
-    public void onEvent(MachineStatusEvent event) {
-        String workspaceId = event.getWorkspaceId();
+  @Override
+  public void onEvent(MachineStatusEvent event) {
+    String workspaceId = event.getWorkspaceId();
 
-        if (event.isDev() && DESTROYED.equals(event.getEventType())) {
-            try {
-                WorkspaceImpl currentWorkspace = workspaceManager.getWorkspace(workspaceId);
+    if (event.isDev() && DESTROYED.equals(event.getEventType())) {
+      try {
+        WorkspaceImpl currentWorkspace = workspaceManager.getWorkspace(workspaceId);
 
-                if (RUNNING.equals(currentWorkspace.getStatus())) {
-                    workspaceManager.stopWorkspace(workspaceId);
-                }
-
-            } catch (ServerException | ConflictException exception) {
-                LOG.error(exception.getLocalizedMessage(), exception);
-            } catch (NotFoundException ignored) {
-            }
+        if (RUNNING.equals(currentWorkspace.getStatus())) {
+          workspaceManager.stopWorkspace(workspaceId);
         }
-    }
 
-    @PostConstruct
-    private void subscribe() {
-        eventService.subscribe(this);
+      } catch (ServerException | ConflictException exception) {
+        LOG.error(exception.getLocalizedMessage(), exception);
+      } catch (NotFoundException ignored) {
+      }
     }
+  }
 
-    @PreDestroy
-    private void unsubscribe() {
-        eventService.unsubscribe(this);
-    }
+  @PostConstruct
+  private void subscribe() {
+    eventService.subscribe(this);
+  }
+
+  @PreDestroy
+  private void unsubscribe() {
+    eventService.unsubscribe(this);
+  }
 }

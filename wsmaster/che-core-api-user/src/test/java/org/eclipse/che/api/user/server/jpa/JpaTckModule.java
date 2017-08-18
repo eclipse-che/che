@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.user.server.jpa;
 
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
-
+import java.util.Map;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -35,36 +35,35 @@ import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.SHA512PasswordEncryptor;
 import org.h2.Driver;
 
-import java.util.Map;
-
-/**
- * @author Yevhenii Voevodin
- */
+/** @author Yevhenii Voevodin */
 public class JpaTckModule extends TckModule {
 
-    @Override
-    protected void configure() {
-        H2DBTestServer server = H2DBTestServer.startDefault();
-        install(new PersistTestModuleBuilder().setDriver(Driver.class)
-                                              .runningOn(server)
-                                              .addEntityClasses(UserImpl.class,
-                                                                ProfileImpl.class,
-                                                                PreferenceEntity.class,
-                                                                AccountImpl.class)
-                                              .setExceptionHandler(H2ExceptionHandler.class)
-                                              .build());
-        bind(DBInitializer.class).asEagerSingleton();
-        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
-        bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server.getDataSource()));
+  @Override
+  protected void configure() {
+    H2DBTestServer server = H2DBTestServer.startDefault();
+    install(
+        new PersistTestModuleBuilder()
+            .setDriver(Driver.class)
+            .runningOn(server)
+            .addEntityClasses(
+                UserImpl.class, ProfileImpl.class, PreferenceEntity.class, AccountImpl.class)
+            .setExceptionHandler(H2ExceptionHandler.class)
+            .build());
+    bind(DBInitializer.class).asEagerSingleton();
+    bind(SchemaInitializer.class)
+        .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
+    bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server.getDataSource()));
 
-        bind(new TypeLiteral<TckRepository<UserImpl>>() {}).to(UserJpaTckRepository.class);
-        bind(new TypeLiteral<TckRepository<ProfileImpl>>() {}).toInstance(new JpaTckRepository<>(ProfileImpl.class));
-        bind(new TypeLiteral<TckRepository<Pair<String, Map<String, String>>>>() {}).to(PreferenceJpaTckRepository.class);
+    bind(new TypeLiteral<TckRepository<UserImpl>>() {}).to(UserJpaTckRepository.class);
+    bind(new TypeLiteral<TckRepository<ProfileImpl>>() {})
+        .toInstance(new JpaTckRepository<>(ProfileImpl.class));
+    bind(new TypeLiteral<TckRepository<Pair<String, Map<String, String>>>>() {})
+        .to(PreferenceJpaTckRepository.class);
 
-        bind(UserDao.class).to(JpaUserDao.class);
-        bind(ProfileDao.class).to(JpaProfileDao.class);
-        bind(PreferenceDao.class).to(JpaPreferenceDao.class);
-        // SHA-512 encryptor is faster than PBKDF2 so it is better for testing
-        bind(PasswordEncryptor.class).to(SHA512PasswordEncryptor.class).in(Singleton.class);
-    }
+    bind(UserDao.class).to(JpaUserDao.class);
+    bind(ProfileDao.class).to(JpaProfileDao.class);
+    bind(PreferenceDao.class).to(JpaPreferenceDao.class);
+    // SHA-512 encryptor is faster than PBKDF2 so it is better for testing
+    bind(PasswordEncryptor.class).to(SHA512PasswordEncryptor.class).in(Singleton.class);
+  }
 }

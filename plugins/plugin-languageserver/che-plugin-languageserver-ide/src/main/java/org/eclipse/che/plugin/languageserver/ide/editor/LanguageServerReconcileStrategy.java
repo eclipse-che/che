@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
@@ -36,60 +35,79 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
  */
 public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
 
-    private final TextDocumentSynchronize synchronize;
-    private int version = 0;
-    private TextPosition lastEventStart;
-    private TextPosition lastEventEnd;
+  private final TextDocumentSynchronize synchronize;
+  private int version = 0;
+  private TextPosition lastEventStart;
+  private TextPosition lastEventEnd;
 
-    @Inject
-    public LanguageServerReconcileStrategy(TextDocumentSynchronizeFactory synchronizeFactory,
-                                           @Assisted ServerCapabilities serverCapabilities) {
+  @Inject
+  public LanguageServerReconcileStrategy(
+      TextDocumentSynchronizeFactory synchronizeFactory,
+      @Assisted ServerCapabilities serverCapabilities) {
 
-        Either<TextDocumentSyncKind, TextDocumentSyncOptions> sync = serverCapabilities.getTextDocumentSync();
-        TextDocumentSyncKind documentSync;
-        if (sync.isLeft()) {
-            documentSync = sync.getLeft();
-        } else {
-            documentSync = sync.getRight().getChange();
-        }
-
-        synchronize = synchronizeFactory.getSynchronize(documentSync);
+    Either<TextDocumentSyncKind, TextDocumentSyncOptions> sync =
+        serverCapabilities.getTextDocumentSync();
+    TextDocumentSyncKind documentSync;
+    if (sync.isLeft()) {
+      documentSync = sync.getLeft();
+    } else {
+      documentSync = sync.getRight().getChange();
     }
 
-    @Override
-    public void setDocument(Document document) {
-        document.getDocumentHandle().getDocEventBus().addHandler(DocumentChangedEvent.TYPE, new DocumentChangedHandler() {
-            @Override
-            public void onDocumentChanged(DocumentChangedEvent event) {
-                synchronize.syncTextDocument(event.getDocument().getDocument(), lastEventStart, lastEventEnd, event.getText(), ++version);
-            }
-        });
-        document.getDocumentHandle().getDocEventBus().addHandler(DocumentChangingEvent.TYPE, new DocumentChangingHandler() {
-            @Override
-            public void onDocumentChanging(DocumentChangingEvent event) {
-                lastEventStart = event.getDocument().getDocument().getPositionFromIndex(event.getOffset());
-                lastEventEnd = event.getDocument().getDocument().getPositionFromIndex(event.getOffset() + event.getRemoveCharCount());
-            }
-        });
+    synchronize = synchronizeFactory.getSynchronize(documentSync);
+  }
 
-    }
+  @Override
+  public void setDocument(Document document) {
+    document
+        .getDocumentHandle()
+        .getDocEventBus()
+        .addHandler(
+            DocumentChangedEvent.TYPE,
+            new DocumentChangedHandler() {
+              @Override
+              public void onDocumentChanged(DocumentChangedEvent event) {
+                synchronize.syncTextDocument(
+                    event.getDocument().getDocument(),
+                    lastEventStart,
+                    lastEventEnd,
+                    event.getText(),
+                    ++version);
+              }
+            });
+    document
+        .getDocumentHandle()
+        .getDocEventBus()
+        .addHandler(
+            DocumentChangingEvent.TYPE,
+            new DocumentChangingHandler() {
+              @Override
+              public void onDocumentChanging(DocumentChangingEvent event) {
+                lastEventStart =
+                    event.getDocument().getDocument().getPositionFromIndex(event.getOffset());
+                lastEventEnd =
+                    event
+                        .getDocument()
+                        .getDocument()
+                        .getPositionFromIndex(event.getOffset() + event.getRemoveCharCount());
+              }
+            });
+  }
 
-    @Override
-    public void reconcile(DirtyRegion dirtyRegion, Region subRegion) {
-        doReconcile();
-    }
+  @Override
+  public void reconcile(DirtyRegion dirtyRegion, Region subRegion) {
+    doReconcile();
+  }
 
-    public void doReconcile() {
-        //TODO use DocumentHighlight to add additional highlight for file
-    }
+  public void doReconcile() {
+    //TODO use DocumentHighlight to add additional highlight for file
+  }
 
-    @Override
-    public void reconcile(Region partition) {
-        doReconcile();
-    }
+  @Override
+  public void reconcile(Region partition) {
+    doReconcile();
+  }
 
-    @Override
-    public void closeReconciler() {
-
-    }
+  @Override
+  public void closeReconciler() {}
 }

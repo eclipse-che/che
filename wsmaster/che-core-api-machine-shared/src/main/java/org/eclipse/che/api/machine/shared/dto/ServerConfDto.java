@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,30 +7,28 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.machine.shared.dto;
 
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Alexander Garagatyi
- */
+/** @author Alexander Garagatyi */
 @DTO
 public interface ServerConfDto extends ServerConf {
-    void setRef(String ref);
+  void setRef(String ref);
 
-    ServerConfDto withRef(String ref);
+  ServerConfDto withRef(String ref);
 
-    void setPort(String port);
+  void setPort(String port);
 
-    ServerConfDto withPort(String port);
+  ServerConfDto withPort(String port);
 
-    void setProtocol(String protocol);
+  void setProtocol(String protocol);
 
-    ServerConfDto withProtocol(String protocol);
+  ServerConfDto withProtocol(String protocol);
 
-    void setPath(String path);
+  void setPath(String path);
 
-    ServerConfDto withPath(String path);
+  ServerConfDto withPath(String path);
 }

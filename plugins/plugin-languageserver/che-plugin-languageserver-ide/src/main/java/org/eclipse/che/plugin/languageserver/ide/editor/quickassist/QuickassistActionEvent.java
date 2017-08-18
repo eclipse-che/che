@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,34 +7,35 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.languageserver.ide.editor.quickassist;
 
+import java.util.List;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 
-import java.util.List;
-
 /**
- * An extension of {@link ActionEvent} to pass command paramenters as a list of Objects to the action.
- * @author Thomas Mäder
+ * An extension of {@link ActionEvent} to pass command paramenters as a list of Objects to the
+ * action.
  *
+ * @author Thomas Mäder
  */
 public class QuickassistActionEvent extends ActionEvent {
 
-	private List<Object> arguments;
+  private List<Object> arguments;
 
-	public QuickassistActionEvent(Presentation presentation,
-								  ActionManager actionManager,
-                                  PerspectiveManager perspectiveManager,
-                                  List<Object> arguments) {
-		super(presentation, actionManager, perspectiveManager);
-		this.arguments= arguments;
-	}
+  public QuickassistActionEvent(
+      Presentation presentation,
+      ActionManager actionManager,
+      PerspectiveManager perspectiveManager,
+      List<Object> arguments) {
+    super(presentation, actionManager, perspectiveManager);
+    this.arguments = arguments;
+  }
 
-	public List<Object> getArguments() {
-		return arguments;
-	}
+  public List<Object> getArguments() {
+    return arguments;
+  }
 }

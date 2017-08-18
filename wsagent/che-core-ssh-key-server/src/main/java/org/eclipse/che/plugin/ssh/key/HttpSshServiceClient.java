@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.ssh.key;
 
+import java.io.IOException;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -21,11 +25,6 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.io.IOException;
-
 /**
  * Implementation of {@link SshServiceClient} that provide access to Ssh Service via http.
  *
@@ -33,63 +32,76 @@ import java.io.IOException;
  */
 @Singleton
 public class HttpSshServiceClient implements SshServiceClient {
-    private final String                 sshUrl;
-    private final HttpJsonRequestFactory requestFactory;
+  private final String sshUrl;
+  private final HttpJsonRequestFactory requestFactory;
 
-    @Inject
-    public HttpSshServiceClient(@Named("che.api") String apiUrl, HttpJsonRequestFactory requestFactory) {
-        this.sshUrl = apiUrl + "/ssh";
-        this.requestFactory = requestFactory;
-    }
+  @Inject
+  public HttpSshServiceClient(
+      @Named("che.api") String apiUrl, HttpJsonRequestFactory requestFactory) {
+    this.sshUrl = apiUrl + "/ssh";
+    this.requestFactory = requestFactory;
+  }
 
-    @Override
-    public SshPairDto generatePair(GenerateSshPairRequest request) throws ServerException {
-        try {
-            return requestFactory.fromUrl(sshUrl + "/generate")
-                                 .usePostMethod()
-                                 .setBody(request)
-                                 .request()
-                                 .asDto(SshPairDto.class);
-        } catch (IOException | ApiException e) {
-            throw new ServerException(e);
-        }
+  @Override
+  public SshPairDto generatePair(GenerateSshPairRequest request) throws ServerException {
+    try {
+      return requestFactory
+          .fromUrl(sshUrl + "/generate")
+          .usePostMethod()
+          .setBody(request)
+          .request()
+          .asDto(SshPairDto.class);
+    } catch (IOException | ApiException e) {
+      throw new ServerException(e);
     }
+  }
 
-    @Override
-    public void createPair(SshPairDto sshPair) throws ServerException {
-        try {
-            requestFactory.fromUrl(sshUrl)
-                          .usePostMethod()
-                          .setBody(sshPair)
-                          .request()
-                          .asDto(SshPairDto.class);
-        } catch (IOException | ApiException e) {
-            throw new ServerException(e);
-        }
+  @Override
+  public void createPair(SshPairDto sshPair) throws ServerException {
+    try {
+      requestFactory
+          .fromUrl(sshUrl)
+          .usePostMethod()
+          .setBody(sshPair)
+          .request()
+          .asDto(SshPairDto.class);
+    } catch (IOException | ApiException e) {
+      throw new ServerException(e);
     }
+  }
 
-    @Override
-    public SshPairDto getPair(String service, String name) throws ServerException, NotFoundException {
-        try {
-            return requestFactory.fromUrl(sshUrl + "/" + service + "/find")
-                                 .useGetMethod()
-                                 .addQueryParam("name", name)
-                                 .request()
-                                 .asDto(SshPairDto.class);
-        } catch (IOException | ForbiddenException | BadRequestException | ConflictException | UnauthorizedException e) {
-            throw new ServerException(e);
-        }
+  @Override
+  public SshPairDto getPair(String service, String name) throws ServerException, NotFoundException {
+    try {
+      return requestFactory
+          .fromUrl(sshUrl + "/" + service + "/find")
+          .useGetMethod()
+          .addQueryParam("name", name)
+          .request()
+          .asDto(SshPairDto.class);
+    } catch (IOException
+        | ForbiddenException
+        | BadRequestException
+        | ConflictException
+        | UnauthorizedException e) {
+      throw new ServerException(e);
     }
+  }
 
-    @Override
-    public void removePair(String service, String name) throws ServerException, NotFoundException {
-        try {
-            requestFactory.fromUrl(sshUrl + "/" + service)
-                          .useDeleteMethod()
-                          .addQueryParam("name", name)
-                          .request();
-        } catch (IOException | ForbiddenException | BadRequestException | ConflictException | UnauthorizedException e) {
-            throw new ServerException(e);
-        }
+  @Override
+  public void removePair(String service, String name) throws ServerException, NotFoundException {
+    try {
+      requestFactory
+          .fromUrl(sshUrl + "/" + service)
+          .useDeleteMethod()
+          .addQueryParam("name", name)
+          .request();
+    } catch (IOException
+        | ForbiddenException
+        | BadRequestException
+        | ConflictException
+        | UnauthorizedException e) {
+      throw new ServerException(e);
     }
+  }
 }

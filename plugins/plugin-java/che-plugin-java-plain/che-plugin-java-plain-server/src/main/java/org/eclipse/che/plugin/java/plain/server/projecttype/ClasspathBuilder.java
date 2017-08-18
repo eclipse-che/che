@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
 import com.google.inject.Singleton;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
 import org.eclipse.core.resources.IContainer;
@@ -27,94 +28,97 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Utility class for generating simple classpath for the Java project. Classpath is contained source folder and JRE container.
+ * Utility class for generating simple classpath for the Java project. Classpath is contained source
+ * folder and JRE container.
  *
  * @author Valeriy Svydenko
  */
 @Singleton
 public class ClasspathBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PlainJavaInitHandler.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PlainJavaInitHandler.class);
 
-    /**
-     * Generates classpath with default entries.
-     *
-     * @param project
-     *         java project which need to contain classpath
-     * @param sourceFolders
-     *         list of the project's source folders
-     * @param library
-     *         list of the project's library folders
-     * @throws ServerException
-     *         happens when some problems with setting classpath
-     */
-    public void generateClasspath(IJavaProject project, List<String> sourceFolders, List<String> library) throws ServerException {
-        List<IClasspathEntry> classpathEntries = new ArrayList<>();
-        //create classpath container for default JRE
-        IClasspathEntry jreContainer = JavaCore.newContainerEntry(new Path(JREContainerInitializer.JRE_CONTAINER));
-        classpathEntries.add(jreContainer);
+  /**
+   * Generates classpath with default entries.
+   *
+   * @param project java project which need to contain classpath
+   * @param sourceFolders list of the project's source folders
+   * @param library list of the project's library folders
+   * @throws ServerException happens when some problems with setting classpath
+   */
+  public void generateClasspath(
+      IJavaProject project, List<String> sourceFolders, List<String> library)
+      throws ServerException {
+    List<IClasspathEntry> classpathEntries = new ArrayList<>();
+    //create classpath container for default JRE
+    IClasspathEntry jreContainer =
+        JavaCore.newContainerEntry(new Path(JREContainerInitializer.JRE_CONTAINER));
+    classpathEntries.add(jreContainer);
 
-        addSourceFolders(project, sourceFolders, classpathEntries);
+    addSourceFolders(project, sourceFolders, classpathEntries);
 
-        addJars(project, library, classpathEntries);
+    addJars(project, library, classpathEntries);
 
-        try {
-            project.setRawClasspath(classpathEntries.toArray(new IClasspathEntry[classpathEntries.size()]), null);
-        } catch (JavaModelException e) {
-            LOG.warn("Can't set classpath for: " + project.getProject().getFullPath().toOSString(), e);
-            throw new ServerException(e);
-        }
+    try {
+      project.setRawClasspath(
+          classpathEntries.toArray(new IClasspathEntry[classpathEntries.size()]), null);
+    } catch (JavaModelException e) {
+      LOG.warn("Can't set classpath for: " + project.getProject().getFullPath().toOSString(), e);
+      throw new ServerException(e);
+    }
+  }
+
+  private void addJars(
+      IJavaProject project, List<String> library, final List<IClasspathEntry> classpathEntries) {
+    if (library == null || library.isEmpty()) {
+      return;
     }
 
-    private void addJars(IJavaProject project, List<String> library, final List<IClasspathEntry> classpathEntries) {
-        if (library == null || library.isEmpty()) {
-            return;
-        }
+    for (String libFolder : library) {
 
-        for (String libFolder : library) {
+      if (libFolder.isEmpty()) {
+        continue;
+      }
 
-            if (libFolder.isEmpty()) {
-                continue;
-            }
+      IFolder libraryFolder = project.getProject().getFolder(libFolder);
+      if (!libraryFolder.exists()) {
+        return;
+      }
 
-            IFolder libraryFolder = project.getProject().getFolder(libFolder);
-            if (!libraryFolder.exists()) {
-                return;
-            }
+      try {
+        libraryFolder.accept(
+            proxy -> {
+              if (IResource.FILE != proxy.getType()) {
+                return true;
+              }
 
-            try {
-                libraryFolder.accept(proxy -> {
-                    if (IResource.FILE != proxy.getType()) {
-                        return true;
-                    }
+              IPath path = proxy.requestFullPath();
+              if (!path.toString().endsWith(".jar")) {
+                return false;
+              }
 
-                    IPath path = proxy.requestFullPath();
-                    if (!path.toString().endsWith(".jar")) {
-                        return false;
-                    }
+              IClasspathEntry libEntry =
+                  JavaCore.newLibraryEntry(proxy.requestResource().getLocation(), null, null);
+              classpathEntries.add(libEntry);
 
-                    IClasspathEntry libEntry = JavaCore.newLibraryEntry(proxy.requestResource().getLocation(), null, null);
-                    classpathEntries.add(libEntry);
-
-                    return false;
-                }, IContainer.INCLUDE_PHANTOMS);
-            } catch (CoreException e) {
-                LOG.warn("Can't read folder structure: " + libraryFolder.getFullPath().toString());
-            }
-        }
+              return false;
+            },
+            IContainer.INCLUDE_PHANTOMS);
+      } catch (CoreException e) {
+        LOG.warn("Can't read folder structure: " + libraryFolder.getFullPath().toString());
+      }
     }
+  }
 
-    private void addSourceFolders(IJavaProject project, List<String> sourceFolders, List<IClasspathEntry> classpathEntries) {
-        for (String source : sourceFolders) {
-            IFolder src = project.getProject().getFolder(source);
-            if (src.exists()) {
-                IClasspathEntry sourceEntry = JavaCore.newSourceEntry(src.getFullPath());
-                classpathEntries.add(sourceEntry);
-            }
-        }
+  private void addSourceFolders(
+      IJavaProject project, List<String> sourceFolders, List<IClasspathEntry> classpathEntries) {
+    for (String source : sourceFolders) {
+      IFolder src = project.getProject().getFolder(source);
+      if (src.exists()) {
+        IClasspathEntry sourceEntry = JavaCore.newSourceEntry(src.getFullPath());
+        classpathEntries.add(sourceEntry);
+      }
     }
+  }
 }

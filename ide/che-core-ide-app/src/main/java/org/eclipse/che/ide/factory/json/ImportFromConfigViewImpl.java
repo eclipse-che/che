@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.factory.json;
-
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -20,7 +19,6 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.ui.window.Window;
 
@@ -31,88 +29,92 @@ import org.eclipse.che.ide.ui.window.Window;
  */
 public class ImportFromConfigViewImpl extends Window implements ImportFromConfigView {
 
-    @SuppressWarnings("unused") // used in native js
-    private static final int MAX_FILE_SIZE_MB = 3;
+  @SuppressWarnings("unused") // used in native js
+  private static final int MAX_FILE_SIZE_MB = 3;
 
-    public interface ImportFromConfigViewBinder extends UiBinder<Widget, ImportFromConfigViewImpl> {
+  public interface ImportFromConfigViewBinder extends UiBinder<Widget, ImportFromConfigViewImpl> {}
 
-    }
+  @UiField FormPanel uploadForm;
+  @UiField Label errorMessage;
+  FileUpload fileUpload;
 
-    @UiField
-    FormPanel uploadForm;
-    @UiField
-    Label     errorMessage;
-    FileUpload fileUpload;
+  private ActionDelegate delegate;
 
-    private ActionDelegate delegate;
+  private String fileContent;
 
-    private String fileContent;
+  private final Button buttonImport;
 
-    private final Button buttonImport;
+  @Inject
+  public ImportFromConfigViewImpl(
+      ImportFromConfigViewBinder importFromConfigViewBinder, CoreLocalizationConstant locale) {
+    this.setTitle(locale.importFromConfigurationTitle());
+    setWidget(importFromConfigViewBinder.createAndBindUi(this));
 
-    @Inject
-    public ImportFromConfigViewImpl(ImportFromConfigViewBinder importFromConfigViewBinder,
-                                    CoreLocalizationConstant locale) {
-        this.setTitle(locale.importFromConfigurationTitle());
-        setWidget(importFromConfigViewBinder.createAndBindUi(this));
+    Button btnCancel =
+        createButton(
+            locale.cancelButton(),
+            "import-from-config-btn-cancel",
+            event -> delegate.onCancelClicked());
+    addButtonToFooter(btnCancel);
 
-        Button btnCancel = createButton(locale.cancelButton(), "import-from-config-btn-cancel", event -> delegate.onCancelClicked());
-        addButtonToFooter(btnCancel);
+    buttonImport =
+        createButton(
+            locale.importButton(),
+            "import-from-config-btn-import",
+            event -> delegate.onImportClicked());
+    addButtonToFooter(buttonImport);
+  }
 
-        buttonImport = createButton(locale.importButton(), "import-from-config-btn-import", event -> delegate.onImportClicked());
-        addButtonToFooter(buttonImport);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void showDialog() {
+    errorMessage.setText("");
+    fileContent = null;
+    fileUpload = new FileUpload();
+    fileUpload.setHeight("22px");
+    fileUpload.setWidth("100%");
+    fileUpload.setName("file");
+    fileUpload.ensureDebugId("import-from-config-ChooseFile");
+    addHandler(fileUpload.getElement());
 
-    /** {@inheritDoc} */
-    @Override
-    public void showDialog() {
-        errorMessage.setText("");
-        fileContent = null;
-        fileUpload = new FileUpload();
-        fileUpload.setHeight("22px");
-        fileUpload.setWidth("100%");
-        fileUpload.setName("file");
-        fileUpload.ensureDebugId("import-from-config-ChooseFile");
-        addHandler(fileUpload.getElement());
+    fileUpload.addChangeHandler(event -> buttonImport.setEnabled(fileUpload.getFilename() != null));
 
-        fileUpload.addChangeHandler(event -> buttonImport.setEnabled(fileUpload.getFilename() != null));
+    uploadForm.add(fileUpload);
 
-        uploadForm.add(fileUpload);
+    this.show();
+  }
 
-        this.show();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void closeDialog() {
+    hide();
+    onClose();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void closeDialog() {
-        hide();
-        onClose();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public void setEnabledImportButton(boolean enabled) {
+    buttonImport.setEnabled(enabled);
+  }
 
-    @Override
-    public void setEnabledImportButton(boolean enabled) {
-        buttonImport.setEnabled(enabled);
-    }
+  @Override
+  public String getFileContent() {
+    return fileContent;
+  }
 
-    @Override
-    public String getFileContent() {
-        return fileContent;
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected void onClose() {
+    uploadForm.remove(fileUpload);
+    fileUpload = null;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-        uploadForm.remove(fileUpload);
-        fileUpload = null;
-    }
-
-    private native void addHandler(Element element) /*-{
+  private native void addHandler(Element element) /*-{
         var instance = this;
 
         function readFileContent(evt) {
@@ -153,24 +155,24 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
         element.addEventListener('change', readFileContent, false);
     }-*/;
 
-    private void resetUploadFileField() {
-        uploadForm.remove(fileUpload);
-        fileUpload = new FileUpload();
-        fileUpload.setHeight("22px");
-        fileUpload.setWidth("100%");
-        fileUpload.setName("file");
-        fileUpload.ensureDebugId("import-from-config-ChooseFile");
-        addHandler(fileUpload.getElement());
+  private void resetUploadFileField() {
+    uploadForm.remove(fileUpload);
+    fileUpload = new FileUpload();
+    fileUpload.setHeight("22px");
+    fileUpload.setWidth("100%");
+    fileUpload.setName("file");
+    fileUpload.ensureDebugId("import-from-config-ChooseFile");
+    addHandler(fileUpload.getElement());
 
-        fileUpload.addChangeHandler(event -> buttonImport.setEnabled(fileUpload.getFilename() != null));
-        uploadForm.add(fileUpload);
-    }
+    fileUpload.addChangeHandler(event -> buttonImport.setEnabled(fileUpload.getFilename() != null));
+    uploadForm.add(fileUpload);
+  }
 
-    private void setErrorMessageOnForm(String msg) {
-        errorMessage.setText(msg);
-    }
+  private void setErrorMessageOnForm(String msg) {
+    errorMessage.setText(msg);
+  }
 
-    private void onError(String message) {
-        delegate.onErrorReadingFile(message);
-    }
+  private void onError(String message) {
+    delegate.onErrorReadingFile(message);
+  }
 }

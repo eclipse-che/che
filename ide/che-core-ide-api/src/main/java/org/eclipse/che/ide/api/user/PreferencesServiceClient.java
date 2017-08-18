@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.user;
 
-import org.eclipse.che.api.promises.client.Promise;
-import javax.validation.constraints.NotNull;
 import java.util.Map;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.promises.client.Promise;
 
 /**
  * GWT client for preferences service;
@@ -21,19 +21,18 @@ import java.util.Map;
  */
 public interface PreferencesServiceClient {
 
-    /**
-     * Updates user's preferences using the merge strategy.
-     *
-     * @param prefsToUpdate
-     *         preferences update
-     * @return a promise that resolves all the user's preferences, or rejects with an error
-     */
-    Promise<Map<String, String>> updatePreferences(@NotNull Map<String, String> prefsToUpdate);
+  /**
+   * Updates user's preferences using the merge strategy.
+   *
+   * @param prefsToUpdate preferences update
+   * @return a promise that resolves all the user's preferences, or rejects with an error
+   */
+  Promise<Map<String, String>> updatePreferences(@NotNull Map<String, String> prefsToUpdate);
 
-    /**
-     * Gets user preferences.
-     *
-     * @return a promise that resolves preferences, or rejects with an error
-     */
-    Promise<Map<String, String>> getPreferences();
+  /**
+   * Gets user preferences.
+   *
+   * @return a promise that resolves preferences, or rejects with an error
+   */
+  Promise<Map<String, String>> getPreferences();
 }

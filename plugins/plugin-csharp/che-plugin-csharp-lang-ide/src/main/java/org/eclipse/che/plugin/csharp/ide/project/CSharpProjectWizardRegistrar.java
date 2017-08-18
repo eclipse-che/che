@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,21 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.csharp.ide.project;
 
 import com.google.inject.Provider;
-
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.plugin.csharp.ide.CSharpExtension;
 import org.eclipse.che.plugin.csharp.shared.Constants;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
-
 
 /**
  * Provides information for registering CSHARP_PROJECT_TYPE_ID project type into project wizard.
@@ -30,24 +27,24 @@ import java.util.List;
  */
 public class CSharpProjectWizardRegistrar implements ProjectWizardRegistrar {
 
-    private final List<Provider<? extends WizardPage<MutableProjectConfig>>> wizardPages;
+  private final List<Provider<? extends WizardPage<MutableProjectConfig>>> wizardPages;
 
-    public CSharpProjectWizardRegistrar() {
-        wizardPages = new ArrayList<>();
-    }
+  public CSharpProjectWizardRegistrar() {
+    wizardPages = new ArrayList<>();
+  }
 
-    @NotNull
-    public String getProjectTypeId() {
-        return Constants.CSHARP_PROJECT_TYPE_ID;
-    }
+  @NotNull
+  public String getProjectTypeId() {
+    return Constants.CSHARP_PROJECT_TYPE_ID;
+  }
 
-    @NotNull
-    public String getCategory() {
-        return CSharpExtension.CSHARP_CATEGORY;
-    }
+  @NotNull
+  public String getCategory() {
+    return CSharpExtension.CSHARP_CATEGORY;
+  }
 
-    @NotNull
-    public List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages() {
-        return wizardPages;
-    }
+  @NotNull
+  public List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages() {
+    return wizardPages;
+  }
 }

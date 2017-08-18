@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.gdb.ide.configuration;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.junit.Assert.assertEquals;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.icon.IconRegistry;
@@ -23,40 +24,35 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.junit.Assert.assertEquals;
-
 /** @author Artem Zatsarynnyi */
 @RunWith(GwtMockitoTestRunner.class)
 public class GdbConfigurationTypeTest {
 
-    @Mock
-    private GdbResources                  resources;
-    @Mock
-    private GdbConfigurationPagePresenter gdbConfigurationPagePresenter;
-    @Mock
-    private IconRegistry                  iconRegistry;
+  @Mock private GdbResources resources;
+  @Mock private GdbConfigurationPagePresenter gdbConfigurationPagePresenter;
+  @Mock private IconRegistry iconRegistry;
 
-    @InjectMocks
-    private GdbConfigurationType gdbConfigurationType;
+  @InjectMocks private GdbConfigurationType gdbConfigurationType;
 
-    @Test
-    public void testGetId() throws Exception {
-        final String id = gdbConfigurationType.getId();
+  @Test
+  public void testGetId() throws Exception {
+    final String id = gdbConfigurationType.getId();
 
-        Assert.assertEquals(GdbDebugger.ID, id);
-    }
+    Assert.assertEquals(GdbDebugger.ID, id);
+  }
 
-    @Test
-    public void testGetDisplayName() throws Exception {
-        final String displayName = gdbConfigurationType.getDisplayName();
+  @Test
+  public void testGetDisplayName() throws Exception {
+    final String displayName = gdbConfigurationType.getDisplayName();
 
-        assertEquals(GdbConfigurationType.DISPLAY_NAME, displayName);
-    }
+    assertEquals(GdbConfigurationType.DISPLAY_NAME, displayName);
+  }
 
-    @Test
-    public void testGetConfigurationPage() throws Exception {
-        final DebugConfigurationPage<? extends DebugConfiguration> page = gdbConfigurationType.getConfigurationPage();
+  @Test
+  public void testGetConfigurationPage() throws Exception {
+    final DebugConfigurationPage<? extends DebugConfiguration> page =
+        gdbConfigurationType.getConfigurationPage();
 
-        assertEquals(gdbConfigurationPagePresenter, page);
-    }
+    assertEquals(gdbConfigurationPagePresenter, page);
+  }
 }

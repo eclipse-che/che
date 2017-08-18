@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.ServerConf;
-
+import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Embeddable;
-import java.util.Objects;
+import org.eclipse.che.api.core.model.machine.ServerConf;
 
 /**
  * @author Alexander Garagatyi
@@ -23,93 +22,97 @@ import java.util.Objects;
 @Embeddable
 public class ServerConfImpl implements ServerConf {
 
-    @Basic
-    private String ref;
+  @Basic private String ref;
 
-    @Basic
-    private String port;
+  @Basic private String port;
 
-    @Basic
-    private String protocol;
+  @Basic private String protocol;
 
-    @Basic
-    private String path;
+  @Basic private String path;
 
-    public ServerConfImpl() {}
+  public ServerConfImpl() {}
 
-    public ServerConfImpl(String ref, String port, String protocol, String path) {
-        this.ref = ref;
-        this.port = port;
-        this.protocol = protocol;
-        this.path = path;
-    }
+  public ServerConfImpl(String ref, String port, String protocol, String path) {
+    this.ref = ref;
+    this.port = port;
+    this.protocol = protocol;
+    this.path = path;
+  }
 
-    public ServerConfImpl(ServerConf serverConf) {
-        this.ref = serverConf.getRef();
-        this.port = serverConf.getPort();
-        this.protocol = serverConf.getProtocol();
-        this.path = serverConf.getPath();
-    }
+  public ServerConfImpl(ServerConf serverConf) {
+    this.ref = serverConf.getRef();
+    this.port = serverConf.getPort();
+    this.protocol = serverConf.getProtocol();
+    this.path = serverConf.getPath();
+  }
 
-    @Override
-    public String getRef() {
-        return ref;
-    }
+  @Override
+  public String getRef() {
+    return ref;
+  }
 
-    public void setRef(String ref) {
-        this.ref = ref;
-    }
+  public void setRef(String ref) {
+    this.ref = ref;
+  }
 
-    @Override
-    public String getPort() {
-        return port;
-    }
+  @Override
+  public String getPort() {
+    return port;
+  }
 
-    public void setPort(String port) {
-        this.port = port;
-    }
+  public void setPort(String port) {
+    this.port = port;
+  }
 
-    @Override
-    public String getProtocol() {
-        return protocol;
-    }
+  @Override
+  public String getProtocol() {
+    return protocol;
+  }
 
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
+  public void setProtocol(String protocol) {
+    this.protocol = protocol;
+  }
 
-    @Override
-    public String getPath() {
-        return path;
-    }
+  @Override
+  public String getPath() {
+    return path;
+  }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
+  public void setPath(String path) {
+    this.path = path;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ServerConfImpl)) return false;
-        ServerConfImpl that = (ServerConfImpl)o;
-        return Objects.equals(ref, that.ref) &&
-               Objects.equals(port, that.port) &&
-               Objects.equals(protocol, that.protocol) &&
-               Objects.equals(path, that.path);
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof ServerConfImpl)) return false;
+    ServerConfImpl that = (ServerConfImpl) o;
+    return Objects.equals(ref, that.ref)
+        && Objects.equals(port, that.port)
+        && Objects.equals(protocol, that.protocol)
+        && Objects.equals(path, that.path);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(ref, port, protocol, path);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(ref, port, protocol, path);
+  }
 
-    @Override
-    public String toString() {
-        return "ServerConfImpl{" +
-               "ref='" + ref + '\'' +
-               ", port='" + port + '\'' +
-               ", protocol='" + protocol + '\'' +
-               ", path='" + path + '\'' +
-               '}';
-    }
+  @Override
+  public String toString() {
+    return "ServerConfImpl{"
+        + "ref='"
+        + ref
+        + '\''
+        + ", port='"
+        + port
+        + '\''
+        + ", protocol='"
+        + protocol
+        + '\''
+        + ", path='"
+        + path
+        + '\''
+        + '}';
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,39 +7,36 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.processes;
-
-import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
-import com.google.inject.Singleton;
-
-import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenuFactory;
-import org.eclipse.che.ide.processes.panel.ProcessesPanelView;
-import org.eclipse.che.ide.processes.panel.ProcessesPanelViewImpl;
 
 import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
 import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.MACHINE_NODE;
 import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.TERMINAL_NODE;
 
-/**
- * GIN module for configuring process panel.
- */
-public class ProcessesGinModule extends AbstractGinModule {
-    @Override
-    protected void configure() {
-        bind(ProcessesPanelView.class).to(ProcessesPanelViewImpl.class).in(Singleton.class);
-        install(new GinFactoryModuleBuilder().build(ConsoleTreeContextMenuFactory.class));
+import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+import com.google.gwt.inject.client.multibindings.GinMapBinder;
+import com.google.inject.Singleton;
+import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenuFactory;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelView;
+import org.eclipse.che.ide.processes.panel.ProcessesPanelViewImpl;
 
-        GinMapBinder.newMapBinder(binder(), String.class, ProcessTreeNodeRenderStrategy.class)
-                    .addBinding(COMMAND_NODE.getStringValue())
-                    .to(CommandNodeRenderStrategy.class);
-        GinMapBinder.newMapBinder(binder(), String.class, ProcessTreeNodeRenderStrategy.class)
-                    .addBinding(MACHINE_NODE.getStringValue())
-                    .to(MachineNodeRenderStrategy.class);
-        GinMapBinder.newMapBinder(binder(), String.class, ProcessTreeNodeRenderStrategy.class)
-                    .addBinding(TERMINAL_NODE.getStringValue())
-                    .to(TerminalNodeRenderStrategy.class);
-    }
+/** GIN module for configuring process panel. */
+public class ProcessesGinModule extends AbstractGinModule {
+  @Override
+  protected void configure() {
+    bind(ProcessesPanelView.class).to(ProcessesPanelViewImpl.class).in(Singleton.class);
+    install(new GinFactoryModuleBuilder().build(ConsoleTreeContextMenuFactory.class));
+
+    GinMapBinder.newMapBinder(binder(), String.class, ProcessTreeNodeRenderStrategy.class)
+        .addBinding(COMMAND_NODE.getStringValue())
+        .to(CommandNodeRenderStrategy.class);
+    GinMapBinder.newMapBinder(binder(), String.class, ProcessTreeNodeRenderStrategy.class)
+        .addBinding(MACHINE_NODE.getStringValue())
+        .to(MachineNodeRenderStrategy.class);
+    GinMapBinder.newMapBinder(binder(), String.class, ProcessTreeNodeRenderStrategy.class)
+        .addBinding(TERMINAL_NODE.getStringValue())
+        .to(TerminalNodeRenderStrategy.class);
+  }
 }

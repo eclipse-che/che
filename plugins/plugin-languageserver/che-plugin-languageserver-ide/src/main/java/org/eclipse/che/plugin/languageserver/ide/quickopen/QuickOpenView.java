@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,33 +7,28 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.languageserver.ide.quickopen;
 
 import com.google.inject.ImplementedBy;
-
 import org.eclipse.che.ide.api.mvp.View;
 
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 @ImplementedBy(QuickOpenViewImpl.class)
 public interface QuickOpenView extends View<QuickOpenView.ActionDelegate> {
 
-    void focusOnInput();
+  void focusOnInput();
 
-    void show(String value);
+  void show(String value);
 
-    void hide();
+  void hide();
 
-    void setModel(QuickOpenModel model);
+  void setModel(QuickOpenModel model);
 
-    interface ActionDelegate {
+  interface ActionDelegate {
 
-        void valueChanged(String value);
+    void valueChanged(String value);
 
-        void onClose(boolean canceled);
-
-    }
-
+    void onClose(boolean canceled);
+  }
 }

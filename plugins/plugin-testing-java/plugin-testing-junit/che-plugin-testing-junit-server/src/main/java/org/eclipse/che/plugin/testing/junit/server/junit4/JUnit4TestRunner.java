@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.junit.server.junit4;
 
 import com.google.inject.name.Named;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.inject.Inject;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
@@ -34,114 +38,112 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-/**
- * JUnit implementation for the test runner service.
- */
+/** JUnit implementation for the test runner service. */
 public class JUnit4TestRunner extends AbstractJavaTestRunner {
-    private static final Logger LOG = LoggerFactory.getLogger(JUnit4TestRunner.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JUnit4TestRunner.class);
 
-    private static final String JUNIT_TEST_NAME = "junit";
-    private static final String MAIN_CLASS_NAME = "org.eclipse.che.junit.junit4.CheJUnitLauncher";
+  private static final String JUNIT_TEST_NAME = "junit";
+  private static final String MAIN_CLASS_NAME = "org.eclipse.che.junit.junit4.CheJUnitLauncher";
 
-    private String                   workspacePath;
-    private JavaTestFinder           javaTestFinder;
-    private ProjectClasspathProvider classpathProvider;
+  private String workspacePath;
+  private JavaTestFinder javaTestFinder;
+  private ProjectClasspathProvider classpathProvider;
 
-    @Inject
-    public JUnit4TestRunner(@Named("che.user.workspaces.storage") String workspacePath,
-                            JavaTestFinder javaTestFinder,
-                            ProjectClasspathProvider classpathProvider) {
-        super(workspacePath, javaTestFinder);
-        this.workspacePath = workspacePath;
-        this.javaTestFinder = javaTestFinder;
-        this.classpathProvider = classpathProvider;
+  @Inject
+  public JUnit4TestRunner(
+      @Named("che.user.workspaces.storage") String workspacePath,
+      JavaTestFinder javaTestFinder,
+      ProjectClasspathProvider classpathProvider) {
+    super(workspacePath, javaTestFinder);
+    this.workspacePath = workspacePath;
+    this.javaTestFinder = javaTestFinder;
+    this.classpathProvider = classpathProvider;
+  }
+
+  @Override
+  public ProcessHandler execute(TestExecutionContext context) {
+    IJavaProject javaProject = getJavaProject(context.getProjectPath());
+    if (javaProject.exists()) {
+      return startTestProcess(javaProject, context);
     }
 
-    @Override
-    public ProcessHandler execute(TestExecutionContext context) {
-        IJavaProject javaProject = getJavaProject(context.getProjectPath());
-        if (javaProject.exists()) {
-            return startTestProcess(javaProject, context);
-        }
+    return null;
+  }
 
-        return null;
+  @Override
+  public String getName() {
+    return JUNIT_TEST_NAME;
+  }
+
+  @Override
+  public boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
+    try {
+      int flags = method.getFlags();
+      // 'V' is void signature
+      return !(method.isConstructor()
+              || !Flags.isPublic(flags)
+              || Flags.isAbstract(flags)
+              || Flags.isStatic(flags)
+              || !"V".equals(method.getReturnType()))
+          && javaTestFinder.isTest(
+              method, compilationUnit, JavaTestAnnotations.JUNIT4X_TEST.getName());
+
+    } catch (JavaModelException ignored) {
+      return false;
+    }
+  }
+
+  private ProcessHandler startTestProcess(IJavaProject javaProject, TestExecutionContext context) {
+    JavaParameters parameters = new JavaParameters();
+    parameters.setJavaExecutable(JAVA_EXECUTABLE);
+    parameters.setMainClassName(MAIN_CLASS_NAME);
+    parameters.setWorkingDirectory(workspacePath + javaProject.getPath());
+
+    List<String> classPath = new ArrayList<>();
+    Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);
+    classPath.addAll(projectClassPath);
+    classPath.add(ClasspathUtil.getJarPathForClass(CheJUnitCoreRunner.class));
+    parameters.getClassPath().addAll(classPath);
+
+    List<String> suite =
+        createTestSuite(
+            context,
+            javaProject,
+            JavaTestAnnotations.JUNIT4X_TEST.getName(),
+            JavaTestAnnotations.JUNIT4X_RUN_WITH.getName());
+    for (String element : suite) {
+      parameters.getParametersList().add(element);
+    }
+    if (context.isDebugModeEnable()) {
+      generateDebuggerPort();
+      parameters.getVmParameters().add("-Xdebug");
+      parameters
+          .getVmParameters()
+          .add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + getDebugPort());
+    }
+    CommandLine command = parameters.createCommand();
+    try {
+      return new ProcessHandler(command.createProcess());
+    } catch (ExecutionException e) {
+      LOG.error("Can't run JUnit JVM", e);
     }
 
-    @Override
-    public String getName() {
-        return JUNIT_TEST_NAME;
-    }
+    return null;
+  }
 
-    @Override
-    public boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
-        try {
-            int flags = method.getFlags();
-            // 'V' is void signature
-            return !(method.isConstructor() ||
-                     !Flags.isPublic(flags) ||
-                     Flags.isAbstract(flags) ||
-                     Flags.isStatic(flags) ||
-                     !"V".equals(method.getReturnType()))
-                   && javaTestFinder.isTest(method, compilationUnit, JavaTestAnnotations.JUNIT4X_TEST.getName());
+  @Override
+  @Deprecated
+  public TestResult execute(Map<String, String> testParameters) throws Exception {
+    throw new UnsupportedOperationException();
+  }
 
-        } catch (JavaModelException ignored) {
-            return false;
-        }
-    }
+  @Override
+  public TestResultRootDto runTests(Map<String, String> testParameters) throws Exception {
+    throw new UnsupportedOperationException();
+  }
 
-    private ProcessHandler startTestProcess(IJavaProject javaProject, TestExecutionContext context) {
-        JavaParameters parameters = new JavaParameters();
-        parameters.setJavaExecutable(JAVA_EXECUTABLE);
-        parameters.setMainClassName(MAIN_CLASS_NAME);
-        parameters.setWorkingDirectory(workspacePath + javaProject.getPath());
-
-        List<String> classPath = new ArrayList<>();
-        Set<String> projectClassPath = classpathProvider.getProjectClassPath(javaProject);
-        classPath.addAll(projectClassPath);
-        classPath.add(ClasspathUtil.getJarPathForClass(CheJUnitCoreRunner.class));
-        parameters.getClassPath().addAll(classPath);
-
-        List<String> suite = createTestSuite(context,
-                                             javaProject,
-                                             JavaTestAnnotations.JUNIT4X_TEST.getName(),
-                                             JavaTestAnnotations.JUNIT4X_RUN_WITH.getName());
-        for (String element : suite) {
-            parameters.getParametersList().add(element);
-        }
-        if (context.isDebugModeEnable()) {
-            generateDebuggerPort();
-            parameters.getVmParameters().add("-Xdebug");
-            parameters.getVmParameters().add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + getDebugPort());
-        }
-        CommandLine command = parameters.createCommand();
-        try {
-            return new ProcessHandler(command.createProcess());
-        } catch (ExecutionException e) {
-            LOG.error("Can't run JUnit JVM", e);
-        }
-
-        return null;
-    }
-
-    @Override
-    @Deprecated
-    public TestResult execute(Map<String, String> testParameters) throws Exception {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public TestResultRootDto runTests(Map<String, String> testParameters) throws Exception {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<TestResultDto> getTestResults(List<String> testResultsPath) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public List<TestResultDto> getTestResults(List<String> testResultsPath) {
+    throw new UnsupportedOperationException();
+  }
 }

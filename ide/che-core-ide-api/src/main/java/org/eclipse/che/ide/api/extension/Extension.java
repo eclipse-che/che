@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.extension;
 
 /**
@@ -17,13 +17,12 @@ package org.eclipse.che.ide.api.extension;
  */
 public @interface Extension {
 
-    /** @return Extension version */
-    String version() default "1.0";
+  /** @return Extension version */
+  String version() default "1.0";
 
-    /** @return Extension title */
-    String title();
+  /** @return Extension title */
+  String title();
 
-    /** @return Extension brief description */
-    String description() default "";
-
+  /** @return Extension brief description */
+  String description() default "";
 }

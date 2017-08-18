@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.client.json;
 
 import com.google.gson.annotations.SerializedName;
@@ -19,106 +19,127 @@ import com.google.gson.annotations.SerializedName;
  * @author Mykola Morhun
  */
 public class Event {
-    @SerializedName("status")
-    private String status;
-    @SerializedName("id")
-    private String id;
-    @SerializedName("from")
-    private String from;
-    @SerializedName("Type")
-    private String type;
-    @SerializedName("Action")
-    private String action;
-    @SerializedName("Actor")
-    private Actor  actor;
-    @SerializedName("time")
-    private long   time;
-    @SerializedName("timeNano")
-    private long   timeNano;
+  @SerializedName("status")
+  private String status;
 
-    public long getTime() {
-        return time;
-    }
+  @SerializedName("id")
+  private String id;
 
-    public String getFrom() {
-        return from;
-    }
+  @SerializedName("from")
+  private String from;
 
-    public String getId() {
-        return id;
-    }
+  @SerializedName("Type")
+  private String type;
 
-    public String getStatus() {
-        return status;
-    }
+  @SerializedName("Action")
+  private String action;
 
-    public String getType() {
-        return type;
-    }
+  @SerializedName("Actor")
+  private Actor actor;
 
-    public String getAction() {
-        return action;
-    }
+  @SerializedName("time")
+  private long time;
 
-    public Actor getActor() {
-        return actor;
-    }
+  @SerializedName("timeNano")
+  private long timeNano;
 
-    public long getTimeNano() {
-        return timeNano;
-    }
+  public long getTime() {
+    return time;
+  }
 
-    public Event withFrom(String from) {
-        this.from = from;
-        return this;
-    }
+  public String getFrom() {
+    return from;
+  }
 
-    public Event withId(String id) {
-        this.id = id;
-        return this;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public Event withStatus(String status) {
-        this.status = status;
-        return this;
-    }
+  public String getStatus() {
+    return status;
+  }
 
-    public Event withType(String type) {
-        this.type = type;
-        return this;
-    }
+  public String getType() {
+    return type;
+  }
 
-    public Event withAction(String action) {
-        this.action = action;
-        return this;
-    }
+  public String getAction() {
+    return action;
+  }
 
-    public Event withActor(Actor actor) {
-        this.actor = actor;
-        return this;
-    }
+  public Actor getActor() {
+    return actor;
+  }
 
-    public Event withTime(long time) {
-        this.time = time;
-        return this;
-    }
+  public long getTimeNano() {
+    return timeNano;
+  }
 
-    public Event withTimeNano(long timeNano) {
-        this.timeNano = timeNano;
-        return this;
-    }
+  public Event withFrom(String from) {
+    this.from = from;
+    return this;
+  }
 
-    @Override
-    public String toString() {
-        return "Event{" +
-               "status='" + status + '\'' +
-               ", id='" + id + '\'' +
-               ", from='" + from + '\'' +
-               ", type='" + type + '\'' +
-               ", action='" + action + '\'' +
-               ", actor='" + actor + '\'' +
-               ", time=" + time +
-               ", timeNano=" + timeNano +
-               '}';
-    }
+  public Event withId(String id) {
+    this.id = id;
+    return this;
+  }
+
+  public Event withStatus(String status) {
+    this.status = status;
+    return this;
+  }
+
+  public Event withType(String type) {
+    this.type = type;
+    return this;
+  }
+
+  public Event withAction(String action) {
+    this.action = action;
+    return this;
+  }
+
+  public Event withActor(Actor actor) {
+    this.actor = actor;
+    return this;
+  }
+
+  public Event withTime(long time) {
+    this.time = time;
+    return this;
+  }
+
+  public Event withTimeNano(long timeNano) {
+    this.timeNano = timeNano;
+    return this;
+  }
+
+  @Override
+  public String toString() {
+    return "Event{"
+        + "status='"
+        + status
+        + '\''
+        + ", id='"
+        + id
+        + '\''
+        + ", from='"
+        + from
+        + '\''
+        + ", type='"
+        + type
+        + '\''
+        + ", action='"
+        + action
+        + '\''
+        + ", actor='"
+        + actor
+        + '\''
+        + ", time="
+        + time
+        + ", timeNano="
+        + timeNano
+        + '}';
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.pullrequest.client.events;
 
+import com.google.gwt.event.shared.GwtEvent;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
-import com.google.gwt.event.shared.GwtEvent;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * Event sent when a step is done or in error.
@@ -22,48 +21,49 @@ import javax.validation.constraints.NotNull;
  * @author Kevin Pollet
  */
 public class StepEvent extends GwtEvent<StepHandler> {
-    public static final Type<StepHandler> TYPE = new Type<>();
+  public static final Type<StepHandler> TYPE = new Type<>();
 
-    private final Step    step;
-    private final boolean success;
-    private final String  message;
-    private final Context context;
+  private final Step step;
+  private final boolean success;
+  private final String message;
+  private final Context context;
 
-    public StepEvent(final Context context, final Step step, final boolean success) {
-        this(context, step, success, null);
+  public StepEvent(final Context context, final Step step, final boolean success) {
+    this(context, step, success, null);
+  }
+
+  public StepEvent(
+      final Context context, final Step step, final boolean success, final String message) {
+    this.step = step;
+    this.success = success;
+    this.message = message;
+    this.context = context;
+  }
+
+  @Override
+  public Type<StepHandler> getAssociatedType() {
+    return TYPE;
+  }
+
+  @Override
+  protected void dispatch(@NotNull final StepHandler handler) {
+    if (success) {
+      handler.onStepDone(this);
+
+    } else {
+      handler.onStepError(this);
     }
+  }
 
-    public StepEvent(final Context context, final Step step, final boolean success, final String message) {
-        this.step = step;
-        this.success = success;
-        this.message = message;
-        this.context = context;
-    }
+  public Step getStep() {
+    return step;
+  }
 
-    @Override
-    public Type<StepHandler> getAssociatedType() {
-        return TYPE;
-    }
+  public String getMessage() {
+    return message;
+  }
 
-    @Override
-    protected void dispatch(@NotNull final StepHandler handler) {
-        if (success) {
-            handler.onStepDone(this);
-
-        } else {
-            handler.onStepError(this);
-        }
-    }
-
-    public Step getStep() {
-        return step;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Context getContext() {
-        return context;
-    }
+  public Context getContext() {
+    return context;
+  }
 }

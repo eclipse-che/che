@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.event.ng;
-
-import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
-
-import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
@@ -21,9 +16,13 @@ import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperation
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.STOP;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
 
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
+import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
+
 /**
- * Consumed by {@link ClientServerEventService} and sent to server side so we could manage
- * server side VFS file watching from client.
+ * Consumed by {@link ClientServerEventService} and sent to server side so we could manage server
+ * side VFS file watching from client.
  *
  * @author Dmitry Kuleshov
  * @deprecated use {@link ClientServerEventService} directly
@@ -31,63 +30,63 @@ import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperation
 @Deprecated
 public class FileTrackingEvent extends GwtEvent<FileTrackingEvent.FileTrackingEventHandler> {
 
-    public static Type<FileTrackingEventHandler> TYPE = new Type<>();
+  public static Type<FileTrackingEventHandler> TYPE = new Type<>();
 
-    private final String path;
+  private final String path;
 
-    private final String oldPath;
+  private final String oldPath;
 
-    private final FileTrackingOperationDto.Type type;
+  private final FileTrackingOperationDto.Type type;
 
-    private FileTrackingEvent(String path, String oldPath, FileTrackingOperationDto.Type type) {
-        this.path = path;
-        this.oldPath = oldPath;
-        this.type = type;
-    }
+  private FileTrackingEvent(String path, String oldPath, FileTrackingOperationDto.Type type) {
+    this.path = path;
+    this.oldPath = oldPath;
+    this.type = type;
+  }
 
-    public static FileTrackingEvent newFileTrackingSuspendEvent() {
-        return new FileTrackingEvent(null, null, SUSPEND);
-    }
+  public static FileTrackingEvent newFileTrackingSuspendEvent() {
+    return new FileTrackingEvent(null, null, SUSPEND);
+  }
 
-    public static FileTrackingEvent newFileTrackingResumeEvent() {
-        return new FileTrackingEvent(null, null, RESUME);
-    }
+  public static FileTrackingEvent newFileTrackingResumeEvent() {
+    return new FileTrackingEvent(null, null, RESUME);
+  }
 
-    public static FileTrackingEvent newFileTrackingStartEvent(String path) {
-        return new FileTrackingEvent(path, null, START);
-    }
+  public static FileTrackingEvent newFileTrackingStartEvent(String path) {
+    return new FileTrackingEvent(path, null, START);
+  }
 
-    public static FileTrackingEvent newFileTrackingStopEvent(String path) {
-        return new FileTrackingEvent(path, null, STOP);
-    }
+  public static FileTrackingEvent newFileTrackingStopEvent(String path) {
+    return new FileTrackingEvent(path, null, STOP);
+  }
 
-    public static FileTrackingEvent newFileTrackingMoveEvent(String path, String oldPath) {
-        return new FileTrackingEvent(path, oldPath, MOVE);
-    }
+  public static FileTrackingEvent newFileTrackingMoveEvent(String path, String oldPath) {
+    return new FileTrackingEvent(path, oldPath, MOVE);
+  }
 
-    public String getOldPath() {
-        return oldPath;
-    }
+  public String getOldPath() {
+    return oldPath;
+  }
 
-    public FileTrackingOperationDto.Type getType() {
-        return type;
-    }
+  public FileTrackingOperationDto.Type getType() {
+    return type;
+  }
 
-    public String getPath() {
-        return path;
-    }
+  public String getPath() {
+    return path;
+  }
 
-    @Override
-    public Type<FileTrackingEventHandler> getAssociatedType() {
-        return TYPE;
-    }
+  @Override
+  public Type<FileTrackingEventHandler> getAssociatedType() {
+    return TYPE;
+  }
 
-    @Override
-    protected void dispatch(FileTrackingEventHandler handler) {
-        handler.onEvent(this);
-    }
+  @Override
+  protected void dispatch(FileTrackingEventHandler handler) {
+    handler.onEvent(this);
+  }
 
-    public interface FileTrackingEventHandler extends EventHandler {
-        void onEvent(FileTrackingEvent event);
-    }
+  public interface FileTrackingEventHandler extends EventHandler {
+    void onEvent(FileTrackingEvent event);
+  }
 }

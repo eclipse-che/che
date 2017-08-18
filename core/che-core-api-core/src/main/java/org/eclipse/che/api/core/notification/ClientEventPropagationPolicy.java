@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.notification;
 
 import com.google.inject.ImplementedBy;
-
 import java.net.URI;
 
-/**
- * @author andrew00x
- */
+/** @author andrew00x */
 @ImplementedBy(EventOriginClientPropagationPolicy.class)
 public interface ClientEventPropagationPolicy {
-    boolean shouldPropagated(URI uri, Object event);
+  boolean shouldPropagated(URI uri, Object event);
 }

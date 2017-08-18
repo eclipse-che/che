@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import java.util.List;
+import java.util.Set;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.resource.Path;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.Set;
 
 /**
  * The view of {@link CommitPresenter}.
@@ -25,112 +24,109 @@ import java.util.Set;
  * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
  */
 public interface CommitView extends View<CommitView.ActionDelegate> {
-    /** Needs for delegate some function into Commit view. */
-    interface ActionDelegate {
-        /** Performs any actions appropriate in response to the user having pressed the Commit button. */
-        void onCommitClicked();
-
-        /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
-        void onCancelClicked();
-
-        /** Performs any actions appropriate in response to the user having changed something. */
-        void onValueChanged();
-
-        /** Performs any actions appropriate in response to the user having clicked on changed file check-box. */
-        void onFileNodeCheckBoxValueChanged(Path path, boolean newCheckBoxValue);
-
-        /** Set the commit message for an amend commit. */
-        void setAmendCommitMessage();
-
-        /** Get list of changed files paths. */
-        Set<String> getChangedFiles();
-    }
-
-    /** @return entered message */
-    @NotNull
-    String getMessage();
+  /** Needs for delegate some function into Commit view. */
+  interface ActionDelegate {
+    /**
+     * Performs any actions appropriate in response to the user having pressed the Commit button.
+     */
+    void onCommitClicked();
 
     /**
-     * Mark check-boxes of given paths as checked.
-     *
-     * @param paths
-     *         pats of nodes
+     * Performs any actions appropriate in response to the user having pressed the Cancel button.
      */
-    void setMarkedCheckBoxes(Set<Path> paths);
+    void onCancelClicked();
+
+    /** Performs any actions appropriate in response to the user having changed something. */
+    void onValueChanged();
 
     /**
-     * Returns selected remote branch from branches drop-down list.
+     * Performs any actions appropriate in response to the user having clicked on changed file
+     * check-box.
      */
-    String getRemoteBranch();
+    void onFileNodeCheckBoxValueChanged(Path path, boolean newCheckBoxValue);
 
-    /**
-     * Set content into message field.
-     *
-     * @param message
-     *         text what need to insert
-     */
-    void setMessage(@NotNull String message);
+    /** Set the commit message for an amend commit. */
+    void setAmendCommitMessage();
 
-    /**
-     * Set list of remote branches to drop-down.
-     */
-    void setRemoteBranchesList(List<Branch> branches);
+    /** Get list of changed files paths. */
+    Set<String> getChangedFiles();
+  }
 
-    /** Returns <code>true</code> if need to amend the last commit, and <code>false</code> otherwise */
-    boolean isAmend();
+  /** @return entered message */
+  @NotNull
+  String getMessage();
 
-    /** Set checked or unchecked the 'Amend' checkbox. */
-    void setValueToAmendCheckBox(boolean value);
+  /**
+   * Mark check-boxes of given paths as checked.
+   *
+   * @param paths pats of nodes
+   */
+  void setMarkedCheckBoxes(Set<Path> paths);
 
-    /** Set checked or unchecked the 'Push after commit' checkbox. */
-    void setValueToPushAfterCommitCheckBox(boolean value);
+  /** Returns selected remote branch from branches drop-down list. */
+  String getRemoteBranch();
 
-    /**
-     * Change the enable state of the 'Amend' check-box.
-     *
-     * @param enable
-     *         <code>true</code> to enable the check-box, <code>false</code> to disable it
-     */
-    void setEnableAmendCheckBox(boolean enable);
+  /**
+   * Set content into message field.
+   *
+   * @param message text what need to insert
+   */
+  void setMessage(@NotNull String message);
 
-    /**
-     * Change the enable state of the 'Push after commit' check-box.
-     *
-     * @param enable
-     *         <code>true</code> to enable the check-box, <code>false</code> to disable it
-     */
-    void setEnablePushAfterCommitCheckBox(boolean enable);
+  /** Set list of remote branches to drop-down. */
+  void setRemoteBranchesList(List<Branch> branches);
 
-    /**
-     * Change the enable state of the 'Remote branches' drop-down list.
-     *
-     * @param enable
-     *         <code>true</code> to enable the drop-down list, <code>false</code> to disable it
-     */
-    void setEnableRemoteBranchesDropDownLis(boolean enable);
+  /**
+   * Returns <code>true</code> if need to amend the last commit, and <code>false</code> otherwise
+   */
+  boolean isAmend();
 
-    /** Returns <code>true</code> if need to push after commit, and <code>false</code> otherwise */
-    boolean isPushAfterCommit();
+  /** Set checked or unchecked the 'Amend' checkbox. */
+  void setValueToAmendCheckBox(boolean value);
 
-    /**
-     * Change the enable state of the commit button.
-     *
-     * @param enable
-     *         <code>true</code> to enable the button, <code>false</code> to disable it
-     */
-    void setEnableCommitButton(boolean enable);
+  /** Set checked or unchecked the 'Push after commit' checkbox. */
+  void setValueToPushAfterCommitCheckBox(boolean value);
 
-    /** Give focus to message field. */
-    void focusInMessageField();
+  /**
+   * Change the enable state of the 'Amend' check-box.
+   *
+   * @param enable <code>true</code> to enable the check-box, <code>false</code> to disable it
+   */
+  void setEnableAmendCheckBox(boolean enable);
 
-    /** Close dialog. */
-    void close();
+  /**
+   * Change the enable state of the 'Push after commit' check-box.
+   *
+   * @param enable <code>true</code> to enable the check-box, <code>false</code> to disable it
+   */
+  void setEnablePushAfterCommitCheckBox(boolean enable);
 
-    /** Show dialog. */
-    void showDialog();
+  /**
+   * Change the enable state of the 'Remote branches' drop-down list.
+   *
+   * @param enable <code>true</code> to enable the drop-down list, <code>false</code> to disable it
+   */
+  void setEnableRemoteBranchesDropDownLis(boolean enable);
 
-    /**
-     * Initialize changed panel.
-     */
-    void setChangesPanelView(ChangesPanelView changesPanelView);
+  /** Returns <code>true</code> if need to push after commit, and <code>false</code> otherwise */
+  boolean isPushAfterCommit();
+
+  /**
+   * Change the enable state of the commit button.
+   *
+   * @param enable <code>true</code> to enable the button, <code>false</code> to disable it
+   */
+  void setEnableCommitButton(boolean enable);
+
+  /** Give focus to message field. */
+  void focusInMessageField();
+
+  /** Close dialog. */
+  void close();
+
+  /** Show dialog. */
+  void showDialog();
+
+  /** Initialize changed panel. */
+  void setChangesPanelView(ChangesPanelView changesPanelView);
 }

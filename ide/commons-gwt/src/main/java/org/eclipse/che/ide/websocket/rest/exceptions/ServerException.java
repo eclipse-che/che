@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.websocket.rest.exceptions;
 
+import java.util.List;
+import java.util.Map;
 import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.rest.HTTPHeader;
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.rest.Pair;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Thrown when there was an any exception was received from the server over WebSocket.
@@ -26,65 +25,63 @@ import java.util.Map;
 @SuppressWarnings("serial")
 public class ServerException extends Exception {
 
-    private Message response;
+  private Message response;
 
-    private String message;
+  private String message;
 
-    private int errorCode;
+  private int errorCode;
 
+  private Map<String, String> attributes;
 
-    private Map<String, String> attributes;
+  private boolean errorMessageProvided;
 
-    private boolean errorMessageProvided;
+  public ServerException(Message response) {
+    this.response = response;
+    this.message = JsonHelper.parseJsonMessage(response.getBody());
+    this.errorCode = JsonHelper.parseErrorCode(response.getBody());
+    this.errorMessageProvided = checkErrorMessageProvided();
+    this.attributes = JsonHelper.parseErrorAttributes(response.getBody());
+  }
 
-    public ServerException(Message response) {
-        this.response = response;
-        this.message = JsonHelper.parseJsonMessage(response.getBody());
-        this.errorCode = JsonHelper.parseErrorCode(response.getBody());
-        this.errorMessageProvided = checkErrorMessageProvided();
-        this.attributes = JsonHelper.parseErrorAttributes(response.getBody());
-    }
+  @Override
+  public String getMessage() {
+    return message;
+  }
 
-    @Override
-    public String getMessage() {
-        return message;
-    }
+  public int getHTTPStatus() {
+    return response.getResponseCode();
+  }
 
-    public int getHTTPStatus() {
-        return response.getResponseCode();
-    }
-
-    public String getHeader(String key) {
-        List<Pair> headers = response.getHeaders().toList();
-        if (headers != null) {
-            for (Pair header : headers) {
-                if (key.equals(header.getName())) {
-                    return header.getValue();
-                }
-            }
+  public String getHeader(String key) {
+    List<Pair> headers = response.getHeaders().toList();
+    if (headers != null) {
+      for (Pair header : headers) {
+        if (key.equals(header.getName())) {
+          return header.getValue();
         }
-
-        return null;
+      }
     }
 
-    private boolean checkErrorMessageProvided() {
-        String value = getHeader(HTTPHeader.JAXRS_BODY_PROVIDED);
-        if (value != null) {
-            return true;
-        }
-        return false;
-    }
+    return null;
+  }
 
-    public boolean isErrorMessageProvided() {
-        return errorMessageProvided;
+  private boolean checkErrorMessageProvided() {
+    String value = getHeader(HTTPHeader.JAXRS_BODY_PROVIDED);
+    if (value != null) {
+      return true;
     }
+    return false;
+  }
 
-    public int getErrorCode() {
-        return errorCode;
-    }
+  public boolean isErrorMessageProvided() {
+    return errorMessageProvided;
+  }
 
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
+  public int getErrorCode() {
+    return errorCode;
+  }
 
+  public Map<String, String> getAttributes() {
+    return attributes;
+  }
 }

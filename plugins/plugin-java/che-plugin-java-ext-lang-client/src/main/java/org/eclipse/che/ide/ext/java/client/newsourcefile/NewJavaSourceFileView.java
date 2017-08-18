@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.newsourcefile;
 
-import org.eclipse.che.ide.api.mvp.View;
-
 import java.util.List;
+import org.eclipse.che.ide.api.mvp.View;
 
 /**
  * The view of {@link NewJavaSourceFilePresenter}.
@@ -21,33 +20,35 @@ import java.util.List;
  */
 public interface NewJavaSourceFileView extends View<NewJavaSourceFileView.ActionDelegate> {
 
-    /** Set available Java source file types. */
-    void setTypes(List<JavaSourceFileType> types);
+  /** Set available Java source file types. */
+  void setTypes(List<JavaSourceFileType> types);
 
-    /** Returns content of the name field. */
-    String getName();
+  /** Returns content of the name field. */
+  String getName();
 
-    /** Returns selected source file type. */
-    JavaSourceFileType getSelectedType();
+  /** Returns selected source file type. */
+  JavaSourceFileType getSelectedType();
 
-    /** Show dialog. */
-    void showDialog();
+  /** Show dialog. */
+  void showDialog();
 
-    /** Close dialog. */
-    void close();
+  /** Close dialog. */
+  void close();
 
-    void showErrorHint(String text);
+  void showErrorHint(String text);
 
-    void hideErrorHint();
+  void hideErrorHint();
 
-    public interface ActionDelegate {
-        /** Performs any actions appropriate in response to the user having pressed the Ok button. */
-        void onOkClicked();
+  public interface ActionDelegate {
+    /** Performs any actions appropriate in response to the user having pressed the Ok button. */
+    void onOkClicked();
 
-        /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
-        void onCancelClicked();
+    /**
+     * Performs any actions appropriate in response to the user having pressed the Cancel button.
+     */
+    void onCancelClicked();
 
-        /** Called when name changed. */
-        void onNameChanged();
-    }
+    /** Called when name changed. */
+    void onNameChanged();
+  }
 }

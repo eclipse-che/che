@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.macro;
 
 import com.google.common.annotations.Beta;
-
-import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.macro.Macro;
 
 /**
- * Base macro provider which belongs to the current opened editor. Provides easy access to the opened virtual file
- * to allow fetch necessary information to use in custom commands, preview urls, etc.
+ * Base macro provider which belongs to the current opened editor. Provides easy access to the
+ * opened virtual file to allow fetch necessary information to use in custom commands, preview urls,
+ * etc.
  *
  * @author Vlad Zhukovskyi
  * @see EditorAgent
@@ -33,19 +33,18 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 @Beta
 public abstract class AbstractEditorMacro implements Macro {
 
-    private EditorAgent editorAgent;
+  private EditorAgent editorAgent;
 
-    public AbstractEditorMacro(EditorAgent editorAgent) {
-        this.editorAgent = editorAgent;
-    }
+  public AbstractEditorMacro(EditorAgent editorAgent) {
+    this.editorAgent = editorAgent;
+  }
 
-    /**
-     * Returns the active editor or null if no active editor was found.
-     *
-     * @return active editor or {@code null}
-     */
-    public EditorPartPresenter getActiveEditor() {
-        return editorAgent.getActiveEditor();
-    }
-
+  /**
+   * Returns the active editor or null if no active editor was found.
+   *
+   * @return active editor or {@code null}
+   */
+  public EditorPartPresenter getActiveEditor() {
+    return editorAgent.getActiveEditor();
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.util.storage;
 
-/**
- * Provides dummy implementation of the {@link LocalStorage}.
- * Preferably for testing purpose.
- */
-public class DummyLocalStorageProviderImpl implements LocalStorageProvider{
+/** Provides dummy implementation of the {@link LocalStorage}. Preferably for testing purpose. */
+public class DummyLocalStorageProviderImpl implements LocalStorageProvider {
 
-    @Override
-    public LocalStorage get() {
-        return new DummyLocalStorageImpl();
-    }
+  @Override
+  public LocalStorage get() {
+    return new DummyLocalStorageImpl();
+  }
 }

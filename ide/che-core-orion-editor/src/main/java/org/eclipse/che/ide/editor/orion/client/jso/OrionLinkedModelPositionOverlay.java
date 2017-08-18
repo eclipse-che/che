@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,23 +7,20 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.orion.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public class OrionLinkedModelPositionOverlay extends JavaScriptObject {
-    protected OrionLinkedModelPositionOverlay() {
-    }
+  protected OrionLinkedModelPositionOverlay() {}
 
-    public final native void setOffset(int offset) /*-{
+  public final native void setOffset(int offset) /*-{
         this.offset = offset;
     }-*/;
 
-    public final native void setLength(int length) /*-{
+  public final native void setLength(int length) /*-{
         this.length = length;
     }-*/;
 }

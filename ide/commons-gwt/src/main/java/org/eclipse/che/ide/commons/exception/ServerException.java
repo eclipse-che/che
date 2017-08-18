@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,82 +7,73 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.commons.exception;
 
-import org.eclipse.che.ide.rest.HTTPHeader;
-
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.http.client.Response;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.ide.rest.HTTPHeader;
 
-/**
- * @author Vitaliy Gulyy
- */
-
+/** @author Vitaliy Gulyy */
 @SuppressWarnings("serial")
 public class ServerException extends Exception {
 
-    private Response response;
+  private Response response;
 
-    private String message = "";
+  private String message = "";
 
-    private int errorCode;
+  private int errorCode;
 
-    private Map<String, String> attributes = new HashMap<>();
+  private Map<String, String> attributes = new HashMap<>();
 
-    private boolean errorMessageProvided;
+  private boolean errorMessageProvided;
 
-    public ServerException(Response response) {
-        this.response = response;
-        this.errorMessageProvided = checkErrorMessageProvided();
-        this.message = getMessageFromJSON(response.getText());
-        this.errorCode = getErrorCodeFromJSON(response.getText());
-//        parseJsonAttributes(response.getText());
+  public ServerException(Response response) {
+    this.response = response;
+    this.errorMessageProvided = checkErrorMessageProvided();
+    this.message = getMessageFromJSON(response.getText());
+    this.errorCode = getErrorCodeFromJSON(response.getText());
+    //        parseJsonAttributes(response.getText());
+  }
+
+  public ServerException(Response response, String message) {
+    this.response = response;
+    this.message = message;
+  }
+
+  public int getHTTPStatus() {
+    return response.getStatusCode();
+  }
+
+  public String getStatusText() {
+    return response.getStatusText();
+  }
+
+  @Override
+  public String getMessage() {
+    if (message != null) {
+      return message;
     }
 
-    public ServerException(Response response, String message) {
-        this.response = response;
-        this.message = message;
-    }
+    if (response.getText().isEmpty()) return response.getStatusText();
+    else return response.getText();
+  }
 
-    public int getHTTPStatus() {
-        return response.getStatusCode();
-    }
+  public int getErrorCode() {
+    return errorCode;
+  }
 
-    public String getStatusText() {
-        return response.getStatusText();
-    }
+  public Map<String, String> getAttributes() {
+    return attributes;
+  }
 
-    @Override
-    public String getMessage() {
-        if (message != null) {
-            return message;
-        }
+  @Override
+  public String toString() {
+    return getMessage();
+  }
 
-        if (response.getText().isEmpty())
-            return response.getStatusText();
-        else
-            return response.getText();
-    }
-
-    public int getErrorCode() {
-        return errorCode;
-    }
-
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
-
-    @Override
-    public String toString() {
-        return getMessage();
-    }
-
-    private native String getMessageFromJSON(String json) /*-{
+  private native String getMessageFromJSON(String json) /*-{
         try {
             return JSON.parse(json).message;
         } catch (e) {
@@ -90,8 +81,7 @@ public class ServerException extends Exception {
         }
     }-*/;
 
-
-    private native int getErrorCodeFromJSON(String json) /*-{
+  private native int getErrorCodeFromJSON(String json) /*-{
         try {
             var result = JSON.parse(json).errorCode;
             if (result) {
@@ -102,32 +92,32 @@ public class ServerException extends Exception {
         return -1;
     }-*/;
 
-    public String getHeader(String key) {
-        return response.getHeader(key);
+  public String getHeader(String key) {
+    return response.getHeader(key);
+  }
+
+  private boolean checkErrorMessageProvided() {
+    String value = response.getHeader(HTTPHeader.JAXRS_BODY_PROVIDED);
+    if (value != null) {
+      return true;
     }
 
-    private boolean checkErrorMessageProvided() {
-        String value = response.getHeader(HTTPHeader.JAXRS_BODY_PROVIDED);
-        if (value != null) {
-            return true;
-        }
+    return false;
+  }
 
-        return false;
-    }
+  //    private native void parseJsonAttributes(String json) /*-{
+  //        try {
+  //            var attributes = JSON.parse(json).attributes;
+  //            for(var key in attributes) {
+  //                this.@org.eclipse.che.ide.commons.exception.ServerException.attributes::put(Ljava/lang/String;Ljava/lang/String;)(key, attributes[key]);
+  //            }
+  //
+  //        } catch (e) {
+  //            console.log(e.message, e);
+  //        }
+  //    }-*/;
 
-//    private native void parseJsonAttributes(String json) /*-{
-//        try {
-//            var attributes = JSON.parse(json).attributes;
-//            for(var key in attributes) {
-//                this.@org.eclipse.che.ide.commons.exception.ServerException.attributes::put(Ljava/lang/String;Ljava/lang/String;)(key, attributes[key]);
-//            }
-//
-//        } catch (e) {
-//            console.log(e.message, e);
-//        }
-//    }-*/;
-
-    public boolean isErrorMessageProvided() {
-        return errorMessageProvided;
-    }
+  public boolean isErrorMessageProvided() {
+    return errorMessageProvided;
+  }
 }
