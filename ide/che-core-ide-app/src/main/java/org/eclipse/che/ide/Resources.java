@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide;
 
@@ -202,6 +202,9 @@ public interface Resources extends Window.Resources,
     @Source("panel/panel-selector-right.svg")
     SVGResource panelSelectorRight();
 
+    @Source("searchMatch.svg")
+    SVGResource searchMatch();
+
     /** Interface for css resources. */
     interface CoreCss extends CssResource {
         String editorPaneMenuDelimiter();
@@ -231,7 +234,13 @@ public interface Resources extends Window.Resources,
 
         String createWsTagsPopup();
 
-        @ClassName("codeassistant-highlight")
-        String codeassistantHighlight();
+        @ClassName("found-highlight")
+        String foundPhraseHighlight();
+
+        @ClassName("found-item")
+        String foundItem();
+
+        @ClassName("search-match")
+        String searchMatch();
     }
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.search;
 
@@ -18,9 +18,11 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.search.presentation.FindResultPresenter;
+
+import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -74,9 +76,9 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
                 }
 
                 final Container container = optionalContainer.get();
-                container.search(view.getFileMask(), prepareQuery(text)).then(new Operation<Resource[]>() {
+                container.search(view.getFileMask(), prepareQuery(text)).then(new Operation<List<SearchResult>> () {
                     @Override
-                    public void apply(Resource[] result) throws OperationException {
+                    public void apply(List<SearchResult> result) throws OperationException {
                         view.close();
                         findResultPresenter.handleResponse(result, text);
                     }

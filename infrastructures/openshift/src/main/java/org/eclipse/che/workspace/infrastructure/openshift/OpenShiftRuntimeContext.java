@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.workspace.infrastructure.openshift;
 
@@ -22,6 +22,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,6 +36,7 @@ import static org.eclipse.che.api.workspace.server.OutputEndpoint.OUTPUT_WEBSOCK
  * @author Sergii Leshchenko
  */
 public class OpenShiftRuntimeContext extends RuntimeContext {
+    private final OpenShiftClientFactory  clientFactory;
     private final OpenShiftEnvironment    openShiftEnvironment;
     private final OpenShiftRuntimeFactory runtimeFactory;
     private final String                  websocketEndpointBase;
@@ -44,12 +46,14 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
                                    @Assisted OpenShiftEnvironment openShiftEnvironment,
                                    @Assisted RuntimeIdentity identity,
                                    @Assisted RuntimeInfrastructure infrastructure,
+                                   OpenShiftClientFactory clientFactory,
                                    InstallerRegistry installerRegistry,
                                    OpenShiftRuntimeFactory runtimeFactory,
                                    @Named("che.websocket.endpoint.base") String websocketEndpointBase)
             throws ValidationException,
                    InfrastructureException {
         super(environment, identity, infrastructure, installerRegistry);
+        this.clientFactory = clientFactory;
         this.runtimeFactory = runtimeFactory;
         this.openShiftEnvironment = openShiftEnvironment;
         this.websocketEndpointBase = websocketEndpointBase;
@@ -73,7 +77,8 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
     }
 
     @Override
-    public InternalRuntime getRuntime() {
-        return runtimeFactory.create(this);
+    public InternalRuntime getRuntime() throws InfrastructureException {
+        String namespace = identity.getWorkspaceId();
+        return runtimeFactory.create(this, new OpenShiftProject(namespace, clientFactory));
     }
 }

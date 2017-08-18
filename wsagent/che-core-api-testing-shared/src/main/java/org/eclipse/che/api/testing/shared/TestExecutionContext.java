@@ -1,16 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.testing.shared;
 
 import org.eclipse.che.dto.shared.DTO;
+
+import java.util.List;
 
 /**
  * Context which provides information about test execution.
@@ -50,7 +52,17 @@ public interface TestExecutionContext {
 
     TestExecutionContext withDebugModeEnable(Boolean enable);
 
+    /**
+     * returns a list with paths of the test files relative to the project.
+     * The list should be initialized when value of {@link ContextType} is {@link ContextType.SET}
+     *
+     * @param listOfTestClasses
+     */
+    void setListOfTestClasses(List<String> listOfTestClasses);
+
+    List<String> getListOfTestClasses();
+
     enum ContextType {
-        FILE, FOLDER, PROJECT, CURSOR_POSITION
+        FILE, FOLDER, PROJECT, CURSOR_POSITION, SET
     }
 }

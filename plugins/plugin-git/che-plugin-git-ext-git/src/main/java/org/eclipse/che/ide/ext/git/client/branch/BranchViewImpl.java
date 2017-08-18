@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.branch;
 
@@ -26,12 +26,15 @@ import org.eclipse.che.ide.util.dom.Elements;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -60,6 +63,8 @@ public class BranchViewImpl extends Window implements BranchView {
     Button btnCheckout;
     @UiField
     ScrollPanel branchesPanel;
+    @UiField
+    ListBox     filter;
     @UiField(provided = true)
     final         GitResources            res;
     @UiField(provided = true)
@@ -128,7 +133,16 @@ public class BranchViewImpl extends Window implements BranchView {
                 .create((SimpleList.View)breakPointsElement, coreRes.defaultSimpleListCss(), listBranchesRenderer, listBranchesDelegate);
         this.branchesPanel.add(branches);
 
+        this.filter.addItem("All", "all");
+        this.filter.addItem("Local", "local");
+        this.filter.addItem("Remote", "remote");
+
         createButtons();
+    }
+
+    @UiHandler("filter")
+    public void onFilterChanged(ChangeEvent event) {
+        delegate.onFilterValueChanged();
     }
 
     private void createButtons() {
@@ -247,6 +261,11 @@ public class BranchViewImpl extends Window implements BranchView {
     @Override
     public void setEnableRenameButton(boolean enabled) {
         btnRename.setEnabled(enabled);
+    }
+
+    @Override
+    public String getFilterValue() {
+        return filter.getSelectedValue();
     }
 
     /** {@inheritDoc} */

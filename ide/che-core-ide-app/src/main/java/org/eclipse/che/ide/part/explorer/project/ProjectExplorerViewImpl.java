@@ -1,30 +1,29 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.part.explorer.project;
 
-import com.google.common.base.Optional;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.ui.smartTree.data.HasAction;
-import org.eclipse.che.ide.ui.smartTree.data.HasAttributes;
-import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 import org.eclipse.che.ide.api.parts.base.BaseView;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.ide.project.node.SyntheticNode;
+import org.eclipse.che.ide.resources.tree.ContainerNode;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.resources.tree.SkipHiddenNodesInterceptor;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
@@ -34,6 +33,10 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage.StoreSortInfo;
 import org.eclipse.che.ide.ui.smartTree.SortDir;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
+import org.eclipse.che.ide.ui.smartTree.data.HasAction;
+import org.eclipse.che.ide.ui.smartTree.data.HasAttributes;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
 import org.eclipse.che.ide.ui.status.StatusWidget;
 
@@ -217,9 +220,9 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                 final Resource resource = ((ResourceNode)node).getData();
                 element.setAttribute("path", resource.getLocation().toString());
 
-                final Optional<Project> project = resource.getRelatedProject();
-                if (project.isPresent()) {
-                    element.setAttribute("project", project.get().getLocation().toString());
+                Project project = resource.getProject();
+                if (project != null) {
+                    element.setAttribute("project", project.getLocation().toString());
                 }
             }
 
@@ -237,6 +240,19 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                        .setBackgroundColor(((HasAttributes)node).getAttributes().get(CUSTOM_BACKGROUND_FILL).get(0));
             }
 
+            if (node instanceof ContainerNode) {
+                Container container = ((ContainerNode)node).getData();
+                if (container instanceof Project) {
+                    String head = container.getProject().getAttribute("git.current.head.name");
+                    if (head != null) {
+                        Element nodeContainer = element.getFirstChildElement();
+                        DivElement divElement = Document.get().createDivElement();
+                        divElement.setInnerText("(" + head + ")");
+                        divElement.setClassName(treeStyles.styles().vcsHeadContainer());
+                        nodeContainer.insertBefore(divElement, nodeContainer.getLastChild());
+                    }
+                }
+            }
             return element;
         }
     }

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
@@ -79,6 +79,7 @@ public class DtoConverter {
     /** Converts {@link FileEntry} to {@link ItemReference}. */
     public static ItemReference asDto(FileEntry file) throws ServerException {
         return newDto(ItemReference.class).withName(file.getName())
+                                          .withProject(file.getProject())
                                           .withPath(file.getPath().toString())
                                           .withType("file")
                                           .withAttributes(file.getAttributes())

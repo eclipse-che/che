@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.api.theme;
 
@@ -1535,6 +1535,8 @@ public interface Theme {
 
     String projectExplorerHoverRowBorder();
 
+    String projectExplorerVcsHead();
+
     /********************************************************************************************
      *
      * Loader
@@ -1595,7 +1597,7 @@ public interface Theme {
     String notificationPopupProgressBackground();
 
     String notificationPopupWarningBackground();
-    
+
     String notificationPopupPanelShadow();
 
     String notificationPopupIconSuccessFill();
@@ -1605,7 +1607,7 @@ public interface Theme {
     String notificationPopupIconProgressFill();
 
     String notificationPopupIconWarningFill();
-    
+
     String notificationPopupIconSvgFill();
 
     String notificationPopupTextColor();
@@ -1670,6 +1672,12 @@ public interface Theme {
 
     String vcsConsoleChangesLineNumbersColor();
 
+    String vcsStatusAddedColor();
+
+    String vcsStatusModifiedColor();
+
+    String vcsStatusUntrackedColor();
+
     String editorPreferenceCategoryBackgroundColor();
 
     /********************************************************************************************
@@ -1691,6 +1699,7 @@ public interface Theme {
     String popupLoaderShadow();
 
     String popupLoaderTitleColor();
+
     String popupLoaderTextColor();
 
 }

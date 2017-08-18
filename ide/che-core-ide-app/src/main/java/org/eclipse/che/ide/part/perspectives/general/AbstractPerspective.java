@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.part.perspectives.general;
 
@@ -17,6 +17,8 @@ import elemental.json.JsonObject;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
@@ -341,7 +343,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
     }
 
     @Override
-    public void loadState(@NotNull JsonObject state) {
+    public Promise<Void> loadState(@NotNull JsonObject state) {
         if (state.hasKey("PART_STACKS")) {
             JsonObject partStacksState = state.getObject("PART_STACKS");
 
@@ -372,6 +374,8 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
                 setActivePart(provider.get());
             }
         }
+
+        return Promises.resolve(null);
     }
 
     /**
@@ -457,4 +461,8 @@ public abstract class AbstractPerspective implements Presenter, Perspective,
         }
     }
 
+    @Override
+    public String getId() {
+        return null;
+    }
 }

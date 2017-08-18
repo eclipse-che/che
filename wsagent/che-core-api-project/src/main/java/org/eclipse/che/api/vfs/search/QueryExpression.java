@@ -1,22 +1,23 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.vfs.search;
 
-/** Container for parameters of query that executed by Searcher.*/
+/** Container for parameters of query that executed by Searcher. */
 public class QueryExpression {
     private String name;
     private String path;
     private String text;
     private int    skipCount;
     private int    maxItems;
+    private boolean includePositions;
 
     /** Optional file path parameter. Only file with the specified path or children are included in result. */
     public String getPath() {
@@ -65,6 +66,18 @@ public class QueryExpression {
 
     public QueryExpression setMaxItems(int maxItems) {
         this.maxItems = maxItems;
+        return this;
+    }
+
+    /**
+     * search for term position information or not.
+     */
+    public boolean isIncludePositions() {
+        return includePositions;
+    }
+
+    public QueryExpression setIncludePositions(boolean includePositions) {
+        this.includePositions = includePositions;
         return this;
     }
 

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
@@ -26,7 +26,7 @@ import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.L
 import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
 
 /**
- * Presenter for displaying list of changed files.
+ * Presenter for displaying window with list of changed files.
  *
  * @author Igor Vinokur
  * @author Vlad Zhukovskyi
@@ -34,13 +34,12 @@ import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.T
 public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
 
     private final ChangesPanelView        view;
-    private final AppContext              appContext;
-    private final NotificationManager     notificationManager;
-    private final ComparePresenter        comparePresenter;
     private final GitLocalizationConstant locale;
 
     private Map<String, Status> changedFiles;
     private ViewMode            viewMode;
+
+    private FileNodeDoubleClickHandler fileNodeDoubleClickHandler;
 
     @Inject
     public ChangesPanelPresenter(GitLocalizationConstant locale,
@@ -50,11 +49,21 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
                                  ComparePresenter comparePresenter) {
         this.locale = locale;
         this.view = view;
-        this.appContext = appContext;
-        this.notificationManager = notificationManager;
-        this.comparePresenter = comparePresenter;
         this.view.setDelegate(this);
         this.viewMode = TREE;
+
+        this.fileNodeDoubleClickHandler = (path, status) -> {
+            appContext.getRootProject()
+                      .getFile(path)
+                      .then(file -> {
+                          if (file.isPresent()) {
+                              comparePresenter.showCompareWithLatest(file.get(), status, "HEAD");
+                          }
+                      })
+                      .catchError(error -> {
+                          notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                      });
+        };
     }
 
     /**
@@ -83,16 +92,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
 
     @Override
     public void onFileNodeDoubleClicked(String path, final Status status) {
-        appContext.getRootProject()
-                  .getFile(path)
-                  .then(file -> {
-                      if (file.isPresent()) {
-                          comparePresenter.showCompareWithLatest(file.get(), status, "HEAD");
-                      }
-                  })
-                  .catchError(error -> {
-                      notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                  });
+        fileNodeDoubleClickHandler.onFileNodeDoubleClicked(path, status);
     }
 
     @Override
@@ -117,4 +117,16 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
         view.setTextToChangeViewModeButton(viewMode == TREE ? locale.changeListRowListViewButtonText()
                                                             : locale.changeListGroupByDirectoryButtonText());
     }
+
+    public void setFileNodeDoubleClickHandler(FileNodeDoubleClickHandler fileNodeDoubleClickHandler) {
+        this.fileNodeDoubleClickHandler = fileNodeDoubleClickHandler;
+    }
+
+    /**
+     * Describes behaviour on double click action on a selected path.
+     */
+    public interface FileNodeDoubleClickHandler {
+        void onFileNodeDoubleClicked(String path, final Status status);
+    }
+
 }

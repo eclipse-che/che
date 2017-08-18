@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.plugin.typescript.dto;
 
@@ -129,7 +129,7 @@ public class DTOHelper {
         } else if (String.class.equals(type) || (type instanceof Class && ((Class)type).isEnum())) {
             // Maybe find a better enum type for typescript
             return "string";
-        } else if (Integer.class.equals(type) || Integer.TYPE.equals(type) || Long.class.equals(type) || Long.TYPE.equals(type) || Double.class.equals(type) || Double.TYPE.equals(type)) {
+        } else if (Integer.class.equals(type) || Integer.TYPE.equals(type) || Long.class.equals(type) || Long.TYPE.equals(type) || Double.class.equals(type) || Double.TYPE.equals(type) || Float.TYPE.equals(type)) {
             return "number";
         } else if (Boolean.class.equals(type)) {
             return "boolean";

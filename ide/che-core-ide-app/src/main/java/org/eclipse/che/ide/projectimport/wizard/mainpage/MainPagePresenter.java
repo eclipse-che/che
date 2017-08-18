@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.projectimport.wizard.mainpage;
 
@@ -31,7 +31,7 @@ import org.eclipse.che.ide.rest.HTTPHeader;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.util.NameUtils;
 
-import java.util.Iterator;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -136,16 +136,7 @@ public class MainPagePresenter extends AbstractWizardPage<MutableProjectConfig> 
                     protected void onSuccess(ProjectImporterData data) {
                         List<ProjectImporterDescriptor> result = data.getImporters();
                         String defaultImporterId = data.getConfiguration().get(DEFAULT_PROJECT_IMPORTER);
-                        Iterator<ProjectImporterDescriptor> itr = result.iterator();
-                        while (itr.hasNext()) {
-                            ProjectImporterDescriptor importer = itr.next();
-                            if (importer.getId().equals(defaultImporterId)) {
-                                Set<ProjectImporterDescriptor> importersSet = new LinkedHashSet<>();
-                                importersSet.add(importer);
-                                importersByCategory.put(importer.getCategory(), importersSet);
-                                itr.remove();
-                            }
-                        }
+                        result.sort(getProjectImporterComparator(defaultImporterId));
 
                         ProjectImporterDescriptor defaultImporter = null;
                         for (ProjectImporterDescriptor importer : result) {
@@ -190,6 +181,20 @@ public class MainPagePresenter extends AbstractWizardPage<MutableProjectConfig> 
                 };
 
         fetchProjectImporters(callback);
+    }
+
+    private Comparator<ProjectImporterDescriptor> getProjectImporterComparator(String defaultImporterId) {
+        return (o1, o2) -> {
+            if (o1.getId().equals(defaultImporterId)) {
+                return -1;
+            }
+
+            if (o2.getId().equals(defaultImporterId)) {
+                return 1;
+            }
+
+            return 0;
+        };
     }
 
     /** {@inheritDoc} */

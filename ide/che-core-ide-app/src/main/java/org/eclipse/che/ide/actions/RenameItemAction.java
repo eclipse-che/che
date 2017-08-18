@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.actions;
 
@@ -262,23 +262,21 @@ public class RenameItemAction extends AbstractPerspectiveAction {
 
         @Override
         public Violation isValidName(String value) {
-            final String correctValue = value.contains(" ") ? value.replaceAll(" ", "-") : null;
-            final String errormessage = !NameUtils.checkFileName(value) ? localization.invalidName() : null;
-            if (correctValue != null || errormessage != null) {
-                return new Violation() {
-                    @Override
-                    public String getMessage() {
-                        return errormessage;
-                    }
+            return new Violation() {
+                @Override
+                public String getMessage() {
+                    return localization.invalidName();
+                }
 
-                    @Nullable
-                    @Override
-                    public String getCorrectedValue() {
-                        return correctValue;
+                @Nullable
+                @Override
+                public String getCorrectedValue() {
+                    if (NameUtils.checkProjectName(value)) {
+                        return value.contains(" ") ? value.replaceAll(" ", "-") : value;
                     }
-                };
-            }
-            return null;
+                    return null;
+                }
+            };
         }
     }
 }
