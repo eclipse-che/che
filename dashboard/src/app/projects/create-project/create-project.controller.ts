@@ -15,6 +15,8 @@ import {CreateProjectSvc} from './create-project.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {CheEnvironmentRegistry} from '../../../components/api/environment/che-environment-registry.factory';
 import {IEnvironmentManagerMachine} from '../../../components/api/environment/environment-manager-machine';
+import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
+import {CheJsonRpcMasterApi} from '../../../components/api/json-rpc/che-json-rpc-master-api';
 
 /**
  * This class is handling the controller for the projects
@@ -29,7 +31,6 @@ export class CreateProjectController {
   $rootScope: che.IRootScopeService;
   $scope: ng.IScope;
   $timeout: ng.ITimeoutService;
-  $websocket: ng.websocket.IWebSocketProvider;
   $window: ng.IWindowService;
   createProjectSvc: CreateProjectSvc;
   lodash: any;
@@ -37,6 +38,7 @@ export class CreateProjectController {
   cheAPI: CheAPI;
   cheStack: CheStack;
   cheEnvironmentRegistry: CheEnvironmentRegistry;
+  jsonRpcMasterApi: CheJsonRpcMasterApi;
 
   stackMachines: any;
   importProjectData: che.IImportProject;
@@ -47,15 +49,12 @@ export class CreateProjectController {
   selectSourceOption: string;
   templatesChoice: string;
   workspaceRam: number;
-  websocketReconnect: number;
-  messageBus: any;
   selectedTabIndex: number;
   currentTab: string;
   state: string;
   forms: Map<string, ng.IFormController>;
   jsonConfig: any;
   isReady: boolean;
-  listeningChannels: any[];
   defaultProjectName: string;
   projectName: string;
   defaultProjectDescription: string;
@@ -69,8 +68,6 @@ export class CreateProjectController {
   workspaceConfig: any;
   stack: any;
   isCustomStack: boolean;
-  isHandleClose: boolean;
-  connectionClosed: Function;
 
   workspaceResourceForm: ng.IFormController;
   workspaceInformationForm: ng.IFormController;
@@ -80,6 +77,11 @@ export class CreateProjectController {
   private stacks: Array<che.IStack>;
   private recipeContentCopy: string;
 
+  private agentOutputHandler: Function;
+  private statusHandler: Function;
+  private environmentOutputHandler: Function;
+  private projectImportHandler: Function;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
@@ -87,13 +89,12 @@ export class CreateProjectController {
   constructor($document: ng.IDocumentService, $filter: ng.IFilterService, $location: ng.ILocationService,
               $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $rootScope: che.IRootScopeService,
               $routeParams: che.route.IRouteParamsService, $q: ng.IQService, $scope: ng.IScope,
-              $timeout: ng.ITimeoutService, $websocket: ng.websocket.IWebSocketProvider, $window: ng.IWindowService,
+              $timeout: ng.ITimeoutService, $window: ng.IWindowService, cheJsonRpcApi: CheJsonRpcApi,
               lodash: any, cheAPI: CheAPI, cheStack: CheStack, createProjectSvc: CreateProjectSvc,
               cheNotification: CheNotification, cheEnvironmentRegistry: CheEnvironmentRegistry) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
-    this.$websocket = $websocket;
     this.$timeout = $timeout;
     this.$location = $location;
     this.$mdDialog = $mdDialog;
@@ -111,6 +112,7 @@ export class CreateProjectController {
     this.resetCreateProgress();
 
     this.importProjectData = this.getDefaultProjectJson();
+    this.jsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(cheAPI.getWorkspace().getJsonRpcApiLocation());
 
     this.enableWizardProject = true;
 
@@ -129,11 +131,9 @@ export class CreateProjectController {
 
     // default RAM value for workspaces
     this.workspaceRam = 2 * Math.pow(1024, 3);
-    this.websocketReconnect = 50;
 
     this.generateWorkspaceName();
 
-    this.messageBus = null;
 
     // search the selected tab
     let routeParams = $routeParams.tabName;
@@ -212,29 +212,11 @@ export class CreateProjectController {
       deregFunc3();
     });
 
-    // channels on which we will subscribe on the workspace bus websocket
-    this.listeningChannels = [];
-
     this.projectName = null;
     this.projectDescription = null;
     this.defaultWorkspaceName = null;
 
     cheAPI.getWorkspace().getWorkspaces();
-
-    this.isHandleClose = true;
-    this.connectionClosed = () => {
-      if (!this.isHandleClose) {
-        return;
-      }
-
-      this.$mdDialog.show(
-        this.$mdDialog.alert()
-          .title('Connection error')
-          .content('Unable to track the workspace status due to connection closed error. Please, try again or restart the page.')
-          .ariaLabel('Workspace start')
-          .ok('OK')
-      );
-    };
 
     this.stacks = cheStack.getStacks();
     if (!this.stacks || !this.stacks.length) {
@@ -301,12 +283,9 @@ export class CreateProjectController {
         return workspace.config.name === workspaceName;
       });
       // check current workspace
-      if (findWorkspace) {
-        // init WS bus
-        this.messageBus = this.cheAPI.getWebsocket().getBus();
-      } else {
+      if (!findWorkspace) {
         this.resetCreateProgress();
-      }
+      };
     } else {
       let preselectWorkspaceId = this.$location.search().workspaceId;
       if (preselectWorkspaceId) {
@@ -340,7 +319,6 @@ export class CreateProjectController {
 
   }
 
-
   /**
    * Select the given github repository
    * @param gitHubRepository the repository selected
@@ -350,7 +328,6 @@ export class CreateProjectController {
     this.setProjectDescription(gitHubRepository.description);
     this.importProjectData.source.location = gitHubRepository.clone_url;
   }
-
 
   /**
    * Checks if the current forms are being validated
@@ -438,26 +415,12 @@ export class CreateProjectController {
     return this.currentTab;
   }
 
-  startWorkspace(bus: any, workspace: che.IWorkspace): ng.IPromise<any> {
+  startWorkspace(workspace: che.IWorkspace): ng.IPromise<any> {
     // then we've to start workspace
     this.createProjectSvc.setCurrentProgressStep(1);
-
-    let statusLink = this.lodash.find(workspace.links, (link: any) => {
-      return link.rel === 'environment.status_channel';
-    });
-
-    let outputLink = this.lodash.find(workspace.links, (link: any) => {
-      return link.rel === 'environment.output_channel';
-    });
-
     let workspaceId = workspace.id;
 
-    let agentChannel = 'workspace:' + workspace.id + ':ext-server:output';
-    let statusChannel = statusLink ? statusLink.parameters[0].defaultValue : null;
-    let outputChannel = outputLink ? outputLink.parameters[0].defaultValue : null;
-
-    this.listeningChannels.push(agentChannel);
-    bus.subscribe(agentChannel, (message: any) => {
+    this.agentOutputHandler = (message: any) => {
       if (this.createProjectSvc.getCurrentProgressStep() < 2) {
         this.createProjectSvc.setCurrentProgressStep(2);
       }
@@ -467,62 +430,60 @@ export class CreateProjectController {
       } else {
         this.getCreationSteps()[agentStep].logs = message;
       }
+    };
+
+    this.jsonRpcMasterApi.subscribeWsAgentOutput(workspaceId, this.agentOutputHandler);
+
+    this.statusHandler = (message: any) => {
+      message = this.getDisplayMachineLog(message);
+      if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
+        this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+
+        // need to show the error
+        this.$mdDialog.show(
+          this.$mdDialog.alert()
+            .title('Unable to start workspace')
+            .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
+            .ariaLabel('Workspace start')
+            .ok('OK')
+        );
+      }
+      if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
+        this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+        let errorMessage = 'Error when trying to start the workspace';
+        if (message.error) {
+          errorMessage += ': ' + message.error;
+        } else {
+          errorMessage += '.';
+        }
+        // need to show the error
+        this.$mdDialog.show(
+          this.$mdDialog.alert()
+            .title('Error when starting workspace')
+            .content('Unable to start workspace. ' + errorMessage)
+            .ariaLabel('Workspace start')
+            .ok('OK')
+        );
+      }
+      this.$log.log('Status channel of workspaceID', workspaceId, message);
+    };
+    this.jsonRpcMasterApi.subscribeEnvironmentStatus(workspaceId, this.statusHandler);
+
+    this.environmentOutputHandler = (message: any) => {
+      message = this.getDisplayMachineLog(message);
+      if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
+        this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
+      } else {
+        this.getCreationSteps()[this.getCurrentProgressStep()].logs = message;
+      }
+    };
+
+    let machineNames = this.getMachineNames(workspace.config);
+    machineNames.forEach((machine: string) => {
+      this.jsonRpcMasterApi.subscribeEnvironmentOutput(workspaceId, machine, this.environmentOutputHandler);
     });
 
-    if (statusChannel) {
-      // for now, display log of status channel in case of errors
-      this.listeningChannels.push(statusChannel);
-      bus.subscribe(statusChannel, (message: any) => {
-        message = this.getDisplayMachineLog(message);
-        if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
-          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-
-          // need to show the error
-          this.$mdDialog.show(
-              this.$mdDialog.alert()
-                  .title('Unable to start workspace')
-                  .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
-                  .ariaLabel('Workspace start')
-                  .ok('OK')
-          );
-        }
-        if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
-          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-          let errorMessage = 'Error when trying to start the workspace';
-          if (message.error) {
-            errorMessage += ': ' + message.error;
-          } else {
-            errorMessage += '.';
-          }
-          // need to show the error
-          this.$mdDialog.show(
-              this.$mdDialog.alert()
-                  .title('Error when starting workspace')
-                  .content('Unable to start workspace. ' + errorMessage)
-                  .ariaLabel('Workspace start')
-                  .ok('OK')
-          );
-        }
-        this.$log.log('Status channel of workspaceID', workspaceId, message);
-      });
-    }
-
-    if (outputChannel) {
-      this.listeningChannels.push(outputChannel);
-      bus.subscribe(outputChannel, (message: any) => {
-        message = this.getDisplayMachineLog(message);
-        if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
-          this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
-        } else {
-          this.getCreationSteps()[this.getCurrentProgressStep()].logs = message;
-        }
-      });
-    }
-
-
-
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
-    bus.onClose(this.connectionClosed);
     startWorkspacePromise.then(() => {
       // update list of workspaces
       // for new workspace to show in recent workspaces
@@ -568,13 +529,24 @@ export class CreateProjectController {
     }
   }
 
-  createProjectInWorkspace(workspaceId: string, projectName: string, projectData: any, bus: any, websocketStream?: any, workspaceBus?: any): void {
+  getMachineNames(workspaceConfig: any): Array<string> {
+    let machines = [];
+    let environments = workspaceConfig.environments;
+    let envName = workspaceConfig.defaultEnv;
+    let defaultEnvironment = environments[envName];
+    if (!defaultEnvironment) {
+      return machines;
+    }
+
+    return Object.keys(defaultEnvironment.machines);
+  }
+
+  createProjectInWorkspace(workspaceId: string, projectName: string, projectData: any): void {
     this.updateRecentWorkspace(workspaceId);
 
     this.createProjectSvc.setCurrentProgressStep(3);
 
     let promise;
-    let channel: string = null;
     // select mode (create or import)
     if (this.selectSourceOption === 'select-source-new' && this.templatesChoice === 'templates-wizard') {
 
@@ -590,13 +562,10 @@ export class CreateProjectController {
         projectData.project.commands = [];
       }
 
-      // websocket channel
-      channel = 'importProject:output';
-
-      // on import
-      bus.subscribe(channel, (message: any) => {
+      this.projectImportHandler = (message: any) => {
         this.getCreationSteps()[this.getCurrentProgressStep()].logs = message.line;
-      });
+      };
+      this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getWsAgentApi().subscribeProjectImport(projectName, this.projectImportHandler);
 
       let deferredImport = this.$q.defer();
       let deferredImportPromise = deferredImport.promise;
@@ -630,7 +599,7 @@ export class CreateProjectController {
     promise.then(() => {
       this.cheAPI.getWorkspace().fetchWorkspaces();
 
-      this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
+      this.cleanupChannels(workspaceId, projectName);
       this.createProjectSvc.setCurrentProgressStep(4);
 
       // redirect to IDE from crane loader page
@@ -639,7 +608,7 @@ export class CreateProjectController {
         this.createProjectSvc.redirectToIDE();
       }
     }, (error: any) => {
-      this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
+      this.cleanupChannels(workspaceId, projectName);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
       // if we have a SSH error
       if (error.data && error.data.errorCode === 32068) {
@@ -703,7 +672,6 @@ export class CreateProjectController {
     });
   }
 
-
   /**
    * Show the add ssh key dialog
    * @param repoURL  the repository URL
@@ -723,24 +691,15 @@ export class CreateProjectController {
   /**
    * Cleanup the websocket elements after actions are finished
    */
-  cleanupChannels(websocketStream: any, workspaceBus: any, bus: any, channel: any): void {
-    this.isHandleClose = false;
-    if (websocketStream != null) {
-      websocketStream.close();
-    }
-
-    if (workspaceBus != null) {
-      this.listeningChannels.forEach((channel: string) => {
-        workspaceBus.unsubscribe(channel);
-      });
-      this.listeningChannels.length = 0;
-    }
-
-    if (channel != null) {
-      bus.unsubscribe(channel);
-    }
-
-
+  cleanupChannels(workspaceId: string, projectName: string): void {
+    let workspace = this.cheAPI.getWorkspace().getWorkspaceById(workspaceId);
+    this.jsonRpcMasterApi.unSubscribeEnvironmentStatus(workspaceId, this.statusHandler);
+    this.jsonRpcMasterApi.unSubscribeWsAgentOutput(workspaceId, this.agentOutputHandler);
+    let machineNames = this.getMachineNames(workspace.config);
+    machineNames.forEach((machine: string) => {
+      this.jsonRpcMasterApi.unSubscribeEnvironmentOutput(workspaceId, machine, this.environmentOutputHandler);
+    });
+    this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getWsAgentApi().unSubscribeProjectImport(projectName, this.projectImportHandler);
   }
 
 
@@ -787,44 +746,6 @@ export class CreateProjectController {
     }
   }
 
-  connectToExtensionServer(websocketURL: any, workspaceId: string, projectName: string, projectData: any, workspaceBus: any, bus?: any) {
-
-    // try to connect
-    let websocketStream = this.$websocket(websocketURL);
-
-    // on success, create project
-    websocketStream.onOpen(() => {
-      let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
-      this.createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus);
-      bus.onClose(this.connectionClosed);
-    });
-
-    // on error, retry to connect or after a delay, abort
-    websocketStream.onError((error: any) => {
-      this.websocketReconnect--;
-      if (this.websocketReconnect > 0) {
-        this.$timeout(() => {
-          this.connectToExtensionServer(websocketURL, workspaceId, projectName, projectData, workspaceBus, bus);
-        }, 1000);
-      } else {
-        this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-        this.$log.log('error when starting remote extension', error);
-        // need to show the error
-        this.$mdDialog.show(
-          this.$mdDialog.alert()
-            .title('Workspace Connection Error')
-            .content('It seems that your workspace is running, but we cannot connect your browser to it. This commonly happens when Che was' +
-            ' not configured properly. If your browser is connecting to workspaces running remotely, then you must start Che with the ' +
-            '--remote:<ip-address> flag where the <ip-address> is the IP address of the node that is running your Docker workspaces.' +
-            'Please restart Che with this flag. You can read about what this flag does and why it is essential at: ' +
-            '/docs/setup/configuration/index.html')
-            .ariaLabel('Project creation')
-            .ok('OK')
-        );
-      }
-    });
-  }
-
   /**
    * Call the create operation that may create or import a project
    */
@@ -868,24 +789,11 @@ export class CreateProjectController {
   checkExistingWorkspaceState(workspace: che.IWorkspace): void {
     if (workspace.status === 'RUNNING') {
       this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).finally(() => {
-        let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
-        if (!websocketUrl) {
-          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-          this.$log.error('Unable to create project in workspace. Error when trying to get websocket URL.');
-          return;
-        }
-        // get bus
-        let websocketStream = this.$websocket(websocketUrl);
-        // on success, create project
-        websocketStream.onOpen(() => {
-          let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
-          this.createProjectInWorkspace(workspace.id, this.projectName, this.importProjectData, bus);
-        });
+        this.createProjectInWorkspace(workspace.id, this.projectName, this.importProjectData);
       });
     } else {
       this.subscribeStatusChannel(workspace);
-      let bus = this.cheAPI.getWebsocket().getBus();
-      this.startWorkspace(bus, workspace);
+      this.startWorkspace(workspace);
     }
   }
 
@@ -914,11 +822,7 @@ export class CreateProjectController {
 
       let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
       promiseWorkspace.then(() => {
-        let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id),
-          bus = this.cheAPI.getWebsocket().getBus();
-        // try to connect
-        this.websocketReconnect = 10;
-        this.connectToExtensionServer(websocketUrl, workspace.id, this.importProjectData.project.name, this.importProjectData, bus);
+        this.createProjectInWorkspace(workspace.id, this.importProjectData.project.name, this.importProjectData);
       });
     });
   }
@@ -936,18 +840,12 @@ export class CreateProjectController {
       this.createProjectSvc.setWorkspaceNamespace(workspace.namespace);
       this.updateRecentWorkspace(workspace.id);
 
-      // init message bus if not there
-      if (this.workspaces.length === 0) {
-        this.messageBus = this.cheAPI.getWebsocket().getBus();
-      }
-
       this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).then(() => {
         this.subscribeStatusChannel(workspace);
       });
 
       this.$timeout(() => {
-        let bus = this.cheAPI.getWebsocket().getBus();
-        this.startWorkspace(bus, workspace);
+        this.startWorkspace(workspace);
       }, 1000);
 
     }, (error: any) => {

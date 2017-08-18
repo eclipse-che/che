@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -163,7 +164,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
 
             String packagePath = packageRootPath.toOSString();
             if (!packagePath.endsWith("/")) {
-                packagePath += "/";
+                packagePath += '/';
             }
 
             String pathToClass = filePath.substring(packagePath.length());
@@ -204,6 +205,8 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
                                                            context.getFilePath(),
                                                            methodAnnotation,
                                                            classAnnotation);
+            case SET:
+                return convertClassesPathsToFqns(context.getListOfTestClasses(), javaProject);
             case PROJECT:
                 return javaTestFinder.findClassesInProject(javaProject,
                                                            methodAnnotation,
@@ -241,5 +244,21 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
 
     private RuntimeException getRuntimeException(String filePath) {
         return new RuntimeException("Can't find IClasspathEntry for path " + filePath);
+    }
+
+    private List<String> convertClassesPathsToFqns(List<String> testClasses, IJavaProject javaProject) {
+        if (testClasses == null) {
+            return emptyList();
+        }
+        List<String> result = new LinkedList<>();
+        for (String classPath : testClasses) {
+            ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, classPath);
+            if (compilationUnit != null) {
+                IType primaryType = compilationUnit.findPrimaryType();
+                result.add(primaryType.getFullyQualifiedName());
+            }
+        }
+
+        return result;
     }
 }

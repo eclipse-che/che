@@ -33,6 +33,7 @@ import {CheSsh} from './che-ssh.factory';
 import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
 import {CheUser} from './che-user.factory';
 import {ChePageObject} from './paging-resource/page-object.factory';
+import {CheJsonRpcApi} from './json-rpc/che-json-rpc-api.factory';
 
 export class ApiConfig {
 
@@ -60,5 +61,6 @@ export class ApiConfig {
     register.factory('cheNamespaceRegistry', CheNamespaceRegistry);
     register.factory('cheUser', CheUser);
     register.factory('chePageObject', ChePageObject);
+    register.factory('cheJsonRpcApi', CheJsonRpcApi);
   }
 }
