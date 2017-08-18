@@ -75,11 +75,11 @@ public class EditorFileStatusNotificationOperation implements BiConsumer<String,
                     .withBiConsumer(this);
     }
 
-    public void suspend(){
+    public void suspend() {
         suspended = true;
     }
 
-    public void resume(){
+    public void resume() {
         suspended = false;
     }
 
