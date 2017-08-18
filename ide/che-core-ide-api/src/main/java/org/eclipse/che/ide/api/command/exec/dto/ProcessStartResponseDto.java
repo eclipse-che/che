@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,33 +7,33 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.command.exec.dto;
 
-import org.eclipse.che.ide.api.command.exec.dto.event.DtoWithPid;
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.ide.api.command.exec.dto.event.DtoWithPid;
 
 @DTO
 public interface ProcessStartResponseDto extends DtoWithPid {
-    ProcessStartResponseDto withPid(int pid);
+  ProcessStartResponseDto withPid(int pid);
 
-    String getName();
+  String getName();
 
-    ProcessStartResponseDto withName(String name);
+  ProcessStartResponseDto withName(String name);
 
-    String getCommandLine();
+  String getCommandLine();
 
-    ProcessStartResponseDto withCommandLine(String commandLine);
+  ProcessStartResponseDto withCommandLine(String commandLine);
 
-    String getType();
+  String getType();
 
-    ProcessStartResponseDto withType(String type);
+  ProcessStartResponseDto withType(String type);
 
-    boolean getAlive();
+  boolean getAlive();
 
-    ProcessStartResponseDto withAlive(boolean alive);
+  ProcessStartResponseDto withAlive(boolean alive);
 
-    int getNativePid();
+  int getNativePid();
 
-    ProcessStartResponseDto withNativePid(int nativePid);
+  ProcessStartResponseDto withNativePid(int nativePid);
 }

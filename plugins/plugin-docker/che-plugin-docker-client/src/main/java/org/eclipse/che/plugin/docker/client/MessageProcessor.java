@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.client;
 
-/**
- * @author Alexander Garagatyi
- */
+/** @author Alexander Garagatyi */
 public interface MessageProcessor<T> {
-    void process(T message);
+  void process(T message);
 
-    @SuppressWarnings("unchecked")
-    static <TT> MessageProcessor<TT> getDevNull() {
-        return DEV_NULL;
-    }
+  @SuppressWarnings("unchecked")
+  static <TT> MessageProcessor<TT> getDevNull() {
+    return DEV_NULL;
+  }
 
-    MessageProcessor DEV_NULL = Message -> {};
+  MessageProcessor DEV_NULL = Message -> {};
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.part.widgets.partbutton;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton.ActionDelegate;
@@ -25,46 +27,35 @@ import org.mockito.Mock;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
-/**
- * @author Dmitry Shnurenko
- */
+/** @author Dmitry Shnurenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class PartButtonWidgetTest {
 
-    private static final String SOME_TEXT = "someText";
+  private static final String SOME_TEXT = "someText";
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private Resources resources;
+  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+  private Resources resources;
 
-    @Mock
-    private PartPresenter   partPresenter;
-    @Mock
-    private IsWidget        isWidget;
-    @Mock
-    private SVGResource     svgResource;
-    @Mock
-    private OMSVGSVGElement svg;
-    @Mock
-    private ActionDelegate  delegate;
+  @Mock private PartPresenter partPresenter;
+  @Mock private IsWidget isWidget;
+  @Mock private SVGResource svgResource;
+  @Mock private OMSVGSVGElement svg;
+  @Mock private ActionDelegate delegate;
 
-    private PartButtonWidget partButton;
+  private PartButtonWidget partButton;
 
-    @Before
-    public void setUp() {
-        partButton = new PartButtonWidget(SOME_TEXT);
-        partButton.setDelegate(delegate);
-    }
+  @Before
+  public void setUp() {
+    partButton = new PartButtonWidget(SOME_TEXT);
+    partButton.setDelegate(delegate);
+  }
 
-    @Test
-    public void onPartButtonShouldBeClicked() {
-        ClickEvent event = mock(ClickEvent.class);
+  @Test
+  public void onPartButtonShouldBeClicked() {
+    ClickEvent event = mock(ClickEvent.class);
 
-        partButton.onClick(event);
+    partButton.onClick(event);
 
-        verify(delegate).onTabClicked(partButton);
-    }
-
+    verify(delegate).onTabClicked(partButton);
+  }
 }

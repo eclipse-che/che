@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
@@ -22,23 +21,21 @@ import org.eclipse.che.ide.api.mvp.View;
  */
 public interface WorkspaceView extends View<WorkspaceView.ActionDelegate> {
 
-    /** Required for delegating functions in the view. */
-    interface ActionDelegate {
-    }
+  /** Required for delegating functions in the view. */
+  interface ActionDelegate {}
 
-    /** @return central panel */
-    AcceptsOneWidget getPerspectivePanel();
+  /** @return central panel */
+  AcceptsOneWidget getPerspectivePanel();
 
-    /** @return menu panel */
-    AcceptsOneWidget getMenuPanel();
+  /** @return menu panel */
+  AcceptsOneWidget getMenuPanel();
 
-    /** @return toolbar panel */
-    AcceptsOneWidget getToolbarPanel();
+  /** @return toolbar panel */
+  AcceptsOneWidget getToolbarPanel();
 
-    /** Sets visibility of toolbar. */
-    void showToolbar(boolean show);
+  /** Sets visibility of toolbar. */
+  void showToolbar(boolean show);
 
-    /** Determines whether toolbar is visible. */
-    boolean isToolbarVisible();
-
+  /** Determines whether toolbar is visible. */
+  boolean isToolbarVisible();
 }

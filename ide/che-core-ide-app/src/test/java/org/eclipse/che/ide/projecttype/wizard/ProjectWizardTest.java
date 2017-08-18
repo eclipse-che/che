@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.projecttype.wizard;
 
-import com.google.common.base.Optional;
+import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
+import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.IMPORT;
+import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
+import java.util.Collections;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
@@ -37,16 +45,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Collections;
-
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.IMPORT;
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Testing {@link ProjectWizard}.
  *
@@ -55,266 +53,246 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectWizardTest {
-    private static final String PROJECT_NAME = "project1";
+  private static final String PROJECT_NAME = "project1";
 
-    @Mock
-    private MutableProjectConfig         dataObject;
-    @Mock
-    private Wizard.CompleteCallback      completeCallback;
-    @Mock
-    private AppContext                   appContext;
-    @Mock
-    private CommandManager               commandManager;
-    @Mock
-    private Container                    workspaceRoot;
-    @Mock
-    private Project.ProjectRequest       createProjectRequest;
-    @Mock
-    private Promise<Project>             createProjectPromise;
-    @Mock
-    private Project                      createdProject;
-    @Mock
-    private CommandDto                   command;
-    @Mock
-    private Promise<CommandImpl>         createCommandPromise;
-    @Mock
-    private CommandImpl                  createdCommand;
-    @Mock
-    private Promise<Optional<Container>> optionalContainerPromise;
-    @Mock
-    private Project                      projectToUpdate;
-    @Mock
-    private Folder                       folderToUpdate;
+  @Mock private MutableProjectConfig dataObject;
+  @Mock private Wizard.CompleteCallback completeCallback;
+  @Mock private AppContext appContext;
+  @Mock private CommandManager commandManager;
+  @Mock private Container workspaceRoot;
+  @Mock private Project.ProjectRequest createProjectRequest;
+  @Mock private Promise<Project> createProjectPromise;
+  @Mock private Project createdProject;
+  @Mock private CommandDto command;
+  @Mock private Promise<CommandImpl> createCommandPromise;
+  @Mock private CommandImpl createdCommand;
+  @Mock private Promise<Optional<Container>> optionalContainerPromise;
+  @Mock private Project projectToUpdate;
+  @Mock private Folder folderToUpdate;
 
-    @Mock
-    private PromiseError promiseError;
-    @Mock
-    private Exception    exception;
+  @Mock private PromiseError promiseError;
+  @Mock private Exception exception;
 
-    @Captor
-    private ArgumentCaptor<Operation<Project>>             completeOperationCaptor;
-    @Captor
-    private ArgumentCaptor<Operation<CommandImpl>>         completeAddCommandsOperationCaptor;
-    @Captor
-    private ArgumentCaptor<Operation<PromiseError>>        failedOperationCaptor;
-    @Captor
-    private ArgumentCaptor<Operation<Optional<Container>>> optionalContainerCaptor;
+  @Captor private ArgumentCaptor<Operation<Project>> completeOperationCaptor;
+  @Captor private ArgumentCaptor<Operation<CommandImpl>> completeAddCommandsOperationCaptor;
+  @Captor private ArgumentCaptor<Operation<PromiseError>> failedOperationCaptor;
+  @Captor private ArgumentCaptor<Operation<Optional<Container>>> optionalContainerCaptor;
 
-    private ProjectWizard wizard;
+  private ProjectWizard wizard;
 
-    @Before
-    public void setUp() {
-        when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
-        when(appContext.getProjectsRoot()).thenReturn(Path.valueOf("/projects"));
-        when(dataObject.getPath()).thenReturn(Path.valueOf(PROJECT_NAME).toString());
-        when(createdProject.getPath()).thenReturn(PROJECT_NAME);
-    }
+  @Before
+  public void setUp() {
+    when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+    when(appContext.getProjectsRoot()).thenReturn(Path.valueOf("/projects"));
+    when(dataObject.getPath()).thenReturn(Path.valueOf(PROJECT_NAME).toString());
+    when(createdProject.getPath()).thenReturn(PROJECT_NAME);
+  }
 
-    @Test
-    public void shouldCreateProject() throws Exception {
-        prepareWizard(CREATE);
+  @Test
+  public void shouldCreateProject() throws Exception {
+    prepareWizard(CREATE);
 
-        when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
-        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
-        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+    when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
+    when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    when(createProjectRequest.send()).thenReturn(createProjectPromise);
+    when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
 
-        wizard.complete(completeCallback);
+    wizard.complete(completeCallback);
 
-        verify(createProjectPromise).then(completeOperationCaptor.capture());
-        completeOperationCaptor.getValue().apply(createdProject);
+    verify(createProjectPromise).then(completeOperationCaptor.capture());
+    completeOperationCaptor.getValue().apply(createdProject);
 
-        verify(completeCallback).onCompleted();
-    }
+    verify(completeCallback).onCompleted();
+  }
 
-    private void prepareWizard(ProjectWizardMode mode) {
-        wizard = new ProjectWizard(dataObject, mode, appContext, commandManager);
-    }
+  private void prepareWizard(ProjectWizardMode mode) {
+    wizard = new ProjectWizard(dataObject, mode, appContext, commandManager);
+  }
 
-    @Test
-    public void shouldInvokeCallbackWhenCreatingFailure() throws Exception {
-        prepareWizard(CREATE);
+  @Test
+  public void shouldInvokeCallbackWhenCreatingFailure() throws Exception {
+    prepareWizard(CREATE);
 
-        when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
-        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
-        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
-        when(promiseError.getCause()).thenReturn(exception);
+    when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
+    when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    when(createProjectRequest.send()).thenReturn(createProjectPromise);
+    when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+    when(promiseError.getCause()).thenReturn(exception);
 
-        wizard.complete(completeCallback);
+    wizard.complete(completeCallback);
 
-        verify(createProjectPromise).catchError(failedOperationCaptor.capture());
-        failedOperationCaptor.getValue().apply(promiseError);
+    verify(createProjectPromise).catchError(failedOperationCaptor.capture());
+    failedOperationCaptor.getValue().apply(promiseError);
 
-        verify(promiseError).getCause();
-        verify(completeCallback).onFailure(eq(exception));
-    }
+    verify(promiseError).getCause();
+    verify(completeCallback).onFailure(eq(exception));
+  }
 
-    @Test
-    public void shouldImportProjectSuccessfully() throws Exception {
-        prepareWizard(IMPORT);
+  @Test
+  public void shouldImportProjectSuccessfully() throws Exception {
+    prepareWizard(IMPORT);
 
-        when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
-        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
-        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-        when(createProjectPromise.thenPromise(any(Function.class))).thenReturn(createProjectPromise);
-        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
-        when(promiseError.getCause()).thenReturn(exception);
+    when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
+    when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    when(createProjectRequest.send()).thenReturn(createProjectPromise);
+    when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    when(createProjectPromise.thenPromise(any(Function.class))).thenReturn(createProjectPromise);
+    when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+    when(promiseError.getCause()).thenReturn(exception);
 
-        wizard.complete(completeCallback);
+    wizard.complete(completeCallback);
 
-        verify(createProjectPromise).then(completeOperationCaptor.capture());
-        completeOperationCaptor.getValue().apply(createdProject);
+    verify(createProjectPromise).then(completeOperationCaptor.capture());
+    completeOperationCaptor.getValue().apply(createdProject);
 
-        verify(completeCallback).onCompleted();
-    }
+    verify(completeCallback).onCompleted();
+  }
 
-    @Test
-    public void shouldImportProjectWithCommandSuccessfully() throws Exception {
-        prepareWizard(IMPORT);
+  @Test
+  public void shouldImportProjectWithCommandSuccessfully() throws Exception {
+    prepareWizard(IMPORT);
 
-        when(workspaceRoot.importProject()).thenReturn(createProjectRequest);
-        when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
-        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
-        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-        when(createProjectPromise.thenPromise(any(Function.class))).thenReturn(createProjectPromise);
-        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
-        when(promiseError.getCause()).thenReturn(exception);
-        when(dataObject.getCommands()).thenReturn(Collections.singletonList(command));
-        when(command.getCommandLine()).thenReturn("echo 'Hello'");
-        when(commandManager.createCommand(any(CommandImpl.class))).thenReturn(createCommandPromise);
-        when(createCommandPromise.then(any(Operation.class))).thenReturn(createCommandPromise);
-        when(createCommandPromise.catchError(any(Operation.class))).thenReturn(createCommandPromise);
+    when(workspaceRoot.importProject()).thenReturn(createProjectRequest);
+    when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
+    when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    when(createProjectRequest.send()).thenReturn(createProjectPromise);
+    when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    when(createProjectPromise.thenPromise(any(Function.class))).thenReturn(createProjectPromise);
+    when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+    when(promiseError.getCause()).thenReturn(exception);
+    when(dataObject.getCommands()).thenReturn(Collections.singletonList(command));
+    when(command.getCommandLine()).thenReturn("echo 'Hello'");
+    when(commandManager.createCommand(any(CommandImpl.class))).thenReturn(createCommandPromise);
+    when(createCommandPromise.then(any(Operation.class))).thenReturn(createCommandPromise);
+    when(createCommandPromise.catchError(any(Operation.class))).thenReturn(createCommandPromise);
 
-        wizard.complete(completeCallback);
+    wizard.complete(completeCallback);
 
-        verify(createProjectPromise).then(completeOperationCaptor.capture());
-        completeOperationCaptor.getValue().apply(createdProject);
-        
-        verify(createCommandPromise).then(completeAddCommandsOperationCaptor.capture());
-        completeAddCommandsOperationCaptor.getValue().apply(createdCommand);
+    verify(createProjectPromise).then(completeOperationCaptor.capture());
+    completeOperationCaptor.getValue().apply(createdProject);
 
-        verify(completeCallback).onCompleted();
-    }
+    verify(createCommandPromise).then(completeAddCommandsOperationCaptor.capture());
+    completeAddCommandsOperationCaptor.getValue().apply(createdCommand);
 
-    @Test
-    public void shouldFailOnImportProject() throws Exception {
-        prepareWizard(IMPORT);
+    verify(completeCallback).onCompleted();
+  }
 
-        when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
-        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
-        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-        when(createProjectPromise.thenPromise(any(Function.class))).thenReturn(createProjectPromise);
-        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
-        when(promiseError.getCause()).thenReturn(exception);
+  @Test
+  public void shouldFailOnImportProject() throws Exception {
+    prepareWizard(IMPORT);
 
-        wizard.complete(completeCallback);
+    when(workspaceRoot.newProject()).thenReturn(createProjectRequest);
+    when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    when(createProjectRequest.send()).thenReturn(createProjectPromise);
+    when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    when(createProjectPromise.thenPromise(any(Function.class))).thenReturn(createProjectPromise);
+    when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+    when(promiseError.getCause()).thenReturn(exception);
 
-        verify(createProjectPromise).catchError(failedOperationCaptor.capture());
-        failedOperationCaptor.getValue().apply(promiseError);
+    wizard.complete(completeCallback);
 
-        verify(promiseError).getCause();
-        verify(completeCallback).onFailure(eq(exception));
-    }
+    verify(createProjectPromise).catchError(failedOperationCaptor.capture());
+    failedOperationCaptor.getValue().apply(promiseError);
 
-    @Test
-    public void shouldUpdateProjectConfig() throws Exception {
-        prepareWizard(UPDATE);
+    verify(promiseError).getCause();
+    verify(completeCallback).onFailure(eq(exception));
+  }
 
-        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
-        when(projectToUpdate.getResourceType()).thenReturn(Resource.PROJECT);
-        when(projectToUpdate.update()).thenReturn(createProjectRequest);
-        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
-        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+  @Test
+  public void shouldUpdateProjectConfig() throws Exception {
+    prepareWizard(UPDATE);
 
-        wizard.complete(completeCallback);
+    when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
+    when(projectToUpdate.getResourceType()).thenReturn(Resource.PROJECT);
+    when(projectToUpdate.update()).thenReturn(createProjectRequest);
+    when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    when(createProjectRequest.send()).thenReturn(createProjectPromise);
+    when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
 
-        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
-        optionalContainerCaptor.getValue().apply(Optional.of((Container)projectToUpdate));
+    wizard.complete(completeCallback);
 
-        verify(createProjectPromise).then(completeOperationCaptor.capture());
-        completeOperationCaptor.getValue().apply(createdProject);
+    verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+    optionalContainerCaptor.getValue().apply(Optional.of((Container) projectToUpdate));
 
-        verify(completeCallback).onCompleted();
-    }
+    verify(createProjectPromise).then(completeOperationCaptor.capture());
+    completeOperationCaptor.getValue().apply(createdProject);
 
-    @Test
-    public void shouldFailUpdateProjectConfig() throws Exception {
-        prepareWizard(UPDATE);
+    verify(completeCallback).onCompleted();
+  }
 
-        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
-        when(projectToUpdate.getResourceType()).thenReturn(Resource.PROJECT);
-        when(projectToUpdate.update()).thenReturn(createProjectRequest);
-        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
-        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
-        when(promiseError.getCause()).thenReturn(exception);
+  @Test
+  public void shouldFailUpdateProjectConfig() throws Exception {
+    prepareWizard(UPDATE);
 
-        wizard.complete(completeCallback);
+    when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
+    when(projectToUpdate.getResourceType()).thenReturn(Resource.PROJECT);
+    when(projectToUpdate.update()).thenReturn(createProjectRequest);
+    when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    when(createProjectRequest.send()).thenReturn(createProjectPromise);
+    when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+    when(promiseError.getCause()).thenReturn(exception);
 
-        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
-        optionalContainerCaptor.getValue().apply(Optional.of((Container)projectToUpdate));
+    wizard.complete(completeCallback);
 
-        verify(createProjectPromise).catchError(failedOperationCaptor.capture());
-        failedOperationCaptor.getValue().apply(promiseError);
+    verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+    optionalContainerCaptor.getValue().apply(Optional.of((Container) projectToUpdate));
 
-        verify(promiseError).getCause();
-        verify(completeCallback).onFailure(eq(exception));
-    }
+    verify(createProjectPromise).catchError(failedOperationCaptor.capture());
+    failedOperationCaptor.getValue().apply(promiseError);
 
-    @Test
-    public void shouldCreateConfigForFolder() throws Exception {
-//        prepareWizard(UPDATE);
-//
-//        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
-//        when(folderToUpdate.getResourceType()).thenReturn(Resource.FOLDER);
-//        when(folderToUpdate.toProject()).thenReturn(createProjectRequest);
-//        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
-//        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-//        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-//        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
-//
-//        wizard.complete(completeCallback);
-//
-//        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
-//        optionalContainerCaptor.getValue().apply(Optional.of((Container)folderToUpdate));
-//
-//        verify(createProjectPromise).then(completeOperationCaptor.capture());
-//        completeOperationCaptor.getValue().apply(createdProject);
-//
-//        verify(completeCallback).onCompleted();
-    }
+    verify(promiseError).getCause();
+    verify(completeCallback).onFailure(eq(exception));
+  }
 
-    @Test
-    public void shouldFailCreateConfigForFolder() throws Exception {
-//        prepareWizard(UPDATE);
-//
-//        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
-//        when(folderToUpdate.getResourceType()).thenReturn(Resource.FOLDER);
-//        when(folderToUpdate.toProject()).thenReturn(createProjectRequest);
-//        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
-//        when(createProjectRequest.send()).thenReturn(createProjectPromise);
-//        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
-//        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
-//        when(promiseError.getCause()).thenReturn(exception);
-//
-//        wizard.complete(completeCallback);
-//
-//        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
-//        optionalContainerCaptor.getValue().apply(Optional.of((Container)folderToUpdate));
-//
-//        verify(createProjectPromise).catchError(failedOperationCaptor.capture());
-//        failedOperationCaptor.getValue().apply(promiseError);
-//
-//        verify(promiseError).getCause();
-//        verify(completeCallback).onFailure(eq(exception));
-    }
+  @Test
+  public void shouldCreateConfigForFolder() throws Exception {
+    //        prepareWizard(UPDATE);
+    //
+    //        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
+    //        when(folderToUpdate.getResourceType()).thenReturn(Resource.FOLDER);
+    //        when(folderToUpdate.toProject()).thenReturn(createProjectRequest);
+    //        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    //        when(createProjectRequest.send()).thenReturn(createProjectPromise);
+    //        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    //        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+    //
+    //        wizard.complete(completeCallback);
+    //
+    //        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+    //        optionalContainerCaptor.getValue().apply(Optional.of((Container)folderToUpdate));
+    //
+    //        verify(createProjectPromise).then(completeOperationCaptor.capture());
+    //        completeOperationCaptor.getValue().apply(createdProject);
+    //
+    //        verify(completeCallback).onCompleted();
+  }
+
+  @Test
+  public void shouldFailCreateConfigForFolder() throws Exception {
+    //        prepareWizard(UPDATE);
+    //
+    //        when(workspaceRoot.getContainer(any(Path.class))).thenReturn(optionalContainerPromise);
+    //        when(folderToUpdate.getResourceType()).thenReturn(Resource.FOLDER);
+    //        when(folderToUpdate.toProject()).thenReturn(createProjectRequest);
+    //        when(createProjectRequest.withBody(any(ProjectConfig.class))).thenReturn(createProjectRequest);
+    //        when(createProjectRequest.send()).thenReturn(createProjectPromise);
+    //        when(createProjectPromise.then(any(Operation.class))).thenReturn(createProjectPromise);
+    //        when(createProjectPromise.catchError(any(Operation.class))).thenReturn(createProjectPromise);
+    //        when(promiseError.getCause()).thenReturn(exception);
+    //
+    //        wizard.complete(completeCallback);
+    //
+    //        verify(optionalContainerPromise).then(optionalContainerCaptor.capture());
+    //        optionalContainerCaptor.getValue().apply(Optional.of((Container)folderToUpdate));
+    //
+    //        verify(createProjectPromise).catchError(failedOperationCaptor.capture());
+    //        failedOperationCaptor.getValue().apply(promiseError);
+    //
+    //        verify(promiseError).getCause();
+    //        verify(completeCallback).onFailure(eq(exception));
+  }
 }

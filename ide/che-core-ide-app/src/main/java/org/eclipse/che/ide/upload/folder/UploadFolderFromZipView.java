@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.upload.folder;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.ImplementedBy;
-
 import javax.validation.constraints.NotNull;
 
 /**
@@ -23,73 +22,72 @@ import javax.validation.constraints.NotNull;
 @ImplementedBy(UploadFolderFromZipViewImpl.class)
 public interface UploadFolderFromZipView extends IsWidget {
 
-    public interface ActionDelegate {
-        /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
-        void onCancelClicked();
-
-        /**
-         * Performs any actions appropriate in response to submit operation is completed.
-         *
-         * @param result
-         *         result of submit operation
-         */
-        void onSubmitComplete(String result);
-
-        /** Performs any actions appropriate in response to the user having pressed the Upload button. */
-        void onUploadClicked();
-
-        /** Performs any actions appropriate in response to the user having changed file name field. */
-        void onFileNameChanged();
-    }
-
-    /** Show dialog. */
-    void showDialog();
-
-    /** Close dialog */
-    void closeDialog();
+  public interface ActionDelegate {
+    /**
+     * Performs any actions appropriate in response to the user having pressed the Cancel button.
+     */
+    void onCancelClicked();
 
     /**
-     * Set the visibility state of the loader.
+     * Performs any actions appropriate in response to submit operation is completed.
      *
-     * @param isVisible
-     *         <code>true</code> if visible.
+     * @param result result of submit operation
      */
-    void setLoaderVisibility(boolean isVisible);
-
-    /** Sets the delegate to receive events from this view. */
-    void setDelegate(ActionDelegate delegate);
+    void onSubmitComplete(String result);
 
     /**
-     * Change the enable state of the upload button.
-     *
-     * @param enabled
-     *         <code>true</code> to enable the button, <code>false</code> to disable it
+     * Performs any actions appropriate in response to the user having pressed the Upload button.
      */
-    void setEnabledUploadButton(boolean enabled);
+    void onUploadClicked();
 
-    /**
-     * Sets the encoding used for submitting form.
-     *
-     * @param encodingType
-     *         the form's encoding
-     */
-    void setEncoding(@NotNull String encodingType);
+    /** Performs any actions appropriate in response to the user having changed file name field. */
+    void onFileNameChanged();
+  }
 
-    /**
-     * Sets the 'action' associated with form. This is the URL to which it will be submitted.
-     *
-     * @param url
-     *         the form's action
-     */
-    void setAction(@NotNull String url);
+  /** Show dialog. */
+  void showDialog();
 
-    /** Submits the form. */
-    void submit();
+  /** Close dialog */
+  void closeDialog();
 
-    /** @return file name */
-    @NotNull
-    String getFileName();
+  /**
+   * Set the visibility state of the loader.
+   *
+   * @param isVisible <code>true</code> if visible.
+   */
+  void setLoaderVisibility(boolean isVisible);
 
-    /** Performs when user select 'overwrite if file exists'. */
-    boolean isOverwriteFileSelected();
+  /** Sets the delegate to receive events from this view. */
+  void setDelegate(ActionDelegate delegate);
+
+  /**
+   * Change the enable state of the upload button.
+   *
+   * @param enabled <code>true</code> to enable the button, <code>false</code> to disable it
+   */
+  void setEnabledUploadButton(boolean enabled);
+
+  /**
+   * Sets the encoding used for submitting form.
+   *
+   * @param encodingType the form's encoding
+   */
+  void setEncoding(@NotNull String encodingType);
+
+  /**
+   * Sets the 'action' associated with form. This is the URL to which it will be submitted.
+   *
+   * @param url the form's action
+   */
+  void setAction(@NotNull String url);
+
+  /** Submits the form. */
+  void submit();
+
+  /** @return file name */
+  @NotNull
+  String getFileName();
+
+  /** Performs when user select 'overwrite if file exists'. */
+  boolean isOverwriteFileSelected();
 }

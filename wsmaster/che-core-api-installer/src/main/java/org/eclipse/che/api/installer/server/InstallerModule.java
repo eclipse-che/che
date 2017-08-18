@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,25 +7,22 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.installer.server;
 
 import com.google.inject.AbstractModule;
-
 import org.eclipse.che.api.installer.server.exception.InstallerExceptionMapper;
 import org.eclipse.che.api.installer.server.jpa.JpaInstallerDao;
 import org.eclipse.che.api.installer.server.spi.InstallerDao;
 
-/**
- * @author Anatolii Bazko
- */
+/** @author Anatolii Bazko */
 public class InstallerModule extends AbstractModule {
 
-    @Override
-    protected void configure() {
-        bind(InstallerExceptionMapper.class);
-        bind(InstallerRegistry.class).toProvider(InstallerRegistryProvider.class);
-        bind(InstallerRegistryService.class);
-        bind(InstallerDao.class).to(JpaInstallerDao.class);
-    }
+  @Override
+  protected void configure() {
+    bind(InstallerExceptionMapper.class);
+    bind(InstallerRegistry.class).toProvider(InstallerRegistryProvider.class);
+    bind(InstallerRegistryService.class);
+    bind(InstallerDao.class).to(JpaInstallerDao.class);
+  }
 }

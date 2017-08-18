@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.workspace.event;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -16,19 +16,19 @@ import com.google.gwt.event.shared.GwtEvent;
 /** Fired when the current workspace goes into a starting state. */
 public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Handler> {
 
-    public static final Type<WorkspaceStartingEvent.Handler> TYPE = new Type<>();
+  public static final Type<WorkspaceStartingEvent.Handler> TYPE = new Type<>();
 
-    @Override
-    public Type<Handler> getAssociatedType() {
-        return TYPE;
-    }
+  @Override
+  public Type<Handler> getAssociatedType() {
+    return TYPE;
+  }
 
-    @Override
-    protected void dispatch(Handler handler) {
-        handler.onWorkspaceStarting(this);
-    }
+  @Override
+  protected void dispatch(Handler handler) {
+    handler.onWorkspaceStarting(this);
+  }
 
-    public interface Handler extends EventHandler {
-        void onWorkspaceStarting(WorkspaceStartingEvent event);
-    }
+  public interface Handler extends EventHandler {
+    void onWorkspaceStarting(WorkspaceStartingEvent event);
+  }
 }

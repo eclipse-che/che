@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,23 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.client;
 
-import org.eclipse.che.ide.bootstrap.IdeBootstrap;
-import org.eclipse.che.ide.client.inject.IDEInjector;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-
+import org.eclipse.che.ide.bootstrap.IdeBootstrap;
 import org.eclipse.che.ide.client.inject.IDEInjector;
 
 /** The EntryPoint of the IDE application */
 public class IDE implements EntryPoint {
-    /** This is the entry point method. */
-    @Override
-    public void onModuleLoad() {
-        IDEInjector injector = GWT.create(IDEInjector.class);
-        @SuppressWarnings("unused")
-        IdeBootstrap bootstrap = injector.getIdeBootstrap();
-    }
+  /** This is the entry point method. */
+  @Override
+  public void onModuleLoad() {
+    IDEInjector injector = GWT.create(IDEInjector.class);
+    @SuppressWarnings("unused")
+    IdeBootstrap bootstrap = injector.getIdeBootstrap();
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,24 +7,22 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.ClasspathNodeInterceptor;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.JarNodeInterceptor;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 
 /**
  * Presenter for choosing directory for searching a node.
@@ -33,63 +31,67 @@ import java.util.List;
  */
 @Singleton
 public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
-    private final static String WORKSPACE_PATH = "/projects";
+  private static final String WORKSPACE_PATH = "/projects";
 
-    private final SelectNodeView           view;
-    private final ResourceNode.NodeFactory nodeFactory;
-    private final SettingsProvider         settingsProvider;
-    private final AppContext               appContext;
+  private final SelectNodeView view;
+  private final ResourceNode.NodeFactory nodeFactory;
+  private final SettingsProvider settingsProvider;
+  private final AppContext appContext;
 
-    private ClasspathPagePresenter   classpathPagePresenter;
-    private ClasspathNodeInterceptor interceptor;
+  private ClasspathPagePresenter classpathPagePresenter;
+  private ClasspathNodeInterceptor interceptor;
 
-    @Inject
-    public SelectNodePresenter(SelectNodeView view,
-                               ResourceNode.NodeFactory nodeFactory,
-                               SettingsProvider settingsProvider,
-                               AppContext appContext) {
-        this.view = view;
-        this.nodeFactory = nodeFactory;
-        this.settingsProvider = settingsProvider;
-        this.appContext = appContext;
-        this.view.setDelegate(this);
+  @Inject
+  public SelectNodePresenter(
+      SelectNodeView view,
+      ResourceNode.NodeFactory nodeFactory,
+      SettingsProvider settingsProvider,
+      AppContext appContext) {
+    this.view = view;
+    this.nodeFactory = nodeFactory;
+    this.settingsProvider = settingsProvider;
+    this.appContext = appContext;
+    this.view.setDelegate(this);
+  }
+
+  /**
+   * Show tree view with all needed nodes of the workspace.
+   *
+   * @param pagePresenter delegate from the property page
+   * @param nodeInterceptor interceptor for showing nodes
+   * @param forCurrent if is true - show only current project, otherwise - whole workspace
+   */
+  public void show(
+      ClasspathPagePresenter pagePresenter,
+      ClasspathNodeInterceptor nodeInterceptor,
+      boolean forCurrent) {
+    this.classpathPagePresenter = pagePresenter;
+    this.interceptor = nodeInterceptor;
+    if (forCurrent) {
+      final Project project = appContext.getRootProject();
+
+      view.setStructure(
+          Collections.<Node>singletonList(
+              nodeFactory.newContainerNode(project, settingsProvider.getSettings())),
+          interceptor);
+    } else {
+      final List<Node> nodes = new ArrayList<>();
+      for (Project project : appContext.getProjects()) {
+        nodes.add(nodeFactory.newContainerNode(project, settingsProvider.getSettings()));
+      }
+
+      view.setStructure(nodes, interceptor);
     }
 
-    /**
-     * Show tree view with all needed nodes of the workspace.
-     *
-     * @param pagePresenter
-     *         delegate from the property page
-     * @param nodeInterceptor
-     *         interceptor for showing nodes
-     * @param forCurrent
-     *         if is true - show only current project, otherwise - whole workspace
-     */
-    public void show(ClasspathPagePresenter pagePresenter, ClasspathNodeInterceptor nodeInterceptor, boolean forCurrent) {
-        this.classpathPagePresenter = pagePresenter;
-        this.interceptor = nodeInterceptor;
-        if (forCurrent) {
-            final Project project = appContext.getRootProject();
+    view.show();
+  }
 
-            view.setStructure(Collections.<Node>singletonList(nodeFactory.newContainerNode(project, settingsProvider.getSettings())), interceptor);
-        } else {
-            final List<Node> nodes = new ArrayList<>();
-            for (Project project : appContext.getProjects()) {
-                nodes.add(nodeFactory.newContainerNode(project, settingsProvider.getSettings()));
-            }
-
-            view.setStructure(nodes, interceptor);
-        }
-
-        view.show();
+  /** {@inheritDoc} */
+  @Override
+  public void setSelectedNode(String path) {
+    if (interceptor instanceof JarNodeInterceptor) {
+      path = WORKSPACE_PATH + path;
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setSelectedNode(String path) {
-        if (interceptor instanceof JarNodeInterceptor) {
-            path = WORKSPACE_PATH + path;
-        }
-        classpathPagePresenter.addNode(path, interceptor.getKind());
-    }
+    classpathPagePresenter.addNode(path, interceptor.getKind());
+  }
 }

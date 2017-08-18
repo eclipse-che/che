@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.server.model.impl;
 
-import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.api.core.model.workspace.config.Recipe;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -27,12 +28,10 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
 
 /**
  * Data object for {@link Environment}.
@@ -43,96 +42,102 @@ import java.util.stream.Collectors;
 @Table(name = "environment")
 public class EnvironmentImpl implements Environment {
 
-    @Id
-    @GeneratedValue
-    @Column(name = "id")
-    private Long id;
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
 
-    @Embedded
-    private RecipeImpl recipe;
+  @Embedded private RecipeImpl recipe;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "machines_id")
-    @MapKeyColumn(name = "machines_key")
-    private Map<String, MachineConfigImpl> machines;
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "machines_id")
+  @MapKeyColumn(name = "machines_key")
+  private Map<String, MachineConfigImpl> machines;
 
-    @Transient
-    private List<WarningImpl> warnings;
+  @Transient private List<WarningImpl> warnings;
 
-    public EnvironmentImpl() {}
+  public EnvironmentImpl() {}
 
-    public EnvironmentImpl(Recipe recipe,
-                           Map<String, ? extends MachineConfig> machines,
-                           List<? extends Warning> warnings) {
-        if (recipe != null) {
-            this.recipe = new RecipeImpl(recipe);
-        }
-        if (machines != null) {
-            this.machines = machines.entrySet()
-                                    .stream()
-                                    .collect(Collectors.toMap(Map.Entry::getKey,
-                                                              entry -> new MachineConfigImpl(entry.getValue())));
-        }
-        if (warnings != null) {
-            this.warnings = warnings.stream().map(WarningImpl::new).collect(Collectors.toList());
-        }
+  public EnvironmentImpl(
+      Recipe recipe,
+      Map<String, ? extends MachineConfig> machines,
+      List<? extends Warning> warnings) {
+    if (recipe != null) {
+      this.recipe = new RecipeImpl(recipe);
     }
-
-    public EnvironmentImpl(Environment environment) {
-        this(environment.getRecipe(), environment.getMachines(), environment.getWarnings());
+    if (machines != null) {
+      this.machines =
+          machines
+              .entrySet()
+              .stream()
+              .collect(
+                  Collectors.toMap(
+                      Map.Entry::getKey, entry -> new MachineConfigImpl(entry.getValue())));
     }
-
-    public RecipeImpl getRecipe() {
-        return recipe;
+    if (warnings != null) {
+      this.warnings = warnings.stream().map(WarningImpl::new).collect(Collectors.toList());
     }
+  }
 
-    public void setRecipe(RecipeImpl environmentRecipe) {
-        this.recipe = environmentRecipe;
-    }
+  public EnvironmentImpl(Environment environment) {
+    this(environment.getRecipe(), environment.getMachines(), environment.getWarnings());
+  }
 
-    @Override
-    public Map<String, MachineConfigImpl> getMachines() {
-        if (machines == null) {
-            machines = new HashMap<>();
-        }
-        return machines;
-    }
+  public RecipeImpl getRecipe() {
+    return recipe;
+  }
 
-    @Override
-    public List<? extends Warning> getWarnings() {
-        if (warnings == null) {
-            warnings = new ArrayList<>();
-        }
-        return warnings;
-    }
+  public void setRecipe(RecipeImpl environmentRecipe) {
+    this.recipe = environmentRecipe;
+  }
 
-    public void setMachines(Map<String, MachineConfigImpl> machines) {
-        this.machines = machines;
+  @Override
+  public Map<String, MachineConfigImpl> getMachines() {
+    if (machines == null) {
+      machines = new HashMap<>();
     }
+    return machines;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof EnvironmentImpl)) return false;
-        EnvironmentImpl that = (EnvironmentImpl)o;
-        return Objects.equals(id, that.id) &&
-               Objects.equals(getRecipe(), that.getRecipe()) &&
-               Objects.equals(getMachines(), that.getMachines()) &&
-               Objects.equals(getWarnings(), that.getWarnings());
+  @Override
+  public List<? extends Warning> getWarnings() {
+    if (warnings == null) {
+      warnings = new ArrayList<>();
     }
+    return warnings;
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, getRecipe(), getMachines(), getWarnings());
-    }
+  public void setMachines(Map<String, MachineConfigImpl> machines) {
+    this.machines = machines;
+  }
 
-    @Override
-    public String toString() {
-        return "EnvironmentImpl{" +
-               "id=" + id +
-               ", recipe=" + recipe +
-               ", machines=" + machines +
-               ", warnings=" + warnings +
-               '}';
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof EnvironmentImpl)) return false;
+    EnvironmentImpl that = (EnvironmentImpl) o;
+    return Objects.equals(id, that.id)
+        && Objects.equals(getRecipe(), that.getRecipe())
+        && Objects.equals(getMachines(), that.getMachines())
+        && Objects.equals(getWarnings(), that.getWarnings());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, getRecipe(), getMachines(), getWarnings());
+  }
+
+  @Override
+  public String toString() {
+    return "EnvironmentImpl{"
+        + "id="
+        + id
+        + ", recipe="
+        + recipe
+        + ", machines="
+        + machines
+        + ", warnings="
+        + warnings
+        + '}';
+  }
 }

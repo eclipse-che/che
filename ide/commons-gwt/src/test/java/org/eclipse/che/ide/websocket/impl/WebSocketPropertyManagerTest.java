@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.websocket.impl;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,9 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 /**
  * Test for {@link WebSocketPropertyManager}
  *
@@ -27,51 +27,46 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class WebSocketPropertyManagerTest {
-    @InjectMocks
-    private WebSocketPropertyManager propertyManager;
+  @InjectMocks private WebSocketPropertyManager propertyManager;
 
-    @Before
-    public void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {}
 
-    }
+  @After
+  public void tearDown() throws Exception {}
 
-    @After
-    public void tearDown() throws Exception {
+  @Test
+  public void shouldInitializeDefaultDelayOnInitialize() {
+    propertyManager.initializeConnection("url");
 
-    }
+    final int delay = propertyManager.getConnectionDelay("url");
+    assertEquals(0, delay);
+  }
 
-    @Test
-    public void shouldInitializeDefaultDelayOnInitialize() {
-        propertyManager.initializeConnection("url");
+  @Test
+  public void shouldInitializeDefaultAttemptsOnInitialize() {
+    propertyManager.initializeConnection("url");
 
-        final int delay = propertyManager.getConnectionDelay("url");
-        assertEquals(0, delay);
-    }
+    final int attempts = propertyManager.getReConnectionAttempts("url");
 
-    @Test
-    public void shouldInitializeDefaultAttemptsOnInitialize() {
-        propertyManager.initializeConnection("url");
+    assertEquals(0, attempts);
+  }
 
-        final int attempts = propertyManager.getReConnectionAttempts("url");
+  @Test
+  public void shouldInitializeDefaultUrlOnInitialize() {
+    propertyManager.initializeConnection("url");
 
-        assertEquals(0, attempts);
-    }
+    final String url = propertyManager.getUrl("url");
 
-    @Test
-    public void shouldInitializeDefaultUrlOnInitialize() {
-        propertyManager.initializeConnection("url");
+    assertEquals("url", url);
+  }
 
-        final String url = propertyManager.getUrl("url");
+  @Test
+  public void shouldInitializeDefaultSustainerStatusOnInitialize() {
+    propertyManager.initializeConnection("url");
 
-        assertEquals("url", url);
-    }
+    final boolean sustainerEnabled = propertyManager.sustainerEnabled("url");
 
-    @Test
-    public void shouldInitializeDefaultSustainerStatusOnInitialize() {
-        propertyManager.initializeConnection("url");
-
-        final boolean sustainerEnabled = propertyManager.sustainerEnabled("url");
-
-        assertTrue(sustainerEnabled);
-    }
+    assertTrue(sustainerEnabled);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.workspace.infrastructure.docker.provisioner.server;
 
+import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.API_ENDPOINT_URL_VARIABLE;
+
 import com.google.common.base.Strings;
-
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.commons.lang.Pair;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.API_ENDPOINT_URL_VARIABLE;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.commons.lang.Pair;
 
 /**
  * Add env variable to docker machine with url of Che API
@@ -27,21 +25,21 @@ import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.API_
  * @author Alexander Garagatyi
  */
 @Singleton
-public class ApiEndpointEnvVariableProvider implements ServerEnvironmentVariableProvider{
-    private Pair<String, String> apiEnvVar;
+public class ApiEndpointEnvVariableProvider implements ServerEnvironmentVariableProvider {
+  private Pair<String, String> apiEnvVar;
 
-    @Inject
-    public ApiEndpointEnvVariableProvider(@Named("che.workspace.che_server_endpoint") String apiEndpoint) {
-        String apiEndpointEnvVar = System.getenv(API_ENDPOINT_URL_VARIABLE);
-        if (Strings.isNullOrEmpty(apiEndpoint) &&
-            !Strings.isNullOrEmpty(apiEndpointEnvVar)) {
-            apiEndpoint = apiEndpointEnvVar;
-        }
-        apiEnvVar = Pair.of(API_ENDPOINT_URL_VARIABLE, apiEndpoint);
+  @Inject
+  public ApiEndpointEnvVariableProvider(
+      @Named("che.workspace.che_server_endpoint") String apiEndpoint) {
+    String apiEndpointEnvVar = System.getenv(API_ENDPOINT_URL_VARIABLE);
+    if (Strings.isNullOrEmpty(apiEndpoint) && !Strings.isNullOrEmpty(apiEndpointEnvVar)) {
+      apiEndpoint = apiEndpointEnvVar;
     }
+    apiEnvVar = Pair.of(API_ENDPOINT_URL_VARIABLE, apiEndpoint);
+  }
 
-    @Override
-    public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
-        return new Pair<>(apiEnvVar.first, apiEnvVar.second);
-    }
+  @Override
+  public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
+    return new Pair<>(apiEnvVar.first, apiEnvVar.second);
+  }
 }

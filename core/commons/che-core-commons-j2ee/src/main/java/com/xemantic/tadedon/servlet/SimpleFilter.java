@@ -20,25 +20,23 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 
 /**
- * Servlet {@link Filter} which does not require initialization
- * and clean up. 
- * <p>
- * Created on Aug 6, 2010
+ * Servlet {@link Filter} which does not require initialization and clean up.
+ *
+ * <p>Created on Aug 6, 2010
  *
  * @author hshsce
  */
 public abstract class SimpleFilter implements Filter {
 
-	/** {@inheritDoc} */
-	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		/* nothing to do */
-	}
+  /** {@inheritDoc} */
+  @Override
+  public void init(FilterConfig filterConfig) throws ServletException {
+    /* nothing to do */
+  }
 
-	/** {@inheritDoc} */
-	@Override
-	public void destroy() {
-		/* nothing to do */
-	}
-
+  /** {@inheritDoc} */
+  @Override
+  public void destroy() {
+    /* nothing to do */
+  }
 }

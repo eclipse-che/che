@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,35 +7,32 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 @DTO
 public interface ProposalPresentation {
 
-    String getImage();
+  String getImage();
 
-    void setImage(String image);
+  void setImage(String image);
 
-    String getDisplayString();
+  String getDisplayString();
 
-    void setDisplayString(String displayString);
+  void setDisplayString(String displayString);
 
-    boolean isAutoInsertable();
+  boolean isAutoInsertable();
 
-    void setAutoInsertable(boolean insertable);
+  void setAutoInsertable(boolean insertable);
 
-    int getIndex();
+  int getIndex();
 
-    void setIndex(int index);
+  void setIndex(int index);
 
-    String getActionId();
+  String getActionId();
 
-    void setActionId(String actionId);
-
+  void setActionId(String actionId);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.part.editor;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Iterables.filter;
+import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
+import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
+import static org.eclipse.che.ide.api.editor.EditorWithErrors.EditorState.ERROR;
+import static org.eclipse.che.ide.api.editor.EditorWithErrors.EditorState.WARNING;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
+import static org.eclipse.che.ide.part.editor.actions.EditorAbstractAction.CURRENT_FILE_PROP;
+import static org.eclipse.che.ide.part.editor.actions.EditorAbstractAction.CURRENT_PANE_PROP;
+import static org.eclipse.che.ide.part.editor.actions.EditorAbstractAction.CURRENT_TAB_PROP;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
@@ -16,7 +27,13 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -53,28 +70,9 @@ import org.eclipse.che.ide.part.widgets.panemenu.EditorPaneMenuItemFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Iterables.filter;
-import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
-import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
-import static org.eclipse.che.ide.api.editor.EditorWithErrors.EditorState.ERROR;
-import static org.eclipse.che.ide.api.editor.EditorWithErrors.EditorState.WARNING;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
-import static org.eclipse.che.ide.part.editor.actions.EditorAbstractAction.CURRENT_FILE_PROP;
-import static org.eclipse.che.ide.part.editor.actions.EditorAbstractAction.CURRENT_PANE_PROP;
-import static org.eclipse.che.ide.part.editor.actions.EditorAbstractAction.CURRENT_TAB_PROP;
-
 /**
- * EditorPartStackPresenter is a special PartStackPresenter that is shared among all
- * Perspectives and used to display Editors.
+ * EditorPartStackPresenter is a special PartStackPresenter that is shared among all Perspectives
+ * and used to display Editors.
  *
  * @author Nikolay Zamosenchuk
  * @author Stéphane Daviet
@@ -82,455 +80,470 @@ import static org.eclipse.che.ide.part.editor.actions.EditorAbstractAction.CURRE
  * @author Vlad Zhukovskyi
  * @author Roman Nikitenko
  */
-public class EditorPartStackPresenter extends PartStackPresenter implements EditorPartStack,
-                                                                            EditorTab.ActionDelegate,
-                                                                            CloseNonPinnedEditorsHandler,
-                                                                            ResourceChangedHandler {
-    private final PresentationFactory              presentationFactory;
-    private final AppContext                       appContext;
-    private final EditorPaneMenuItemFactory        editorPaneMenuItemFactory;
-    private final EventBus                         eventBus;
-    private final EditorPaneMenu                   editorPaneMenu;
-    private final ActionManager                    actionManager;
-    private final ClosePaneAction                  closePaneAction;
-    private final CloseAllTabsPaneAction           closeAllTabsPaneAction;
-    private final EditorAgent                      editorAgent;
-    private final Map<EditorPaneMenuItem, TabItem> items;
+public class EditorPartStackPresenter extends PartStackPresenter
+    implements EditorPartStack,
+        EditorTab.ActionDelegate,
+        CloseNonPinnedEditorsHandler,
+        ResourceChangedHandler {
+  private final PresentationFactory presentationFactory;
+  private final AppContext appContext;
+  private final EditorPaneMenuItemFactory editorPaneMenuItemFactory;
+  private final EventBus eventBus;
+  private final EditorPaneMenu editorPaneMenu;
+  private final ActionManager actionManager;
+  private final ClosePaneAction closePaneAction;
+  private final CloseAllTabsPaneAction closeAllTabsPaneAction;
+  private final EditorAgent editorAgent;
+  private final Map<EditorPaneMenuItem, TabItem> items;
 
-    //this list need to save order of added parts
-    private final LinkedList<EditorPartPresenter> partsOrder;
-    private final LinkedList<EditorPartPresenter> closedParts;
+  //this list need to save order of added parts
+  private final LinkedList<EditorPartPresenter> partsOrder;
+  private final LinkedList<EditorPartPresenter> closedParts;
 
-    private HandlerRegistration closeNonPinnedEditorsHandler;
-    private HandlerRegistration resourceChangeHandler;
+  private HandlerRegistration closeNonPinnedEditorsHandler;
+  private HandlerRegistration resourceChangeHandler;
 
-    @VisibleForTesting
-    PaneMenuActionItemHandler paneMenuActionItemHandler;
-    @VisibleForTesting
-    PaneMenuTabItemHandler    paneMenuTabItemHandler;
+  @VisibleForTesting PaneMenuActionItemHandler paneMenuActionItemHandler;
+  @VisibleForTesting PaneMenuTabItemHandler paneMenuTabItemHandler;
 
-    @Inject
-    public EditorPartStackPresenter(EditorPartStackView view,
-                                    AppContext appContext,
-                                    PartMenu partMenu,
-                                    PartsComparator partsComparator,
-                                    EditorPaneMenuItemFactory editorPaneMenuItemFactory,
-                                    PresentationFactory presentationFactory,
-                                    EventBus eventBus,
-                                    TabItemFactory tabItemFactory,
-                                    PartStackEventHandler partStackEventHandler,
-                                    EditorPaneMenu editorPaneMenu,
-                                    ActionManager actionManager,
-                                    ClosePaneAction closePaneAction,
-                                    CloseAllTabsPaneAction closeAllTabsPaneAction,
-                                    EditorAgent editorAgent) {
-        super(eventBus, partMenu, partStackEventHandler, tabItemFactory, partsComparator, view, null);
-        this.appContext = appContext;
-        this.editorPaneMenuItemFactory = editorPaneMenuItemFactory;
-        this.eventBus = eventBus;
-        this.presentationFactory = presentationFactory;
-        this.editorPaneMenu = editorPaneMenu;
-        this.actionManager = actionManager;
-        this.closePaneAction = closePaneAction;
-        this.closeAllTabsPaneAction = closeAllTabsPaneAction;
-        this.editorAgent = editorAgent;
-        this.view.setDelegate(this);
-        this.items = new HashMap<>();
-        this.partsOrder = new LinkedList<>();
-        this.closedParts = new LinkedList<>();
+  @Inject
+  public EditorPartStackPresenter(
+      EditorPartStackView view,
+      AppContext appContext,
+      PartMenu partMenu,
+      PartsComparator partsComparator,
+      EditorPaneMenuItemFactory editorPaneMenuItemFactory,
+      PresentationFactory presentationFactory,
+      EventBus eventBus,
+      TabItemFactory tabItemFactory,
+      PartStackEventHandler partStackEventHandler,
+      EditorPaneMenu editorPaneMenu,
+      ActionManager actionManager,
+      ClosePaneAction closePaneAction,
+      CloseAllTabsPaneAction closeAllTabsPaneAction,
+      EditorAgent editorAgent) {
+    super(eventBus, partMenu, partStackEventHandler, tabItemFactory, partsComparator, view, null);
+    this.appContext = appContext;
+    this.editorPaneMenuItemFactory = editorPaneMenuItemFactory;
+    this.eventBus = eventBus;
+    this.presentationFactory = presentationFactory;
+    this.editorPaneMenu = editorPaneMenu;
+    this.actionManager = actionManager;
+    this.closePaneAction = closePaneAction;
+    this.closeAllTabsPaneAction = closeAllTabsPaneAction;
+    this.editorAgent = editorAgent;
+    this.view.setDelegate(this);
+    this.items = new HashMap<>();
+    this.partsOrder = new LinkedList<>();
+    this.closedParts = new LinkedList<>();
 
-        initializePaneMenu();
-        view.addPaneMenuButton(editorPaneMenu);
+    initializePaneMenu();
+    view.addPaneMenuButton(editorPaneMenu);
+  }
+
+  private void initializePaneMenu() {
+    paneMenuTabItemHandler = new PaneMenuTabItemHandler();
+    paneMenuActionItemHandler = new PaneMenuActionItemHandler();
+
+    final EditorPaneMenuItem<Action> closePaneItemWidget =
+        editorPaneMenuItemFactory.createMenuItem(closePaneAction);
+    closePaneItemWidget.setDelegate(paneMenuActionItemHandler);
+    editorPaneMenu.addItem(closePaneItemWidget);
+
+    final EditorPaneMenuItem<Action> closeAllTabsItemWidget =
+        editorPaneMenuItemFactory.createMenuItem(closeAllTabsPaneAction);
+    closeAllTabsItemWidget.setDelegate(paneMenuActionItemHandler);
+    editorPaneMenu.addItem(closeAllTabsItemWidget, true);
+
+    final Action splitHorizontallyAction = actionManager.getAction(SPLIT_HORIZONTALLY);
+    final EditorPaneMenuItem<Action> splitHorizontallyItemWidget =
+        editorPaneMenuItemFactory.createMenuItem(splitHorizontallyAction);
+    splitHorizontallyItemWidget.setDelegate(paneMenuActionItemHandler);
+    editorPaneMenu.addItem(splitHorizontallyItemWidget);
+
+    final Action splitVerticallyAction = actionManager.getAction(SPLIT_VERTICALLY);
+    final EditorPaneMenuItem<Action> splitVerticallyItemWidget =
+        editorPaneMenuItemFactory.createMenuItem(splitVerticallyAction);
+    splitVerticallyItemWidget.setDelegate(paneMenuActionItemHandler);
+    editorPaneMenu.addItem(splitVerticallyItemWidget);
+  }
+
+  @Nullable
+  private EditorPaneMenuItem getPaneMenuItemByTab(@NotNull TabItem tabItem) {
+    for (Entry<EditorPaneMenuItem, TabItem> entry : items.entrySet()) {
+      if (tabItem.equals(entry.getValue())) {
+        return entry.getKey();
+      }
     }
 
-    private void initializePaneMenu() {
-        paneMenuTabItemHandler = new PaneMenuTabItemHandler();
-        paneMenuActionItemHandler = new PaneMenuActionItemHandler();
+    return null;
+  }
 
-        final EditorPaneMenuItem<Action> closePaneItemWidget = editorPaneMenuItemFactory.createMenuItem(closePaneAction);
-        closePaneItemWidget.setDelegate(paneMenuActionItemHandler);
-        editorPaneMenu.addItem(closePaneItemWidget);
+  @Override
+  public List<EditorPartPresenter> getParts() {
+    return new ArrayList<>(partsOrder);
+  }
 
-        final EditorPaneMenuItem<Action> closeAllTabsItemWidget = editorPaneMenuItemFactory.createMenuItem(closeAllTabsPaneAction);
-        closeAllTabsItemWidget.setDelegate(paneMenuActionItemHandler);
-        editorPaneMenu.addItem(closeAllTabsItemWidget, true);
+  /** {@inheritDoc} */
+  @Override
+  public void setFocus(boolean focused) {
+    view.setFocus(focused);
+  }
 
-        final Action splitHorizontallyAction = actionManager.getAction(SPLIT_HORIZONTALLY);
-        final EditorPaneMenuItem<Action> splitHorizontallyItemWidget = editorPaneMenuItemFactory.createMenuItem(splitHorizontallyAction);
-        splitHorizontallyItemWidget.setDelegate(paneMenuActionItemHandler);
-        editorPaneMenu.addItem(splitHorizontallyItemWidget);
+  /** {@inheritDoc} */
+  @Override
+  public void addPart(@NotNull PartPresenter part, Constraints constraint) {
+    addPart(part);
+  }
 
-        final Action splitVerticallyAction = actionManager.getAction(SPLIT_VERTICALLY);
-        final EditorPaneMenuItem<Action> splitVerticallyItemWidget = editorPaneMenuItemFactory.createMenuItem(splitVerticallyAction);
-        splitVerticallyItemWidget.setDelegate(paneMenuActionItemHandler);
-        editorPaneMenu.addItem(splitVerticallyItemWidget);
+  /** {@inheritDoc} */
+  @Override
+  public void addPart(@NotNull PartPresenter part) {
+    checkArgument(
+        part instanceof AbstractEditorPresenter,
+        "Can not add part " + part.getTitle() + " to editor part stack");
+
+    EditorPartPresenter editorPart = (AbstractEditorPresenter) part;
+    if (containsPart(editorPart)) {
+      setActivePart(editorPart);
+      return;
     }
 
-    @Nullable
-    private EditorPaneMenuItem getPaneMenuItemByTab(@NotNull TabItem tabItem) {
-        for (Entry<EditorPaneMenuItem, TabItem> entry : items.entrySet()) {
-            if (tabItem.equals(entry.getValue())) {
-                return entry.getKey();
+    VirtualFile file = editorPart.getEditorInput().getFile();
+    checkArgument(file != null, "File doesn't provided");
+
+    addHandlers();
+    updateListClosedParts(file);
+
+    editorPart.addPropertyListener(propertyListener);
+
+    final EditorTab editorTab = tabItemFactory.createEditorPartButton(editorPart, this);
+
+    appContext
+        .getWorkspaceRoot()
+        .getFile(file.getLocation())
+        .then(
+            optional -> {
+              if (optional.isPresent()) {
+                editorTab.setTitleColor(optional.get().getVcsStatus().getColor());
+              }
+            });
+
+    editorPart.addPropertyListener(
+        new PropertyListener() {
+          @Override
+          public void propertyChanged(PartPresenter source, int propId) {
+            if (!(source instanceof EditorPartPresenter)) {
+              return;
             }
-        }
 
-        return null;
+            boolean isReadOnly =
+                ((EditorPartPresenter) source).getEditorInput().getFile().isReadOnly();
+            if (propId == EditorPartPresenter.PROP_INPUT) {
+              editorTab.setReadOnlyMark(isReadOnly);
+              return;
+            }
+
+            if (!isReadOnly && propId == EditorPartPresenter.PROP_DIRTY) {
+              editorTab.setUnsavedDataMark(((EditorPartPresenter) source).isDirty());
+            }
+          }
+        });
+
+    editorTab.setDelegate(this);
+
+    parts.put(editorTab, editorPart);
+    partsOrder.add(editorPart);
+
+    view.addTab(editorTab, editorPart);
+
+    TabItem tabItem = getTabByPart(editorPart);
+
+    if (tabItem != null) {
+      final EditorPaneMenuItem<TabItem> item = editorPaneMenuItemFactory.createMenuItem(tabItem);
+      item.setDelegate(paneMenuTabItemHandler);
+      editorPaneMenu.addItem(item);
+      items.put(item, tabItem);
     }
 
-    @Override
-    public List<EditorPartPresenter> getParts() {
-        return new ArrayList<>(partsOrder);
-    }
+    if (editorPart instanceof EditorWithErrors) {
+      final EditorWithErrors presenter = ((EditorWithErrors) editorPart);
 
-    /** {@inheritDoc} */
-    @Override
-    public void setFocus(boolean focused) {
-        view.setFocus(focused);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void addPart(@NotNull PartPresenter part, Constraints constraint) {
-        addPart(part);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void addPart(@NotNull PartPresenter part) {
-        checkArgument(part instanceof AbstractEditorPresenter, "Can not add part " + part.getTitle() + " to editor part stack");
-
-        EditorPartPresenter editorPart = (AbstractEditorPresenter)part;
-        if (containsPart(editorPart)) {
-            setActivePart(editorPart);
-            return;
-        }
-
-        VirtualFile file = editorPart.getEditorInput().getFile();
-        checkArgument(file != null, "File doesn't provided");
-
-        addHandlers();
-        updateListClosedParts(file);
-
-        editorPart.addPropertyListener(propertyListener);
-
-        final EditorTab editorTab = tabItemFactory.createEditorPartButton(editorPart, this);
-
-        appContext.getWorkspaceRoot()
-                  .getFile(file.getLocation())
-                  .then(optional -> {
-                      if (optional.isPresent()) {
-                          editorTab.setTitleColor(optional.get().getVcsStatus().getColor());
-                      }
-                  });
-
-        editorPart.addPropertyListener(new PropertyListener() {
+      editorPart.addPropertyListener(
+          new PropertyListener() {
             @Override
             public void propertyChanged(PartPresenter source, int propId) {
-                if (!(source instanceof EditorPartPresenter)) {
-                    return;
-                }
+              EditorState editorState = presenter.getErrorState();
 
-                boolean isReadOnly = ((EditorPartPresenter)source).getEditorInput().getFile().isReadOnly();
-                if (propId == EditorPartPresenter.PROP_INPUT) {
-                    editorTab.setReadOnlyMark(isReadOnly);
-                    return;
-                }
-
-                if (!isReadOnly && propId == EditorPartPresenter.PROP_DIRTY) {
-                    editorTab.setUnsavedDataMark(((EditorPartPresenter)source).isDirty());
-                }
+              editorTab.setErrorMark(ERROR.equals(editorState));
+              editorTab.setWarningMark(WARNING.equals(editorState));
             }
-        });
+          });
+    }
+    view.selectTab(editorPart);
+  }
 
-        editorTab.setDelegate(this);
+  private void updateListClosedParts(VirtualFile file) {
+    if (closedParts.isEmpty()) {
+      return;
+    }
 
-        parts.put(editorTab, editorPart);
-        partsOrder.add(editorPart);
+    for (EditorPartPresenter closedEditorPart : closedParts) {
+      Path path = closedEditorPart.getEditorInput().getFile().getLocation();
+      if (path.equals(file.getLocation())) {
+        closedParts.remove(closedEditorPart);
+        return;
+      }
+    }
+  }
 
-        view.addTab(editorTab, editorPart);
+  /** {@inheritDoc} */
+  @Override
+  public PartPresenter getActivePart() {
+    return activePart;
+  }
 
-        TabItem tabItem = getTabByPart(editorPart);
+  /** {@inheritDoc} */
+  @Override
+  public void setActivePart(@NotNull PartPresenter part) {
+    activePart = part;
+    view.selectTab(part);
+  }
 
-        if (tabItem != null) {
-            final EditorPaneMenuItem<TabItem> item = editorPaneMenuItemFactory.createMenuItem(tabItem);
-            item.setDelegate(paneMenuTabItemHandler);
-            editorPaneMenu.addItem(item);
-            items.put(item, tabItem);
-        }
+  /** {@inheritDoc} */
+  @Override
+  public void onTabClicked(@NotNull TabItem tab) {
+    activePart = parts.get(tab);
+    view.selectTab(parts.get(tab));
+  }
 
-        if (editorPart instanceof EditorWithErrors) {
-            final EditorWithErrors presenter = ((EditorWithErrors)editorPart);
+  @Override
+  public void onTabDoubleClicked(@NotNull TabItem tab) {
+    eventBus.fireEvent(new MaximizePartEvent(parts.get(tab)));
+  }
 
-            editorPart.addPropertyListener(new PropertyListener() {
-                @Override
-                public void propertyChanged(PartPresenter source, int propId) {
-                    EditorState editorState = presenter.getErrorState();
+  /** {@inheritDoc} */
+  @Override
+  public void removePart(PartPresenter part) {
+    super.removePart(part);
+    partsOrder.remove(part);
+    activePart = partsOrder.isEmpty() ? null : partsOrder.getLast();
 
-                    editorTab.setErrorMark(ERROR.equals(editorState));
-                    editorTab.setWarningMark(WARNING.equals(editorState));
-                }
+    if (activePart != null) {
+      onRequestFocus();
+    }
+
+    if (parts.isEmpty()) {
+      removeHandlers();
+    }
+  }
+
+  @Override
+  public void openPreviousActivePart() {
+    if (activePart != null) {
+      view.selectTab(activePart);
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onTabClose(@NotNull TabItem tab) {
+    final EditorPaneMenuItem editorPaneMenuItem = getPaneMenuItemByTab(tab);
+    editorPaneMenu.removeItem(editorPaneMenuItem);
+    items.remove(editorPaneMenuItem);
+
+    EditorPartPresenter part = ((EditorTab) tab).getRelativeEditorPart();
+    closedParts.add(part);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onCloseNonPinnedEditors(CloseNonPinnedEditorsEvent event) {
+    EditorPartPresenter editorPart = event.getEditorTab().getRelativeEditorPart();
+    if (!containsPart(editorPart)) {
+      return;
+    }
+
+    Iterable<TabItem> nonPinned =
+        filter(
+            parts.keySet(),
+            new Predicate<TabItem>() {
+              @Override
+              public boolean apply(@Nullable TabItem input) {
+                return input instanceof EditorTab && !((EditorTab) input).isPinned();
+              }
             });
-        }
-        view.selectTab(editorPart);
-    }
 
-    private void updateListClosedParts(VirtualFile file) {
-        if (closedParts.isEmpty()) {
-            return;
-        }
-
-        for (EditorPartPresenter closedEditorPart : closedParts) {
-            Path path = closedEditorPart.getEditorInput().getFile().getLocation();
-            if (path.equals(file.getLocation())) {
-                closedParts.remove(closedEditorPart);
-                return;
-            }
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public PartPresenter getActivePart() {
-        return activePart;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setActivePart(@NotNull PartPresenter part) {
-        activePart = part;
-        view.selectTab(part);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onTabClicked(@NotNull TabItem tab) {
-        activePart = parts.get(tab);
-        view.selectTab(parts.get(tab));
-    }
-
-    @Override
-    public void onTabDoubleClicked(@NotNull TabItem tab) {
-        eventBus.fireEvent(new MaximizePartEvent(parts.get(tab)));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void removePart(PartPresenter part) {
-        super.removePart(part);
-        partsOrder.remove(part);
-        activePart = partsOrder.isEmpty() ? null : partsOrder.getLast();
-
-        if (activePart != null) {
-            onRequestFocus();
-        }
-
-        if (parts.isEmpty()) {
-            removeHandlers();
-        }
-    }
-
-    @Override
-    public void openPreviousActivePart() {
-        if (activePart != null) {
-            view.selectTab(activePart);
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onTabClose(@NotNull TabItem tab) {
-        final EditorPaneMenuItem editorPaneMenuItem = getPaneMenuItemByTab(tab);
-        editorPaneMenu.removeItem(editorPaneMenuItem);
-        items.remove(editorPaneMenuItem);
-
-        EditorPartPresenter part = ((EditorTab)tab).getRelativeEditorPart();
-        closedParts.add(part);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onCloseNonPinnedEditors(CloseNonPinnedEditorsEvent event) {
-        EditorPartPresenter editorPart = event.getEditorTab().getRelativeEditorPart();
-        if (!containsPart(editorPart)) {
-            return;
-        }
-
-        Iterable<TabItem> nonPinned = filter(parts.keySet(), new Predicate<TabItem>() {
-            @Override
-            public boolean apply(@Nullable TabItem input) {
-                return input instanceof EditorTab && !((EditorTab)input).isPinned();
-            }
-        });
-
-        for (final TabItem tabItem : nonPinned) {
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+    for (final TabItem tabItem : nonPinned) {
+      Scheduler.get()
+          .scheduleDeferred(
+              new Scheduler.ScheduledCommand() {
                 @Override
                 public void execute() {
-                    editorAgent.closeEditor(((EditorTab)tabItem).getRelativeEditorPart());
+                  editorAgent.closeEditor(((EditorTab) tabItem).getRelativeEditorPart());
                 }
-            });
-        }
+              });
+    }
+  }
+
+  @Override
+  public EditorPartPresenter getPartByTabId(@NotNull String tabId) {
+    for (TabItem tab : parts.keySet()) {
+      EditorTab currentTab = (EditorTab) tab;
+      if (currentTab.getId().equals(tabId)) {
+        return (EditorPartPresenter) parts.get(currentTab);
+      }
+    }
+    return null;
+  }
+
+  @Nullable
+  public EditorTab getTabByPart(@NotNull EditorPartPresenter part) {
+    for (Map.Entry<TabItem, PartPresenter> entry : parts.entrySet()) {
+      PartPresenter currentPart = entry.getValue();
+      if (part.equals(currentPart)) {
+        return (EditorTab) entry.getKey();
+      }
+    }
+    return null;
+  }
+
+  @Nullable
+  @Override
+  public EditorTab getTabByPath(@NotNull Path path) {
+    for (TabItem tab : parts.keySet()) {
+      EditorTab editorTab = (EditorTab) tab;
+      Path currentPath = editorTab.getFile().getLocation();
+
+      if (currentPath.equals(path)) {
+        return editorTab;
+      }
+    }
+    return null;
+  }
+
+  @Nullable
+  public PartPresenter getPartByPath(Path path) {
+    for (TabItem tab : parts.keySet()) {
+      EditorTab editorTab = (EditorTab) tab;
+      Path currentPath = editorTab.getFile().getLocation();
+
+      if (currentPath.equals(path)) {
+        return parts.get(tab);
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public EditorPartPresenter getNextFor(EditorPartPresenter editorPart) {
+    int indexForNext = partsOrder.indexOf(editorPart) + 1;
+    return indexForNext >= partsOrder.size() ? partsOrder.getFirst() : partsOrder.get(indexForNext);
+  }
+
+  @Override
+  public EditorPartPresenter getPreviousFor(EditorPartPresenter editorPart) {
+    int indexForNext = partsOrder.indexOf(editorPart) - 1;
+    return indexForNext < 0 ? partsOrder.getLast() : partsOrder.get(indexForNext);
+  }
+
+  @Nullable
+  @Override
+  public EditorPartPresenter getLastClosed() {
+    if (closedParts.isEmpty()) {
+      return null;
+    }
+    return closedParts.getLast();
+  }
+
+  @Override
+  public void onResourceChanged(ResourceChangedEvent event) {
+    final ResourceDelta delta = event.getDelta();
+    if (delta.getKind() != REMOVED) {
+      return;
+    }
+
+    Path resourcePath = delta.getResource().getLocation();
+    for (EditorPartPresenter editorPart : closedParts) {
+      Path editorPath = editorPart.getEditorInput().getFile().getLocation();
+      if (editorPath.equals(resourcePath)) {
+        closedParts.remove(editorPart);
+        return;
+      }
+    }
+  }
+
+  private void addHandlers() {
+    if (closeNonPinnedEditorsHandler == null) {
+      closeNonPinnedEditorsHandler =
+          eventBus.addHandler(CloseNonPinnedEditorsEvent.getType(), this);
+    }
+
+    if (resourceChangeHandler == null) {
+      resourceChangeHandler = eventBus.addHandler(ResourceChangedEvent.getType(), this);
+    }
+  }
+
+  private void removeHandlers() {
+    if (resourceChangeHandler != null) {
+      resourceChangeHandler.removeHandler();
+      resourceChangeHandler = null;
+    }
+
+    if (closeNonPinnedEditorsHandler != null) {
+      closeNonPinnedEditorsHandler.removeHandler();
+      closeNonPinnedEditorsHandler = null;
+    }
+  }
+
+  @VisibleForTesting
+  protected class PaneMenuActionItemHandler implements EditorPaneMenuItem.ActionDelegate<Action> {
+
+    @Override
+    public void onItemClicked(@NotNull EditorPaneMenuItem<Action> item) {
+      editorPaneMenu.hide();
+
+      final Action action = item.getData();
+      final Presentation presentation = presentationFactory.getPresentation(action);
+      presentation.putClientProperty(CURRENT_PANE_PROP, EditorPartStackPresenter.this);
+
+      final PartPresenter activePart = getActivePart();
+      final TabItem tab = getTabByPart(activePart);
+
+      if (tab != null) {
+        final VirtualFile virtualFile = ((EditorTab) tab).getFile();
+        //pass into action file property and editor tab
+        presentation.putClientProperty(CURRENT_TAB_PROP, tab);
+        presentation.putClientProperty(CURRENT_FILE_PROP, virtualFile);
+      }
+      action.actionPerformed(new ActionEvent(presentation, actionManager, null));
     }
 
     @Override
-    public EditorPartPresenter getPartByTabId(@NotNull String tabId) {
-        for (TabItem tab : parts.keySet()) {
-            EditorTab currentTab = (EditorTab)tab;
-            if (currentTab.getId().equals(tabId)) {
-                return (EditorPartPresenter)parts.get(currentTab);
-            }
-        }
-        return null;
-    }
+    public void onCloseButtonClicked(@NotNull EditorPaneMenuItem<Action> item) {}
+  }
 
-    @Nullable
-    public EditorTab getTabByPart(@NotNull EditorPartPresenter part) {
-        for (Map.Entry<TabItem, PartPresenter> entry : parts.entrySet()) {
-            PartPresenter currentPart = entry.getValue();
-            if (part.equals(currentPart)) {
-                return (EditorTab)entry.getKey();
-            }
-        }
-        return null;
-    }
+  @VisibleForTesting
+  protected class PaneMenuTabItemHandler implements EditorPaneMenuItem.ActionDelegate<TabItem> {
 
-    @Nullable
     @Override
-    public EditorTab getTabByPath(@NotNull Path path) {
-        for (TabItem tab : parts.keySet()) {
-            EditorTab editorTab = (EditorTab)tab;
-            Path currentPath = editorTab.getFile().getLocation();
+    public void onItemClicked(@NotNull EditorPaneMenuItem<TabItem> item) {
+      editorPaneMenu.hide();
 
-            if (currentPath.equals(path)) {
-                return editorTab;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    public PartPresenter getPartByPath(Path path) {
-        for (TabItem tab : parts.keySet()) {
-            EditorTab editorTab = (EditorTab)tab;
-            Path currentPath = editorTab.getFile().getLocation();
-
-            if (currentPath.equals(path)) {
-                return parts.get(tab);
-            }
-        }
-        return null;
+      final TabItem tabItem = item.getData();
+      activePart = parts.get(tabItem);
+      view.selectTab(activePart);
     }
 
     @Override
-    public EditorPartPresenter getNextFor(EditorPartPresenter editorPart) {
-        int indexForNext = partsOrder.indexOf(editorPart) + 1;
-        return indexForNext >= partsOrder.size() ? partsOrder.getFirst() : partsOrder.get(indexForNext);
+    public void onCloseButtonClicked(@NotNull EditorPaneMenuItem<TabItem> item) {
+      editorPaneMenu.hide();
+
+      final TabItem tabItem = item.getData();
+      if (tabItem instanceof EditorTab) {
+        EditorTab editorTab = (EditorTab) tabItem;
+        editorAgent.closeEditor(editorTab.getRelativeEditorPart());
+      }
     }
-
-    @Override
-    public EditorPartPresenter getPreviousFor(EditorPartPresenter editorPart) {
-        int indexForNext = partsOrder.indexOf(editorPart) - 1;
-        return indexForNext < 0 ? partsOrder.getLast() : partsOrder.get(indexForNext);
-    }
-
-    @Nullable
-    @Override
-    public EditorPartPresenter getLastClosed() {
-        if (closedParts.isEmpty()) {
-            return null;
-        }
-        return closedParts.getLast();
-    }
-
-    @Override
-    public void onResourceChanged(ResourceChangedEvent event) {
-        final ResourceDelta delta = event.getDelta();
-        if (delta.getKind() != REMOVED) {
-            return;
-        }
-
-        Path resourcePath = delta.getResource().getLocation();
-        for (EditorPartPresenter editorPart : closedParts) {
-            Path editorPath = editorPart.getEditorInput().getFile().getLocation();
-            if (editorPath.equals(resourcePath)) {
-                closedParts.remove(editorPart);
-                return;
-            }
-        }
-    }
-
-    private void addHandlers() {
-        if (closeNonPinnedEditorsHandler == null) {
-            closeNonPinnedEditorsHandler = eventBus.addHandler(CloseNonPinnedEditorsEvent.getType(), this);
-        }
-
-        if (resourceChangeHandler == null) {
-            resourceChangeHandler = eventBus.addHandler(ResourceChangedEvent.getType(), this);
-        }
-    }
-
-    private void removeHandlers() {
-        if (resourceChangeHandler != null) {
-            resourceChangeHandler.removeHandler();
-            resourceChangeHandler = null;
-        }
-
-        if (closeNonPinnedEditorsHandler != null) {
-            closeNonPinnedEditorsHandler.removeHandler();
-            closeNonPinnedEditorsHandler = null;
-        }
-    }
-
-    @VisibleForTesting
-    protected class PaneMenuActionItemHandler implements EditorPaneMenuItem.ActionDelegate<Action> {
-
-        @Override
-        public void onItemClicked(@NotNull EditorPaneMenuItem<Action> item) {
-            editorPaneMenu.hide();
-
-            final Action action = item.getData();
-            final Presentation presentation = presentationFactory.getPresentation(action);
-            presentation.putClientProperty(CURRENT_PANE_PROP, EditorPartStackPresenter.this);
-
-            final PartPresenter activePart = getActivePart();
-            final TabItem tab = getTabByPart(activePart);
-
-            if (tab != null) {
-                final VirtualFile virtualFile = ((EditorTab)tab).getFile();
-                //pass into action file property and editor tab
-                presentation.putClientProperty(CURRENT_TAB_PROP, tab);
-                presentation.putClientProperty(CURRENT_FILE_PROP, virtualFile);
-            }
-            action.actionPerformed(new ActionEvent(presentation, actionManager, null));
-        }
-
-        @Override
-        public void onCloseButtonClicked(@NotNull EditorPaneMenuItem<Action> item) {
-        }
-    }
-
-    @VisibleForTesting
-    protected class PaneMenuTabItemHandler implements EditorPaneMenuItem.ActionDelegate<TabItem> {
-
-        @Override
-        public void onItemClicked(@NotNull EditorPaneMenuItem<TabItem> item) {
-            editorPaneMenu.hide();
-
-            final TabItem tabItem = item.getData();
-            activePart = parts.get(tabItem);
-            view.selectTab(activePart);
-        }
-
-        @Override
-        public void onCloseButtonClicked(@NotNull EditorPaneMenuItem<TabItem> item) {
-            editorPaneMenu.hide();
-
-            final TabItem tabItem = item.getData();
-            if (tabItem instanceof EditorTab) {
-                EditorTab editorTab = (EditorTab)tabItem;
-                editorAgent.closeEditor(editorTab.getRelativeEditorPart());
-            }
-        }
-    }
-
+  }
 }

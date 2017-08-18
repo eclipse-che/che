@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions.common;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.ui.smartTree.data.TreeExpander;
@@ -19,11 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link ExpandTreeAction}.
@@ -33,52 +32,49 @@ import static org.mockito.Mockito.when;
 @RunWith(GwtMockitoTestRunner.class)
 public class ExpandTreeActionTest {
 
-    @Mock
-    TreeExpander treeExpander;
-    @Mock
-    ActionEvent actionEvent;
-    @Mock
-    Presentation presentation;
+  @Mock TreeExpander treeExpander;
+  @Mock ActionEvent actionEvent;
+  @Mock Presentation presentation;
 
-    private ExpandTreeAction action;
+  private ExpandTreeAction action;
 
-    @Before
-    public void setUp() throws Exception {
-        action = new ExpandTreeAction() {
-            @Override
-            public TreeExpander getTreeExpander() {
-                return treeExpander;
-            }
+  @Before
+  public void setUp() throws Exception {
+    action =
+        new ExpandTreeAction() {
+          @Override
+          public TreeExpander getTreeExpander() {
+            return treeExpander;
+          }
         };
 
-        when(actionEvent.getPresentation()).thenReturn(presentation);
-    }
+    when(actionEvent.getPresentation()).thenReturn(presentation);
+  }
 
-    @Test
-    public void testShouldNotFireTreeCollapse() throws Exception {
-        when(treeExpander.isExpandEnabled()).thenReturn(false);
+  @Test
+  public void testShouldNotFireTreeCollapse() throws Exception {
+    when(treeExpander.isExpandEnabled()).thenReturn(false);
 
-        action.actionPerformed(actionEvent);
+    action.actionPerformed(actionEvent);
 
-        verify(treeExpander, never()).expandTree();
-    }
+    verify(treeExpander, never()).expandTree();
+  }
 
-    @Test
-    public void testShouldFireTreeCollapse() throws Exception {
-        when(treeExpander.isExpandEnabled()).thenReturn(true);
+  @Test
+  public void testShouldFireTreeCollapse() throws Exception {
+    when(treeExpander.isExpandEnabled()).thenReturn(true);
 
-        action.actionPerformed(actionEvent);
+    action.actionPerformed(actionEvent);
 
-        verify(treeExpander).expandTree();
-    }
+    verify(treeExpander).expandTree();
+  }
 
-    @Test
-    public void testShouldUpdatePresentationBasedOnStatus() throws Exception {
-        when(treeExpander.isExpandEnabled()).thenReturn(true);
+  @Test
+  public void testShouldUpdatePresentationBasedOnStatus() throws Exception {
+    when(treeExpander.isExpandEnabled()).thenReturn(true);
 
-        action.update(actionEvent);
+    action.update(actionEvent);
 
-        verify(presentation).setEnabledAndVisible(eq(true));
-    }
-
+    verify(presentation).setEnabledAndVisible(eq(true));
+  }
 }

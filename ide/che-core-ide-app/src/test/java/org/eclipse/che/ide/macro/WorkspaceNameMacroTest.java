@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.macro;
+
+import static org.junit.Assert.assertSame;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -21,12 +27,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Unit tests for the {@link WorkspaceNameMacro}.
  *
@@ -35,40 +35,36 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class WorkspaceNameMacroTest {
 
-    public static final String WS_NAME = "workspace";
+  public static final String WS_NAME = "workspace";
 
-    @Mock
-    AppContext appContext;
+  @Mock AppContext appContext;
 
-    @Mock
-    PromiseProvider promiseProvider;
+  @Mock PromiseProvider promiseProvider;
 
-    @Mock
-    CoreLocalizationConstant localizationConstants;
+  @Mock CoreLocalizationConstant localizationConstants;
 
-    private WorkspaceNameMacro provider;
+  private WorkspaceNameMacro provider;
 
-    @Before
-    public void init() throws Exception {
-        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
-        WorkspaceConfigImpl workspaceConfig = mock(WorkspaceConfigImpl.class);
-        when(workspaceConfig.getName()).thenReturn(WS_NAME);
-        when(workspace.getConfig()).thenReturn(workspaceConfig);
-        when(appContext.getWorkspace()).thenReturn(workspace);
+  @Before
+  public void init() throws Exception {
+    WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+    WorkspaceConfigImpl workspaceConfig = mock(WorkspaceConfigImpl.class);
+    when(workspaceConfig.getName()).thenReturn(WS_NAME);
+    when(workspace.getConfig()).thenReturn(workspaceConfig);
+    when(appContext.getWorkspace()).thenReturn(workspace);
 
-        provider = new WorkspaceNameMacro(appContext, promiseProvider, localizationConstants);
-    }
+    provider = new WorkspaceNameMacro(appContext, promiseProvider, localizationConstants);
+  }
 
-    @Test
-    public void getKey() throws Exception {
-        assertSame(provider.getName(), WorkspaceNameMacro.KEY);
-    }
+  @Test
+  public void getKey() throws Exception {
+    assertSame(provider.getName(), WorkspaceNameMacro.KEY);
+  }
 
-    @Test
-    public void getValue() throws Exception {
-        provider.expand();
+  @Test
+  public void getValue() throws Exception {
+    provider.expand();
 
-        verify(promiseProvider).resolve(eq(WS_NAME));
-    }
-
+    verify(promiseProvider).resolve(eq(WS_NAME));
+  }
 }

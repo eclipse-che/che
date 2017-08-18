@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.git.params;
 
 import java.util.ArrayList;
@@ -20,42 +20,37 @@ import java.util.List;
  */
 public class RmParams {
 
-    private List<String> items;
-    private boolean      cached;
+  private List<String> items;
+  private boolean cached;
 
-    private RmParams() {
-    }
+  private RmParams() {}
 
-    /**
-     * Create new {@link RmParams} instance.
-     *
-     * @param items
-     *         files to remove
-     */
-    public static RmParams create(List<String> items) {
-        return new RmParams().withItems(items);
-    }
+  /**
+   * Create new {@link RmParams} instance.
+   *
+   * @param items files to remove
+   */
+  public static RmParams create(List<String> items) {
+    return new RmParams().withItems(items);
+  }
 
-    /** Returns files to remove */
-    public List<String> getItems() {
-        return items == null ? new ArrayList<>() : items;
-    }
+  /** Returns files to remove */
+  public List<String> getItems() {
+    return items == null ? new ArrayList<>() : items;
+  }
 
-    public RmParams withItems(List<String> items) {
-        this.items = items;
-        return this;
-    }
+  public RmParams withItems(List<String> items) {
+    this.items = items;
+    return this;
+  }
 
-    /**
-     * Returns {@code true} if needed to remove from index only,
-     * otherwise returns {@code false}.
-     */
-    public boolean isCached() {
-        return cached;
-    }
+  /** Returns {@code true} if needed to remove from index only, otherwise returns {@code false}. */
+  public boolean isCached() {
+    return cached;
+  }
 
-    public RmParams withCached(boolean cached) {
-        this.cached = cached;
-        return this;
-    }
+  public RmParams withCached(boolean cached) {
+    this.cached = cached;
+    return this;
+  }
 }

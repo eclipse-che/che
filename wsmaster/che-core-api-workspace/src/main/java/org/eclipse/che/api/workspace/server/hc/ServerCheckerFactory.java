@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.server.hc;
 
 import java.net.URL;
@@ -19,5 +19,6 @@ import java.util.Timer;
  * @author Alexander Garagatyi
  */
 public interface ServerCheckerFactory {
-    HttpConnectionServerChecker httpChecker(URL url, String machineName, String serverRef, Timer timer);
+  HttpConnectionServerChecker httpChecker(
+      URL url, String machineName, String serverRef, Timer timer);
 }

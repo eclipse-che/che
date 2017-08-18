@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.smartTree.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
-
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.event.CollapseNodeEvent.CollapseNodeHandler;
 
@@ -24,42 +23,41 @@ import org.eclipse.che.ide.ui.smartTree.event.CollapseNodeEvent.CollapseNodeHand
  */
 public class CollapseNodeEvent extends GwtEvent<CollapseNodeHandler> {
 
-    public interface CollapseNodeHandler extends EventHandler {
-        void onCollapse(CollapseNodeEvent event);
+  public interface CollapseNodeHandler extends EventHandler {
+    void onCollapse(CollapseNodeEvent event);
+  }
+
+  public interface HasCollapseItemHandlers {
+    HandlerRegistration addCollapseHandler(CollapseNodeHandler handler);
+  }
+
+  private static Type<CollapseNodeHandler> TYPE;
+
+  public static Type<CollapseNodeHandler> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<>();
     }
+    return TYPE;
+  }
 
-    public interface HasCollapseItemHandlers {
-        HandlerRegistration addCollapseHandler(CollapseNodeHandler handler);
-    }
+  @Override
+  public Type<CollapseNodeHandler> getAssociatedType() {
+    return TYPE;
+  }
 
-    private static Type<CollapseNodeHandler> TYPE;
+  private Node node;
 
-    public static Type<CollapseNodeHandler> getType() {
-        if (TYPE == null) {
-            TYPE = new Type<>();
-        }
-        return TYPE;
-    }
+  public CollapseNodeEvent(Node node) {
+    this.node = node;
+  }
 
-    @Override
-    public Type<CollapseNodeHandler> getAssociatedType() {
-        return TYPE;
-    }
+  public Node getNode() {
+    return node;
+  }
 
-    private Node node;
-
-    public CollapseNodeEvent(Node node) {
-        this.node = node;
-    }
-
-    public Node getNode() {
-        return node;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void dispatch(CollapseNodeHandler handler) {
-        handler.onCollapse(this);
-    }
-
+  /** {@inheritDoc} */
+  @Override
+  protected void dispatch(CollapseNodeHandler handler) {
+    handler.onCollapse(this);
+  }
 }

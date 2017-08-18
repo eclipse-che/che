@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.api.core.model.workspace.runtime.BootstrapperStatus;
@@ -22,36 +22,33 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface BootstrapperStatusEvent {
 
-    BootstrapperStatus getStatus();
+  BootstrapperStatus getStatus();
 
-    void setStatus(BootstrapperStatus status);
+  void setStatus(BootstrapperStatus status);
 
-    BootstrapperStatusEvent withStatus(BootstrapperStatus status);
+  BootstrapperStatusEvent withStatus(BootstrapperStatus status);
 
-    String getMachineName();
+  String getMachineName();
 
-    void setMachineName(String machineName);
+  void setMachineName(String machineName);
 
-    BootstrapperStatusEvent withMachineName(String machineName);
+  BootstrapperStatusEvent withMachineName(String machineName);
 
+  RuntimeIdentityDto getRuntimeId();
 
-    RuntimeIdentityDto getRuntimeId();
+  void setRuntimeId(RuntimeIdentityDto runtimeId);
 
-    void setRuntimeId(RuntimeIdentityDto runtimeId);
+  BootstrapperStatusEvent withRuntimeId(RuntimeIdentityDto runtimeId);
 
-    BootstrapperStatusEvent withRuntimeId(RuntimeIdentityDto runtimeId);
+  String getError();
 
+  void setError(String error);
 
-    String getError();
+  BootstrapperStatusEvent withError(String error);
 
-    void setError(String error);
+  String getTime();
 
-    BootstrapperStatusEvent withError(String error);
+  void setTime(String time);
 
-
-    String getTime();
-
-    void setTime(String time);
-
-    BootstrapperStatusEvent withTime(String time);
+  BootstrapperStatusEvent withTime(String time);
 }

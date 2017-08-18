@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.navigation;
 
 import com.google.gwt.core.client.Scheduler;
@@ -30,11 +30,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
 import elemental.html.TableElement;
-
+import java.util.List;
 import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
@@ -42,8 +41,6 @@ import org.eclipse.che.ide.api.editor.codeassist.AutoCompleteResources;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
-
-import java.util.List;
 
 /**
  * The implementation of {@link NavigateToFileView} view.
@@ -55,268 +52,276 @@ import java.util.List;
 @Singleton
 public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFileView {
 
-    interface NavigateToFileViewImplUiBinder extends UiBinder<Widget, NavigateToFileViewImpl> {
-    }
+  interface NavigateToFileViewImplUiBinder extends UiBinder<Widget, NavigateToFileViewImpl> {}
 
-    @UiField
-    TextBox fileName;
+  @UiField TextBox fileName;
 
-    @UiField(provided = true)
-    CoreLocalizationConstant locale;
+  @UiField(provided = true)
+  CoreLocalizationConstant locale;
 
-    private ActionDelegate      delegate;
+  private ActionDelegate delegate;
 
-    private final AutoCompleteResources.Css css;
+  private final AutoCompleteResources.Css css;
 
-    private final Resources resources;
+  private final Resources resources;
 
-    private SimpleList<SearchResultDto> list;
+  private SimpleList<SearchResultDto> list;
 
-    @UiField
-    FlowPanel suggestionsPanel;
+  @UiField FlowPanel suggestionsPanel;
 
-    @UiField
-    HTML suggestionsContainer;
+  @UiField HTML suggestionsContainer;
 
-    private HandlerRegistration resizeHandler;
+  private HandlerRegistration resizeHandler;
 
-    @Inject
-    public NavigateToFileViewImpl(CoreLocalizationConstant locale,
-                                  NavigateToFileViewImplUiBinder uiBinder,
-                                  AutoCompleteResources autoCompleteResources,
-                                  Resources resources) {
-        this.locale = locale;
-        this.resources = resources;
+  @Inject
+  public NavigateToFileViewImpl(
+      CoreLocalizationConstant locale,
+      NavigateToFileViewImplUiBinder uiBinder,
+      AutoCompleteResources autoCompleteResources,
+      Resources resources) {
+    this.locale = locale;
+    this.resources = resources;
 
-        css = autoCompleteResources.autocompleteComponentCss();
-        css.ensureInjected();
+    css = autoCompleteResources.autocompleteComponentCss();
+    css.ensureInjected();
 
-        setWidget(uiBinder.createAndBindUi(this));
-        setAutoHideEnabled(true);
-        setAnimationEnabled(true);
-        getElement().getStyle().setProperty("boxShadow", "0 2px 4px 0 rgba(0, 0, 0, 0.50)");
-        getElement().getStyle().setProperty("borderRadius", "0px");
-    }
+    setWidget(uiBinder.createAndBindUi(this));
+    setAutoHideEnabled(true);
+    setAnimationEnabled(true);
+    getElement().getStyle().setProperty("boxShadow", "0 2px 4px 0 rgba(0, 0, 0, 0.50)");
+    getElement().getStyle().setProperty("borderRadius", "0px");
+  }
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    @Override
-    public void showPopup() {
-        fileName.getElement().setAttribute("placeholder", locale.navigateToFileSearchIsCaseSensitive());
+  @Override
+  public void showPopup() {
+    fileName.getElement().setAttribute("placeholder", locale.navigateToFileSearchIsCaseSensitive());
 
-        setPopupPositionAndShow(new PositionCallback() {
-            @Override
-            public void setPosition(int offsetWidth, int offsetHeight) {
-                setPopupPosition((com.google.gwt.user.client.Window.getClientWidth() / 2) - (offsetWidth / 2),
-                        (com.google.gwt.user.client.Window.getClientHeight() / 4) - (offsetHeight / 2));
-                // Set 'clip' css property to auto when show animation is finished.
-                new Timer() {
-                    @Override
-                    public void run() {
-                        getElement().getStyle().setProperty("clip", "auto");
-                        delegate.onFileNameChanged(fileName.getText());
-                    }
-                }.schedule(300);
-            }
+    setPopupPositionAndShow(
+        new PositionCallback() {
+          @Override
+          public void setPosition(int offsetWidth, int offsetHeight) {
+            setPopupPosition(
+                (com.google.gwt.user.client.Window.getClientWidth() / 2) - (offsetWidth / 2),
+                (com.google.gwt.user.client.Window.getClientHeight() / 4) - (offsetHeight / 2));
+            // Set 'clip' css property to auto when show animation is finished.
+            new Timer() {
+              @Override
+              public void run() {
+                getElement().getStyle().setProperty("clip", "auto");
+                delegate.onFileNameChanged(fileName.getText());
+              }
+            }.schedule(300);
+          }
         });
 
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
+    Scheduler.get()
+        .scheduleDeferred(
+            new Scheduler.ScheduledCommand() {
+              @Override
+              public void execute() {
                 fileName.setFocus(true);
-            }
-        });
+              }
+            });
 
-        // Add window resize handler
-        if (resizeHandler == null) {
-            resizeHandler = Window.addResizeHandler(new ResizeHandler() {
+    // Add window resize handler
+    if (resizeHandler == null) {
+      resizeHandler =
+          Window.addResizeHandler(
+              new ResizeHandler() {
                 @Override
                 public void onResize(ResizeEvent event) {
-                    updatePositionAndSize();
+                  updatePositionAndSize();
                 }
-            });
+              });
+    }
+  }
+
+  private final SimpleList.ListItemRenderer<SearchResultDto> listItemRenderer =
+      new SimpleList.ListItemRenderer<SearchResultDto>() {
+        @Override
+        public void render(Element itemElement, SearchResultDto itemData) {
+          TableCellElement label = Elements.createTDElement();
+          TableCellElement path = Elements.createTDElement();
+
+          Path itemPath = Path.valueOf(itemData.getItemReference().getPath());
+
+          label.setInnerHTML(itemPath.lastSegment());
+          path.setInnerHTML("(" + itemPath.parent() + ")");
+
+          itemElement.appendChild(label);
+          itemElement.appendChild(path);
+
+          path.getStyle().setProperty("opacity", "0.6");
         }
+
+        @Override
+        public Element createElement() {
+          return Elements.createTRElement();
+        }
+      };
+
+  @Override
+  public void hidePopup() {
+    suggestionsContainer.getElement().setInnerHTML("");
+    suggestionsPanel.setVisible(false);
+
+    suggestionsPanel.getElement().getStyle().setWidth(400, Style.Unit.PX);
+    suggestionsPanel.getElement().getStyle().setHeight(20, Style.Unit.PX);
+
+    if (resizeHandler != null) {
+      resizeHandler.removeHandler();
+      resizeHandler = null;
     }
 
-    private final SimpleList.ListItemRenderer<SearchResultDto> listItemRenderer =
-            new SimpleList.ListItemRenderer<SearchResultDto>() {
-                @Override
-                public void render(Element itemElement, SearchResultDto itemData) {
-                    TableCellElement label = Elements.createTDElement();
-                    TableCellElement path = Elements.createTDElement();
+    super.hide();
+  }
 
-                    Path itemPath = Path.valueOf(itemData.getItemReference().getPath());
+  @Override
+  public void showItems(List<SearchResultDto> items) {
+    // Hide popup if it is nothing to show
+    if (items.isEmpty()) {
+      suggestionsContainer.getElement().setInnerHTML("");
+      suggestionsPanel.setVisible(false);
 
-                    label.setInnerHTML(itemPath.lastSegment());
-                    path.setInnerHTML("(" + itemPath.parent() + ")");
+      suggestionsPanel.getElement().getStyle().setWidth(400, Style.Unit.PX);
+      suggestionsPanel.getElement().getStyle().setHeight(20, Style.Unit.PX);
 
-                    itemElement.appendChild(label);
-                    itemElement.appendChild(path);
-
-                    path.getStyle().setProperty("opacity", "0.6");
-                }
-
-                @Override
-                public Element createElement() {
-                    return Elements.createTRElement();
-                }
-            };
-
-    @Override
-    public void hidePopup() {
-        suggestionsContainer.getElement().setInnerHTML("");
-        suggestionsPanel.setVisible(false);
-
-        suggestionsPanel.getElement().getStyle().setWidth(400, Style.Unit.PX);
-        suggestionsPanel.getElement().getStyle().setHeight(20, Style.Unit.PX);
-
-        if (resizeHandler != null) {
-            resizeHandler.removeHandler();
-            resizeHandler = null;
-        }
-
-        super.hide();
+      return;
     }
 
-    @Override
-    public void showItems(List<SearchResultDto> items) {
-        // Hide popup if it is nothing to show
-        if (items.isEmpty()) {
-            suggestionsContainer.getElement().setInnerHTML("");
-            suggestionsPanel.setVisible(false);
+    // Show popup
+    suggestionsPanel.setVisible(true);
+    suggestionsContainer.getElement().setInnerHTML("");
 
-            suggestionsPanel.getElement().getStyle().setWidth(400, Style.Unit.PX);
-            suggestionsPanel.getElement().getStyle().setHeight(20, Style.Unit.PX);
+    // Create and show list of items
+    final TableElement itemHolder = Elements.createTableElement();
+    suggestionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
+    list =
+        SimpleList.create(
+            (SimpleList.View) suggestionsContainer.getElement().cast(),
+            (Element) suggestionsContainer.getElement(),
+            itemHolder,
+            resources.defaultSimpleListCss(),
+            listItemRenderer,
+            eventDelegate);
+    list.render(items);
+    list.getSelectionModel().setSelectedItem(0);
 
-            return;
-        }
+    // Update popup position
+    updatePositionAndSize();
+  }
 
-        // Show popup
-        suggestionsPanel.setVisible(true);
-        suggestionsContainer.getElement().setInnerHTML("");
+  private void updatePositionAndSize() {
+    // Update position
+    setPopupPosition(
+        (com.google.gwt.user.client.Window.getClientWidth() / 2) - (getOffsetWidth() / 2),
+        (com.google.gwt.user.client.Window.getClientHeight() / 4) - (getOffsetHeight() / 2));
 
-        // Create and show list of items
-        final TableElement itemHolder = Elements.createTableElement();
-        suggestionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
-        list = SimpleList.create((SimpleList.View) suggestionsContainer.getElement().cast(),
-                                 (Element)suggestionsContainer.getElement(),
-                                 itemHolder,
-                                 resources.defaultSimpleListCss(),
-                                 listItemRenderer,
-                                 eventDelegate);
-        list.render(items);
-        list.getSelectionModel().setSelectedItem(0);
-
-        // Update popup position
-        updatePositionAndSize();
+    // Exit if suggestions is not shown
+    if (!suggestionsPanel.isVisible()) {
+      return;
     }
 
-    private void updatePositionAndSize() {
-        // Update position
-        setPopupPosition((com.google.gwt.user.client.Window.getClientWidth() / 2) - (getOffsetWidth() / 2),
-                (com.google.gwt.user.client.Window.getClientHeight() / 4) - (getOffsetHeight() / 2));
+    // Update popup width
+    int width = suggestionsContainer.getElement().getFirstChildElement().getOffsetWidth();
+    int newWidth = Window.getClientWidth() - getElement().getAbsoluteLeft() - 50;
+    if (width < newWidth) {
+      newWidth = width;
+    }
+    suggestionsPanel.getElement().getStyle().setWidth(newWidth, Style.Unit.PX);
 
-        // Exit if suggestions is not shown
-        if (!suggestionsPanel.isVisible()) {
-            return;
-        }
+    // Update popup height
+    int height = suggestionsContainer.getElement().getFirstChildElement().getOffsetHeight();
+    int newHeight = height > 300 ? 300 : height;
+    int bottom = getElement().getAbsoluteTop() + getElement().getOffsetHeight();
 
-        // Update popup width
-        int width = suggestionsContainer.getElement().getFirstChildElement().getOffsetWidth();
-        int newWidth = Window.getClientWidth() - getElement().getAbsoluteLeft() - 50;
-        if (width < newWidth) {
-            newWidth = width;
-        }
-        suggestionsPanel.getElement().getStyle().setWidth(newWidth, Style.Unit.PX);
-
-        // Update popup height
-        int height = suggestionsContainer.getElement().getFirstChildElement().getOffsetHeight();
-        int newHeight = height > 300 ? 300 : height;
-        int bottom = getElement().getAbsoluteTop() + getElement().getOffsetHeight();
-
-        if (bottom + newHeight > Window.getClientHeight() - 10) {
-            newHeight = Window.getClientHeight() - 10 - bottom;
-        }
-
-        if (newHeight < 50) {
-            newHeight = 50;
-        }
-
-        suggestionsPanel.getElement().getStyle().setHeight(newHeight, Style.Unit.PX);
+    if (bottom + newHeight > Window.getClientHeight() - 10) {
+      newHeight = Window.getClientHeight() - 10 - bottom;
     }
 
-    private final SimpleList.ListEventDelegate<SearchResultDto> eventDelegate = new SimpleList.ListEventDelegate<SearchResultDto>() {
+    if (newHeight < 50) {
+      newHeight = 50;
+    }
+
+    suggestionsPanel.getElement().getStyle().setHeight(newHeight, Style.Unit.PX);
+  }
+
+  private final SimpleList.ListEventDelegate<SearchResultDto> eventDelegate =
+      new SimpleList.ListEventDelegate<SearchResultDto>() {
         @Override
         public void onListItemClicked(Element listItemBase, SearchResultDto itemData) {
-            list.getSelectionModel().setSelectedItem(itemData);
+          list.getSelectionModel().setSelectedItem(itemData);
         }
 
         @Override
         public void onListItemDoubleClicked(Element listItemBase, SearchResultDto itemData) {
-            delegate.onFileSelected(Path.valueOf(itemData.getItemReference().getPath()));
+          delegate.onFileSelected(Path.valueOf(itemData.getItemReference().getPath()));
         }
-    };
+      };
 
-    @UiHandler("fileName")
-    void handleKeyDown(KeyDownEvent event) {
-        switch (event.getNativeKeyCode()) {
-            case KeyCodes.KEY_UP:
-                event.stopPropagation();
-                event.preventDefault();
-                if (list != null) {
-                    list.getSelectionModel().selectPrevious();
-                }
-                return;
-
-            case KeyCodes.KEY_DOWN:
-                event.stopPropagation();
-                event.preventDefault();
-                if (list != null) {
-                    list.getSelectionModel().selectNext();
-                }
-                return;
-
-            case KeyCodes.KEY_PAGEUP:
-                event.stopPropagation();
-                event.preventDefault();
-                if (list != null) {
-                    list.getSelectionModel().selectPreviousPage();
-                }
-                return;
-
-            case KeyCodes.KEY_PAGEDOWN:
-                event.stopPropagation();
-                event.preventDefault();
-                if (list != null) {
-                    list.getSelectionModel().selectNextPage();
-                }
-                return;
-
-            case KeyCodes.KEY_ENTER:
-                event.stopPropagation();
-                event.preventDefault();
-                SearchResultDto selectedItem = list.getSelectionModel().getSelectedItem();
-                if (selectedItem != null) {
-                    delegate.onFileSelected(Path.valueOf(selectedItem.getItemReference().getPath()));
-                }
-                return;
-
-            case KeyCodes.KEY_ESCAPE:
-                event.stopPropagation();
-                event.preventDefault();
-                hidePopup();
-                return;
+  @UiHandler("fileName")
+  void handleKeyDown(KeyDownEvent event) {
+    switch (event.getNativeKeyCode()) {
+      case KeyCodes.KEY_UP:
+        event.stopPropagation();
+        event.preventDefault();
+        if (list != null) {
+          list.getSelectionModel().selectPrevious();
         }
+        return;
 
-        Scheduler.get().scheduleDeferred(new Command() {
-            @Override
-            public void execute() {
-                delegate.onFileNameChanged(fileName.getText());
-            }
-        });
+      case KeyCodes.KEY_DOWN:
+        event.stopPropagation();
+        event.preventDefault();
+        if (list != null) {
+          list.getSelectionModel().selectNext();
+        }
+        return;
+
+      case KeyCodes.KEY_PAGEUP:
+        event.stopPropagation();
+        event.preventDefault();
+        if (list != null) {
+          list.getSelectionModel().selectPreviousPage();
+        }
+        return;
+
+      case KeyCodes.KEY_PAGEDOWN:
+        event.stopPropagation();
+        event.preventDefault();
+        if (list != null) {
+          list.getSelectionModel().selectNextPage();
+        }
+        return;
+
+      case KeyCodes.KEY_ENTER:
+        event.stopPropagation();
+        event.preventDefault();
+        SearchResultDto selectedItem = list.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+          delegate.onFileSelected(Path.valueOf(selectedItem.getItemReference().getPath()));
+        }
+        return;
+
+      case KeyCodes.KEY_ESCAPE:
+        event.stopPropagation();
+        event.preventDefault();
+        hidePopup();
+        return;
     }
 
+    Scheduler.get()
+        .scheduleDeferred(
+            new Command() {
+              @Override
+              public void execute() {
+                delegate.onFileNameChanged(fileName.getText());
+              }
+            });
+  }
 }

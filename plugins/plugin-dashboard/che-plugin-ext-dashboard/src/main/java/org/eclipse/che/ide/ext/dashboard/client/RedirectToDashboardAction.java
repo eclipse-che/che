@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.dashboard.client;
+
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.LEFT;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
@@ -18,7 +21,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
@@ -28,107 +30,113 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.ui.Tooltip;
 
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.LEFT;
-import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
-
 /**
  * Action to provide Dashboard button onto toolbar.
  *
  * @author Oleksii Orel
  */
-public class RedirectToDashboardAction extends Action implements CustomComponentAction,
-                                                                 WorkspaceRunningEvent.Handler, WorkspaceStoppedEvent.Handler {
+public class RedirectToDashboardAction extends Action
+    implements CustomComponentAction, WorkspaceRunningEvent.Handler, WorkspaceStoppedEvent.Handler {
 
-    private final DashboardLocalizationConstant constant;
-    private final DashboardResources            resources;
-    private final AppContext                    appContext;
+  private final DashboardLocalizationConstant constant;
+  private final DashboardResources resources;
+  private final AppContext appContext;
 
-    private Element                             arrow;
-    private Tooltip                             tooltip;
+  private Element arrow;
+  private Tooltip tooltip;
 
-    @Inject
-    public RedirectToDashboardAction(DashboardLocalizationConstant constant,
-                                     DashboardResources resources,
-                                     EventBus eventBus,
-                                     AppContext appContext) {
-        this.constant = constant;
-        this.resources = resources;
-        this.appContext = appContext;
+  @Inject
+  public RedirectToDashboardAction(
+      DashboardLocalizationConstant constant,
+      DashboardResources resources,
+      EventBus eventBus,
+      AppContext appContext) {
+    this.constant = constant;
+    this.resources = resources;
+    this.appContext = appContext;
 
-        eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
-        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent e) {}
+
+  @Override
+  public Widget createCustomComponent(Presentation presentation) {
+    FlowPanel panel = new FlowPanel();
+    panel.setWidth("24px");
+    panel.setHeight("24px");
+
+    /** Show button Expanded by default if IDE is loaded in frame. */
+    if (isInFrame()) {
+      arrow = DOM.createDiv();
+      arrow.setClassName(resources.dashboardCSS().dashboardArrow());
+      panel.getElement().appendChild(arrow);
+
+      tooltip =
+          Tooltip.create(
+              (elemental.dom.Element) arrow,
+              BOTTOM,
+              LEFT,
+              constant.hideDashboardNavBarToolbarButtonTitle());
+
+      showExpanded();
+
+      DOM.setEventListener(
+          arrow,
+          new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+              onArrowClicked();
+            }
+          });
+      DOM.sinkEvents(arrow, Event.ONMOUSEDOWN);
+    } else {
+      arrow = DOM.createAnchor();
+      arrow.setClassName(resources.dashboardCSS().dashboardArrow());
+      panel.getElement().appendChild(arrow);
+
+      tooltip =
+          Tooltip.create(
+              (elemental.dom.Element) arrow,
+              BOTTOM,
+              LEFT,
+              constant.openDashboardToolbarButtonTitle());
+
+      showCollapsed();
+
+      arrow.setAttribute(
+          "href",
+          constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
+      arrow.setAttribute("target", "_blank");
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+    return panel;
+  }
+
+  @Override
+  public void onWorkspaceRunning(WorkspaceRunningEvent event) {
+    if (arrow != null) {
+      arrow.setAttribute(
+          "href",
+          constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
     }
+  }
 
-    @Override
-    public Widget createCustomComponent(Presentation presentation) {
-        FlowPanel panel = new FlowPanel();
-        panel.setWidth("24px");
-        panel.setHeight("24px");
-
-        /**
-         * Show button Expanded by default if IDE is loaded in frame.
-         */
-        if (isInFrame()) {
-            arrow = DOM.createDiv();
-            arrow.setClassName(resources.dashboardCSS().dashboardArrow());
-            panel.getElement().appendChild(arrow);
-
-            tooltip = Tooltip.create((elemental.dom.Element) arrow,
-                    BOTTOM,
-                    LEFT,
-                    constant.hideDashboardNavBarToolbarButtonTitle());
-
-            showExpanded();
-
-            DOM.setEventListener(arrow, new EventListener() {
-                @Override
-                public void onBrowserEvent(Event event) {
-                    onArrowClicked();
-                }
-            });
-            DOM.sinkEvents(arrow, Event.ONMOUSEDOWN);
-        } else {
-            arrow = DOM.createAnchor();
-            arrow.setClassName(resources.dashboardCSS().dashboardArrow());
-            panel.getElement().appendChild(arrow);
-
-            tooltip = Tooltip.create((elemental.dom.Element) arrow,
-                    BOTTOM,
-                    LEFT,
-                    constant.openDashboardToolbarButtonTitle());
-
-            showCollapsed();
-
-            arrow.setAttribute("href", constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
-            arrow.setAttribute("target", "_blank");
-        }
-
-        return panel;
+  @Override
+  public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+    if (arrow != null) {
+      arrow.setAttribute("href", constant.openDashboardUrlWorkspaces());
     }
+  }
 
-    @Override
-    public void onWorkspaceRunning(WorkspaceRunningEvent event) {
-        if (arrow != null) {
-            arrow.setAttribute("href", constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
-        }
-    }
-
-    @Override
-    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-        if (arrow != null) {
-            arrow.setAttribute("href", constant.openDashboardUrlWorkspaces());
-        }
-    }
-
-    /**
-     * Determines whether the IDE is loaded inside frame.
-     * @return <b>true</b> if IDE is loaded in frame
-     */
-    private native boolean isInFrame() /*-{
+  /**
+   * Determines whether the IDE is loaded inside frame.
+   *
+   * @return <b>true</b> if IDE is loaded in frame
+   */
+  private native boolean isInFrame() /*-{
         if ($wnd == $wnd.parent) {
             return false;
         }
@@ -136,11 +144,8 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
         return true;
     }-*/;
 
-    /**
-     * Makes arrow left-oriented.
-     * Dashboard navigation bar should be visible.
-     */
-    private native void showExpanded() /*-{
+  /** Makes arrow left-oriented. Dashboard navigation bar should be visible. */
+  private native void showExpanded() /*-{
         var elem = this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::arrow;
         if (!elem) {
             return;
@@ -159,11 +164,8 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
         tooltip.@org.eclipse.che.ide.ui.Tooltip::setTitle(*)(message);
     }-*/;
 
-    /**
-     * Makes arrow right-oriented.
-     * Dashboard navigation bar should be hidden.
-     */
-    private native void showCollapsed() /*-{
+  /** Makes arrow right-oriented. Dashboard navigation bar should be hidden. */
+  private native void showCollapsed() /*-{
         var elem = this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::arrow;
         if (!elem) {
             return;
@@ -182,10 +184,8 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
         tooltip.@org.eclipse.che.ide.ui.Tooltip::setTitle(*)(message);
     }-*/;
 
-    /**
-     * Handles clicking on the arrow.
-     */
-    private native void onArrowClicked() /*-{
+  /** Handles clicking on the arrow. */
+  private native void onArrowClicked() /*-{
         var elem = this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::arrow;
         if (!elem) {
             return;
@@ -199,5 +199,4 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
             this.@org.eclipse.che.ide.ext.dashboard.client.RedirectToDashboardAction::showExpanded()();
         }
     }-*/;
-
 }

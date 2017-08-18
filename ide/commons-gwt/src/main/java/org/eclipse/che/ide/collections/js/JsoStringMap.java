@@ -14,17 +14,16 @@
 
 package org.eclipse.che.ide.collections.js;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.collections.StringMap;
-import com.google.gwt.core.client.JavaScriptObject;
-
 
 /**
  * This is used to satisfy DTO casting requirements.
- * <p/>
- * On the client, if you have a reference to StringMap, or JsoStringMap
- * (the JavaScriptObject backed impl), feel free to cross cast this to the more
- * robust {@link com.codenvy.ide.collections.Jso}.
+ *
+ * <p>On the client, if you have a reference to StringMap, or JsoStringMap (the JavaScriptObject
+ * backed impl), feel free to cross cast this to the more robust {@link
+ * com.codenvy.ide.collections.Jso}.
  */
 public final class JsoStringMap<T> extends JavaScriptObject implements StringMap<T> {
 
@@ -35,21 +34,20 @@ public final class JsoStringMap<T> extends JavaScriptObject implements StringMap
    * set by Chrome dev mode.
    */
 
-    /** Convenience factory method. */
-    public static <T> JsoStringMap<T> create() {
-        return Jso.create().cast();
-    }
+  /** Convenience factory method. */
+  public static <T> JsoStringMap<T> create() {
+    return Jso.create().cast();
+  }
 
-    protected JsoStringMap() {
-    }
+  protected JsoStringMap() {}
 
-    @Override
-    public native T get(String key) /*-{
+  @Override
+  public native T get(String key) /*-{
         return Object.prototype.hasOwnProperty.call(this, key) ? this[key] : undefined;
     }-*/;
 
-    @Override
-    public native final JsoArray<String> getKeys() /*-{
+  @Override
+  public final native JsoArray<String> getKeys() /*-{
         keys = [];
         for (key in this) {
             if (Object.prototype.hasOwnProperty.call(this, key)) {
@@ -59,8 +57,8 @@ public final class JsoStringMap<T> extends JavaScriptObject implements StringMap
         return keys;
     }-*/;
 
-    @Override
-    public final native boolean isEmpty()/*-{
+  @Override
+  public final native boolean isEmpty() /*-{
         for (key in this) {
             if (Object.prototype.hasOwnProperty.call(this, key)) {
                 return false;
@@ -69,18 +67,18 @@ public final class JsoStringMap<T> extends JavaScriptObject implements StringMap
         return true;
     }-*/;
 
-    /**
-     * Method for iterating through the contents of a Map.
-     * <p/>
-     * <p>{@code T} is the expected type of the values returned from the map.
-     * <b>Caveat:</b> if you have a map of heterogeneous types, you need to think
-     * what value of T you specify here.
-     *
-     * @param callback
-     *         The callback object that gets called on each iteration.
-     */
-    @Override
-    public native void iterate(IterationCallback<T> callback) /*-{
+  /**
+   * Method for iterating through the contents of a Map.
+   *
+   * <p>
+   *
+   * <p>{@code T} is the expected type of the values returned from the map. <b>Caveat:</b> if you
+   * have a map of heterogeneous types, you need to think what value of T you specify here.
+   *
+   * @param callback The callback object that gets called on each iteration.
+   */
+  @Override
+  public native void iterate(IterationCallback<T> callback) /*-{
         for (key in this) {
             if (Object.prototype.hasOwnProperty.call(this, key)) {
                 callback.
@@ -90,24 +88,25 @@ public final class JsoStringMap<T> extends JavaScriptObject implements StringMap
         }
     }-*/;
 
-    // TODO: We still have problem with "__proto__"
-    @Override
-    public native void put(String key, T value) /*-{
+  // TODO: We still have problem with "__proto__"
+  @Override
+  public native void put(String key, T value) /*-{
         this[key] = value;
     }-*/;
 
-    @Override
-    public void putAll(StringMap<T> map) {
-        map.iterate(new IterationCallback<T>() {
-            @Override
-            public void onIteration(String key, T value) {
-                put(key, value);
-            }
+  @Override
+  public void putAll(StringMap<T> map) {
+    map.iterate(
+        new IterationCallback<T>() {
+          @Override
+          public void onIteration(String key, T value) {
+            put(key, value);
+          }
         });
-    }
+  }
 
-    @Override
-    public native T remove(String key) /*-{
+  @Override
+  public native T remove(String key) /*-{
         if (!Object.prototype.hasOwnProperty.call(this, key)) {
             return undefined;
         }
@@ -116,20 +115,22 @@ public final class JsoStringMap<T> extends JavaScriptObject implements StringMap
         return retVal;
     }-*/;
 
-    @Override
-    public native boolean containsKey(String key) /*-{
+  @Override
+  public native boolean containsKey(String key) /*-{
         return Object.prototype.hasOwnProperty.call(this, key);
     }-*/;
 
-    /**
-     * Returns the size of the map (the number of keys).
-     * <p/>
-     * <p>NB: This method is currently O(N) because it iterates over all keys.
-     *
-     * @return the size of the map.
-     */
-    @Override
-    public final native int size() /*-{
+  /**
+   * Returns the size of the map (the number of keys).
+   *
+   * <p>
+   *
+   * <p>NB: This method is currently O(N) because it iterates over all keys.
+   *
+   * @return the size of the map.
+   */
+  @Override
+  public final native int size() /*-{
         size = 0;
         for (key in this) {
             if (Object.prototype.hasOwnProperty.call(this, key)) {
@@ -139,9 +140,8 @@ public final class JsoStringMap<T> extends JavaScriptObject implements StringMap
         return size;
     }-*/;
 
-
-    /** {@inheritDoc} */
-    public final native JsoArray<T> getValues() /*-{
+  /** {@inheritDoc} */
+  public final native JsoArray<T> getValues() /*-{
         var data = [];
         for (var i in this) {
             if (Object.prototype.hasOwnProperty.call(this, key)) {

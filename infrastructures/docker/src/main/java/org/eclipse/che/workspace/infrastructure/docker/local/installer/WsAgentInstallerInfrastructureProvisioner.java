@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.workspace.infrastructure.docker.local.installer;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -21,9 +23,6 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConf
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ConfigurationProvisioner;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Provides volumes configuration of machine for wsagent installer
  *
@@ -33,33 +32,36 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class WsAgentInstallerInfrastructureProvisioner implements ConfigurationProvisioner {
-    private final WsAgentBinariesInfrastructureProvisioner binariesProvisioner;
-    private final String                                   extConfBinding;
+  private final WsAgentBinariesInfrastructureProvisioner binariesProvisioner;
+  private final String extConfBinding;
 
-    @Inject
-    public WsAgentInstallerInfrastructureProvisioner(WsAgentBinariesInfrastructureProvisioner binariesProvisioner,
-                                                     DockerExtConfBindingProvider dockerExtConfBindingProvider) {
+  @Inject
+  public WsAgentInstallerInfrastructureProvisioner(
+      WsAgentBinariesInfrastructureProvisioner binariesProvisioner,
+      DockerExtConfBindingProvider dockerExtConfBindingProvider) {
 
-        this.extConfBinding = dockerExtConfBindingProvider.get();
-        this.binariesProvisioner = binariesProvisioner;
+    this.extConfBinding = dockerExtConfBindingProvider.get();
+    this.binariesProvisioner = binariesProvisioner;
+  }
+
+  @Override
+  public void provision(
+      EnvironmentImpl envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+      throws InfrastructureException {
+
+    binariesProvisioner.provision(envConfig, internalEnv, identity);
+
+    if (extConfBinding != null) {
+      String devMachineName = Utils.getDevMachineName(envConfig);
+      if (devMachineName == null) {
+        throw new InternalInfrastructureException("Dev machine is not found in environment");
+      }
+      DockerContainerConfig containerConfig = internalEnv.getContainers().get(devMachineName);
+      containerConfig.getVolumes().add(extConfBinding);
+      containerConfig
+          .getEnvironment()
+          .put(
+              CheBootstrap.CHE_LOCAL_CONF_DIR, DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);
     }
-
-    @Override
-    public void provision(EnvironmentImpl envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
-            throws InfrastructureException {
-
-        binariesProvisioner.provision(envConfig, internalEnv, identity);
-
-        if (extConfBinding != null) {
-            String devMachineName = Utils.getDevMachineName(envConfig);
-            if (devMachineName == null) {
-                throw new InternalInfrastructureException("Dev machine is not found in environment");
-            }
-            DockerContainerConfig containerConfig = internalEnv.getContainers().get(devMachineName);
-            containerConfig.getVolumes().add(extConfBinding);
-            containerConfig.getEnvironment().put(CheBootstrap.CHE_LOCAL_CONF_DIR,
-                                                 DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);
-        }
-    }
-
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.workspace.infrastructure.docker;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -21,18 +21,14 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  * @author Alexander Garagatyi
  */
 public interface InfrastructureProvisioner {
-    /**
-     * Modifies environment config and internal environment representation
-     * with everything needed for infrastructure of workspace.
-     *
-     * @param envConfig
-     *         configuration of environment
-     * @param internalEnv
-     *         internal environment representation
-     * @throws InfrastructureException
-     *         if any error occurs
-     */
-    void provision(EnvironmentImpl envConfig,
-                   DockerEnvironment internalEnv,
-                   RuntimeIdentity identity) throws InfrastructureException;
+  /**
+   * Modifies environment config and internal environment representation with everything needed for
+   * infrastructure of workspace.
+   *
+   * @param envConfig configuration of environment
+   * @param internalEnv internal environment representation
+   * @throws InfrastructureException if any error occurs
+   */
+  void provision(EnvironmentImpl envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+      throws InfrastructureException;
 }

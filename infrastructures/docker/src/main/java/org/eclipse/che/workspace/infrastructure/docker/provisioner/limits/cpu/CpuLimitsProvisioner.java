@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.cpu;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
@@ -17,40 +19,39 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConf
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisioner;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 /**
- * Sets CPU limits to docker containers and docker image build configuration in case limits are configured.
+ * Sets CPU limits to docker containers and docker image build configuration in case limits are
+ * configured.
  *
  * @author Alexander Garagatyi
  */
 public class CpuLimitsProvisioner implements ContainerSystemSettingsProvisioner {
-    private final String cpuSet;
-    private final long   cpuPeriod;
-    private final long   cpuQuota;
+  private final String cpuSet;
+  private final long cpuPeriod;
+  private final long cpuQuota;
 
-    @Inject
-    public CpuLimitsProvisioner(@Nullable @Named("che.docker.cpuset_cpus") String cpuSet,
-                                @Named("che.docker.cpu_period") long cpuPeriod,
-                                @Named("che.docker.cpu_quota") long cpuQuota) {
-        this.cpuSet = cpuSet;
-        this.cpuPeriod = cpuPeriod;
-        this.cpuQuota = cpuQuota;
-    }
+  @Inject
+  public CpuLimitsProvisioner(
+      @Nullable @Named("che.docker.cpuset_cpus") String cpuSet,
+      @Named("che.docker.cpu_period") long cpuPeriod,
+      @Named("che.docker.cpu_quota") long cpuQuota) {
+    this.cpuSet = cpuSet;
+    this.cpuPeriod = cpuPeriod;
+    this.cpuQuota = cpuQuota;
+  }
 
-    @Override
-    public void provision(DockerEnvironment internalEnv) throws InfrastructureException {
-        for (DockerContainerConfig containerConfig : internalEnv.getContainers().values()) {
-            containerConfig.setCpuPeriod(cpuPeriod);
-            containerConfig.setCpuQuota(cpuQuota);
-            containerConfig.setCpuSet(cpuSet);
-            DockerBuildContext build = containerConfig.getBuild();
-            if (build != null) {
-                build.setCpuPeriod(cpuPeriod);
-                build.setCpuQuota(cpuQuota);
-                build.setCpuSet(cpuSet);
-            }
-        }
+  @Override
+  public void provision(DockerEnvironment internalEnv) throws InfrastructureException {
+    for (DockerContainerConfig containerConfig : internalEnv.getContainers().values()) {
+      containerConfig.setCpuPeriod(cpuPeriod);
+      containerConfig.setCpuQuota(cpuQuota);
+      containerConfig.setCpuSet(cpuSet);
+      DockerBuildContext build = containerConfig.getBuild();
+      if (build != null) {
+        build.setCpuPeriod(cpuPeriod);
+        build.setCpuQuota(cpuQuota);
+        build.setCpuSet(cpuSet);
+      }
     }
+  }
 }

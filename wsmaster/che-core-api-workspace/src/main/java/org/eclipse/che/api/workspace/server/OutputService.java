@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.workspace.shared.dto.event.InstallerLogEvent;
+import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHOD;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHOD;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.shared.dto.event.InstallerLogEvent;
 
 /**
  * Defines a JSON-RPC methods for handling machine output.
@@ -28,24 +27,24 @@ import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHO
 @Singleton
 public class OutputService {
 
-    private final EventService eventService;
+  private final EventService eventService;
 
-    @Inject
-    public OutputService(EventService eventService) {
-        this.eventService = eventService;
-    }
+  @Inject
+  public OutputService(EventService eventService) {
+    this.eventService = eventService;
+  }
 
-    @Inject
-    public void configureMethods(RequestHandlerConfigurator requestHandler) {
-        requestHandler.newConfiguration()
-                      .methodName(INSTALLER_LOG_METHOD)
-                      .paramsAsDto(InstallerLogEvent.class)
-                      .noResult()
-                      .withConsumer(this::handleInstallerLog);
-    }
+  @Inject
+  public void configureMethods(RequestHandlerConfigurator requestHandler) {
+    requestHandler
+        .newConfiguration()
+        .methodName(INSTALLER_LOG_METHOD)
+        .paramsAsDto(InstallerLogEvent.class)
+        .noResult()
+        .withConsumer(this::handleInstallerLog);
+  }
 
-    private void handleInstallerLog(InstallerLogEvent installerStatusEvent) {
-        eventService.publish(installerStatusEvent);
-    }
-
+  private void handleInstallerLog(InstallerLogEvent installerStatusEvent) {
+    eventService.publish(installerStatusEvent);
+  }
 }

@@ -14,63 +14,54 @@
 
 package org.eclipse.che.ide.mvp;
 
-
 import elemental.dom.Element;
 
 /**
  * Wraps an Element that corresponds to some DOM subtree.
- * <p/>
- * This is a View (V) in our use of MVP.
- * <p/>
- * Use this when you want to give some brains to one or more DOM elements by
- * making this the View for some {@link UiComponent} that will contain business
- * logic.
- * <p/>
- * Implementors may choose to attach event listeners that it needs to DOM
- * elements that are contained with this View, and expose logical events where
- * appropriate to the containing UiComponent.
+ *
+ * <p>This is a View (V) in our use of MVP.
+ *
+ * <p>Use this when you want to give some brains to one or more DOM elements by making this the View
+ * for some {@link UiComponent} that will contain business logic.
+ *
+ * <p>Implementors may choose to attach event listeners that it needs to DOM elements that are
+ * contained with this View, and expose logical events where appropriate to the containing
+ * UiComponent.
  */
 public abstract class CompositeView<D> implements View<D> {
-    private Element element;
-    private D       delegate;
+  private Element element;
+  private D delegate;
 
-    /**
-     * This constructor only exists to support UiBinder which requires us to inject
-     * the element after the call to the constructor.
-     */
-    protected CompositeView() {
-    }
+  /**
+   * This constructor only exists to support UiBinder which requires us to inject the element after
+   * the call to the constructor.
+   */
+  protected CompositeView() {}
 
-    protected CompositeView(Element element) {
-        this.setElement(element);
-    }
+  protected CompositeView(Element element) {
+    this.setElement(element);
+  }
 
-    /** @return the delegate */
-    @Override
-    public D getDelegate() {
-        return delegate;
-    }
+  /** @return the delegate */
+  @Override
+  public D getDelegate() {
+    return delegate;
+  }
 
-    /** @return the element */
-    @Override
-    public Element getElement() {
-        return element;
-    }
+  /** @return the element */
+  @Override
+  public Element getElement() {
+    return element;
+  }
 
-    /**
-     * @param delegate
-     *         the delegate to set
-     */
-    @Override
-    public void setDelegate(D delegate) {
-        this.delegate = delegate;
-    }
+  /** @param delegate the delegate to set */
+  @Override
+  public void setDelegate(D delegate) {
+    this.delegate = delegate;
+  }
 
-    /**
-     * @param element
-     *         the element to set
-     */
-    protected void setElement(Element element) {
-        this.element = element;
-    }
+  /** @param element the element to set */
+  protected void setElement(Element element) {
+    this.element = element;
+  }
 }

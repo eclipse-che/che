@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,23 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.languageserver.registry;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -29,291 +40,310 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PreDestroy;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry {
-    private final static Logger                LOG                 = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
-    private final List<LanguageDescription>    languages;
-    private final List<LanguageServerLauncher> launchers;
-    private final AtomicInteger                serverId            = new AtomicInteger();
+  private static final Logger LOG = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
+  private final List<LanguageDescription> languages;
+  private final List<LanguageServerLauncher> launchers;
+  private final AtomicInteger serverId = new AtomicInteger();
 
-    /**
-     * Started {@link LanguageServer} by project.
-     */
-    private final Map<String, List<LanguageServerLauncher>>    launchedServers;
-    private final Map<String, List<InitializedLanguageServer>> initializedServers;
+  /** Started {@link LanguageServer} by project. */
+  private final Map<String, List<LanguageServerLauncher>> launchedServers;
 
-    private final Provider<ProjectManager> projectManagerProvider;
-    private final ServerInitializer        initializer;
-    private EventService                   eventService;
+  private final Map<String, List<InitializedLanguageServer>> initializedServers;
 
-    @Inject
-    public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers, Set<LanguageDescription> languages,
-                                      Provider<ProjectManager> projectManagerProvider, ServerInitializer initializer,
-                                      EventService eventService) {
-        this.languages = new ArrayList<>(languages);
-        this.launchers = new ArrayList<>(languageServerLaunchers);
-        this.projectManagerProvider = projectManagerProvider;
-        this.initializer = initializer;
-        this.eventService = eventService;
-        this.launchedServers = new HashMap<>();
-        this.initializedServers = new HashMap<>();
+  private final Provider<ProjectManager> projectManagerProvider;
+  private final ServerInitializer initializer;
+  private EventService eventService;
+
+  @Inject
+  public LanguageServerRegistryImpl(
+      Set<LanguageServerLauncher> languageServerLaunchers,
+      Set<LanguageDescription> languages,
+      Provider<ProjectManager> projectManagerProvider,
+      ServerInitializer initializer,
+      EventService eventService) {
+    this.languages = new ArrayList<>(languages);
+    this.launchers = new ArrayList<>(languageServerLaunchers);
+    this.projectManagerProvider = projectManagerProvider;
+    this.initializer = initializer;
+    this.eventService = eventService;
+    this.launchedServers = new HashMap<>();
+    this.initializedServers = new HashMap<>();
+  }
+
+  private LanguageDescription findLanguage(String path) {
+    for (LanguageDescription language : languages) {
+      if (matchesFilenames(language, path) || matchesExtensions(language, path)) {
+        return language;
+      }
     }
+    return null;
+  }
 
-    private LanguageDescription findLanguage(String path) {
-        for (LanguageDescription language : languages) {
-            if (matchesFilenames(language, path) || matchesExtensions(language, path)) {
-                return language;
-            }
-        }
-        return null;
+  private boolean matchesExtensions(LanguageDescription language, String path) {
+    return language.getFileExtensions().stream().anyMatch(extension -> path.endsWith(extension));
+  }
+
+  private boolean matchesFilenames(LanguageDescription language, String path) {
+    return language.getFileNames().stream().anyMatch(name -> path.endsWith(name));
+  }
+
+  @Override
+  public ServerCapabilities getCapabilities(String fileUri) throws LanguageServerException {
+    return getApplicableLanguageServers(fileUri)
+        .stream()
+        .flatMap(Collection::stream)
+        .map(s -> s.getInitializeResult().getCapabilities())
+        .reduce(
+            null,
+            (left, right) ->
+                left == null ? right : new ServerCapabilitiesOverlay(left, right).compute());
+  }
+
+  public ServerCapabilities initialize(String fileUri) throws LanguageServerException {
+    String projectPath = extractProjectPath(fileUri);
+    if (projectPath == null) {
+      return null;
     }
+    List<LanguageServerLauncher> launchers = findLaunchers(projectPath, fileUri);
+    // launchers is the set of things we need to have initialized
 
-    private boolean matchesExtensions(LanguageDescription language, String path) {
-        return language.getFileExtensions().stream().anyMatch(extension -> path.endsWith(extension));
-    }
+    for (LanguageServerLauncher launcher : new ArrayList<>(launchers)) {
+      synchronized (initializedServers) {
+        List<LanguageServerLauncher> servers =
+            launchedServers.computeIfAbsent(projectPath, k -> new ArrayList<>());
 
-    private boolean matchesFilenames(LanguageDescription language, String path) {
-        return language.getFileNames().stream().anyMatch(name -> path.endsWith(name));
-    }
-
-    @Override
-    public ServerCapabilities getCapabilities(String fileUri) throws LanguageServerException {
-        return getApplicableLanguageServers(fileUri).stream().flatMap(Collection::stream)
-                        .map(s -> s.getInitializeResult().getCapabilities())
-                        .reduce(null, (left, right) -> left == null ? right : new ServerCapabilitiesOverlay(left, right).compute());
-    }
-
-    public ServerCapabilities initialize(String fileUri) throws LanguageServerException {
-        String projectPath = extractProjectPath(fileUri);
-        if (projectPath == null) {
-            return null;
-        }
-        List<LanguageServerLauncher> launchers = findLaunchers(projectPath, fileUri);
-        // launchers is the set of things we need to have initialized
-
-        for (LanguageServerLauncher launcher : new ArrayList<>(launchers)) {
-            synchronized (initializedServers) {
-                List<LanguageServerLauncher> servers = launchedServers.computeIfAbsent(projectPath, k -> new ArrayList<>());
-
-                if (!servers.contains(launcher)) {
-                    servers.add(launcher);
-                    String id = String.valueOf(serverId.incrementAndGet());
-                    initializer.initialize(launcher, new CheLanguageClient(eventService, id), projectPath).thenAccept(pair -> {
-                        synchronized (initializedServers) {
-                            List<InitializedLanguageServer> initialized =
-                                    initializedServers.computeIfAbsent(projectPath, k -> new ArrayList<>());
-                            initialized.add(new InitializedLanguageServer(id, pair.first, pair.second, launcher));
-                            launchers.remove(launcher);
-                            initializedServers.notifyAll();
-                        }
-                    }).exceptionally(t -> {
-                        eventService.publish(new MessageParams(MessageType.Error, "Failed to initialized LS "+launcher.getDescription().getId()+": "+t.getMessage()));
-                        LOG.error("Error launching language server " + launcher, t);
-                        synchronized (initializedServers) {
-                            launchers.remove(launcher);
-                            servers.remove(launcher);
-                            initializedServers.notifyAll();
-                        }
-                        return null;
-                    });
-                }
-            }
-        }
-
-        // now wait for all launchers to arrive at initialized
-        // eventually, all launchers will either fail or succeed, regardless of
-        // which request thread started them. Thus the loop below will
-        // end.
-        synchronized (initializedServers) {
-            List<InitializedLanguageServer> initForProject = initializedServers.get(projectPath);
-            if (initForProject != null) {
-                for (InitializedLanguageServer initialized : initForProject) {
-                    launchers.remove(initialized.getLauncher());
-                }
-            }
-            while (!launchers.isEmpty()) {
-                try {
-                    initializedServers.wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+        if (!servers.contains(launcher)) {
+          servers.add(launcher);
+          String id = String.valueOf(serverId.incrementAndGet());
+          initializer
+              .initialize(launcher, new CheLanguageClient(eventService, id), projectPath)
+              .thenAccept(
+                  pair -> {
+                    synchronized (initializedServers) {
+                      List<InitializedLanguageServer> initialized =
+                          initializedServers.computeIfAbsent(projectPath, k -> new ArrayList<>());
+                      initialized.add(
+                          new InitializedLanguageServer(id, pair.first, pair.second, launcher));
+                      launchers.remove(launcher);
+                      initializedServers.notifyAll();
+                    }
+                  })
+              .exceptionally(
+                  t -> {
+                    eventService.publish(
+                        new MessageParams(
+                            MessageType.Error,
+                            "Failed to initialized LS "
+                                + launcher.getDescription().getId()
+                                + ": "
+                                + t.getMessage()));
+                    LOG.error("Error launching language server " + launcher, t);
+                    synchronized (initializedServers) {
+                      launchers.remove(launcher);
+                      servers.remove(launcher);
+                      initializedServers.notifyAll();
+                    }
                     return null;
-                }
-            }
+                  });
         }
-        return getCapabilities(fileUri);
+      }
     }
 
-    private List<LanguageServerLauncher> findLaunchers(String projectPath, String fileUri) {
-        LanguageDescription language = findLanguage(fileUri);
-        if (language == null) {
-            return Collections.emptyList();
+    // now wait for all launchers to arrive at initialized
+    // eventually, all launchers will either fail or succeed, regardless of
+    // which request thread started them. Thus the loop below will
+    // end.
+    synchronized (initializedServers) {
+      List<InitializedLanguageServer> initForProject = initializedServers.get(projectPath);
+      if (initForProject != null) {
+        for (InitializedLanguageServer initialized : initForProject) {
+          launchers.remove(initialized.getLauncher());
         }
-        List<LanguageServerLauncher> result = new ArrayList<>();
-        for (LanguageServerLauncher launcher : launchers) {
-            if (launcher.isAbleToLaunch()) {
-                int score = matchScore(launcher.getDescription(), fileUri, language.getLanguageId());
-                if (score > 0) {
-                    result.add(launcher);
-                }
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public List<LanguageDescription> getSupportedLanguages() {
-        return Collections.unmodifiableList(languages);
-    }
-
-    protected String extractProjectPath(String filePath) throws LanguageServerException {
-        FolderEntry root;
+      }
+      while (!launchers.isEmpty()) {
         try {
-            root = projectManagerProvider.get().getProjectsRoot();
-        } catch (ServerException e) {
-            throw new LanguageServerException("Project not found for " + filePath, e);
+          initializedServers.wait();
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+          return null;
         }
+      }
+    }
+    return getCapabilities(fileUri);
+  }
 
-        if (!LanguageServiceUtils.isProjectUri(filePath)) {
-            throw new LanguageServerException("Project not found for " + filePath);
+  private List<LanguageServerLauncher> findLaunchers(String projectPath, String fileUri) {
+    LanguageDescription language = findLanguage(fileUri);
+    if (language == null) {
+      return Collections.emptyList();
+    }
+    List<LanguageServerLauncher> result = new ArrayList<>();
+    for (LanguageServerLauncher launcher : launchers) {
+      if (launcher.isAbleToLaunch()) {
+        int score = matchScore(launcher.getDescription(), fileUri, language.getLanguageId());
+        if (score > 0) {
+          result.add(launcher);
         }
+      }
+    }
+    return result;
+  }
 
-        VirtualFileEntry fileEntry;
-        try {
-            fileEntry = root.getChild(LanguageServiceUtils.removePrefixUri(filePath));
-        } catch (ServerException e) {
-            throw new LanguageServerException("Project not found for " + filePath, e);
-        }
+  @Override
+  public List<LanguageDescription> getSupportedLanguages() {
+    return Collections.unmodifiableList(languages);
+  }
 
-        if (fileEntry == null) {
-            throw new LanguageServerException("Project not found for " + filePath);
-        }
-
-        return LanguageServiceUtils.prefixURI(fileEntry.getProject());
+  protected String extractProjectPath(String filePath) throws LanguageServerException {
+    FolderEntry root;
+    try {
+      root = projectManagerProvider.get().getProjectsRoot();
+    } catch (ServerException e) {
+      throw new LanguageServerException("Project not found for " + filePath, e);
     }
 
-    public List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri) throws LanguageServerException {
-        String projectPath = extractProjectPath(fileUri);
-        LanguageDescription language = findLanguage(fileUri);
-        if (projectPath == null || language == null) {
-            return Collections.emptyList();
-        }
-
-        Map<Integer, List<InitializedLanguageServer>> result = new HashMap<>();
-
-        List<InitializedLanguageServer> servers = null;
-        synchronized (initializedServers) {
-            List<InitializedLanguageServer> list = initializedServers.get(projectPath);
-            if (list == null) {
-                return Collections.emptyList();
-            }
-            servers = new ArrayList<InitializedLanguageServer>(list);
-        }
-        for (InitializedLanguageServer server : servers) {
-            int score = matchScore(server.getLauncher().getDescription(), fileUri, language.getLanguageId());
-            if (score > 0) {
-                List<InitializedLanguageServer> list = result.get(score);
-                if (list == null) {
-                    list = new ArrayList<>();
-                    result.put(score, list);
-                }
-                list.add(server);
-            }
-        }
-        // sort lists highest score first
-        return result.entrySet().stream().sorted((left, right) -> right.getKey() - left.getKey()).map(entry -> entry.getValue())
-                        .collect(Collectors.toList());
+    if (!LanguageServiceUtils.isProjectUri(filePath)) {
+      throw new LanguageServerException("Project not found for " + filePath);
     }
 
-    private int matchScore(LanguageServerDescription desc, String path, String languageId) {
-        int match = matchLanguageId(desc, languageId);
+    VirtualFileEntry fileEntry;
+    try {
+      fileEntry = root.getChild(LanguageServiceUtils.removePrefixUri(filePath));
+    } catch (ServerException e) {
+      throw new LanguageServerException("Project not found for " + filePath, e);
+    }
+
+    if (fileEntry == null) {
+      throw new LanguageServerException("Project not found for " + filePath);
+    }
+
+    return LanguageServiceUtils.prefixURI(fileEntry.getProject());
+  }
+
+  public List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri)
+      throws LanguageServerException {
+    String projectPath = extractProjectPath(fileUri);
+    LanguageDescription language = findLanguage(fileUri);
+    if (projectPath == null || language == null) {
+      return Collections.emptyList();
+    }
+
+    Map<Integer, List<InitializedLanguageServer>> result = new HashMap<>();
+
+    List<InitializedLanguageServer> servers = null;
+    synchronized (initializedServers) {
+      List<InitializedLanguageServer> list = initializedServers.get(projectPath);
+      if (list == null) {
+        return Collections.emptyList();
+      }
+      servers = new ArrayList<InitializedLanguageServer>(list);
+    }
+    for (InitializedLanguageServer server : servers) {
+      int score =
+          matchScore(server.getLauncher().getDescription(), fileUri, language.getLanguageId());
+      if (score > 0) {
+        List<InitializedLanguageServer> list = result.get(score);
+        if (list == null) {
+          list = new ArrayList<>();
+          result.put(score, list);
+        }
+        list.add(server);
+      }
+    }
+    // sort lists highest score first
+    return result
+        .entrySet()
+        .stream()
+        .sorted((left, right) -> right.getKey() - left.getKey())
+        .map(entry -> entry.getValue())
+        .collect(Collectors.toList());
+  }
+
+  private int matchScore(LanguageServerDescription desc, String path, String languageId) {
+    int match = matchLanguageId(desc, languageId);
+    if (match == 10) {
+      return 10;
+    }
+
+    for (DocumentFilter filter : desc.getDocumentFilters()) {
+      if (filter.getLanguageId() != null && filter.getLanguageId().length() > 0) {
+        match = Math.max(match, matchLanguageId(filter.getLanguageId(), languageId));
         if (match == 10) {
-            return 10;
+          return 10;
         }
-
-        for (DocumentFilter filter : desc.getDocumentFilters()) {
-            if (filter.getLanguageId() != null && filter.getLanguageId().length() > 0) {
-                match = Math.max(match, matchLanguageId(filter.getLanguageId(), languageId));
-                if (match == 10) {
-                    return 10;
-                }
-            }
-            if (filter.getScheme() != null && path.startsWith(filter.getScheme() + ":")) {
-                return 10;
-            }
-            String pattern = filter.getPathRegex();
-            if (pattern != null) {
-                if (pattern.equals(path)) {
-                    return 10;
-                }
-                Pattern regex = Pattern.compile(pattern);
-                if (regex.matcher(path).matches()) {
-                    match = Math.max(match, 5);
-                }
-            }
+      }
+      if (filter.getScheme() != null && path.startsWith(filter.getScheme() + ":")) {
+        return 10;
+      }
+      String pattern = filter.getPathRegex();
+      if (pattern != null) {
+        if (pattern.equals(path)) {
+          return 10;
         }
-        return match;
+        Pattern regex = Pattern.compile(pattern);
+        if (regex.matcher(path).matches()) {
+          match = Math.max(match, 5);
+        }
+      }
     }
+    return match;
+  }
 
-    private int matchLanguageId(String id, String languageId) {
-        if (id.equals(languageId)) {
-            return 10;
-        } else if ("*".equals(id)) {
-            return 5;
-        }
-        return 0;
+  private int matchLanguageId(String id, String languageId) {
+    if (id.equals(languageId)) {
+      return 10;
+    } else if ("*".equals(id)) {
+      return 5;
     }
+    return 0;
+  }
 
-    private int matchLanguageId(LanguageServerDescription desc, String languageId) {
-        int match = 0;
-        List<String> languageIds = desc.getLanguageIds();
-        if (languageIds == null) {
-            return 0;
-        }
-        for (String id : languageIds) {
-            if (id.equals(languageId)) {
-                match = 10;
-                break;
-            } else if ("*".equals(id)) {
-                match = 5;
-            }
-        }
-        return match;
+  private int matchLanguageId(LanguageServerDescription desc, String languageId) {
+    int match = 0;
+    List<String> languageIds = desc.getLanguageIds();
+    if (languageIds == null) {
+      return 0;
     }
+    for (String id : languageIds) {
+      if (id.equals(languageId)) {
+        match = 10;
+        break;
+      } else if ("*".equals(id)) {
+        match = 5;
+      }
+    }
+    return match;
+  }
 
-    @PreDestroy
-    protected void shutdown() {
-        List<LanguageServer> allServers;
-        synchronized (initializedServers) {
-            allServers = initializedServers.values().stream().flatMap(l -> l.stream()).map(s -> s.getServer()).collect(Collectors.toList());
-        }
-        for (LanguageServer server : allServers) {
-            server.shutdown();
-            server.exit();
-        }
+  @PreDestroy
+  protected void shutdown() {
+    List<LanguageServer> allServers;
+    synchronized (initializedServers) {
+      allServers =
+          initializedServers
+              .values()
+              .stream()
+              .flatMap(l -> l.stream())
+              .map(s -> s.getServer())
+              .collect(Collectors.toList());
     }
+    for (LanguageServer server : allServers) {
+      server.shutdown();
+      server.exit();
+    }
+  }
 
-    @Override
-    public InitializedLanguageServer getServer(String id) {
-        for (List<InitializedLanguageServer> list : initializedServers.values()) {
-            for (InitializedLanguageServer initializedLanguageServer : list) {
-                if (initializedLanguageServer.getId().equals(id)) {
-                    return initializedLanguageServer;
-                }
-            }
+  @Override
+  public InitializedLanguageServer getServer(String id) {
+    for (List<InitializedLanguageServer> list : initializedServers.values()) {
+      for (InitializedLanguageServer initializedLanguageServer : list) {
+        if (initializedLanguageServer.getId().equals(id)) {
+          return initializedLanguageServer;
         }
-        return null;
+      }
     }
+    return null;
+  }
 }

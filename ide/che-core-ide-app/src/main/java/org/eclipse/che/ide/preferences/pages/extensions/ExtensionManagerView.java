@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.preferences.pages.extensions;
 
+import java.util.List;
 import org.eclipse.che.ide.api.extension.ExtensionDescription;
 import org.eclipse.che.ide.api.mvp.View;
-
-import java.util.List;
 
 /** @author Evgen Vidolob */
 public interface ExtensionManagerView extends View<ExtensionManagerView.ActionDelegate> {
 
-    void setExtensions(List<ExtensionDescription> extensions);
+  void setExtensions(List<ExtensionDescription> extensions);
 
-    interface ActionDelegate {
-    }
+  interface ActionDelegate {}
 }

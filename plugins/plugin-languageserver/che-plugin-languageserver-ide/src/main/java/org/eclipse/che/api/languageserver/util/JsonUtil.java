@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.languageserver.util;
-
 
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
@@ -22,21 +21,20 @@ import com.google.gwt.json.client.JSONValue;
  * @author Thomas Mäder
  */
 public class JsonUtil {
-    public static JSONValue convertToJson(Object value) {
-        if (value instanceof Enum) {
-            return new JSONString(((Enum<?>)value).name());
-        } else if (value instanceof String) {
-            return new JSONString((String)value);
-        } else if (value instanceof Number) {
-            return new JSONNumber(((Number)value).doubleValue());
-        } else if (value instanceof Boolean) {
-            return JSONBoolean.getInstance((boolean)value);
-        } else if (value instanceof JsonSerializable) {
-            return ((JsonSerializable)value).toJsonElement();
-        } else if (value instanceof JSONValue) {
-            return (JSONValue)value;
-        }
-        throw new RuntimeException("Unexpected runtime value: " + value);
+  public static JSONValue convertToJson(Object value) {
+    if (value instanceof Enum) {
+      return new JSONString(((Enum<?>) value).name());
+    } else if (value instanceof String) {
+      return new JSONString((String) value);
+    } else if (value instanceof Number) {
+      return new JSONNumber(((Number) value).doubleValue());
+    } else if (value instanceof Boolean) {
+      return JSONBoolean.getInstance((boolean) value);
+    } else if (value instanceof JsonSerializable) {
+      return ((JsonSerializable) value).toJsonElement();
+    } else if (value instanceof JSONValue) {
+      return (JSONValue) value;
     }
-
+    throw new RuntimeException("Unexpected runtime value: " + value);
+  }
 }

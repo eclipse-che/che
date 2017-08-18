@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.promises.client.callback;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Executor;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
@@ -27,31 +26,32 @@ import org.eclipse.che.api.promises.client.js.ResolveFunction;
  */
 public final class AsyncPromiseHelper {
 
-    private AsyncPromiseHelper() {
-    }
+  private AsyncPromiseHelper() {}
 
-    public static <V> Promise<V> createFromAsyncRequest(final RequestCall<V> call) {
-        final Executor.ExecutorBody<V> body = new Executor.ExecutorBody<V>() {
-            @Override
-            public void apply(final ResolveFunction<V> resolve, final RejectFunction reject) {
-                call.makeCall(new AsyncCallback<V>() {
-                    @Override
-                    public void onSuccess(final V result) {
-                        resolve.apply(result);
-                    }
+  public static <V> Promise<V> createFromAsyncRequest(final RequestCall<V> call) {
+    final Executor.ExecutorBody<V> body =
+        new Executor.ExecutorBody<V>() {
+          @Override
+          public void apply(final ResolveFunction<V> resolve, final RejectFunction reject) {
+            call.makeCall(
+                new AsyncCallback<V>() {
+                  @Override
+                  public void onSuccess(final V result) {
+                    resolve.apply(result);
+                  }
 
-                    @Override
-                    public void onFailure(final Throwable exception) {
-                        reject.apply(JsPromiseError.create(exception));
-                    }
+                  @Override
+                  public void onFailure(final Throwable exception) {
+                    reject.apply(JsPromiseError.create(exception));
+                  }
                 });
-            }
+          }
         };
-        final Executor<V> executor = Executor.create(body);
-        return Promises.create(executor);
-    }
+    final Executor<V> executor = Executor.create(body);
+    return Promises.create(executor);
+  }
 
-    public interface RequestCall<V> {
-        void makeCall(AsyncCallback<V> callback);
-    }
+  public interface RequestCall<V> {
+    void makeCall(AsyncCallback<V> callback);
+  }
 }

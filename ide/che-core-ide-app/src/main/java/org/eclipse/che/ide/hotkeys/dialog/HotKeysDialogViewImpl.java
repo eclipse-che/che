@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.hotkeys.dialog;
 
 import com.google.gwt.dom.client.DivElement;
@@ -29,7 +29,9 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.editor.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.keybinding.Scheme;
@@ -39,10 +41,6 @@ import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
 import org.eclipse.che.ide.ui.window.Window;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Implementation {@link HotKeysDialogView}
@@ -54,173 +52,183 @@ import java.util.Map;
 @Singleton
 public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
 
-    interface KeyMapViewImplUiBinder extends UiBinder<Widget, HotKeysDialogViewImpl> {
-    }
+  interface KeyMapViewImplUiBinder extends UiBinder<Widget, HotKeysDialogViewImpl> {}
 
-    private final HotKeyResources hotKeyResources;
+  private final HotKeyResources hotKeyResources;
 
-    private final Category.CategoryEventDelegate<HotKeyItem> keyBindingsEventDelegate =
-            new Category.CategoryEventDelegate<HotKeyItem>() {
+  private final Category.CategoryEventDelegate<HotKeyItem> keyBindingsEventDelegate =
+      new Category.CategoryEventDelegate<HotKeyItem>() {
 
-                @Override
-                public void onListItemClicked(Element listItemBase, HotKeyItem hotKeyItem) {
-                }
-            };
+        @Override
+        public void onListItemClicked(Element listItemBase, HotKeyItem hotKeyItem) {}
+      };
 
-    private final CategoryRenderer<HotKeyItem> keyBindingsRenderer =
-            new CategoryRenderer<HotKeyItem>() {
-                @Override
-                public void renderElement(Element element, HotKeyItem hotKeyItem) {
-                    element.setInnerText(hotKeyItem.getActionDescription());
-                    element.addClassName(hotKeyResources.css().description());
-                    if (hotKeyItem.isGlobal()) {
-                        element.addClassName(hotKeyResources.css().isGlobal());
-                    }
+  private final CategoryRenderer<HotKeyItem> keyBindingsRenderer =
+      new CategoryRenderer<HotKeyItem>() {
+        @Override
+        public void renderElement(Element element, HotKeyItem hotKeyItem) {
+          element.setInnerText(hotKeyItem.getActionDescription());
+          element.addClassName(hotKeyResources.css().description());
+          if (hotKeyItem.isGlobal()) {
+            element.addClassName(hotKeyResources.css().isGlobal());
+          }
 
-                    DivElement hotKeyElem = Document.get().createDivElement();
-                    hotKeyElem.setInnerText(hotKeyItem.getHotKey());
-                    hotKeyElem.addClassName(hotKeyResources.css().hotKey());
-                    hotKeyElem.addClassName(hotKeyResources.css().floatRight());
+          DivElement hotKeyElem = Document.get().createDivElement();
+          hotKeyElem.setInnerText(hotKeyItem.getHotKey());
+          hotKeyElem.addClassName(hotKeyResources.css().hotKey());
+          hotKeyElem.addClassName(hotKeyResources.css().floatRight());
 
-                    element.appendChild(hotKeyElem);
-                }
+          element.appendChild(hotKeyElem);
+        }
 
-                @Override
-                public SpanElement renderCategory(Category<HotKeyItem> category) {
-                    SpanElement spanElement = Document.get().createSpanElement();
-                    spanElement.setInnerText(category.getTitle());
-                    return spanElement;
-                }
-            };
+        @Override
+        public SpanElement renderCategory(Category<HotKeyItem> category) {
+          SpanElement spanElement = Document.get().createSpanElement();
+          spanElement.setInnerText(category.getTitle());
+          return spanElement;
+        }
+      };
 
-    private CategoriesList    list;
-    private List<Category<?>> categoriesList;
-    private ActionDelegate    delegate;
-    private String            filteredValue;
+  private CategoriesList list;
+  private List<Category<?>> categoriesList;
+  private ActionDelegate delegate;
+  private String filteredValue;
 
-    Button saveButton;
+  Button saveButton;
 
-    Button closeButton;
+  Button closeButton;
 
-    Button printButton;
+  Button printButton;
 
-    @UiField
-    FlowPanel category;
+  @UiField FlowPanel category;
 
-    @UiField
-    TextBox filterInput;
+  @UiField TextBox filterInput;
 
-    @UiField
-    CustomListBox selectionListBox;
+  @UiField CustomListBox selectionListBox;
 
-    @UiField
-    FlowPanel selectionPanel;
+  @UiField FlowPanel selectionPanel;
 
-    @Inject
-    public HotKeysDialogViewImpl(KeyMapViewImplUiBinder uiBinder,
-                                 CoreLocalizationConstant locale,
-                                 org.eclipse.che.ide.Resources res,
-                                 HotKeyResources hotKeyResources) {
-        hotKeyResources.css().ensureInjected();
+  @Inject
+  public HotKeysDialogViewImpl(
+      KeyMapViewImplUiBinder uiBinder,
+      CoreLocalizationConstant locale,
+      org.eclipse.che.ide.Resources res,
+      HotKeyResources hotKeyResources) {
+    hotKeyResources.css().ensureInjected();
 
-        this.hotKeyResources = hotKeyResources;
+    this.hotKeyResources = hotKeyResources;
 
-        this.setTitle(locale.keyBindingsDialogTitle());
-        this.setWidget(uiBinder.createAndBindUi(this));
+    this.setTitle(locale.keyBindingsDialogTitle());
+    this.setWidget(uiBinder.createAndBindUi(this));
 
-        saveButton = createButton(locale.save(), "keybindings-saveButton-btn", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
+    saveButton =
+        createButton(
+            locale.save(),
+            "keybindings-saveButton-btn",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent clickEvent) {
                 delegate.onSaveClicked();
-            }
-        });
-        addButtonToFooter(saveButton);
-        saveButton.addStyleName(resources.windowCss().primaryButton());
+              }
+            });
+    addButtonToFooter(saveButton);
+    saveButton.addStyleName(resources.windowCss().primaryButton());
 
-        closeButton = createButton(locale.close(), "keybindings-closeButton-btn", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    closeButton =
+        createButton(
+            locale.close(),
+            "keybindings-closeButton-btn",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onCloseClicked();
-            }
-        });
-        addButtonToFooter(closeButton);
+              }
+            });
+    addButtonToFooter(closeButton);
 
-        printButton = createButton(locale.print(), "keybindings-printButton-btn", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
+    printButton =
+        createButton(
+            locale.print(),
+            "keybindings-printButton-btn",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent clickEvent) {
                 delegate.onPrintClicked();
-            }
+              }
+            });
+    addButtonToFooter(printButton);
+
+    list = new CategoriesList(res);
+    categoriesList = new ArrayList<>();
+    category.add(list);
+    filterInput.getElement().setAttribute("placeholder", "Search");
+    selectionListBox.addChangeHandler(
+        new ChangeHandler() {
+          @Override
+          public void onChange(ChangeEvent changeEvent) {
+            delegate.onSchemeSelectionChanged();
+          }
         });
-        addButtonToFooter(printButton);
 
-        list = new CategoriesList(res);
-        categoriesList = new ArrayList<>();
-        category.add(list);
-        filterInput.getElement().setAttribute("placeholder", "Search");
-        selectionListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent changeEvent) {
-                delegate.onSchemeSelectionChanged();
-            }
-        });
+    // Override DockLayoutPanel Overflow to correctly display ListBox
+    selectionPanel.getElement().getParentElement().getStyle().setOverflow(Style.Overflow.VISIBLE);
+  }
 
-        // Override DockLayoutPanel Overflow to correctly display ListBox
-        selectionPanel.getElement().getParentElement().getStyle().setOverflow(Style.Overflow.VISIBLE);
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
+
+  @Override
+  public void hide() {
+    super.hide();
+    resetFilter();
+  }
+
+  @Override
+  public void renderKeybindings() {
+    list.clear();
+    list.render(categoriesList, true);
+  }
+
+  @Override
+  public void setData(Map<String, List<HotKeyItem>> data) {
+    categoriesList.clear();
+    for (Map.Entry<String, List<HotKeyItem>> elem : data.entrySet()) {
+      categoriesList.add(
+          new Category<>(
+              elem.getKey(), keyBindingsRenderer, elem.getValue(), keyBindingsEventDelegate));
     }
+  }
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public String getSelectedScheme() {
+    return selectionListBox.getValue();
+  }
 
-    @Override
-    public void hide() {
-        super.hide();
-        resetFilter();
+  @Override
+  public void setSchemes(String select, List<Scheme> schemes) {
+    selectionListBox.clear();
+    for (Scheme s : schemes) {
+      selectionListBox.addItem(s.getDescription(), s.getSchemeId());
+      if (s.getSchemeId().equals(select)) {
+        // TODO Might be a better way to select item
+        selectionListBox.setSelectedIndex(selectionListBox.getItemCount() - 1);
+      }
     }
+  }
 
-    @Override
-    public void renderKeybindings() {
-        list.clear();
-        list.render(categoriesList, true);
+  @UiHandler("filterInput")
+  public void onKeyUp(KeyUpEvent keyUpEvent) {
+    String value = filterInput.getText();
+    if (!filterInput.getText().equals(filteredValue)) {
+      filteredValue = value;
+      delegate.onFilterValueChanged(value);
     }
+  }
 
-    @Override
-    public void setData(Map<String, List<HotKeyItem>> data) {
-        categoriesList.clear();
-        for (Map.Entry<String, List<HotKeyItem>> elem : data.entrySet()) {
-            categoriesList.add(new Category<>(elem.getKey(), keyBindingsRenderer, elem.getValue(), keyBindingsEventDelegate));
-        }
-    }
-
-    @Override
-    public String getSelectedScheme() {
-        return selectionListBox.getValue();
-    }
-
-    @Override
-    public void setSchemes(String select, List<Scheme> schemes) {
-        selectionListBox.clear();
-        for (Scheme s : schemes) {
-            selectionListBox.addItem(s.getDescription(), s.getSchemeId());
-            if (s.getSchemeId().equals(select)) {
-                // TODO Might be a better way to select item
-                selectionListBox.setSelectedIndex(selectionListBox.getItemCount() - 1);
-            }
-        }
-    }
-
-    @UiHandler("filterInput")
-    public void onKeyUp(KeyUpEvent keyUpEvent) {
-        String value = filterInput.getText();
-        if (!filterInput.getText().equals(filteredValue)) {
-            filteredValue = value;
-            delegate.onFilterValueChanged(value);
-        }
-    }
-
-    private void resetFilter() {
-        filterInput.setText("");
-        filterInput.setFocus(true);
-    }
+  private void resetFilter() {
+    filterInput.setText("");
+    filterInput.setFocus(true);
+  }
 }

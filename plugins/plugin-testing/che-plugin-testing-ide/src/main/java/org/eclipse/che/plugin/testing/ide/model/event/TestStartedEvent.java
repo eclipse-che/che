@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,35 +7,34 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.ide.model.event;
 
 import org.eclipse.che.plugin.testing.ide.messages.TestStarted;
 
-/**
- * Event which informs about starting test.
- */
+/** Event which informs about starting test. */
 public class TestStartedEvent extends BaseStartEvent {
 
-    private final boolean config;
+  private final boolean config;
 
-    public TestStartedEvent(TestStarted testStarted) {
-        super(getNodeId(testStarted),
-                testStarted.getTestName(),
-                getParantNodeId(testStarted),
-                testStarted.getLocation(),
-                getNodeType(testStarted),
-                getNodeArg(testStarted),
-                isNodeRunning(testStarted));
-        config = testStarted.isConfig();
-    }
+  public TestStartedEvent(TestStarted testStarted) {
+    super(
+        getNodeId(testStarted),
+        testStarted.getTestName(),
+        getParantNodeId(testStarted),
+        testStarted.getLocation(),
+        getNodeType(testStarted),
+        getNodeArg(testStarted),
+        isNodeRunning(testStarted));
+    config = testStarted.isConfig();
+  }
 
-    public TestStartedEvent(String name, String location) {
-        super(null, name, null, location, null, null, true);
-        config = false;
-    }
+  public TestStartedEvent(String name, String location) {
+    super(null, name, null, location, null, null, true);
+    config = false;
+  }
 
-    public boolean isConfig() {
-        return config;
-    }
+  public boolean isConfig() {
+    return config;
+  }
 }

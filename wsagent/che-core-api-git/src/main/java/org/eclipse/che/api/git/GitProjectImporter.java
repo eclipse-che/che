@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,29 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.git;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
+import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT_WITH_START_POINT;
+import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.clearCredentials;
+import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.setCurrentCredentials;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.eclipse.che.WorkspaceIdProvider;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -35,311 +52,303 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
-import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT_WITH_START_POINT;
-import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.clearCredentials;
-import static org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider.setCurrentCredentials;
-import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
-import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
-
-/**
- * @author Vladyslav Zhukovskii
- */
+/** @author Vladyslav Zhukovskii */
 @Singleton
 public class GitProjectImporter implements ProjectImporter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GitProjectImporter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(GitProjectImporter.class);
 
-    private final GitConnectionFactory gitConnectionFactory;
-    private final EventService         eventService;
+  private final GitConnectionFactory gitConnectionFactory;
+  private final EventService eventService;
 
-    @Inject
-    public GitProjectImporter(GitConnectionFactory gitConnectionFactory,
-                              EventService eventService) {
-        this.gitConnectionFactory = gitConnectionFactory;
-        this.eventService = eventService;
-    }
+  @Inject
+  public GitProjectImporter(GitConnectionFactory gitConnectionFactory, EventService eventService) {
+    this.gitConnectionFactory = gitConnectionFactory;
+    this.eventService = eventService;
+  }
 
-    @Override
-    public String getId() {
-        return "git";
-    }
+  @Override
+  public String getId() {
+    return "git";
+  }
 
-    @Override
-    public boolean isInternal() {
-        return false;
-    }
+  @Override
+  public boolean isInternal() {
+    return false;
+  }
 
-    @Override
-    public String getDescription() {
-        return "Import project from hosted GIT repository URL.";
-    }
+  @Override
+  public String getDescription() {
+    return "Import project from hosted GIT repository URL.";
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public ImporterCategory getCategory() {
-        return ImporterCategory.SOURCE_CONTROL;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public ImporterCategory getCategory() {
+    return ImporterCategory.SOURCE_CONTROL;
+  }
 
-    @Override
-    public void importSources(FolderEntry baseFolder, SourceStorage storage) throws ForbiddenException,
-                                                                                    ConflictException,
-                                                                                    UnauthorizedException,
-                                                                                    IOException,
-                                                                                    ServerException {
-        importSources(baseFolder, storage, LineConsumerFactory.NULL);
-    }
+  @Override
+  public void importSources(FolderEntry baseFolder, SourceStorage storage)
+      throws ForbiddenException, ConflictException, UnauthorizedException, IOException,
+          ServerException {
+    importSources(baseFolder, storage, LineConsumerFactory.NULL);
+  }
 
-    @Override
-    public void importSources(FolderEntry baseFolder,
-                              SourceStorage storage,
-                              LineConsumerFactory consumerFactory) throws ForbiddenException,
-                                                                          ConflictException,
-                                                                          UnauthorizedException,
-                                                                          IOException,
-                                                                          ServerException {
-        GitConnection git = null;
-        boolean credentialsHaveBeenSet = false;
-        try {
-            // For factory: checkout particular commit after clone
-            String commitId = null;
-            // For factory: github pull request feature
-            String fetch = null;
-            String branch = null;
-            String startPoint = null;
-            // For factory or probably for our projects templates:
-            // If git repository contains more than one project need clone all repository but after cloning keep just
-            // sub-project that is specified in parameter "keepDir".
-            String keepDir = null;
-            // For factory and for our projects templates:
-            // Keep all info related to the vcs. In case of Git: ".git" directory and ".gitignore" file.
-            // Delete vcs info if false.
-            String branchMerge = null;
-            boolean keepVcs = true;
-            boolean recursiveEnabled = false;
-            boolean convertToTopLevelProject = false;
+  @Override
+  public void importSources(
+      FolderEntry baseFolder, SourceStorage storage, LineConsumerFactory consumerFactory)
+      throws ForbiddenException, ConflictException, UnauthorizedException, IOException,
+          ServerException {
+    GitConnection git = null;
+    boolean credentialsHaveBeenSet = false;
+    try {
+      // For factory: checkout particular commit after clone
+      String commitId = null;
+      // For factory: github pull request feature
+      String fetch = null;
+      String branch = null;
+      String startPoint = null;
+      // For factory or probably for our projects templates:
+      // If git repository contains more than one project need clone all repository but after cloning keep just
+      // sub-project that is specified in parameter "keepDir".
+      String keepDir = null;
+      // For factory and for our projects templates:
+      // Keep all info related to the vcs. In case of Git: ".git" directory and ".gitignore" file.
+      // Delete vcs info if false.
+      String branchMerge = null;
+      boolean keepVcs = true;
+      boolean recursiveEnabled = false;
+      boolean convertToTopLevelProject = false;
 
-            Map<String, String> parameters = storage.getParameters();
-            if (parameters != null) {
-                commitId = parameters.get("commitId");
-                branch = parameters.get("branch");
-                startPoint = parameters.get("startPoint");
-                fetch = parameters.get("fetch");
-                keepDir = parameters.get("keepDir");
-                if (parameters.containsKey("keepVcs")) {
-                    keepVcs = Boolean.parseBoolean(parameters.get("keepVcs"));
-                }
-                if (parameters.containsKey("recursive")) {
-                    recursiveEnabled = true;
-                }
-                //convertToTopLevelProject feature is working only if we don't need any git information
-                //and when we are working in git sparse checkout mode.
-                if (!keepVcs && !isNullOrEmpty(keepDir) && parameters.containsKey("convertToTopLevelProject")) {
-                    convertToTopLevelProject = Boolean.parseBoolean(parameters.get("convertToTopLevelProject"));
-                }
-                branchMerge = parameters.get("branchMerge");
-                final String user = storage.getParameters().remove("username");
-                final String pass = storage.getParameters().remove("password");
-                if (user != null && pass != null) {
-                    credentialsHaveBeenSet = true;
-                    setCurrentCredentials(user, pass);
-                }
-            }
-            // Get path to local file. Git works with local filesystem only.
-            final String localPath = baseFolder.getVirtualFile().toIoFile().getAbsolutePath();
-            final String location = storage.getLocation();
-            final String projectName = baseFolder.getName();
-
-            // Converting steps
-            // 1. Clone to temporary folder on same device with /projects
-            // 2. Remove git information
-            // 3. Move to path requested by user.
-            // Very important to have initial clone folder on the same drive with /project
-            // otherwise we will have to replace atomic move with copy-delete operation.
-            if (convertToTopLevelProject) {
-                File tempDir = new File(new File(localPath).getParent(), NameGenerator.generate(".che", 6));
-                git = gitConnectionFactory.getConnection(tempDir, consumerFactory);
-            } else {
-                git = gitConnectionFactory.getConnection(localPath, consumerFactory);
-            }
-
-            if (keepDir != null) {
-                git.cloneWithSparseCheckout(keepDir, location);
-                if (branch != null) {
-                    git.checkout(CheckoutParams.create(branch));
-                }
-            } else {
-                if (baseFolder.getChildren().size() == 0) {
-                    cloneRepository(git, "origin", location, recursiveEnabled);
-                    if (commitId != null) {
-                        checkoutCommit(git, commitId);
-                    } else if (fetch != null) {
-                        git.getConfig().add("remote.origin.fetch", fetch);
-                        fetch(git, "origin");
-                        if (branch != null) {
-                            checkoutBranch(git, projectName, branch, startPoint);
-                        }
-                    } else if (branch != null) {
-                        checkoutBranch(git, projectName, branch, startPoint);
-                    }
-                } else {
-                    git.init(false);
-                    addRemote(git, "origin", location);
-                    if (commitId != null) {
-                        fetchBranch(git, "origin", branch == null ? "*" : branch);
-                        checkoutCommit(git, commitId);
-                    } else if (fetch != null) {
-                        git.getConfig().add("remote.origin.fetch", fetch);
-                        fetch(git, "origin");
-                        if (branch != null) {
-                            checkoutBranch(git, projectName, branch, startPoint);
-                        }
-                    } else {
-                        fetchBranch(git, "origin", branch == null ? "*" : branch);
-
-                        List<Branch> branchList = git.branchList(LIST_REMOTE);
-                        if (!branchList.isEmpty()) {
-                            checkoutBranch(git, projectName, branch == null ? "master" : branch, startPoint);
-                        }
-                    }
-                }
-                if (branchMerge != null) {
-                    git.getConfig().set("branch." + (branch == null ? "master" : branch) + ".merge", branchMerge);
-                }
-            }
-            if (!keepVcs) {
-                cleanGit(git.getWorkingDir());
-            }
-            if (convertToTopLevelProject) {
-                Files.move(new File(git.getWorkingDir(), keepDir).toPath(),
-                           new File(localPath).toPath(),
-                           StandardCopyOption.ATOMIC_MOVE);
-                IoUtil.deleteRecursive(git.getWorkingDir());
-            }
-
-        } catch (URISyntaxException e) {
-            throw new ServerException(
-                    "Your project cannot be imported. The issue is either from git configuration, a malformed URL, " +
-                    "or file system corruption. Please contact support for assistance.",
-                    e);
-        } finally {
-            if (git != null) {
-                git.close();
-            }
-            if (credentialsHaveBeenSet) {
-                clearCredentials();
-            }
+      Map<String, String> parameters = storage.getParameters();
+      if (parameters != null) {
+        commitId = parameters.get("commitId");
+        branch = parameters.get("branch");
+        startPoint = parameters.get("startPoint");
+        fetch = parameters.get("fetch");
+        keepDir = parameters.get("keepDir");
+        if (parameters.containsKey("keepVcs")) {
+          keepVcs = Boolean.parseBoolean(parameters.get("keepVcs"));
         }
-    }
-
-    private void cloneRepository(GitConnection git, String remoteName, String url, boolean recursiveEnabled)
-            throws ServerException, UnauthorizedException, URISyntaxException {
-        final CloneParams params = CloneParams.create(url).withRemoteName(remoteName).withRecursive(recursiveEnabled);
-        git.clone(params);
-    }
-
-    private void addRemote(GitConnection git, String name, String url) throws GitException {
-        git.remoteAdd(RemoteAddParams.create(name, url));
-    }
-
-    private void fetch(GitConnection git, String remote) throws UnauthorizedException, GitException {
-        final FetchParams params = FetchParams.create(remote);
-        git.fetch(params);
-    }
-
-    private void fetchBranch(GitConnection gitConnection, String remote, String branch)
-            throws UnauthorizedException, GitException {
-
-        final List<String> refSpecs = Collections.singletonList(String.format("refs/heads/%1$s:refs/remotes/origin/%1$s", branch));
-        try {
-            fetchRefSpecs(gitConnection, remote, refSpecs);
-        } catch (GitException e) {
-            LOG.warn("Git exception on branch fetch", e);
-            throw new GitException(
-                    String.format("Unable to fetch remote branch %s. Make sure it exists and can be accessed.", branch),
-                    e);
+        if (parameters.containsKey("recursive")) {
+          recursiveEnabled = true;
         }
-    }
-
-    private void fetchRefSpecs(GitConnection git, String remote, List<String> refSpecs)
-            throws UnauthorizedException, GitException {
-        final FetchParams params = FetchParams.create(remote).withRefSpec(refSpecs);
-        git.fetch(params);
-    }
-
-    private void checkoutCommit(GitConnection git, String commit) throws GitException {
-        final CheckoutParams params = CheckoutParams.create("temp")
-                                                    .withCreateNew(true)
-                                                    .withStartPoint(commit);
-        try {
-            git.checkout(params);
-        } catch (GitException e) {
-            LOG.warn("Git exception on commit checkout", e);
-            throw new GitException(
-                    String.format("Unable to checkout commit %s. Make sure it exists and can be accessed.", commit), e);
+        //convertToTopLevelProject feature is working only if we don't need any git information
+        //and when we are working in git sparse checkout mode.
+        if (!keepVcs
+            && !isNullOrEmpty(keepDir)
+            && parameters.containsKey("convertToTopLevelProject")) {
+          convertToTopLevelProject =
+              Boolean.parseBoolean(parameters.get("convertToTopLevelProject"));
         }
-    }
+        branchMerge = parameters.get("branchMerge");
+        final String user = storage.getParameters().remove("username");
+        final String pass = storage.getParameters().remove("password");
+        if (user != null && pass != null) {
+          credentialsHaveBeenSet = true;
+          setCurrentCredentials(user, pass);
+        }
+      }
+      // Get path to local file. Git works with local filesystem only.
+      final String localPath = baseFolder.getVirtualFile().toIoFile().getAbsolutePath();
+      final String location = storage.getLocation();
+      final String projectName = baseFolder.getName();
 
-    private void checkoutBranch(GitConnection git,
-                                String projectName,
-                                String branchName,
-                                String startPoint) throws GitException {
-        final CheckoutParams params = CheckoutParams.create(branchName);
-        final boolean branchExist = git.branchList(LIST_ALL)
-                                       .stream()
-                                       .anyMatch(branch -> branch.getDisplayName().equals("origin/" + branchName));
-        final GitCheckoutEvent checkout = newDto(GitCheckoutEvent.class).withWorkspaceId(WorkspaceIdProvider.getWorkspaceId())
-                                                                        .withProjectName(projectName);
-        if (startPoint != null) {
-            if (branchExist) {
-                git.checkout(params);
-                eventService.publish(checkout.withCheckoutOnly(true)
-                                             .withBranchRef(getRemoteBranch(git, branchName)));
-            } else {
-                checkoutAndRethrow(git, params.withCreateNew(true).withStartPoint(startPoint).withNoTrack(true),
-                                   FAILED_CHECKOUT_WITH_START_POINT);
-                eventService.publish(checkout.withCheckoutOnly(false));
+      // Converting steps
+      // 1. Clone to temporary folder on same device with /projects
+      // 2. Remove git information
+      // 3. Move to path requested by user.
+      // Very important to have initial clone folder on the same drive with /project
+      // otherwise we will have to replace atomic move with copy-delete operation.
+      if (convertToTopLevelProject) {
+        File tempDir = new File(new File(localPath).getParent(), NameGenerator.generate(".che", 6));
+        git = gitConnectionFactory.getConnection(tempDir, consumerFactory);
+      } else {
+        git = gitConnectionFactory.getConnection(localPath, consumerFactory);
+      }
+
+      if (keepDir != null) {
+        git.cloneWithSparseCheckout(keepDir, location);
+        if (branch != null) {
+          git.checkout(CheckoutParams.create(branch));
+        }
+      } else {
+        if (baseFolder.getChildren().size() == 0) {
+          cloneRepository(git, "origin", location, recursiveEnabled);
+          if (commitId != null) {
+            checkoutCommit(git, commitId);
+          } else if (fetch != null) {
+            git.getConfig().add("remote.origin.fetch", fetch);
+            fetch(git, "origin");
+            if (branch != null) {
+              checkoutBranch(git, projectName, branch, startPoint);
             }
+          } else if (branch != null) {
+            checkoutBranch(git, projectName, branch, startPoint);
+          }
         } else {
-            checkoutAndRethrow(git, params, FAILED_CHECKOUT);
-            eventService.publish(checkout.withCheckoutOnly(true)
-                                         .withBranchRef(getRemoteBranch(git, branchName)));
-        }
-    }
+          git.init(false);
+          addRemote(git, "origin", location);
+          if (commitId != null) {
+            fetchBranch(git, "origin", branch == null ? "*" : branch);
+            checkoutCommit(git, commitId);
+          } else if (fetch != null) {
+            git.getConfig().add("remote.origin.fetch", fetch);
+            fetch(git, "origin");
+            if (branch != null) {
+              checkoutBranch(git, projectName, branch, startPoint);
+            }
+          } else {
+            fetchBranch(git, "origin", branch == null ? "*" : branch);
 
-    private void checkoutAndRethrow(GitConnection git, CheckoutParams params, int errorCode) throws GitException {
-        try {
-            git.checkout(params);
-        } catch (GitException ex) {
-            throw new GitException(ex.getMessage(), errorCode);
+            List<Branch> branchList = git.branchList(LIST_REMOTE);
+            if (!branchList.isEmpty()) {
+              checkoutBranch(git, projectName, branch == null ? "master" : branch, startPoint);
+            }
+          }
         }
-    }
-
-    private void cleanGit(File project) {
-        IoUtil.deleteRecursive(new File(project, ".git"));
-        new File(project, ".gitignore").delete();
-    }
-
-    private String getRemoteBranch(GitConnection git, String branchName) throws GitException {
-        final List<Branch> remotes = git.branchList(LIST_REMOTE);
-        final Optional<Branch> first = remotes.stream()
-                                              .filter(br -> branchName.equals(br.getName().substring(br.getName().lastIndexOf("/") + 1)))
-                                              .findFirst();
-        if (!first.isPresent()) {
-            throw new GitException("Failed to get remote branch name", FAILED_CHECKOUT);
+        if (branchMerge != null) {
+          git.getConfig()
+              .set("branch." + (branch == null ? "master" : branch) + ".merge", branchMerge);
         }
-        return first.get().getName();
+      }
+      if (!keepVcs) {
+        cleanGit(git.getWorkingDir());
+      }
+      if (convertToTopLevelProject) {
+        Files.move(
+            new File(git.getWorkingDir(), keepDir).toPath(),
+            new File(localPath).toPath(),
+            StandardCopyOption.ATOMIC_MOVE);
+        IoUtil.deleteRecursive(git.getWorkingDir());
+      }
+
+    } catch (URISyntaxException e) {
+      throw new ServerException(
+          "Your project cannot be imported. The issue is either from git configuration, a malformed URL, "
+              + "or file system corruption. Please contact support for assistance.",
+          e);
+    } finally {
+      if (git != null) {
+        git.close();
+      }
+      if (credentialsHaveBeenSet) {
+        clearCredentials();
+      }
     }
+  }
+
+  private void cloneRepository(
+      GitConnection git, String remoteName, String url, boolean recursiveEnabled)
+      throws ServerException, UnauthorizedException, URISyntaxException {
+    final CloneParams params =
+        CloneParams.create(url).withRemoteName(remoteName).withRecursive(recursiveEnabled);
+    git.clone(params);
+  }
+
+  private void addRemote(GitConnection git, String name, String url) throws GitException {
+    git.remoteAdd(RemoteAddParams.create(name, url));
+  }
+
+  private void fetch(GitConnection git, String remote) throws UnauthorizedException, GitException {
+    final FetchParams params = FetchParams.create(remote);
+    git.fetch(params);
+  }
+
+  private void fetchBranch(GitConnection gitConnection, String remote, String branch)
+      throws UnauthorizedException, GitException {
+
+    final List<String> refSpecs =
+        Collections.singletonList(
+            String.format("refs/heads/%1$s:refs/remotes/origin/%1$s", branch));
+    try {
+      fetchRefSpecs(gitConnection, remote, refSpecs);
+    } catch (GitException e) {
+      LOG.warn("Git exception on branch fetch", e);
+      throw new GitException(
+          String.format(
+              "Unable to fetch remote branch %s. Make sure it exists and can be accessed.", branch),
+          e);
+    }
+  }
+
+  private void fetchRefSpecs(GitConnection git, String remote, List<String> refSpecs)
+      throws UnauthorizedException, GitException {
+    final FetchParams params = FetchParams.create(remote).withRefSpec(refSpecs);
+    git.fetch(params);
+  }
+
+  private void checkoutCommit(GitConnection git, String commit) throws GitException {
+    final CheckoutParams params =
+        CheckoutParams.create("temp").withCreateNew(true).withStartPoint(commit);
+    try {
+      git.checkout(params);
+    } catch (GitException e) {
+      LOG.warn("Git exception on commit checkout", e);
+      throw new GitException(
+          String.format(
+              "Unable to checkout commit %s. Make sure it exists and can be accessed.", commit),
+          e);
+    }
+  }
+
+  private void checkoutBranch(
+      GitConnection git, String projectName, String branchName, String startPoint)
+      throws GitException {
+    final CheckoutParams params = CheckoutParams.create(branchName);
+    final boolean branchExist =
+        git.branchList(LIST_ALL)
+            .stream()
+            .anyMatch(branch -> branch.getDisplayName().equals("origin/" + branchName));
+    final GitCheckoutEvent checkout =
+        newDto(GitCheckoutEvent.class)
+            .withWorkspaceId(WorkspaceIdProvider.getWorkspaceId())
+            .withProjectName(projectName);
+    if (startPoint != null) {
+      if (branchExist) {
+        git.checkout(params);
+        eventService.publish(
+            checkout.withCheckoutOnly(true).withBranchRef(getRemoteBranch(git, branchName)));
+      } else {
+        checkoutAndRethrow(
+            git,
+            params.withCreateNew(true).withStartPoint(startPoint).withNoTrack(true),
+            FAILED_CHECKOUT_WITH_START_POINT);
+        eventService.publish(checkout.withCheckoutOnly(false));
+      }
+    } else {
+      checkoutAndRethrow(git, params, FAILED_CHECKOUT);
+      eventService.publish(
+          checkout.withCheckoutOnly(true).withBranchRef(getRemoteBranch(git, branchName)));
+    }
+  }
+
+  private void checkoutAndRethrow(GitConnection git, CheckoutParams params, int errorCode)
+      throws GitException {
+    try {
+      git.checkout(params);
+    } catch (GitException ex) {
+      throw new GitException(ex.getMessage(), errorCode);
+    }
+  }
+
+  private void cleanGit(File project) {
+    IoUtil.deleteRecursive(new File(project, ".git"));
+    new File(project, ".gitignore").delete();
+  }
+
+  private String getRemoteBranch(GitConnection git, String branchName) throws GitException {
+    final List<Branch> remotes = git.branchList(LIST_REMOTE);
+    final Optional<Branch> first =
+        remotes
+            .stream()
+            .filter(
+                br -> branchName.equals(br.getName().substring(br.getName().lastIndexOf("/") + 1)))
+            .findFirst();
+    if (!first.isPresent()) {
+      throw new GitException("Failed to get remote branch name", FAILED_CHECKOUT);
+    }
+    return first.get().getName();
+  }
 }

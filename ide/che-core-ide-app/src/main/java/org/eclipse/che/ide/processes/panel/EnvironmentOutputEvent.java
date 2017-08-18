@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.processes.panel;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -20,52 +20,43 @@ import com.google.gwt.event.shared.GwtEvent;
  */
 public class EnvironmentOutputEvent extends GwtEvent<EnvironmentOutputEvent.Handler> {
 
-
-    public interface Handler extends EventHandler {
-        /**
-         * Perform actions when receive Environment Output message
-         *
-         * @param event
-         */
-        void onEnvironmentOutputEvent(EnvironmentOutputEvent event);
-    }
-
-
-    public static final Type<EnvironmentOutputEvent.Handler> TYPE = new Type<>();
-
-
+  public interface Handler extends EventHandler {
     /**
-     * Content of log message
+     * Perform actions when receive Environment Output message
+     *
+     * @param event
      */
-    private  final String content;
+    void onEnvironmentOutputEvent(EnvironmentOutputEvent event);
+  }
 
-    /**
-     * Machine name
-     */
-    private final String machineName;
+  public static final Type<EnvironmentOutputEvent.Handler> TYPE = new Type<>();
 
-    public EnvironmentOutputEvent(String content, String machineName) {
-        this.content = content;
-        this.machineName = machineName;
-    }
+  /** Content of log message */
+  private final String content;
 
+  /** Machine name */
+  private final String machineName;
 
-    public String getContent() {
-        return content;
-    }
+  public EnvironmentOutputEvent(String content, String machineName) {
+    this.content = content;
+    this.machineName = machineName;
+  }
 
-    public String getMachineName() {
-        return machineName;
-    }
+  public String getContent() {
+    return content;
+  }
 
+  public String getMachineName() {
+    return machineName;
+  }
 
-    @Override
-    public Type<Handler> getAssociatedType() {
-        return TYPE;
-    }
+  @Override
+  public Type<Handler> getAssociatedType() {
+    return TYPE;
+  }
 
-    @Override
-    protected void dispatch(Handler handler) {
-        handler.onEnvironmentOutputEvent(this);
-    }
+  @Override
+  protected void dispatch(Handler handler) {
+    handler.onEnvironmentOutputEvent(this);
+  }
 }

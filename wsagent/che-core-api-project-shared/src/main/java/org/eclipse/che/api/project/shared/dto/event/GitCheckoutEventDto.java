@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.shared.dto.event;
 
 import com.google.common.annotations.Beta;
-
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -23,16 +22,16 @@ import org.eclipse.che.dto.shared.DTO;
 @Beta
 @DTO
 public interface GitCheckoutEventDto {
-    Type getType();
+  Type getType();
 
-    String getName();
+  String getName();
 
-    GitCheckoutEventDto withType(Type type);
+  GitCheckoutEventDto withType(Type type);
 
-    GitCheckoutEventDto withName(String name);
+  GitCheckoutEventDto withName(String name);
 
-    enum Type {
-        BRANCH,
-        REVISION,
-    }
+  enum Type {
+    BRANCH,
+    REVISION,
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.model.user;
 
-import org.eclipse.che.commons.annotation.Nullable;
-
 import java.util.List;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Defines the user model.
@@ -21,41 +20,35 @@ import java.util.List;
  */
 public interface User {
 
-    /**
-     * Returns the identifier of the user (e.g. "user0x124567890").
-     * The identifier value is unique and mandatory.
-     */
-    String getId();
+  /**
+   * Returns the identifier of the user (e.g. "user0x124567890"). The identifier value is unique and
+   * mandatory.
+   */
+  String getId();
 
-    /**
-     * Returns the user's email (e.g. user@codenvy.com).
-     * The email is unique, mandatory and updatable.
-     */
-    String getEmail();
+  /**
+   * Returns the user's email (e.g. user@codenvy.com). The email is unique, mandatory and updatable.
+   */
+  String getEmail();
 
-    /**
-     * Returns the user's name (e.g. name_example).
-     * The name is unique, mandatory and updatable.
-     */
-    String getName();
+  /** Returns the user's name (e.g. name_example). The name is unique, mandatory and updatable. */
+  String getName();
 
-    /**
-     * Returns the list of the user's aliases, the aliases are the values
-     * which identify user in the system with third party ids (e.g. if user is registered
-     * within google oauth the aliases list may contain 'google:user_identifier' alias).
-     *
-     * <p>Note that user's {@link #getEmail() email} and {@link #getName() name}
-     * are not a part of the result, and returned list never contains those values.
-     * Also note that returned aliases are unique, so there are no two users
-     * who have the alias in common.
-     */
-    List<String> getAliases();
+  /**
+   * Returns the list of the user's aliases, the aliases are the values which identify user in the
+   * system with third party ids (e.g. if user is registered within google oauth the aliases list
+   * may contain 'google:user_identifier' alias).
+   *
+   * <p>Note that user's {@link #getEmail() email} and {@link #getName() name} are not a part of the
+   * result, and returned list never contains those values. Also note that returned aliases are
+   * unique, so there are no two users who have the alias in common.
+   */
+  List<String> getAliases();
 
-    /**
-     * Returns the user's password.
-     * The returned value may be the password placeholder such as 'none' or
-     * even null, depends on the context.
-     */
-    @Nullable
-    String getPassword();
+  /**
+   * Returns the user's password. The returned value may be the password placeholder such as 'none'
+   * or even null, depends on the context.
+   */
+  @Nullable
+  String getPassword();
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.google.gwt.webworker.client.messages;
 
 /**
@@ -16,9 +16,9 @@ package com.google.gwt.webworker.client.messages;
  * @author <a href="mailto:evidolob@codenvy.com">Evgen Vidolob</a>
  */
 public interface Message {
-    int    NON_ROUTABLE_TYPE = -2;
-    String TYPE_FIELD        = "_type";
+  int NON_ROUTABLE_TYPE = -2;
+  String TYPE_FIELD = "_type";
 
-    /** Every DTO needs to report a type for the purposes of routing messages on the client. */
-    int getType();
+  /** Every DTO needs to report a type for the purposes of routing messages on the client. */
+  int getType();
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,45 +7,41 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto;
-
-import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.dto.shared.DTO;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
 
-/**
- * @author Alexander Garagatyi
- */
+import java.util.List;
+import java.util.Map;
+import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.dto.shared.DTO;
+
+/** @author Alexander Garagatyi */
 @DTO
 public interface EnvironmentDto extends Environment {
 
-    @Override
-    @FactoryParameter(obligation = MANDATORY)
-    RecipeDto getRecipe();
+  @Override
+  @FactoryParameter(obligation = MANDATORY)
+  RecipeDto getRecipe();
 
-    void setRecipe(RecipeDto recipe);
+  void setRecipe(RecipeDto recipe);
 
-    EnvironmentDto withRecipe(RecipeDto recipe);
+  EnvironmentDto withRecipe(RecipeDto recipe);
 
-    @Override
-    @FactoryParameter(obligation = MANDATORY)
-    Map<String, MachineConfigDto> getMachines();
+  @Override
+  @FactoryParameter(obligation = MANDATORY)
+  Map<String, MachineConfigDto> getMachines();
 
-    void setMachines(Map<String, MachineConfigDto> machines);
+  void setMachines(Map<String, MachineConfigDto> machines);
 
-    EnvironmentDto withMachines(Map<String, MachineConfigDto> machines);
+  EnvironmentDto withMachines(Map<String, MachineConfigDto> machines);
 
-    @Override
-    List<WarningDto> getWarnings();
+  @Override
+  List<WarningDto> getWarnings();
 
-    void setWarnings(List<WarningDto> warnings);
+  void setWarnings(List<WarningDto> warnings);
 
-    EnvironmentDto withWarnings(List<WarningDto> warnings);
+  EnvironmentDto withWarnings(List<WarningDto> warnings);
 }

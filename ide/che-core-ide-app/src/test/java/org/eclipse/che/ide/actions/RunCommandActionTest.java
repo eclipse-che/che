@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.Optional;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -25,67 +35,46 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-
 /** @author Max Shaposhnik */
 @RunWith(MockitoJUnitRunner.class)
 public class RunCommandActionTest {
 
-    private static final String NAME_PROPERTY = "name";
+  private static final String NAME_PROPERTY = "name";
 
-    //constructors mocks
-    @Mock
-    private CommandManager           commandManager;
-    @Mock
-    private CommandExecutor          commandExecutor;
-    @Mock
-    private CoreLocalizationConstant locale;
-    @Mock
-    private ActionEvent              event;
-    @Mock
-    private CommandImpl              command;
-    @Mock
-    private AppContext               appContext;
+  //constructors mocks
+  @Mock private CommandManager commandManager;
+  @Mock private CommandExecutor commandExecutor;
+  @Mock private CoreLocalizationConstant locale;
+  @Mock private ActionEvent event;
+  @Mock private CommandImpl command;
+  @Mock private AppContext appContext;
 
-    @InjectMocks
-    private RunCommandAction action;
+  @InjectMocks private RunCommandAction action;
 
+  @Before
+  public void setUp() throws Exception {
+    when(commandManager.getCommand(anyString())).thenReturn(Optional.of(command));
+  }
 
-    @Before
-    public void setUp() throws Exception {
-        when(commandManager.getCommand(anyString())).thenReturn(Optional.of(command));
-    }
+  @Test
+  public void commandNameShouldBePresent() {
+    when(event.getParameters()).thenReturn(Collections.singletonMap("otherParam", "MCI"));
+    action.actionPerformed(event);
 
-    @Test
-    public void commandNameShouldBePresent() {
-        when(event.getParameters()).thenReturn(Collections.singletonMap("otherParam", "MCI"));
-        action.actionPerformed(event);
+    verify(commandExecutor, never()).executeCommand(any(CommandImpl.class), anyString());
+  }
 
-        verify(commandExecutor, never()).executeCommand(any(CommandImpl.class), anyString());
-    }
+  @Test
+  public void actionShouldBePerformed() {
+    when(event.getParameters()).thenReturn(Collections.singletonMap(NAME_PROPERTY, "MCI"));
 
-    @Test
-    public void actionShouldBePerformed() {
-        when(event.getParameters()).thenReturn(Collections.singletonMap(NAME_PROPERTY, "MCI"));
+    WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+    MachineImpl machine = mock(MachineImpl.class);
+    when(workspace.getDevMachine()).thenReturn(Optional.of(machine));
+    when(appContext.getWorkspace()).thenReturn(workspace);
 
-        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
-        MachineImpl machine = mock(MachineImpl.class);
-        when(workspace.getDevMachine()).thenReturn(Optional.of(machine));
-        when(appContext.getWorkspace()).thenReturn(workspace);
+    action.actionPerformed(event);
 
-        action.actionPerformed(event);
-
-        verify(commandExecutor).executeCommand(eq(command), anyString());
-    }
-
+    verify(commandExecutor).executeCommand(eq(command), anyString());
+  }
 }

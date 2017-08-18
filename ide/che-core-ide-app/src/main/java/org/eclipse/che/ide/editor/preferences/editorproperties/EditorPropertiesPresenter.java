@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,21 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.preferences.editorproperties;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-
+import java.util.HashSet;
+import java.util.Set;
 import org.eclipse.che.ide.api.editor.events.EditorSettingsChangedEvent;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.editor.preferences.EditorPreferenceSection;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPreferenceSectionFactory;
 import org.eclipse.che.ide.editor.preferences.editorproperties.sections.EditorPropertiesSection;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Presenter to manage the editor sections in the 'Preferences' menu.
@@ -29,74 +27,76 @@ import java.util.Set;
  * @author Roman Nikitenko
  */
 public class EditorPropertiesPresenter implements EditorPreferenceSection {
-    /** The preference page presenter. */
-    private ParentPresenter parentPresenter;
-    private Set<EditorPreferenceSection> sectionsSet = new HashSet<>();
+  /** The preference page presenter. */
+  private ParentPresenter parentPresenter;
 
-    private final EventBus                       eventBus;
-    private final EditorPropertiesView           view;
-    private final Set<EditorPropertiesSection>   sections;
-    private final EditorPreferenceSectionFactory editorPreferenceSectionFactory;
+  private Set<EditorPreferenceSection> sectionsSet = new HashSet<>();
 
-    @Inject
-    public EditorPropertiesPresenter(final EditorPropertiesView view,
-                                     final EventBus eventBus,
-                                     final Set<EditorPropertiesSection> sections,
-                                     final EditorPreferenceSectionFactory editorPreferenceSectionFactory) {
-        this.view = view;
-        this.sections = sections;
-        this.editorPreferenceSectionFactory = editorPreferenceSectionFactory;
-        this.eventBus = eventBus;
+  private final EventBus eventBus;
+  private final EditorPropertiesView view;
+  private final Set<EditorPropertiesSection> sections;
+  private final EditorPreferenceSectionFactory editorPreferenceSectionFactory;
 
-        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> init());
+  @Inject
+  public EditorPropertiesPresenter(
+      final EditorPropertiesView view,
+      final EventBus eventBus,
+      final Set<EditorPropertiesSection> sections,
+      final EditorPreferenceSectionFactory editorPreferenceSectionFactory) {
+    this.view = view;
+    this.sections = sections;
+    this.editorPreferenceSectionFactory = editorPreferenceSectionFactory;
+    this.eventBus = eventBus;
+
+    eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> init());
+  }
+
+  private void init() {
+    for (EditorPropertiesSection section : sections) {
+      EditorPreferenceSection editorPreferenceSection =
+          editorPreferenceSectionFactory.create(section.getSectionTitle(), section.getProperties());
+      editorPreferenceSection.go(view.getEditorSectionsContainer());
+      editorPreferenceSection.setParent(parentPresenter);
+      sectionsSet.add(editorPreferenceSection);
     }
+  }
 
-    private void init() {
-        for (EditorPropertiesSection section : sections) {
-            EditorPreferenceSection editorPreferenceSection = editorPreferenceSectionFactory.create(section.getSectionTitle(),
-                                                                                                    section.getProperties());
-            editorPreferenceSection.go(view.getEditorSectionsContainer());
-            editorPreferenceSection.setParent(parentPresenter);
-            sectionsSet.add(editorPreferenceSection);
-        }
+  @Override
+  public void storeChanges() {
+    for (EditorPreferenceSection section : sectionsSet) {
+      if (section.isDirty()) {
+        section.storeChanges();
+      }
     }
+    eventBus.fireEvent(new EditorSettingsChangedEvent());
+  }
 
-    @Override
-    public void storeChanges() {
-        for (EditorPreferenceSection section : sectionsSet) {
-            if (section.isDirty()) {
-                section.storeChanges();
-            }
-        }
-        eventBus.fireEvent(new EditorSettingsChangedEvent());
+  @Override
+  public void refresh() {
+    for (EditorPreferenceSection section : sectionsSet) {
+      if (section.isDirty()) {
+        section.refresh();
+      }
     }
+  }
 
-    @Override
-    public void refresh() {
-        for (EditorPreferenceSection section : sectionsSet) {
-            if (section.isDirty()) {
-                section.refresh();
-            }
-        }
+  @Override
+  public boolean isDirty() {
+    for (EditorPreferenceSection section : sectionsSet) {
+      if (section.isDirty()) {
+        return true;
+      }
     }
+    return false;
+  }
 
-    @Override
-    public boolean isDirty() {
-        for (EditorPreferenceSection section : sectionsSet) {
-            if (section.isDirty()) {
-                return true;
-            }
-        }
-        return false;
-    }
+  @Override
+  public void go(final AcceptsOneWidget container) {
+    container.setWidget(view);
+  }
 
-    @Override
-    public void go(final AcceptsOneWidget container) {
-        container.setWidget(view);
-    }
-
-    @Override
-    public void setParent(final EditorPreferenceSection.ParentPresenter parent) {
-        this.parentPresenter = parent;
-    }
+  @Override
+  public void setParent(final EditorPreferenceSection.ParentPresenter parent) {
+    this.parentPresenter = parent;
+  }
 }

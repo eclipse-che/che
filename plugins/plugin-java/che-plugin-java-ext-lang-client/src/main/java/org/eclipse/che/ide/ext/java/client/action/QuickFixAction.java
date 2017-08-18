@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.action;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -29,29 +28,29 @@ import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 @Singleton
 public class QuickFixAction extends JavaEditorAction {
 
-    @Inject
-    public QuickFixAction(JavaLocalizationConstant locale,
-                          EditorAgent editorAgent,
-                          FileTypeRegistry fileTypeRegistry) {
-        super(locale.actionQuickFixTitle(),
-              locale.actionQuickFixDescription(),
-              null,
-              editorAgent,
-              fileTypeRegistry);
-    }
+  @Inject
+  public QuickFixAction(
+      JavaLocalizationConstant locale, EditorAgent editorAgent, FileTypeRegistry fileTypeRegistry) {
+    super(
+        locale.actionQuickFixTitle(),
+        locale.actionQuickFixDescription(),
+        null,
+        editorAgent,
+        fileTypeRegistry);
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if (activeEditor == null) {
-            return;
-        }
-        if (activeEditor instanceof HandlesTextOperations) {
-
-            HandlesTextOperations textEditor = (HandlesTextOperations)activeEditor;
-            if (textEditor.canDoOperation(TextEditorOperations.QUICK_ASSIST)) {
-                textEditor.doOperation(TextEditorOperations.QUICK_ASSIST);
-            }
-        }
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+    if (activeEditor == null) {
+      return;
     }
+    if (activeEditor instanceof HandlesTextOperations) {
+
+      HandlesTextOperations textEditor = (HandlesTextOperations) activeEditor;
+      if (textEditor.canDoOperation(TextEditorOperations.QUICK_ASSIST)) {
+        textEditor.doOperation(TextEditorOperations.QUICK_ASSIST);
+      }
+    }
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.workspace.infrastructure.docker.provisioner.server;
 
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.commons.lang.Pair;
+import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.JAVA_OPTS_VARIABLE;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.JAVA_OPTS_VARIABLE;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.commons.lang.Pair;
 
 /**
  * Add env variable to docker machine with java opts
@@ -25,15 +24,15 @@ import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.JAVA
  * @author Alexander Garagatyi
  */
 public class JavaOptsEnvVariableProvider implements ServerEnvironmentVariableProvider {
-    private String javaOpts;
+  private String javaOpts;
 
-    @Inject
-    public JavaOptsEnvVariableProvider(@Named("che.workspace.java.options") String javaOpts) {
-        this.javaOpts = javaOpts;
-    }
+  @Inject
+  public JavaOptsEnvVariableProvider(@Named("che.workspace.java.options") String javaOpts) {
+    this.javaOpts = javaOpts;
+  }
 
-    @Override
-    public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
-        return Pair.of(JAVA_OPTS_VARIABLE, javaOpts);
-    }
+  @Override
+  public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
+    return Pair.of(JAVA_OPTS_VARIABLE, javaOpts);
+  }
 }

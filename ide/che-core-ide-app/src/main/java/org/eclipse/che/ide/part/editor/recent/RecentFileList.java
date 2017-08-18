@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.part.editor.recent;
 
 import org.eclipse.che.ide.api.resources.File;
@@ -18,10 +18,10 @@ import org.eclipse.che.ide.api.resources.File;
  * @author Vlad Zhukovskiy
  */
 public interface RecentFileList extends RecentList<File> {
-    /**
-     * Return recent file list user dialog.
-     *
-     * @return user dialog with recent file list
-     */
-    OpenRecentFilesPresenter getRecentViewDialog();
+  /**
+   * Return recent file list user dialog.
+   *
+   * @return user dialog with recent file list
+   */
+  OpenRecentFilesPresenter getRecentViewDialog();
 }

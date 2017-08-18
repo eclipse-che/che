@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.commons.lang.execution;
 
 /**
@@ -17,15 +17,15 @@ package org.eclipse.che.commons.lang.execution;
  */
 public class ExecutionException extends Exception {
 
-    public ExecutionException(String message) {
-        super(message);
-    }
+  public ExecutionException(String message) {
+    super(message);
+  }
 
-    public ExecutionException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public ExecutionException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-    public ExecutionException(Throwable cause) {
-        super(cause);
-    }
+  public ExecutionException(Throwable cause) {
+    super(cause);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
@@ -28,121 +33,105 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Valeriy Svydenko
- */
+/** @author Valeriy Svydenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class ConvertFolderToProjectActionTest {
 
-    private final static String TEXT = "to be or not to be";
+  private static final String TEXT = "to be or not to be";
 
-    @Mock
-    private CoreLocalizationConstant locale;
-    @Mock
-    private AppContext               appContext;
-    @Mock
-    private ProjectWizardPresenter   projectConfigWizard;
+  @Mock private CoreLocalizationConstant locale;
+  @Mock private AppContext appContext;
+  @Mock private ProjectWizardPresenter projectConfigWizard;
 
-    @InjectMocks
-    private ConvertFolderToProjectAction action;
+  @InjectMocks private ConvertFolderToProjectAction action;
 
-    @Mock
-    private Resource     resource;
-    @Mock
-    private ActionEvent  event;
-    @Mock
-    private Presentation presentation;
+  @Mock private Resource resource;
+  @Mock private ActionEvent event;
+  @Mock private Presentation presentation;
 
-    @Captor
-    private ArgumentCaptor<MutableProjectConfig> projectConfigCapture;
+  @Captor private ArgumentCaptor<MutableProjectConfig> projectConfigCapture;
 
-    @Before
-    public void setUp() throws Exception {
-        when(locale.actionConvertFolderToProject()).thenReturn(TEXT);
-        when(locale.actionConvertFolderToProjectDescription()).thenReturn(TEXT);
+  @Before
+  public void setUp() throws Exception {
+    when(locale.actionConvertFolderToProject()).thenReturn(TEXT);
+    when(locale.actionConvertFolderToProjectDescription()).thenReturn(TEXT);
 
-        when(appContext.getResource()).thenReturn(resource);
-        when(event.getPresentation()).thenReturn(presentation);
+    when(appContext.getResource()).thenReturn(resource);
+    when(event.getPresentation()).thenReturn(presentation);
 
-        when(resource.isFolder()).thenReturn(true);
-        when(resource.getLocation()).thenReturn(Path.valueOf(TEXT));
-    }
+    when(resource.isFolder()).thenReturn(true);
+    when(resource.getLocation()).thenReturn(Path.valueOf(TEXT));
+  }
 
-    @Test
-    public void actionShouldBeInitialized() throws Exception {
-        verify(locale).actionConvertFolderToProject();
-        verify(locale).actionConvertFolderToProjectDescription();
-    }
+  @Test
+  public void actionShouldBeInitialized() throws Exception {
+    verify(locale).actionConvertFolderToProject();
+    verify(locale).actionConvertFolderToProjectDescription();
+  }
 
-    @Test
-    public void actionShouldBeVisibleIfFolderWasSelected() throws Exception {
-        action.updateInPerspective(event);
+  @Test
+  public void actionShouldBeVisibleIfFolderWasSelected() throws Exception {
+    action.updateInPerspective(event);
 
-        verify(presentation).setEnabledAndVisible(true);
-    }
+    verify(presentation).setEnabledAndVisible(true);
+  }
 
-    @Test
-    public void actionShouldBeHiddenIfSelectedElementIsNull() throws Exception {
-        when(appContext.getResource()).thenReturn(null);
+  @Test
+  public void actionShouldBeHiddenIfSelectedElementIsNull() throws Exception {
+    when(appContext.getResource()).thenReturn(null);
 
-        action.updateInPerspective(event);
+    action.updateInPerspective(event);
 
-        verify(presentation).setEnabledAndVisible(false);
-    }
+    verify(presentation).setEnabledAndVisible(false);
+  }
 
-    @Test
-    public void actionShouldBeHiddenIfSelectedElementIsNotFolder() throws Exception {
-        when(resource.isFolder()).thenReturn(false);
+  @Test
+  public void actionShouldBeHiddenIfSelectedElementIsNotFolder() throws Exception {
+    when(resource.isFolder()).thenReturn(false);
 
-        action.updateInPerspective(event);
+    action.updateInPerspective(event);
 
-        verify(presentation).setEnabledAndVisible(false);
-    }
+    verify(presentation).setEnabledAndVisible(false);
+  }
 
-    @Test
-    public void configurationWizardShouldNotBeShowedIfSelectedElementIsNotFolder() throws Exception {
-        when(resource.isFolder()).thenReturn(false);
+  @Test
+  public void configurationWizardShouldNotBeShowedIfSelectedElementIsNotFolder() throws Exception {
+    when(resource.isFolder()).thenReturn(false);
 
-        action.actionPerformed(event);
+    action.actionPerformed(event);
 
-        verify(projectConfigWizard, never()).show((MutableProjectConfig)anyObject());
-    }
+    verify(projectConfigWizard, never()).show((MutableProjectConfig) anyObject());
+  }
 
-    @Test
-    public void configurationWizardShouldNotBeShowedIfSelectedElementIsNull() throws Exception {
-        when(appContext.getResource()).thenReturn(null);
+  @Test
+  public void configurationWizardShouldNotBeShowedIfSelectedElementIsNull() throws Exception {
+    when(appContext.getResource()).thenReturn(null);
 
-        action.actionPerformed(event);
+    action.actionPerformed(event);
 
-        verify(projectConfigWizard, never()).show((MutableProjectConfig)anyObject());
-    }
+    verify(projectConfigWizard, never()).show((MutableProjectConfig) anyObject());
+  }
 
-    @Test
-    public void configurationWizardShouldNotBeShowedIfPathOfFolderIsNull() throws Exception {
-        when(resource.getLocation()).thenReturn(null);
+  @Test
+  public void configurationWizardShouldNotBeShowedIfPathOfFolderIsNull() throws Exception {
+    when(resource.getLocation()).thenReturn(null);
 
-        action.actionPerformed(event);
+    action.actionPerformed(event);
 
-        verify(projectConfigWizard, never()).show((MutableProjectConfig)anyObject());
-    }
+    verify(projectConfigWizard, never()).show((MutableProjectConfig) anyObject());
+  }
 
-    @Test
-    public void configurationWizardShouldBeShowed() throws Exception {
-        when(resource.getName()).thenReturn(TEXT);
+  @Test
+  public void configurationWizardShouldBeShowed() throws Exception {
+    when(resource.getName()).thenReturn(TEXT);
 
-        action.actionPerformed(event);
+    action.actionPerformed(event);
 
-        verify(resource).getName();
-        verify(projectConfigWizard).show(projectConfigCapture.capture());
+    verify(resource).getName();
+    verify(projectConfigWizard).show(projectConfigCapture.capture());
 
-        MutableProjectConfig projectConfig = projectConfigCapture.getValue();
-        assertEquals(TEXT, projectConfig.getName());
-        assertEquals(TEXT, projectConfig.getPath());
-    }
+    MutableProjectConfig projectConfig = projectConfigCapture.getValue();
+    assertEquals(TEXT, projectConfig.getName());
+    assertEquals(TEXT, projectConfig.getPath());
+  }
 }

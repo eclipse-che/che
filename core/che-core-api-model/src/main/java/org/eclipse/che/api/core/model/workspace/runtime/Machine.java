@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.model.workspace.runtime;
 
 import java.util.Map;
@@ -19,26 +19,22 @@ import java.util.Map;
  */
 public interface Machine {
 
-    /**
-     * Returns machine specific properties.
-     */
-    Map<String, String> getProperties();
+  /** Returns machine specific properties. */
+  Map<String, String> getProperties();
 
-
-    /**
-     * Returns mapping of exposed ports to {@link Server}.
-     *
-     * <p>Key is a symbolic server name
-     * <br>Example:
-     * <pre>
-     * {
-     *     server1 : {
-     *         "url" : "http://server-with-machines.com:8080"
-     *     }
-     * }
-     * </pre>
-     */
-    Map<String, ? extends Server> getServers();
-
-
+  /**
+   * Returns mapping of exposed ports to {@link Server}.
+   *
+   * <p>Key is a symbolic server name <br>
+   * Example:
+   *
+   * <pre>
+   * {
+   *     server1 : {
+   *         "url" : "http://server-with-machines.com:8080"
+   *     }
+   * }
+   * </pre>
+   */
+  Map<String, ? extends Server> getServers();
 }

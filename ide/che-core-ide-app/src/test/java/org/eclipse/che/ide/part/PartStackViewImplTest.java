@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.part;
+
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -18,7 +23,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
@@ -31,11 +35,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * @author Dmitry Shnurenko
  * @author Valeriy Svydenko
@@ -43,82 +42,68 @@ import static org.mockito.Mockito.when;
 @RunWith(GwtMockitoTestRunner.class)
 public class PartStackViewImplTest {
 
-    @Mock(answer = RETURNS_DEEP_STUBS)
-    PartStackUIResources resources;
-    @Mock
-    private CoreLocalizationConstant localizationConstant;
+  @Mock(answer = RETURNS_DEEP_STUBS)
+  PartStackUIResources resources;
 
-    @Mock
-    FlowPanel            tabsPanel;
+  @Mock private CoreLocalizationConstant localizationConstant;
 
-    //additional mocks
-    @Mock
-    private MouseDownEvent   event;
-    @Mock
-    private ContextMenuEvent contextMenuEvent;
+  @Mock FlowPanel tabsPanel;
 
-    @Mock
-    private ActionDelegate   delegate;
+  //additional mocks
+  @Mock private MouseDownEvent event;
+  @Mock private ContextMenuEvent contextMenuEvent;
 
-    @Mock
-    private TabItem          tabItem;
-    @Mock
-    private TabItem          tabItem2;
-    @Mock
-    private PartPresenter    partPresenter;
-    @Mock
-    private PartPresenter    partPresenter2;
-    @Mock
-    private IsWidget         widget;
-    @Mock
-    private IsWidget         widget2;
-    @Mock
-    private Widget           focusedWidget;
-    @Mock
-    private Element          element;
+  @Mock private ActionDelegate delegate;
 
-    @Captor
-    private ArgumentCaptor<AcceptsOneWidget> contentCaptor;
+  @Mock private TabItem tabItem;
+  @Mock private TabItem tabItem2;
+  @Mock private PartPresenter partPresenter;
+  @Mock private PartPresenter partPresenter2;
+  @Mock private IsWidget widget;
+  @Mock private IsWidget widget2;
+  @Mock private Widget focusedWidget;
+  @Mock private Element element;
 
-    private PartStackViewImpl view;
+  @Captor private ArgumentCaptor<AcceptsOneWidget> contentCaptor;
 
-    @Before
-    public void setUp() {
-        when(focusedWidget.getElement()).thenReturn(element);
-        when(tabItem.getView()).thenReturn(widget);
-        when(partPresenter.getView()).thenReturn(widget);
+  private PartStackViewImpl view;
 
-        view = new PartStackViewImpl(resources, localizationConstant);
-        view.setDelegate(delegate);
-    }
+  @Before
+  public void setUp() {
+    when(focusedWidget.getElement()).thenReturn(element);
+    when(tabItem.getView()).thenReturn(widget);
+    when(partPresenter.getView()).thenReturn(widget);
 
-    @Test
-    public void onPartStackMouseShouldBeDown() {
-        view.onMouseDown(event);
-        verify(delegate).onRequestFocus();
-    }
+    view = new PartStackViewImpl(resources, localizationConstant);
+    view.setDelegate(delegate);
+  }
 
-    @Test
-    public void onPartStackContextMenuShouldBeClicked() {
-        view.onContextMenu(contextMenuEvent);
-        verify(delegate).onRequestFocus();
-    }
+  @Test
+  public void onPartStackMouseShouldBeDown() {
+    view.onMouseDown(event);
+    verify(delegate).onRequestFocus();
+  }
 
-    @Test
-    public void tabShouldBeAdded() {
-        view.addTab(tabItem, partPresenter);
+  @Test
+  public void onPartStackContextMenuShouldBeClicked() {
+    view.onContextMenu(contextMenuEvent);
+    verify(delegate).onRequestFocus();
+  }
 
-        verify(tabItem).getView();
-        verify(partPresenter).go(any());
-    }
+  @Test
+  public void tabShouldBeAdded() {
+    view.addTab(tabItem, partPresenter);
 
-    @Test
-    public void tabShouldBeSelected() {
-        view.addTab(tabItem, partPresenter);
-        view.selectTab(partPresenter);
+    verify(tabItem).getView();
+    verify(partPresenter).go(any());
+  }
 
-        verify(tabItem).select();
-        verify(delegate).onRequestFocus();
-    }
+  @Test
+  public void tabShouldBeSelected() {
+    view.addTab(tabItem, partPresenter);
+    view.selectTab(partPresenter);
 
+    verify(tabItem).select();
+    verify(delegate).onRequestFocus();
+  }
 }

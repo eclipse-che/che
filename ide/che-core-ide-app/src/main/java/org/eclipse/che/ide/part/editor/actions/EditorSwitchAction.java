@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,21 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.part.editor.actions;
-
-import com.google.common.annotations.Beta;
-
-import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
-import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-
-import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+
+import com.google.common.annotations.Beta;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
+import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 
 /**
  * @author Vlad Zhukovskiy
@@ -30,28 +28,28 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
 @Beta
 abstract class EditorSwitchAction extends AbstractPerspectiveAction {
 
-    protected final EditorAgent                   editorAgent;
+  protected final EditorAgent editorAgent;
 
-    public EditorSwitchAction(String text, String description, EditorAgent editorAgent) {
-        super(singletonList(PROJECT_PERSPECTIVE_ID), text, description, null, null);
-        this.editorAgent = editorAgent;
-    }
+  public EditorSwitchAction(String text, String description, EditorAgent editorAgent) {
+    super(singletonList(PROJECT_PERSPECTIVE_ID), text, description, null, null);
+    this.editorAgent = editorAgent;
+  }
 
-    @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setVisible(true);
-        event.getPresentation().setEnabled(editorAgent.getOpenedEditors().size() > 1);
-    }
+  @Override
+  public void updateInPerspective(@NotNull ActionEvent event) {
+    event.getPresentation().setVisible(true);
+    event.getPresentation().setEnabled(editorAgent.getOpenedEditors().size() > 1);
+  }
 
-    protected EditorPartPresenter getPreviousEditorBaseOn(EditorPartPresenter editor) {
-        checkArgument(editor != null);
+  protected EditorPartPresenter getPreviousEditorBaseOn(EditorPartPresenter editor) {
+    checkArgument(editor != null);
 
-        return editorAgent.getPreviousFor(editor);
-    }
+    return editorAgent.getPreviousFor(editor);
+  }
 
-    protected EditorPartPresenter getNextEditorBaseOn(EditorPartPresenter editor) {
-        checkArgument(editor != null);
+  protected EditorPartPresenter getNextEditorBaseOn(EditorPartPresenter editor) {
+    checkArgument(editor != null);
 
-        return editorAgent.getNextFor(editor);
-    }
+    return editorAgent.getNextFor(editor);
+  }
 }

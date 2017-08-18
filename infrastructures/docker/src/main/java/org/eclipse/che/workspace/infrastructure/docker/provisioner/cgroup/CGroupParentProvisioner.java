@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.workspace.infrastructure.docker.provisioner.cgroup;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisioner;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * Sets parent CGroup for containers in a docker environment.
@@ -25,17 +24,17 @@ import javax.inject.Named;
  * @author Alexander Garagatyi
  */
 public class CGroupParentProvisioner implements ContainerSystemSettingsProvisioner {
-    private final String parentCGroup;
+  private final String parentCGroup;
 
-    @Inject
-    public CGroupParentProvisioner(@Nullable @Named("che.docker.parent_cgroup") String parentCGroup) {
-        this.parentCGroup = parentCGroup;
-    }
+  @Inject
+  public CGroupParentProvisioner(@Nullable @Named("che.docker.parent_cgroup") String parentCGroup) {
+    this.parentCGroup = parentCGroup;
+  }
 
-    @Override
-    public void provision(DockerEnvironment internalEnv) throws InfrastructureException {
-        for (DockerContainerConfig containerConfig : internalEnv.getContainers().values()) {
-            containerConfig.setCgroupParent(parentCGroup);
-        }
+  @Override
+  public void provision(DockerEnvironment internalEnv) throws InfrastructureException {
+    for (DockerContainerConfig containerConfig : internalEnv.getContainers().values()) {
+      containerConfig.setCgroupParent(parentCGroup);
     }
+  }
 }

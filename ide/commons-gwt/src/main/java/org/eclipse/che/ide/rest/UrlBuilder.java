@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.rest;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -17,67 +17,64 @@ import com.google.gwt.json.client.JSONObject;
  * Extended {@link com.google.gwt.http.client.UrlBuilder} with constructor that consumes string url.
  *
  * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
- * @version $Id:  Aug 29, 2011 evgen $
+ * @version $Id: Aug 29, 2011 evgen $
  */
 public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
 
-    private JSONObject o;
+  private JSONObject o;
 
-    /**
-     *
-     */
-    public UrlBuilder() {
+  /** */
+  public UrlBuilder() {}
+
+  /**
+   * Parse url and set initial parameters(protocol, host, port, path)<br>
+   *
+   * @param url
+   */
+  public UrlBuilder(String url) {
+    JavaScriptObject jso = parseUrl(url);
+    o = new JSONObject(jso);
+    setHost(o.get("host").isString().stringValue());
+    setProtocol(o.get("protocol").isString().stringValue());
+    if (o.containsKey("port")) {
+      final String port = o.get("port").isString().stringValue();
+      if (!port.isEmpty()) {
+        setPort(Integer.valueOf(port));
+      }
     }
-
-    /**
-     * Parse url and set initial parameters(protocol, host, port, path)<br>
-     *
-     * @param url
-     */
-    public UrlBuilder(String url) {
-        JavaScriptObject jso = parseUrl(url);
-        o = new JSONObject(jso);
-        setHost(o.get("host").isString().stringValue());
-        setProtocol(o.get("protocol").isString().stringValue());
-        if (o.containsKey("port")) {
-            final String port = o.get("port").isString().stringValue();
-            if (!port.isEmpty()) {
-                setPort(Integer.valueOf(port));
-            }
-        }
-        setPath(o.get("path").isString().stringValue());
-        //fill query parameters
-        JSONObject query = o.get("queryKey").isObject();
-        for (String key : query.keySet()) {
-            setParameter(key, query.get(key).isString().stringValue());
-        }
+    setPath(o.get("path").isString().stringValue());
+    //fill query parameters
+    JSONObject query = o.get("queryKey").isObject();
+    for (String key : query.keySet()) {
+      setParameter(key, query.get(key).isString().stringValue());
     }
+  }
 
-    public String getHost() {
-        return o.get("host").toString();
-    }
+  public String getHost() {
+    return o.get("host").toString();
+  }
 
-    public String getProtocol() {
-        return o.get("protocol").toString();
-    }
+  public String getProtocol() {
+    return o.get("protocol").toString();
+  }
 
-    public String getPort() {
-        return o.get("port").toString();
-    }
+  public String getPort() {
+    return o.get("port").toString();
+  }
 
-    public String getPath() {
-        return o.get("path").toString();
-    }
+  public String getPath() {
+    return o.get("path").toString();
+  }
 
-    public boolean containsPort() {
-        return getPort() != null && !getPort().isEmpty();
-    }
+  public boolean containsPort() {
+    return getPort() != null && !getPort().isEmpty();
+  }
 
-    public String getUrl() {
-        return buildString();
-    }
+  public String getUrl() {
+    return buildString();
+  }
 
-    private native JavaScriptObject parseUrl(String url)/*-{
+  private native JavaScriptObject parseUrl(String url) /*-{
 
         options = {
             strictMode: false,
@@ -106,5 +103,4 @@ public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
         });
         return uri;
     }-*/;
-
 }

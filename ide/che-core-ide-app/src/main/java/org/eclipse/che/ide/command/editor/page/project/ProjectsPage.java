@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.editor.page.project;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
 import org.eclipse.che.ide.api.resources.Project;
@@ -26,108 +29,101 @@ import org.eclipse.che.ide.command.editor.EditorMessages;
 import org.eclipse.che.ide.command.editor.page.AbstractCommandEditorPage;
 import org.eclipse.che.ide.command.editor.page.CommandEditorPage;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /** Presenter for {@link CommandEditorPage} which allows to edit command's applicable projects. */
-public class ProjectsPage extends AbstractCommandEditorPage implements ProjectsPageView.ActionDelegate,
-                                                                       ResourceChangedHandler {
+public class ProjectsPage extends AbstractCommandEditorPage
+    implements ProjectsPageView.ActionDelegate, ResourceChangedHandler {
 
-    private final ProjectsPageView view;
-    private final AppContext       appContext;
+  private final ProjectsPageView view;
+  private final AppContext appContext;
 
-    /** Initial value of the applicable projects list. */
-    private Set<String> applicableProjectsInitial;
+  /** Initial value of the applicable projects list. */
+  private Set<String> applicableProjectsInitial;
 
-    @Inject
-    public ProjectsPage(ProjectsPageView view,
-                        AppContext appContext,
-                        EditorMessages messages,
-                        EventBus eventBus) {
-        super(messages.pageProjectsTitle());
+  @Inject
+  public ProjectsPage(
+      ProjectsPageView view, AppContext appContext, EditorMessages messages, EventBus eventBus) {
+    super(messages.pageProjectsTitle());
 
-        this.view = view;
-        this.appContext = appContext;
+    this.view = view;
+    this.appContext = appContext;
 
-        eventBus.addHandler(ResourceChangedEvent.getType(), this);
+    eventBus.addHandler(ResourceChangedEvent.getType(), this);
 
-        view.setDelegate(this);
+    view.setDelegate(this);
+  }
+
+  @Override
+  public IsWidget getView() {
+    return view;
+  }
+
+  @Override
+  protected void initialize() {
+    final ApplicableContext context = editedCommand.getApplicableContext();
+
+    applicableProjectsInitial = new HashSet<>(context.getApplicableProjects());
+
+    refreshProjects();
+  }
+
+  /** Refresh 'Projects' section in the view. */
+  private void refreshProjects() {
+    final Map<Project, Boolean> projectsStates = new HashMap<>();
+
+    for (Project project : appContext.getProjects()) {
+      ApplicableContext context = editedCommand.getApplicableContext();
+      boolean applicable = context.getApplicableProjects().contains(project.getPath());
+
+      projectsStates.put(project, applicable);
     }
 
-    @Override
-    public IsWidget getView() {
-        return view;
+    view.setProjects(projectsStates);
+  }
+
+  @Override
+  public boolean isDirty() {
+    if (editedCommand == null) {
+      return false;
     }
 
-    @Override
-    protected void initialize() {
-        final ApplicableContext context = editedCommand.getApplicableContext();
+    ApplicableContext context = editedCommand.getApplicableContext();
 
-        applicableProjectsInitial = new HashSet<>(context.getApplicableProjects());
+    return !(applicableProjectsInitial.equals(context.getApplicableProjects()));
+  }
 
-        refreshProjects();
+  @Override
+  public void onApplicableProjectChanged(Project project, boolean applicable) {
+    final ApplicableContext context = editedCommand.getApplicableContext();
+
+    if (applicable) {
+      // if command is bound with one project at least
+      // then remove command from the workspace
+      if (context.getApplicableProjects().isEmpty()) {
+        context.setWorkspaceApplicable(false);
+      }
+
+      context.addProject(project.getPath());
+    } else {
+      context.removeProject(project.getPath());
+
+      // if command isn't bound to any project
+      // then save it to the workspace
+      if (context.getApplicableProjects().isEmpty()) {
+        context.setWorkspaceApplicable(true);
+      }
     }
 
-    /** Refresh 'Projects' section in the view. */
-    private void refreshProjects() {
-        final Map<Project, Boolean> projectsStates = new HashMap<>();
+    notifyDirtyStateChanged();
+  }
 
-        for (Project project : appContext.getProjects()) {
-            ApplicableContext context = editedCommand.getApplicableContext();
-            boolean applicable = context.getApplicableProjects().contains(project.getPath());
+  @Override
+  public void onResourceChanged(ResourceChangedEvent event) {
+    final ResourceDelta delta = event.getDelta();
+    final Resource resource = delta.getResource();
 
-            projectsStates.put(project, applicable);
-        }
-
-        view.setProjects(projectsStates);
+    if (resource.isProject()) {
+      // defer refreshing the projects section since appContext#getProjects may return old data
+      Scheduler.get().scheduleDeferred(this::refreshProjects);
     }
-
-    @Override
-    public boolean isDirty() {
-        if (editedCommand == null) {
-            return false;
-        }
-
-        ApplicableContext context = editedCommand.getApplicableContext();
-
-        return !(applicableProjectsInitial.equals(context.getApplicableProjects()));
-    }
-
-    @Override
-    public void onApplicableProjectChanged(Project project, boolean applicable) {
-        final ApplicableContext context = editedCommand.getApplicableContext();
-
-        if (applicable) {
-            // if command is bound with one project at least
-            // then remove command from the workspace
-            if (context.getApplicableProjects().isEmpty()) {
-                context.setWorkspaceApplicable(false);
-            }
-
-            context.addProject(project.getPath());
-        } else {
-            context.removeProject(project.getPath());
-
-            // if command isn't bound to any project
-            // then save it to the workspace
-            if (context.getApplicableProjects().isEmpty()) {
-                context.setWorkspaceApplicable(true);
-            }
-        }
-
-        notifyDirtyStateChanged();
-    }
-
-    @Override
-    public void onResourceChanged(ResourceChangedEvent event) {
-        final ResourceDelta delta = event.getDelta();
-        final Resource resource = delta.getResource();
-
-        if (resource.isProject()) {
-            // defer refreshing the projects section since appContext#getProjects may return old data
-            Scheduler.get().scheduleDeferred(this::refreshProjects);
-        }
-    }
+  }
 }

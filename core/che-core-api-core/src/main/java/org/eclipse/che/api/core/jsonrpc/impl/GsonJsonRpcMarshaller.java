@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.jsonrpc.impl;
+
+import static org.eclipse.che.api.core.jsonrpc.commons.JsonRpcUtils.cast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -17,7 +19,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.inject.Inject;
-
+import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMarshaller;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcParams;
@@ -25,146 +27,144 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcRequest;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcResponse;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcResult;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.dto.server.JsonSerializable;
-
-import java.util.List;
-
-import static org.eclipse.che.api.core.jsonrpc.commons.JsonRpcUtils.cast;
 
 public class GsonJsonRpcMarshaller implements JsonRpcMarshaller {
-    private final JsonParser jsonParser;
+  private final JsonParser jsonParser;
 
-    @Inject
-    public GsonJsonRpcMarshaller(JsonParser jsonParser) {
-        this.jsonParser = jsonParser;
+  @Inject
+  public GsonJsonRpcMarshaller(JsonParser jsonParser) {
+    this.jsonParser = jsonParser;
+  }
+
+  @Override
+  public String marshall(JsonRpcResponse response) {
+    JsonElement jsonId = getId(response);
+    JsonElement jsonResult = getResult(response);
+    JsonElement jsonError = getError(response);
+
+    return getResponse(jsonId, jsonResult, jsonError).toString();
+  }
+
+  @Override
+  public String marshall(JsonRpcRequest request) {
+    JsonElement method = getMethod(request);
+    JsonElement id = getId(request);
+    JsonElement params = getParams(request);
+
+    return getRequest(method, id, params).toString();
+  }
+
+  private JsonObject getRequest(
+      JsonElement jsonMethod, JsonElement jsonId, JsonElement jsonParams) {
+    JsonObject jsonRequest = new JsonObject();
+    jsonRequest.addProperty("jsonrpc", "2.0");
+    jsonRequest.add("method", jsonMethod);
+
+    if (jsonId != null) {
+      jsonRequest.add("id", jsonId);
     }
 
-    @Override
-    public String marshall(JsonRpcResponse response) {
-        JsonElement jsonId = getId(response);
-        JsonElement jsonResult = getResult(response);
-        JsonElement jsonError = getError(response);
+    if (jsonParams != null) {
+      jsonRequest.add("params", jsonParams);
+    }
+    return jsonRequest;
+  }
 
-        return getResponse(jsonId, jsonResult, jsonError).toString();
+  private JsonElement getParams(JsonRpcRequest request) {
+    if (!request.hasParams()) {
+      return null;
     }
 
-    @Override
-    public String marshall(JsonRpcRequest request) {
-        JsonElement method = getMethod(request);
-        JsonElement id = getId(request);
-        JsonElement params = getParams(request);
+    JsonRpcParams params = request.getParams();
+    return params.isSingle() ? getElement(params.getOne()) : getElements(params.getMany());
+  }
 
-        return getRequest(method, id, params).toString();
+  private JsonElement getId(JsonRpcRequest request) {
+    return request.hasId() ? new JsonPrimitive(request.getId()) : null;
+  }
+
+  private JsonPrimitive getMethod(JsonRpcRequest request) {
+    return new JsonPrimitive(request.getMethod());
+  }
+
+  private JsonObject getResponse(
+      JsonElement jsonId, JsonElement jsonResult, JsonElement jsonError) {
+    JsonObject jsonResponse = new JsonObject();
+    jsonResponse.addProperty("jsonrpc", "2.0");
+    if (jsonId != null) {
+      jsonResponse.add("id", jsonId);
     }
 
-    private JsonObject getRequest(JsonElement jsonMethod, JsonElement jsonId, JsonElement jsonParams) {
-        JsonObject jsonRequest = new JsonObject();
-        jsonRequest.addProperty("jsonrpc", "2.0");
-        jsonRequest.add("method", jsonMethod);
+    if (jsonResult != null) {
+      jsonResponse.add("result", jsonResult);
+    } else {
+      jsonResponse.add("error", jsonError);
+    }
+    return jsonResponse;
+  }
 
-        if (jsonId != null) {
-            jsonRequest.add("id", jsonId);
-        }
-
-        if (jsonParams != null) {
-            jsonRequest.add("params", jsonParams);
-        }
-        return jsonRequest;
+  private JsonObject getError(JsonRpcResponse response) {
+    if (!response.hasError()) {
+      return null;
     }
 
-    private JsonElement getParams(JsonRpcRequest request) {
-        if (!request.hasParams()) {
-            return null;
-        }
+    JsonObject jsonError = new JsonObject();
+    JsonRpcError error = response.getError();
+    jsonError.add("code", new JsonPrimitive(error.getCode()));
+    jsonError.add("message", new JsonPrimitive(error.getMessage()));
+    return jsonError;
+  }
 
-        JsonRpcParams params = request.getParams();
-        return params.isSingle() ? getElement(params.getOne()) : getElements(params.getMany());
+  private JsonElement getResult(JsonRpcResponse response) {
+    if (!response.hasResult()) {
+      return null;
     }
 
-    private JsonElement getId(JsonRpcRequest request) {
-        return request.hasId() ? new JsonPrimitive(request.getId()) : null;
+    JsonRpcResult result = response.getResult();
+    return result.isSingle() ? getElement(result.getOne()) : getElements(result.getMany());
+  }
+
+  private JsonElement getId(JsonRpcResponse response) {
+    return response.hasId() ? new JsonPrimitive(response.getId()) : null;
+  }
+
+  private JsonElement getElements(List<?> params) {
+    JsonArray elements = new JsonArray();
+    params.forEach(param -> elements.add(getJsonElement(param)));
+    return elements;
+  }
+
+  private JsonElement getElement(Object param) {
+    JsonElement jsonElement = getJsonElement(param);
+    if (jsonElement.isJsonObject()) {
+      return jsonElement;
     }
 
-    private JsonPrimitive getMethod(JsonRpcRequest request) {
-        return new JsonPrimitive(request.getMethod());
+    JsonArray array = new JsonArray();
+    array.add(jsonElement);
+    return array;
+  }
+
+  private JsonElement getJsonElement(Object param) {
+    if (param == null) {
+      return JsonNull.INSTANCE;
     }
-
-    private JsonObject getResponse(JsonElement jsonId, JsonElement jsonResult, JsonElement jsonError) {
-        JsonObject jsonResponse = new JsonObject();
-        jsonResponse.addProperty("jsonrpc", "2.0");
-        if (jsonId != null) {
-            jsonResponse.add("id", jsonId);
-        }
-
-        if (jsonResult != null) {
-            jsonResponse.add("result", jsonResult);
-        } else {
-            jsonResponse.add("error", jsonError);
-        }
-        return jsonResponse;
+    if (param instanceof JsonElement) {
+      return cast(param);
     }
-
-    private JsonObject getError(JsonRpcResponse response) {
-        if (!response.hasError()) {
-            return null;
-        }
-
-        JsonObject jsonError = new JsonObject();
-        JsonRpcError error = response.getError();
-        jsonError.add("code", new JsonPrimitive(error.getCode()));
-        jsonError.add("message", new JsonPrimitive(error.getMessage()));
-        return jsonError;
+    if (param instanceof String) {
+      return new JsonPrimitive((String) param);
     }
-
-    private JsonElement getResult(JsonRpcResponse response) {
-        if (!response.hasResult()) {
-            return null;
-        }
-
-        JsonRpcResult result = response.getResult();
-        return result.isSingle() ? getElement(result.getOne()) : getElements(result.getMany());
+    if (param instanceof Boolean) {
+      return new JsonPrimitive((Boolean) param);
     }
-
-    private JsonElement getId(JsonRpcResponse response) {
-        return response.hasId() ? new JsonPrimitive(response.getId()) : null;
+    if (param instanceof Double) {
+      return new JsonPrimitive((Double) param);
     }
-
-    private JsonElement getElements(List<?> params) {
-        JsonArray elements = new JsonArray();
-        params.forEach(param -> elements.add(getJsonElement(param)));
-        return elements;
+    try {
+      return jsonParser.parse(DtoFactory.getInstance().toJson(param));
+    } catch (IllegalArgumentException e) {
+      return jsonParser.parse(param.toString());
     }
-
-    private JsonElement getElement(Object param) {
-        JsonElement jsonElement = getJsonElement(param);
-        if (jsonElement.isJsonObject()) {
-            return jsonElement;
-        }
-
-        JsonArray array = new JsonArray();
-        array.add(jsonElement);
-        return array;
-    }
-    private JsonElement getJsonElement(Object param) {
-        if (param == null) {
-            return JsonNull.INSTANCE;
-        }
-        if (param instanceof JsonElement) {
-            return cast(param);
-        }
-        if (param instanceof String) {
-            return new JsonPrimitive((String)param);
-        }
-        if (param instanceof Boolean) {
-            return new JsonPrimitive((Boolean)param);
-        }
-        if (param instanceof Double) {
-            return new JsonPrimitive((Double)param);
-        }
-        try {
-            return jsonParser.parse(DtoFactory.getInstance().toJson(param));
-        } catch (IllegalArgumentException e){
-            return jsonParser.parse(param.toString());
-        }
-    }
+  }
 }

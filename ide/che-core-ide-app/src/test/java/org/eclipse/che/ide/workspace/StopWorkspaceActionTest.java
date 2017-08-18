@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -19,8 +23,6 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
-import org.eclipse.che.ide.workspace.CurrentWorkspaceManager;
-import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -29,60 +31,47 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Dmitry Shnurenko
- */
+/** @author Dmitry Shnurenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class StopWorkspaceActionTest {
 
-    @Mock
-    private CoreLocalizationConstant locale;
-    @Mock
-    private AppContext               appContext;
-    @Mock
-    private CurrentWorkspaceManager  workspaceManager;
-    @Mock
-    private WorkspaceImpl            workspace;
+  @Mock private CoreLocalizationConstant locale;
+  @Mock private AppContext appContext;
+  @Mock private CurrentWorkspaceManager workspaceManager;
+  @Mock private WorkspaceImpl workspace;
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ActionEvent   actionEvent;
-    @Mock
-    private Promise<Void> voidPromise;
+  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+  private ActionEvent actionEvent;
 
-    @Captor
-    private ArgumentCaptor<Operation<Void>> operationCaptor;
+  @Mock private Promise<Void> voidPromise;
 
-    @InjectMocks
-    private StopWorkspaceAction action;
+  @Captor private ArgumentCaptor<Operation<Void>> operationCaptor;
 
-    @Test
-    public void titleAndDescriptionShouldBeSet() {
-        verify(locale).stopWsTitle();
-        verify(locale).stopWsDescription();
-    }
+  @InjectMocks private StopWorkspaceAction action;
 
-    @Test
-    public void actionShouldBeUpdated() {
-        when(workspace.getRuntime()).thenReturn(mock(RuntimeImpl.class));
-        when(appContext.getWorkspace()).thenReturn(workspace);
+  @Test
+  public void titleAndDescriptionShouldBeSet() {
+    verify(locale).stopWsTitle();
+    verify(locale).stopWsDescription();
+  }
 
-        action.updateInPerspective(actionEvent);
+  @Test
+  public void actionShouldBeUpdated() {
+    when(workspace.getRuntime()).thenReturn(mock(RuntimeImpl.class));
+    when(appContext.getWorkspace()).thenReturn(workspace);
 
-        verify(actionEvent, times(2)).getPresentation();
-    }
+    action.updateInPerspective(actionEvent);
 
-    @Test
-    public void actionShouldBePerformed() throws Exception {
-        when(appContext.getWorkspace()).thenReturn(workspace);
-        when(workspace.getId()).thenReturn("id");
+    verify(actionEvent, times(2)).getPresentation();
+  }
 
-        action.actionPerformed(actionEvent);
+  @Test
+  public void actionShouldBePerformed() throws Exception {
+    when(appContext.getWorkspace()).thenReturn(workspace);
+    when(workspace.getId()).thenReturn("id");
 
-        verify(workspaceManager).stopWorkspace();
-    }
+    action.actionPerformed(actionEvent);
+
+    verify(workspaceManager).stopWorkspace();
+  }
 }

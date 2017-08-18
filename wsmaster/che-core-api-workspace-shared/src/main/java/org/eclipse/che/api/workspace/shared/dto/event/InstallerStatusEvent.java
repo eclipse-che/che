@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.api.core.model.workspace.runtime.InstallerStatus;
@@ -22,45 +22,39 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface InstallerStatusEvent {
 
+  InstallerStatus getStatus();
 
-    InstallerStatus getStatus();
+  void setStatus(InstallerStatus status);
 
-    void setStatus(InstallerStatus status);
+  InstallerStatusEvent withStatus(InstallerStatus status);
 
-    InstallerStatusEvent withStatus(InstallerStatus status);
+  String getInstaller();
 
+  void setInstaller(String installer);
 
-    String getInstaller();
+  InstallerStatusEvent withInstaller(String installer);
 
-    void setInstaller(String installer);
+  String getMachineName();
 
-    InstallerStatusEvent withInstaller(String installer);
+  void setMachineName(String machineName);
 
+  InstallerStatusEvent withMachineName(String machineName);
 
-    String getMachineName();
+  RuntimeIdentityDto getRuntimeId();
 
-    void setMachineName(String machineName);
+  void setRuntimeId(RuntimeIdentityDto runtimeId);
 
-    InstallerStatusEvent withMachineName(String machineName);
+  InstallerStatusEvent withRuntimeId(RuntimeIdentityDto runtimeId);
 
+  String getError();
 
-    RuntimeIdentityDto getRuntimeId();
+  void setError(String error);
 
-    void setRuntimeId(RuntimeIdentityDto runtimeId);
+  InstallerStatusEvent withError(String error);
 
-    InstallerStatusEvent withRuntimeId(RuntimeIdentityDto runtimeId);
+  String getTime();
 
+  void setTime(String time);
 
-    String getError();
-
-    void setError(String error);
-
-    InstallerStatusEvent withError(String error);
-
-
-    String getTime();
-
-    void setTime(String time);
-
-    InstallerStatusEvent withTime(String time);
+  InstallerStatusEvent withTime(String time);
 }

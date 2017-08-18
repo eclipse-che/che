@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import com.google.inject.assistedinject.Assisted;
+import static org.eclipse.che.api.workspace.server.OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE;
 
+import com.google.inject.assistedinject.Assisted;
+import java.net.URI;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -24,61 +30,49 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriBuilderException;
-import java.net.URI;
-
-import static org.eclipse.che.api.workspace.server.OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE;
-
-/**
- * @author Sergii Leshchenko
- */
+/** @author Sergii Leshchenko */
 public class OpenShiftRuntimeContext extends RuntimeContext {
-    private final OpenShiftClientFactory  clientFactory;
-    private final OpenShiftEnvironment    openShiftEnvironment;
-    private final OpenShiftRuntimeFactory runtimeFactory;
-    private final String                  websocketEndpointBase;
+  private final OpenShiftClientFactory clientFactory;
+  private final OpenShiftEnvironment openShiftEnvironment;
+  private final OpenShiftRuntimeFactory runtimeFactory;
+  private final String websocketEndpointBase;
 
-    @Inject
-    public OpenShiftRuntimeContext(@Assisted Environment environment,
-                                   @Assisted OpenShiftEnvironment openShiftEnvironment,
-                                   @Assisted RuntimeIdentity identity,
-                                   @Assisted RuntimeInfrastructure infrastructure,
-                                   OpenShiftClientFactory clientFactory,
-                                   InstallerRegistry installerRegistry,
-                                   OpenShiftRuntimeFactory runtimeFactory,
-                                   @Named("che.websocket.endpoint.base") String websocketEndpointBase)
-            throws ValidationException,
-                   InfrastructureException {
-        super(environment, identity, infrastructure, installerRegistry);
-        this.clientFactory = clientFactory;
-        this.runtimeFactory = runtimeFactory;
-        this.openShiftEnvironment = openShiftEnvironment;
-        this.websocketEndpointBase = websocketEndpointBase;
-    }
+  @Inject
+  public OpenShiftRuntimeContext(
+      @Assisted Environment environment,
+      @Assisted OpenShiftEnvironment openShiftEnvironment,
+      @Assisted RuntimeIdentity identity,
+      @Assisted RuntimeInfrastructure infrastructure,
+      OpenShiftClientFactory clientFactory,
+      InstallerRegistry installerRegistry,
+      OpenShiftRuntimeFactory runtimeFactory,
+      @Named("che.websocket.endpoint.base") String websocketEndpointBase)
+      throws ValidationException, InfrastructureException {
+    super(environment, identity, infrastructure, installerRegistry);
+    this.clientFactory = clientFactory;
+    this.runtimeFactory = runtimeFactory;
+    this.openShiftEnvironment = openShiftEnvironment;
+    this.websocketEndpointBase = websocketEndpointBase;
+  }
 
-    /** Returns OpenShift environment which based on normalized context environment configuration. */
-    public OpenShiftEnvironment getOpenShiftEnvironment() {
-        return openShiftEnvironment;
-    }
+  /** Returns OpenShift environment which based on normalized context environment configuration. */
+  public OpenShiftEnvironment getOpenShiftEnvironment() {
+    return openShiftEnvironment;
+  }
 
-    @Override
-    public URI getOutputChannel() throws InfrastructureException {
-        try {
-            return UriBuilder.fromUri(websocketEndpointBase)
-                             .path(OUTPUT_WEBSOCKET_ENDPOINT_BASE)
-                             .build();
-        } catch (UriBuilderException | IllegalArgumentException ex) {
-            throw new InternalInfrastructureException("Failed to get the output channel.  " +
-                                                      ex.getMessage());
-        }
+  @Override
+  public URI getOutputChannel() throws InfrastructureException {
+    try {
+      return UriBuilder.fromUri(websocketEndpointBase).path(OUTPUT_WEBSOCKET_ENDPOINT_BASE).build();
+    } catch (UriBuilderException | IllegalArgumentException ex) {
+      throw new InternalInfrastructureException(
+          "Failed to get the output channel.  " + ex.getMessage());
     }
+  }
 
-    @Override
-    public InternalRuntime getRuntime() throws InfrastructureException {
-        String namespace = identity.getWorkspaceId();
-        return runtimeFactory.create(this, new OpenShiftProject(namespace, clientFactory));
-    }
+  @Override
+  public InternalRuntime getRuntime() throws InfrastructureException {
+    String namespace = identity.getWorkspaceId();
+    return runtimeFactory.create(this, new OpenShiftProject(namespace, clientFactory));
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.workspace.infrastructure.openshift;
+
+import static java.lang.Integer.parseInt;
+import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_POD_NAME_LABEL;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
@@ -18,10 +22,6 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.openshift.api.model.Route;
-
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,17 +30,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static java.lang.Integer.parseInt;
-import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_POD_NAME_LABEL;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
- * Helps to modify {@link OpenShiftEnvironment} to make servers that are
- * configured by {@link ServerConfig} public accessible.
+ * Helps to modify {@link OpenShiftEnvironment} to make servers that are configured by {@link
+ * ServerConfig} public accessible.
  *
- * <p>To make server accessible it is needed to make sure that container port is declared,
- * create {@link Service} and corresponding {@link Route} for exposing this port.
+ * <p>To make server accessible it is needed to make sure that container port is declared, create
+ * {@link Service} and corresponding {@link Route} for exposing this port.
  *
  * <p>Container, service and route are linked in the following way:
  *
@@ -60,6 +58,7 @@ import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_P
  * </pre>
  *
  * Then services expose containers ports in the following way:
+ *
  * <pre>
  * Service
  * metadata:
@@ -75,6 +74,7 @@ import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_P
  * </pre>
  *
  * Then corresponding route expose one of the service's port:
+ *
  * <pre>
  * Route
  * ...
@@ -84,173 +84,179 @@ import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_P
  *     targetPort: [8080|web-app]     ---->> Service.spec.ports[0].[port|name]
  * </pre>
  *
- * <p>For accessing to server user will use route host. Information about
- * servers that are exposed by route are stored in its annotations.
+ * <p>For accessing to server user will use route host. Information about servers that are exposed
+ * by route are stored in its annotations.
  *
  * @author Sergii Leshchenko
  * @see RoutesAnnotations
  */
 public class ServerExposer {
 
-    private final String               machineName;
-    private final Container            container;
-    private final OpenShiftEnvironment openShiftEnvironment;
+  private final String machineName;
+  private final Container container;
+  private final OpenShiftEnvironment openShiftEnvironment;
 
-    public ServerExposer(String machineName,
-                         Container container,
-                         OpenShiftEnvironment openShiftEnvironment) {
-        this.machineName = machineName;
-        this.container = container;
-        this.openShiftEnvironment = openShiftEnvironment;
+  public ServerExposer(
+      String machineName, Container container, OpenShiftEnvironment openShiftEnvironment) {
+    this.machineName = machineName;
+    this.container = container;
+    this.openShiftEnvironment = openShiftEnvironment;
+  }
+
+  /**
+   * Exposes specified servers.
+   *
+   * @param namePrefix name prefix that will be used for generated objects
+   * @param servers servers to expose
+   */
+  public void expose(String namePrefix, Map<String, ? extends ServerConfig> servers) {
+    Map<String, ServicePort> portToServicePort = exposePort(servers.values());
+
+    Service service =
+        new ServiceBuilder()
+            .withName(namePrefix + '-' + machineName)
+            .withSelectorEntry(CHE_POD_NAME_LABEL, machineName.split("/")[0])
+            .withPorts(new ArrayList<>(portToServicePort.values()))
+            .build();
+
+    openShiftEnvironment.getServices().put(service.getMetadata().getName(), service);
+
+    for (ServicePort servicePort : portToServicePort.values()) {
+      int port = servicePort.getTargetPort().getIntVal();
+      Map<String, ServerConfig> routesServers =
+          servers
+              .entrySet()
+              .stream()
+              .filter(e -> parseInt(e.getValue().getPort().split("/")[0]) == port)
+              .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+      Route route =
+          new RouteBuilder()
+              .withName(namePrefix + '-' + machineName + '-' + servicePort.getName())
+              .withTargetPort(servicePort.getName())
+              .withServers(routesServers)
+              .withTo(service.getMetadata().getName())
+              .build();
+      openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
+    }
+  }
+
+  private Map<String, ServicePort> exposePort(Collection<? extends ServerConfig> serverConfig) {
+    Map<String, ServicePort> exposedPorts = new HashMap<>();
+    Set<String> portsToExpose =
+        serverConfig.stream().map(ServerConfig::getPort).collect(Collectors.toSet());
+
+    for (String portToExpose : portsToExpose) {
+      String[] portProtocol = portToExpose.split("/");
+      int port = parseInt(portProtocol[0]);
+      String protocol = portProtocol.length > 1 ? portProtocol[1].toUpperCase() : "TCP";
+      Optional<ContainerPort> exposedOpt =
+          container
+              .getPorts()
+              .stream()
+              .filter(p -> p.getContainerPort().equals(port) && protocol.equals(p.getProtocol()))
+              .findAny();
+      ContainerPort containerPort;
+
+      if (exposedOpt.isPresent()) {
+        containerPort = exposedOpt.get();
+      } else {
+        containerPort =
+            new ContainerPortBuilder().withContainerPort(port).withProtocol(protocol).build();
+        container.getPorts().add(containerPort);
+      }
+
+      exposedPorts.put(
+          portToExpose,
+          new ServicePortBuilder()
+              .withName("server-" + containerPort.getContainerPort())
+              .withPort(containerPort.getContainerPort())
+              .withProtocol(protocol)
+              .withNewTargetPort(containerPort.getContainerPort())
+              .build());
+    }
+    return exposedPorts;
+  }
+
+  private static class ServiceBuilder {
+    private String name;
+    private Map<String, String> selector = new HashMap<>();
+    private List<ServicePort> ports = new ArrayList<>();
+
+    private ServiceBuilder withName(String name) {
+      this.name = name;
+      return this;
     }
 
-    /**
-     * Exposes specified servers.
-     *
-     * @param namePrefix
-     *         name prefix that will be used for generated objects
-     * @param servers
-     *         servers to expose
-     */
-    public void expose(String namePrefix, Map<String, ? extends ServerConfig> servers) {
-        Map<String, ServicePort> portToServicePort = exposePort(servers.values());
-
-        Service service = new ServiceBuilder().withName(namePrefix + '-' + machineName)
-                                              .withSelectorEntry(CHE_POD_NAME_LABEL, machineName.split("/")[0])
-                                              .withPorts(new ArrayList<>(portToServicePort.values()))
-                                              .build();
-
-        openShiftEnvironment.getServices().put(service.getMetadata().getName(), service);
-
-
-        for (ServicePort servicePort : portToServicePort.values()) {
-            int port = servicePort.getTargetPort().getIntVal();
-            Map<String, ServerConfig> routesServers = servers.entrySet()
-                                                             .stream()
-                                                             .filter(e -> parseInt(e.getValue().getPort().split("/")[0]) == port)
-                                                             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-            Route route = new RouteBuilder().withName(namePrefix + '-' + machineName + '-' + servicePort.getName())
-                                            .withTargetPort(servicePort.getName())
-                                            .withServers(routesServers)
-                                            .withTo(service.getMetadata().getName())
-                                            .build();
-            openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
-        }
+    private ServiceBuilder withSelectorEntry(String key, String value) {
+      selector.put(key, value);
+      return this;
     }
 
-    private Map<String, ServicePort> exposePort(Collection<? extends ServerConfig> serverConfig) {
-        Map<String, ServicePort> exposedPorts = new HashMap<>();
-        Set<String> portsToExpose = serverConfig.stream()
-                                                .map(ServerConfig::getPort)
-                                                .collect(Collectors.toSet());
-
-        for (String portToExpose : portsToExpose) {
-            String[] portProtocol = portToExpose.split("/");
-            int port = parseInt(portProtocol[0]);
-            String protocol = portProtocol.length > 1 ? portProtocol[1].toUpperCase() : "TCP";
-            Optional<ContainerPort> exposedOpt = container.getPorts()
-                                                          .stream()
-                                                          .filter(p -> p.getContainerPort().equals(port) &&
-                                                                       protocol.equals(p.getProtocol()))
-                                                          .findAny();
-            ContainerPort containerPort;
-
-            if (exposedOpt.isPresent()) {
-                containerPort = exposedOpt.get();
-            } else {
-                containerPort = new ContainerPortBuilder().withContainerPort(port)
-                                                          .withProtocol(protocol)
-                                                          .build();
-                container.getPorts().add(containerPort);
-            }
-
-            exposedPorts.put(portToExpose, new ServicePortBuilder().withName("server-" + containerPort.getContainerPort())
-                                                                   .withPort(containerPort.getContainerPort())
-                                                                   .withProtocol(protocol)
-                                                                   .withNewTargetPort(containerPort.getContainerPort())
-                                                                   .build());
-        }
-        return exposedPorts;
+    private ServiceBuilder withPorts(List<ServicePort> ports) {
+      this.ports = ports;
+      return this;
     }
 
-    private static class ServiceBuilder {
-        private String name;
-        private Map<String, String> selector = new HashMap<>();
-        private List<ServicePort>   ports    = new ArrayList<>();
+    private Service build() {
+      io.fabric8.kubernetes.api.model.ServiceBuilder builder =
+          new io.fabric8.kubernetes.api.model.ServiceBuilder();
+      return builder
+          .withNewMetadata()
+          .withName(name.replace("/", "-"))
+          .endMetadata()
+          .withNewSpec()
+          .withSelector(selector)
+          .withPorts(ports)
+          .endSpec()
+          .build();
+    }
+  }
 
-        private ServiceBuilder withName(String name) {
-            this.name = name;
-            return this;
-        }
+  private static class RouteBuilder {
+    private String name;
+    private String serviceName;
+    private IntOrString targetPort;
+    private Map<String, ? extends ServerConfig> serversConfigs;
 
-        private ServiceBuilder withSelectorEntry(String key, String value) {
-            selector.put(key, value);
-            return this;
-        }
-
-        private ServiceBuilder withPorts(List<ServicePort> ports) {
-            this.ports = ports;
-            return this;
-        }
-
-        private Service build() {
-            io.fabric8.kubernetes.api.model.ServiceBuilder builder = new io.fabric8.kubernetes.api.model.ServiceBuilder();
-            return builder.withNewMetadata()
-                              .withName(name.replace("/", "-"))
-                          .endMetadata()
-                          .withNewSpec()
-                              .withSelector(selector)
-                              .withPorts(ports)
-                          .endSpec()
-                          .build();
-        }
+    private RouteBuilder withName(String name) {
+      this.name = name;
+      return this;
     }
 
-    private static class RouteBuilder {
-        private String                              name;
-        private String                              serviceName;
-        private IntOrString                         targetPort;
-        private Map<String, ? extends ServerConfig> serversConfigs;
-
-        private RouteBuilder withName(String name) {
-            this.name = name;
-            return this;
-        }
-
-        private RouteBuilder withTo(String serviceName) {
-            this.serviceName = serviceName;
-            return this;
-        }
-
-        private RouteBuilder withTargetPort(String targetPortName) {
-            this.targetPort = new IntOrString(targetPortName);
-            return this;
-        }
-
-        private RouteBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
-            this.serversConfigs = serversConfigs;
-            return this;
-        }
-
-        private Route build() {
-            io.fabric8.openshift.api.model.RouteBuilder builder = new io.fabric8.openshift.api.model.RouteBuilder();
-
-            return builder.withNewMetadata()
-                              .withName(name.replace("/", "-"))
-                          .withAnnotations(RoutesAnnotations.newSerializer()
-                                                            .servers(serversConfigs)
-                                                            .annotations())
-                          .endMetadata()
-                          .withNewSpec()
-                              .withNewTo()
-                                  .withName(serviceName)
-                              .endTo()
-                              .withNewPort()
-                                  .withTargetPort(targetPort)
-                              .endPort()
-                          .endSpec()
-                          .build();
-        }
+    private RouteBuilder withTo(String serviceName) {
+      this.serviceName = serviceName;
+      return this;
     }
+
+    private RouteBuilder withTargetPort(String targetPortName) {
+      this.targetPort = new IntOrString(targetPortName);
+      return this;
+    }
+
+    private RouteBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
+      this.serversConfigs = serversConfigs;
+      return this;
+    }
+
+    private Route build() {
+      io.fabric8.openshift.api.model.RouteBuilder builder =
+          new io.fabric8.openshift.api.model.RouteBuilder();
+
+      return builder
+          .withNewMetadata()
+          .withName(name.replace("/", "-"))
+          .withAnnotations(RoutesAnnotations.newSerializer().servers(serversConfigs).annotations())
+          .endMetadata()
+          .withNewSpec()
+          .withNewTo()
+          .withName(serviceName)
+          .endTo()
+          .withNewPort()
+          .withTargetPort(targetPort)
+          .endPort()
+          .endSpec()
+          .build();
+    }
+  }
 }

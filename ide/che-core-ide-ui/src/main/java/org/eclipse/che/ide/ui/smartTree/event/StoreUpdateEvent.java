@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.smartTree.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
-
-import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ui.smartTree.event.StoreUpdateEvent.StoreUpdateHandler;
-
 import java.util.Collections;
 import java.util.List;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.event.StoreUpdateEvent.StoreUpdateHandler;
 
 /**
  * Event fires when nodes have been changed.
@@ -28,41 +26,41 @@ import java.util.List;
  */
 public final class StoreUpdateEvent extends GwtEvent<StoreUpdateHandler> {
 
-    public interface HasStoreUpdateHandlers extends HasHandlers {
-        HandlerRegistration addStoreUpdateHandler(StoreUpdateHandler handler);
+  public interface HasStoreUpdateHandlers extends HasHandlers {
+    HandlerRegistration addStoreUpdateHandler(StoreUpdateHandler handler);
+  }
+
+  public interface StoreUpdateHandler extends EventHandler {
+    void onUpdate(StoreUpdateEvent event);
+  }
+
+  private static Type<StoreUpdateHandler> TYPE;
+
+  public static Type<StoreUpdateHandler> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<>();
     }
+    return TYPE;
+  }
 
-    public interface StoreUpdateHandler extends EventHandler {
-        void onUpdate(StoreUpdateEvent event);
-    }
+  private List<Node> nodes;
 
-    private static Type<StoreUpdateHandler> TYPE;
+  public StoreUpdateEvent(List<Node> nodes) {
+    this.nodes = Collections.unmodifiableList(nodes);
+  }
 
-    public static Type<StoreUpdateHandler> getType() {
-        if (TYPE == null) {
-            TYPE = new Type<>();
-        }
-        return TYPE;
-    }
+  @Override
+  public Type<StoreUpdateHandler> getAssociatedType() {
+    return getType();
+  }
 
-    private List<Node> nodes;
+  public List<Node> getNodes() {
+    return nodes;
+  }
 
-    public StoreUpdateEvent(List<Node> nodes) {
-        this.nodes = Collections.unmodifiableList(nodes);
-    }
-
-    @Override
-    public Type<StoreUpdateHandler> getAssociatedType() {
-        return getType();
-    }
-
-    public List<Node> getNodes() {
-        return nodes;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void dispatch(StoreUpdateHandler handler) {
-        handler.onUpdate(this);
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected void dispatch(StoreUpdateHandler handler) {
+    handler.onUpdate(this);
+  }
 }

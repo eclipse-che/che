@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.macro;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
@@ -40,33 +39,33 @@ import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectTyp
  */
 public class MacroApiModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        bind(MacroRegistry.class).to(MacroRegistryImpl.class).in(Singleton.class);
+  @Override
+  protected void configure() {
+    bind(MacroRegistry.class).to(MacroRegistryImpl.class).in(Singleton.class);
 
-        bind(MacroProcessor.class).to(MacroProcessorImpl.class).in(Singleton.class);
+    bind(MacroProcessor.class).to(MacroProcessorImpl.class).in(Singleton.class);
 
-        GinMultibinder<Macro> macrosBinder = GinMultibinder.newSetBinder(binder(), Macro.class);
-        macrosBinder.addBinding().to(EditorCurrentFileNameMacro.class);
-        macrosBinder.addBinding().to(EditorCurrentFileBaseNameMacro.class);
-        macrosBinder.addBinding().to(EditorCurrentFilePathMacro.class);
-        macrosBinder.addBinding().to(EditorCurrentFileRelativePathMacro.class);
-        macrosBinder.addBinding().to(EditorCurrentProjectNameMacro.class);
-        macrosBinder.addBinding().to(EditorCurrentProjectTypeMacro.class);
-        macrosBinder.addBinding().to(ExplorerCurrentFileNameMacro.class);
-        macrosBinder.addBinding().to(ExplorerCurrentFileBaseNameMacro.class);
-        macrosBinder.addBinding().to(ExplorerCurrentFilePathMacro.class);
-        macrosBinder.addBinding().to(ExplorerCurrentFileParentPathMacro.class);
-        macrosBinder.addBinding().to(ExplorerCurrentFileRelativePathMacro.class);
-        macrosBinder.addBinding().to(ExplorerCurrentProjectNameMacro.class);
-        macrosBinder.addBinding().to(ExplorerCurrentProjectTypeMacro.class);
-        macrosBinder.addBinding().to(WorkspaceNameMacro.class);
-        macrosBinder.addBinding().to(DevMachineHostNameMacro.class);
-        macrosBinder.addBinding().to(CurrentProjectPathMacro.class);
-        macrosBinder.addBinding().to(CurrentProjectRelativePathMacro.class);
+    GinMultibinder<Macro> macrosBinder = GinMultibinder.newSetBinder(binder(), Macro.class);
+    macrosBinder.addBinding().to(EditorCurrentFileNameMacro.class);
+    macrosBinder.addBinding().to(EditorCurrentFileBaseNameMacro.class);
+    macrosBinder.addBinding().to(EditorCurrentFilePathMacro.class);
+    macrosBinder.addBinding().to(EditorCurrentFileRelativePathMacro.class);
+    macrosBinder.addBinding().to(EditorCurrentProjectNameMacro.class);
+    macrosBinder.addBinding().to(EditorCurrentProjectTypeMacro.class);
+    macrosBinder.addBinding().to(ExplorerCurrentFileNameMacro.class);
+    macrosBinder.addBinding().to(ExplorerCurrentFileBaseNameMacro.class);
+    macrosBinder.addBinding().to(ExplorerCurrentFilePathMacro.class);
+    macrosBinder.addBinding().to(ExplorerCurrentFileParentPathMacro.class);
+    macrosBinder.addBinding().to(ExplorerCurrentFileRelativePathMacro.class);
+    macrosBinder.addBinding().to(ExplorerCurrentProjectNameMacro.class);
+    macrosBinder.addBinding().to(ExplorerCurrentProjectTypeMacro.class);
+    macrosBinder.addBinding().to(WorkspaceNameMacro.class);
+    macrosBinder.addBinding().to(DevMachineHostNameMacro.class);
+    macrosBinder.addBinding().to(CurrentProjectPathMacro.class);
+    macrosBinder.addBinding().to(CurrentProjectRelativePathMacro.class);
 
-        bind(ServerAddressMacroRegistrar.class).asEagerSingleton();
+    bind(ServerAddressMacroRegistrar.class).asEagerSingleton();
 
-        bind(MacroChooserView.class).to(MacroChooserViewImpl.class);
-    }
+    bind(MacroChooserView.class).to(MacroChooserViewImpl.class);
+  }
 }

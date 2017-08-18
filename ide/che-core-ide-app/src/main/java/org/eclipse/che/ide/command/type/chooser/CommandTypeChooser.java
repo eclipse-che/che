@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.type.chooser;
 
-import com.google.inject.Inject;
+import static java.util.Comparator.comparing;
 
+import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.Executor;
@@ -23,11 +26,6 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.command.type.CommandTypeMessages;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Comparator.comparing;
-
 /**
  * Provides a simple mechanism for the user to choose a {@link CommandType}.
  *
@@ -35,65 +33,67 @@ import static java.util.Comparator.comparing;
  */
 public class CommandTypeChooser implements CommandTypeChooserView.ActionDelegate {
 
-    private final CommandTypeChooserView view;
-    private final CommandTypeRegistry    commandTypeRegistry;
-    private final PromiseProvider        promiseProvider;
-    private final CommandTypeMessages    messages;
+  private final CommandTypeChooserView view;
+  private final CommandTypeRegistry commandTypeRegistry;
+  private final PromiseProvider promiseProvider;
+  private final CommandTypeMessages messages;
 
-    private ResolveFunction<CommandType> resolveFunction;
-    private RejectFunction               rejectFunction;
+  private ResolveFunction<CommandType> resolveFunction;
+  private RejectFunction rejectFunction;
 
-    @Inject
-    public CommandTypeChooser(CommandTypeChooserView view,
-                              CommandTypeRegistry commandTypeRegistry,
-                              PromiseProvider promiseProvider,
-                              CommandTypeMessages messages) {
-        this.view = view;
-        this.commandTypeRegistry = commandTypeRegistry;
-        this.promiseProvider = promiseProvider;
-        this.messages = messages;
+  @Inject
+  public CommandTypeChooser(
+      CommandTypeChooserView view,
+      CommandTypeRegistry commandTypeRegistry,
+      PromiseProvider promiseProvider,
+      CommandTypeMessages messages) {
+    this.view = view;
+    this.commandTypeRegistry = commandTypeRegistry;
+    this.promiseProvider = promiseProvider;
+    this.messages = messages;
 
-        view.setDelegate(this);
+    view.setDelegate(this);
+  }
+
+  /**
+   * Pops up a command type chooser dialog at the position relative to the browser's client area.
+   *
+   * @param left the left position, in pixels
+   * @param top the top position, in pixels
+   * @return promise that will be resolved with a chosen {@link CommandType} or rejected in case
+   *     command type selection has been cancelled
+   */
+  public Promise<CommandType> show(int left, int top) {
+    final List<CommandType> commandTypes = new ArrayList<>(commandTypeRegistry.getCommandTypes());
+
+    if (commandTypes.size() == 1) {
+      return promiseProvider.resolve(commandTypes.get(0));
     }
 
-    /**
-     * Pops up a command type chooser dialog at the position relative to the browser's client area.
-     *
-     * @param left
-     *         the left position, in pixels
-     * @param top
-     *         the top position, in pixels
-     * @return promise that will be resolved with a chosen {@link CommandType}
-     * or rejected in case command type selection has been cancelled
-     */
-    public Promise<CommandType> show(int left, int top) {
-        final List<CommandType> commandTypes = new ArrayList<>(commandTypeRegistry.getCommandTypes());
+    commandTypes.sort(comparing(CommandType::getDisplayName));
 
-        if (commandTypes.size() == 1) {
-            return promiseProvider.resolve(commandTypes.get(0));
-        }
+    view.setCommandTypes(commandTypes);
 
-        commandTypes.sort(comparing(CommandType::getDisplayName));
+    view.show(left, top);
 
-        view.setCommandTypes(commandTypes);
+    return promiseProvider.create(
+        Executor.create(
+            (ExecutorBody<CommandType>)
+                (resolve, reject) -> {
+                  resolveFunction = resolve;
+                  rejectFunction = reject;
+                }));
+  }
 
-        view.show(left, top);
+  @Override
+  public void onSelected(CommandType commandType) {
+    view.close();
 
-        return promiseProvider.create(Executor.create((ExecutorBody<CommandType>)(resolve, reject) -> {
-            resolveFunction = resolve;
-            rejectFunction = reject;
-        }));
-    }
+    resolveFunction.apply(commandType);
+  }
 
-    @Override
-    public void onSelected(CommandType commandType) {
-        view.close();
-
-        resolveFunction.apply(commandType);
-    }
-
-    @Override
-    public void onCanceled() {
-        rejectFunction.apply(JsPromiseError.create(messages.typeChooserMessageCanceled()));
-    }
+  @Override
+  public void onCanceled() {
+    rejectFunction.apply(JsPromiseError.create(messages.typeChooserMessageCanceled()));
+  }
 }

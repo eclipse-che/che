@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.languageserver.ide.location;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
+import java.util.List;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -32,98 +32,104 @@ import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import java.util.List;
+/** @author Evgen Vidolob */
+public class OpenLocationPresenter extends BasePresenter
+    implements OpenLocationView.ActionDelegate {
 
-/**
- * @author Evgen Vidolob
- */
-public class OpenLocationPresenter extends BasePresenter implements OpenLocationView.ActionDelegate {
+  private final LanguageServerResources resources;
+  private final OpenLocationView view;
+  private final WorkspaceAgent workspaceAgent;
+  private final OpenFileInEditorHelper helper;
+  private final NotificationManager notificationManager;
+  private final String title;
 
-    private final LanguageServerResources resources;
-    private final OpenLocationView        view;
-    private final WorkspaceAgent          workspaceAgent;
-    private final OpenFileInEditorHelper  helper;
-    private final NotificationManager     notificationManager;
-    private final String                  title;
+  @Inject
+  public OpenLocationPresenter(
+      LanguageServerResources resources,
+      OpenLocationView view,
+      WorkspaceAgent workspaceAgent,
+      OpenFileInEditorHelper helper,
+      NotificationManager notificationManager,
+      @Assisted String title) {
+    this.resources = resources;
+    this.view = view;
+    this.workspaceAgent = workspaceAgent;
+    this.helper = helper;
+    this.notificationManager = notificationManager;
+    this.title = title;
+    view.setDelegate(this);
+    view.setTitle(title);
+  }
 
-    @Inject
-    public OpenLocationPresenter(LanguageServerResources resources,
-                                 OpenLocationView view,
-                                 WorkspaceAgent workspaceAgent,
-                                 OpenFileInEditorHelper helper,
-                                 NotificationManager notificationManager,
-                                 @Assisted String title) {
-        this.resources = resources;
-        this.view = view;
-        this.workspaceAgent = workspaceAgent;
-        this.helper = helper;
-        this.notificationManager = notificationManager;
-        this.title = title;
-        view.setDelegate(this);
-        view.setTitle(title);
-    }
-
-
-    //TODO maybe we should use some generic data object not a DTO
-    public void openLocation(Promise<List<Location>> promise) {
-        promise.then(new Operation<List<Location>>() {
-            @Override
-            public void apply(List<Location> arg) throws OperationException {
+  //TODO maybe we should use some generic data object not a DTO
+  public void openLocation(Promise<List<Location>> promise) {
+    promise
+        .then(
+            new Operation<List<Location>>() {
+              @Override
+              public void apply(List<Location> arg) throws OperationException {
                 showLocations(arg);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
+              }
+            })
+        .catchError(
+            new Operation<PromiseError>() {
+              @Override
+              public void apply(PromiseError arg) throws OperationException {
                 showError(arg);
-            }
-        });
-    }
+              }
+            });
+  }
 
-    public void showError(PromiseError arg) {
-        notificationManager
-                .notify(title, arg.getMessage(), StatusNotification.Status.FAIL, StatusNotification.DisplayMode.FLOAT_MODE);
-    }
+  public void showError(PromiseError arg) {
+    notificationManager.notify(
+        title,
+        arg.getMessage(),
+        StatusNotification.Status.FAIL,
+        StatusNotification.DisplayMode.FLOAT_MODE);
+  }
 
-    private void showLocations(List<Location> locations) {
-        view.setLocations(locations);
-        openPart();
-    }
+  private void showLocations(List<Location> locations) {
+    view.setLocations(locations);
+    openPart();
+  }
 
-    @Override
-    public SVGResource getTitleImage() {
-        return resources.fieldItem();
-    }
+  @Override
+  public SVGResource getTitleImage() {
+    return resources.fieldItem();
+  }
 
-    @Override
-    public String getTitle() {
-        return title;
-    }
+  @Override
+  public String getTitle() {
+    return title;
+  }
 
-    @Override
-    public IsWidget getView() {
-        return view;
-    }
+  @Override
+  public IsWidget getView() {
+    return view;
+  }
 
-    @Override
-    public String getTitleToolTip() {
-        return null;
-    }
+  @Override
+  public String getTitleToolTip() {
+    return null;
+  }
 
-    @Override
-    public void go(AcceptsOneWidget container) {
-        container.setWidget(view);
-    }
+  @Override
+  public void go(AcceptsOneWidget container) {
+    container.setWidget(view);
+  }
 
-    private void openPart() {
-        workspaceAgent.openPart(this, PartStackType.INFORMATION);
-        workspaceAgent.setActivePart(this);
-    }
+  private void openPart() {
+    workspaceAgent.openPart(this, PartStackType.INFORMATION);
+    workspaceAgent.setActivePart(this);
+  }
 
-    @Override
-    public void onLocationSelected(Location location) {
-        Range range = location.getRange();
-        helper.openFile(location.getUri(), new TextRange(new TextPosition(
-                range.getStart().getLine(),
-                range.getStart().getCharacter()), new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter())));
-    }
+  @Override
+  public void onLocationSelected(Location location) {
+    Range range = location.getRange();
+    helper.openFile(
+        location.getUri(),
+        new TextRange(
+            new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
+            new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter())));
+  }
 }

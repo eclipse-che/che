@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.server.jpa;
 
 import com.google.inject.TypeLiteral;
-
+import java.util.Collection;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.recipe.JpaRecipeDao;
 import org.eclipse.che.api.recipe.OldRecipeImpl;
@@ -42,78 +42,88 @@ import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.h2.Driver;
 
-import java.util.Collection;
-
-/**
- * @author Yevhenii Voevodin
- */
+/** @author Yevhenii Voevodin */
 public class WorkspaceTckModule extends TckModule {
 
+  @Override
+  protected void configure() {
+    H2DBTestServer server = H2DBTestServer.startDefault();
+    install(
+        new PersistTestModuleBuilder()
+            .setDriver(Driver.class)
+            .runningOn(server)
+            .addEntityClasses(
+                AccountImpl.class,
+                WorkspaceImpl.class,
+                WorkspaceConfigImpl.class,
+                ProjectConfigImpl.class,
+                EnvironmentImpl.class,
+                RecipeImpl.class,
+                MachineConfigImpl.class,
+                SourceStorageImpl.class,
+                ServerConfigImpl.class,
+                StackImpl.class,
+                CommandImpl.class,
+                OldRecipeImpl.class,
+                RecipeImpl.class)
+            .addEntityClass(
+                "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+            .setExceptionHandler(H2ExceptionHandler.class)
+            .build());
+    bind(DBInitializer.class).asEagerSingleton();
+    bind(SchemaInitializer.class)
+        .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
+    bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
+
+    bind(new TypeLiteral<TckRepository<AccountImpl>>() {})
+        .toInstance(new JpaTckRepository<>(AccountImpl.class));
+    bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
+    bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
+    bind(new TypeLiteral<TckRepository<OldRecipeImpl>>() {}).toInstance(new OldRecipeRepository());
+
+    bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
+    bind(StackDao.class).to(JpaStackDao.class);
+    bind(RecipeDao.class).to(JpaRecipeDao.class);
+  }
+
+  private static class WorkspaceRepository extends JpaTckRepository<WorkspaceImpl> {
+    public WorkspaceRepository() {
+      super(WorkspaceImpl.class);
+    }
+
     @Override
-    protected void configure() {
-        H2DBTestServer server = H2DBTestServer.startDefault();
-        install(new PersistTestModuleBuilder().setDriver(Driver.class)
-                                              .runningOn(server)
-                                              .addEntityClasses(AccountImpl.class,
-                                                                WorkspaceImpl.class,
-                                                                WorkspaceConfigImpl.class,
-                                                                ProjectConfigImpl.class,
-                                                                EnvironmentImpl.class,
-                                                                RecipeImpl.class,
-                                                                MachineConfigImpl.class,
-                                                                SourceStorageImpl.class,
-                                                                ServerConfigImpl.class,
-                                                                StackImpl.class,
-                                                                CommandImpl.class,
-                                                                OldRecipeImpl.class,
-                                                                RecipeImpl.class)
-                                              .addEntityClass("org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
-                                              .setExceptionHandler(H2ExceptionHandler.class)
-                                              .build());
-        bind(DBInitializer.class).asEagerSingleton();
-        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
-        bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
+    public void createAll(Collection<? extends WorkspaceImpl> entities)
+        throws TckRepositoryException {
+      for (WorkspaceImpl entity : entities) {
+        entity.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+      }
+      super.createAll(entities);
+    }
+  }
 
-        bind(new TypeLiteral<TckRepository<AccountImpl>>() {}).toInstance(new JpaTckRepository<>(AccountImpl.class));
-        bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
-        bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
-        bind(new TypeLiteral<TckRepository<OldRecipeImpl>>() {}).toInstance(new OldRecipeRepository());
-
-        bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
-        bind(StackDao.class).to(JpaStackDao.class);
-        bind(RecipeDao.class).to(JpaRecipeDao.class);
+  private static class StackRepository extends JpaTckRepository<StackImpl> {
+    public StackRepository() {
+      super(StackImpl.class);
     }
 
-    private static class WorkspaceRepository extends JpaTckRepository<WorkspaceImpl> {
-        public WorkspaceRepository() { super(WorkspaceImpl.class); }
+    @Override
+    public void createAll(Collection<? extends StackImpl> entities) throws TckRepositoryException {
+      for (StackImpl stack : entities) {
+        stack.getWorkspaceConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+      }
+      super.createAll(entities);
+    }
+  }
 
-        @Override
-        public void createAll(Collection<? extends WorkspaceImpl> entities) throws TckRepositoryException {
-            for (WorkspaceImpl entity : entities) {
-                entity.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
-            }
-            super.createAll(entities);
-        }
+  private static class OldRecipeRepository extends JpaTckRepository<OldRecipeImpl> {
+    public OldRecipeRepository() {
+      super(OldRecipeImpl.class);
     }
 
-    private static class StackRepository extends JpaTckRepository<StackImpl> {
-        public StackRepository() { super(StackImpl.class); }
-
-        @Override
-        public void createAll(Collection<? extends StackImpl> entities) throws TckRepositoryException {
-            for (StackImpl stack : entities) {
-                stack.getWorkspaceConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
-            }
-            super.createAll(entities);
-        }
+    @Override
+    public void createAll(Collection<? extends OldRecipeImpl> entities)
+        throws TckRepositoryException {
+      super.createAll(entities);
     }
-
-    private static class OldRecipeRepository extends JpaTckRepository<OldRecipeImpl> {
-        public OldRecipeRepository() { super(OldRecipeImpl.class); }
-
-        @Override
-        public void createAll(Collection<? extends OldRecipeImpl> entities) throws TckRepositoryException {
-            super.createAll(entities);
-        }
-    }
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.project;
 
-import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
-import org.eclipse.che.api.project.shared.NewProjectConfig;
-import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import static java.util.Collections.emptyMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static java.util.Collections.emptyMap;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 /**
  * Implementation of {@link NewProjectConfig} for creating project
@@ -28,148 +27,149 @@ import static java.util.Collections.emptyMap;
  * @author Roman Nikitenko
  */
 public class NewProjectConfigImpl implements NewProjectConfig {
-    private String                    name;
-    private String                    path;
-    private String                    description;
-    private String                    type;
-    private SourceStorage             sourceStorage;
-    private List<String>              mixins;
-    private Map<String, List<String>> attributes;
-    private Map<String, String>       options;
+  private String name;
+  private String path;
+  private String description;
+  private String type;
+  private SourceStorage sourceStorage;
+  private List<String> mixins;
+  private Map<String, List<String>> attributes;
+  private Map<String, String> options;
 
-    /** Constructor for creating project import configuration */
-    public NewProjectConfigImpl(String name,
-                                String path,
-                                String description,
-                                String type,
-                                SourceStorage sourceStorage) {
-        this(name, path, description, type, sourceStorage, null, null, null);
-    }
+  /** Constructor for creating project import configuration */
+  public NewProjectConfigImpl(
+      String name, String path, String description, String type, SourceStorage sourceStorage) {
+    this(name, path, description, type, sourceStorage, null, null, null);
+  }
 
-    /** Constructor for creating project generator configuration */
-    public NewProjectConfigImpl(String name,
-                                String path,
-                                String description,
-                                String type,
-                                Map<String, List<String>> attributes,
-                                Map<String, String> options) {
-        this(name, path, description, type, null, null, attributes, options);
-    }
+  /** Constructor for creating project generator configuration */
+  public NewProjectConfigImpl(
+      String name,
+      String path,
+      String description,
+      String type,
+      Map<String, List<String>> attributes,
+      Map<String, String> options) {
+    this(name, path, description, type, null, null, attributes, options);
+  }
 
-    /** Constructor for creating configuration from project template descriptor */
-    public NewProjectConfigImpl(ProjectTemplateDescriptor descriptor) {
-        this(descriptor.getName(),
-             descriptor.getPath(),
-             descriptor.getDescription(),
-             descriptor.getProjectType(),
-             descriptor.getSource(),
-             descriptor.getMixins(),
-             descriptor.getAttributes(),
-             descriptor.getOptions());
-    }
+  /** Constructor for creating configuration from project template descriptor */
+  public NewProjectConfigImpl(ProjectTemplateDescriptor descriptor) {
+    this(
+        descriptor.getName(),
+        descriptor.getPath(),
+        descriptor.getDescription(),
+        descriptor.getProjectType(),
+        descriptor.getSource(),
+        descriptor.getMixins(),
+        descriptor.getAttributes(),
+        descriptor.getOptions());
+  }
 
-    /** Constructor for creating configuration from DTO object */
-    public NewProjectConfigImpl(ProjectConfigDto dto) {
-        this(dto.getName(),
-             dto.getPath(),
-             dto.getDescription(),
-             dto.getType(),
-             dto.getSource(),
-             dto.getMixins(),
-             dto.getAttributes(),
-             emptyMap());
-    }
+  /** Constructor for creating configuration from DTO object */
+  public NewProjectConfigImpl(ProjectConfigDto dto) {
+    this(
+        dto.getName(),
+        dto.getPath(),
+        dto.getDescription(),
+        dto.getType(),
+        dto.getSource(),
+        dto.getMixins(),
+        dto.getAttributes(),
+        emptyMap());
+  }
 
-    public NewProjectConfigImpl(String name,
-                                String path,
-                                String description,
-                                String type,
-                                SourceStorage sourceStorage,
-                                List<String> mixins,
-                                Map<String, List<String>> attributes,
-                                Map<String, String> options) {
-        this.name = name;
-        this.path = path;
-        this.description = description;
-        this.type = type;
-        this.sourceStorage = sourceStorage;
-        this.mixins = mixins;
-        this.attributes = attributes != null ? attributes : new HashMap<String, List<String>>();
-        this.options = options != null ? options : new HashMap<String, String>();
-    }
+  public NewProjectConfigImpl(
+      String name,
+      String path,
+      String description,
+      String type,
+      SourceStorage sourceStorage,
+      List<String> mixins,
+      Map<String, List<String>> attributes,
+      Map<String, String> options) {
+    this.name = name;
+    this.path = path;
+    this.description = description;
+    this.type = type;
+    this.sourceStorage = sourceStorage;
+    this.mixins = mixins;
+    this.attributes = attributes != null ? attributes : new HashMap<String, List<String>>();
+    this.options = options != null ? options : new HashMap<String, String>();
+  }
 
-    @Override
-    public String getName() {
-        return name;
-    }
+  @Override
+  public String getName() {
+    return name;
+  }
 
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
+  @Override
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    @Override
-    public String getPath() {
-        return path;
-    }
+  @Override
+  public String getPath() {
+    return path;
+  }
 
-    @Override
-    public void setPath(String path) {
-        this.path = path;
-    }
+  @Override
+  public void setPath(String path) {
+    this.path = path;
+  }
 
-    @Override
-    public String getDescription() {
-        return description;
-    }
+  @Override
+  public String getDescription() {
+    return description;
+  }
 
-    @Override
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  @Override
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    @Override
-    public String getType() {
-        return type;
-    }
+  @Override
+  public String getType() {
+    return type;
+  }
 
-    @Override
-    public void setType(String type) {
-        this.type = type;
-    }
+  @Override
+  public void setType(String type) {
+    this.type = type;
+  }
 
-    @Override
-    public List<String> getMixins() {
-        return mixins != null ? mixins : new ArrayList<String>();
-    }
+  @Override
+  public List<String> getMixins() {
+    return mixins != null ? mixins : new ArrayList<String>();
+  }
 
-    @Override
-    public void setMixins(List<String> mixins) {
-        this.mixins = mixins;
-    }
+  @Override
+  public void setMixins(List<String> mixins) {
+    this.mixins = mixins;
+  }
 
-    @Override
-    public Map<String, List<String>> getAttributes() {
-        return attributes != null ? attributes : new HashMap<String, List<String>>();
-    }
+  @Override
+  public Map<String, List<String>> getAttributes() {
+    return attributes != null ? attributes : new HashMap<String, List<String>>();
+  }
 
-    @Override
-    public void setAttributes(Map<String, List<String>> attributes) {
-        this.attributes = attributes;
-    }
+  @Override
+  public void setAttributes(Map<String, List<String>> attributes) {
+    this.attributes = attributes;
+  }
 
-    @Override
-    public Map<String, String> getOptions() {
-        return options != null ? options : new HashMap<String, String>();
-    }
+  @Override
+  public Map<String, String> getOptions() {
+    return options != null ? options : new HashMap<String, String>();
+  }
 
-    @Override
-    public void setOptions(Map<String, String> options) {
-        this.options = options;
-    }
+  @Override
+  public void setOptions(Map<String, String> options) {
+    this.options = options;
+  }
 
-    @Override
-    public SourceStorage getSource() {
-        return sourceStorage;
-    }
+  @Override
+  public SourceStorage getSource() {
+    return sourceStorage;
+  }
 }

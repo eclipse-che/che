@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.deploy;
+
+import static com.google.inject.matcher.Matchers.subclassesOf;
+import static org.eclipse.che.inject.Matchers.names;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-
+import javax.sql.DataSource;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
@@ -57,143 +60,153 @@ import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
-import javax.sql.DataSource;
-
-import static com.google.inject.matcher.Matchers.subclassesOf;
-import static org.eclipse.che.inject.Matchers.names;
-
 /** @author andrew00x */
 @DynaModule
 public class WsMasterModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        // db related components modules
-        install(new com.google.inject.persist.jpa.JpaPersistModule("main"));
-        install(new org.eclipse.che.account.api.AccountModule());
-        install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
-        install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
-//        install(new org.eclipse.che.api.machine.server.jpa.MachineJpaModule());
-        bind(RecipeDao.class).to(JpaRecipeDao.class);
-        // TODO spi move into docker infra impl
-        bind(SnapshotDao.class).to(JpaSnapshotDao.class);
-        install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
-        install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
-        install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
+  @Override
+  protected void configure() {
+    // db related components modules
+    install(new com.google.inject.persist.jpa.JpaPersistModule("main"));
+    install(new org.eclipse.che.account.api.AccountModule());
+    install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
+    install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
+    //        install(new org.eclipse.che.api.machine.server.jpa.MachineJpaModule());
+    bind(RecipeDao.class).to(JpaRecipeDao.class);
+    // TODO spi move into docker infra impl
+    bind(SnapshotDao.class).to(JpaSnapshotDao.class);
+    install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
+    install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
+    install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
 
-        // db configuration
-        bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
-        bind(SchemaInitializer.class).to(org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer.class);
-        bind(org.eclipse.che.core.db.DBInitializer.class).asEagerSingleton();
-        bind(PlaceholderReplacer.class).toProvider(org.eclipse.che.core.db.schema.impl.flyway.PlaceholderReplacerProvider.class);
+    // db configuration
+    bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
+    bind(SchemaInitializer.class)
+        .to(org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer.class);
+    bind(org.eclipse.che.core.db.DBInitializer.class).asEagerSingleton();
+    bind(PlaceholderReplacer.class)
+        .toProvider(org.eclipse.che.core.db.schema.impl.flyway.PlaceholderReplacerProvider.class);
 
-        //factory
-        bind(FactoryAcceptValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryAcceptValidatorImpl.class);
-        bind(FactoryCreateValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryCreateValidatorImpl.class);
-        bind(FactoryEditValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryEditValidatorImpl.class);
-        bind(org.eclipse.che.api.factory.server.FactoryService.class);
-        install(new org.eclipse.che.api.factory.server.jpa.FactoryJpaModule());
+    //factory
+    bind(FactoryAcceptValidator.class)
+        .to(org.eclipse.che.api.factory.server.impl.FactoryAcceptValidatorImpl.class);
+    bind(FactoryCreateValidator.class)
+        .to(org.eclipse.che.api.factory.server.impl.FactoryCreateValidatorImpl.class);
+    bind(FactoryEditValidator.class)
+        .to(org.eclipse.che.api.factory.server.impl.FactoryEditValidatorImpl.class);
+    bind(org.eclipse.che.api.factory.server.FactoryService.class);
+    install(new org.eclipse.che.api.factory.server.jpa.FactoryJpaModule());
 
-        Multibinder<FactoryParametersResolver> factoryParametersResolverMultibinder =
-                Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
-        factoryParametersResolverMultibinder.addBinding()
-                                            .to(GithubFactoryParametersResolver.class);
+    Multibinder<FactoryParametersResolver> factoryParametersResolverMultibinder =
+        Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
+    factoryParametersResolverMultibinder.addBinding().to(GithubFactoryParametersResolver.class);
 
-        bind(org.eclipse.che.api.user.server.CheUserCreator.class);
+    bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
-        bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
+    bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
 
-        bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
-        bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class).asEagerSingleton();
-        bind(org.eclipse.che.api.project.server.template.ProjectTemplateRegistry.class);
-        bind(org.eclipse.che.api.project.server.template.ProjectTemplateService.class);
-        bind(org.eclipse.che.api.ssh.server.SshService.class);
-        bind(RecipeService.class);
-        bind(org.eclipse.che.api.user.server.UserService.class);
-        bind(org.eclipse.che.api.user.server.ProfileService.class);
-        bind(org.eclipse.che.api.user.server.PreferencesService.class);
+    bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
+    bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class)
+        .asEagerSingleton();
+    bind(org.eclipse.che.api.project.server.template.ProjectTemplateRegistry.class);
+    bind(org.eclipse.che.api.project.server.template.ProjectTemplateService.class);
+    bind(org.eclipse.che.api.ssh.server.SshService.class);
+    bind(RecipeService.class);
+    bind(org.eclipse.che.api.user.server.UserService.class);
+    bind(org.eclipse.che.api.user.server.ProfileService.class);
+    bind(org.eclipse.che.api.user.server.PreferencesService.class);
 
-        bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
-        MapBinder<String, String> stacks = MapBinder.newMapBinder(binder(), String.class, String.class,
-                                                                  Names.named(StackLoader.CHE_PREDEFINED_STACKS));
-        stacks.addBinding("stacks.json").toInstance("stacks-images");
-        stacks.addBinding("che-in-che.json").toInstance("");
-        bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
-        bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
-        bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
-        bind(org.eclipse.che.api.workspace.server.OutputService.class);
-        bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
-        bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();
-        bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class).asEagerSingleton();
-        bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
-        bind(org.eclipse.che.everrest.ETagResponseFilter.class);
+    bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
+    MapBinder<String, String> stacks =
+        MapBinder.newMapBinder(
+            binder(), String.class, String.class, Names.named(StackLoader.CHE_PREDEFINED_STACKS));
+    stacks.addBinding("stacks.json").toInstance("stacks-images");
+    stacks.addBinding("che-in-che.json").toInstance("");
+    bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
+    bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
+    bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
+    bind(org.eclipse.che.api.workspace.server.OutputService.class);
+    bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
+    bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();
+    bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)
+        .asEagerSingleton();
+    bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
+    bind(org.eclipse.che.everrest.ETagResponseFilter.class);
 
-        // temporary solution
-        bind(org.eclipse.che.api.workspace.server.event.RuntimeStatusJsonRpcMessenger.class).asEagerSingleton();
-        bind(org.eclipse.che.api.workspace.server.event.MachineStatusJsonRpcMessenger.class).asEagerSingleton();
-        bind(org.eclipse.che.api.workspace.server.event.ServerStatusJsonRpcMessenger.class).asEagerSingleton();
-        bind(org.eclipse.che.api.workspace.server.event.InstallerLogJsonRpcMessenger.class).asEagerSingleton();
-        bind(org.eclipse.che.api.workspace.server.event.MachineLogJsonRpcMessenger.class).asEagerSingleton();
-        //
+    // temporary solution
+    bind(org.eclipse.che.api.workspace.server.event.RuntimeStatusJsonRpcMessenger.class)
+        .asEagerSingleton();
+    bind(org.eclipse.che.api.workspace.server.event.MachineStatusJsonRpcMessenger.class)
+        .asEagerSingleton();
+    bind(org.eclipse.che.api.workspace.server.event.ServerStatusJsonRpcMessenger.class)
+        .asEagerSingleton();
+    bind(org.eclipse.che.api.workspace.server.event.InstallerLogJsonRpcMessenger.class)
+        .asEagerSingleton();
+    bind(org.eclipse.che.api.workspace.server.event.MachineLogJsonRpcMessenger.class)
+        .asEagerSingleton();
+    //
 
-        bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
-                .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
-        bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
-                .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
-        bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
+    bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
+        .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
+    bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
+        .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
+    bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
-        bind(org.eclipse.che.api.core.notification.WSocketEventBusServer.class);
+    bind(org.eclipse.che.api.core.notification.WSocketEventBusServer.class);
 
-        bind(org.eclipse.che.api.recipe.RecipeLoader.class);
-        Multibinder.newSetBinder(binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
-                   .addBinding().toInstance("predefined-recipes.json");
+    bind(org.eclipse.che.api.recipe.RecipeLoader.class);
+    Multibinder.newSetBinder(
+            binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
+        .addBinding()
+        .toInstance("predefined-recipes.json");
 
-        // installers
-        install(new InstallerModule());
+    // installers
+    install(new InstallerModule());
 
-        Multibinder<Installer> installers = Multibinder.newSetBinder(binder(), Installer.class);
-        installers.addBinding().to(SshInstaller.class);
-        installers.addBinding().to(UnisonInstaller.class);
-        installers.addBinding().to(ExecInstaller.class);
-        installers.addBinding().to(TerminalInstaller.class);
-        installers.addBinding().to(WsInstaller.class);
-        installers.addBinding().to(LSPhpInstaller.class);
-        installers.addBinding().to(LSPythonInstaller.class);
-        installers.addBinding().to(LSJsonInstaller.class);
-        installers.addBinding().to(LSCSharpInstaller.class);
-        installers.addBinding().to(LSTypeScriptInstaller.class);
-        installers.addBinding().to(GitCredentialsInstaller.class);
+    Multibinder<Installer> installers = Multibinder.newSetBinder(binder(), Installer.class);
+    installers.addBinding().to(SshInstaller.class);
+    installers.addBinding().to(UnisonInstaller.class);
+    installers.addBinding().to(ExecInstaller.class);
+    installers.addBinding().to(TerminalInstaller.class);
+    installers.addBinding().to(WsInstaller.class);
+    installers.addBinding().to(LSPhpInstaller.class);
+    installers.addBinding().to(LSPythonInstaller.class);
+    installers.addBinding().to(LSJsonInstaller.class);
+    installers.addBinding().to(LSCSharpInstaller.class);
+    installers.addBinding().to(LSTypeScriptInstaller.class);
+    installers.addBinding().to(GitCredentialsInstaller.class);
 
-        bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
+    bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
-        install(new org.eclipse.che.plugin.activity.inject.WorkspaceActivityModule());
+    install(new org.eclipse.che.plugin.activity.inject.WorkspaceActivityModule());
 
-        install(new org.eclipse.che.api.core.rest.CoreRestModule());
-        install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
-        install(new org.eclipse.che.swagger.deploy.DocsModule());
-        install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
+    install(new org.eclipse.che.api.core.rest.CoreRestModule());
+    install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
+    install(new org.eclipse.che.swagger.deploy.DocsModule());
+    install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
 
-        final Multibinder<MessageBodyAdapter> adaptersMultibinder = Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
-        adaptersMultibinder.addBinding().to(WorkspaceConfigMessageBodyAdapter.class);
-        adaptersMultibinder.addBinding().to(WorkspaceMessageBodyAdapter.class);
-        adaptersMultibinder.addBinding().to(StackMessageBodyAdapter.class);
+    final Multibinder<MessageBodyAdapter> adaptersMultibinder =
+        Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
+    adaptersMultibinder.addBinding().to(WorkspaceConfigMessageBodyAdapter.class);
+    adaptersMultibinder.addBinding().to(WorkspaceMessageBodyAdapter.class);
+    adaptersMultibinder.addBinding().to(StackMessageBodyAdapter.class);
 
-        final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
-        requestInjection(interceptor);
-        bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
+    final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
+    requestInjection(interceptor);
+    bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
 
-        // system components
-        install(new SystemModule());
-        Multibinder.newSetBinder(binder(), ServiceTermination.class)
-                   .addBinding()
-                   .to(org.eclipse.che.api.workspace.server.WorkspaceServiceTermination.class);
-// FIXME: spi
-//        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
-//        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
+    // system components
+    install(new SystemModule());
+    Multibinder.newSetBinder(binder(), ServiceTermination.class)
+        .addBinding()
+        .to(org.eclipse.che.api.workspace.server.WorkspaceServiceTermination.class);
+    // FIXME: spi
+    //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
+    //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
 
-// FIXME: spi
-        install(new DockerInfraModule());
-        install(new LocalDockerModule());
-        install(new OpenShiftInfraModule());
-        bind(RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class).asEagerSingleton();
-    }
+    // FIXME: spi
+    install(new DockerInfraModule());
+    install(new LocalDockerModule());
+    install(new OpenShiftInfraModule());
+    bind(RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class).asEagerSingleton();
+  }
 }

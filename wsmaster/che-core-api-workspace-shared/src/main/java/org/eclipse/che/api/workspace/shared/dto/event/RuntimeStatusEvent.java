@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
@@ -22,41 +22,32 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface RuntimeStatusEvent {
 
-    /**
-     * @return new status
-     */
-    String getStatus();
+  /** @return new status */
+  String getStatus();
 
-    RuntimeStatusEvent withStatus(String status);
+  RuntimeStatusEvent withStatus(String status);
 
-    /**
-     * @return previous status
-     */
-    String getPrevStatus();
+  /** @return previous status */
+  String getPrevStatus();
 
-    RuntimeStatusEvent withPrevStatus(String status);
+  RuntimeStatusEvent withPrevStatus(String status);
 
-    /**
-     * @return runtime identity
-     */
-    RuntimeIdentityDto getIdentity();
+  /** @return runtime identity */
+  RuntimeIdentityDto getIdentity();
 
-    RuntimeStatusEvent withIdentity(RuntimeIdentityDto identity);
+  RuntimeStatusEvent withIdentity(RuntimeIdentityDto identity);
 
-    /**
-     * Error message/log returned by infrastructure in case if it caused runtime failure
-     * Filled only if failed == true
-     */
-    @Nullable
-    String getError();
+  /**
+   * Error message/log returned by infrastructure in case if it caused runtime failure Filled only
+   * if failed == true
+   */
+  @Nullable
+  String getError();
 
-    RuntimeStatusEvent withError(String error);
+  RuntimeStatusEvent withError(String error);
 
-    /**
-     * @return whether Runtime is not workable anymore
-     */
-    boolean isFailed();
+  /** @return whether Runtime is not workable anymore */
+  boolean isFailed();
 
-    RuntimeStatusEvent withFailed(boolean failed);
-
+  RuntimeStatusEvent withFailed(boolean failed);
 }

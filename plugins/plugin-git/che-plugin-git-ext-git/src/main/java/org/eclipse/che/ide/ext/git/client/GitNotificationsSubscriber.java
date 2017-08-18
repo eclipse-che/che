@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,71 +7,73 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client;
+
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
-import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
-
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 /** Subscribes on receiving notifications from git. */
 @Singleton
 public class GitNotificationsSubscriber {
 
-    private final EventBus           eventBus;
-    private final AppContext         appContext;
-    private final RequestTransmitter requestTransmitter;
+  private final EventBus eventBus;
+  private final AppContext appContext;
+  private final RequestTransmitter requestTransmitter;
 
-    @Inject
-    public GitNotificationsSubscriber(EventBus eventBus, AppContext appContext, RequestTransmitter requestTransmitter) {
-        this.eventBus = eventBus;
-        this.appContext = appContext;
-        this.requestTransmitter = requestTransmitter;
+  @Inject
+  public GitNotificationsSubscriber(
+      EventBus eventBus, AppContext appContext, RequestTransmitter requestTransmitter) {
+    this.eventBus = eventBus;
+    this.appContext = appContext;
+    this.requestTransmitter = requestTransmitter;
+  }
+
+  void subscribe() {
+    eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> initialize());
+
+    if (appContext.getWorkspace().getStatus() == RUNNING) {
+      initialize();
     }
+  }
 
-    void subscribe() {
-        eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> initialize());
+  private void initialize() {
+    initializeGitCheckoutWatcher();
+    initializeGitChangeWatcher();
+    initializeGitIndexWatcher();
+  }
 
-        if (appContext.getWorkspace().getStatus() == RUNNING) {
-            initialize();
-        }
-    }
+  private void initializeGitCheckoutWatcher() {
+    requestTransmitter
+        .newRequest()
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+        .methodName("track/git-checkout")
+        .noParams()
+        .sendAndSkipResult();
+  }
 
-    private void initialize() {
-        initializeGitCheckoutWatcher();
-        initializeGitChangeWatcher();
-        initializeGitIndexWatcher();
-    }
+  private void initializeGitChangeWatcher() {
+    requestTransmitter
+        .newRequest()
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+        .methodName("track/git-change")
+        .noParams()
+        .sendAndSkipResult();
+  }
 
-    private void initializeGitCheckoutWatcher() {
-        requestTransmitter.newRequest()
-                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                          .methodName("track/git-checkout")
-                          .noParams()
-                          .sendAndSkipResult();
-    }
-
-    private void initializeGitChangeWatcher() {
-        requestTransmitter.newRequest()
-                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                          .methodName("track/git-change")
-                          .noParams()
-                          .sendAndSkipResult();
-    }
-
-    private void initializeGitIndexWatcher() {
-        requestTransmitter.newRequest()
-                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                          .methodName("track/git-index")
-                          .noParams()
-                          .sendAndSkipResult();
-    }
+  private void initializeGitIndexWatcher() {
+    requestTransmitter
+        .newRequest()
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+        .methodName("track/git-index")
+        .noParams()
+        .sendAndSkipResult();
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.project;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -24,13 +31,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Unit test for {@link ProjectServiceClient}.
  *
@@ -39,38 +39,31 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectServiceClientTest {
 
-    @Mock
-    private LoaderFactory          loaderFactory;
-    @Mock
-    private AsyncRequestFactory    asyncRequestFactory;
-    @Mock
-    private DtoFactory             dtoFactory;
-    @Mock
-    private DtoUnmarshallerFactory dtoUnmarshallerFactory;
-    @Mock
-    private AppContext             appContext;
+  @Mock private LoaderFactory loaderFactory;
+  @Mock private AsyncRequestFactory asyncRequestFactory;
+  @Mock private DtoFactory dtoFactory;
+  @Mock private DtoUnmarshallerFactory dtoUnmarshallerFactory;
+  @Mock private AppContext appContext;
 
-    private ProjectServiceClient projectServiceClient;
+  private ProjectServiceClient projectServiceClient;
 
-    @Before
-    public void setUp() throws Exception {
-        projectServiceClient = new ProjectServiceClient(loaderFactory,
-                                                        asyncRequestFactory,
-                                                        dtoFactory,
-                                                        dtoUnmarshallerFactory,
-                                                        appContext);
-        when(appContext.getWsAgentServerApiEndpoint()).thenReturn("");
-    }
+  @Before
+  public void setUp() throws Exception {
+    projectServiceClient =
+        new ProjectServiceClient(
+            loaderFactory, asyncRequestFactory, dtoFactory, dtoUnmarshallerFactory, appContext);
+    when(appContext.getWsAgentServerApiEndpoint()).thenReturn("");
+  }
 
-    @Test
-    public void testShouldNotSetupLoaderForTheGetTreeMethod() throws Exception {
-        AsyncRequest asyncRequest = mock(AsyncRequest.class);
+  @Test
+  public void testShouldNotSetupLoaderForTheGetTreeMethod() throws Exception {
+    AsyncRequest asyncRequest = mock(AsyncRequest.class);
 
-        when(asyncRequestFactory.createGetRequest(anyString())).thenReturn(asyncRequest);
-        when(asyncRequest.header(anyString(), anyString())).thenReturn(asyncRequest);
+    when(asyncRequestFactory.createGetRequest(anyString())).thenReturn(asyncRequest);
+    when(asyncRequest.header(anyString(), anyString())).thenReturn(asyncRequest);
 
-        projectServiceClient.getTree(Path.EMPTY, 1, true);
+    projectServiceClient.getTree(Path.EMPTY, 1, true);
 
-        verify(asyncRequest, never()).loader(any(AsyncRequestLoader.class)); //see CHE-3467
-    }
+    verify(asyncRequest, never()).loader(any(AsyncRequestLoader.class)); //see CHE-3467
+  }
 }

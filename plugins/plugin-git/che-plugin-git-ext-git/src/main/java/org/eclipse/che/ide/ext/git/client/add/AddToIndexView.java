@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.add;
 
 import org.eclipse.che.ide.api.mvp.View;
-
 
 /**
  * The view of {@link AddToIndexPresenter}.
@@ -19,37 +18,39 @@ import org.eclipse.che.ide.api.mvp.View;
  * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
  */
 public interface AddToIndexView extends View<AddToIndexView.ActionDelegate> {
-    /** Needs for delegate some function into CloneRepository view. */
-    interface ActionDelegate {
-        /** Performs any actions appropriate in response to the user having pressed the Add button. */
-        void onAddClicked();
-
-        /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
-        void onCancelClicked();
-    }
+  /** Needs for delegate some function into CloneRepository view. */
+  interface ActionDelegate {
+    /** Performs any actions appropriate in response to the user having pressed the Add button. */
+    void onAddClicked();
 
     /**
-     * Set content into message field.
-     *
-     * @param htmlMessage
-     *         content of the message in html format
+     * Performs any actions appropriate in response to the user having pressed the Cancel button.
      */
-    void setMessage(String htmlMessage);
+    void onCancelClicked();
+  }
 
-    /** @return <code>true</code> if new file must be added to index, and <code>false</code> otherwise */
-    boolean isUpdated();
+  /**
+   * Set content into message field.
+   *
+   * @param htmlMessage content of the message in html format
+   */
+  void setMessage(String htmlMessage);
 
-    /**
-     * Set state of add new file.
-     *
-     * @param isUpdated
-     *         <code>true</code> to add new file to index, <code>false</code> don't do it
-     */
-    void setUpdated(boolean isUpdated);
+  /**
+   * @return <code>true</code> if new file must be added to index, and <code>false</code> otherwise
+   */
+  boolean isUpdated();
 
-    /** Close dialog. */
-    void close();
+  /**
+   * Set state of add new file.
+   *
+   * @param isUpdated <code>true</code> to add new file to index, <code>false</code> don't do it
+   */
+  void setUpdated(boolean isUpdated);
 
-    /** Show dialog. */
-    void showDialog();
+  /** Close dialog. */
+  void close();
+
+  /** Show dialog. */
+  void showDialog();
 }

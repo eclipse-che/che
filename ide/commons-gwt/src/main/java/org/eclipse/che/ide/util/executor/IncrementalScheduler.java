@@ -17,22 +17,22 @@ package org.eclipse.che.ide.util.executor;
 /** A scheduler that can incrementally run a task. */
 public interface IncrementalScheduler {
 
-    public interface Task {
-        /** @return true if the task needs to continue */
-        boolean run(int workAmount);
-    }
+  public interface Task {
+    /** @return true if the task needs to continue */
+    boolean run(int workAmount);
+  }
 
-    public void schedule(Task worker);
+  public void schedule(Task worker);
 
-    public void cancel();
+  public void cancel();
 
-    public void pause();
+  public void pause();
 
-    public void resume();
+  public void resume();
 
-    public boolean isPaused();
+  public boolean isPaused();
 
-    public boolean isBusy();
+  public boolean isBusy();
 
-    public void teardown();
+  public void teardown();
 }
