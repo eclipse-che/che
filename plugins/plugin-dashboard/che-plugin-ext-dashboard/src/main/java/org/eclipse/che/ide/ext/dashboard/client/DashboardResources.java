@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.dashboard.client;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
-
 /**
  * Dashboard extension resources (css styles, images).
  *
