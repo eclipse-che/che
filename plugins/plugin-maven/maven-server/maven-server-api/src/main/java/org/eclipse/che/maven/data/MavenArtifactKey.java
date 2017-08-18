@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.maven.data;
 
 import java.io.Serializable;
@@ -18,57 +18,58 @@ import java.util.Objects;
  *
  * @author Evgen Vidolob
  */
-public class MavenArtifactKey implements Serializable{
-    private static final long serialVersionUID = 1L;
+public class MavenArtifactKey implements Serializable {
+  private static final long serialVersionUID = 1L;
 
-    private final String groupId;
-    private final String artifactId;
-    private final String version;
-    private final String packaging;
-    private final String classifier;
+  private final String groupId;
+  private final String artifactId;
+  private final String version;
+  private final String packaging;
+  private final String classifier;
 
-    public MavenArtifactKey(String groupId, String artifactId, String version, String packaging, String classifier) {
-        this.groupId = groupId;
-        this.artifactId = artifactId;
-        this.version = version;
-        this.packaging = packaging;
-        this.classifier = classifier;
-    }
+  public MavenArtifactKey(
+      String groupId, String artifactId, String version, String packaging, String classifier) {
+    this.groupId = groupId;
+    this.artifactId = artifactId;
+    this.version = version;
+    this.packaging = packaging;
+    this.classifier = classifier;
+  }
 
-    public String getGroupId() {
-        return groupId;
-    }
+  public String getGroupId() {
+    return groupId;
+  }
 
-    public String getArtifactId() {
-        return artifactId;
-    }
+  public String getArtifactId() {
+    return artifactId;
+  }
 
-    public String getVersion() {
-        return version;
-    }
+  public String getVersion() {
+    return version;
+  }
 
-    public String getPackaging() {
-        return packaging;
-    }
+  public String getPackaging() {
+    return packaging;
+  }
 
-    public String getClassifier() {
-        return classifier;
-    }
+  public String getClassifier() {
+    return classifier;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MavenArtifactKey that = (MavenArtifactKey)o;
-        return Objects.equals(groupId, that.groupId) &&
-               Objects.equals(artifactId, that.artifactId) &&
-               Objects.equals(version, that.version) &&
-               Objects.equals(packaging, that.packaging) &&
-               Objects.equals(classifier, that.classifier);
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    MavenArtifactKey that = (MavenArtifactKey) o;
+    return Objects.equals(groupId, that.groupId)
+        && Objects.equals(artifactId, that.artifactId)
+        && Objects.equals(version, that.version)
+        && Objects.equals(packaging, that.packaging)
+        && Objects.equals(classifier, that.classifier);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(groupId, artifactId, version, packaging, classifier);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(groupId, artifactId, version, packaging, classifier);
+  }
 }

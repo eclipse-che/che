@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.editor.keymap;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -19,11 +19,10 @@ import com.google.gwt.event.shared.EventHandler;
  */
 public interface KeymapChangeHandler extends EventHandler {
 
-    /**
-     * Action triggered by the event.
-     *
-     * @param event
-     *         the event
-     */
-    void onKeymapChanged(KeymapChangeEvent event);
+  /**
+   * Action triggered by the event.
+   *
+   * @param event the event
+   */
+  void onKeymapChanged(KeymapChangeEvent event);
 }

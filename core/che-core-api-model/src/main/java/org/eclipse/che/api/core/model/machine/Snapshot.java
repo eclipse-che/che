@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.model.machine;
 
 /**
@@ -18,40 +18,26 @@ package org.eclipse.che.api.core.model.machine;
  */
 public interface Snapshot {
 
-    /**
-     * Unique identifier of snapshot
-     */
-    String getId();
+  /** Unique identifier of snapshot */
+  String getId();
 
-    /**
-     * Type of the instance implementation, e.g. docker
-     */
-    String getType();
+  /** Type of the instance implementation, e.g. docker */
+  String getType();
 
-    /**
-     * Creation date of the snapshot
-     */
-    long getCreationDate();
+  /** Creation date of the snapshot */
+  long getCreationDate();
 
-    boolean isDev();
+  boolean isDev();
 
-    /**
-     * Description of the snapshot
-     */
-    String getDescription();
+  /** Description of the snapshot */
+  String getDescription();
 
-    /**
-     * Id of workspace which machines is bound to snapshot
-     */
-    String getWorkspaceId();
+  /** Id of workspace which machines is bound to snapshot */
+  String getWorkspaceId();
 
-    /**
-     * Returns name of bound to this snapshot machine
-     */
-    String getMachineName();
+  /** Returns name of bound to this snapshot machine */
+  String getMachineName();
 
-    /**
-     * Returns name of environment which machine belongs to
-     */
-    String getEnvName();
+  /** Returns name of environment which machine belongs to */
+  String getEnvName();
 }

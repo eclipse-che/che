@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.server;
 
 import javax.ws.rs.WebApplicationException;
@@ -20,15 +20,15 @@ import javax.ws.rs.core.Response;
  * @author andrew00x
  */
 public final class HtmlErrorFormatter {
-    public static void sendErrorAsHTML(Exception e) {
-        // GWT framework (used on client side) requires result in HTML format if use HTML forms.
-        throw new WebApplicationException(Response.ok(formatAsHtml(e.getMessage()), MediaType.TEXT_HTML).build());
-    }
+  public static void sendErrorAsHTML(Exception e) {
+    // GWT framework (used on client side) requires result in HTML format if use HTML forms.
+    throw new WebApplicationException(
+        Response.ok(formatAsHtml(e.getMessage()), MediaType.TEXT_HTML).build());
+  }
 
-    private static String formatAsHtml(String message) {
-        return String.format("<pre>message: %s</pre>", message);
-    }
+  private static String formatAsHtml(String message) {
+    return String.format("<pre>message: %s</pre>", message);
+  }
 
-    private HtmlErrorFormatter() {
-    }
+  private HtmlErrorFormatter() {}
 }

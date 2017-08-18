@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.vfs.watcher;
 
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.nio.file.Path;
+import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,90 +26,73 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.nio.file.Path;
-import java.util.function.Consumer;
-
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * Tests for {@link FileWatcherByPathValue}
- */
+/** Tests for {@link FileWatcherByPathValue} */
 @RunWith(MockitoJUnitRunner.class)
 public class FileWatcherByPathValueTest {
-    private static final int    OPERATION_ID = 0;
-    private static final String FILE_NAME    = "name.ext";
+  private static final int OPERATION_ID = 0;
+  private static final String FILE_NAME = "name.ext";
 
-    @Rule
-    public TemporaryFolder rootFolder = new TemporaryFolder();
+  @Rule public TemporaryFolder rootFolder = new TemporaryFolder();
 
-    @Mock
-    FileWatcherEventHandler handler;
-    @Mock
-    FileWatcherService      service;
-    @InjectMocks
-    FileWatcherByPathValue  watcher;
+  @Mock FileWatcherEventHandler handler;
+  @Mock FileWatcherService service;
+  @InjectMocks FileWatcherByPathValue watcher;
 
-    @Mock
-    Consumer<String> create;
-    @Mock
-    Consumer<String> modify;
-    @Mock
-    Consumer<String> delete;
+  @Mock Consumer<String> create;
+  @Mock Consumer<String> modify;
+  @Mock Consumer<String> delete;
 
-    Path root;
+  Path root;
 
-    @Before
-    public void setUp() throws Exception {
-        root = rootFolder.getRoot().toPath();
-    }
+  @Before
+  public void setUp() throws Exception {
+    root = rootFolder.getRoot().toPath();
+  }
 
-    @Test
-    public void shouldRegisterInServiceWhenWatchFile() throws Exception {
-        Path path = root.resolve(FILE_NAME);
+  @Test
+  public void shouldRegisterInServiceWhenWatchFile() throws Exception {
+    Path path = root.resolve(FILE_NAME);
 
-        watcher.watch(path, create, modify, delete);
+    watcher.watch(path, create, modify, delete);
 
-        verify(service).register(path.getParent());
-    }
+    verify(service).register(path.getParent());
+  }
 
-    @Test
-    public void shouldRegisterInServiceWhenWatchDirectory() throws Exception {
-        Path path = root.resolve(FILE_NAME);
+  @Test
+  public void shouldRegisterInServiceWhenWatchDirectory() throws Exception {
+    Path path = root.resolve(FILE_NAME);
 
-        watcher.watch(path.getParent(), create, modify, delete);
+    watcher.watch(path.getParent(), create, modify, delete);
 
-        verify(service).register(path.getParent());
-    }
+    verify(service).register(path.getParent());
+  }
 
-    @Test
-    public void shouldRegisterInHandlerWhenWatch() throws Exception {
-        Path path = root.resolve(FILE_NAME);
+  @Test
+  public void shouldRegisterInHandlerWhenWatch() throws Exception {
+    Path path = root.resolve(FILE_NAME);
 
-        watcher.watch(path, create, modify, delete);
+    watcher.watch(path, create, modify, delete);
 
-        verify(handler).register(path, create, modify, delete);
-    }
+    verify(handler).register(path, create, modify, delete);
+  }
 
-    @Test
-    public void shouldUnRegisterInServiceWhenUnWatch() throws Exception {
-        Path path = mock(Path.class);
-        when(handler.unRegister(anyInt())).thenReturn(path);
+  @Test
+  public void shouldUnRegisterInServiceWhenUnWatch() throws Exception {
+    Path path = mock(Path.class);
+    when(handler.unRegister(anyInt())).thenReturn(path);
 
-        watcher.unwatch(OPERATION_ID);
+    watcher.unwatch(OPERATION_ID);
 
-        verify(service).unRegister(path);
-    }
+    verify(service).unRegister(path);
+  }
 
-    @Test
-    public void shouldUnRegisterInHandlerWhenUnWatch() throws Exception {
-        Path path = mock(Path.class);
-        when(handler.unRegister(anyInt())).thenReturn(path);
+  @Test
+  public void shouldUnRegisterInHandlerWhenUnWatch() throws Exception {
+    Path path = mock(Path.class);
+    when(handler.unRegister(anyInt())).thenReturn(path);
 
-        watcher.unwatch(OPERATION_ID);
+    watcher.unwatch(OPERATION_ID);
 
-        verify(handler).unRegister(OPERATION_ID);
-    }
+    verify(handler).unRegister(OPERATION_ID);
+  }
 }

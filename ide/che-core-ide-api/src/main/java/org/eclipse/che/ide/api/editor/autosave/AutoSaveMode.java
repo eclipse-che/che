@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.editor.autosave;
 
 import org.eclipse.che.ide.api.editor.document.UseDocumentHandle;
@@ -21,45 +21,41 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
  */
 public interface AutoSaveMode extends DocumentChangedHandler, UseDocumentHandle {
 
+  /** Installs auto save mode on the given editor. */
+  void install(TextEditor editor);
+
+  /** Removes auto save mode from editor. */
+  void uninstall();
+
+  /** Suspends auto save mode for editor content. */
+  void suspend();
+
+  /**
+   * Resumes auto save mode for editor content and sets mode corresponding to 'Enable Autosave'
+   * option in editor preferences.
+   */
+  void resume();
+
+  /** Return true if auto save mode is activated, false otherwise. */
+  boolean isActivated();
+
+  enum Mode {
     /**
-     * Installs auto save mode on the given editor.
+     * The state when auto save mode of editor content is turned on. Corresponds to the case when
+     * the 'Enable Autosave' option in editor preferences is enabled.
      */
-    void install(TextEditor editor);
+    ACTIVATED,
 
     /**
-     * Removes auto save mode from editor.
+     * Corresponds to the state when auto save mode is suspended for processing some operations
+     * (java refactoring, for example)
      */
-    void uninstall();
+    SUSPENDED,
 
     /**
-     * Suspends auto save mode for editor content.
+     * The state when auto save mode of editor content is turned off. Corresponds to the case when
+     * the 'Enable Autosave' option in editor preferences is disabled.
      */
-    void suspend();
-
-    /**
-     * Resumes auto save mode for editor content and sets mode corresponding to 'Enable Autosave' option in editor preferences.
-     */
-    void resume();
-
-    /**
-     * Return true if auto save mode is activated, false otherwise.
-     */
-    boolean isActivated();
-
-    enum Mode {
-        /**
-         * The state when auto save mode of editor content is turned on.
-         * Corresponds to the case when the 'Enable Autosave' option in editor preferences is enabled.
-         */
-        ACTIVATED,
-
-        /** Corresponds to the state when auto save mode is suspended for processing some operations (java refactoring, for example) */
-        SUSPENDED,
-
-        /**
-         * The state when auto save mode of editor content is turned off.
-         * Corresponds to the case when the 'Enable Autosave' option in editor preferences is disabled.
-         */
-        DEACTIVATED
-    }
+    DEACTIVATED
+  }
 }

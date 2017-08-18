@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,36 +7,32 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.promises.client.js;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * The executor is the conclusion callback, a js function with two parameters, usually named
- * resolve and reject. The first argument fulfills the promise, the second argument rejects it.
+ * The executor is the conclusion callback, a js function with two parameters, usually named resolve
+ * and reject. The first argument fulfills the promise, the second argument rejects it.
  *
- * @param <V>
- *         the type of the promised value
+ * @param <V> the type of the promised value
  * @author Mickaël Leduque
  * @author Artem Zatsarynnyi
  */
 public class Executor<V> extends JavaScriptObject {
 
-    /** JSO mandated protected constructor. */
-    protected Executor() {
-    }
+  /** JSO mandated protected constructor. */
+  protected Executor() {}
 
-    /**
-     * Creates an executor.
-     *
-     * @param executorBody
-     *         the body of the executor
-     * @param <V>
-     *         the fulfillment value
-     * @return the new executor
-     */
-    public static final native <V> Executor<V> create(ExecutorBody<V> executorBody) /*-{
+  /**
+   * Creates an executor.
+   *
+   * @param executorBody the body of the executor
+   * @param <V> the fulfillment value
+   * @return the new executor
+   */
+  public static final native <V> Executor<V> create(ExecutorBody<V> executorBody) /*-{
         return function (resolve, reject) {
             try {
                 executorBody.@org.eclipse.che.api.promises.client.js.Executor.ExecutorBody::apply(*)(resolve, reject);
@@ -46,23 +42,20 @@ public class Executor<V> extends JavaScriptObject {
         }
     }-*/;
 
+  /**
+   * The definition of an executor.
+   *
+   * @param <V> the type of the fulfillment value
+   */
+  public interface ExecutorBody<V> {
     /**
-     * The definition of an executor.
+     * The executor describes what the promise must do in order to be fulfilled. It will execute
+     * some code to process or retrieve some value, then use the {@code resolve} or {@code reject}
+     * callback to conclude.
      *
-     * @param <V>
-     *         the type of the fulfillment value
+     * @param resolve what to do on success
+     * @param reject what to do on failure
      */
-    public interface ExecutorBody<V> {
-        /**
-         * The executor describes what the promise must do in order to be fulfilled.
-         * It will execute some code to process or retrieve some value,
-         * then use the {@code resolve} or {@code reject} callback to conclude.
-         *
-         * @param resolve
-         *         what to do on success
-         * @param reject
-         *         what to do on failure
-         */
-        void apply(ResolveFunction<V> resolve, RejectFunction reject);
-    }
+    void apply(ResolveFunction<V> resolve, RejectFunction reject);
+  }
 }

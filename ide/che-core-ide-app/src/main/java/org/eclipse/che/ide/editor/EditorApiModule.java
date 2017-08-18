@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
-
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorProvider;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
@@ -59,60 +58,69 @@ import org.eclipse.che.ide.util.executor.UserActivityManager;
  */
 public class EditorApiModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        bind(EditorAgent.class).to(EditorAgentImpl.class).in(Singleton.class);
+  @Override
+  protected void configure() {
+    bind(EditorAgent.class).to(EditorAgentImpl.class).in(Singleton.class);
 
-        bind(AutoSaveMode.class).to(AutoSaveModeImpl.class);
+    bind(AutoSaveMode.class).to(AutoSaveModeImpl.class);
 
-        bind(UserActivityManager.class).in(Singleton.class);
+    bind(UserActivityManager.class).in(Singleton.class);
 
-        bind(EditorRegistry.class).to(EditorRegistryImpl.class).in(Singleton.class);
+    bind(EditorRegistry.class).to(EditorRegistryImpl.class).in(Singleton.class);
 
-        bind(EditorPartStackView.class);
+    bind(EditorPartStackView.class);
 
-        bind(EditorContentSynchronizer.class).to(EditorContentSynchronizerImpl.class).in(Singleton.class);
-        bind(EditorGroupSynchronization.class).to(EditorGroupSynchronizationImpl.class);
+    bind(EditorContentSynchronizer.class)
+        .to(EditorContentSynchronizerImpl.class)
+        .in(Singleton.class);
+    bind(EditorGroupSynchronization.class).to(EditorGroupSynchronizationImpl.class);
 
-        // the text editor view
-        bind(TextEditorPartView.class).to(TextEditorPartViewImpl.class);
+    // the text editor view
+    bind(TextEditorPartView.class).to(TextEditorPartViewImpl.class);
 
-        // Bind the file type identifier
-        bind(FileTypeIdentifier.class).to(MultipleMethodFileIdentifier.class);
+    // Bind the file type identifier
+    bind(FileTypeIdentifier.class).to(MultipleMethodFileIdentifier.class);
 
-        // bind the document storage
-        bind(DocumentStorage.class);
+    // bind the document storage
+    bind(DocumentStorage.class);
 
-        // bind the default editor
-        bind(EditorProvider.class).annotatedWith(Names.named("defaultEditor")).to(DefaultTextEditorProvider.class);
+    // bind the default editor
+    bind(EditorProvider.class)
+        .annotatedWith(Names.named("defaultEditor"))
+        .to(DefaultTextEditorProvider.class);
 
-        // bind the info panel
-        bind(InfoPanel.class);
+    // bind the info panel
+    bind(InfoPanel.class);
 
-        // bind the document position model
-        bind(DocumentPositionMap.class).to(DocumentPositionMapImpl.class);
+    // bind the document position model
+    bind(DocumentPositionMap.class).to(DocumentPositionMapImpl.class);
 
-        // bind the reconciler
-        install(new GinFactoryModuleBuilder()
-                        .implement(Reconciler.class, DefaultReconciler.class)
-                        .build(ReconcilerFactory.class));
+    // bind the reconciler
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(Reconciler.class, DefaultReconciler.class)
+            .build(ReconcilerFactory.class));
 
-        // bind the code assistant and quick assistant
-        install(new GinFactoryModuleBuilder()
-                        .implement(CodeAssistant.class, CodeAssistantImpl.class)
-                        .build(CodeAssistantFactory.class));
-        install(new GinFactoryModuleBuilder()
-                        .implement(QuickAssistAssistant.class, QuickAssistAssistantImpl.class)
-                        .build(QuickAssistantFactory.class));
+    // bind the code assistant and quick assistant
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(CodeAssistant.class, CodeAssistantImpl.class)
+            .build(CodeAssistantFactory.class));
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(QuickAssistAssistant.class, QuickAssistAssistantImpl.class)
+            .build(QuickAssistantFactory.class));
 
-        // bind the quick assist widget factory
-        install(new GinFactoryModuleBuilder().build(QuickAssistWidgetFactory.class));
+    // bind the quick assist widget factory
+    install(new GinFactoryModuleBuilder().build(QuickAssistWidgetFactory.class));
 
-        install(new GinFactoryModuleBuilder().build(EditorTabContextMenuFactory.class));
+    install(new GinFactoryModuleBuilder().build(EditorTabContextMenuFactory.class));
 
-        install(new GinFactoryModuleBuilder().build(RecentFileActionFactory.class));
-        bind(RecentFileList.class).to(RecentFileStore.class).in(Singleton.class);
+    install(new GinFactoryModuleBuilder().build(RecentFileActionFactory.class));
+    bind(RecentFileList.class).to(RecentFileStore.class).in(Singleton.class);
 
-        bind(EditorWorkingCopySynchronizer.class).to(EditorWorkingCopySynchronizerImpl.class).in(Singleton.class);
-    }
+    bind(EditorWorkingCopySynchronizer.class)
+        .to(EditorWorkingCopySynchronizerImpl.class)
+        .in(Singleton.class);
+  }
 }

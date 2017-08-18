@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.editor;
 
 import com.google.gwt.i18n.client.Messages;
@@ -19,96 +19,97 @@ import com.google.gwt.i18n.client.Messages;
  */
 public interface EditorLocalizationConstants extends Messages {
 
-    @DefaultMessage("Close")
-    String askWindowCloseTitle();
+  @DefaultMessage("Close")
+  String askWindowCloseTitle();
 
-    @DefaultMessage("{0} has been modified. Save changes?")
-    String askWindowSaveChangesMessage(String name);
+  @DefaultMessage("{0} has been modified. Save changes?")
+  String askWindowSaveChangesMessage(String name);
 
-    @DefaultMessage("An error occurred while initializing the editor.\nReloading the page may be necessary.")
-    String editorInitErrorMessage();
+  @DefaultMessage(
+      "An error occurred while initializing the editor.\nReloading the page may be necessary.")
+  String editorInitErrorMessage();
 
-    @DefaultMessage("An error occurred while loading the file.")
-    String editorFileErrorMessage();
+  @DefaultMessage("An error occurred while loading the file.")
+  String editorFileErrorMessage();
 
-    @DefaultMessage("Finishing editor initialization")
-    String waitEditorInitMessage();
+  @DefaultMessage("Finishing editor initialization")
+  String waitEditorInitMessage();
 
-    @DefaultMessage("Failed to update content of file(s)")
-    String failedToUpdateContentOfFiles();
+  @DefaultMessage("Failed to update content of file(s)")
+  String failedToUpdateContentOfFiles();
 
-    @DefaultMessage("Tabs")
-    String tabsPropertiesSection();
+  @DefaultMessage("Tabs")
+  String tabsPropertiesSection();
 
-    @DefaultMessage("Edit")
-    String tabsEditSection();
+  @DefaultMessage("Edit")
+  String tabsEditSection();
 
-    @DefaultMessage("Typing")
-    String typingPropertiesSection();
+  @DefaultMessage("Typing")
+  String typingPropertiesSection();
 
-    @DefaultMessage("White spaces")
-    String whiteSpacesPropertiesSection();
+  @DefaultMessage("White spaces")
+  String whiteSpacesPropertiesSection();
 
-    @DefaultMessage("Rulers")
-    String rulersPropertiesSection();
+  @DefaultMessage("Rulers")
+  String rulersPropertiesSection();
 
-    @DefaultMessage("Language tools")
-    String languageToolsPropertiesSection();
+  @DefaultMessage("Language tools")
+  String languageToolsPropertiesSection();
 
-    @DefaultMessage("Expand Tab")
-    String propertyExpandTab();
+  @DefaultMessage("Expand Tab")
+  String propertyExpandTab();
 
-    @DefaultMessage("Tab Size")
-    String propertyTabSize();
+  @DefaultMessage("Tab Size")
+  String propertyTabSize();
 
-    @DefaultMessage("Soft Wrap")
-    String propertySoftWrap();
+  @DefaultMessage("Soft Wrap")
+  String propertySoftWrap();
 
-    @DefaultMessage("Enable Autosave")
-    String propertyAutoSave();
+  @DefaultMessage("Enable Autosave")
+  String propertyAutoSave();
 
-    @DefaultMessage("Autopair (Parentheses)")
-    String propertyAutoPairParentheses();
+  @DefaultMessage("Autopair (Parentheses)")
+  String propertyAutoPairParentheses();
 
-    @DefaultMessage("Autopair Braces")
-    String propertyAutoPairBraces();
+  @DefaultMessage("Autopair Braces")
+  String propertyAutoPairBraces();
 
-    @DefaultMessage("Autopair [Square] Brackets")
-    String propertyAutoPairSquareBrackets();
+  @DefaultMessage("Autopair [Square] Brackets")
+  String propertyAutoPairSquareBrackets();
 
-    @DefaultMessage("Autopair <Angle> Brackets")
-    String propertyAutoPairAngelBrackets();
+  @DefaultMessage("Autopair <Angle> Brackets")
+  String propertyAutoPairAngelBrackets();
 
-    @DefaultMessage("Autopair \"Quotations\"")
-    String propertyAutoPairQuotations();
+  @DefaultMessage("Autopair \"Quotations\"")
+  String propertyAutoPairQuotations();
 
-    @DefaultMessage("Autocomplete /** Block Comments */")
-    String propertyAutoCompleteComments();
+  @DefaultMessage("Autocomplete /** Block Comments */")
+  String propertyAutoCompleteComments();
 
-    @DefaultMessage("Smart Indentation")
-    String propertySmartIndentation();
+  @DefaultMessage("Smart Indentation")
+  String propertySmartIndentation();
 
-    @DefaultMessage("Show Whitespace Characters")
-    String propertyShowWhitespaces();
+  @DefaultMessage("Show Whitespace Characters")
+  String propertyShowWhitespaces();
 
-    @DefaultMessage("Show Annotation Ruler")
-    String propertyShowAnnotationRuler();
+  @DefaultMessage("Show Annotation Ruler")
+  String propertyShowAnnotationRuler();
 
-    @DefaultMessage("Show Line Number Ruler")
-    String propertyShowLineNumberRuler();
+  @DefaultMessage("Show Line Number Ruler")
+  String propertyShowLineNumberRuler();
 
-    @DefaultMessage("Show Folding Ruler")
-    String propertyShowFoldingRuler();
+  @DefaultMessage("Show Folding Ruler")
+  String propertyShowFoldingRuler();
 
-    @DefaultMessage("Show Overview Ruler")
-    String propertyShowOverviewRuler();
+  @DefaultMessage("Show Overview Ruler")
+  String propertyShowOverviewRuler();
 
-    @DefaultMessage("Show Zoom Ruler")
-    String propertyShowZoomRuler();
+  @DefaultMessage("Show Zoom Ruler")
+  String propertyShowZoomRuler();
 
-    @DefaultMessage("Show Occurrences")
-    String propertyShowOccurrences();
+  @DefaultMessage("Show Occurrences")
+  String propertyShowOccurrences();
 
-    @DefaultMessage("Show Content Assist automatically")
-    String propertyShowContentAssistAutomatically();
+  @DefaultMessage("Show Content Assist automatically")
+  String propertyShowContentAssistAutomatically();
 }

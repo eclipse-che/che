@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.model.factory;
 
 import java.util.Map;
@@ -19,13 +19,9 @@ import java.util.Map;
  */
 public interface Action {
 
-    /**
-     * Returns the IDE specific identifier of action e.g. ('openFile', 'editFile')
-     */
-    String getId();
+  /** Returns the IDE specific identifier of action e.g. ('openFile', 'editFile') */
+  String getId();
 
-    /**
-     * Returns properties of this action instance
-     */
-    Map<String, String> getProperties();
+  /** Returns properties of this action instance */
+  Map<String, String> getProperties();
 }

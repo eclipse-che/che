@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.multisplitpanel.menu;
 
 import org.eclipse.che.ide.api.mvp.View;
@@ -19,15 +19,15 @@ import org.eclipse.che.ide.api.mvp.View;
  */
 public interface MenuItem<T> extends View<MenuItem.ActionDelegate> {
 
-    /** Returns associated data. */
-    T getData();
+  /** Returns associated data. */
+  T getData();
 
-    interface ActionDelegate {
+  interface ActionDelegate {
 
-        /** Called when {@code menuItem} has been selected. */
-        void onItemSelected(MenuItem menuItem);
+    /** Called when {@code menuItem} has been selected. */
+    void onItemSelected(MenuItem menuItem);
 
-        /** Called when {@code menuItem} is going to be closed. */
-        void onItemClosing(MenuItem menuItem);
-    }
+    /** Called when {@code menuItem} is going to be closed. */
+    void onItemClosing(MenuItem menuItem);
+  }
 }

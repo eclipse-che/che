@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.lsp;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.plugin.maven.server.core.reconcile.PomReconciler;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.CodeLens;
@@ -38,110 +40,107 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
 public class MavenTextDocumentService implements TextDocumentService {
-    private PomReconciler reconciler;
+  private PomReconciler reconciler;
 
-    public MavenTextDocumentService(PomReconciler reconciler) {
-        this.reconciler= reconciler;
-    }
+  public MavenTextDocumentService(PomReconciler reconciler) {
+    this.reconciler = reconciler;
+  }
 
-    @Override
-    public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(TextDocumentPositionParams position) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(
+      TextDocumentPositionParams position) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<CompletionItem> resolveCompletionItem(CompletionItem unresolved) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<CompletionItem> resolveCompletionItem(CompletionItem unresolved) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<Hover> hover(TextDocumentPositionParams position) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<Hover> hover(TextDocumentPositionParams position) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<SignatureHelp> signatureHelp(TextDocumentPositionParams position) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<SignatureHelp> signatureHelp(TextDocumentPositionParams position) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<List<? extends Location>> definition(TextDocumentPositionParams position) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<List<? extends Location>> definition(
+      TextDocumentPositionParams position) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<List<? extends Location>> references(ReferenceParams params) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<List<? extends Location>> references(ReferenceParams params) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<List<? extends DocumentHighlight>> documentHighlight(TextDocumentPositionParams position) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<List<? extends DocumentHighlight>> documentHighlight(
+      TextDocumentPositionParams position) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<List<? extends SymbolInformation>> documentSymbol(DocumentSymbolParams params) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<List<? extends SymbolInformation>> documentSymbol(
+      DocumentSymbolParams params) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<List<? extends Command>> codeAction(CodeActionParams params) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<List<? extends Command>> codeAction(CodeActionParams params) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<List<? extends CodeLens>> codeLens(CodeLensParams params) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<List<? extends CodeLens>> codeLens(CodeLensParams params) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<CodeLens> resolveCodeLens(CodeLens unresolved) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<CodeLens> resolveCodeLens(CodeLens unresolved) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<List<? extends TextEdit>> formatting(DocumentFormattingParams params) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<List<? extends TextEdit>> formatting(DocumentFormattingParams params) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<List<? extends TextEdit>> rangeFormatting(DocumentRangeFormattingParams params) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<List<? extends TextEdit>> rangeFormatting(
+      DocumentRangeFormattingParams params) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<List<? extends TextEdit>> onTypeFormatting(DocumentOnTypeFormattingParams params) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<List<? extends TextEdit>> onTypeFormatting(
+      DocumentOnTypeFormattingParams params) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<WorkspaceEdit> rename(RenameParams params) {
-        return null;
-    }
+  @Override
+  public CompletableFuture<WorkspaceEdit> rename(RenameParams params) {
+    return null;
+  }
 
-    @Override
-    public void didOpen(DidOpenTextDocumentParams params) {
-        String uri = params.getTextDocument().getUri();
-        String text = params.getTextDocument().getText();
-        reconciler.reconcileUri(uri, text);
-    }
+  @Override
+  public void didOpen(DidOpenTextDocumentParams params) {
+    String uri = params.getTextDocument().getUri();
+    String text = params.getTextDocument().getText();
+    reconciler.reconcileUri(uri, text);
+  }
 
-    
-    @Override
-    public void didChange(DidChangeTextDocumentParams params) {
-    }
+  @Override
+  public void didChange(DidChangeTextDocumentParams params) {}
 
-    @Override
-    public void didClose(DidCloseTextDocumentParams params) {
-    }
+  @Override
+  public void didClose(DidCloseTextDocumentParams params) {}
 
-    @Override
-    public void didSave(DidSaveTextDocumentParams params) {
-        
-    }
-
+  @Override
+  public void didSave(DidSaveTextDocumentParams params) {}
 }

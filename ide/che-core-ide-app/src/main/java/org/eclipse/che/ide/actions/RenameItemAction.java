@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,23 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.resources.Resource.FILE;
+import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
+import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.List;
+import java.util.Set;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -34,19 +45,6 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.NameUtils;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.resources.Resource.FILE;
-import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
-import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
 /**
  * Rename selected resource in the application context.
  *
@@ -56,227 +54,239 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 @Singleton
 public class RenameItemAction extends AbstractPerspectiveAction {
-    private final CoreLocalizationConstant localization;
-    private final Set<RenamingSupport>     renamingSupport;
-    private final EditorAgent              editorAgent;
-    private final NotificationManager      notificationManager;
-    private final DialogFactory            dialogFactory;
-    private final AppContext               appContext;
+  private final CoreLocalizationConstant localization;
+  private final Set<RenamingSupport> renamingSupport;
+  private final EditorAgent editorAgent;
+  private final NotificationManager notificationManager;
+  private final DialogFactory dialogFactory;
+  private final AppContext appContext;
 
-    @Inject
-    public RenameItemAction(Resources resources,
-                            CoreLocalizationConstant localization,
-                            Set<RenamingSupport> renamingSupport,
-                            EditorAgent editorAgent,
-                            NotificationManager notificationManager,
-                            DialogFactory dialogFactory,
-                            AppContext appContext) {
-        super(singletonList(PROJECT_PERSPECTIVE_ID),
-              localization.renameItemActionText(),
-              localization.renameItemActionDescription(),
-              null,
-              resources.rename());
-        this.localization = localization;
-        this.renamingSupport = renamingSupport;
-        this.editorAgent = editorAgent;
-        this.notificationManager = notificationManager;
-        this.dialogFactory = dialogFactory;
-        this.appContext = appContext;
+  @Inject
+  public RenameItemAction(
+      Resources resources,
+      CoreLocalizationConstant localization,
+      Set<RenamingSupport> renamingSupport,
+      EditorAgent editorAgent,
+      NotificationManager notificationManager,
+      DialogFactory dialogFactory,
+      AppContext appContext) {
+    super(
+        singletonList(PROJECT_PERSPECTIVE_ID),
+        localization.renameItemActionText(),
+        localization.renameItemActionDescription(),
+        null,
+        resources.rename());
+    this.localization = localization;
+    this.renamingSupport = renamingSupport;
+    this.editorAgent = editorAgent;
+    this.notificationManager = notificationManager;
+    this.dialogFactory = dialogFactory;
+    this.appContext = appContext;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void actionPerformed(ActionEvent e) {
+
+    final Resource resource = appContext.getResource();
+
+    checkState(resource != null, "Null resource occurred");
+
+    final String resourceName = resource.getName();
+    final int selectionLength =
+        resourceName.indexOf('.') >= 0 ? resourceName.lastIndexOf('.') : resourceName.length();
+    final InputValidator validator;
+    final String dialogTitle;
+
+    if (resource.getResourceType() == FILE) {
+      validator = new FileNameValidator(resourceName);
+      dialogTitle = localization.renameFileDialogTitle(resourceName);
+    } else if (resource.getResourceType() == FOLDER) {
+      validator = new FolderNameValidator(resourceName);
+      dialogTitle = localization.renameFolderDialogTitle(resourceName);
+    } else if (resource.getResourceType() == PROJECT) {
+      validator = new ProjectNameValidator(resourceName);
+      dialogTitle = localization.renameProjectDialogTitle(resourceName);
+    } else {
+      throw new IllegalStateException("Not a resource");
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void actionPerformed(ActionEvent e) {
+    final InputCallback inputCallback =
+        new InputCallback() {
+          @Override
+          public void accepted(final String value) {
+            //we shouldn't perform renaming file with the same name
+            if (!value.trim().equals(resourceName)) {
 
+              closeRelatedEditors(resource);
 
-        final Resource resource = appContext.getResource();
+              final Path destination = resource.getLocation().parent().append(value);
 
-        checkState(resource != null, "Null resource occurred");
-
-        final String resourceName = resource.getName();
-        final int selectionLength = resourceName.indexOf('.') >= 0 ? resourceName.lastIndexOf('.') : resourceName.length();
-        final InputValidator validator;
-        final String dialogTitle;
-
-        if (resource.getResourceType() == FILE) {
-            validator = new FileNameValidator(resourceName);
-            dialogTitle = localization.renameFileDialogTitle(resourceName);
-        } else if (resource.getResourceType() == FOLDER) {
-            validator = new FolderNameValidator(resourceName);
-            dialogTitle = localization.renameFolderDialogTitle(resourceName);
-        } else if (resource.getResourceType() == PROJECT) {
-            validator = new ProjectNameValidator(resourceName);
-            dialogTitle = localization.renameProjectDialogTitle(resourceName);
-        } else {
-            throw new IllegalStateException("Not a resource");
-        }
-
-        final InputCallback inputCallback = new InputCallback() {
-            @Override
-            public void accepted(final String value) {
-                //we shouldn't perform renaming file with the same name
-                if (!value.trim().equals(resourceName)) {
-
-                    closeRelatedEditors(resource);
-
-                    final Path destination = resource.getLocation().parent().append(value);
-
-                    resource.move(destination).catchError(new Operation<PromiseError>() {
+              resource
+                  .move(destination)
+                  .catchError(
+                      new Operation<PromiseError>() {
                         @Override
                         public void apply(PromiseError arg) throws OperationException {
-                            notificationManager.notify("", arg.getMessage(), FAIL, EMERGE_MODE);
+                          notificationManager.notify("", arg.getMessage(), FAIL, EMERGE_MODE);
                         }
-                    });
-                }
+                      });
             }
+          }
         };
 
-        InputDialog inputDialog = dialogFactory.createInputDialog(dialogTitle,
-                                                                  localization.renameDialogNewNameLabel(),
-                                                                  resource.getName(), 0, selectionLength, inputCallback, null);
-        inputDialog.withValidator(validator);
-        inputDialog.show();
+    InputDialog inputDialog =
+        dialogFactory.createInputDialog(
+            dialogTitle,
+            localization.renameDialogNewNameLabel(),
+            resource.getName(),
+            0,
+            selectionLength,
+            inputCallback,
+            null);
+    inputDialog.withValidator(validator);
+    inputDialog.show();
+  }
+
+  private void closeRelatedEditors(Resource resource) {
+    if (!resource.isProject()) {
+      return;
     }
 
-    private void closeRelatedEditors(Resource resource) {
-        if (!resource.isProject()) {
-            return;
-        }
+    final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
 
-        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
+    for (EditorPartPresenter editor : openedEditors) {
+      if (resource.getLocation().isPrefixOf(editor.getEditorInput().getFile().getLocation())) {
+        editorAgent.closeEditor(editor);
+      }
+    }
+  }
 
-        for (EditorPartPresenter editor : openedEditors) {
-            if (resource.getLocation().isPrefixOf(editor.getEditorInput().getFile().getLocation())) {
-                editorAgent.closeEditor(editor);
-            }
-        }
+  /** {@inheritDoc} */
+  @Override
+  public void updateInPerspective(@NotNull ActionEvent e) {
+    final Resource[] resources = appContext.getResources();
+    e.getPresentation().setVisible(true);
+
+    if (resources == null || resources.length != 1) {
+      e.getPresentation().setEnabled(false);
+      return;
     }
 
-    /** {@inheritDoc} */
+    for (RenamingSupport validator : renamingSupport) {
+      if (!validator.isRenameAllowed(resources[0])) {
+        e.getPresentation().setEnabled(false);
+        return;
+      }
+    }
+
+    e.getPresentation().setEnabled(true);
+  }
+
+  private abstract class AbstractNameValidator implements InputValidator {
+    private final String selfName;
+
+    public AbstractNameValidator(final String selfName) {
+      this.selfName = selfName;
+    }
+
     @Override
-    public void updateInPerspective(@NotNull ActionEvent e) {
-        final Resource[] resources = appContext.getResources();
-        e.getPresentation().setVisible(true);
+    public Violation validate(String value) {
+      if (value.trim().equals(selfName)) {
+        return new Violation() {
+          @Override
+          public String getMessage() {
+            return "";
+          }
 
-        if (resources == null || resources.length != 1) {
-            e.getPresentation().setEnabled(false);
-            return;
-        }
-
-        for (RenamingSupport validator : renamingSupport) {
-            if (!validator.isRenameAllowed(resources[0])) {
-                e.getPresentation().setEnabled(false);
-                return;
-            }
-        }
-
-        e.getPresentation().setEnabled(true);
-    }
-
-    private abstract class AbstractNameValidator implements InputValidator {
-        private final String selfName;
-
-        public AbstractNameValidator(final String selfName) {
-            this.selfName = selfName;
-        }
-
-        @Override
-        public Violation validate(String value) {
-            if (value.trim().equals(selfName)) {
-                return new Violation() {
-                    @Override
-                    public String getMessage() {
-                        return "";
-                    }
-
-                    @Override
-                    public String getCorrectedValue() {
-                        return null;
-                    }
-                };
-            }
-
-            return isValidName(value);
-        }
-
-        public abstract Violation isValidName(String value);
-    }
-
-    private class FileNameValidator extends AbstractNameValidator {
-
-        public FileNameValidator(String selfName) {
-            super(selfName);
-        }
-
-        @Override
-        public Violation isValidName(String value) {
-            if (!NameUtils.checkFileName(value)) {
-                return new Violation() {
-                    @Override
-                    public String getMessage() {
-                        return localization.invalidName();
-                    }
-
-                    @Nullable
-                    @Override
-                    public String getCorrectedValue() {
-                        return null;
-                    }
-                };
-            }
+          @Override
+          public String getCorrectedValue() {
             return null;
-        }
+          }
+        };
+      }
+
+      return isValidName(value);
     }
 
-    private class FolderNameValidator extends AbstractNameValidator {
+    public abstract Violation isValidName(String value);
+  }
 
-        public FolderNameValidator(String selfName) {
-            super(selfName);
-        }
+  private class FileNameValidator extends AbstractNameValidator {
 
-        @Override
-        public Violation isValidName(String value) {
-            if (!NameUtils.checkFolderName(value)) {
-                return new Violation() {
-                    @Override
-                    public String getMessage() {
-                        return localization.invalidName();
-                    }
+    public FileNameValidator(String selfName) {
+      super(selfName);
+    }
 
-                    @Nullable
-                    @Override
-                    public String getCorrectedValue() {
-                        return null;
-                    }
-                };
-            }
+    @Override
+    public Violation isValidName(String value) {
+      if (!NameUtils.checkFileName(value)) {
+        return new Violation() {
+          @Override
+          public String getMessage() {
+            return localization.invalidName();
+          }
+
+          @Nullable
+          @Override
+          public String getCorrectedValue() {
             return null;
-        }
+          }
+        };
+      }
+      return null;
+    }
+  }
+
+  private class FolderNameValidator extends AbstractNameValidator {
+
+    public FolderNameValidator(String selfName) {
+      super(selfName);
     }
 
-    private class ProjectNameValidator extends AbstractNameValidator {
+    @Override
+    public Violation isValidName(String value) {
+      if (!NameUtils.checkFolderName(value)) {
+        return new Violation() {
+          @Override
+          public String getMessage() {
+            return localization.invalidName();
+          }
 
-        public ProjectNameValidator(String selfName) {
-            super(selfName);
-        }
+          @Nullable
+          @Override
+          public String getCorrectedValue() {
+            return null;
+          }
+        };
+      }
+      return null;
+    }
+  }
 
+  private class ProjectNameValidator extends AbstractNameValidator {
+
+    public ProjectNameValidator(String selfName) {
+      super(selfName);
+    }
+
+    @Override
+    public Violation isValidName(String value) {
+      return new Violation() {
         @Override
-        public Violation isValidName(String value) {
-            return new Violation() {
-                @Override
-                public String getMessage() {
-                    return localization.invalidName();
-                }
-
-                @Nullable
-                @Override
-                public String getCorrectedValue() {
-                    if (NameUtils.checkProjectName(value)) {
-                        return value.contains(" ") ? value.replaceAll(" ", "-") : value;
-                    }
-                    return null;
-                }
-            };
+        public String getMessage() {
+          return localization.invalidName();
         }
+
+        @Nullable
+        @Override
+        public String getCorrectedValue() {
+          if (NameUtils.checkProjectName(value)) {
+            return value.contains(" ") ? value.replaceAll(" ", "-") : value;
+          }
+          return null;
+        }
+      };
     }
+  }
 }

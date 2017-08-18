@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.core.db;
 
 import com.google.inject.Inject;
-
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.naming.InitialContext;
@@ -25,17 +24,17 @@ import javax.sql.DataSource;
  */
 public class JndiDataSourceProvider implements Provider<DataSource> {
 
-    @Inject
-    @Named("db.jndi.datasource.name")
-    private String name;
+  @Inject
+  @Named("db.jndi.datasource.name")
+  private String name;
 
-    @Override
-    public DataSource get() {
-        try {
-            final InitialContext context = new InitialContext();
-            return (DataSource)context.lookup(name);
-        } catch (NamingException x) {
-            throw new IllegalStateException(x.getLocalizedMessage(), x);
-        }
+  @Override
+  public DataSource get() {
+    try {
+      final InitialContext context = new InitialContext();
+      return (DataSource) context.lookup(name);
+    } catch (NamingException x) {
+      throw new IllegalStateException(x.getLocalizedMessage(), x);
     }
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,46 +7,48 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.agent.server.launcher;
 
+import java.net.Socket;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 
-import java.net.Socket;
-
 /**
- * Verifies that agent was started successfully by checking that specified local port is listened in a machine.
+ * Verifies that agent was started successfully by checking that specified local port is listened in
+ * a machine.
  *
  * @author Alexander Garagatyi
- * @deprecated It is needed to be sure that the right service is up on the given port.
- * Also, some proxies (like docker-proxy) response that the port is listened but actually it is forwarded only.
+ * @deprecated It is needed to be sure that the right service is up on the given port. Also, some
+ *     proxies (like docker-proxy) response that the port is listened but actually it is forwarded
+ *     only.
  */
 @Deprecated
 public class MappedPortIsListeningAgentChecker implements AgentLaunchingChecker {
-    private final String exposedPort;
+  private final String exposedPort;
 
-    public MappedPortIsListeningAgentChecker(String exposedPort) {
-        // normalize port/transport value
-        this.exposedPort = exposedPort.contains("/") ? exposedPort : exposedPort + "/tcp";
-    }
+  public MappedPortIsListeningAgentChecker(String exposedPort) {
+    // normalize port/transport value
+    this.exposedPort = exposedPort.contains("/") ? exposedPort : exposedPort + "/tcp";
+  }
 
-    @Override
-    public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException {
-        Server server = machine.getRuntime().getServers().get(exposedPort);
-        if (server != null) {
-            try {
-                String[] hostPort = server.getProperties().getInternalAddress().split(":");
-                try (@SuppressWarnings("unused") Socket socket = new Socket(hostPort[0],
-                                                                            Integer.parseInt(hostPort[1]))) {
-                    return true;
-                }
-            } catch (Exception ignored) {
-            }
+  @Override
+  public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine)
+      throws MachineException {
+    Server server = machine.getRuntime().getServers().get(exposedPort);
+    if (server != null) {
+      try {
+        String[] hostPort = server.getProperties().getInternalAddress().split(":");
+        try (@SuppressWarnings("unused")
+            Socket socket = new Socket(hostPort[0], Integer.parseInt(hostPort[1]))) {
+          return true;
         }
-        return false;
+      } catch (Exception ignored) {
+      }
     }
+    return false;
+  }
 }

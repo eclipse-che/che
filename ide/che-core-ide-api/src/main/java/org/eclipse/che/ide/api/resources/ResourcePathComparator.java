@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.resources;
 
 import com.google.common.annotations.Beta;
-
 import java.util.Comparator;
 
 /**
@@ -24,18 +23,17 @@ import java.util.Comparator;
 @Beta
 public class ResourcePathComparator implements Comparator<Resource> {
 
-    private static final ResourcePathComparator INSTANCE = new ResourcePathComparator();
+  private static final ResourcePathComparator INSTANCE = new ResourcePathComparator();
 
-    private ResourcePathComparator() {
-    }
+  private ResourcePathComparator() {}
 
-    public static Comparator<Resource> getInstance() {
-        return INSTANCE;
-    }
+  public static Comparator<Resource> getInstance() {
+    return INSTANCE;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int compare(Resource o1, Resource o2) {
-        return o1.getLocation().toString().compareTo(o2.getLocation().toString());
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int compare(Resource o1, Resource o2) {
+    return o1.getLocation().toString().compareTo(o2.getLocation().toString());
+  }
 }

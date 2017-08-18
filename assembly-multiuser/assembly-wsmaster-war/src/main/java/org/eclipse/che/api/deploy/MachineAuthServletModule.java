@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
-
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.machine.authentication.server.MachineLoginFilter;
 
@@ -23,9 +22,9 @@ import org.eclipse.che.machine.authentication.server.MachineLoginFilter;
 @DynaModule
 public class MachineAuthServletModule extends ServletModule {
 
-    @Override
-    protected void configureServlets() {
-        // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
-        filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(MachineLoginFilter.class);
-    }
+  @Override
+  protected void configureServlets() {
+    // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
+    filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(MachineLoginFilter.class);
+  }
 }

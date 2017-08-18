@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,24 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.processes;
 
-import elemental.dom.Element;
-import elemental.html.SpanElement;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.che.ide.util.dom.Elements.addClassName;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import elemental.dom.Element;
+import elemental.html.SpanElement;
+import java.util.Map;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.terminal.AddTerminalClickHandler;
 import org.eclipse.che.ide.terminal.HasAddTerminalClickHandler;
 import org.eclipse.che.ide.ui.tree.BaseNodeRenderer;
-
-import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.eclipse.che.ide.util.dom.Elements.addClassName;
 
 /**
  * Renderer for {@link ProcessTreeNode} UI presentation.
@@ -34,62 +31,71 @@ import static org.eclipse.che.ide.util.dom.Elements.addClassName;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class ProcessTreeRenderer extends BaseNodeRenderer<ProcessTreeNode> implements HasAddTerminalClickHandler,
-                                                                                      HasPreviewSshClickHandler,
-                                                                                      HasStopProcessHandler {
+public class ProcessTreeRenderer extends BaseNodeRenderer<ProcessTreeNode>
+    implements HasAddTerminalClickHandler, HasPreviewSshClickHandler, HasStopProcessHandler {
 
-    private final MachineResources                           resources;
-    private final Map<String, ProcessTreeNodeRenderStrategy> renderStrategyMap;
+  private final MachineResources resources;
+  private final Map<String, ProcessTreeNodeRenderStrategy> renderStrategyMap;
 
-    @Inject
-    public ProcessTreeRenderer(MachineResources resources,
-                               Map<String, ProcessTreeNodeRenderStrategy> renderStrategyMap) {
-        this.resources = resources;
-        this.renderStrategyMap = renderStrategyMap;
-    }
+  @Inject
+  public ProcessTreeRenderer(
+      MachineResources resources, Map<String, ProcessTreeNodeRenderStrategy> renderStrategyMap) {
+    this.resources = resources;
+    this.renderStrategyMap = renderStrategyMap;
+  }
 
-    @Override
-    public Element getNodeKeyTextContainer(SpanElement treeNodeLabel) {
-        return (Element)treeNodeLabel.getChildNodes().item(1);
-    }
+  @Override
+  public Element getNodeKeyTextContainer(SpanElement treeNodeLabel) {
+    return (Element) treeNodeLabel.getChildNodes().item(1);
+  }
 
-    @Override
-    public SpanElement renderNodeContents(ProcessTreeNode node) {
-        final ProcessTreeNodeRenderStrategy renderStrategy = renderStrategyMap.get(node.getType().getStringValue());
+  @Override
+  public SpanElement renderNodeContents(ProcessTreeNode node) {
+    final ProcessTreeNodeRenderStrategy renderStrategy =
+        renderStrategyMap.get(node.getType().getStringValue());
 
-        checkNotNull(renderStrategy, "Unknown node type");
+    checkNotNull(renderStrategy, "Unknown node type");
 
-        final SpanElement spanElement = renderStrategy.renderSpanElementFor(node);
+    final SpanElement spanElement = renderStrategy.renderSpanElementFor(node);
 
-        addClassName(resources.getCss().processTreeNode(), spanElement);
+    addClassName(resources.getCss().processTreeNode(), spanElement);
 
-        return spanElement;
-    }
+    return spanElement;
+  }
 
-    @Override
-    public void addStopProcessHandler(StopProcessHandler handler) {
-        renderStrategyMap.values().forEach(strategy -> {
-            if (strategy instanceof HasStopProcessHandler) {
-                ((HasStopProcessHandler)strategy).addStopProcessHandler(handler);
-            }
-        });
-    }
+  @Override
+  public void addStopProcessHandler(StopProcessHandler handler) {
+    renderStrategyMap
+        .values()
+        .forEach(
+            strategy -> {
+              if (strategy instanceof HasStopProcessHandler) {
+                ((HasStopProcessHandler) strategy).addStopProcessHandler(handler);
+              }
+            });
+  }
 
-    @Override
-    public void addAddTerminalClickHandler(AddTerminalClickHandler handler) {
-        renderStrategyMap.values().forEach(strategy -> {
-            if (strategy instanceof HasAddTerminalClickHandler) {
-                ((HasAddTerminalClickHandler)strategy).addAddTerminalClickHandler(handler);
-            }
-        });
-    }
+  @Override
+  public void addAddTerminalClickHandler(AddTerminalClickHandler handler) {
+    renderStrategyMap
+        .values()
+        .forEach(
+            strategy -> {
+              if (strategy instanceof HasAddTerminalClickHandler) {
+                ((HasAddTerminalClickHandler) strategy).addAddTerminalClickHandler(handler);
+              }
+            });
+  }
 
-    @Override
-    public void addPreviewSshClickHandler(PreviewSshClickHandler handler) {
-        renderStrategyMap.values().forEach(strategy -> {
-            if (strategy instanceof HasPreviewSshClickHandler) {
-                ((HasPreviewSshClickHandler)strategy).addPreviewSshClickHandler(handler);
-            }
-        });
-    }
+  @Override
+  public void addPreviewSshClickHandler(PreviewSshClickHandler handler) {
+    renderStrategyMap
+        .values()
+        .forEach(
+            strategy -> {
+              if (strategy instanceof HasPreviewSshClickHandler) {
+                ((HasPreviewSshClickHandler) strategy).addPreviewSshClickHandler(handler);
+              }
+            });
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.util;
 
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,29 +23,30 @@ import java.util.List;
  * @author Vlad Zhukovskyi
  */
 public class UIUtil {
-    public static final char MNEMONIC = 0x1B;
+  public static final char MNEMONIC = 0x1B;
 
-    /**
-     * Lookup all nested children in widget and tries to search children which implement Focusable interface.
-     *
-     * @param widget
-     *         widget to lookup
-     * @return list of {@link com.google.gwt.user.client.ui.Focusable} widgets or empty list if none was found
-     * @see com.google.gwt.user.client.ui.Focusable
-     */
-    public static List<FocusWidget> getFocusableChildren(Widget widget) {
-        List<FocusWidget> focusable = new ArrayList<>();
+  /**
+   * Lookup all nested children in widget and tries to search children which implement Focusable
+   * interface.
+   *
+   * @param widget widget to lookup
+   * @return list of {@link com.google.gwt.user.client.ui.Focusable} widgets or empty list if none
+   *     was found
+   * @see com.google.gwt.user.client.ui.Focusable
+   */
+  public static List<FocusWidget> getFocusableChildren(Widget widget) {
+    List<FocusWidget> focusable = new ArrayList<>();
 
-        if (widget instanceof FocusWidget) {
-            focusable.add((FocusWidget)widget);
-        }
-
-        if (widget instanceof HasWidgets) {
-            for (Widget w : ((HasWidgets)widget)) {
-                focusable.addAll(getFocusableChildren(w));
-            }
-        }
-
-        return focusable;
+    if (widget instanceof FocusWidget) {
+      focusable.add((FocusWidget) widget);
     }
+
+    if (widget instanceof HasWidgets) {
+      for (Widget w : ((HasWidgets) widget)) {
+        focusable.addAll(getFocusableChildren(w));
+      }
+    }
+
+    return focusable;
+  }
 }

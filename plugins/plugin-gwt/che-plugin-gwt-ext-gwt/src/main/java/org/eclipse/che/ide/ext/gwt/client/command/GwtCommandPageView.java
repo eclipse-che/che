@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.gwt.client.command;
 
 import com.google.inject.ImplementedBy;
-
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
@@ -22,34 +21,34 @@ import org.eclipse.che.ide.api.mvp.View;
 @ImplementedBy(GwtCommandPageViewImpl.class)
 public interface GwtCommandPageView extends View<GwtCommandPageView.ActionDelegate> {
 
-    /** Returns working directory. */
-    String getWorkingDirectory();
+  /** Returns working directory. */
+  String getWorkingDirectory();
 
-    /** Sets working directory. */
-    void setWorkingDirectory(String workingDirectory);
+  /** Sets working directory. */
+  void setWorkingDirectory(String workingDirectory);
 
-    /** Returns GWT module name. */
-    String getGwtModule();
+  /** Returns GWT module name. */
+  String getGwtModule();
 
-    /** Sets GWT module name. */
-    void setGwtModule(String gwtModule);
+  /** Sets GWT module name. */
+  void setGwtModule(String gwtModule);
 
-    /** Returns GWT code server address. */
-    String getCodeServerAddress();
+  /** Returns GWT code server address. */
+  String getCodeServerAddress();
 
-    /** Sets GWT code server address. */
-    void setCodeServerAddress(String codeServerAddress);
+  /** Sets GWT code server address. */
+  void setCodeServerAddress(String codeServerAddress);
 
-    /** Action handler for the view actions/controls. */
-    interface ActionDelegate {
+  /** Action handler for the view actions/controls. */
+  interface ActionDelegate {
 
-        /** Called when working directory has been changed. */
-        void onWorkingDirectoryChanged();
+    /** Called when working directory has been changed. */
+    void onWorkingDirectoryChanged();
 
-        /** Called when GWT module has been changed. */
-        void onGwtModuleChanged();
+    /** Called when GWT module has been changed. */
+    void onGwtModuleChanged();
 
-        /** Called when GWT code server address has been changed. */
-        void onCodeServerAddressChanged();
-    }
+    /** Called when GWT code server address has been changed. */
+    void onCodeServerAddressChanged();
+  }
 }

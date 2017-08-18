@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.workspace.event;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -21,36 +21,34 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
  */
 public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedEvent.Handler> {
 
-    public interface Handler extends EventHandler {
-        /**
-         * Perform actions when workspace is stopped.
-         *
-         * @param event
-         *         workspace stopped event
-         */
-        void onWorkspaceStopped(WorkspaceStoppedEvent event);
-    }
+  public interface Handler extends EventHandler {
+    /**
+     * Perform actions when workspace is stopped.
+     *
+     * @param event workspace stopped event
+     */
+    void onWorkspaceStopped(WorkspaceStoppedEvent event);
+  }
 
-    public static final Type<WorkspaceStoppedEvent.Handler> TYPE = new Type<>();
+  public static final Type<WorkspaceStoppedEvent.Handler> TYPE = new Type<>();
 
-    private final Workspace workspace;
+  private final Workspace workspace;
 
-    public WorkspaceStoppedEvent(Workspace workspace) {
-        this.workspace = workspace;
-    }
+  public WorkspaceStoppedEvent(Workspace workspace) {
+    this.workspace = workspace;
+  }
 
-    public Workspace getWorkspace() {
-        return workspace;
-    }
+  public Workspace getWorkspace() {
+    return workspace;
+  }
 
-    @Override
-    public Type<WorkspaceStoppedEvent.Handler> getAssociatedType() {
-        return TYPE;
-    }
+  @Override
+  public Type<WorkspaceStoppedEvent.Handler> getAssociatedType() {
+    return TYPE;
+  }
 
-    @Override
-    protected void dispatch(WorkspaceStoppedEvent.Handler handler) {
-        handler.onWorkspaceStopped(this);
-    }
-
+  @Override
+  protected void dispatch(WorkspaceStoppedEvent.Handler handler) {
+    handler.onWorkspaceStopped(this);
+  }
 }

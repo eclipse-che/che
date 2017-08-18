@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.server.template;
 
-import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
-
+import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
+import org.eclipse.che.api.core.rest.Service;
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 
 /**
  * Provide information about registered ProjectTemplates via REST.
@@ -29,23 +28,23 @@ import java.util.List;
 @Path("project-template")
 public class ProjectTemplateService extends Service {
 
-    private ProjectTemplateRegistry templateRegistry;
+  private ProjectTemplateRegistry templateRegistry;
 
-    @Inject
-    public ProjectTemplateService(ProjectTemplateRegistry templateRegistry) {
-        this.templateRegistry = templateRegistry;
-    }
+  @Inject
+  public ProjectTemplateService(ProjectTemplateRegistry templateRegistry) {
+    this.templateRegistry = templateRegistry;
+  }
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<ProjectTemplateDescriptor> getProjectTemplates(@QueryParam("tag") List<String> tags) {
-        return templateRegistry.getTemplates(tags);
-    }
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<ProjectTemplateDescriptor> getProjectTemplates(@QueryParam("tag") List<String> tags) {
+    return templateRegistry.getTemplates(tags);
+  }
 
-    @GET
-    @Path("/all")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<ProjectTemplateDescriptor> getProjectTemplates() {
-        return templateRegistry.getAllTemplates();
-    }
+  @GET
+  @Path("/all")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<ProjectTemplateDescriptor> getProjectTemplates() {
+    return templateRegistry.getAllTemplates();
+  }
 }

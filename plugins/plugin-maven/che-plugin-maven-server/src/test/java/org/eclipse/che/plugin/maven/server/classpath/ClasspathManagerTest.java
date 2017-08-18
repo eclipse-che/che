@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.server.classpath;
 
-import com.google.inject.Provider;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
+import com.google.inject.Provider;
+import java.io.File;
+import java.util.Collections;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.maven.server.MavenTerminal;
@@ -33,120 +41,131 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.util.Collections;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public class ClasspathManagerTest extends BaseTest {
 
-    private   MavenProjectManager       mavenProjectManager;
-    private   MavenWorkspace            mavenWorkspace;
-    private   ClasspathManager          classpathManager;
-    private   File                      localRepository;
-    @Mock
-    protected Provider<ProjectRegistry> projectRegistryProvider;
+  private MavenProjectManager mavenProjectManager;
+  private MavenWorkspace mavenWorkspace;
+  private ClasspathManager classpathManager;
+  private File localRepository;
+  @Mock protected Provider<ProjectRegistry> projectRegistryProvider;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        Provider<ProjectRegistry> projectRegistryProvider = (Provider<ProjectRegistry>)mock(Provider.class);
-        when(projectRegistryProvider.get()).thenReturn(projectRegistry);
-        MavenServerManagerTest.MyMavenServerProgressNotifier mavenNotifier = new MavenServerManagerTest.MyMavenServerProgressNotifier();
-        MavenTerminal terminal = (level, message, throwable) -> {
-            System.out.println(message);
-            if (throwable != null) {
-                throwable.printStackTrace();
-            }
+  @BeforeMethod
+  public void setUp() throws Exception {
+    Provider<ProjectRegistry> projectRegistryProvider =
+        (Provider<ProjectRegistry>) mock(Provider.class);
+    when(projectRegistryProvider.get()).thenReturn(projectRegistry);
+    MavenServerManagerTest.MyMavenServerProgressNotifier mavenNotifier =
+        new MavenServerManagerTest.MyMavenServerProgressNotifier();
+    MavenTerminal terminal =
+        (level, message, throwable) -> {
+          System.out.println(message);
+          if (throwable != null) {
+            throwable.printStackTrace();
+          }
         };
-        localRepository = new File(new File("target/localRepo").getAbsolutePath());
-        localRepository.mkdirs();
-        mavenServerManager.setLocalRepository(localRepository);
-        MavenWrapperManager wrapperManager = new MavenWrapperManager(mavenServerManager);
-        mavenProjectManager =
-                new MavenProjectManager(wrapperManager, mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
-        classpathManager = new ClasspathManager(root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal, mavenNotifier);
-        mavenWorkspace = new MavenWorkspace(mavenProjectManager, mavenNotifier, new MavenExecutorService(), projectRegistryProvider,
-                                            classpathManager, eventService, new EclipseWorkspaceProvider());
-    }
+    localRepository = new File(new File("target/localRepo").getAbsolutePath());
+    localRepository.mkdirs();
+    mavenServerManager.setLocalRepository(localRepository);
+    MavenWrapperManager wrapperManager = new MavenWrapperManager(mavenServerManager);
+    mavenProjectManager =
+        new MavenProjectManager(
+            wrapperManager,
+            mavenServerManager,
+            terminal,
+            mavenNotifier,
+            new EclipseWorkspaceProvider());
+    classpathManager =
+        new ClasspathManager(
+            root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal, mavenNotifier);
+    mavenWorkspace =
+        new MavenWorkspace(
+            mavenProjectManager,
+            mavenNotifier,
+            new MavenExecutorService(),
+            projectRegistryProvider,
+            classpathManager,
+            eventService,
+            new EclipseWorkspaceProvider());
+  }
 
-    @AfterMethod
-    public void tearDown() throws Exception {
-        IoUtil.deleteRecursive(localRepository);
-    }
+  @AfterMethod
+  public void tearDown() throws Exception {
+    IoUtil.deleteRecursive(localRepository);
+  }
 
-    @Test
-    public void testDownloadSources() throws Exception {
-        String pom = "<groupId>test</groupId>" +
-                     "<artifactId>testArtifact</artifactId>" +
-                     "<version>42</version>" +
-                     "<dependencies>" +
-                     "    <dependency>" +
-                     "        <groupId>junit</groupId>" +
-                     "        <artifactId>junit</artifactId>" +
-                     "        <version>4.12</version>" +
-                     "    </dependency>" +
-                     "</dependencies>";
-        createTestProject("test", pom);
+  @Test
+  public void testDownloadSources() throws Exception {
+    String pom =
+        "<groupId>test</groupId>"
+            + "<artifactId>testArtifact</artifactId>"
+            + "<version>42</version>"
+            + "<dependencies>"
+            + "    <dependency>"
+            + "        <groupId>junit</groupId>"
+            + "        <artifactId>junit</artifactId>"
+            + "        <version>4.12</version>"
+            + "    </dependency>"
+            + "</dependencies>";
+    createTestProject("test", pom);
 
-        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
-        mavenWorkspace.update(Collections.singletonList(test));
-        mavenWorkspace.waitForUpdate();
-        boolean downloadSources = classpathManager.downloadSources(test.getFullPath().toOSString(), "org.junit.Test");
-        assertTrue(downloadSources);
-    }
+    IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+    mavenWorkspace.update(Collections.singletonList(test));
+    mavenWorkspace.waitForUpdate();
+    boolean downloadSources =
+        classpathManager.downloadSources(test.getFullPath().toOSString(), "org.junit.Test");
+    assertTrue(downloadSources);
+  }
 
-    @Test
-    public void testDownloadSourcesLog4j() throws Exception {
-        String pom = "<groupId>test</groupId>" +
-                     "<artifactId>testArtifact</artifactId>" +
-                     "<version>42</version>" +
-                     "<dependencies>" +
-                     "    <dependency>" +
-                     "        <groupId>log4j</groupId>" +
-                     "        <artifactId>log4j</artifactId>" +
-                     "        <version>1.2.12</version>" +
-                     "    </dependency>" +
-                     "</dependencies>";
-        createTestProject("test", pom);
+  @Test
+  public void testDownloadSourcesLog4j() throws Exception {
+    String pom =
+        "<groupId>test</groupId>"
+            + "<artifactId>testArtifact</artifactId>"
+            + "<version>42</version>"
+            + "<dependencies>"
+            + "    <dependency>"
+            + "        <groupId>log4j</groupId>"
+            + "        <artifactId>log4j</artifactId>"
+            + "        <version>1.2.12</version>"
+            + "    </dependency>"
+            + "</dependencies>";
+    createTestProject("test", pom);
 
-        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
-        mavenWorkspace.update(Collections.singletonList(test));
-        mavenWorkspace.waitForUpdate();
-        boolean downloadSources = classpathManager.downloadSources(test.getFullPath().toOSString(), "org.apache.log4j.Logger");
-        assertFalse(downloadSources);
-    }
+    IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+    mavenWorkspace.update(Collections.singletonList(test));
+    mavenWorkspace.waitForUpdate();
+    boolean downloadSources =
+        classpathManager.downloadSources(
+            test.getFullPath().toOSString(), "org.apache.log4j.Logger");
+    assertFalse(downloadSources);
+  }
 
-    @Test
-    public void testDownloadedSourcesShouldAttachToPackageFragmentRoot() throws Exception {
-        String pom = "<groupId>test</groupId>" +
-                     "<artifactId>testArtifact</artifactId>" +
-                     "<version>42</version>" +
-                     "<dependencies>" +
-                     "    <dependency>" +
-                     "        <groupId>junit</groupId>" +
-                     "        <artifactId>junit</artifactId>" +
-                     "        <version>4.12</version>" +
-                     "    </dependency>" +
-                     "</dependencies>";
-        createTestProject("test2", pom);
+  @Test
+  public void testDownloadedSourcesShouldAttachToPackageFragmentRoot() throws Exception {
+    String pom =
+        "<groupId>test</groupId>"
+            + "<artifactId>testArtifact</artifactId>"
+            + "<version>42</version>"
+            + "<dependencies>"
+            + "    <dependency>"
+            + "        <groupId>junit</groupId>"
+            + "        <artifactId>junit</artifactId>"
+            + "        <version>4.12</version>"
+            + "    </dependency>"
+            + "</dependencies>";
+    createTestProject("test2", pom);
 
-        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test2");
-        mavenWorkspace.update(Collections.singletonList(test));
-        mavenWorkspace.waitForUpdate();
-        IJavaProject javaProject = JavaCore.create(test);
-        IType type = javaProject.findType("org.junit.Test");
-        assertNull(type.getClassFile().getSourceRange());
-        boolean downloadSources = classpathManager.downloadSources(test.getFullPath().toOSString(), "org.junit.Test");
-        assertTrue(downloadSources);
-        IType type2 = javaProject.findType("org.junit.Test");
-        assertNotNull(type2.getClassFile().getSourceRange());
-    }
+    IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test2");
+    mavenWorkspace.update(Collections.singletonList(test));
+    mavenWorkspace.waitForUpdate();
+    IJavaProject javaProject = JavaCore.create(test);
+    IType type = javaProject.findType("org.junit.Test");
+    assertNull(type.getClassFile().getSourceRange());
+    boolean downloadSources =
+        classpathManager.downloadSources(test.getFullPath().toOSString(), "org.junit.Test");
+    assertTrue(downloadSources);
+    IType type2 = javaProject.findType("org.junit.Test");
+    assertNotNull(type2.getClassFile().getSourceRange());
+  }
 }

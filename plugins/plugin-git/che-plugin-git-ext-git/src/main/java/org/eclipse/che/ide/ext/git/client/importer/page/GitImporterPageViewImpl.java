@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.importer.page;
 
 import com.google.gwt.core.client.Scheduler;
@@ -25,309 +25,298 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.inject.Inject;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ui.TextBox;
 
-import javax.validation.constraints.NotNull;
-
-/**
- * @author Roman Nikitenko
- */
+/** @author Roman Nikitenko */
 public class GitImporterPageViewImpl extends Composite implements GitImporterPageView {
 
-    @UiField(provided = true)
-    Style       style;
+  @UiField(provided = true)
+  Style style;
 
-    @UiField
-    Label       labelUrlError;
+  @UiField Label labelUrlError;
 
-    @UiField
-    TextBox     projectName;
+  @UiField TextBox projectName;
 
-    @UiField
-    TextArea    projectDescription;
+  @UiField TextArea projectDescription;
 
-    @UiField
-    TextBox     projectUrl;
+  @UiField TextBox projectUrl;
 
-    @UiField
-    CheckBox    recursive;
+  @UiField CheckBox recursive;
 
-    @UiField
-    FlowPanel   importerPanel;
+  @UiField FlowPanel importerPanel;
 
-    @UiField
-    CheckBox    keepDirectory;
+  @UiField CheckBox keepDirectory;
 
-    @UiField
-    TextBox     directoryName;
+  @UiField TextBox directoryName;
 
-    @UiField
-    CheckBox    branchSelection;
+  @UiField CheckBox branchSelection;
 
-    @UiField
-    TextBox branch;
+  @UiField TextBox branch;
 
-    private ActionDelegate delegate;
+  private ActionDelegate delegate;
 
-    @Inject
-    public GitImporterPageViewImpl(GitResources resources,
-                                   GitImporterPageViewImplUiBinder uiBinder) {
-        style = resources.gitImporterPageStyle();
-        style.ensureInjected();
-        initWidget(uiBinder.createAndBindUi(this));
+  @Inject
+  public GitImporterPageViewImpl(GitResources resources, GitImporterPageViewImplUiBinder uiBinder) {
+    style = resources.gitImporterPageStyle();
+    style.ensureInjected();
+    initWidget(uiBinder.createAndBindUi(this));
 
-        projectName.getElement().setAttribute("maxlength", "32");
-        projectDescription.getElement().setAttribute("maxlength", "256");
+    projectName.getElement().setAttribute("maxlength", "32");
+    projectDescription.getElement().setAttribute("maxlength", "256");
+  }
+
+  @UiHandler("projectName")
+  void onProjectNameChanged(KeyUpEvent event) {
+    String projectNameValue = projectName.getValue();
+
+    if (projectNameValue != null && projectNameValue.contains(" ")) {
+      projectNameValue = projectNameValue.replace(" ", "-");
+      projectName.setValue(projectNameValue);
     }
 
-    @UiHandler("projectName")
-    void onProjectNameChanged(KeyUpEvent event) {
-        String projectNameValue = projectName.getValue();
-
-        if (projectNameValue != null && projectNameValue.contains(" ")) {
-            projectNameValue = projectNameValue.replace(" ", "-");
-            projectName.setValue(projectNameValue);
-        }
-
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            return;
-        }
-
-        delegate.projectNameChanged(projectName.getValue());
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+      return;
     }
 
-    @UiHandler("projectUrl")
-    void onProjectUrlChanged(KeyUpEvent event) {
-        delegate.projectUrlChanged(projectUrl.getValue());
+    delegate.projectNameChanged(projectName.getValue());
+  }
+
+  @UiHandler("projectUrl")
+  void onProjectUrlChanged(KeyUpEvent event) {
+    delegate.projectUrlChanged(projectUrl.getValue());
+  }
+
+  @UiHandler("recursive")
+  void recursiveHandler(ValueChangeEvent<Boolean> event) {
+    delegate.onRecursiveSelected(event.getValue());
+  }
+
+  @UiHandler("projectDescription")
+  void onProjectDescriptionChanged(KeyUpEvent event) {
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+      return;
+    }
+    delegate.projectDescriptionChanged(projectDescription.getValue());
+  }
+
+  @UiHandler({"keepDirectory"})
+  void keepDirectoryHandler(ValueChangeEvent<Boolean> event) {
+    delegate.keepDirectorySelected(event.getValue());
+  }
+
+  @UiHandler({"branchSelection"})
+  void branchSelectedHandler(ValueChangeEvent<Boolean> event) {
+    delegate.branchSelected(event.getValue());
+  }
+
+  @UiHandler("directoryName")
+  void onDirectoryNameChanged(KeyUpEvent event) {
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+      return;
     }
 
-    @UiHandler("recursive")
-    void recursiveHandler(ValueChangeEvent<Boolean> event) {
-        delegate.onRecursiveSelected(event.getValue());
+    delegate.keepDirectoryNameChanged(directoryName.getValue());
+  }
+
+  @UiHandler("branch")
+  void onBranchNameChanged(KeyUpEvent event) {
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+      return;
     }
 
-    @UiHandler("projectDescription")
-    void onProjectDescriptionChanged(KeyUpEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            return;
-        }
-        delegate.projectDescriptionChanged(projectDescription.getValue());
+    delegate.branchNameChanged(branch.getValue());
+  }
+
+  @Override
+  public void setProjectUrl(@NotNull String url) {
+    projectUrl.setText(url);
+    delegate.projectUrlChanged(url);
+  }
+
+  @Override
+  public void markURLValid() {
+    projectUrl.markValid();
+  }
+
+  @Override
+  public void markURLInvalid() {
+    projectUrl.markInvalid();
+  }
+
+  @Override
+  public void unmarkURL() {
+    projectUrl.unmark();
+  }
+
+  @Override
+  public void setURLErrorMessage(@NotNull String message) {
+    labelUrlError.setText(message != null ? message : "");
+  }
+
+  @Override
+  public void markNameValid() {
+    projectName.markValid();
+  }
+
+  @Override
+  public void markNameInvalid() {
+    projectName.markInvalid();
+  }
+
+  @Override
+  public void unmarkName() {
+    projectName.unmark();
+  }
+
+  @NotNull
+  @Override
+  public String getProjectName() {
+    return projectName.getValue();
+  }
+
+  @Override
+  public void setProjectName(@NotNull String projectName) {
+    this.projectName.setValue(projectName);
+    delegate.projectNameChanged(projectName);
+  }
+
+  @Override
+  public void focusInUrlInput() {
+    projectUrl.setFocus(true);
+  }
+
+  @Override
+  public void setInputsEnableState(boolean isEnabled) {
+    projectName.setEnabled(isEnabled);
+    projectDescription.setEnabled(isEnabled);
+    projectUrl.setEnabled(isEnabled);
+
+    if (isEnabled) {
+      focusInUrlInput();
     }
+  }
 
-    @UiHandler({"keepDirectory"})
-    void keepDirectoryHandler(ValueChangeEvent<Boolean> event) {
-        delegate.keepDirectorySelected(event.getValue());
-    }
+  @Override
+  public void setProjectDescription(@NotNull String projectDescription) {
+    this.projectDescription.setValue(projectDescription);
+  }
 
-    @UiHandler({"branchSelection"})
-    void branchSelectedHandler(ValueChangeEvent<Boolean> event) {
-        delegate.branchSelected(event.getValue());
-    }
+  @Override
+  public boolean keepDirectory() {
+    return keepDirectory.getValue();
+  }
 
-    @UiHandler("directoryName")
-    void onDirectoryNameChanged(KeyUpEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            return;
-        }
+  @Override
+  public boolean isBranchName() {
+    return branchSelection.getValue();
+  }
 
-        delegate.keepDirectoryNameChanged(directoryName.getValue());
-    }
+  @Override
+  public void setKeepDirectoryChecked(boolean checked) {
+    keepDirectory.setValue(checked);
+  }
 
-    @UiHandler("branch")
-    void onBranchNameChanged(KeyUpEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            return;
-        }
+  @Override
+  public void setBranchChecked(boolean checked) {
+    branchSelection.setValue(checked);
+  }
 
-        delegate.branchNameChanged(branch.getValue());
-    }
+  @Override
+  public String getDirectoryName() {
+    return directoryName.getValue();
+  }
 
-    @Override
-    public void setProjectUrl(@NotNull String url) {
-        projectUrl.setText(url);
-        delegate.projectUrlChanged(url);
-    }
+  @Override
+  public void setDirectoryName(String directoryName) {
+    this.directoryName.setValue(directoryName);
+  }
 
-    @Override
-    public void markURLValid() {
-        projectUrl.markValid();
-    }
+  @Override
+  public void enableDirectoryNameField(boolean enable) {
+    directoryName.setEnabled(enable);
+  }
 
-    @Override
-    public void markURLInvalid() {
-        projectUrl.markInvalid();
-    }
+  @Override
+  public void setBranchName(String branchName) {
+    branch.setValue(branchName);
+  }
 
-    @Override
-    public void unmarkURL() {
-        projectUrl.unmark();
-    }
+  @Override
+  public void enableBranchNameField(boolean enable) {
+    branch.setEnabled(enable);
+  }
 
-    @Override
-    public void setURLErrorMessage(@NotNull String message) {
-        labelUrlError.setText(message != null ? message : "");
-    }
-
-    @Override
-    public void markNameValid() {
-        projectName.markValid();
-    }
-
-    @Override
-    public void markNameInvalid() {
-        projectName.markInvalid();
-    }
-
-    @Override
-    public void unmarkName() {
-        projectName.unmark();
-    }
-
-    @NotNull
-    @Override
-    public String getProjectName() {
-        return projectName.getValue();
-    }
-
-    @Override
-    public void setProjectName(@NotNull String projectName) {
-        this.projectName.setValue(projectName);
-        delegate.projectNameChanged(projectName);
-    }
-
-    @Override
-    public void focusInUrlInput() {
-        projectUrl.setFocus(true);
-    }
-
-    @Override
-    public void setInputsEnableState(boolean isEnabled) {
-        projectName.setEnabled(isEnabled);
-        projectDescription.setEnabled(isEnabled);
-        projectUrl.setEnabled(isEnabled);
-
-        if (isEnabled) {
-            focusInUrlInput();
-        }
-    }
-
-    @Override
-    public void setProjectDescription(@NotNull String projectDescription) {
-        this.projectDescription.setValue(projectDescription);
-    }
-
-    @Override
-    public boolean keepDirectory() {
-        return keepDirectory.getValue();
-    }
-
-    @Override
-    public boolean isBranchName() {
-        return branchSelection.getValue();
-    }
-
-    @Override
-    public void setKeepDirectoryChecked(boolean checked) {
-        keepDirectory.setValue(checked);
-    }
-
-    @Override
-    public void setBranchChecked(boolean checked) {
-        branchSelection.setValue(checked);
-    }
-
-    @Override
-    public String getDirectoryName() {
-        return directoryName.getValue();
-    }
-
-    @Override
-    public void setDirectoryName(String directoryName) {
-        this.directoryName.setValue(directoryName);
-    }
-
-    @Override
-    public void enableDirectoryNameField(boolean enable) {
-        directoryName.setEnabled(enable);
-    }
-
-    @Override
-    public void setBranchName(String branchName) {
-        branch.setValue(branchName);
-    }
-
-    @Override
-    public void enableBranchNameField(boolean enable) {
-        branch.setEnabled(enable);
-    }
-
-    @Override
-    public void focusBranchNameField() {
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
+  @Override
+  public void focusBranchNameField() {
+    Scheduler.get()
+        .scheduleDeferred(
+            new Scheduler.ScheduledCommand() {
+              @Override
+              public void execute() {
                 branch.setFocus(true);
                 branch.selectAll();
-            }
-        });
-    }
+              }
+            });
+  }
 
-    @Override
-    public String getBranchName() {
-        return branch.getValue();
-    }
+  @Override
+  public String getBranchName() {
+    return branch.getValue();
+  }
 
-    @Override
-    public void highlightDirectoryNameField(boolean highlight) {
-        if (highlight) {
-            directoryName.addStyleName(style.inputError());
-        } else {
-            directoryName.removeStyleName(style.inputError());
-        }
+  @Override
+  public void highlightDirectoryNameField(boolean highlight) {
+    if (highlight) {
+      directoryName.addStyleName(style.inputError());
+    } else {
+      directoryName.removeStyleName(style.inputError());
     }
+  }
 
-    @Override
-    public void focusDirectoryNameField() {
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
+  @Override
+  public void focusDirectoryNameField() {
+    Scheduler.get()
+        .scheduleDeferred(
+            new Scheduler.ScheduledCommand() {
+              @Override
+              public void execute() {
                 directoryName.setFocus(true);
                 directoryName.selectAll();
-            }
-        });
-    }
+              }
+            });
+  }
 
-    @Override
-    public void setDelegate(@NotNull ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public void setDelegate(@NotNull ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    interface GitImporterPageViewImplUiBinder extends UiBinder<DockLayoutPanel, GitImporterPageViewImpl> {
-    }
+  interface GitImporterPageViewImplUiBinder
+      extends UiBinder<DockLayoutPanel, GitImporterPageViewImpl> {}
 
-    public interface Style extends CssResource {
-        String mainPanel();
+  public interface Style extends CssResource {
+    String mainPanel();
 
-        String namePanel();
+    String namePanel();
 
-        String labelPosition();
+    String labelPosition();
 
-        String alignRight();
+    String alignRight();
 
-        String alignLeft();
+    String alignLeft();
 
-        String labelErrorPosition();
+    String labelErrorPosition();
 
-        String description();
+    String description();
 
-        String label();
+    String label();
 
-        String horizontalLine();
+    String horizontalLine();
 
-        String inputField();
+    String inputField();
 
-        String inputError();
-    }
+    String inputError();
+  }
 }

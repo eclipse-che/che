@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.core.internal.resources;
 
 import org.eclipse.core.resources.IResource;
@@ -16,80 +16,77 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.QualifiedName;
 
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public class ResourceProxy implements IResourceProxy {
-    protected final Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
-    protected ResourceInfo info;
-    protected IPath        fullPath;
+  protected final Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
+  protected ResourceInfo info;
+  protected IPath fullPath;
 
-    protected IResource resource;
+  protected IResource resource;
 
-    @Override
-    public long getModificationStamp() {
-        return 0;
-    }
+  @Override
+  public long getModificationStamp() {
+    return 0;
+  }
 
-    @Override
-    public boolean isAccessible() {
-        return false;
-    }
+  @Override
+  public boolean isAccessible() {
+    return false;
+  }
 
-    @Override
-    public boolean isDerived() {
-        return false;
-    }
+  @Override
+  public boolean isDerived() {
+    return false;
+  }
 
-    @Override
-    public boolean isLinked() {
-        return false;
-    }
+  @Override
+  public boolean isLinked() {
+    return false;
+  }
 
-    @Override
-    public boolean isPhantom() {
-        return false;
-    }
+  @Override
+  public boolean isPhantom() {
+    return false;
+  }
 
-    @Override
-    public boolean isHidden() {
-        return false;
-    }
+  @Override
+  public boolean isHidden() {
+    return false;
+  }
 
-    @Override
-    public boolean isTeamPrivateMember() {
-        return false;
-    }
+  @Override
+  public boolean isTeamPrivateMember() {
+    return false;
+  }
 
-    @Override
-    public String getName() {
-        return fullPath.lastSegment();
-    }
+  @Override
+  public String getName() {
+    return fullPath.lastSegment();
+  }
 
-    @Override
-    public Object getSessionProperty(QualifiedName qualifiedName) {
-        return null;
-    }
+  @Override
+  public Object getSessionProperty(QualifiedName qualifiedName) {
+    return null;
+  }
 
-    @Override
-    public int getType() {
-        return info.getType();
-    }
+  @Override
+  public int getType() {
+    return info.getType();
+  }
 
-    @Override
-    public IPath requestFullPath() {
-        return fullPath;
-    }
+  @Override
+  public IPath requestFullPath() {
+    return fullPath;
+  }
 
-    @Override
-    public IResource requestResource() {
-        if (resource == null)
-            resource = workspace.newResource(requestFullPath(), info.getType());
-        return resource;
-    }
+  @Override
+  public IResource requestResource() {
+    if (resource == null) resource = workspace.newResource(requestFullPath(), info.getType());
+    return resource;
+  }
 
-    protected void reset() {
-        fullPath = null;
-        resource = null;
-    }
+  protected void reset() {
+    fullPath = null;
+    resource = null;
+  }
 }

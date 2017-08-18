@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.maven.data;
 
 import java.io.Serializable;
@@ -20,60 +20,60 @@ import java.util.List;
  * @author Evgen Vidolob
  */
 public class MavenBuildBase implements Serializable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private String finalName;
-    private String defaultGoal;
-    private String directory;
-    private List<MavenResource> resources     = Collections.emptyList();
-    private List<MavenResource> testResources = Collections.emptyList();
-    private List<String>        filters       = Collections.emptyList();
+  private String finalName;
+  private String defaultGoal;
+  private String directory;
+  private List<MavenResource> resources = Collections.emptyList();
+  private List<MavenResource> testResources = Collections.emptyList();
+  private List<String> filters = Collections.emptyList();
 
-    public String getFinalName() {
-        return finalName;
-    }
+  public String getFinalName() {
+    return finalName;
+  }
 
-    public void setFinalName(String finalName) {
-        this.finalName = finalName;
-    }
+  public void setFinalName(String finalName) {
+    this.finalName = finalName;
+  }
 
-    public String getDefaultGoal() {
-        return defaultGoal;
-    }
+  public String getDefaultGoal() {
+    return defaultGoal;
+  }
 
-    public void setDefaultGoal(String defaultGoal) {
-        this.defaultGoal = defaultGoal;
-    }
+  public void setDefaultGoal(String defaultGoal) {
+    this.defaultGoal = defaultGoal;
+  }
 
-    public String getDirectory() {
-        return directory;
-    }
+  public String getDirectory() {
+    return directory;
+  }
 
-    public void setDirectory(String directory) {
-        this.directory = directory;
-    }
+  public void setDirectory(String directory) {
+    this.directory = directory;
+  }
 
-    public List<MavenResource> getResources() {
-        return resources;
-    }
+  public List<MavenResource> getResources() {
+    return resources;
+  }
 
-    public void setResources(List<MavenResource> resources) {
-        this.resources = resources;
-    }
+  public void setResources(List<MavenResource> resources) {
+    this.resources = resources;
+  }
 
-    public List<String> getFilters() {
-        return filters;
-    }
+  public List<String> getFilters() {
+    return filters;
+  }
 
-    public void setFilters(List<String> filters) {
-        this.filters = filters;
-    }
+  public void setFilters(List<String> filters) {
+    this.filters = filters;
+  }
 
-    public List<MavenResource> getTestResources() {
-        return testResources;
-    }
+  public List<MavenResource> getTestResources() {
+    return testResources;
+  }
 
-    public void setTestResources(List<MavenResource> testResources) {
-        this.testResources = testResources;
-    }
+  public void setTestResources(List<MavenResource> testResources) {
+    this.testResources = testResources;
+  }
 }

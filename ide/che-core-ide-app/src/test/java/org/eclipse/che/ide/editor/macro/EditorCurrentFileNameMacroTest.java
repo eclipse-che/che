@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.macro;
+
+import static org.junit.Assert.assertSame;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for the {@link EditorCurrentFileNameMacro}
@@ -27,39 +27,38 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class EditorCurrentFileNameMacroTest extends AbstractEditorMacroTest {
 
-    private EditorCurrentFileNameMacro provider;
+  private EditorCurrentFileNameMacro provider;
 
-    @Override
-    protected AbstractEditorMacro getProvider() {
-        return provider;
-    }
+  @Override
+  protected AbstractEditorMacro getProvider() {
+    return provider;
+  }
 
-    @Before
-    public void init() throws Exception {
-        provider = new EditorCurrentFileNameMacro(editorAgent, promiseProvider, localizationConstants);
-    }
+  @Before
+  public void init() throws Exception {
+    provider = new EditorCurrentFileNameMacro(editorAgent, promiseProvider, localizationConstants);
+  }
 
-    @Test
-    public void testGetKey() throws Exception {
-        assertSame(provider.getName(), EditorCurrentFileNameMacro.KEY);
-    }
+  @Test
+  public void testGetKey() throws Exception {
+    assertSame(provider.getName(), EditorCurrentFileNameMacro.KEY);
+  }
 
-    @Test
-    public void getValue() throws Exception {
-        initEditorWithTestFile();
+  @Test
+  public void getValue() throws Exception {
+    initEditorWithTestFile();
 
-        provider.expand();
+    provider.expand();
 
-        verify(editorAgent).getActiveEditor();
-        verify(promiseProvider).resolve(eq(FILE_NAME));
-    }
+    verify(editorAgent).getActiveEditor();
+    verify(promiseProvider).resolve(eq(FILE_NAME));
+  }
 
-    @Test
-    public void getEmptyValue() throws Exception {
-        provider.expand();
+  @Test
+  public void getEmptyValue() throws Exception {
+    provider.expand();
 
-        verify(editorAgent).getActiveEditor();
-        verify(promiseProvider).resolve(eq(""));
-    }
-
+    verify(editorAgent).getActiveEditor();
+    verify(promiseProvider).resolve(eq(""));
+  }
 }

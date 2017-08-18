@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.project;
 
 import com.google.gwt.inject.client.AbstractGinModule;
@@ -15,7 +15,6 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
@@ -45,31 +44,37 @@ import org.eclipse.che.ide.projecttype.wizard.ProjectWizardRegistryImpl;
  */
 public class ProjectApiModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        GinMapBinder.newMapBinder(binder(), String.class, Component.class)
-                    .addBinding("Project templates")
-                    .to(ProjectTemplatesComponent.class);
-        GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class)
-                    .addBinding("Project types")
-                    .to(ProjectTypeComponent.class);
+  @Override
+  protected void configure() {
+    GinMapBinder.newMapBinder(binder(), String.class, Component.class)
+        .addBinding("Project templates")
+        .to(ProjectTemplatesComponent.class);
+    GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class)
+        .addBinding("Project types")
+        .to(ProjectTypeComponent.class);
 
-        // clients for the REST services
-        bind(ProjectTypeServiceClient.class).to(ProjectTypeServiceClientImpl.class).in(Singleton.class);
-        bind(ProjectTemplateServiceClient.class).to(ProjectTemplateServiceClientImpl.class).in(Singleton.class);
-        bind(ProjectServiceClient.class).to(ProjectServiceClientImpl.class).in(Singleton.class);
+    // clients for the REST services
+    bind(ProjectTypeServiceClient.class).to(ProjectTypeServiceClientImpl.class).in(Singleton.class);
+    bind(ProjectTemplateServiceClient.class)
+        .to(ProjectTemplateServiceClientImpl.class)
+        .in(Singleton.class);
+    bind(ProjectServiceClient.class).to(ProjectServiceClientImpl.class).in(Singleton.class);
 
-        // registries
-        bind(ProjectTypeRegistry.class).to(ProjectTypeRegistryImpl.class).in(Singleton.class);
-        bind(ProjectTemplateRegistry.class).to(ProjectTemplateRegistryImpl.class).in(Singleton.class);
+    // registries
+    bind(ProjectTypeRegistry.class).to(ProjectTypeRegistryImpl.class).in(Singleton.class);
+    bind(ProjectTemplateRegistry.class).to(ProjectTemplateRegistryImpl.class).in(Singleton.class);
 
-        // project wizard
-        GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class).addBinding().to(BlankProjectWizardRegistrar.class);
+    // project wizard
+    GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class)
+        .addBinding()
+        .to(BlankProjectWizardRegistrar.class);
 
-        bind(ProjectWizardRegistry.class).to(ProjectWizardRegistryImpl.class).in(Singleton.class);
+    bind(ProjectWizardRegistry.class).to(ProjectWizardRegistryImpl.class).in(Singleton.class);
 
-        install(new GinFactoryModuleBuilder().build(ProjectWizardFactory.class));
+    install(new GinFactoryModuleBuilder().build(ProjectWizardFactory.class));
 
-        bind(PreSelectedProjectTypeManager.class).to(PreSelectedProjectTypeManagerImpl.class).in(Singleton.class);
-    }
+    bind(PreSelectedProjectTypeManager.class)
+        .to(PreSelectedProjectTypeManagerImpl.class)
+        .in(Singleton.class);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,30 +7,27 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.ide.messages;
 
 import org.eclipse.che.plugin.testing.ide.model.Printer.OutputType;
 
-/**
- * Data class represents test uncaptured message.
- */
+/** Data class represents test uncaptured message. */
 public class UncapturedOutputMessage extends ClientTestingMessage {
 
-    UncapturedOutputMessage() {
-    }
+  UncapturedOutputMessage() {}
 
-    @Override
-    public void visit(TestingMessageVisitor visitor) {
-        visitor.visitUncapturedOutput(this);
-    }
+  @Override
+  public void visit(TestingMessageVisitor visitor) {
+    visitor.visitUncapturedOutput(this);
+  }
 
-    public String getOutput() {
-        return getAttributeValue("output");
-    }
+  public String getOutput() {
+    return getAttributeValue("output");
+  }
 
-    public OutputType getOutputType() {
-        String outputType = getAttributeValue("outputType");
-        return OutputType.valueOf(outputType);
-    }
+  public OutputType getOutputType() {
+    String outputType = getAttributeValue("outputType");
+    return OutputType.valueOf(outputType);
+  }
 }

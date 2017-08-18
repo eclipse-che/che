@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.machine.parser;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
+import static org.testng.Assert.assertEquals;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Environment;
@@ -24,11 +29,6 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonMap;
-import static org.testng.Assert.assertEquals;
-
 /**
  * @author Alexander Garagatyi
  * @author Alexander Andrienko
@@ -36,65 +36,71 @@ import static org.testng.Assert.assertEquals;
 @Listeners(MockitoTestNGListener.class)
 public class DockerImageEnvironmentParserTest {
 
-    private static final String DEFAULT_MACHINE_NAME = "dev-machine";
-    private static final String DEFAULT_DOCKER_IMAGE = "codenvy/ubuntu_jdk8";
+  private static final String DEFAULT_MACHINE_NAME = "dev-machine";
+  private static final String DEFAULT_DOCKER_IMAGE = "codenvy/ubuntu_jdk8";
 
-    @Mock
-    private Environment       environment;
-    @Mock
-    private EnvironmentRecipe recipe;
+  @Mock private Environment environment;
+  @Mock private EnvironmentRecipe recipe;
 
-    @InjectMocks
-    public DockerImageEnvironmentParser parser;
+  @InjectMocks public DockerImageEnvironmentParser parser;
 
-    @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Environment of type '.*' doesn't support multiple machines, but contains machines: .*")
-    public void shouldThrowExceptionOnParseOfDockerimageEnvWithSeveralExtendedMachines() throws Exception {
-        EnvironmentImpl environment = createDockerimageEnvConfig();
-        environment.getMachines().put("anotherMachine", new ExtendedMachineImpl(emptyList(), emptyMap(), emptyMap()));
+  @Test(
+    expectedExceptions = IllegalArgumentException.class,
+    expectedExceptionsMessageRegExp =
+        "Environment of type '.*' doesn't support multiple machines, but contains machines: .*"
+  )
+  public void shouldThrowExceptionOnParseOfDockerimageEnvWithSeveralExtendedMachines()
+      throws Exception {
+    EnvironmentImpl environment = createDockerimageEnvConfig();
+    environment
+        .getMachines()
+        .put("anotherMachine", new ExtendedMachineImpl(emptyList(), emptyMap(), emptyMap()));
 
-        // when
-        parser.parse(environment);
-    }
+    // when
+    parser.parse(environment);
+  }
 
-    @Test
-    public void shouldBeAbleToParseDockerImageEnvironment() throws Exception {
-        // given
-        EnvironmentImpl environment = createDockerimageEnvConfig(DEFAULT_DOCKER_IMAGE, DEFAULT_MACHINE_NAME);
+  @Test
+  public void shouldBeAbleToParseDockerImageEnvironment() throws Exception {
+    // given
+    EnvironmentImpl environment =
+        createDockerimageEnvConfig(DEFAULT_DOCKER_IMAGE, DEFAULT_MACHINE_NAME);
 
-        CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-        expected.getServices().put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withImage(DEFAULT_DOCKER_IMAGE));
+    CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
+    expected
+        .getServices()
+        .put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withImage(DEFAULT_DOCKER_IMAGE));
 
-        // when
-        CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
+    // when
+    CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
 
-        // then
-        assertEquals(cheServicesEnvironment, expected);
-    }
+    // then
+    assertEquals(cheServicesEnvironment, expected);
+  }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Docker image environment parser doesn't support recipe type 'dockerfile'")
-    public void shouldReturnThrowExceptionInCaseEnvironmentContainsNotSupportedRecipeType() throws ServerException {
-        // given
-        EnvironmentImpl environment = createDockerimageEnvConfig(DEFAULT_DOCKER_IMAGE, DEFAULT_MACHINE_NAME);
-        environment.getRecipe().setType("dockerfile");
+  @Test(
+    expectedExceptions = IllegalArgumentException.class,
+    expectedExceptionsMessageRegExp =
+        "Docker image environment parser doesn't support recipe type 'dockerfile'"
+  )
+  public void shouldReturnThrowExceptionInCaseEnvironmentContainsNotSupportedRecipeType()
+      throws ServerException {
+    // given
+    EnvironmentImpl environment =
+        createDockerimageEnvConfig(DEFAULT_DOCKER_IMAGE, DEFAULT_MACHINE_NAME);
+    environment.getRecipe().setType("dockerfile");
 
-        // when
-        parser.parse(environment);
-    }
+    // when
+    parser.parse(environment);
+  }
 
-    private static EnvironmentImpl createDockerimageEnvConfig() {
-        return createDockerimageEnvConfig(DEFAULT_DOCKER_IMAGE, DEFAULT_MACHINE_NAME);
-    }
+  private static EnvironmentImpl createDockerimageEnvConfig() {
+    return createDockerimageEnvConfig(DEFAULT_DOCKER_IMAGE, DEFAULT_MACHINE_NAME);
+  }
 
-    private static EnvironmentImpl createDockerimageEnvConfig(String image, String machineName) {
-        return new EnvironmentImpl(new EnvironmentRecipeImpl("dockerimage",
-                                                             null,
-                                                             null,
-                                                             image),
-                                   singletonMap(machineName,
-                                                new ExtendedMachineImpl(emptyList(),
-                                                                        emptyMap(),
-                                                                        emptyMap())));
-    }
+  private static EnvironmentImpl createDockerimageEnvConfig(String image, String machineName) {
+    return new EnvironmentImpl(
+        new EnvironmentRecipeImpl("dockerimage", null, null, image),
+        singletonMap(machineName, new ExtendedMachineImpl(emptyList(), emptyMap(), emptyMap())));
+  }
 }

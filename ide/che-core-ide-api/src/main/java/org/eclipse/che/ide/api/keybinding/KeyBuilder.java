@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.keybinding;
 
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
@@ -20,90 +20,83 @@ import org.eclipse.che.ide.util.input.ModifierKeys;
  * @version $Id:
  */
 public class KeyBuilder {
-    private int modifiers;
+  private int modifiers;
 
-    private int charCode;
+  private int charCode;
 
-    public KeyBuilder() {
-    }
+  public KeyBuilder() {}
 
-    /**
-     * Add ACTION modifier.
-     * Action is abstraction for the primary modifier used for chording shortcuts
-     * in IDE. To stay consistent with native OS shortcuts, this will be set
-     * if CTRL is pressed on Linux or Windows, or if CMD is pressed on Mac.
-     *
-     * @return the KeyBuilder with action modifier added
-     */
-    public KeyBuilder action() {
-        modifiers |= ModifierKeys.ACTION;
-        return this;
-    }
+  /**
+   * Add ACTION modifier. Action is abstraction for the primary modifier used for chording shortcuts
+   * in IDE. To stay consistent with native OS shortcuts, this will be set if CTRL is pressed on
+   * Linux or Windows, or if CMD is pressed on Mac.
+   *
+   * @return the KeyBuilder with action modifier added
+   */
+  public KeyBuilder action() {
+    modifiers |= ModifierKeys.ACTION;
+    return this;
+  }
 
-    /**
-     * Add ALT modifier
-     *
-     * @return the KeyBuilder with ALT modifier added
-     */
-    public KeyBuilder alt() {
-        modifiers |= ModifierKeys.ALT;
-        return this;
-    }
+  /**
+   * Add ALT modifier
+   *
+   * @return the KeyBuilder with ALT modifier added
+   */
+  public KeyBuilder alt() {
+    modifiers |= ModifierKeys.ALT;
+    return this;
+  }
 
-    /**
-     * Add CTRL modifier.
-     * <b>
-     * This will only be set on Mac. (On Windows and Linux, the
-     * {@link KeyBuilder#action()} will be set instead.)
-     * </b>
-     *
-     * @return the KeyBuilder with CTRL modifier added
-     */
-    public KeyBuilder control() {
-        modifiers |= ModifierKeys.CTRL;
-        return this;
-    }
+  /**
+   * Add CTRL modifier. <b> This will only be set on Mac. (On Windows and Linux, the {@link
+   * KeyBuilder#action()} will be set instead.) </b>
+   *
+   * @return the KeyBuilder with CTRL modifier added
+   */
+  public KeyBuilder control() {
+    modifiers |= ModifierKeys.CTRL;
+    return this;
+  }
 
-    /**
-     * Add SHIFT modifier.
-     *
-     * @return the KeyBuilder with SHIFT modifier added
-     */
-    public KeyBuilder shift() {
-        modifiers |= ModifierKeys.SHIFT;
-        return this;
-    }
+  /**
+   * Add SHIFT modifier.
+   *
+   * @return the KeyBuilder with SHIFT modifier added
+   */
+  public KeyBuilder shift() {
+    modifiers |= ModifierKeys.SHIFT;
+    return this;
+  }
 
-    /**
-     * Key binding has no modifier keys.
-     *
-     * @return the KeyBuilder with NONE modifier added
-     */
-    public KeyBuilder none() {
-        modifiers = ModifierKeys.NONE;
-        return this;
-    }
+  /**
+   * Key binding has no modifier keys.
+   *
+   * @return the KeyBuilder with NONE modifier added
+   */
+  public KeyBuilder none() {
+    modifiers = ModifierKeys.NONE;
+    return this;
+  }
 
+  /**
+   * Set char code
+   *
+   * @param charCode the code of the character. If the character is upper-case it means that
+   *     KeyBuilder will be with the SHIFT modifier.
+   * @return the KeyBuilder with char code added
+   */
+  public KeyBuilder charCode(int charCode) {
+    this.charCode = charCode;
+    return this;
+  }
 
-    /**
-     * Set char code
-     *
-     * @param charCode
-     *         the code of the character. If the character is upper-case it means that KeyBuilder will be with the SHIFT modifier.
-     * @return the KeyBuilder with char code added
-     */
-    public KeyBuilder charCode(int charCode) {
-        this.charCode = charCode;
-        return this;
-    }
-
-    /**
-     * Build CharCodeWithModifiers object.
-     *
-     * @return new CharCodeWithModifiers object.
-     */
-    public CharCodeWithModifiers build() {
-        return new CharCodeWithModifiers(modifiers, charCode);
-    }
-
+  /**
+   * Build CharCodeWithModifiers object.
+   *
+   * @return new CharCodeWithModifiers object.
+   */
+  public CharCodeWithModifiers build() {
+    return new CharCodeWithModifiers(modifiers, charCode);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.client;
 
-/**
- * @author Alexander Garagatyi
- */
+/** @author Alexander Garagatyi */
 public interface MessageProcessor<T> {
-    void process(T message);
+  void process(T message);
 
-    MessageProcessor DEV_NULL = new MessageProcessor() {
+  MessageProcessor DEV_NULL =
+      new MessageProcessor() {
         @Override
-        public void process(Object Message) {
-        }
-    };
-
+        public void process(Object Message) {}
+      };
 }

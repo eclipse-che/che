@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.gwt.client.command;
 
 import com.google.gwt.core.client.GWT;
@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-
 import org.eclipse.che.ide.ext.gwt.client.GwtLocalizationConstants;
 
 /**
@@ -30,104 +29,102 @@ import org.eclipse.che.ide.ext.gwt.client.GwtLocalizationConstants;
  */
 public class GwtCommandPageViewImpl implements GwtCommandPageView {
 
-    private static final GwtPageViewImplUiBinder UI_BINDER = GWT.create(GwtPageViewImplUiBinder.class);
+  private static final GwtPageViewImplUiBinder UI_BINDER =
+      GWT.create(GwtPageViewImplUiBinder.class);
 
-    private final FlowPanel rootElement;
+  private final FlowPanel rootElement;
 
-    @UiField
-    TextBox                  workingDirectory;
-    @UiField
-    TextBox                  gwtModule;
-    @UiField
-    TextBox                  codeServerAddress;
-    @UiField(provided = true)
-    GwtLocalizationConstants locale;
+  @UiField TextBox workingDirectory;
+  @UiField TextBox gwtModule;
+  @UiField TextBox codeServerAddress;
 
-    private ActionDelegate delegate;
+  @UiField(provided = true)
+  GwtLocalizationConstants locale;
 
-    @Inject
-    public GwtCommandPageViewImpl(GwtLocalizationConstants locale) {
-        this.locale = locale;
+  private ActionDelegate delegate;
 
-        rootElement = UI_BINDER.createAndBindUi(this);
-    }
+  @Inject
+  public GwtCommandPageViewImpl(GwtLocalizationConstants locale) {
+    this.locale = locale;
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+    rootElement = UI_BINDER.createAndBindUi(this);
+  }
 
-    @Override
-    public Widget asWidget() {
-        return rootElement;
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    @Override
-    public String getWorkingDirectory() {
-        return workingDirectory.getValue();
-    }
+  @Override
+  public Widget asWidget() {
+    return rootElement;
+  }
 
-    @Override
-    public void setWorkingDirectory(String workingDirectory) {
-        this.workingDirectory.setValue(workingDirectory);
-    }
+  @Override
+  public String getWorkingDirectory() {
+    return workingDirectory.getValue();
+  }
 
-    @Override
-    public String getGwtModule() {
-        return gwtModule.getValue();
-    }
+  @Override
+  public void setWorkingDirectory(String workingDirectory) {
+    this.workingDirectory.setValue(workingDirectory);
+  }
 
-    @Override
-    public void setGwtModule(String gwtModule) {
-        this.gwtModule.setValue(gwtModule);
-    }
+  @Override
+  public String getGwtModule() {
+    return gwtModule.getValue();
+  }
 
-    @Override
-    public String getCodeServerAddress() {
-        return codeServerAddress.getValue();
-    }
+  @Override
+  public void setGwtModule(String gwtModule) {
+    this.gwtModule.setValue(gwtModule);
+  }
 
-    @Override
-    public void setCodeServerAddress(String codeServerAddress) {
-        this.codeServerAddress.setValue(codeServerAddress);
-    }
+  @Override
+  public String getCodeServerAddress() {
+    return codeServerAddress.getValue();
+  }
 
-    @UiHandler({"workingDirectory"})
-    void onWorkingDirectoryChanged(KeyUpEvent event) {
-        // workingDirectory value may not be updated immediately after keyUp
-        // therefore use the timer with delay=0
-        new Timer() {
-            @Override
-            public void run() {
-                delegate.onWorkingDirectoryChanged();
-            }
-        }.schedule(0);
-    }
+  @Override
+  public void setCodeServerAddress(String codeServerAddress) {
+    this.codeServerAddress.setValue(codeServerAddress);
+  }
 
-    @UiHandler({"gwtModule"})
-    void onGwtModuleChanged(KeyUpEvent event) {
-        // gwtModule value may not be updated immediately after keyUp
-        // therefore use the timer with delay=0
-        new Timer() {
-            @Override
-            public void run() {
-                delegate.onGwtModuleChanged();
-            }
-        }.schedule(0);
-    }
+  @UiHandler({"workingDirectory"})
+  void onWorkingDirectoryChanged(KeyUpEvent event) {
+    // workingDirectory value may not be updated immediately after keyUp
+    // therefore use the timer with delay=0
+    new Timer() {
+      @Override
+      public void run() {
+        delegate.onWorkingDirectoryChanged();
+      }
+    }.schedule(0);
+  }
 
-    @UiHandler({"codeServerAddress"})
-    void onCodeServerAddressChanged(KeyUpEvent event) {
-        // codeServerAddress value may not be updated immediately after keyUp
-        // therefore use the timer with delay=0
-        new Timer() {
-            @Override
-            public void run() {
-                delegate.onCodeServerAddressChanged();
-            }
-        }.schedule(0);
-    }
+  @UiHandler({"gwtModule"})
+  void onGwtModuleChanged(KeyUpEvent event) {
+    // gwtModule value may not be updated immediately after keyUp
+    // therefore use the timer with delay=0
+    new Timer() {
+      @Override
+      public void run() {
+        delegate.onGwtModuleChanged();
+      }
+    }.schedule(0);
+  }
 
-    interface GwtPageViewImplUiBinder extends UiBinder<FlowPanel, GwtCommandPageViewImpl> {
-    }
+  @UiHandler({"codeServerAddress"})
+  void onCodeServerAddressChanged(KeyUpEvent event) {
+    // codeServerAddress value may not be updated immediately after keyUp
+    // therefore use the timer with delay=0
+    new Timer() {
+      @Override
+      public void run() {
+        delegate.onCodeServerAddressChanged();
+      }
+    }.schedule(0);
+  }
+
+  interface GwtPageViewImplUiBinder extends UiBinder<FlowPanel, GwtCommandPageViewImpl> {}
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.machine.authentication.server;
-
-import org.eclipse.che.api.core.NotFoundException;
-import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+
+import java.util.HashMap;
+import java.util.Map;
+import org.eclipse.che.api.core.NotFoundException;
+import org.testng.annotations.Test;
 
 /**
  * Tests for {@link MachineTokenRegistry}.
@@ -27,33 +26,31 @@ import static org.testng.Assert.assertTrue;
  */
 public class MachineTokenRegistryTest {
 
-    @Test
-    public void removeTokensShouldReturnUserToTokenMap() throws Exception {
-        final MachineTokenRegistry registry = new MachineTokenRegistry();
+  @Test
+  public void removeTokensShouldReturnUserToTokenMap() throws Exception {
+    final MachineTokenRegistry registry = new MachineTokenRegistry();
 
-        final Map<String, String> userToToken = new HashMap<>();
-        userToToken.put("user1", registry.generateToken("user1", "workspace123"));
-        userToToken.put("user2", registry.generateToken("user2", "workspace123"));
-        userToToken.put("user3", registry.generateToken("user3", "workspace123"));
-        registry.generateToken("user1", "workspace234");
+    final Map<String, String> userToToken = new HashMap<>();
+    userToToken.put("user1", registry.generateToken("user1", "workspace123"));
+    userToToken.put("user2", registry.generateToken("user2", "workspace123"));
+    userToToken.put("user3", registry.generateToken("user3", "workspace123"));
+    registry.generateToken("user1", "workspace234");
 
+    final Map<String, String> removedTokens = registry.removeTokens("workspace123");
 
-        final Map<String, String> removedTokens = registry.removeTokens("workspace123");
+    assertEquals(removedTokens, userToToken);
+    assertTrue(exists(registry, "user1", "workspace234"));
+    assertFalse(exists(registry, "user1", "workspace123"));
+    assertFalse(exists(registry, "user2", "workspace123"));
+    assertFalse(exists(registry, "user3", "workspace123"));
+  }
 
-
-        assertEquals(removedTokens, userToToken);
-        assertTrue(exists(registry, "user1", "workspace234"));
-        assertFalse(exists(registry, "user1", "workspace123"));
-        assertFalse(exists(registry, "user2", "workspace123"));
-        assertFalse(exists(registry, "user3", "workspace123"));
+  private static boolean exists(MachineTokenRegistry registry, String user, String workspace) {
+    try {
+      registry.getOrCreateToken(user, workspace);
+      return true;
+    } catch (NotFoundException e) {
+      return false;
     }
-
-    private static boolean exists(MachineTokenRegistry registry, String user, String workspace) {
-        try {
-            registry.getOrCreateToken(user, workspace);
-            return true;
-        } catch (NotFoundException e) {
-            return false;
-        }
-    }
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.loaders;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,135 +23,130 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 /**
- * Implementation of PopupLoader.
- * This loader is UI widget appearing on the top of the IDE.
+ * Implementation of PopupLoader. This loader is UI widget appearing on the top of the IDE.
  *
  * @author Vitaliy Guliy
  */
 public class PopupLoaderImpl extends Composite implements PopupLoader {
 
-    interface LoaderPopupImplUiBinder extends UiBinder<FlowPanel, PopupLoaderImpl> {
+  interface LoaderPopupImplUiBinder extends UiBinder<FlowPanel, PopupLoaderImpl> {}
+
+  // Loader title
+  String title;
+
+  // Loader title animation suffix
+  String titleSuffix = "";
+
+  // Loader description
+  String description;
+
+  @UiField Label titleLabel;
+
+  @UiField Label descriptionLabel;
+
+  @UiField FlowPanel customWidget;
+
+  @UiField Hyperlink downloadOutputs;
+
+  private ActionDelegate actionDelegate;
+
+  @AssistedInject
+  public PopupLoaderImpl(
+      LoaderPopupImplUiBinder uiBinder,
+      @NotNull @Assisted("title") String title,
+      @NotNull @Assisted("description") String description) {
+    initWidget(uiBinder.createAndBindUi(this));
+
+    this.title = title;
+    this.description = description;
+
+    titleLabel.setText(title);
+    descriptionLabel.setText(description);
+
+    // Start show animation
+    getElement().addClassName("inDown");
+
+    // Attach to the root
+    RootPanel.get().add(this);
+
+    // Start animation timer
+    playTimer.scheduleRepeating(1000);
+  }
+
+  @AssistedInject
+  public PopupLoaderImpl(
+      LoaderPopupImplUiBinder uiBinder,
+      @NotNull @Assisted("title") String title,
+      @NotNull @Assisted("description") String description,
+      @Nullable @Assisted("widget") Widget widget) {
+    this(uiBinder, title, description);
+
+    if (widget != null) {
+      customWidget.clear();
+      customWidget.setVisible(true);
+      customWidget.add(widget);
+      playTimer.cancel();
     }
+  }
 
-    // Loader title
-    String title;
+  @Override
+  public void setSuccess() {
+    // Stop animation timer
+    playTimer.cancel();
 
-    // Loader title animation suffix
-    String titleSuffix = "";
+    // Start hide animation
+    getElement().addClassName("outDown");
 
-    // Loader description
-    String description;
+    // Remove from the parent
+    new Timer() {
+      @Override
+      public void run() {
+        removeFromParent();
+      }
+    }.schedule(1000);
+  }
 
-    @UiField
-    Label titleLabel;
+  @Override
+  public void setError() {
+    // Stop animation
+    playTimer.cancel();
 
-    @UiField
-    Label descriptionLabel;
+    // Reset title
+    titleLabel.setText(title);
+  }
 
-    @UiField
-    FlowPanel customWidget;
+  @Override
+  public void showDownloadButton() {
+    customWidget.setVisible(true);
+    downloadOutputs.setVisible(true);
+  }
 
-    @UiField
-    Hyperlink downloadOutputs;
+  @Override
+  public void setDelegate(ActionDelegate actionDelegate) {
+    this.actionDelegate = actionDelegate;
+  }
 
-    private ActionDelegate actionDelegate;
-
-    @AssistedInject
-    public PopupLoaderImpl(LoaderPopupImplUiBinder uiBinder,
-                           @NotNull @Assisted("title") String title,
-                           @NotNull @Assisted("description") String description) {
-        initWidget(uiBinder.createAndBindUi(this));
-
-        this.title = title;
-        this.description = description;
-
-        titleLabel.setText(title);
-        descriptionLabel.setText(description);
-
-        // Start show animation
-        getElement().addClassName("inDown");
-
-        // Attach to the root
-        RootPanel.get().add(this);
-
-        // Start animation timer
-        playTimer.scheduleRepeating(1000);
+  @UiHandler("downloadOutputs")
+  void downloadLogsClicked(ClickEvent e) {
+    if (actionDelegate != null) {
+      actionDelegate.onDownloadLogs();
     }
+  }
 
-    @AssistedInject
-    public PopupLoaderImpl(LoaderPopupImplUiBinder uiBinder,
-                           @NotNull @Assisted("title") String title,
-                           @NotNull @Assisted("description") String description,
-                           @Nullable @Assisted("widget") Widget widget) {
-        this(uiBinder, title, description);
-
-        if (widget != null) {
-            customWidget.clear();
-            customWidget.setVisible(true);
-            customWidget.add(widget);
-            playTimer.cancel();
-        }
-    }
-
-    @Override
-    public void setSuccess() {
-        // Stop animation timer
-        playTimer.cancel();
-
-        // Start hide animation
-        getElement().addClassName("outDown");
-
-        // Remove from the parent
-        new Timer() {
-            @Override
-            public void run() {
-                removeFromParent();
-            }
-        }.schedule(1000);
-    }
-
-    @Override
-    public void setError() {
-        // Stop animation
-        playTimer.cancel();
-
-        // Reset title
-        titleLabel.setText(title);
-    }
-
-    @Override
-    public void showDownloadButton() {
-        customWidget.setVisible(true);
-        downloadOutputs.setVisible(true);
-    }
-
-    @Override
-    public void setDelegate(ActionDelegate actionDelegate) {
-        this.actionDelegate = actionDelegate;
-    }
-
-    @UiHandler("downloadOutputs")
-    void downloadLogsClicked(ClickEvent e) {
-        if (actionDelegate != null) {
-            actionDelegate.onDownloadLogs();
-        }
-    }
-
-    private Timer playTimer = new Timer() {
+  private Timer playTimer =
+      new Timer() {
         @Override
         public void run() {
-            titleSuffix += ".";
-            if (titleSuffix.length() > 3) {
-                titleSuffix = ".";
-            }
+          titleSuffix += ".";
+          if (titleSuffix.length() > 3) {
+            titleSuffix = ".";
+          }
 
-            titleLabel.setText(title + titleSuffix);
+          titleLabel.setText(title + titleSuffix);
         }
-    };
-
+      };
 }

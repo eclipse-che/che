@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 /**
@@ -20,38 +19,38 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
  * @author Dmitry Shnurenko
  */
 public class ModuleCreatedEvent extends GwtEvent<ModuleCreatedEvent.ModuleCreatedHandler> {
-    public interface ModuleCreatedHandler extends EventHandler {
-        void onModuleCreated(ModuleCreatedEvent event);
+  public interface ModuleCreatedHandler extends EventHandler {
+    void onModuleCreated(ModuleCreatedEvent event);
+  }
+
+  private static Type<ModuleCreatedHandler> TYPE;
+
+  public static Type<ModuleCreatedHandler> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<>();
     }
+    return TYPE;
+  }
 
-    private static Type<ModuleCreatedHandler> TYPE;
+  private ProjectConfigDto module;
 
-    public static Type<ModuleCreatedHandler> getType() {
-        if (TYPE == null) {
-            TYPE = new Type<>();
-        }
-        return TYPE;
-    }
+  public ModuleCreatedEvent(ProjectConfigDto module) {
+    this.module = module;
+  }
 
-    private ProjectConfigDto module;
+  public ProjectConfigDto getModule() {
+    return module;
+  }
 
-    public ModuleCreatedEvent(ProjectConfigDto module) {
-        this.module = module;
-    }
+  /** {@inheritDoc} */
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  @Override
+  public Type<ModuleCreatedHandler> getAssociatedType() {
+    return (Type) TYPE;
+  }
 
-    public ProjectConfigDto getModule() {
-        return module;
-    }
-
-    /** {@inheritDoc} */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Override
-    public Type<ModuleCreatedHandler> getAssociatedType() {
-        return (Type)TYPE;
-    }
-
-    @Override
-    protected void dispatch(ModuleCreatedHandler handler) {
-        handler.onModuleCreated(this);
-    }
+  @Override
+  protected void dispatch(ModuleCreatedHandler handler) {
+    handler.onModuleCreated(this);
+  }
 }

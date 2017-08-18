@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.parts.base;
 
 import com.google.gwt.core.client.GWT;
@@ -22,7 +22,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
@@ -32,61 +31,56 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  */
 public class ToolButton extends Composite implements HasClickHandlers {
 
-    /** UIBinder class for this TabButton. */
-    interface TabButtonUiBinder extends UiBinder<Widget, ToolButton> {
-    }
+  /** UIBinder class for this TabButton. */
+  interface TabButtonUiBinder extends UiBinder<Widget, ToolButton> {}
 
-    /** UIBinder for this TabButton. */
-    private static TabButtonUiBinder uiBinder = GWT.create(TabButtonUiBinder.class);
+  /** UIBinder for this TabButton. */
+  private static TabButtonUiBinder uiBinder = GWT.create(TabButtonUiBinder.class);
 
-    @UiField
-    FlowPanel iconPanel;
+  @UiField FlowPanel iconPanel;
 
-    /**
-     * Creates new button based on SVG image.
-     *
-     * @param image
-     *         SVG image
-     */
-    public ToolButton(SVGImage image) {
-        initWidget(uiBinder.createAndBindUi(this));
-        iconPanel.add(image);
+  /**
+   * Creates new button based on SVG image.
+   *
+   * @param image SVG image
+   */
+  public ToolButton(SVGImage image) {
+    initWidget(uiBinder.createAndBindUi(this));
+    iconPanel.add(image);
 
-        blockDoubleClicking();
-    }
+    blockDoubleClicking();
+  }
 
-    /**
-     * Creates new button containing new Image created from HTML.
-     *
-     * @param htmlImageResource
-     *         HTML content for new image
-     */
-    public ToolButton(String htmlImageResource) {
-        initWidget(uiBinder.createAndBindUi(this));
+  /**
+   * Creates new button containing new Image created from HTML.
+   *
+   * @param htmlImageResource HTML content for new image
+   */
+  public ToolButton(String htmlImageResource) {
+    initWidget(uiBinder.createAndBindUi(this));
 
-        FlowPanel image = new FlowPanel();
-        image.getElement().setInnerHTML(htmlImageResource);
-        iconPanel.add(image);
+    FlowPanel image = new FlowPanel();
+    image.getElement().setInnerHTML(htmlImageResource);
+    iconPanel.add(image);
 
-        blockDoubleClicking();
-    }
+    blockDoubleClicking();
+  }
 
-    @Override
-    public HandlerRegistration addClickHandler(ClickHandler clickHandler) {
-        return iconPanel.addDomHandler(clickHandler, ClickEvent.getType());
-    }
+  @Override
+  public HandlerRegistration addClickHandler(ClickHandler clickHandler) {
+    return iconPanel.addDomHandler(clickHandler, ClickEvent.getType());
+  }
 
-    /**
-     * Blocks double clicking on the button and on the parent element.
-     */
-    private void blockDoubleClicking() {
-        addDomHandler(new DoubleClickHandler() {
-            @Override
-            public void onDoubleClick(DoubleClickEvent event) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
-        }, DoubleClickEvent.getType());
-    }
-
+  /** Blocks double clicking on the button and on the parent element. */
+  private void blockDoubleClicking() {
+    addDomHandler(
+        new DoubleClickHandler() {
+          @Override
+          public void onDoubleClick(DoubleClickEvent event) {
+            event.stopPropagation();
+            event.preventDefault();
+          }
+        },
+        DoubleClickEvent.getType());
+  }
 }

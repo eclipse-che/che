@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.keycloak.server;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -23,9 +23,9 @@ import org.eclipse.che.commons.subject.Subject;
  * @author Max Shaposhnik (mshaposhnik@redhat.com)
  */
 public class KeycloakTokenValidator implements TokenValidator {
-    @Override
-    public User validateToken(String token) throws ConflictException {
-        final Subject subject = EnvironmentContext.getCurrent().getSubject();
-        return new UserImpl(subject.getUserId(), "", subject.getUserName());
-    }
+  @Override
+  public User validateToken(String token) throws ConflictException {
+    final Subject subject = EnvironmentContext.getCurrent().getSubject();
+    return new UserImpl(subject.getUserId(), "", subject.getUserName());
+  }
 }

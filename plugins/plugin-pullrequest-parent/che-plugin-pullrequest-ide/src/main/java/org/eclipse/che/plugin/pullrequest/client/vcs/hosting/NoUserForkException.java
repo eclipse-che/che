@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.pullrequest.client.vcs.hosting;
 
 import javax.validation.constraints.NotNull;
@@ -17,15 +17,14 @@ import javax.validation.constraints.NotNull;
  */
 public class NoUserForkException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructs an instance of {@link NoUserForkException}.
-     *
-     * @param user
-     *         the user.
-     */
-    public NoUserForkException(@NotNull final String user) {
-        super("No fork for user: " + user);
-    }
+  /**
+   * Constructs an instance of {@link NoUserForkException}.
+   *
+   * @param user the user.
+   */
+  public NoUserForkException(@NotNull final String user) {
+    super("No fork for user: " + user);
+  }
 }

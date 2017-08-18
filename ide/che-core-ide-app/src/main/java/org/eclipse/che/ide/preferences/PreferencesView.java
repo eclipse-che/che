@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.preferences;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-
-import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
-
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 
 /**
  * Interface of Preferences view.
@@ -24,74 +22,62 @@ import java.util.Set;
  * @author <a href="mailto:aplotnikov@exoplatform.com">Andrey Plotnikov</a>
  */
 public interface PreferencesView extends View<PreferencesView.ActionDelegate> {
-    /** Needs for delegate some function into preferences view. */
-    interface ActionDelegate {
-        /**
-         * Performs actions when user click Save button.
-         * Actually when button is pressed, preferences must be stored on the server.
-         */
-        void onSaveClicked();
+  /** Needs for delegate some function into preferences view. */
+  interface ActionDelegate {
+    /**
+     * Performs actions when user click Save button. Actually when button is pressed, preferences
+     * must be stored on the server.
+     */
+    void onSaveClicked();
 
-        /**
-         * Loads preferences from the server discarding any changes.
-         */
-        void onRefreshClicked();
+    /** Loads preferences from the server discarding any changes. */
+    void onRefreshClicked();
 
-        /**
-         * Performs any actions appropriate in response to the user
-         * having pressed the Close button
-         */
-        void onCloseClicked();
-
-        /**
-         * Performs any actions appropriate in response to select some preference.
-         *
-         * @param preference
-         *         selected preference
-         */
-        void onPreferenceSelected(PreferencePagePresenter preference);
-
-        /**
-         * Performs any actions on the preferences window closing.
-         */
-        void onCloseWindow();
-
-    }
+    /** Performs any actions appropriate in response to the user having pressed the Close button */
+    void onCloseClicked();
 
     /**
-     * Select the pointed preference.
+     * Performs any actions appropriate in response to select some preference.
      *
-     * @param preference
-     *         preference to select.
+     * @param preference selected preference
      */
-    void selectPreference(PreferencePagePresenter preference);
+    void onPreferenceSelected(PreferencePagePresenter preference);
 
-    /** Close view. */
-    void close();
+    /** Performs any actions on the preferences window closing. */
+    void onCloseWindow();
+  }
 
-    /** Show preferences. */
-    void show();
+  /**
+   * Select the pointed preference.
+   *
+   * @param preference preference to select.
+   */
+  void selectPreference(PreferencePagePresenter preference);
 
-    /**
-     * Returns content panel.
-     *
-     * @return
-     */
-    AcceptsOneWidget getContentPanel();
+  /** Close view. */
+  void close();
 
-    /**
-     * Enables or disables Save button.
-     *
-     * @param enabled
-     *         <code>true</code> to enable the button, <code>false</code>
-     *         to disable it
-     */
-    void enableSaveButton(boolean enabled);
+  /** Show preferences. */
+  void show();
 
-    /**
-     * Sets available preferences.
-     *
-     * @param preferences
-     */
-    void setPreferences(Map<String, Set<PreferencePagePresenter>> preferences);
+  /**
+   * Returns content panel.
+   *
+   * @return
+   */
+  AcceptsOneWidget getContentPanel();
+
+  /**
+   * Enables or disables Save button.
+   *
+   * @param enabled <code>true</code> to enable the button, <code>false</code> to disable it
+   */
+  void enableSaveButton(boolean enabled);
+
+  /**
+   * Sets available preferences.
+   *
+   * @param preferences
+   */
+  void setPreferences(Map<String, Set<PreferencePagePresenter>> preferences);
 }

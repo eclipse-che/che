@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.model.factory;
 
 /**
@@ -17,23 +17,15 @@ package org.eclipse.che.api.core.model.factory;
  */
 public interface Policies {
 
-    /**
-     * Restrict access if referer header doesn't match this field
-     */
-    String getReferer();
+  /** Restrict access if referer header doesn't match this field */
+  String getReferer();
 
-    /**
-     * Restrict access for factories used earlier then author supposes
-     */
-    Long getSince();
+  /** Restrict access for factories used earlier then author supposes */
+  Long getSince();
 
-    /**
-     * Restrict access for factories used later then author supposes
-     */
-    Long getUntil();
+  /** Restrict access for factories used later then author supposes */
+  Long getUntil();
 
-    /**
-     * Workspace creation strategy
-     */
-    String getCreate();
+  /** Workspace creation strategy */
+  String getCreate();
 }

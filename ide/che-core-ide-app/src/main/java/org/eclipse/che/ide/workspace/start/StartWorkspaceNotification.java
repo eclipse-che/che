@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace.start;
 
 import com.google.gwt.core.client.Callback;
@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -28,86 +29,85 @@ import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.workspace.WorkspaceComponentProvider;
 
-import java.util.List;
-
 /**
  * Toast notification appearing on the top of the IDE and containing a proposal message to start
- *   current workspace and the button to perform the operation.
+ * current workspace and the button to perform the operation.
  *
  * @author Vitaliy Guliy
  */
 @Singleton
 public class StartWorkspaceNotification {
 
-    interface WorkspaceStarterUiBinder extends UiBinder<Widget, StartWorkspaceNotification> {
-    }
+  interface WorkspaceStarterUiBinder extends UiBinder<Widget, StartWorkspaceNotification> {}
 
-    private final WorkspaceStarterUiBinder      uiBinder;
+  private final WorkspaceStarterUiBinder uiBinder;
 
-    private final LoaderPresenter               loader;
-    private final WorkspaceServiceClient        workspaceServiceClient;
-    private final WorkspaceComponentProvider    workspaceComponentProvider;
+  private final LoaderPresenter loader;
+  private final WorkspaceServiceClient workspaceServiceClient;
+  private final WorkspaceComponentProvider workspaceComponentProvider;
 
-    @UiField
-    Button                                      button;
+  @UiField Button button;
 
-    @UiField
-    CheckBox                                    restore;
+  @UiField CheckBox restore;
 
-    private String                              workspaceID;
+  private String workspaceID;
 
-    @Inject
-    public StartWorkspaceNotification(LoaderPresenter loader,
-                                      WorkspaceStarterUiBinder uiBinder,
-                                      WorkspaceServiceClient workspaceServiceClient,
-                                      WorkspaceComponentProvider workspaceComponentProvider) {
-        this.loader = loader;
-        this.uiBinder = uiBinder;
-        this.workspaceServiceClient = workspaceServiceClient;
-        this.workspaceComponentProvider = workspaceComponentProvider;
-    }
+  @Inject
+  public StartWorkspaceNotification(
+      LoaderPresenter loader,
+      WorkspaceStarterUiBinder uiBinder,
+      WorkspaceServiceClient workspaceServiceClient,
+      WorkspaceComponentProvider workspaceComponentProvider) {
+    this.loader = loader;
+    this.uiBinder = uiBinder;
+    this.workspaceServiceClient = workspaceServiceClient;
+    this.workspaceComponentProvider = workspaceComponentProvider;
+  }
 
-    /**
-     * Displays a notification with a proposal to start workspace with ID.
-     *
-     * @param workspaceID
-     *          workspace ID
-     */
-    public void show(String workspaceID) {
-        this.workspaceID = workspaceID;
+  /**
+   * Displays a notification with a proposal to start workspace with ID.
+   *
+   * @param workspaceID workspace ID
+   */
+  public void show(String workspaceID) {
+    this.workspaceID = workspaceID;
 
-        workspaceServiceClient.getSnapshot(workspaceID).then(new Operation<List<SnapshotDto>>() {
-            @Override
-            public void apply(List<SnapshotDto> snapshots) throws OperationException {
+    workspaceServiceClient
+        .getSnapshot(workspaceID)
+        .then(
+            new Operation<List<SnapshotDto>>() {
+              @Override
+              public void apply(List<SnapshotDto> snapshots) throws OperationException {
                 Widget widget = uiBinder.createAndBindUi(StartWorkspaceNotification.this);
 
                 if (snapshots.isEmpty()) {
-                    restore.setVisible(false);
+                  restore.setVisible(false);
                 }
 
                 loader.show(LoaderPresenter.Phase.WORKSPACE_STOPPED, widget);
-            }
-        });
-    }
+              }
+            });
+  }
 
-    /**
-     * Hides a notification.
-     */
-    public void hide() {
-        loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
-    }
+  /** Hides a notification. */
+  public void hide() {
+    loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
+  }
 
-    @UiHandler("button")
-    void startClicked(ClickEvent e) {
-        loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
-        workspaceComponentProvider.get().startWorkspace(workspaceID, new Callback<Component, Exception>() {
-            @Override
-            public void onSuccess(Component result) {
-            }
-            @Override
-            public void onFailure(Exception reason) {
-            }
-        }, restore.getValue());
-    }
+  @UiHandler("button")
+  void startClicked(ClickEvent e) {
+    loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
+    workspaceComponentProvider
+        .get()
+        .startWorkspace(
+            workspaceID,
+            new Callback<Component, Exception>() {
+              @Override
+              public void onSuccess(Component result) {}
 
+              @Override
+              public void onFailure(Exception reason) {}
+            },
+            restore.getValue());
+  }
 }

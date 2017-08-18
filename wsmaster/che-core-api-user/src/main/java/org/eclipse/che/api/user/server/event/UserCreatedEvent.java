@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.user.server.event;
 
 import org.eclipse.che.api.core.model.user.User;
@@ -22,11 +22,13 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 @EventOrigin("user")
 public class UserCreatedEvent {
 
-    private final User user;
+  private final User user;
 
-    public UserCreatedEvent(User user) {this.user = user;}
+  public UserCreatedEvent(User user) {
+    this.user = user;
+  }
 
-    public User getUser() {
-        return user;
-    }
+  public User getUser() {
+    return user;
+  }
 }

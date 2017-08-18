@@ -15,10 +15,9 @@
  */
 package org.eclipse.che.commons.lang;
 
-
-import java.io.OutputStreamWriter;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 /**
  * Stream writer which flushes after each write operation.
@@ -27,22 +26,22 @@ import java.io.IOException;
  */
 public class FlushingStreamWriter extends OutputStreamWriter {
 
-    public FlushingStreamWriter(OutputStream out) {
-        super(out);
-    }
+  public FlushingStreamWriter(OutputStream out) {
+    super(out);
+  }
 
-    public void write(char[] cbuf, int off, int len) throws IOException {
-        super.write(cbuf, off, len);
-        flush();
-    }
+  public void write(char[] cbuf, int off, int len) throws IOException {
+    super.write(cbuf, off, len);
+    flush();
+  }
 
-    public void write(int c) throws IOException {
-        super.write(c);
-        flush();
-    }
+  public void write(int c) throws IOException {
+    super.write(c);
+    flush();
+  }
 
-    public void write(String str, int off, int len) throws IOException {
-        super.write(str, off, len);
-        flush();
-    }
+  public void write(String str, int off, int len) throws IOException {
+    super.write(str, off, len);
+    flush();
+  }
 }

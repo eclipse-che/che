@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.search;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -26,7 +26,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.search.selectpath.SelectPathPresenter;
 import org.eclipse.che.ide.ui.window.Window;
@@ -39,200 +38,205 @@ import org.eclipse.che.ide.ui.window.Window;
 @Singleton
 public class FullTextSearchViewImpl extends Window implements FullTextSearchView {
 
-    interface FullTextSearchViewImplUiBinder extends UiBinder<Widget, FullTextSearchViewImpl> {
-    }
+  interface FullTextSearchViewImplUiBinder extends UiBinder<Widget, FullTextSearchViewImpl> {}
 
-    @UiField
-    Label                    errLabel;
-    @UiField(provided = true)
-    CoreLocalizationConstant locale;
-    @UiField
-    TextBox  text;
-    @UiField
-    TextBox  filesMask;
-    @UiField
-    CheckBox isUseFileMask;
-    @UiField
-    CheckBox isUseDirectory;
-    @UiField
-    CheckBox wholeWordsOnly;
-    @UiField
-    TextBox  directory;
-    @UiField
-    Button   selectPathButton;
+  @UiField Label errLabel;
 
-    Button cancelButton;
-    Button acceptButton;
+  @UiField(provided = true)
+  CoreLocalizationConstant locale;
 
-    private ActionDelegate delegate;
+  @UiField TextBox text;
+  @UiField TextBox filesMask;
+  @UiField CheckBox isUseFileMask;
+  @UiField CheckBox isUseDirectory;
+  @UiField CheckBox wholeWordsOnly;
+  @UiField TextBox directory;
+  @UiField Button selectPathButton;
 
-    private final SelectPathPresenter selectPathPresenter;
+  Button cancelButton;
+  Button acceptButton;
 
-    @Inject
-    public FullTextSearchViewImpl(CoreLocalizationConstant locale,
-                                  final SelectPathPresenter selectPathPresenter,
-                                  FullTextSearchViewImplUiBinder uiBinder) {
-        this.locale = locale;
-        this.selectPathPresenter = selectPathPresenter;
+  private ActionDelegate delegate;
 
-        setTitle(locale.textSearchTitle());
+  private final SelectPathPresenter selectPathPresenter;
 
-        Widget widget = uiBinder.createAndBindUi(this);
-        setWidget(widget);
+  @Inject
+  public FullTextSearchViewImpl(
+      CoreLocalizationConstant locale,
+      final SelectPathPresenter selectPathPresenter,
+      FullTextSearchViewImplUiBinder uiBinder) {
+    this.locale = locale;
+    this.selectPathPresenter = selectPathPresenter;
 
-        createButtons();
-        addHandlers();
+    setTitle(locale.textSearchTitle());
 
-        directory.setReadOnly(true);
-    }
+    Widget widget = uiBinder.createAndBindUi(this);
+    setWidget(widget);
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+    createButtons();
+    addHandlers();
 
-    @Override
-    public void close() {
-        hide();
-    }
+    directory.setReadOnly(true);
+  }
 
-    @Override
-    public void showDialog() {
-        acceptButton.setEnabled(false);
-        isUseFileMask.setValue(false);
-        filesMask.setEnabled(false);
-        isUseDirectory.setValue(false);
-        wholeWordsOnly.setValue(false);
-        directory.setEnabled(false);
-        selectPathButton.setEnabled(false);
-        directory.setText("");
-        filesMask.setText("*.*");
-        directory.setText("/");
-        errLabel.setText("");
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-        new Timer() {
-            @Override
-            public void run() {
-                text.setFocus(true);
-            }
-        }.schedule(100);
+  @Override
+  public void close() {
+    hide();
+  }
 
-        super.show();
-    }
+  @Override
+  public void showDialog() {
+    acceptButton.setEnabled(false);
+    isUseFileMask.setValue(false);
+    filesMask.setEnabled(false);
+    isUseDirectory.setValue(false);
+    wholeWordsOnly.setValue(false);
+    directory.setEnabled(false);
+    selectPathButton.setEnabled(false);
+    directory.setText("");
+    filesMask.setText("*.*");
+    directory.setText("/");
+    errLabel.setText("");
 
-    @Override
-    public void setPathDirectory(String path) {
-        directory.setText(path);
-    }
+    new Timer() {
+      @Override
+      public void run() {
+        text.setFocus(true);
+      }
+    }.schedule(100);
 
-    @Override
-    public String getSearchText() {
-        return text.getText();
-    }
+    super.show();
+  }
 
-    @Override
-    public String getFileMask() {
-        return isUseFileMask.getValue() ? filesMask.getText() : "";
-    }
+  @Override
+  public void setPathDirectory(String path) {
+    directory.setText(path);
+  }
 
-    @Override
-    public String getPathToSearch() {
-        return isUseDirectory.getValue() ? directory.getText() : "";
-    }
+  @Override
+  public String getSearchText() {
+    return text.getText();
+  }
 
-    @Override
-    public void showErrorMessage(String message) {
-        errLabel.setText(message);
-    }
+  @Override
+  public String getFileMask() {
+    return isUseFileMask.getValue() ? filesMask.getText() : "";
+  }
 
-    @Override
-    protected void onEnterClicked() {
-        delegate.onEnterClicked();
-    }
+  @Override
+  public String getPathToSearch() {
+    return isUseDirectory.getValue() ? directory.getText() : "";
+  }
 
-    @Override
-    public void clearInput() {
-        text.setText("");
-    }
+  @Override
+  public void showErrorMessage(String message) {
+    errLabel.setText(message);
+  }
 
-    @Override
-    public void setFocus() {
-        acceptButton.setFocus(true);
-    }
+  @Override
+  protected void onEnterClicked() {
+    delegate.onEnterClicked();
+  }
 
-    @Override
-    public boolean isAcceptButtonInFocus() {
-        return isWidgetFocused(acceptButton);
-    }
+  @Override
+  public void clearInput() {
+    text.setText("");
+  }
 
-    @Override
-    public boolean isCancelButtonInFocus() {
-        return isWidgetFocused(cancelButton);
-    }
+  @Override
+  public void setFocus() {
+    acceptButton.setFocus(true);
+  }
 
-    @Override
-    public boolean isSelectPathButtonInFocus() {
-        return isWidgetFocused(selectPathButton);
-    }
+  @Override
+  public boolean isAcceptButtonInFocus() {
+    return isWidgetFocused(acceptButton);
+  }
 
+  @Override
+  public boolean isCancelButtonInFocus() {
+    return isWidgetFocused(cancelButton);
+  }
 
-    @Override
-    public boolean isWholeWordsOnly() {
-        return wholeWordsOnly.getValue();
-    }
+  @Override
+  public boolean isSelectPathButtonInFocus() {
+    return isWidgetFocused(selectPathButton);
+  }
 
-    @Override
-    public void showSelectPathDialog() {
-        selectPathPresenter.show(delegate);
-    }
+  @Override
+  public boolean isWholeWordsOnly() {
+    return wholeWordsOnly.getValue();
+  }
 
-    private void createButtons() {
-        cancelButton = createButton(locale.cancel(), "search-cancel-button", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+  @Override
+  public void showSelectPathDialog() {
+    selectPathPresenter.show(delegate);
+  }
+
+  private void createButtons() {
+    cancelButton =
+        createButton(
+            locale.cancel(),
+            "search-cancel-button",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 close();
-            }
-        });
+              }
+            });
 
-        acceptButton = createPrimaryButton(locale.search(), "search-button", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    acceptButton =
+        createPrimaryButton(
+            locale.search(),
+            "search-button",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.search(text.getText());
-            }
+              }
+            });
+
+    addButtonToFooter(acceptButton);
+    addButtonToFooter(cancelButton);
+  }
+
+  private void addHandlers() {
+    isUseFileMask.addValueChangeHandler(
+        new ValueChangeHandler<Boolean>() {
+          @Override
+          public void onValueChange(ValueChangeEvent<Boolean> event) {
+            filesMask.setEnabled(event.getValue());
+          }
         });
 
-        addButtonToFooter(acceptButton);
-        addButtonToFooter(cancelButton);
-    }
-
-    private void addHandlers() {
-        isUseFileMask.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                filesMask.setEnabled(event.getValue());
-            }
+    isUseDirectory.addValueChangeHandler(
+        new ValueChangeHandler<Boolean>() {
+          @Override
+          public void onValueChange(ValueChangeEvent<Boolean> event) {
+            directory.setEnabled(event.getValue());
+            selectPathButton.setEnabled(event.getValue());
+          }
         });
 
-        isUseDirectory.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                directory.setEnabled(event.getValue());
-                selectPathButton.setEnabled(event.getValue());
-            }
+    text.addKeyUpHandler(
+        new KeyUpHandler() {
+          @Override
+          public void onKeyUp(KeyUpEvent event) {
+            acceptButton.setEnabled(!text.getValue().isEmpty());
+          }
         });
 
-        text.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                acceptButton.setEnabled(!text.getValue().isEmpty());
-            }
+    selectPathButton.addClickHandler(
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            showSelectPathDialog();
+          }
         });
-
-        selectPathButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                showSelectPathDialog();
-            }
-        });
-    }
+  }
 }

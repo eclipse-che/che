@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,25 +7,25 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.shared.dto.event;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface ProjectTreeTrackingOperationDto {
-    String getPath();
+  String getPath();
 
-    ProjectTreeTrackingOperationDto withPath(String path);
+  ProjectTreeTrackingOperationDto withPath(String path);
 
-    Type getType();
+  Type getType();
 
-    ProjectTreeTrackingOperationDto withType(Type type);
+  ProjectTreeTrackingOperationDto withType(Type type);
 
-    enum Type {
-        START,
-        STOP,
-        SUSPEND,
-        RESUME,
-    }
+  enum Type {
+    START,
+    STOP,
+    SUSPEND,
+    RESUME,
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,23 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.keycloak.ide;
 
 import com.google.gwt.core.client.JavaScriptObject;
-
 import org.eclipse.che.api.promises.client.Promise;
 
-/**
- * @author Max Shaposhnik (mshaposh@redhat.com)
- */
+/** @author Max Shaposhnik (mshaposh@redhat.com) */
 public final class Keycloak extends JavaScriptObject {
 
-    protected Keycloak() {
-        super();
-    }
+  protected Keycloak() {
+    super();
+  }
 
-    public static native Promise<Keycloak> init(String theUrl, String theRealm, String theClientId) /*-{
+  public static native Promise<Keycloak> init(
+      String theUrl, String theRealm, String theClientId) /*-{
         return new Promise(function (resolve, reject) {
             try {
                 console.log('[Keycloak] Initializing');
@@ -47,7 +45,7 @@ public final class Keycloak extends JavaScriptObject {
         });
     }-*/;
 
-    public native Promise<Boolean> updateToken(int minValidity) /*-{
+  public native Promise<Boolean> updateToken(int minValidity) /*-{
         var theKeycloak = this;
         return new Promise(function (resolve, reject) {
             try {
@@ -71,7 +69,7 @@ public final class Keycloak extends JavaScriptObject {
         return updatePromise;
     }-*/;
 
-    public native String getToken() /*-{
+  public native String getToken() /*-{
         return this.token;
     }-*/;
 }

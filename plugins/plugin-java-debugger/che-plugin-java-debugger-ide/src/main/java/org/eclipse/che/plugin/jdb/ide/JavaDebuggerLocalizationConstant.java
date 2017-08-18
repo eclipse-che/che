@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.jdb.ide;
 
 /**
@@ -17,16 +17,16 @@ package org.eclipse.che.plugin.jdb.ide;
  */
 public interface JavaDebuggerLocalizationConstant extends com.google.gwt.i18n.client.Messages {
 
-    /* JavaDebugConfigurationPage */
-    @Key("view.javaDebugConfigurationPage.notice")
-    String javaDebugConfigurationPageViewNotice();
+  /* JavaDebugConfigurationPage */
+  @Key("view.javaDebugConfigurationPage.notice")
+  String javaDebugConfigurationPageViewNotice();
 
-    @Key("view.javaDebugConfigurationPage.devHostCheckbox")
-    String javaDebugConfigurationPageViewDevHostCheckbox();
+  @Key("view.javaDebugConfigurationPage.devHostCheckbox")
+  String javaDebugConfigurationPageViewDevHostCheckbox();
 
-    @Key("view.javaDebugConfigurationPage.hostLabel")
-    String javaDebugConfigurationPageViewHostLabel();
+  @Key("view.javaDebugConfigurationPage.hostLabel")
+  String javaDebugConfigurationPageViewHostLabel();
 
-    @Key("view.javaDebugConfigurationPage.portLabel")
-    String javaDebugConfigurationPageViewPortLabel();
+  @Key("view.javaDebugConfigurationPage.portLabel")
+  String javaDebugConfigurationPageViewPortLabel();
 }
