@@ -17,6 +17,6 @@ package org.eclipse.che.ide.dto;
 /** An entity that may serialize itself to JSON. */
 public interface JsonSerializable {
 
-    /** Serializes DTO to JSON format. */
-    String toJson();
+  /** Serializes DTO to JSON format. */
+  String toJson();
 }

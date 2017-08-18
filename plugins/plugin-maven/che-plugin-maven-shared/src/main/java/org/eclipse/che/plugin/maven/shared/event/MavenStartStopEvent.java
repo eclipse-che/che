@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.shared.event;
 
-/**
- * Event that describes Maven start notification.
- */
+/** Event that describes Maven start notification. */
 public interface MavenStartStopEvent extends MavenOutputEvent {
-    /** Returns {@code true} if the process of resolving is started otherwise returns {@code false}. */
-    boolean isStart();
+  /**
+   * Returns {@code true} if the process of resolving is started otherwise returns {@code false}.
+   */
+  boolean isStart();
 }

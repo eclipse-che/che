@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.context;
 
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 
 /**
@@ -24,73 +23,69 @@ import org.eclipse.che.ide.api.ProductInfoDataProvider;
  */
 @Singleton
 public class BrowserAddress {
-    private static final int NAMESPACE_START_SEGMENT = 1;
+  private static final int NAMESPACE_START_SEGMENT = 1;
 
-    private final ProductInfoDataProvider productInfoDataProvider;
+  private final ProductInfoDataProvider productInfoDataProvider;
 
-    @Inject
-    public BrowserAddress(ProductInfoDataProvider productInfoDataProvider) {
-        this.productInfoDataProvider = productInfoDataProvider;
+  @Inject
+  public BrowserAddress(ProductInfoDataProvider productInfoDataProvider) {
+    this.productInfoDataProvider = productInfoDataProvider;
+  }
+
+  /**
+   * Updates browser's address along with tab title in accordance to current running workspace.
+   *
+   * @param namespace namespace of workspace
+   * @param workspaceName name of the current running workspace. Can be null or empty if workspace
+   *     was stopped.
+   */
+  public void setAddress(String namespace, String workspaceName) {
+    String browserUrl = Window.Location.getPath();
+    int currentSlashIndex = 0;
+    int currentSlashNumber = 0;
+    while (currentSlashNumber < NAMESPACE_START_SEGMENT) {
+      currentSlashIndex = browserUrl.indexOf('/', currentSlashIndex);
+      currentSlashNumber++;
     }
 
-    /**
-     * Updates browser's address along with tab title in accordance to current running workspace.
-     *
-     * @param namespace
-     *         namespace of workspace
-     * @param workspaceName
-     *         name of the current running workspace. Can be null or empty if workspace was stopped.
-     */
-    public void setAddress(String namespace, String workspaceName) {
-        String browserUrl = Window.Location.getPath();
-        int currentSlashIndex = 0;
-        int currentSlashNumber = 0;
-        while (currentSlashNumber < NAMESPACE_START_SEGMENT) {
-            currentSlashIndex = browserUrl.indexOf('/', currentSlashIndex);
-            currentSlashNumber++;
-        }
+    String baseUrl =
+        browserUrl.substring(0, currentSlashIndex) + "/" + namespace + "/" + workspaceName;
 
-        String baseUrl = browserUrl.substring(0, currentSlashIndex) + "/" + namespace + "/" + workspaceName;
-
-        String title;
-        if (workspaceName == null || workspaceName.isEmpty()) {
-            title = productInfoDataProvider.getDocumentTitle();
-        } else {
-            title = productInfoDataProvider.getDocumentTitle(workspaceName);
-        }
-        doSetAddress(baseUrl, title);
+    String title;
+    if (workspaceName == null || workspaceName.isEmpty()) {
+      title = productInfoDataProvider.getDocumentTitle();
+    } else {
+      title = productInfoDataProvider.getDocumentTitle(workspaceName);
     }
+    doSetAddress(baseUrl, title);
+  }
 
-    /**
-     * Returns workspace name from current address
-     * or empty string when it is undefined.
-     */
-    public String getWorkspaceName() {
-        String workspaceKey = getWorkspaceKey();
-        String[] split = workspaceKey.split("/", 2);
-        if (split.length != 2) {
-            return "";
-        }
-        return workspaceKey.substring(workspaceKey.lastIndexOf("/") + 1);
+  /** Returns workspace name from current address or empty string when it is undefined. */
+  public String getWorkspaceName() {
+    String workspaceKey = getWorkspaceKey();
+    String[] split = workspaceKey.split("/", 2);
+    if (split.length != 2) {
+      return "";
     }
+    return workspaceKey.substring(workspaceKey.lastIndexOf("/") + 1);
+  }
 
-    /**
-     * Returns workspace key from current address
-     * or empty string when it is undefined.
-     *
-     * @see org.eclipse.che.ide.api.workspace.WorkspaceServiceClient#getWorkspace(String)
-     */
-    public String getWorkspaceKey() {
-        String browserUrl = Window.Location.getPath();
-        String[] urlParts = browserUrl.split("/", NAMESPACE_START_SEGMENT + 1);
-        if (urlParts.length < NAMESPACE_START_SEGMENT) {
-            return "";
-        } else {
-            return urlParts[NAMESPACE_START_SEGMENT];
-        }
+  /**
+   * Returns workspace key from current address or empty string when it is undefined.
+   *
+   * @see org.eclipse.che.ide.api.workspace.WorkspaceServiceClient#getWorkspace(String)
+   */
+  public String getWorkspaceKey() {
+    String browserUrl = Window.Location.getPath();
+    String[] urlParts = browserUrl.split("/", NAMESPACE_START_SEGMENT + 1);
+    if (urlParts.length < NAMESPACE_START_SEGMENT) {
+      return "";
+    } else {
+      return urlParts[NAMESPACE_START_SEGMENT];
     }
+  }
 
-    private native void doSetAddress(String url, String title) /*-{
+  private native void doSetAddress(String url, String title) /*-{
         try {
             var window = $wnd;
 

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.system.server;
 
+import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDOWN;
+import static org.eclipse.che.api.system.shared.SystemStatus.RUNNING;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+
+import java.io.IOException;
 import org.eclipse.che.api.core.util.WebsocketLineConsumer;
 import org.eclipse.che.api.system.shared.dto.SystemEventDto;
 import org.eclipse.che.api.system.shared.event.SystemEvent;
@@ -25,14 +32,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-
-import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDOWN;
-import static org.eclipse.che.api.system.shared.SystemStatus.RUNNING;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-
 /**
  * Test {@link SystemEventsWebsocketBroadcaster}.
  *
@@ -41,41 +40,42 @@ import static org.mockito.Mockito.verify;
 @Listeners(MockitoTestNGListener.class)
 public class SystemEventsWebsocketBroadcasterTest {
 
-    @Mock
-    private WebsocketLineConsumer messageCustomer;
+  @Mock private WebsocketLineConsumer messageCustomer;
 
-    private SystemEventsWebsocketBroadcaster broadcaster;
+  private SystemEventsWebsocketBroadcaster broadcaster;
 
-    @BeforeMethod
-    public void setUp() {
-        broadcaster = new SystemEventsWebsocketBroadcaster(messageCustomer);
-    }
+  @BeforeMethod
+  public void setUp() {
+    broadcaster = new SystemEventsWebsocketBroadcaster(messageCustomer);
+  }
 
-    @Test(dataProvider = "eventToDto")
-    public void sendsMessage(SystemEvent event, SystemEventDto dto) throws Exception {
-        broadcaster.onEvent(event);
+  @Test(dataProvider = "eventToDto")
+  public void sendsMessage(SystemEvent event, SystemEventDto dto) throws Exception {
+    broadcaster.onEvent(event);
 
-        verify(messageCustomer).writeLine(DtoFactory.getInstance().toJson(dto));
-    }
+    verify(messageCustomer).writeLine(DtoFactory.getInstance().toJson(dto));
+  }
 
-    @Test
-    public void sendExceptionsAreLoggedAndNotThrown() throws Exception {
-        doThrow(new IOException("exception!")).when(messageCustomer).writeLine(anyString());
+  @Test
+  public void sendExceptionsAreLoggedAndNotThrown() throws Exception {
+    doThrow(new IOException("exception!")).when(messageCustomer).writeLine(anyString());
 
-        broadcaster.onEvent(new SystemServiceStoppedEvent("service1"));
-    }
+    broadcaster.onEvent(new SystemServiceStoppedEvent("service1"));
+  }
 
-    @DataProvider(name = "eventToDto")
-    private static Object[][] eventToDto() {
-        SystemStatusChangedEvent statusChanged = new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN);
-        StoppingSystemServiceEvent stoppingService = new StoppingSystemServiceEvent("service1");
-        SystemServiceStoppedEvent serviceStopped = new SystemServiceStoppedEvent("service1");
-        SystemServiceItemStoppedEvent itemStopped = new SystemServiceItemStoppedEvent("service1", "item1", 5, 10);
-        return new Object[][] {
-                {statusChanged, DtoConverter.asDto(statusChanged)},
-                {stoppingService, DtoConverter.asDto(stoppingService)},
-                {serviceStopped, DtoConverter.asDto(serviceStopped)},
-                {itemStopped, DtoConverter.asDto(itemStopped)}
-        };
-    }
+  @DataProvider(name = "eventToDto")
+  private static Object[][] eventToDto() {
+    SystemStatusChangedEvent statusChanged =
+        new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN);
+    StoppingSystemServiceEvent stoppingService = new StoppingSystemServiceEvent("service1");
+    SystemServiceStoppedEvent serviceStopped = new SystemServiceStoppedEvent("service1");
+    SystemServiceItemStoppedEvent itemStopped =
+        new SystemServiceItemStoppedEvent("service1", "item1", 5, 10);
+    return new Object[][] {
+      {statusChanged, DtoConverter.asDto(statusChanged)},
+      {stoppingService, DtoConverter.asDto(stoppingService)},
+      {serviceStopped, DtoConverter.asDto(serviceStopped)},
+      {itemStopped, DtoConverter.asDto(itemStopped)}
+    };
+  }
 }

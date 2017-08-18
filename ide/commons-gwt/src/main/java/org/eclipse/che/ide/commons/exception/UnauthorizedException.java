@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.commons.exception;
 
 import com.google.gwt.http.client.Response;
-
 import org.eclipse.che.ide.rest.AsyncRequest;
-
 
 /**
  * @author Vitaliy Gulyy
@@ -22,14 +20,14 @@ import org.eclipse.che.ide.rest.AsyncRequest;
 @SuppressWarnings("serial")
 public class UnauthorizedException extends ServerException {
 
-    private AsyncRequest request;
+  private AsyncRequest request;
 
-    public UnauthorizedException(Response response, AsyncRequest request) {
-        super(response);
-        this.request = request;
-    }
+  public UnauthorizedException(Response response, AsyncRequest request) {
+    super(response);
+    this.request = request;
+  }
 
-    public AsyncRequest getRequest() {
-        return request;
-    }
+  public AsyncRequest getRequest() {
+    return request;
+  }
 }

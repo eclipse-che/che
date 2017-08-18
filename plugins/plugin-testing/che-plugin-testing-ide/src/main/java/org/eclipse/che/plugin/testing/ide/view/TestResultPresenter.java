@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.ide.view;
 
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.ide.api.parts.PartStackType;
@@ -19,11 +23,6 @@ import org.eclipse.che.plugin.testing.ide.TestLocalizationConstant;
 import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 /**
  * Presenter for the displaying the test results on the workspace.
  *
@@ -31,74 +30,73 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class TestResultPresenter extends BasePresenter implements TestResultView.ActionDelegate {
-    private final WorkspaceAgent workspaceAgent;
-    private final TestLocalizationConstant localizationConstant;
-    private final TestResources resources;
-    private final TestResultView view;
+  private final WorkspaceAgent workspaceAgent;
+  private final TestLocalizationConstant localizationConstant;
+  private final TestResources resources;
+  private final TestResultView view;
 
-    @Inject
-    public TestResultPresenter(WorkspaceAgent workspaceAgent,
-                               TestLocalizationConstant localizationConstant,
-                               TestResources resources,
-                               TestResultView view) {
-        this.workspaceAgent = workspaceAgent;
-        this.localizationConstant = localizationConstant;
-        this.resources = resources;
-        this.view = view;
-        view.setDelegate(this);
-    }
+  @Inject
+  public TestResultPresenter(
+      WorkspaceAgent workspaceAgent,
+      TestLocalizationConstant localizationConstant,
+      TestResources resources,
+      TestResultView view) {
+    this.workspaceAgent = workspaceAgent;
+    this.localizationConstant = localizationConstant;
+    this.resources = resources;
+    this.view = view;
+    view.setDelegate(this);
+  }
 
-    @Override
-    public String getTitle() {
-        return localizationConstant.titleTestResultPresenter();
-    }
+  @Override
+  public String getTitle() {
+    return localizationConstant.titleTestResultPresenter();
+  }
 
-    @Override
-    public IsWidget getView() {
-        return view;
-    }
+  @Override
+  public IsWidget getView() {
+    return view;
+  }
 
-    @Override
-    public String getTitleToolTip() {
-        return localizationConstant.titleTestResultPresenterToolTip();
-    }
+  @Override
+  public String getTitleToolTip() {
+    return localizationConstant.titleTestResultPresenterToolTip();
+  }
 
-    @Override
-    public SVGResource getTitleImage() {
-        return resources.testIcon();
-    }
+  @Override
+  public SVGResource getTitleImage() {
+    return resources.testIcon();
+  }
 
-    @Override
-    public void go(AcceptsOneWidget container) {
-        container.setWidget(view);
-    }
+  @Override
+  public void go(AcceptsOneWidget container) {
+    container.setWidget(view);
+  }
 
-    /**
-     * Activate Test results part and showing the test results.
-     *
-     * @param response
-     *            result of the test runner
-     */
-    @Deprecated
-    public void handleResponse(TestResult response) {
-        workspaceAgent.openPart(this, PartStackType.INFORMATION);
-        workspaceAgent.setActivePart(this);
-        view.showResults(response);
-    }
+  /**
+   * Activate Test results part and showing the test results.
+   *
+   * @param response result of the test runner
+   */
+  @Deprecated
+  public void handleResponse(TestResult response) {
+    workspaceAgent.openPart(this, PartStackType.INFORMATION);
+    workspaceAgent.setActivePart(this);
+    view.showResults(response);
+  }
 
-    /**
-     * Activates test results part and shows the results.
-     *
-     * @param response
-     *            result root of the test runner
-     */
-    public void handleResponse(TestResultRootDto response) {
-        workspaceAgent.openPart(this, PartStackType.INFORMATION);
-        workspaceAgent.setActivePart(this);
-        view.showResults(response);
-    }
+  /**
+   * Activates test results part and shows the results.
+   *
+   * @param response result root of the test runner
+   */
+  public void handleResponse(TestResultRootDto response) {
+    workspaceAgent.openPart(this, PartStackType.INFORMATION);
+    workspaceAgent.setActivePart(this);
+    view.showResults(response);
+  }
 
-    public void clear() {
-        view.clear();
-    }
+  public void clear() {
+    view.clear();
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.ide.commit.diff;
 
 import org.eclipse.che.ide.api.mvp.View;
@@ -19,18 +19,18 @@ import org.eclipse.che.ide.api.mvp.View;
  */
 public interface DiffViewerView extends View<DiffViewerView.ActionDelegate> {
 
-    /** Action handler for the view actions/controls. */
-    interface ActionDelegate {
-        /** Perform actions when close button clicked. */
-        void onCloseClicked();
-    }
+  /** Action handler for the view actions/controls. */
+  interface ActionDelegate {
+    /** Perform actions when close button clicked. */
+    void onCloseClicked();
+  }
 
-    /** Display diff for current file in console */
-    void showDiff(String content);
+  /** Display diff for current file in console */
+  void showDiff(String content);
 
-    /** Perform actions when close window performed. */
-    void onClose();
+  /** Perform actions when close window performed. */
+  void onClose();
 
-    /** Perform actions when open window performed. */
-    void onShow();
+  /** Perform actions when open window performed. */
+  void onShow();
 }

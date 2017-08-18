@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.parts.ide;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -22,16 +21,14 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 public interface SamplePartsResources extends ClientBundle {
 
-    /**
-     * Singleton instance.
-     */
-    SamplePartsResources INSTANCE = GWT.create(SamplePartsResources.class);
+  /** Singleton instance. */
+  SamplePartsResources INSTANCE = GWT.create(SamplePartsResources.class);
 
-    /**
-     * Declares an icon.
-     *
-     * @return the icon
-     */
-    @Source("icons/my.svg")
-    SVGResource icon();
+  /**
+   * Declares an icon.
+   *
+   * @return the icon
+   */
+  @Source("icons/my.svg")
+  SVGResource icon();
 }

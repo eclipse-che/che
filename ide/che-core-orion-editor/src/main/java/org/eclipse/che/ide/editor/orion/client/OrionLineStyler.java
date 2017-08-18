@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.orion.client;
 
-
+import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationIteratorOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAttributesOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
-import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
 
 /**
  * Implementation of {@link LineStyler} for orion.
@@ -25,71 +24,73 @@ import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
  */
 public class OrionLineStyler implements LineStyler {
 
-    private static final String CHE_CUSTOM_LINE = "che-custom-line";
+  private static final String CHE_CUSTOM_LINE = "che-custom-line";
 
-    /** The editor object. */
-    private final OrionEditorOverlay editorOverlay;
+  /** The editor object. */
+  private final OrionEditorOverlay editorOverlay;
 
-    public OrionLineStyler(OrionEditorOverlay editorOverlay) {
-        this.editorOverlay = editorOverlay;
-        this.editorOverlay.getAnnotationStyler().addAnnotationType(CHE_CUSTOM_LINE, 50);
+  public OrionLineStyler(OrionEditorOverlay editorOverlay) {
+    this.editorOverlay = editorOverlay;
+    this.editorOverlay.getAnnotationStyler().addAnnotationType(CHE_CUSTOM_LINE, 50);
+  }
+
+  @Override
+  public void addLineStyles(final int lineNumber, final String... styles) {
+    for (final String classname : styles) {
+      OrionAttributesOverlay attributesOverlay = OrionAttributesOverlay.create();
+      attributesOverlay.setAttribute("debugId", "debug-line");
+
+      OrionStyleOverlay style = OrionStyleOverlay.create();
+      style.setStyleClass(classname);
+      style.setAttributes(attributesOverlay);
+
+      int lineStart = editorOverlay.getModel().getLineStart(lineNumber);
+      int lineEnd = editorOverlay.getModel().getLineEnd(lineNumber);
+
+      OrionAnnotationOverlay annotation = OrionAnnotationOverlay.create();
+      annotation.setStart(lineStart);
+      annotation.setEnd(lineEnd);
+      annotation.setRangeStyle(style);
+      annotation.setType(CHE_CUSTOM_LINE);
+
+      editorOverlay.getAnnotationModel().addAnnotation(annotation);
     }
+  }
 
-    @Override
-    public void addLineStyles(final int lineNumber, final String... styles) {
-        for (final String classname : styles) {
-            OrionAttributesOverlay attributesOverlay = OrionAttributesOverlay.create();
-            attributesOverlay.setAttribute("debugId", "debug-line");
+  @Override
+  public void removeLineStyles(final int lineNumber, final String... styles) {
+    for (final String classname : styles) {
+      int lineStart = editorOverlay.getModel().getLineStart(lineNumber);
+      int lineEnd = editorOverlay.getModel().getLineEnd(lineNumber);
 
-            OrionStyleOverlay style = OrionStyleOverlay.create();
-            style.setStyleClass(classname);
-            style.setAttributes(attributesOverlay);
-
-            int lineStart = editorOverlay.getModel().getLineStart(lineNumber);
-            int lineEnd = editorOverlay.getModel().getLineEnd(lineNumber);
-
-            OrionAnnotationOverlay annotation = OrionAnnotationOverlay.create();
-            annotation.setStart(lineStart);
-            annotation.setEnd(lineEnd);
-            annotation.setRangeStyle(style);
-            annotation.setType(CHE_CUSTOM_LINE);
-
-            editorOverlay.getAnnotationModel().addAnnotation(annotation);
+      OrionAnnotationIteratorOverlay iter =
+          editorOverlay.getAnnotationModel().getAnnotations(lineStart, lineEnd);
+      if (iter != null) {
+        while (iter.hasNext()) {
+          OrionAnnotationOverlay annotation = iter.next();
+          if (CHE_CUSTOM_LINE.equals(annotation.getType())
+              && annotation.getRangeStyle().getStyleClass().equals(classname)) {
+            editorOverlay.getAnnotationModel().removeAnnotation(annotation);
+          }
         }
+      }
     }
+  }
 
-    @Override
-    public void removeLineStyles(final int lineNumber, final String... styles) {
-        for (final String classname : styles) {
-            int lineStart = editorOverlay.getModel().getLineStart(lineNumber);
-            int lineEnd = editorOverlay.getModel().getLineEnd(lineNumber);
+  @Override
+  public void clearLineStyles(final int lineNumber) {
+    int lineStart = editorOverlay.getModel().getLineStart(lineNumber);
+    int lineEnd = editorOverlay.getModel().getLineEnd(lineNumber);
 
-            OrionAnnotationIteratorOverlay iter = editorOverlay.getAnnotationModel().getAnnotations(lineStart, lineEnd);
-            if (iter != null) {
-                while (iter.hasNext()) {
-                    OrionAnnotationOverlay annotation = iter.next();
-                    if (CHE_CUSTOM_LINE.equals(annotation.getType()) && annotation.getRangeStyle().getStyleClass().equals(classname)) {
-                        editorOverlay.getAnnotationModel().removeAnnotation(annotation);
-                    }
-                }
-            }
+    OrionAnnotationIteratorOverlay iter =
+        editorOverlay.getAnnotationModel().getAnnotations(lineStart, lineEnd);
+    if (iter != null) {
+      while (iter.hasNext()) {
+        OrionAnnotationOverlay annotation = iter.next();
+        if (CHE_CUSTOM_LINE.equals(annotation.getType())) {
+          editorOverlay.getAnnotationModel().removeAnnotation(annotation);
         }
+      }
     }
-
-    @Override
-    public void clearLineStyles(final int lineNumber) {
-        int lineStart = editorOverlay.getModel().getLineStart(lineNumber);
-        int lineEnd = editorOverlay.getModel().getLineEnd(lineNumber);
-
-        OrionAnnotationIteratorOverlay iter = editorOverlay.getAnnotationModel().getAnnotations(lineStart, lineEnd);
-        if (iter != null) {
-            while (iter.hasNext()) {
-                OrionAnnotationOverlay annotation = iter.next();
-                if (CHE_CUSTOM_LINE.equals(annotation.getType())) {
-                    editorOverlay.getAnnotationModel().removeAnnotation(annotation);
-                }
-            }
-        }
-    }
-
+  }
 }

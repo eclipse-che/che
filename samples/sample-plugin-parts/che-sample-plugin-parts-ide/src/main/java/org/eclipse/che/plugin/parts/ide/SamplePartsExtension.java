@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.parts.ide;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 
+import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.plugin.parts.ide.helloworldview.HelloWorldViewAction;
-
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 
 /**
  * Extension that defines a simple view containing a 'Hello World' label.
@@ -27,20 +26,21 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 @Extension(title = "Sample Parts Extension")
 public class SamplePartsExtension {
 
-    /**
-     * Constructor.
-     *
-     * @param actionManager the {@link ActionManager} that is used to register the action
-     * @param action the {@link HelloWorldViewAction} that display the sample view
-     */
-    @Inject
-    public SamplePartsExtension(ActionManager actionManager, HelloWorldViewAction action){
-        actionManager.registerAction("helloWorldViewAction",action);
-        DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
+  /**
+   * Constructor.
+   *
+   * @param actionManager the {@link ActionManager} that is used to register the action
+   * @param action the {@link HelloWorldViewAction} that display the sample view
+   */
+  @Inject
+  public SamplePartsExtension(ActionManager actionManager, HelloWorldViewAction action) {
+    actionManager.registerAction("helloWorldViewAction", action);
+    DefaultActionGroup mainMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
 
-        DefaultActionGroup sampleActionGroup = new DefaultActionGroup("Sample Action", true, actionManager);
-        sampleActionGroup.add(action);
+    DefaultActionGroup sampleActionGroup =
+        new DefaultActionGroup("Sample Action", true, actionManager);
+    sampleActionGroup.add(action);
 
-        mainMenu.add(sampleActionGroup);
-    }
+    mainMenu.add(sampleActionGroup);
+  }
 }

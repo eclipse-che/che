@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,37 +7,32 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.orion.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public class OrionProblemOverlay extends JavaScriptObject {
-    protected OrionProblemOverlay() {
-    }
+  protected OrionProblemOverlay() {}
 
-    public final native void setDescription(String description) /*-{
+  public final native void setDescription(String description) /*-{
         this["description"] = description;
     }-*/;
 
-    public final native void setId(String id) /*-{
+  public final native void setId(String id) /*-{
         this["id"] = id;
     }-*/;
 
-    public final native void setStart(int offset) /*-{
+  public final native void setStart(int offset) /*-{
         this["start"]= offset;
     }-*/;
 
-    public final native void setEnd(int offset) /*-{
+  public final native void setEnd(int offset) /*-{
         this["end"]= offset;
     }-*/;
 
-    public final native void setSeverity(String severity) /*-{
+  public final native void setSeverity(String severity) /*-{
         this["severity"]= severity;
     }-*/;
-
-
 }

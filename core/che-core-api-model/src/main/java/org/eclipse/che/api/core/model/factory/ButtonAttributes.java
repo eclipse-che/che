@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.model.factory;
 
 /**
@@ -17,23 +17,15 @@ package org.eclipse.che.api.core.model.factory;
  */
 public interface ButtonAttributes {
 
-    /**
-     * Returns factory button color
-     */
-    String getColor();
+  /** Returns factory button color */
+  String getColor();
 
-    /**
-     * Returns factory button counter
-     */
-    Boolean getCounter();
+  /** Returns factory button counter */
+  Boolean getCounter();
 
-    /**
-     * Returns factory button logo
-     */
-    String getLogo();
+  /** Returns factory button logo */
+  String getLogo();
 
-    /**
-     * Returns factory button style
-     */
-    String getStyle();
+  /** Returns factory button style */
+  String getStyle();
 }

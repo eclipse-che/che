@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,28 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.vfs.impl.file.event.detectors;
-
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
-import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
-import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type;
-import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.stream.Collectors.toSet;
@@ -38,129 +18,162 @@ import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
+import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
+import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type;
+import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
+import org.slf4j.Logger;
+
 @Singleton
 public class ProjectTreeTracker {
-    private static final Logger LOG = getLogger(ProjectTreeTracker.class);
+  private static final Logger LOG = getLogger(ProjectTreeTracker.class);
 
-    private static final String OUTGOING_METHOD = "event/project-tree-state-changed";
-    private static final String INCOMING_METHOD = "track/project-tree";
+  private static final String OUTGOING_METHOD = "event/project-tree-state-changed";
+  private static final String INCOMING_METHOD = "track/project-tree";
 
-    private final Map<String, Integer> watchIdRegistry = new HashMap<>();
-    private final Set<String>          timers          = newConcurrentHashSet();
+  private final Map<String, Integer> watchIdRegistry = new HashMap<>();
+  private final Set<String> timers = newConcurrentHashSet();
 
+  private final RequestTransmitter transmitter;
+  private final FileWatcherManager fileWatcherManager;
 
-    private final RequestTransmitter transmitter;
-    private final FileWatcherManager fileWatcherManager;
+  @Inject
+  public ProjectTreeTracker(FileWatcherManager fileWatcherManager, RequestTransmitter transmitter) {
+    this.fileWatcherManager = fileWatcherManager;
+    this.transmitter = transmitter;
+  }
 
-    @Inject
-    public ProjectTreeTracker(FileWatcherManager fileWatcherManager, RequestTransmitter transmitter) {
-        this.fileWatcherManager = fileWatcherManager;
-        this.transmitter = transmitter;
-    }
+  @Inject
+  public void configureHandler(RequestHandlerConfigurator configurator) {
+    configurator
+        .newConfiguration()
+        .methodName(INCOMING_METHOD)
+        .paramsAsDto(ProjectTreeTrackingOperationDto.class)
+        .noResult()
+        .withBiConsumer(getProjectTreeTrackingOperationConsumer());
+  }
 
-    @Inject
-    public void configureHandler(RequestHandlerConfigurator configurator) {
-        configurator.newConfiguration()
-                    .methodName(INCOMING_METHOD)
-                    .paramsAsDto(ProjectTreeTrackingOperationDto.class)
-                    .noResult()
-                    .withBiConsumer(getProjectTreeTrackingOperationConsumer());
-    }
+  private BiConsumer<String, ProjectTreeTrackingOperationDto>
+      getProjectTreeTrackingOperationConsumer() {
+    return (String endpointId, ProjectTreeTrackingOperationDto operation) -> {
+      final Type type = operation.getType();
+      final String path = operation.getPath();
 
-    private BiConsumer<String, ProjectTreeTrackingOperationDto> getProjectTreeTrackingOperationConsumer() {
-        return (String endpointId, ProjectTreeTrackingOperationDto operation) -> {
-            final Type type = operation.getType();
-            final String path = operation.getPath();
+      switch (type) {
+        case START:
+          {
+            LOG.debug("Received project tree tracking operation START trigger.");
 
-            switch (type) {
-                case START: {
-                    LOG.debug("Received project tree tracking operation START trigger.");
+            int pathRegistrationId =
+                fileWatcherManager.registerByPath(
+                    path,
+                    getCreateOperation(endpointId),
+                    getModifyConsumer(endpointId),
+                    getDeleteOperation(endpointId));
+            watchIdRegistry.put(path + endpointId, pathRegistrationId);
+            break;
+          }
+        case STOP:
+          {
+            LOG.debug("Received project tree tracking operation STOP trigger.");
 
-                    int pathRegistrationId = fileWatcherManager.registerByPath(path,
-                                                                               getCreateOperation(endpointId),
-                                                                               getModifyConsumer(endpointId),
-                                                                               getDeleteOperation(endpointId));
-                    watchIdRegistry.put(path + endpointId, pathRegistrationId);
-                    break;
-                }
-                case STOP: {
-                    LOG.debug("Received project tree tracking operation STOP trigger.");
+            Predicate<Entry<String, Integer>> isSubPath =
+                it -> it.getKey().startsWith(path) && it.getKey().endsWith(endpointId);
 
-                    Predicate<Entry<String, Integer>> isSubPath = it -> it.getKey().startsWith(path) && it.getKey().endsWith(endpointId);
+            watchIdRegistry
+                .entrySet()
+                .stream()
+                .filter(isSubPath)
+                .map(Entry::getKey)
+                .collect(toSet())
+                .stream()
+                .map(watchIdRegistry::remove)
+                .forEach(fileWatcherManager::unRegisterByPath);
 
-                    watchIdRegistry.entrySet()
-                                   .stream()
-                                   .filter(isSubPath)
-                                   .map(Entry::getKey)
-                                   .collect(toSet())
-                                   .stream()
-                                   .map(watchIdRegistry::remove)
-                                   .forEach(fileWatcherManager::unRegisterByPath);
+            break;
+          }
+        case SUSPEND:
+          {
+            LOG.debug("Received project tree tracking operation SUSPEND trigger.");
 
-                    break;
-                }
-                case SUSPEND: {
-                    LOG.debug("Received project tree tracking operation SUSPEND trigger.");
+            fileWatcherManager.suspend();
 
-                    fileWatcherManager.suspend();
+            break;
+          }
+        case RESUME:
+          {
+            LOG.debug("Received project tree tracking operation RESUME trigger.");
 
-                    break;
-                }
-                case RESUME: {
-                    LOG.debug("Received project tree tracking operation RESUME trigger.");
+            fileWatcherManager.resume();
 
-                    fileWatcherManager.resume();
+            break;
+          }
+        default:
+          {
+            LOG.error("Received file tracking operation UNKNOWN trigger.");
 
-                    break;
-                }
-                default: {
-                    LOG.error("Received file tracking operation UNKNOWN trigger.");
+            break;
+          }
+      }
+    };
+  }
 
-                    break;
-                }
-            }
-        };
-    }
+  private Consumer<String> getCreateOperation(String endpointId) {
+    return it -> {
+      if (timers.contains(it)) {
+        timers.remove(it);
+      } else {
+        ProjectTreeStateUpdateDto params =
+            newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(CREATED);
+        transmitter
+            .newRequest()
+            .endpointId(endpointId)
+            .methodName(OUTGOING_METHOD)
+            .paramsAsDto(params)
+            .sendAndSkipResult();
+      }
+    };
+  }
 
-    private Consumer<String> getCreateOperation(String endpointId) {
-        return it -> {
-            if (timers.contains(it)) {
-                timers.remove(it);
-            } else {
-                ProjectTreeStateUpdateDto params = newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(CREATED);
-                transmitter.newRequest()
-                           .endpointId(endpointId)
-                           .methodName(OUTGOING_METHOD)
-                           .paramsAsDto(params)
-                           .sendAndSkipResult();
+  private Consumer<String> getModifyConsumer(String endpointId) {
+    return EMPTY_CONSUMER;
+  }
 
-            }
-        };
-    }
-
-    private Consumer<String> getModifyConsumer(String endpointId) {
-        return EMPTY_CONSUMER;
-    }
-
-    private Consumer<String> getDeleteOperation(String endpointId) {
-        return it -> {
-            timers.add(it);
-            new Timer().schedule(new TimerTask() {
+  private Consumer<String> getDeleteOperation(String endpointId) {
+    return it -> {
+      timers.add(it);
+      new Timer()
+          .schedule(
+              new TimerTask() {
                 @Override
                 public void run() {
-                    if (timers.contains(it)) {
-                        timers.remove(it);
-                        ProjectTreeStateUpdateDto params = newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(DELETED);
-                        transmitter.newRequest()
-                                   .endpointId(endpointId)
-                                   .methodName(OUTGOING_METHOD)
-                                   .paramsAsDto(params)
-                                   .sendAndSkipResult();
-
-                    }
-
+                  if (timers.contains(it)) {
+                    timers.remove(it);
+                    ProjectTreeStateUpdateDto params =
+                        newDto(ProjectTreeStateUpdateDto.class).withPath(it).withType(DELETED);
+                    transmitter
+                        .newRequest()
+                        .endpointId(endpointId)
+                        .methodName(OUTGOING_METHOD)
+                        .paramsAsDto(params)
+                        .sendAndSkipResult();
+                  }
                 }
-            }, 1_000L);
-        };
-    }
+              },
+              1_000L);
+    };
+  }
 }

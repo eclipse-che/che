@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.workspace.event;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -21,35 +21,31 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
  */
 public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Handler> {
 
-    /**
-     * Implement this handler to handle the event.
-     */
-    public interface Handler extends EventHandler {
+  /** Implement this handler to handle the event. */
+  public interface Handler extends EventHandler {
 
-        void onWorkspaceStarting(WorkspaceStartingEvent event);
+    void onWorkspaceStarting(WorkspaceStartingEvent event);
+  }
 
-    }
+  public static final GwtEvent.Type<WorkspaceStartingEvent.Handler> TYPE = new GwtEvent.Type<>();
 
-    public static final GwtEvent.Type<WorkspaceStartingEvent.Handler> TYPE = new GwtEvent.Type<>();
+  private final Workspace workspace;
 
-    private final Workspace workspace;
+  public WorkspaceStartingEvent(Workspace workspace) {
+    this.workspace = workspace;
+  }
 
-    public WorkspaceStartingEvent(Workspace workspace) {
-        this.workspace = workspace;
-    }
+  public Workspace getWorkspace() {
+    return workspace;
+  }
 
-    public Workspace getWorkspace() {
-        return workspace;
-    }
+  @Override
+  public Type<Handler> getAssociatedType() {
+    return TYPE;
+  }
 
-    @Override
-    public Type<Handler> getAssociatedType() {
-        return TYPE;
-    }
-
-    @Override
-    protected void dispatch(Handler handler) {
-        handler.onWorkspaceStarting(this);
-    }
-
+  @Override
+  protected void dispatch(Handler handler) {
+    handler.onWorkspaceStarting(this);
+  }
 }

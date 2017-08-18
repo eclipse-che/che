@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,23 +7,23 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.commons.test.mockito.answer;
-
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 /**
  * Answer class that helps to lock execution of test in separate threads for testing purposes.
- * <p/>
- * It can hold waiting thread until this answer is called.<br/>
+ *
+ * <p>It can hold waiting thread until this answer is called.<br>
  * It can hold waiting thread that uses mock until answering to mock call is allowed.
  *
- * Here is an example of complex test that ensures that (for example) locked area is not called
+ * <p>Here is an example of complex test that ensures that (for example) locked area is not called
  * when other thread try to access it.
+ *
  * <pre class="code"><code class="java">
  *     // given
  *     WaitingAnswer<Void> waitingAnswer = new WaitingAnswer<>();
@@ -58,103 +58,95 @@ import java.util.concurrent.TimeUnit;
  */
 public class WaitingAnswer<T> implements Answer<T> {
 
-    private final CountDownLatch answerIsCalledLatch;
-    private final CountDownLatch answerResultIsUnlockedLatch;
+  private final CountDownLatch answerIsCalledLatch;
+  private final CountDownLatch answerResultIsUnlockedLatch;
 
-    private long     maxWaitingTime;
-    private TimeUnit maxWaitingUnit;
-    private T        result;
+  private long maxWaitingTime;
+  private TimeUnit maxWaitingUnit;
+  private T result;
 
-    private volatile String error;
+  private volatile String error;
 
-    public WaitingAnswer() {
-        this.maxWaitingTime = 1;
-        this.maxWaitingUnit = TimeUnit.SECONDS;
-        this.result = null;
-        this.answerIsCalledLatch = new CountDownLatch(1);
-        this.answerResultIsUnlockedLatch = new CountDownLatch(1);
-        this.error = null;
+  public WaitingAnswer() {
+    this.maxWaitingTime = 1;
+    this.maxWaitingUnit = TimeUnit.SECONDS;
+    this.result = null;
+    this.answerIsCalledLatch = new CountDownLatch(1);
+    this.answerResultIsUnlockedLatch = new CountDownLatch(1);
+    this.error = null;
+  }
+
+  public WaitingAnswer(long maxWaitingTime, TimeUnit maxWaitingUnit) {
+    this();
+    this.maxWaitingTime = maxWaitingTime;
+    this.maxWaitingUnit = maxWaitingUnit;
+  }
+
+  public WaitingAnswer(T result) {
+    this();
+    this.result = result;
+  }
+
+  public WaitingAnswer(T result, long maxWaitingTime, TimeUnit maxWaitingUnit) {
+    this();
+    this.result = result;
+    this.maxWaitingTime = maxWaitingTime;
+    this.maxWaitingUnit = maxWaitingUnit;
+  }
+
+  /**
+   * Waits until answer is called in method {@link #answer(InvocationOnMock)}.
+   *
+   * @param maxWaitingTime max time to wait
+   * @param maxWaitingUnit time unit of the max waiting time argument
+   * @throws Exception if the waiting time elapsed before this answer is called
+   * @see #answer(InvocationOnMock)
+   */
+  public void waitAnswerCall(long maxWaitingTime, TimeUnit maxWaitingUnit) throws Exception {
+    if (!answerIsCalledLatch.await(maxWaitingTime, maxWaitingUnit)) {
+      error = "Waiting time elapsed but answer is not called";
+      throw new Exception(error);
     }
+  }
 
-    public WaitingAnswer(long maxWaitingTime, TimeUnit maxWaitingUnit) {
-        this();
-        this.maxWaitingTime = maxWaitingTime;
-        this.maxWaitingUnit = maxWaitingUnit;
+  /**
+   * Stops process of waiting returning result of answer in method {@link
+   * #answer(InvocationOnMock)}.
+   *
+   * @throws Exception if this answer waiting time elapsed before this method is called
+   * @see #answer(InvocationOnMock)
+   */
+  public void completeAnswer() throws Exception {
+    answerResultIsUnlockedLatch.countDown();
+    if (error != null) {
+      throw new Exception(error);
     }
+  }
 
-    public WaitingAnswer(T result) {
-        this();
-        this.result = result;
+  /**
+   * Stops waiting until answer is called in method {@link #waitAnswerCall(long, TimeUnit)} and then
+   * waits until method {@link #completeAnswer()} is called.
+   *
+   * @param invocationOnMock see {@link Answer#answer(InvocationOnMock)}
+   * @return returns answer result if provided in constructor or null otherwise
+   * @throws Exception if answer call or answer result waiting time is elapsed
+   * @throws Throwable in the same cases as in {@link Answer#answer(InvocationOnMock)}
+   * @see #waitAnswerCall(long, TimeUnit)
+   * @see #completeAnswer()
+   * @see Answer#answer(InvocationOnMock)
+   */
+  @Override
+  public T answer(InvocationOnMock invocationOnMock) throws Throwable {
+    // report start of answer call
+    answerIsCalledLatch.countDown();
+    if (error != null) {
+      throw new Exception(error);
     }
-
-    public WaitingAnswer(T result,
-                         long maxWaitingTime,
-                         TimeUnit maxWaitingUnit) {
-        this();
-        this.result = result;
-        this.maxWaitingTime = maxWaitingTime;
-        this.maxWaitingUnit = maxWaitingUnit;
+    // wait until another thread unlocks returning of answer
+    if (!answerResultIsUnlockedLatch.await(maxWaitingTime, maxWaitingUnit)) {
+      error = "Waiting time elapsed but completeAnswer is not called";
+      throw new Exception(error);
     }
-
-    /**
-     * Waits until answer is called in method {@link #answer(InvocationOnMock)}.
-     *
-     * @param maxWaitingTime
-     *         max time to wait
-     * @param maxWaitingUnit
-     *         time unit of the max waiting time argument
-     * @throws Exception
-     *         if the waiting time elapsed before this answer is called
-     * @see #answer(InvocationOnMock)
-     */
-    public void waitAnswerCall(long maxWaitingTime, TimeUnit maxWaitingUnit) throws Exception {
-        if (!answerIsCalledLatch.await(maxWaitingTime, maxWaitingUnit)) {
-            error = "Waiting time elapsed but answer is not called";
-            throw new Exception(error);
-        }
-    }
-
-    /**
-     * Stops process of waiting returning result of answer in method {@link #answer(InvocationOnMock)}.
-     *
-     * @throws Exception
-     *         if this answer waiting time elapsed before this method is called
-     * @see #answer(InvocationOnMock)
-     */
-    public void completeAnswer() throws Exception {
-        answerResultIsUnlockedLatch.countDown();
-        if (error != null) {
-            throw new Exception(error);
-        }
-    }
-
-    /**
-     * Stops waiting until answer is called in method {@link #waitAnswerCall(long, TimeUnit)} and
-     * then waits until method {@link #completeAnswer()} is called.
-     *
-     * @param invocationOnMock
-     *         see {@link Answer#answer(InvocationOnMock)}
-     * @return returns answer result if provided in constructor or null otherwise
-     * @throws Exception
-     *         if answer call or answer result waiting time is elapsed
-     * @throws Throwable
-     *         in the same cases as in {@link Answer#answer(InvocationOnMock)}
-     * @see #waitAnswerCall(long, TimeUnit)
-     * @see #completeAnswer()
-     * @see Answer#answer(InvocationOnMock)
-     */
-    @Override
-    public T answer(InvocationOnMock invocationOnMock) throws Throwable {
-        // report start of answer call
-        answerIsCalledLatch.countDown();
-        if (error != null) {
-            throw new Exception(error);
-        }
-        // wait until another thread unlocks returning of answer
-        if (!answerResultIsUnlockedLatch.await(maxWaitingTime, maxWaitingUnit)) {
-            error = "Waiting time elapsed but completeAnswer is not called";
-            throw new Exception(error);
-        }
-        return result;
-    }
+    return result;
+  }
 }

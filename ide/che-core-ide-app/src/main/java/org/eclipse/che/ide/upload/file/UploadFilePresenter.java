@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.upload.file;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -30,9 +32,6 @@ import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-
 /**
  * The purpose of this class is upload file
  *
@@ -42,128 +41,146 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 @Singleton
 public class UploadFilePresenter implements UploadFileView.ActionDelegate {
 
-    private final UploadFileView           view;
-    private final AppContext               appContext;
-    private final EventBus                 eventBus;
-    private final NotificationManager      notificationManager;
-    private final EditorAgent              editorAgent;
-    private final CoreLocalizationConstant locale;
-    private       Container                container;
+  private final UploadFileView view;
+  private final AppContext appContext;
+  private final EventBus eventBus;
+  private final NotificationManager notificationManager;
+  private final EditorAgent editorAgent;
+  private final CoreLocalizationConstant locale;
+  private Container container;
 
-    @Inject
-    public UploadFilePresenter(UploadFileView view,
-                               AppContext appContext,
-                               EventBus eventBus,
-                               NotificationManager notificationManager,
-                               CoreLocalizationConstant locale,
-                               EditorAgent editorAgent) {
-        this.appContext = appContext;
-        this.eventBus = eventBus;
-        this.view = view;
-        this.locale = locale;
-        this.notificationManager = notificationManager;
-        this.editorAgent = editorAgent;
-        this.view.setDelegate(this);
+  @Inject
+  public UploadFilePresenter(
+      UploadFileView view,
+      AppContext appContext,
+      EventBus eventBus,
+      NotificationManager notificationManager,
+      CoreLocalizationConstant locale,
+      EditorAgent editorAgent) {
+    this.appContext = appContext;
+    this.eventBus = eventBus;
+    this.view = view;
+    this.locale = locale;
+    this.notificationManager = notificationManager;
+    this.editorAgent = editorAgent;
+    this.view.setDelegate(this);
 
-        this.view.setEnabledUploadButton(false);
-        this.view.setEncoding(FormPanel.ENCODING_MULTIPART);
+    this.view.setEnabledUploadButton(false);
+    this.view.setEncoding(FormPanel.ENCODING_MULTIPART);
+  }
+
+  /** Show dialog. */
+  public void showDialog(Container container) {
+    this.container = container;
+    view.showDialog();
+    view.setAction(
+        appContext.getDevMachine().getWsAgentBaseUrl()
+            + "/project/uploadfile"
+            + container.getLocation());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onCancelClicked() {
+    view.closeDialog();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onSubmitComplete(String result) {
+    if (!isNullOrEmpty(result)) {
+      view.closeDialog();
+      notificationManager.notify(
+          locale.failedToUploadFiles(),
+          parseMessage(result),
+          StatusNotification.Status.FAIL,
+          FLOAT_MODE);
+      return;
     }
 
-    /** Show dialog. */
-    public void showDialog(Container container) {
-        this.container = container;
-        view.showDialog();
-        view.setAction(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/uploadfile" + container.getLocation());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onCancelClicked() {
-        view.closeDialog();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onSubmitComplete(String result) {
-        if (!isNullOrEmpty(result)) {
-            view.closeDialog();
-            notificationManager.notify(locale.failedToUploadFiles(), parseMessage(result), StatusNotification.Status.FAIL, FLOAT_MODE);
-            return;
-        }
-
-        container.getFile(Path.valueOf(view.getFileName())).then(new Operation<Optional<File>>() {
-            @Override
-            public void apply(final Optional<File> file) throws OperationException {
+    container
+        .getFile(Path.valueOf(view.getFileName()))
+        .then(
+            new Operation<Optional<File>>() {
+              @Override
+              public void apply(final Optional<File> file) throws OperationException {
 
                 if (file.isPresent()) {
-                    eventBus.fireEvent(new RevealResourceEvent(file.get()));
+                  eventBus.fireEvent(new RevealResourceEvent(file.get()));
 
-                    final NotificationListener notificationListener = new NotificationListener() {
+                  final NotificationListener notificationListener =
+                      new NotificationListener() {
                         boolean clicked = false;
 
                         @Override
                         public void onClick(Notification notification) {
-                            if (!clicked) {
-                                editorAgent.openEditor(file.get());
-                                clicked = true;
-                                notification.setListener(null);
-                                notification.setContent("");
-                            }
+                          if (!clicked) {
+                            editorAgent.openEditor(file.get());
+                            clicked = true;
+                            notification.setListener(null);
+                            notification.setContent("");
+                          }
                         }
 
                         @Override
                         public void onDoubleClick(Notification notification) {
-                            //stub
+                          //stub
                         }
 
                         @Override
                         public void onClose(Notification notification) {
-                            //stub
+                          //stub
                         }
-                    };
+                      };
 
-                    notificationManager.notify("File '" + view.getFileName() + "' has uploaded successfully", "Click here to open it",
-                                               StatusNotification.Status.SUCCESS, FLOAT_MODE, notificationListener);
+                  notificationManager.notify(
+                      "File '" + view.getFileName() + "' has uploaded successfully",
+                      "Click here to open it",
+                      StatusNotification.Status.SUCCESS,
+                      FLOAT_MODE,
+                      notificationListener);
 
-                    view.closeDialog();
+                  view.closeDialog();
                 }
-            }
-        });
+              }
+            });
 
-        //TODO this should process editor agent
-//        if (view.isOverwriteFileSelected()) {
-//            String path = ((HasStorablePath)getResourceBasedNode()).getStorablePath() + "/" + view.getFileName();
-//            eventBus.fireEvent(new FileContentUpdateEvent(path));
-//        }
+    //TODO this should process editor agent
+    //        if (view.isOverwriteFileSelected()) {
+    //            String path = ((HasStorablePath)getResourceBasedNode()).getStorablePath() + "/" + view.getFileName();
+    //            eventBus.fireEvent(new FileContentUpdateEvent(path));
+    //        }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onUploadClicked() {
+    view.submit();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onFileNameChanged() {
+    String fileName = view.getFileName();
+    boolean enabled = !fileName.isEmpty();
+    view.setEnabledUploadButton(enabled);
+  }
+
+  private String parseMessage(String message) {
+    int startIndex = 0;
+    int endIndex = -1;
+
+    if (message.contains("<pre>message:")) {
+      startIndex = message.indexOf("<pre>message:") + "<pre>message:".length();
+    } else if (message.contains("<pre>")) {
+      startIndex = message.indexOf("<pre>") + "<pre>".length();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onUploadClicked() {
-        view.submit();
+    if (message.contains("</pre>")) {
+      endIndex = message.indexOf("</pre>");
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onFileNameChanged() {
-        String fileName = view.getFileName();
-        boolean enabled = !fileName.isEmpty();
-        view.setEnabledUploadButton(enabled);
-    }
-
-    private String parseMessage(String message) {
-        int startIndex = 0;
-        int endIndex = -1;
-
-        if (message.contains("<pre>message:")) {
-            startIndex = message.indexOf("<pre>message:") + "<pre>message:".length();
-        } else if (message.contains("<pre>")) {
-            startIndex = message.indexOf("<pre>") + "<pre>".length();
-        }
-
-        if (message.contains("</pre>")) {
-            endIndex = message.indexOf("</pre>");
-        }
-        return (endIndex != -1) ? message.substring(startIndex, endIndex) : message.substring(startIndex);
-    }
+    return (endIndex != -1)
+        ? message.substring(startIndex, endIndex)
+        : message.substring(startIndex);
+  }
 }

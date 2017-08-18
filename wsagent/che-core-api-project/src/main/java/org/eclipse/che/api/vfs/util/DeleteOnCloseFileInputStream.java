@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.vfs.util;
-
-import org.eclipse.che.api.core.util.FileCleaner;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import org.eclipse.che.api.core.util.FileCleaner;
 
 /**
  * Delete java.io.File after closing.
@@ -22,20 +21,20 @@ import java.io.IOException;
  * @author andrew00x
  */
 public final class DeleteOnCloseFileInputStream extends FileInputStream {
-    private final java.io.File file;
+  private final java.io.File file;
 
-    public DeleteOnCloseFileInputStream(java.io.File file) throws FileNotFoundException {
-        super(file);
-        this.file = file;
-    }
+  public DeleteOnCloseFileInputStream(java.io.File file) throws FileNotFoundException {
+    super(file);
+    this.file = file;
+  }
 
-    /** @see java.io.FileInputStream#close() */
-    @Override
-    public void close() throws IOException {
-        try {
-            super.close();
-        } finally {
-            FileCleaner.addFile(file);
-        }
+  /** @see java.io.FileInputStream#close() */
+  @Override
+  public void close() throws IOException {
+    try {
+      super.close();
+    } finally {
+      FileCleaner.addFile(file);
     }
+  }
 }

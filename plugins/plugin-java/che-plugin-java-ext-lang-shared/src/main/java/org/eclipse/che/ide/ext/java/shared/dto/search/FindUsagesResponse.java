@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,66 +7,60 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.shared.dto.search;
-
-import org.eclipse.che.dto.shared.DTO;
-import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 
 /**
- * Response for FindUsages Request.
- * Contains projects and matches.
+ * Response for FindUsages Request. Contains projects and matches.
  *
  * @author Evgen Vidolob
  */
 @DTO
 public interface FindUsagesResponse {
-    /**
-     * Gets projects.
-     *
-     * @return the projects
-     */
-    List<JavaProject> getProjects();
+  /**
+   * Gets projects.
+   *
+   * @return the projects
+   */
+  List<JavaProject> getProjects();
 
-    /**
-     * Sets projects.
-     *
-     * @param projects
-     *         the projects
-     */
-    void setProjects(List<JavaProject> projects);
+  /**
+   * Sets projects.
+   *
+   * @param projects the projects
+   */
+  void setProjects(List<JavaProject> projects);
 
-    /**
-     * Matches mapped to java element handle.
-     *
-     * @return the map matches
-     */
-    Map<String, List<Match>> getMatches();
+  /**
+   * Matches mapped to java element handle.
+   *
+   * @return the map matches
+   */
+  Map<String, List<Match>> getMatches();
 
-    /**
-     * Sets matches.
-     *
-     * @param matches
-     *         the matches
-     */
-    void setMatches(Map<String, List<Match>> matches);
+  /**
+   * Sets matches.
+   *
+   * @param matches the matches
+   */
+  void setMatches(Map<String, List<Match>> matches);
 
-    /**
-     * Gets search element description.
-     *
-     * @return search element
-     */
-    String getSearchElementLabel();
+  /**
+   * Gets search element description.
+   *
+   * @return search element
+   */
+  String getSearchElementLabel();
 
-    /**
-     * Sets search element description.
-     *
-     * @param label
-     *         the search element label
-     */
-    void setSearchElementLabel(String label);
-
+  /**
+   * Sets search element description.
+   *
+   * @param label the search element label
+   */
+  void setSearchElementLabel(String label);
 }

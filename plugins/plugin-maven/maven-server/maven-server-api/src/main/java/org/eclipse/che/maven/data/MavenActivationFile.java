@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.maven.data;
 
 import java.io.Serializable;
@@ -18,22 +18,22 @@ import java.io.Serializable;
  * @author Evgen Vidolob
  */
 public class MavenActivationFile implements Serializable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private final String exist;
-    private final String missing;
+  private final String exist;
+  private final String missing;
 
-    public MavenActivationFile(String exist, String missing) {
+  public MavenActivationFile(String exist, String missing) {
 
-        this.exist = exist;
-        this.missing = missing;
-    }
+    this.exist = exist;
+    this.missing = missing;
+  }
 
-    public String getExist() {
-        return exist;
-    }
+  public String getExist() {
+    return exist;
+  }
 
-    public String getMissing() {
-        return missing;
-    }
+  public String getMissing() {
+    return missing;
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.agent.server.launcher;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.model.machine.Command;
@@ -22,68 +29,55 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-/**
- * @author Anatolii Bazko
- */
+/** @author Anatolii Bazko */
 @Listeners(value = {MockitoTestNGListener.class})
 public class DefaultAgentLauncherTest {
 
-    @Mock
-    private Instance                        machine;
-    @Mock
-    private Agent                           agent;
-    @Mock
-    private LineConsumer                    lineConsumer;
-    @Mock
-    private InstanceProcess                 instanceProcess;
+  @Mock private Instance machine;
+  @Mock private Agent agent;
+  @Mock private LineConsumer lineConsumer;
+  @Mock private InstanceProcess instanceProcess;
 
-    private AgentLauncher agentLauncher;
+  private AgentLauncher agentLauncher;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        agentLauncher = new DefaultAgentLauncher();
+  @BeforeMethod
+  public void setUp() throws Exception {
+    agentLauncher = new DefaultAgentLauncher();
 
-        when(machine.createProcess(any(), any())).thenReturn(instanceProcess);
-        when(machine.getLogger()).thenReturn(lineConsumer);
-        when(agent.getScript()).thenReturn("script1");
-    }
+    when(machine.createProcess(any(), any())).thenReturn(instanceProcess);
+    when(machine.getLogger()).thenReturn(lineConsumer);
+    when(agent.getScript()).thenReturn("script1");
+  }
 
-    @Test
-    public void shouldLaunchAgent() throws Exception {
-        ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
+  @Test
+  public void shouldLaunchAgent() throws Exception {
+    ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
 
-        agentLauncher.launch(machine, agent);
+    agentLauncher.launch(machine, agent);
 
-        verify(machine).createProcess(commandCaptor.capture(), (String)isNull());
+    verify(machine).createProcess(commandCaptor.capture(), (String) isNull());
 
-        Command command = commandCaptor.getValue();
-        assertEquals(command.getCommandLine(), "script1");
+    Command command = commandCaptor.getValue();
+    assertEquals(command.getCommandLine(), "script1");
 
-        verify(instanceProcess).start(any());
-    }
+    verify(instanceProcess).start(any());
+  }
 
-    @Test
-    public void shouldDoNothingIfAgentScriptIsNull() throws Exception {
-        when(agent.getScript()).thenReturn(null);
+  @Test
+  public void shouldDoNothingIfAgentScriptIsNull() throws Exception {
+    when(agent.getScript()).thenReturn(null);
 
-        agentLauncher.launch(machine, agent);
+    agentLauncher.launch(machine, agent);
 
-        verifyZeroInteractions(machine, lineConsumer, instanceProcess);
-    }
+    verifyZeroInteractions(machine, lineConsumer, instanceProcess);
+  }
 
-    @Test
-    public void shouldDoNothingIfAgentScriptIsEmpty() throws Exception {
-        when(agent.getScript()).thenReturn("");
+  @Test
+  public void shouldDoNothingIfAgentScriptIsEmpty() throws Exception {
+    when(agent.getScript()).thenReturn("");
 
-        agentLauncher.launch(machine, agent);
+    agentLauncher.launch(machine, agent);
 
-        verifyZeroInteractions(machine, lineConsumer, instanceProcess);
-    }
+    verifyZeroInteractions(machine, lineConsumer, instanceProcess);
+  }
 }

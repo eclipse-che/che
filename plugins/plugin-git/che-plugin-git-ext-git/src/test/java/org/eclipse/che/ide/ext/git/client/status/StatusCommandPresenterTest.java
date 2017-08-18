@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.status;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.promises.client.Operation;
@@ -21,13 +28,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Testing {@link StatusCommandPresenter} functionality.
  *
@@ -35,52 +35,52 @@ import static org.mockito.Mockito.when;
  * @author Vlad Zhukovskyi
  */
 public class StatusCommandPresenterTest extends BaseTest {
-    @InjectMocks
-    private StatusCommandPresenter presenter;
+  @InjectMocks private StatusCommandPresenter presenter;
 
-    @Mock
-    private GitOutputConsoleFactory gitOutputConsoleFactory;
+  @Mock private GitOutputConsoleFactory gitOutputConsoleFactory;
 
-    @Mock
-    private ProcessesPanelPresenter processesPanelPresenter;
+  @Mock private ProcessesPanelPresenter processesPanelPresenter;
 
-    @Override
-    public void disarm() {
-        super.disarm();
+  @Override
+  public void disarm() {
+    super.disarm();
 
-        presenter = new StatusCommandPresenter(service,
-                                               appContext,
-                                               gitOutputConsoleFactory,
-                                               processesPanelPresenter,
-                                               constant,
-                                               notificationManager);
+    presenter =
+        new StatusCommandPresenter(
+            service,
+            appContext,
+            gitOutputConsoleFactory,
+            processesPanelPresenter,
+            constant,
+            notificationManager);
 
-        when(service.statusText(any(Path.class), any(StatusFormat.class))).thenReturn(stringPromise);
-        when(stringPromise.then(any(Operation.class))).thenReturn(stringPromise);
-        when(stringPromise.catchError(any(Operation.class))).thenReturn(stringPromise);
-    }
+    when(service.statusText(any(Path.class), any(StatusFormat.class))).thenReturn(stringPromise);
+    when(stringPromise.then(any(Operation.class))).thenReturn(stringPromise);
+    when(stringPromise.catchError(any(Operation.class))).thenReturn(stringPromise);
+  }
 
-    @Test
-    public void testShowStatusWhenStatusTextRequestIsSuccessful() throws Exception {
-        when(gitOutputConsoleFactory.create(anyString())).thenReturn(console);
+  @Test
+  public void testShowStatusWhenStatusTextRequestIsSuccessful() throws Exception {
+    when(gitOutputConsoleFactory.create(anyString())).thenReturn(console);
 
-        presenter.showStatus(project);
+    presenter.showStatus(project);
 
-        verify(stringPromise).then(stringCaptor.capture());
-        stringCaptor.getValue().apply("");
+    verify(stringPromise).then(stringCaptor.capture());
+    stringCaptor.getValue().apply("");
 
-        verify(console, times(2)).print(anyString());
-        verify(processesPanelPresenter).addCommandOutput(anyString(), anyObject());
-    }
+    verify(console, times(2)).print(anyString());
+    verify(processesPanelPresenter).addCommandOutput(anyString(), anyObject());
+  }
 
-    @Test
-    public void testShowStatusWhenStatusTextRequestIsFailed() throws Exception {
-        presenter.showStatus(project);
+  @Test
+  public void testShowStatusWhenStatusTextRequestIsFailed() throws Exception {
+    presenter.showStatus(project);
 
-        verify(stringPromise).catchError(promiseErrorCaptor.capture());
-        promiseErrorCaptor.getValue().apply(promiseError);
+    verify(stringPromise).catchError(promiseErrorCaptor.capture());
+    promiseErrorCaptor.getValue().apply(promiseError);
 
-        verify(notificationManager).notify(anyString(), any(StatusNotification.Status.class), anyObject());
-        verify(constant).statusFailed();
-    }
+    verify(notificationManager)
+        .notify(anyString(), any(StatusNotification.Status.class), anyObject());
+    verify(constant).statusFailed();
+  }
 }

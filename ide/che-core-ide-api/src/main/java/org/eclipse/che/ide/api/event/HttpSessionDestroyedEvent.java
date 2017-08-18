@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.event;
 
 import com.google.gwt.event.shared.GwtEvent;
@@ -18,15 +18,15 @@ import com.google.gwt.event.shared.GwtEvent;
  * @author Evgen Vidolob
  */
 public class HttpSessionDestroyedEvent extends GwtEvent<HttpSessionDestroyedHandler> {
-    public static Type<HttpSessionDestroyedHandler> TYPE = new Type<HttpSessionDestroyedHandler>();
+  public static Type<HttpSessionDestroyedHandler> TYPE = new Type<HttpSessionDestroyedHandler>();
 
-    @Override
-    public Type<HttpSessionDestroyedHandler> getAssociatedType() {
-        return TYPE;
-    }
+  @Override
+  public Type<HttpSessionDestroyedHandler> getAssociatedType() {
+    return TYPE;
+  }
 
-    @Override
-    protected void dispatch(HttpSessionDestroyedHandler handler) {
-        handler.onHttpSessionDestroyed(this);
-    }
+  @Override
+  protected void dispatch(HttpSessionDestroyedHandler handler) {
+    handler.onHttpSessionDestroyed(this);
+  }
 }

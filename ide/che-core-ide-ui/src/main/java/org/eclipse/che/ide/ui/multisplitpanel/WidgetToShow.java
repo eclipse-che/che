@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.multisplitpanel;
 
 import com.google.gwt.user.client.ui.IsWidget;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -21,12 +20,12 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 public interface WidgetToShow {
 
-    /** Returns widget to display on the panel. */
-    IsWidget getWidget();
+  /** Returns widget to display on the panel. */
+  IsWidget getWidget();
 
-    /** Returns the text for displaying as corresponding tab title. */
-    String getTitle();
+  /** Returns the text for displaying as corresponding tab title. */
+  String getTitle();
 
-    /** Returns the associated icon for displaying on the corresponding tab. */
-    SVGResource getIcon();
+  /** Returns the associated icon for displaying on the corresponding tab. */
+  SVGResource getIcon();
 }

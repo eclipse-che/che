@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.preferences.editorproperties.sections;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.EXPAND_TAB;
 import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties.TAB_SIZE;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import java.util.Arrays;
+import java.util.List;
+import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
 
 /**
  * The class provides info about 'Tabs' editor's section.
@@ -28,24 +26,22 @@ import static org.eclipse.che.ide.editor.preferences.editorproperties.EditorProp
  */
 @Singleton
 public class TabsPropertiesSection implements EditorPropertiesSection {
-    private final List<String>                properties;
-    private final EditorLocalizationConstants locale;
+  private final List<String> properties;
+  private final EditorLocalizationConstants locale;
 
-    @Inject
-    public TabsPropertiesSection(EditorLocalizationConstants locale) {
-        this.locale = locale;
-        properties = Arrays.asList(TAB_SIZE.toString(),
-                                   EXPAND_TAB.toString()
-        );
-    }
+  @Inject
+  public TabsPropertiesSection(EditorLocalizationConstants locale) {
+    this.locale = locale;
+    properties = Arrays.asList(TAB_SIZE.toString(), EXPAND_TAB.toString());
+  }
 
-    @Override
-    public List<String> getProperties() {
-        return properties;
-    }
+  @Override
+  public List<String> getProperties() {
+    return properties;
+  }
 
-    @Override
-    public String getSectionTitle() {
-        return locale.tabsPropertiesSection();
-    }
+  @Override
+  public String getSectionTitle() {
+    return locale.tabsPropertiesSection();
+  }
 }

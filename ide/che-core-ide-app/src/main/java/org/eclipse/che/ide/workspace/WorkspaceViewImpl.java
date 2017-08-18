@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.GWT;
@@ -30,67 +30,59 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
-    interface WorkspaceViewUiBinder extends UiBinder<Widget, WorkspaceViewImpl> {
-    }
+  interface WorkspaceViewUiBinder extends UiBinder<Widget, WorkspaceViewImpl> {}
 
-    private static WorkspaceViewUiBinder uiBinder = GWT.create(WorkspaceViewUiBinder.class);
+  private static WorkspaceViewUiBinder uiBinder = GWT.create(WorkspaceViewUiBinder.class);
 
-    @UiField
-    SimpleLayoutPanel perspectivePanel;
+  @UiField SimpleLayoutPanel perspectivePanel;
 
-    @UiField
-    DockLayoutPanel ideMainDockPanel;
+  @UiField DockLayoutPanel ideMainDockPanel;
 
-    @UiField
-    DockLayoutPanel topMenuLayoutPanel;
+  @UiField DockLayoutPanel topMenuLayoutPanel;
 
-    @UiField
-    SimplePanel     menuPanel;
+  @UiField SimplePanel menuPanel;
 
-    @UiField
-    SimplePanel toolbarPanel, noToolbarPanel;
+  @UiField SimplePanel toolbarPanel, noToolbarPanel;
+  @UiField SimplePanel actionsPanel, statusPanel;
 
-    @UiField
-    SimplePanel actionsPanel, statusPanel;
+  ActionDelegate delegate;
 
-    ActionDelegate delegate;
+  /** Create view. */
+  @Inject
+  protected WorkspaceViewImpl() {
+    add(uiBinder.createAndBindUi(this));
+    getElement().setId("codenvyIdeWorkspaceViewImpl");
+    ideMainDockPanel.setWidgetHidden(noToolbarPanel, true);
+    ideMainDockPanel.setWidgetHidden(actionsPanel, true);
+    ideMainDockPanel.setWidgetHidden(statusPanel, false);
+  }
 
-    /** Create view. */
-    @Inject
-    protected WorkspaceViewImpl() {
-        add(uiBinder.createAndBindUi(this));
-        getElement().setId("codenvyIdeWorkspaceViewImpl");
-        ideMainDockPanel.setWidgetHidden(noToolbarPanel, true);
-        ideMainDockPanel.setWidgetHidden(actionsPanel, true);
-        ideMainDockPanel.setWidgetHidden(statusPanel, false);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public AcceptsOneWidget getMenuPanel() {
+    return menuPanel;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public AcceptsOneWidget getMenuPanel() {
-        return menuPanel;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public AcceptsOneWidget getPerspectivePanel() {
+    return perspectivePanel;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public AcceptsOneWidget getPerspectivePanel() {
-        return perspectivePanel;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public AcceptsOneWidget getToolbarPanel() {
+    return toolbarPanel;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public AcceptsOneWidget getToolbarPanel() {
-        return toolbarPanel;
-    }
-
-    @Override
-    public AcceptsOneWidget getStatusPanel() {
-        return statusPanel;
-    }
+  @Override
+  public AcceptsOneWidget getStatusPanel() {
+    return statusPanel;
+  }
 }

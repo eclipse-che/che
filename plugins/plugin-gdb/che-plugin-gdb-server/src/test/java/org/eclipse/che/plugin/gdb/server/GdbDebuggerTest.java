@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,26 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.gdb.server;
 
-import com.google.common.collect.ImmutableMap;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
-import org.eclipse.che.api.debugger.server.Debugger;
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import com.google.common.collect.ImmutableMap;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
@@ -33,207 +41,201 @@ import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOutActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOverActionImpl;
+import org.eclipse.che.api.debugger.server.Debugger;
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-/**
- * @author Anatoliy Bazko
- */
+/** @author Anatoliy Bazko */
 public class GdbDebuggerTest {
 
-    private String                       file;
-    private Path                         sourceDirectory;
-    private GdbServer                    gdbServer;
-    private Debugger                     gdbDebugger;
-    private BlockingQueue<DebuggerEvent> events;
+  private String file;
+  private Path sourceDirectory;
+  private GdbServer gdbServer;
+  private Debugger gdbDebugger;
+  private BlockingQueue<DebuggerEvent> events;
 
-    @BeforeClass
-    public void beforeClass() throws Exception {
-        file = GdbTest.class.getResource("/hello").getFile();
-        sourceDirectory = Paths.get(GdbTest.class.getResource("/h.cpp").getFile());
-        events = new ArrayBlockingQueue<>(10);
+  @BeforeClass
+  public void beforeClass() throws Exception {
+    file = GdbTest.class.getResource("/hello").getFile();
+    sourceDirectory = Paths.get(GdbTest.class.getResource("/h.cpp").getFile());
+    events = new ArrayBlockingQueue<>(10);
+  }
+
+  @BeforeMethod
+  public void setUp() throws Exception {
+    gdbServer = GdbServer.start("localhost", 1111, file);
+  }
+
+  @AfterMethod
+  public void tearDown() throws Exception {
+    gdbServer.stop();
+  }
+
+  @Test
+  public void testDebugger() throws Exception {
+    initializeDebugger();
+    addBreakpoint();
+    startDebugger();
+    doSetAndGetValues();
+    //        stepInto();
+    stepOver();
+    stepOut();
+    resume();
+    deleteAllBreakpoints();
+    disconnect();
+  }
+
+  private void deleteAllBreakpoints() throws DebuggerException {
+    List<Breakpoint> breakpoints = gdbDebugger.getAllBreakpoints();
+    assertEquals(breakpoints.size(), 1);
+
+    gdbDebugger.deleteAllBreakpoints();
+
+    breakpoints = gdbDebugger.getAllBreakpoints();
+    assertTrue(breakpoints.isEmpty());
+  }
+
+  private void resume() throws DebuggerException, InterruptedException {
+    gdbDebugger.resume(new ResumeActionImpl());
+
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+
+    SuspendEvent suspendEvent = (SuspendEvent) debuggerEvent;
+    assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
+    assertEquals(suspendEvent.getLocation().getLineNumber(), 7);
+  }
+
+  private void stepOut() throws DebuggerException, InterruptedException {
+    try {
+      gdbDebugger.stepOut(new StepOutActionImpl());
+    } catch (DebuggerException e) {
+      // ignore
     }
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        gdbServer = GdbServer.start("localhost", 1111, file);
-    }
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+  }
 
-    @AfterMethod
-    public void tearDown() throws Exception {
-        gdbServer.stop();
-    }
+  private void stepOver() throws DebuggerException, InterruptedException {
+    gdbDebugger.stepOver(new StepOverActionImpl());
 
-    @Test
-    public void testDebugger() throws Exception {
-        initializeDebugger();
-        addBreakpoint();
-        startDebugger();
-        doSetAndGetValues();
-//        stepInto();
-        stepOver();
-        stepOut();
-        resume();
-        deleteAllBreakpoints();
-        disconnect();
-    }
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
 
-    private void deleteAllBreakpoints() throws DebuggerException {
-        List<Breakpoint> breakpoints = gdbDebugger.getAllBreakpoints();
-        assertEquals(breakpoints.size(), 1);
+    SuspendEvent suspendEvent = (SuspendEvent) debuggerEvent;
+    assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
+    assertEquals(suspendEvent.getLocation().getLineNumber(), 5);
 
-        gdbDebugger.deleteAllBreakpoints();
+    gdbDebugger.stepOver(new StepOverActionImpl());
 
-        breakpoints = gdbDebugger.getAllBreakpoints();
-        assertTrue(breakpoints.isEmpty());
-    }
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
 
-    private void resume() throws DebuggerException, InterruptedException {
-        gdbDebugger.resume(new ResumeActionImpl());
+    suspendEvent = (SuspendEvent) debuggerEvent;
+    assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
+    assertEquals(suspendEvent.getLocation().getLineNumber(), 6);
 
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
+    gdbDebugger.stepOver(new StepOverActionImpl());
 
-        SuspendEvent suspendEvent = (SuspendEvent)debuggerEvent;
-        assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
-        assertEquals(suspendEvent.getLocation().getLineNumber(), 7);
-    }
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
 
-    private void stepOut() throws DebuggerException, InterruptedException {
-        try {
-            gdbDebugger.stepOut(new StepOutActionImpl());
-        } catch (DebuggerException e) {
-            // ignore
-        }
+    suspendEvent = (SuspendEvent) debuggerEvent;
+    assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
+    assertEquals(suspendEvent.getLocation().getLineNumber(), 7);
+  }
 
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
-    }
+  private void doSetAndGetValues() throws DebuggerException {
+    VariablePath variablePath = new VariablePathImpl("i");
+    Variable variable =
+        new VariableImpl("int", "i", "2", true, variablePath, Collections.emptyList(), false);
 
-    private void stepOver() throws DebuggerException, InterruptedException {
-        gdbDebugger.stepOver(new StepOverActionImpl());
+    SimpleValue value = gdbDebugger.getValue(variablePath);
+    assertEquals(value.getValue(), "0");
 
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
+    gdbDebugger.setValue(variable);
 
-        SuspendEvent suspendEvent = (SuspendEvent)debuggerEvent;
-        assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
-        assertEquals(suspendEvent.getLocation().getLineNumber(), 5);
+    value = gdbDebugger.getValue(variablePath);
 
-        gdbDebugger.stepOver(new StepOverActionImpl());
+    assertEquals(value.getValue(), "2");
 
-        debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
+    String expression = gdbDebugger.evaluate("i");
+    assertEquals(expression, "2");
 
-        suspendEvent = (SuspendEvent)debuggerEvent;
-        assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
-        assertEquals(suspendEvent.getLocation().getLineNumber(), 6);
+    expression = gdbDebugger.evaluate("10 + 10");
+    assertEquals(expression, "20");
 
-        gdbDebugger.stepOver(new StepOverActionImpl());
+    StackFrameDump stackFrameDump = gdbDebugger.dumpStackFrame();
+    assertTrue(stackFrameDump.getFields().isEmpty());
+    assertEquals(stackFrameDump.getVariables().size(), 1);
+    assertEquals(stackFrameDump.getVariables().get(0).getName(), "i");
+    assertEquals(stackFrameDump.getVariables().get(0).getValue(), "2");
+    assertEquals(stackFrameDump.getVariables().get(0).getType(), "int");
+  }
 
-        debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
+  private void startDebugger() throws DebuggerException, InterruptedException {
+    gdbDebugger.start(new StartActionImpl(Collections.emptyList()));
 
-        suspendEvent = (SuspendEvent)debuggerEvent;
-        assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
-        assertEquals(suspendEvent.getLocation().getLineNumber(), 7);
-    }
+    assertEquals(events.size(), 1);
 
-    private void doSetAndGetValues() throws DebuggerException {
-        VariablePath variablePath = new VariablePathImpl("i");
-        Variable variable = new VariableImpl("int", "i", "2", true, variablePath, Collections.emptyList(), false);
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
 
-        SimpleValue value = gdbDebugger.getValue(variablePath);
-        assertEquals(value.getValue(), "0");
+    SuspendEvent suspendEvent = (SuspendEvent) debuggerEvent;
+    assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
+    assertEquals(suspendEvent.getLocation().getLineNumber(), 7);
+  }
 
-        gdbDebugger.setValue(variable);
+  private void disconnect() throws DebuggerException, InterruptedException {
+    gdbDebugger.disconnect();
 
-        value = gdbDebugger.getValue(variablePath);
+    assertEquals(events.size(), 1);
 
-        assertEquals(value.getValue(), "2");
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof DisconnectEvent);
+  }
 
-        String expression = gdbDebugger.evaluate("i");
-        assertEquals(expression, "2");
+  private void addBreakpoint() throws DebuggerException, InterruptedException {
+    Location location = new LocationImpl("h.cpp", 7);
+    Breakpoint breakpoint = new BreakpointImpl(location);
 
-        expression = gdbDebugger.evaluate("10 + 10");
-        assertEquals(expression, "20");
+    gdbDebugger.addBreakpoint(breakpoint);
 
-        StackFrameDump stackFrameDump = gdbDebugger.dumpStackFrame();
-        assertTrue(stackFrameDump.getFields().isEmpty());
-        assertEquals(stackFrameDump.getVariables().size(), 1);
-        assertEquals(stackFrameDump.getVariables().get(0).getName(), "i");
-        assertEquals(stackFrameDump.getVariables().get(0).getValue(), "2");
-        assertEquals(stackFrameDump.getVariables().get(0).getType(), "int");
-    }
+    assertEquals(events.size(), 1);
 
-    private void startDebugger() throws DebuggerException, InterruptedException {
-        gdbDebugger.start(new StartActionImpl(Collections.emptyList()));
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
 
-        assertEquals(events.size(), 1);
+    BreakpointActivatedEvent breakpointActivatedEvent = (BreakpointActivatedEvent) debuggerEvent;
+    assertEquals(breakpointActivatedEvent.getBreakpoint().getLocation().getTarget(), "h.cpp");
+    assertEquals(breakpointActivatedEvent.getBreakpoint().getLocation().getLineNumber(), 7);
+  }
 
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
+  private void initializeDebugger() throws DebuggerException {
+    Map<String, String> properties =
+        ImmutableMap.of(
+            "host",
+            "localhost",
+            "port",
+            "1111",
+            "binary",
+            file,
+            "sources",
+            sourceDirectory.getParent().toString());
 
-        SuspendEvent suspendEvent = (SuspendEvent)debuggerEvent;
-        assertEquals(suspendEvent.getLocation().getTarget(), "h.cpp");
-        assertEquals(suspendEvent.getLocation().getLineNumber(), 7);
-    }
+    GdbDebuggerFactory gdbDebuggerFactory = new GdbDebuggerFactory();
+    gdbDebugger = gdbDebuggerFactory.create(properties, events::add);
 
-    private void disconnect() throws DebuggerException, InterruptedException {
-        gdbDebugger.disconnect();
+    DebuggerInfo debuggerInfo = gdbDebugger.getInfo();
 
-        assertEquals(events.size(), 1);
-
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof DisconnectEvent);
-    }
-
-    private void addBreakpoint() throws DebuggerException, InterruptedException {
-        Location location = new LocationImpl("h.cpp", 7);
-        Breakpoint breakpoint = new BreakpointImpl(location);
-
-        gdbDebugger.addBreakpoint(breakpoint);
-
-        assertEquals(events.size(), 1);
-
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
-
-        BreakpointActivatedEvent breakpointActivatedEvent = (BreakpointActivatedEvent)debuggerEvent;
-        assertEquals(breakpointActivatedEvent.getBreakpoint().getLocation().getTarget(), "h.cpp");
-        assertEquals(breakpointActivatedEvent.getBreakpoint().getLocation().getLineNumber(), 7);
-    }
-
-    private void initializeDebugger() throws DebuggerException {
-        Map<String, String> properties = ImmutableMap.of("host", "localhost",
-                                                         "port", "1111",
-                                                         "binary", file,
-                                                         "sources", sourceDirectory.getParent().toString());
-
-        GdbDebuggerFactory gdbDebuggerFactory = new GdbDebuggerFactory();
-        gdbDebugger = gdbDebuggerFactory.create(properties, events::add);
-
-
-        DebuggerInfo debuggerInfo = gdbDebugger.getInfo();
-
-        assertEquals(debuggerInfo.getFile(), file);
-        assertEquals(debuggerInfo.getHost(), "localhost");
-        assertEquals(debuggerInfo.getPort(), 1111);
-        assertNotNull(debuggerInfo.getName());
-        assertNotNull(debuggerInfo.getVersion());
-    }
+    assertEquals(debuggerInfo.getFile(), file);
+    assertEquals(debuggerInfo.getHost(), "localhost");
+    assertEquals(debuggerInfo.getPort(), 1111);
+    assertNotNull(debuggerInfo.getName());
+    assertNotNull(debuggerInfo.getVersion());
+  }
 }

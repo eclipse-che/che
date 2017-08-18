@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.parts.ide.helloworldview;
 
 import com.google.inject.Inject;
@@ -25,27 +25,26 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 @Singleton
 public class HelloWorldViewAction extends Action {
 
-    private WorkspaceAgent workspaceAgent;
-    private HelloWorldPresenter helloWorldPresenter;
+  private WorkspaceAgent workspaceAgent;
+  private HelloWorldPresenter helloWorldPresenter;
 
-    /**
-     * Constructor.
-     *
-     * @param workspaceAgent the {@link WorkspaceAgent} that will open our sample part
-     * @param helloWorldPresenter the {@link HelloWorldPresenter} displaying the view
-     *
-     */
-    @Inject
-    public HelloWorldViewAction(WorkspaceAgent workspaceAgent, HelloWorldPresenter helloWorldPresenter) {
-        super("Show Hello World View");
-        this.workspaceAgent = workspaceAgent;
-        this.helloWorldPresenter = helloWorldPresenter;
-    }
+  /**
+   * Constructor.
+   *
+   * @param workspaceAgent the {@link WorkspaceAgent} that will open our sample part
+   * @param helloWorldPresenter the {@link HelloWorldPresenter} displaying the view
+   */
+  @Inject
+  public HelloWorldViewAction(
+      WorkspaceAgent workspaceAgent, HelloWorldPresenter helloWorldPresenter) {
+    super("Show Hello World View");
+    this.workspaceAgent = workspaceAgent;
+    this.helloWorldPresenter = helloWorldPresenter;
+  }
 
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        workspaceAgent.openPart(helloWorldPresenter, PartStackType.INFORMATION);
-        workspaceAgent.setActivePart(helloWorldPresenter);
-    }
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    workspaceAgent.openPart(helloWorldPresenter, PartStackType.INFORMATION);
+    workspaceAgent.setActivePart(helloWorldPresenter);
+  }
 }

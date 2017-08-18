@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,23 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.wizard;
-
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Testing {@link AbstractWizardPage}.
@@ -32,48 +30,48 @@ import static org.mockito.Mockito.mock;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractWizardPageTest {
-    private AbstractWizardPage<String> wizardPage;
+  private AbstractWizardPage<String> wizardPage;
 
-    @Before
-    public void setUp() {
-        wizardPage = new DummyWizardPage();
-    }
+  @Before
+  public void setUp() {
+    wizardPage = new DummyWizardPage();
+  }
 
-    @Test
-    public void shouldInitPage() throws Exception {
-        String dataObject = "dataObject";
-        wizardPage.init(dataObject);
-        assertEquals(dataObject, wizardPage.dataObject);
-    }
+  @Test
+  public void shouldInitPage() throws Exception {
+    String dataObject = "dataObject";
+    wizardPage.init(dataObject);
+    assertEquals(dataObject, wizardPage.dataObject);
+  }
 
-    @Test
-    public void shouldSetContext() throws Exception {
-        Map<String, String> context = new HashMap<>();
-        wizardPage.setContext(context);
-        assertEquals(context, wizardPage.context);
-    }
+  @Test
+  public void shouldSetContext() throws Exception {
+    Map<String, String> context = new HashMap<>();
+    wizardPage.setContext(context);
+    assertEquals(context, wizardPage.context);
+  }
 
-    @Test
-    public void shouldSetUpdateDelegate() throws Exception {
-        Wizard.UpdateDelegate updateDelegate = mock(Wizard.UpdateDelegate.class);
-        wizardPage.setUpdateDelegate(updateDelegate);
-        assertEquals(updateDelegate, wizardPage.updateDelegate);
-    }
+  @Test
+  public void shouldSetUpdateDelegate() throws Exception {
+    Wizard.UpdateDelegate updateDelegate = mock(Wizard.UpdateDelegate.class);
+    wizardPage.setUpdateDelegate(updateDelegate);
+    assertEquals(updateDelegate, wizardPage.updateDelegate);
+  }
 
-    @Test
-    public void shouldNotSkipped() throws Exception {
-        assertFalse(wizardPage.canSkip());
-    }
+  @Test
+  public void shouldNotSkipped() throws Exception {
+    assertFalse(wizardPage.canSkip());
+  }
 
-    @Test
-    public void shouldBeCompleted() throws Exception {
-        assertTrue(wizardPage.isCompleted());
-    }
+  @Test
+  public void shouldBeCompleted() throws Exception {
+    assertTrue(wizardPage.isCompleted());
+  }
 
-    private class DummyWizardPage extends AbstractWizardPage<String> {
-        @Override
-        public void go(AcceptsOneWidget container) {
-            // do nothing
-        }
+  private class DummyWizardPage extends AbstractWizardPage<String> {
+    @Override
+    public void go(AcceptsOneWidget container) {
+      // do nothing
     }
+  }
 }

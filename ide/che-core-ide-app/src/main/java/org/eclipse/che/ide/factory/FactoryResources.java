@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.factory;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-
 import org.eclipse.che.ide.ui.Styles;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -23,32 +22,36 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Anton Korneta
  */
 public interface FactoryResources extends ClientBundle {
-    interface FactoryCSS extends CssResource, Styles {
-        String label();
+  interface FactoryCSS extends CssResource, Styles {
+    String label();
 
-        String createFactoryButton();
+    String createFactoryButton();
 
-        String labelErrorPosition();
-    }
+    String labelErrorPosition();
+  }
 
-    interface Style extends CssResource {
-        String launchIcon();
+  interface Style extends CssResource {
+    String launchIcon();
 
-        String configureIcon();
-    }
+    String configureIcon();
+  }
 
-    @Source({"Factory.css", "org/eclipse/che/ide/api/ui/style.css", "org/eclipse/che/ide/ui/Styles.css"})
-    FactoryCSS factoryCSS();
+  @Source({
+    "Factory.css",
+    "org/eclipse/che/ide/api/ui/style.css",
+    "org/eclipse/che/ide/ui/Styles.css"
+  })
+  FactoryCSS factoryCSS();
 
-    @Source("export-config.svg")
-    SVGResource exportConfig();
+  @Source("export-config.svg")
+  SVGResource exportConfig();
 
-    @Source("import-config.svg")
-    SVGResource importConfig();
+  @Source("import-config.svg")
+  SVGResource importConfig();
 
-    @Source("execute.svg")
-    SVGResource execute();
+  @Source("execute.svg")
+  SVGResource execute();
 
-    @Source("cog-icon.svg")
-    SVGResource configure();
+  @Source("cog-icon.svg")
+  SVGResource configure();
 }

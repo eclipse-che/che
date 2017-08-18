@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.resources;
 
 import com.google.gwt.inject.client.AbstractGinModule;
@@ -15,7 +15,6 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
@@ -40,30 +39,35 @@ import org.eclipse.che.ide.resources.tree.ResourceNode;
  */
 public class ResourceApiModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        install(new GinFactoryModuleBuilder().build(ResourceManager.ResourceFactory.class));
-        install(new GinFactoryModuleBuilder().build(ResourceManager.ResourceManagerFactory.class));
-        install(new GinFactoryModuleBuilder().build(ResourceNode.NodeFactory.class));
+  @Override
+  protected void configure() {
+    install(new GinFactoryModuleBuilder().build(ResourceManager.ResourceFactory.class));
+    install(new GinFactoryModuleBuilder().build(ResourceManager.ResourceManagerFactory.class));
+    install(new GinFactoryModuleBuilder().build(ResourceNode.NodeFactory.class));
 
-        GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class).addBinding().to(ResourceInterceptor.NoOpInterceptor.class);
+    GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class)
+        .addBinding()
+        .to(ResourceInterceptor.NoOpInterceptor.class);
 
-        GinMultibinder<NodeInterceptor> nodeInterceptors = GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
-        nodeInterceptors.addBinding().to(DefaultNodeInterceptor.class);
+    GinMultibinder<NodeInterceptor> nodeInterceptors =
+        GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
+    nodeInterceptors.addBinding().to(DefaultNodeInterceptor.class);
 
-        bind(SettingsProvider.class).to(DummySettingsProvider.class).in(Singleton.class);
+    bind(SettingsProvider.class).to(DummySettingsProvider.class).in(Singleton.class);
 
-        GinMultibinder<NodeIconProvider> themeBinder = GinMultibinder.newSetBinder(binder(), NodeIconProvider.class);
-        themeBinder.addBinding().to(FileIconProvider.class);
-        themeBinder.addBinding().to(DockerfileIconProvider.class);
+    GinMultibinder<NodeIconProvider> themeBinder =
+        GinMultibinder.newSetBinder(binder(), NodeIconProvider.class);
+    themeBinder.addBinding().to(FileIconProvider.class);
+    themeBinder.addBinding().to(DockerfileIconProvider.class);
 
-        bind(TreeResourceRevealer.class);
+    bind(TreeResourceRevealer.class);
 
-        bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
+    bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
 
-        bind(ResourceManagerInitializer.class).to(AppContextImpl.class).in(Singleton.class);
-        GinMapBinder<String, WsAgentComponent> mapBinder = GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
-        mapBinder.addBinding("Resource Manager").to(ResourceManagerComponent.class);
-        GinMultibinder.newSetBinder(binder(), RenamingSupport.class);
-    }
+    bind(ResourceManagerInitializer.class).to(AppContextImpl.class).in(Singleton.class);
+    GinMapBinder<String, WsAgentComponent> mapBinder =
+        GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
+    mapBinder.addBinding("Resource Manager").to(ResourceManagerComponent.class);
+    GinMultibinder.newSetBinder(binder(), RenamingSupport.class);
+  }
 }

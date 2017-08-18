@@ -23,15 +23,16 @@ import elemental.dom.Element;
  */
 
 /** A controller that wraps the given element in a {@link AutoHideComponent}. */
-public class AutoHideController extends AutoHideComponent<AutoHideView<Void>, AutoHideComponent.AutoHideModel> {
+public class AutoHideController
+    extends AutoHideComponent<AutoHideView<Void>, AutoHideComponent.AutoHideModel> {
 
-    public static AutoHideController create(Element element) {
-        AutoHideView<Void> view = new AutoHideView<Void>(element);
-        AutoHideModel model = new AutoHideModel();
-        return new AutoHideController(view, model);
-    }
+  public static AutoHideController create(Element element) {
+    AutoHideView<Void> view = new AutoHideView<Void>(element);
+    AutoHideModel model = new AutoHideModel();
+    return new AutoHideController(view, model);
+  }
 
-    private AutoHideController(AutoHideView<Void> view, AutoHideComponent.AutoHideModel model) {
-        super(view, model);
-    }
+  private AutoHideController(AutoHideView<Void> view, AutoHideComponent.AutoHideModel model) {
+    super(view, model);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.node;
 
 import com.google.gwt.core.client.GWT;
@@ -20,12 +20,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathResources;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * The class describes special widget which is entry in list of nodes.
@@ -33,88 +31,86 @@ import javax.validation.constraints.NotNull;
  * @author Valeriy Svydenko
  */
 public class NodeWidget extends Composite implements NodeEntry, ClickHandler {
-    interface RecipeEntryWidgetUiBinder extends UiBinder<Widget, NodeWidget> {
-    }
+  interface RecipeEntryWidgetUiBinder extends UiBinder<Widget, NodeWidget> {}
 
-    private final static RecipeEntryWidgetUiBinder UI_BINDER = GWT.create(RecipeEntryWidgetUiBinder.class);
+  private static final RecipeEntryWidgetUiBinder UI_BINDER =
+      GWT.create(RecipeEntryWidgetUiBinder.class);
 
-    @UiField
-    SimplePanel icon;
-    @UiField
-    Label       name;
-    @UiField
-    FlowPanel   main;
-    @UiField
-    SimplePanel removeButton;
+  @UiField SimplePanel icon;
+  @UiField Label name;
+  @UiField FlowPanel main;
+  @UiField SimplePanel removeButton;
 
-    private final ProjectClasspathResources resources;
-    private final String                    nodeName;
-    private final int                       nodeKind;
+  private final ProjectClasspathResources resources;
+  private final String nodeName;
+  private final int nodeKind;
 
-    private ActionDelegate delegate;
+  private ActionDelegate delegate;
 
-    public NodeWidget(String nodeName, ProjectClasspathResources resources, int nodeKind, SVGResource nodeIcon) {
-        this.resources = resources;
-        this.nodeName = nodeName;
-        this.nodeKind = nodeKind;
+  public NodeWidget(
+      String nodeName, ProjectClasspathResources resources, int nodeKind, SVGResource nodeIcon) {
+    this.resources = resources;
+    this.nodeName = nodeName;
+    this.nodeKind = nodeKind;
 
-        initWidget(UI_BINDER.createAndBindUi(this));
+    initWidget(UI_BINDER.createAndBindUi(this));
 
-        SVGImage icon = new SVGImage(nodeIcon.getSvg());
-        this.icon.getElement().appendChild(icon.getSvgElement().getElement());
-        this.removeButton.getElement().appendChild(resources.removeNode().getSvg().getElement());
+    SVGImage icon = new SVGImage(nodeIcon.getSvg());
+    this.icon.getElement().appendChild(icon.getSvgElement().getElement());
+    this.removeButton.getElement().appendChild(resources.removeNode().getSvg().getElement());
 
-        name.setText(nodeName);
+    name.setText(nodeName);
 
-        removeButton.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onRemoveButtonClicked(NodeWidget.this);
-            }
-        }, ClickEvent.getType());
-        addDomHandler(this, ClickEvent.getType());
-    }
+    removeButton.addDomHandler(
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            delegate.onRemoveButtonClicked(NodeWidget.this);
+          }
+        },
+        ClickEvent.getType());
+    addDomHandler(this, ClickEvent.getType());
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onClick(@NotNull ClickEvent event) {
-        delegate.onNodeClicked(this);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void onClick(@NotNull ClickEvent event) {
+    delegate.onNodeClicked(this);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(@NotNull ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(@NotNull ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    /** Changes style of widget as selected */
-    public void select() {
-        main.addStyleName(resources.getCss().selectNode());
-    }
+  /** Changes style of widget as selected */
+  public void select() {
+    main.addStyleName(resources.getCss().selectNode());
+  }
 
-    /** Changes style of widget as unselected */
-    public void deselect() {
-        main.removeStyleName(resources.getCss().selectNode());
-    }
+  /** Changes style of widget as unselected */
+  public void deselect() {
+    main.removeStyleName(resources.getCss().selectNode());
+  }
 
-    /** Sets name of the Recipe. */
-    public void setName(@NotNull String name) {
-        this.name.setText(name);
-    }
+  /** Sets name of the Recipe. */
+  public void setName(@NotNull String name) {
+    this.name.setText(name);
+  }
 
-    /** Returns name of the current node. */
-    public String getName() {
-        return nodeName;
-    }
+  /** Returns name of the current node. */
+  public String getName() {
+    return nodeName;
+  }
 
-    /** Hides panel wit the Remove button. */
-    public void hideRemoveButton() {
-        removeButton.setVisible(false);
-    }
+  /** Hides panel wit the Remove button. */
+  public void hideRemoveButton() {
+    removeButton.setVisible(false);
+  }
 
-    /** Returns type of the node. */
-    public int getKind() {
-        return nodeKind;
-    }
-
+  /** Returns type of the node. */
+  public int getKind() {
+    return nodeKind;
+  }
 }

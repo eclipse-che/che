@@ -1,14 +1,12 @@
-/*******************************************************************************
- * Copyright (c) 2017 Red Hat.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c) 2017
+ * Red Hat. All rights reserved. This program and the accompanying materials are made available
+ * under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     Red Hat - Initial Contribution
- *******************************************************************************/
-
+ * <p>Contributors: Red Hat - Initial Contribution
+ * *****************************************************************************
+ */
 package org.eclipse.che.api.languageserver.generator;
 
 import java.io.File;
@@ -16,36 +14,36 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * Generates client side dto's from lsp4j message classes and che extensions thereof.
- * The classes in question must have a zero-arg constructor and standard getters/setters for all fields.
+ * Generates client side dto's from lsp4j message classes and che extensions thereof. The classes in
+ * question must have a zero-arg constructor and standard getters/setters for all fields.
  *
  * @author Thomas Mäder
  */
 public class ClientDtoGenerator extends DtoGenerator {
-    public ClientDtoGenerator() {
-        super(new ClientJsonImpl());
-    }
+  public ClientDtoGenerator() {
+    super(new ClientJsonImpl());
+  }
 
-    public static void main(String[] args) throws IOException {
-        new ClientDtoGenerator().generate(new File(args[0]), "Dtos", args[1], args[2].split(","), new String[]{});
-    }
+  public static void main(String[] args) throws IOException {
+    new ClientDtoGenerator()
+        .generate(new File(args[0]), "Dtos", args[1], args[2].split(","), new String[] {});
+  }
 
-    @Override
-    protected void writeEnvClassAnnotations(PrintWriter out) {
-        out.println("@Singleton");
-        out.println("@ClientDtoFactoryVisitor");
-        out.println("@SuppressWarnings(\"deprecation\")");
-    }
+  @Override
+  protected void writeEnvClassAnnotations(PrintWriter out) {
+    out.println("@Singleton");
+    out.println("@ClientDtoFactoryVisitor");
+    out.println("@SuppressWarnings(\"deprecation\")");
+  }
 
-    @Override
-    protected void writeEnvImports(PrintWriter out) {
-        out.println("import org.eclipse.che.ide.dto.ClientDtoFactoryVisitor;");
-        out.println("import org.eclipse.che.ide.dto.DtoFactoryVisitor;");
-        out.println("import org.eclipse.che.ide.dto.DtoFactory;");
-        out.println("import org.eclipse.che.ide.dto.DtoProvider;");
-        out.println("import org.eclipse.che.api.languageserver.util.JsonSerializable;");
+  @Override
+  protected void writeEnvImports(PrintWriter out) {
+    out.println("import org.eclipse.che.ide.dto.ClientDtoFactoryVisitor;");
+    out.println("import org.eclipse.che.ide.dto.DtoFactoryVisitor;");
+    out.println("import org.eclipse.che.ide.dto.DtoFactory;");
+    out.println("import org.eclipse.che.ide.dto.DtoProvider;");
+    out.println("import org.eclipse.che.api.languageserver.util.JsonSerializable;");
 
-        out.println("import com.google.inject.Singleton;");
-    }
-
+    out.println("import com.google.inject.Singleton;");
+  }
 }

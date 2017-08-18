@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.client.command;
 
 import org.eclipse.che.ide.CommandLine;
@@ -19,65 +19,66 @@ import org.eclipse.che.ide.CommandLine;
  */
 class MavenCommandModel {
 
-    private String workingDirectory;
-    private String arguments;
+  private String workingDirectory;
+  private String arguments;
 
-    // Note that Closure Compiler doesn't allow to use 'arguments' as a name of a method argument.
-    MavenCommandModel(String workingDirectory, String args) {
-        this.workingDirectory = workingDirectory;
-        this.arguments = args;
+  // Note that Closure Compiler doesn't allow to use 'arguments' as a name of a method argument.
+  MavenCommandModel(String workingDirectory, String args) {
+    this.workingDirectory = workingDirectory;
+    this.arguments = args;
+  }
+
+  /** Crates {@link MavenCommandModel} instance from the given command line. */
+  static MavenCommandModel fromCommandLine(String commandLine) {
+    final CommandLine cmd = new CommandLine(commandLine);
+
+    String workingDirectory = null;
+
+    if (cmd.hasArgument("-f")) {
+      workingDirectory = cmd.getArgument(cmd.indexOf("-f") + 1);
+
+      cmd.removeArgument("-f");
+      cmd.removeArgument(workingDirectory);
     }
 
-    /** Crates {@link MavenCommandModel} instance from the given command line. */
-    static MavenCommandModel fromCommandLine(String commandLine) {
-        final CommandLine cmd = new CommandLine(commandLine);
+    cmd.removeArgument("mvn");
+    String arguments = cmd.toString();
 
-        String workingDirectory = null;
+    return new MavenCommandModel(workingDirectory, arguments);
+  }
 
-        if (cmd.hasArgument("-f")) {
-            workingDirectory = cmd.getArgument(cmd.indexOf("-f") + 1);
+  String getWorkingDirectory() {
+    return workingDirectory;
+  }
 
-            cmd.removeArgument("-f");
-            cmd.removeArgument(workingDirectory);
-        }
+  void setWorkingDirectory(String workingDirectory) {
+    this.workingDirectory = workingDirectory;
+  }
 
-        cmd.removeArgument("mvn");
-        String arguments = cmd.toString();
+  String getArguments() {
+    return arguments;
+  }
 
-        return new MavenCommandModel(workingDirectory, arguments);
+  /**
+   * Set command arguments, e.g. {@code [options] [<goal(s)>] [<phase(s)>]}.
+   *
+   * <p>Note that Closure Compiler doesn't allow to use 'arguments' as a name of a method argument.
+   */
+  void setArguments(String args) {
+    this.arguments = args;
+  }
+
+  String toCommandLine() {
+    final StringBuilder cmd = new StringBuilder("mvn");
+
+    if (!workingDirectory.trim().isEmpty()) {
+      cmd.append(" -f ").append(workingDirectory.trim());
     }
 
-    String getWorkingDirectory() {
-        return workingDirectory;
+    if (!arguments.trim().isEmpty()) {
+      cmd.append(' ').append(arguments.trim());
     }
 
-    void setWorkingDirectory(String workingDirectory) {
-        this.workingDirectory = workingDirectory;
-    }
-
-    String getArguments() {
-        return arguments;
-    }
-
-    /**
-     * Set command arguments, e.g. {@code [options] [<goal(s)>] [<phase(s)>]}.
-     * <p>Note that Closure Compiler doesn't allow to use 'arguments' as a name of a method argument.
-     */
-    void setArguments(String args) {
-        this.arguments = args;
-    }
-
-    String toCommandLine() {
-        final StringBuilder cmd = new StringBuilder("mvn");
-
-        if (!workingDirectory.trim().isEmpty()) {
-            cmd.append(" -f ").append(workingDirectory.trim());
-        }
-
-        if (!arguments.trim().isEmpty()) {
-            cmd.append(' ').append(arguments.trim());
-        }
-
-        return cmd.toString();
-    }
+    return cmd.toString();
+  }
 }

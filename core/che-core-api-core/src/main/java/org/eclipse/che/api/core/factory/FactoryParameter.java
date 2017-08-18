@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.factory;
 
 import java.lang.annotation.ElementType;
@@ -23,38 +23,40 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FactoryParameter {
-    enum Obligation {
-        MANDATORY, OPTIONAL
+  enum Obligation {
+    MANDATORY,
+    OPTIONAL
+  }
+
+  enum Version {
+    // NEVER must be the last defined constant
+    V4_0,
+    NEVER;
+
+    public static Version fromString(String v) {
+      if (null != v) {
+        switch (v) {
+          case "4.0":
+            return V4_0;
+        }
+      }
+
+      throw new IllegalArgumentException("Unknown version " + v + ".");
     }
 
-    enum Version {
-        // NEVER must be the last defined constant
-        V4_0, NEVER;
-
-        public static Version fromString(String v) {
-            if (null != v) {
-                switch (v) {
-                    case "4.0":
-                        return V4_0;
-                }
-            }
-
-            throw new IllegalArgumentException("Unknown version " + v + ".");
-        }
-
-        @Override
-        public String toString() {
-            return super.name().substring(1).replace('_', '.');
-        }
+    @Override
+    public String toString() {
+      return super.name().substring(1).replace('_', '.');
     }
+  }
 
-    Obligation obligation();
+  Obligation obligation();
 
-    boolean setByServer() default false;
+  boolean setByServer() default false;
 
-    boolean trackedOnly() default false;
+  boolean trackedOnly() default false;
 
-    Version deprecatedSince() default Version.NEVER;
+  Version deprecatedSince() default Version.NEVER;
 
-    Version ignoredSince() default Version.NEVER;
+  Version ignoredSince() default Version.NEVER;
 }

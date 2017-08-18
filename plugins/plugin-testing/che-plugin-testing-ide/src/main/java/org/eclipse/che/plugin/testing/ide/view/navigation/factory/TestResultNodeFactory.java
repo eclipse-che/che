@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.ide.view.navigation.factory;
 
 import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
 import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
@@ -31,28 +30,27 @@ import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestResultTraceF
  */
 public interface TestResultNodeFactory {
 
-    TestResultRootNode createTestResultRootNode(TestResultRootDto testResultRootDto, 
-                                                String frameworkName);
+  TestResultRootNode createTestResultRootNode(
+      TestResultRootDto testResultRootDto, String frameworkName);
 
-    TestResultNode createTestResultEntryNode(TestResultDto testResultDto,
-                                             String frameworkName);
-    
-    TestResultTraceFrameNode createTestResultTraceFrameNode(TestResultTraceFrameDto testResultTraceFrameDto);
+  TestResultNode createTestResultEntryNode(TestResultDto testResultDto, String frameworkName);
 
-    @Deprecated
-    TestResultGroupNode getTestResultGroupNode(TestResult result,
-                                               boolean showFailuresOnly,
-                                               Runnable showOnlyFailuresDelegate);
+  TestResultTraceFrameNode createTestResultTraceFrameNode(
+      TestResultTraceFrameDto testResultTraceFrameDto);
 
-    @Deprecated
-    TestResultClassNode getTestResultClassNodeNode(String className);
+  @Deprecated
+  TestResultGroupNode getTestResultGroupNode(
+      TestResult result, boolean showFailuresOnly, Runnable showOnlyFailuresDelegate);
 
-    @Deprecated
-    TestResultMethodNode getTestResultMethodNodeNode(boolean success,
-                                                     @Assisted("methodName") String methodName,
-                                                     @Assisted("stackTrace") String stackTrace, 
-                                                     @Assisted("message") String message, 
-                                                     int lineNumber,
-                                                     TestClassNavigation navigationHandler);
+  @Deprecated
+  TestResultClassNode getTestResultClassNodeNode(String className);
 
+  @Deprecated
+  TestResultMethodNode getTestResultMethodNodeNode(
+      boolean success,
+      @Assisted("methodName") String methodName,
+      @Assisted("stackTrace") String stackTrace,
+      @Assisted("message") String message,
+      int lineNumber,
+      TestClassNavigation navigationHandler);
 }

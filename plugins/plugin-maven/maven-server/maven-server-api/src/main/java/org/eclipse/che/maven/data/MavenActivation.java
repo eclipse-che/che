@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.maven.data;
 
 import java.io.Serializable;
@@ -18,56 +18,56 @@ import java.io.Serializable;
  * @author Evgen Vidolob
  */
 public class MavenActivation implements Serializable, Cloneable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private boolean                 activeByDefault;
-    private MavenActivationOS       os;
-    private MavenActivationFile     file;
-    private MavenActivationProperty property;
-    private String                  jdk;
+  private boolean activeByDefault;
+  private MavenActivationOS os;
+  private MavenActivationFile file;
+  private MavenActivationProperty property;
+  private String jdk;
 
-    public boolean isActiveByDefault() {
-        return activeByDefault;
-    }
+  public boolean isActiveByDefault() {
+    return activeByDefault;
+  }
 
-    public void setActiveByDefault(boolean activeByDefault) {
-        this.activeByDefault = activeByDefault;
-    }
+  public void setActiveByDefault(boolean activeByDefault) {
+    this.activeByDefault = activeByDefault;
+  }
 
-    public MavenActivationOS getOs() {
-        return os;
-    }
+  public MavenActivationOS getOs() {
+    return os;
+  }
 
-    public void setOs(MavenActivationOS os) {
-        this.os = os;
-    }
+  public void setOs(MavenActivationOS os) {
+    this.os = os;
+  }
 
-    public MavenActivationFile getFile() {
-        return file;
-    }
+  public MavenActivationFile getFile() {
+    return file;
+  }
 
-    public void setFile(MavenActivationFile file) {
-        this.file = file;
-    }
+  public void setFile(MavenActivationFile file) {
+    this.file = file;
+  }
 
-    public MavenActivationProperty getProperty() {
-        return property;
-    }
+  public MavenActivationProperty getProperty() {
+    return property;
+  }
 
-    public void setProperty(MavenActivationProperty property) {
-        this.property = property;
-    }
+  public void setProperty(MavenActivationProperty property) {
+    this.property = property;
+  }
 
-    public String getJdk() {
-        return jdk;
-    }
+  public String getJdk() {
+    return jdk;
+  }
 
-    public void setJdk(String jdk) {
-        this.jdk = jdk;
-    }
+  public void setJdk(String jdk) {
+    this.jdk = jdk;
+  }
 
-    @Override
-    protected MavenActivation clone() throws CloneNotSupportedException {
-        return (MavenActivation)super.clone();
-    }
+  @Override
+  protected MavenActivation clone() throws CloneNotSupportedException {
+    return (MavenActivation) super.clone();
+  }
 }

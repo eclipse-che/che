@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,29 +7,26 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.machine.cleaner;
-
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Singleton;
-
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Listener for remove workspace files after {@code WorkspaceRemovedEvent}.
@@ -37,39 +34,49 @@ import java.util.concurrent.Executors;
  * @author Alexander Andrienko
  */
 @Singleton
-public class RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber implements EventSubscriber<WorkspaceRemovedEvent> {
+public class RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber
+    implements EventSubscriber<WorkspaceRemovedEvent> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class);
 
-    private final WorkspaceFilesCleaner workspaceFilesCleaner;
-    private final ExecutorService       executor;
-    private final EventService          eventService;
+  private final WorkspaceFilesCleaner workspaceFilesCleaner;
+  private final ExecutorService executor;
+  private final EventService eventService;
 
-    @Inject
-    public RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber(EventService eventService, WorkspaceFilesCleaner workspaceFilesCleaner) {
-        this.workspaceFilesCleaner = workspaceFilesCleaner;
-        this.eventService = eventService;
-        executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber-%d")
-                                                                           .setUncaughtExceptionHandler(
-                                                                                   LoggingUncaughtExceptionHandler.getInstance())
-                                                                           .setDaemon(true)
-                                                                           .build());
-    }
+  @Inject
+  public RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber(
+      EventService eventService, WorkspaceFilesCleaner workspaceFilesCleaner) {
+    this.workspaceFilesCleaner = workspaceFilesCleaner;
+    this.eventService = eventService;
+    executor =
+        Executors.newCachedThreadPool(
+            new ThreadFactoryBuilder()
+                .setNameFormat("RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber-%d")
+                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                .setDaemon(true)
+                .build());
+  }
 
-    @Override
-    public void onEvent(WorkspaceRemovedEvent event) {
-        executor.execute(ThreadLocalPropagateContext.wrap(() -> {
-            Workspace workspace = event.getWorkspace();
-            try {
+  @Override
+  public void onEvent(WorkspaceRemovedEvent event) {
+    executor.execute(
+        ThreadLocalPropagateContext.wrap(
+            () -> {
+              Workspace workspace = event.getWorkspace();
+              try {
                 workspaceFilesCleaner.clear(workspace);
-            } catch (IOException | ServerException e) {
-                LOG.error("Failed to remove workspace files for workspace with id: '{}'. Cause: '{}'", workspace.getId(), e.getMessage());
-            }
-        }));
-    }
+              } catch (IOException | ServerException e) {
+                LOG.error(
+                    "Failed to remove workspace files for workspace with id: '{}'. Cause: '{}'",
+                    workspace.getId(),
+                    e.getMessage());
+              }
+            }));
+  }
 
-    @PostConstruct
-    public void subscribe() {
-        eventService.subscribe(this);
-    }
+  @PostConstruct
+  public void subscribe() {
+    eventService.subscribe(this);
+  }
 }

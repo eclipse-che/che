@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,76 +7,74 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.ssh.key.client;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
 
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public interface SshKeyLocalizationConstant extends Messages {
-    @Key("cancelButton")
-    String cancelButton();
+  @Key("cancelButton")
+  String cancelButton();
 
-    @Key("uploadButton")
-    String uploadButton();
+  @Key("uploadButton")
+  String uploadButton();
 
-    @Key("hostFieldTitle")
-    String hostFieldTitle();
+  @Key("hostFieldTitle")
+  String hostFieldTitle();
 
-    @Key("fileNameFieldTitle")
-    String fileNameFieldTitle();
+  @Key("fileNameFieldTitle")
+  String fileNameFieldTitle();
 
-    @Key("generate.sshKey.title")
-    String generateSshKeyTitle();
+  @Key("generate.sshKey.title")
+  String generateSshKeyTitle();
 
-    @Key("generate.sshKey.hostname")
-    String generateSshKeyHostname();
+  @Key("generate.sshKey.hostname")
+  String generateSshKeyHostname();
 
-    @Key("uploadSshKeyViewTitle")
-    String uploadSshKeyViewTitle();
+  @Key("uploadSshKeyViewTitle")
+  String uploadSshKeyViewTitle();
 
-    @Key("host.validation.error")
-    String hostValidationError();
+  @Key("host.validation.error")
+  String hostValidationError();
 
-    @Key("key.manager.uploadButton")
-    String managerUploadButton();
+  @Key("key.manager.uploadButton")
+  String managerUploadButton();
 
-    @Key("key.manager.generateButton")
-    String managerGenerateButton();
+  @Key("key.manager.generateButton")
+  String managerGenerateButton();
 
-    @Key("key.manager.title")
-    String sshManagerTitle();
+  @Key("key.manager.title")
+  String sshManagerTitle();
 
-    @Key("key.manager.category")
-    String sshManagerCategory();
+  @Key("key.manager.category")
+  String sshManagerCategory();
 
-    @Key("public.sshkey.field")
-    String publicSshKeyField();
+  @Key("public.sshkey.field")
+  String publicSshKeyField();
 
-    @Key("delete.sshkey.question")
-    SafeHtml deleteSshKeyQuestion(String host);
+  @Key("delete.sshkey.question")
+  SafeHtml deleteSshKeyQuestion(String host);
 
-    @Key("delete.sshkey.title")
-    String deleteSshKeyTitle();
+  @Key("delete.sshkey.title")
+  String deleteSshKeyTitle();
 
-    @Key("delete.sshkey.failed")
-    String deleteSshKeyFailed();
+  @Key("delete.sshkey.failed")
+  String deleteSshKeyFailed();
 
-    @Key("sshkeys.provider.not.found")
-    String sshKeysProviderNotFound(String host);
+  @Key("sshkeys.provider.not.found")
+  String sshKeysProviderNotFound(String host);
 
-    @Key("failed.to.generate.ssh.key")
-    String failedToGenerateSshKey();
+  @Key("failed.to.generate.ssh.key")
+  String failedToGenerateSshKey();
 
-    @Key("failed.to.load.ssh.keys")
-    String failedToLoadSshKeys();
+  @Key("failed.to.load.ssh.keys")
+  String failedToLoadSshKeys();
 
-    @Key("failed.to.upload.ssh.key")
-    String failedToUploadSshKey();
+  @Key("failed.to.upload.ssh.key")
+  String failedToUploadSshKey();
 
-    @Key("invalid.hostname")
-    String invalidHostName();
+  @Key("invalid.hostname")
+  String invalidHostName();
 }

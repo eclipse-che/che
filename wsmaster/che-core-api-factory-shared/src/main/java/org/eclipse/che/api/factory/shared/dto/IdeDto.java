@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.factory.shared.dto;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
@@ -24,37 +24,30 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface IdeDto extends Ide {
 
-    /**
-     * @return configuration of IDE on application loaded event.
-     */
-    @Override
-    @FactoryParameter(obligation = OPTIONAL)
-    OnAppLoadedDto getOnAppLoaded();
+  /** @return configuration of IDE on application loaded event. */
+  @Override
+  @FactoryParameter(obligation = OPTIONAL)
+  OnAppLoadedDto getOnAppLoaded();
 
-    void setOnAppLoaded(OnAppLoadedDto onAppLoaded);
+  void setOnAppLoaded(OnAppLoadedDto onAppLoaded);
 
-    IdeDto withOnAppLoaded(OnAppLoadedDto onAppLoaded);
+  IdeDto withOnAppLoaded(OnAppLoadedDto onAppLoaded);
 
-    /**
-     * @return configuration of IDE on application closed event.
-     */
-    @Override
-    @FactoryParameter(obligation = OPTIONAL)
-    OnAppClosedDto getOnAppClosed();
+  /** @return configuration of IDE on application closed event. */
+  @Override
+  @FactoryParameter(obligation = OPTIONAL)
+  OnAppClosedDto getOnAppClosed();
 
-    void setOnAppClosed(OnAppClosedDto onAppClosed);
+  void setOnAppClosed(OnAppClosedDto onAppClosed);
 
-    IdeDto withOnAppClosed(OnAppClosedDto onAppClosed);
+  IdeDto withOnAppClosed(OnAppClosedDto onAppClosed);
 
-    /**
-     * @return configuration of IDE on projects loaded event.
-     */
-    @Override
-    @FactoryParameter(obligation = OPTIONAL)
-    OnProjectsLoadedDto getOnProjectsLoaded();
+  /** @return configuration of IDE on projects loaded event. */
+  @Override
+  @FactoryParameter(obligation = OPTIONAL)
+  OnProjectsLoadedDto getOnProjectsLoaded();
 
-    void setOnProjectsLoaded(OnProjectsLoadedDto onProjectsLoaded);
+  void setOnProjectsLoaded(OnProjectsLoadedDto onProjectsLoaded);
 
-    IdeDto withOnProjectsLoaded(OnProjectsLoadedDto onProjectsLoaded);
-
+  IdeDto withOnProjectsLoaded(OnProjectsLoadedDto onProjectsLoaded);
 }

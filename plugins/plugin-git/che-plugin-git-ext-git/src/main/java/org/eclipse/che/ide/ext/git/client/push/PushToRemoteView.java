@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.push;
-
-import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.ide.api.mvp.View;
 
 /**
  * The view of {@link PushToRemotePresenter}.
@@ -23,107 +22,98 @@ import javax.validation.constraints.NotNull;
  * @author Sergii Leschenko
  */
 public interface PushToRemoteView extends View<PushToRemoteView.ActionDelegate> {
-    /** Needs for delegate some function into PushToRemote view. */
-    public interface ActionDelegate {
-        /** Performs any actions appropriate in response to the user having pressed the Push button. */
-        void onPushClicked();
-
-        /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
-        void onCancelClicked();
-
-        /** Performs any actions appropriate in response to the local branch value changed. */
-        void onLocalBranchChanged();
-
-        /** Performs any actions appropriate in response to the repository value changed. */
-        void onRepositoryChanged();
-    }
+  /** Needs for delegate some function into PushToRemote view. */
+  public interface ActionDelegate {
+    /** Performs any actions appropriate in response to the user having pressed the Push button. */
+    void onPushClicked();
 
     /**
-     * Returns selected repository.
-     *
-     * @return repository.
+     * Performs any actions appropriate in response to the user having pressed the Cancel button.
      */
-    @NotNull
-    String getRepository();
+    void onCancelClicked();
 
-    /**
-     * Sets available repositories.
-     *
-     * @param repositories
-     *         available repositories
-     */
-    void setRepositories(@NotNull List<Remote> repositories);
+    /** Performs any actions appropriate in response to the local branch value changed. */
+    void onLocalBranchChanged();
 
-    /** @return local branch */
-    @NotNull
-    String getLocalBranch();
+    /** Performs any actions appropriate in response to the repository value changed. */
+    void onRepositoryChanged();
+  }
 
-    /**
-     * Set local branches into view.
-     *
-     * @param branches
-     *         local branches
-     */
-    void setLocalBranches(@NotNull List<String> branches);
+  /**
+   * Returns selected repository.
+   *
+   * @return repository.
+   */
+  @NotNull
+  String getRepository();
 
-    /** @return remote branches */
-    @NotNull
-    String getRemoteBranch();
+  /**
+   * Sets available repositories.
+   *
+   * @param repositories available repositories
+   */
+  void setRepositories(@NotNull List<Remote> repositories);
 
-    /**
-     * Set remote branches into view.
-     *
-     * @param branches
-     *         remote branches
-     */
-    void setRemoteBranches(@NotNull List<String> branches);
+  /** @return local branch */
+  @NotNull
+  String getLocalBranch();
 
-    /**
-     * Add remote branch into view.
-     *
-     * @param branch
-     *         remote branch
-     * @return {@code true} if branch added and {@code false} if branch already exist
-     */
-    boolean addRemoteBranch(@NotNull String branch);
+  /**
+   * Set local branches into view.
+   *
+   * @param branches local branches
+   */
+  void setLocalBranches(@NotNull List<String> branches);
 
-    /**
-     * Selects pointed local branch
-     *
-     * @param branch
-     *         local branch to select
-     */
-    void selectLocalBranch(@NotNull String branch);
+  /** @return remote branches */
+  @NotNull
+  String getRemoteBranch();
 
-    /**
-     * Selects pointed remote branch
-     *
-     * @param branch
-     *         remote branch to select
-     */
-    void selectRemoteBranch(@NotNull String branch);
+  /**
+   * Set remote branches into view.
+   *
+   * @param branches remote branches
+   */
+  void setRemoteBranches(@NotNull List<String> branches);
 
-    /**
-     * Change the enable state of the push button.
-     *
-     * @param enabled
-     *         {@code true} to enable the button, {@code false} to disable it
-     */
-    void setEnablePushButton(boolean enabled);
+  /**
+   * Add remote branch into view.
+   *
+   * @param branch remote branch
+   * @return {@code true} if branch added and {@code false} if branch already exist
+   */
+  boolean addRemoteBranch(@NotNull String branch);
 
-    /**
-     * Set selected force push check-box.
-     */
-    void setSelectedForcePushCheckBox(boolean isSelected);
+  /**
+   * Selects pointed local branch
+   *
+   * @param branch local branch to select
+   */
+  void selectLocalBranch(@NotNull String branch);
 
-    /**
-     * Returns {@code true} if force push check-box is selected, otherwise returns {@code false}.
-     */
-    boolean isForcePushSelected();
+  /**
+   * Selects pointed remote branch
+   *
+   * @param branch remote branch to select
+   */
+  void selectRemoteBranch(@NotNull String branch);
 
-    /** Close dialog. */
-    void close();
+  /**
+   * Change the enable state of the push button.
+   *
+   * @param enabled {@code true} to enable the button, {@code false} to disable it
+   */
+  void setEnablePushButton(boolean enabled);
 
-    /** Show dialog. */
-    void showDialog();
+  /** Set selected force push check-box. */
+  void setSelectedForcePushCheckBox(boolean isSelected);
+
+  /** Returns {@code true} if force push check-box is selected, otherwise returns {@code false}. */
+  boolean isForcePushSelected();
+
+  /** Close dialog. */
+  void close();
+
+  /** Show dialog. */
+  void showDialog();
 }

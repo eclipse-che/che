@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.settings.property;
 
 import com.google.gwt.core.client.GWT;
@@ -20,79 +20,73 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
 
-import org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions;
-
-import javax.validation.constraints.NotNull;
-
-/**
- * @author Dmitry Shnurenko
- */
+/** @author Dmitry Shnurenko */
 public class PropertyWidgetImpl extends Composite implements PropertyWidget {
-    interface PropertyWidgetImplUiBinder extends UiBinder<Widget, PropertyWidgetImpl> {
+  interface PropertyWidgetImplUiBinder extends UiBinder<Widget, PropertyWidgetImpl> {}
+
+  private static final PropertyWidgetImplUiBinder UI_BINDER =
+      GWT.create(PropertyWidgetImplUiBinder.class);
+
+  public static final String IGNORE = "ignore";
+  public static final String WARNING = "warning";
+  public static final String ERROR = "error";
+
+  private final ErrorWarningsOptions optionId;
+
+  @UiField Label title;
+  @UiField CustomListBox property;
+
+  private ActionDelegate delegate;
+
+  @Inject
+  public PropertyWidgetImpl(
+      PropertyNameManager nameManager, @Assisted ErrorWarningsOptions optionId) {
+    initWidget(UI_BINDER.createAndBindUi(this));
+
+    this.optionId = optionId;
+
+    this.title.setText(nameManager.getName(optionId));
+
+    property.addItem(IGNORE);
+    property.addItem(WARNING);
+    property.addItem(ERROR);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void selectPropertyValue(@NotNull String value) {
+    for (int i = 0; i < property.getItemCount(); i++) {
+      if (property.getValue(i).equals(value)) {
+        property.setItemSelected(i, true);
+        return;
+      }
     }
+  }
 
-    private static final PropertyWidgetImplUiBinder UI_BINDER = GWT.create(PropertyWidgetImplUiBinder.class);
+  @UiHandler("property")
+  public void onPropertyChanged(@SuppressWarnings("UnusedParameters") ChangeEvent event) {
+    delegate.onPropertyChanged();
+  }
 
-    public static final String IGNORE  = "ignore";
-    public static final String WARNING = "warning";
-    public static final String ERROR   = "error";
+  @Override
+  public String getSelectedValue() {
+    int index = property.getSelectedIndex();
 
-    private final ErrorWarningsOptions optionId;
+    return index != -1 ? property.getValue(index) : "";
+  }
 
-    @UiField
-    Label         title;
-    @UiField
-    CustomListBox property;
+  @Override
+  public ErrorWarningsOptions getOptionId() {
+    return optionId;
+  }
 
-    private ActionDelegate delegate;
-
-    @Inject
-    public PropertyWidgetImpl(PropertyNameManager nameManager, @Assisted ErrorWarningsOptions optionId) {
-        initWidget(UI_BINDER.createAndBindUi(this));
-
-        this.optionId = optionId;
-
-        this.title.setText(nameManager.getName(optionId));
-
-        property.addItem(IGNORE);
-        property.addItem(WARNING);
-        property.addItem(ERROR);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void selectPropertyValue(@NotNull String value) {
-        for (int i = 0; i < property.getItemCount(); i++) {
-            if (property.getValue(i).equals(value)) {
-                property.setItemSelected(i, true);
-                return;
-            }
-        }
-    }
-
-    @UiHandler("property")
-    public void onPropertyChanged(@SuppressWarnings("UnusedParameters") ChangeEvent event) {
-        delegate.onPropertyChanged();
-    }
-
-    @Override
-    public String getSelectedValue() {
-        int index = property.getSelectedIndex();
-
-        return index != -1 ? property.getValue(index) : "";
-    }
-
-    @Override
-    public ErrorWarningsOptions getOptionId() {
-        return optionId;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(@NotNull ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(@NotNull ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 }

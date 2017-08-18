@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.projectimport.zip;
 
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -24,176 +24,168 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.projectimport.ProjectImporterResource;
 
-import javax.validation.constraints.NotNull;
-
-/**
- * @author Roman Nikitenko
- */
+/** @author Roman Nikitenko */
 public class ZipImporterPageViewImpl extends Composite implements ZipImporterPageView {
-    @UiField(provided = true)
-    Style       style;
-    @UiField
-    Label       labelUrlError;
-    @UiField
-    TextBox     projectName;
-    @UiField
-    TextArea    projectDescription;
-    @UiField
-    TextBox     projectUrl;
-    @UiField
-    CheckBox    skipFirstLevel;
-    private ActionDelegate delegate;
+  @UiField(provided = true)
+  Style style;
 
-    @Inject
-    public ZipImporterPageViewImpl(ProjectImporterResource resource,
-                                   ZipImporterPageViewImplUiBinder uiBinder) {
-        style = resource.zipImporterPageStyle();
-        style.ensureInjected();
-        initWidget(uiBinder.createAndBindUi(this));
-        projectName.getElement().setAttribute("maxlength", "32");
-        projectDescription.getElement().setAttribute("maxlength", "256");
-        skipFirstLevel.setValue(false);
+  @UiField Label labelUrlError;
+  @UiField TextBox projectName;
+  @UiField TextArea projectDescription;
+  @UiField TextBox projectUrl;
+  @UiField CheckBox skipFirstLevel;
+  private ActionDelegate delegate;
+
+  @Inject
+  public ZipImporterPageViewImpl(
+      ProjectImporterResource resource, ZipImporterPageViewImplUiBinder uiBinder) {
+    style = resource.zipImporterPageStyle();
+    style.ensureInjected();
+    initWidget(uiBinder.createAndBindUi(this));
+    projectName.getElement().setAttribute("maxlength", "32");
+    projectDescription.getElement().setAttribute("maxlength", "256");
+    skipFirstLevel.setValue(false);
+  }
+
+  @UiHandler("projectName")
+  void onProjectNameChanged(KeyUpEvent event) {
+    String projectNameValue = projectName.getValue();
+
+    if (projectNameValue != null && projectNameValue.contains(" ")) {
+      projectNameValue = projectNameValue.replace(" ", "-");
+      projectName.setValue(projectNameValue);
     }
 
-    @UiHandler("projectName")
-    void onProjectNameChanged(KeyUpEvent event) {
-        String projectNameValue = projectName.getValue();
-
-        if (projectNameValue != null && projectNameValue.contains(" ")) {
-            projectNameValue = projectNameValue.replace(" ", "-");
-            projectName.setValue(projectNameValue);
-        }
-
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            return;
-        }
-
-        delegate.projectNameChanged(projectName.getValue());
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+      return;
     }
 
-    @UiHandler("projectUrl")
-    void onProjectUrlChanged(KeyUpEvent event) {
-        delegate.projectUrlChanged(projectUrl.getValue());
+    delegate.projectNameChanged(projectName.getValue());
+  }
+
+  @UiHandler("projectUrl")
+  void onProjectUrlChanged(KeyUpEvent event) {
+    delegate.projectUrlChanged(projectUrl.getValue());
+  }
+
+  @UiHandler("projectDescription")
+  void onProjectDescriptionChanged(KeyUpEvent event) {
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+      return;
     }
+    delegate.projectDescriptionChanged(projectDescription.getValue());
+  }
 
-    @UiHandler("projectDescription")
-    void onProjectDescriptionChanged(KeyUpEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            return;
-        }
-        delegate.projectDescriptionChanged(projectDescription.getValue());
+  @UiHandler({"skipFirstLevel"})
+  void skipFirstLevelHandler(ValueChangeEvent<Boolean> event) {
+    delegate.skipFirstLevelChanged(skipFirstLevel.getValue());
+  }
+
+  @Override
+  public void setProjectUrl(@NotNull String url) {
+    projectUrl.setText(url);
+    delegate.projectUrlChanged(url);
+  }
+
+  @Override
+  public void showNameError() {
+    projectName.addStyleName(style.inputError());
+  }
+
+  @Override
+  public void hideNameError() {
+    projectName.removeStyleName(style.inputError());
+  }
+
+  @Override
+  public void showUrlError(@NotNull String message) {
+    projectUrl.addStyleName(style.inputError());
+    labelUrlError.setText(message);
+  }
+
+  @Override
+  public void hideUrlError() {
+    projectUrl.removeStyleName(style.inputError());
+    labelUrlError.setText("");
+  }
+
+  @NotNull
+  @Override
+  public String getProjectName() {
+    return projectName.getValue();
+  }
+
+  @Override
+  public void setProjectName(@NotNull String projectName) {
+    this.projectName.setValue(projectName);
+  }
+
+  @Override
+  public void setProjectDescription(@NotNull String projectDescription) {
+    this.projectDescription.setValue(projectDescription);
+  }
+
+  @Override
+  public void focusInUrlInput() {
+    projectUrl.setFocus(true);
+  }
+
+  @Override
+  public void setInputsEnableState(boolean isEnabled) {
+    projectName.setEnabled(isEnabled);
+    projectDescription.setEnabled(isEnabled);
+    projectUrl.setEnabled(isEnabled);
+
+    if (isEnabled) {
+      focusInUrlInput();
     }
+  }
 
-    @UiHandler({"skipFirstLevel"})
-    void skipFirstLevelHandler(ValueChangeEvent<Boolean> event) {
-        delegate.skipFirstLevelChanged(skipFirstLevel.getValue());
-    }
+  @Override
+  public boolean isSkipFirstLevelSelected() {
+    return skipFirstLevel.getValue();
+  }
 
-    @Override
-    public void setProjectUrl(@NotNull String url) {
-        projectUrl.setText(url);
-        delegate.projectUrlChanged(url);
-    }
+  @Override
+  public void setSkipFirstLevel(boolean skip) {
+    skipFirstLevel.setValue(skip);
+  }
 
-    @Override
-    public void showNameError() {
-        projectName.addStyleName(style.inputError());
-    }
+  public void setDelegate(@NotNull ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    @Override
-    public void hideNameError() {
-        projectName.removeStyleName(style.inputError());
-    }
+  interface ZipImporterPageViewImplUiBinder
+      extends UiBinder<DockLayoutPanel, ZipImporterPageViewImpl> {}
 
-    @Override
-    public void showUrlError(@NotNull String message) {
-        projectUrl.addStyleName(style.inputError());
-        labelUrlError.setText(message);
-    }
+  public interface Style extends CssResource {
+    String mainPanel();
 
-    @Override
-    public void hideUrlError() {
-        projectUrl.removeStyleName(style.inputError());
-        labelUrlError.setText("");
-    }
+    String namePanel();
 
-    @NotNull
-    @Override
-    public String getProjectName() {
-        return projectName.getValue();
-    }
+    String labelPosition();
 
-    @Override
-    public void setProjectName(@NotNull String projectName) {
-        this.projectName.setValue(projectName);
-    }
+    String marginTop();
 
-    @Override
-    public void setProjectDescription(@NotNull String projectDescription) {
-        this.projectDescription.setValue(projectDescription);
-    }
+    String alignRight();
 
-    @Override
-    public void focusInUrlInput() {
-        projectUrl.setFocus(true);
-    }
+    String alignLeft();
 
-    @Override
-    public void setInputsEnableState(boolean isEnabled) {
-        projectName.setEnabled(isEnabled);
-        projectDescription.setEnabled(isEnabled);
-        projectUrl.setEnabled(isEnabled);
+    String labelErrorPosition();
 
-        if (isEnabled) {
-            focusInUrlInput();
-        }
-    }
+    String description();
 
-    @Override
-    public boolean isSkipFirstLevelSelected() {
-        return skipFirstLevel.getValue();
-    }
+    String label();
 
-    @Override
-    public void setSkipFirstLevel(boolean skip) {
-        skipFirstLevel.setValue(skip);
-    }
+    String horizontalLine();
 
-    public void setDelegate(@NotNull ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+    String checkBoxPosition();
 
-    interface ZipImporterPageViewImplUiBinder extends UiBinder<DockLayoutPanel, ZipImporterPageViewImpl> {
-    }
+    String inputField();
 
-    public interface Style extends CssResource {
-        String mainPanel();
-
-        String namePanel();
-
-        String labelPosition();
-
-        String marginTop();
-
-        String alignRight();
-
-        String alignLeft();
-
-        String labelErrorPosition();
-
-        String description();
-
-        String label();
-
-        String horizontalLine();
-
-        String checkBoxPosition();
-
-        String inputField();
-
-        String inputError();
-    }
+    String inputError();
+  }
 }

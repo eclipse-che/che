@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,62 +7,65 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
-import javax.validation.constraints.NotNull;
 import java.util.List;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface InfoResponse {
 
-    /**************************************************************************
-     *
-     *  Subversion command
-     *
-     **************************************************************************/
+  /**
+   * ************************************************************************
+   *
+   * <p>Subversion command
+   *
+   * <p>************************************************************************
+   */
+  String getCommand();
 
-    String getCommand();
+  void setCommand(@NotNull final String command);
 
-    void setCommand(@NotNull final String command);
+  InfoResponse withCommand(@NotNull final String command);
 
-    InfoResponse withCommand(@NotNull final String command);
+  /**
+   * ************************************************************************
+   *
+   * <p>Execution output
+   *
+   * <p>************************************************************************
+   */
+  List<String> getOutput();
 
-    /**************************************************************************
-     *
-     *  Execution output
-     *
-     **************************************************************************/
+  void setOutput(@NotNull final List<String> output);
 
-    List<String> getOutput();
+  InfoResponse withOutput(@NotNull final List<String> output);
 
-    void setOutput(@NotNull final List<String> output);
+  /**
+   * ************************************************************************
+   *
+   * <p>Error output
+   *
+   * <p>************************************************************************
+   */
+  List<String> getErrorOutput();
 
-    InfoResponse withOutput(@NotNull final List<String> output);
+  void setErrorOutput(List<String> errorOutput);
 
-    /**************************************************************************
-     *
-     *  Error output
-     *
-     **************************************************************************/
+  InfoResponse withErrorOutput(List<String> errorOutput);
 
-    List<String> getErrorOutput();
+  /**
+   * ************************************************************************
+   *
+   * <p>Item list
+   *
+   * <p>************************************************************************
+   */
+  List<SubversionItem> getItems();
 
-    void setErrorOutput(List<String> errorOutput);
+  void setItems(List<SubversionItem> items);
 
-    InfoResponse withErrorOutput(List<String> errorOutput);
-
-    /**************************************************************************
-     *
-     *  Item list
-     *
-     **************************************************************************/
-
-    List<SubversionItem> getItems();
-
-    void setItems(List<SubversionItem> items);
-
-    InfoResponse withItems(List<SubversionItem> items);
+  InfoResponse withItems(List<SubversionItem> items);
 }

@@ -1,20 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2012-2015 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2015 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.java.jdt.text.edits;
-
-import org.eclipse.che.ide.api.editor.text.BadLocationException;
-import org.eclipse.che.ide.ext.java.jdt.text.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.che.ide.api.editor.text.BadLocationException;
+import org.eclipse.che.ide.ext.java.jdt.text.Document;
 
 /**
  * This class encapsulates the reverse changes of an executed text edit tree. To apply an undo memento to a document use method
@@ -27,70 +25,72 @@ import java.util.List;
  */
 public final class UndoEdit extends TextEdit {
 
-    UndoEdit() {
-        super(0, Integer.MAX_VALUE);
-    }
+  UndoEdit() {
+    super(0, Integer.MAX_VALUE);
+  }
 
-    private UndoEdit(UndoEdit other) {
-        super(other);
-    }
+  private UndoEdit(UndoEdit other) {
+    super(other);
+  }
 
-    /*
-     * @see org.eclipse.text.edits.TextEdit#internalAdd(org.eclipse.text.edits.TextEdit )
-     */
-    void internalAdd(TextEdit child) throws MalformedTreeException {
-        throw new MalformedTreeException(null, this, "Cannot add children to an undo edit"); //$NON-NLS-1$
-    }
+  /*
+   * @see org.eclipse.text.edits.TextEdit#internalAdd(org.eclipse.text.edits.TextEdit )
+   */
+  void internalAdd(TextEdit child) throws MalformedTreeException {
+    throw new MalformedTreeException(
+        null, this, "Cannot add children to an undo edit"); //$NON-NLS-1$
+  }
 
-    /*
-     * @see org.eclipse.text.edits.MultiTextEdit#aboutToBeAdded(org.eclipse.text.edits .TextEdit)
-     */
-    void aboutToBeAdded(TextEdit parent) {
-        throw new MalformedTreeException(parent, this, "Cannot add an undo edit to another edit"); //$NON-NLS-1$
-    }
+  /*
+   * @see org.eclipse.text.edits.MultiTextEdit#aboutToBeAdded(org.eclipse.text.edits .TextEdit)
+   */
+  void aboutToBeAdded(TextEdit parent) {
+    throw new MalformedTreeException(
+        parent, this, "Cannot add an undo edit to another edit"); //$NON-NLS-1$
+  }
 
-    UndoEdit dispatchPerformEdits(TextEditProcessor processor) throws BadLocationException {
-        return processor.executeUndo();
-    }
+  UndoEdit dispatchPerformEdits(TextEditProcessor processor) throws BadLocationException {
+    return processor.executeUndo();
+  }
 
-    void dispatchCheckIntegrity(TextEditProcessor processor) throws MalformedTreeException {
-        processor.checkIntegrityUndo();
-    }
+  void dispatchCheckIntegrity(TextEditProcessor processor) throws MalformedTreeException {
+    processor.checkIntegrityUndo();
+  }
 
-    /* @see org.eclipse.text.edits.TextEdit#doCopy() */
-    protected TextEdit doCopy() {
-        return new UndoEdit(this);
-    }
+  /* @see org.eclipse.text.edits.TextEdit#doCopy() */
+  protected TextEdit doCopy() {
+    return new UndoEdit(this);
+  }
 
-    /* @see TextEdit#accept0 */
-    protected void accept0(TextEditVisitor visitor) {
-        boolean visitChildren = visitor.visit(this);
-        if (visitChildren) {
-            acceptChildren(visitor);
-        }
+  /* @see TextEdit#accept0 */
+  protected void accept0(TextEditVisitor visitor) {
+    boolean visitChildren = visitor.visit(this);
+    if (visitChildren) {
+      acceptChildren(visitor);
     }
+  }
 
-    /* @see TextEdit#performDocumentUpdating */
-    int performDocumentUpdating(Document document) throws BadLocationException {
-        fDelta = 0;
-        return fDelta;
-    }
+  /* @see TextEdit#performDocumentUpdating */
+  int performDocumentUpdating(Document document) throws BadLocationException {
+    fDelta = 0;
+    return fDelta;
+  }
 
-    void add(ReplaceEdit edit) {
-        List children = internalGetChildren();
-        if (children == null) {
-            children = new ArrayList(2);
-            internalSetChildren(children);
-        }
-        children.add(edit);
+  void add(ReplaceEdit edit) {
+    List children = internalGetChildren();
+    if (children == null) {
+      children = new ArrayList(2);
+      internalSetChildren(children);
     }
+    children.add(edit);
+  }
 
-    void defineRegion(int offset, int length) {
-        internalSetOffset(offset);
-        internalSetLength(length);
-    }
+  void defineRegion(int offset, int length) {
+    internalSetOffset(offset);
+    internalSetLength(length);
+  }
 
-    boolean deleteChildren() {
-        return false;
-    }
+  boolean deleteChildren() {
+    return false;
+  }
 }

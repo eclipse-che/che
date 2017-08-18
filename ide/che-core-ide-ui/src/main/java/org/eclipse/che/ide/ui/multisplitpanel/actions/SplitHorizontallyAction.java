@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.multisplitpanel.actions;
 
 import org.eclipse.che.ide.api.action.Action;
@@ -21,15 +21,15 @@ import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
  */
 public class SplitHorizontallyAction extends Action {
 
-    private final SubPanel subPanel;
+  private final SubPanel subPanel;
 
-    public SplitHorizontallyAction(SubPanel subPanel) {
-        super("Split Pane In Two Rows", "Split Pane In Two Rows", null, null);
-        this.subPanel = subPanel;
-    }
+  public SplitHorizontallyAction(SubPanel subPanel) {
+    super("Split Pane In Two Rows", "Split Pane In Two Rows", null, null);
+    this.subPanel = subPanel;
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        subPanel.splitHorizontally();
-    }
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    subPanel.splitHorizontally();
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,28 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.context;
+
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.addAll;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -49,21 +62,6 @@ import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.addAll;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
-
 /**
  * Implementation of {@link AppContext}.
  *
@@ -72,60 +70,62 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class AppContextImpl implements AppContext,
-                                       SelectionChangedHandler,
-                                       ResourceChangedHandler,
-                                       WindowActionHandler,
-                                       WorkspaceStartedEvent.Handler,
-                                       WorkspaceStoppedEvent.Handler,
-                                       ResourceManagerInitializer {
-    private final QueryParameters                        queryParameters;
-    private final List<String>                           projectsInImport;
-    private final EventBus                               eventBus;
-    private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
-    private final Provider<EditorAgent>                  editorAgentProvider;
-    private final Provider<AppStateManager>              appStateManager;
+public class AppContextImpl
+    implements AppContext,
+        SelectionChangedHandler,
+        ResourceChangedHandler,
+        WindowActionHandler,
+        WorkspaceStartedEvent.Handler,
+        WorkspaceStoppedEvent.Handler,
+        ResourceManagerInitializer {
+  private final QueryParameters queryParameters;
+  private final List<String> projectsInImport;
+  private final EventBus eventBus;
+  private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
+  private final Provider<EditorAgent> editorAgentProvider;
+  private final Provider<AppStateManager> appStateManager;
 
-    private final List<Project>  rootProjects      = newArrayList();
-    private final List<Resource> selectedResources = newArrayList();
+  private final List<Project> rootProjects = newArrayList();
+  private final List<Resource> selectedResources = newArrayList();
 
-    private String applicationWebsocketId = null;
+  private String applicationWebsocketId = null;
 
-    private Workspace           userWorkspace;
-    private CurrentUser         currentUser;
-    private FactoryDto          factory;
-    private Path                projectsRoot;
-    private ActiveRuntime       runtime;
-    private ResourceManager     resourceManager;
-    private Map<String, String> properties;
+  private Workspace userWorkspace;
+  private CurrentUser currentUser;
+  private FactoryDto factory;
+  private Path projectsRoot;
+  private ActiveRuntime runtime;
+  private ResourceManager resourceManager;
+  private Map<String, String> properties;
 
-    /**
-     * List of actions with parameters which comes from startup URL.
-     * Can be processed after IDE initialization as usual after starting ws-agent.
-     */
-    private List<StartUpAction> startAppActions;
+  /**
+   * List of actions with parameters which comes from startup URL. Can be processed after IDE
+   * initialization as usual after starting ws-agent.
+   */
+  private List<StartUpAction> startAppActions;
 
-    @Inject
-    public AppContextImpl(EventBus eventBus,
-                          QueryParameters queryParameters,
-                          ResourceManager.ResourceManagerFactory resourceManagerFactory,
-                          Provider<EditorAgent> editorAgentProvider,
-                          Provider<AppStateManager> appStateManager) {
-        this.eventBus = eventBus;
-        this.queryParameters = queryParameters;
-        this.resourceManagerFactory = resourceManagerFactory;
-        this.editorAgentProvider = editorAgentProvider;
-        this.appStateManager = appStateManager;
+  @Inject
+  public AppContextImpl(
+      EventBus eventBus,
+      QueryParameters queryParameters,
+      ResourceManager.ResourceManagerFactory resourceManagerFactory,
+      Provider<EditorAgent> editorAgentProvider,
+      Provider<AppStateManager> appStateManager) {
+    this.eventBus = eventBus;
+    this.queryParameters = queryParameters;
+    this.resourceManagerFactory = resourceManagerFactory;
+    this.editorAgentProvider = editorAgentProvider;
+    this.appStateManager = appStateManager;
 
-        projectsInImport = new ArrayList<>();
+    projectsInImport = new ArrayList<>();
 
-        eventBus.addHandler(SelectionChangedEvent.TYPE, this);
-        eventBus.addHandler(ResourceChangedEvent.getType(), this);
-        eventBus.addHandler(WindowActionEvent.TYPE, this);
-        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
-    }
+    eventBus.addHandler(SelectionChangedEvent.TYPE, this);
+    eventBus.addHandler(ResourceChangedEvent.getType(), this);
+    eventBus.addHandler(WindowActionEvent.TYPE, this);
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+  }
 
-    private static native String masterFromIDEConfig() /*-{
+  private static native String masterFromIDEConfig() /*-{
         if ($wnd.IDE && $wnd.IDE.config) {
             return $wnd.IDE.config.restContext;
         } else {
@@ -133,350 +133,356 @@ public class AppContextImpl implements AppContext,
         }
     }-*/;
 
-    @Override
-    public Workspace getWorkspace() {
-        return userWorkspace;
+  @Override
+  public Workspace getWorkspace() {
+    return userWorkspace;
+  }
+
+  @Override
+  public void setWorkspace(Workspace workspace) {
+    if (workspace != null) {
+      userWorkspace = workspace;
+      if (workspace.getRuntime() != null) {
+        runtime = new ActiveRuntime(workspace.getRuntime());
+      }
+    } else {
+      userWorkspace = null;
+      runtime = null;
+    }
+  }
+
+  @Override
+  public String getWorkspaceId() {
+    if (userWorkspace == null) {
+      throw new IllegalArgumentException(getClass() + " Workspace can not be null.");
     }
 
-    @Override
-    public void setWorkspace(Workspace workspace) {
-        if (workspace != null) {
-            userWorkspace = workspace;
-            if (workspace.getRuntime() != null) {
-                runtime = new ActiveRuntime(workspace.getRuntime());
-            }
-        } else {
-            userWorkspace = null;
-            runtime = null;
-        }
+    return userWorkspace.getId();
+  }
+
+  @Override
+  public CurrentUser getCurrentUser() {
+    return currentUser;
+  }
+
+  public void setCurrentUser(CurrentUser currentUser) {
+    this.currentUser = currentUser;
+  }
+
+  @Override
+  public List<String> getImportingProjects() {
+    return projectsInImport;
+  }
+
+  @Override
+  public void addProjectToImporting(String pathToProject) {
+    projectsInImport.add(pathToProject);
+  }
+
+  @Override
+  public void removeProjectFromImporting(String pathToProject) {
+    projectsInImport.remove(pathToProject);
+  }
+
+  @Override
+  public List<StartUpAction> getStartAppActions() {
+    return startAppActions;
+  }
+
+  @Override
+  public void setStartUpActions(List<StartUpAction> startUpActions) {
+    this.startAppActions = startUpActions;
+  }
+
+  @Override
+  public FactoryDto getFactory() {
+    return factory;
+  }
+
+  @Override
+  public void setFactory(FactoryDto factory) {
+    this.factory = factory;
+  }
+
+  @Override
+  public DevMachine getDevMachine() {
+    return runtime.getDevMachine();
+  }
+
+  @Override
+  public void initResourceManager(final Callback<ResourceManager, Exception> callback) {
+    if (runtime.getDevMachine() == null) {
+      //should never happened, but anyway
+      callback.onFailure(new NullPointerException("Dev machine is not initialized"));
     }
 
-    @Override
-    public String getWorkspaceId() {
-        if (userWorkspace == null) {
-            throw new IllegalArgumentException(getClass() + " Workspace can not be null.");
-        }
-
-        return userWorkspace.getId();
+    if (!rootProjects.isEmpty()) {
+      for (Project project : rootProjects) {
+        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
+      }
+      rootProjects.clear();
     }
 
-    @Override
-    public CurrentUser getCurrentUser() {
-        return currentUser;
-    }
+    resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
+    resourceManager
+        .getWorkspaceProjects()
+        .then(
+            projects -> {
+              rootProjects.clear();
+              addAll(rootProjects, projects);
+              rootProjects.sort(ResourcePathComparator.getInstance());
+              callback.onSuccess(resourceManager);
+              eventBus.fireEvent(new WorkspaceReadyEvent(projects));
+            })
+        .catchError(
+            error -> {
+              callback.onFailure((Exception) error.getCause());
+            });
+  }
 
-    public void setCurrentUser(CurrentUser currentUser) {
-        this.currentUser = currentUser;
-    }
+  @Override
+  public String getWorkspaceName() {
+    return userWorkspace.getConfig().getName();
+  }
 
-    @Override
-    public List<String> getImportingProjects() {
-        return projectsInImport;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void onResourceChanged(ResourceChangedEvent event) {
+    final ResourceDelta delta = event.getDelta();
+    final Resource resource = delta.getResource();
 
-    @Override
-    public void addProjectToImporting(String pathToProject) {
-        projectsInImport.add(pathToProject);
-    }
+    if (delta.getKind() == ADDED) {
+      if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) != 0) {
 
-    @Override
-    public void removeProjectFromImporting(String pathToProject) {
-        projectsInImport.remove(pathToProject);
-    }
-
-    @Override
-    public List<StartUpAction> getStartAppActions() {
-        return startAppActions;
-    }
-
-    @Override
-    public void setStartUpActions(List<StartUpAction> startUpActions) {
-        this.startAppActions = startUpActions;
-    }
-
-    @Override
-    public FactoryDto getFactory() {
-        return factory;
-    }
-
-    @Override
-    public void setFactory(FactoryDto factory) {
-        this.factory = factory;
-    }
-
-    @Override
-    public DevMachine getDevMachine() {
-        return runtime.getDevMachine();
-    }
-
-    @Override
-    public void initResourceManager(final Callback<ResourceManager, Exception> callback) {
-        if (runtime.getDevMachine() == null) {
-            //should never happened, but anyway
-            callback.onFailure(new NullPointerException("Dev machine is not initialized"));
-        }
-
-        if (!rootProjects.isEmpty()) {
-            for (Project project : rootProjects) {
-                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
-            }
-            rootProjects.clear();
-        }
-
-        resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
-        resourceManager.getWorkspaceProjects().then(projects -> {
-            rootProjects.clear();
-            addAll(rootProjects, projects);
-            rootProjects.sort(ResourcePathComparator.getInstance());
-            callback.onSuccess(resourceManager);
-            eventBus.fireEvent(new WorkspaceReadyEvent(projects));
-        }).catchError(error -> {
-            callback.onFailure((Exception)error.getCause());
-        });
-    }
-
-    @Override
-    public String getWorkspaceName() {
-        return userWorkspace.getConfig().getName();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onResourceChanged(ResourceChangedEvent event) {
-        final ResourceDelta delta = event.getDelta();
-        final Resource resource = delta.getResource();
-
-        if (delta.getKind() == ADDED) {
-            if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) != 0) {
-
-                for (Project rootProject : rootProjects) {
-                    if (rootProject.getLocation().equals(delta.getFromPath()) && resource.isProject()) {
-                        rootProjects.set(rootProjects.indexOf(rootProject), resource.asProject());
-                        break;
-                    }
-                }
-
-                for (Resource selectedResource : selectedResources) {
-                    if (selectedResource.getLocation().equals(delta.getFromPath())) {
-                        selectedResources.set(selectedResources.indexOf(selectedResource), resource);
-                        break;
-                    }
-                }
-            } else if (resource.getLocation().segmentCount() == 1 && resource.isProject()) {
-                boolean exists = rootProjects.stream().anyMatch(it -> it.getLocation().equals(resource.getLocation()));
-
-                if (!exists) {
-                    rootProjects.add(resource.asProject());
-                    rootProjects.sort(ResourcePathComparator.getInstance());
-                }
-            }
-        } else if (delta.getKind() == REMOVED) {
-
-            for (Project rootProject : rootProjects) {
-                if (rootProject.getLocation().equals(resource.getLocation()) && resource.isProject()) {
-                    rootProjects.remove(rootProjects.indexOf(rootProject));
-                    break;
-                }
-            }
-
-            for (Resource selectedResource : selectedResources) {
-                if (selectedResource.getLocation().equals(resource.getLocation())) {
-                    selectedResources.remove(selectedResources.indexOf(selectedResource));
-                    break;
-                }
-            }
-        } else if (delta.getKind() == UPDATED) {
-
-            for (Project rootProject : rootProjects) {
-                if (rootProject.getLocation().equals(resource.getLocation()) && resource.isProject()) {
-                    rootProjects.set(rootProjects.indexOf(rootProject), resource.asProject());
-                    break;
-                }
-            }
-
-            for (Resource selectedResource : selectedResources) {
-                if (selectedResource.getLocation().equals(resource.getLocation())) {
-                    selectedResources.set(selectedResources.indexOf(selectedResource), resource);
-                    break;
-                }
-            }
-        }
-    }
-
-    @Override
-    public Path getProjectsRoot() {
-        return projectsRoot;
-    }
-
-    public void setProjectsRoot(Path projectsRoot) {
-        this.projectsRoot = projectsRoot;
-    }
-
-    @Override
-    public void onSelectionChanged(SelectionChangedEvent event) {
-        final Selection<?> selection = event.getSelection();
-        if (selection instanceof Selection.NoSelectionProvided) {
-            return;
+        for (Project rootProject : rootProjects) {
+          if (rootProject.getLocation().equals(delta.getFromPath()) && resource.isProject()) {
+            rootProjects.set(rootProjects.indexOf(rootProject), resource.asProject());
+            break;
+          }
         }
 
-        selectedResources.clear();
-
-        if (selection != null) {
-            for (Object o : selection.getAllElements()) {
-                if (o instanceof HasDataObject && ((HasDataObject)o).getData() instanceof Resource) {
-                    selectedResources.add((Resource)((HasDataObject)o).getData());
-                } else if (o instanceof Resource) {
-                    selectedResources.add((Resource)o);
-                }
-            }
+        for (Resource selectedResource : selectedResources) {
+          if (selectedResource.getLocation().equals(delta.getFromPath())) {
+            selectedResources.set(selectedResources.indexOf(selectedResource), resource);
+            break;
+          }
         }
-    }
+      } else if (resource.getLocation().segmentCount() == 1 && resource.isProject()) {
+        boolean exists =
+            rootProjects.stream().anyMatch(it -> it.getLocation().equals(resource.getLocation()));
 
-    @Override
-    public Project[] getProjects() {
-        return rootProjects.toArray(new Project[rootProjects.size()]);
-    }
-
-    @Override
-    public Container getWorkspaceRoot() {
-        checkState(resourceManager != null, "Workspace configuration has not been received yet");
-
-        return resourceManager.getWorkspaceRoot();
-    }
-
-    @Override
-    public Resource getResource() {
-        return selectedResources.isEmpty() ? null : selectedResources.get(0);
-    }
-
-    @Override
-    public Resource[] getResources() {
-        return selectedResources.toArray(new Resource[selectedResources.size()]);
-    }
-
-    @Override
-    public Project getRootProject() {
-        if (rootProjects.isEmpty()) {
-            return null;
+        if (!exists) {
+          rootProjects.add(resource.asProject());
+          rootProjects.sort(ResourcePathComparator.getInstance());
         }
+      }
+    } else if (delta.getKind() == REMOVED) {
 
-        if (selectedResources.isEmpty()) {
-            EditorAgent editorAgent = editorAgentProvider.get();
-            if (editorAgent == null) {
-                return null;
-            }
-
-            final EditorPartPresenter editor = editorAgent.getActiveEditor();
-            if (editor == null) {
-                return null;
-            }
-
-            final VirtualFile file = editor.getEditorInput().getFile();
-
-            if (file instanceof SyntheticNode) {
-                final Path projectPath = ((SyntheticNode)file).getProject();
-                for (Project project : rootProjects) {
-                    if (project.getLocation().equals(projectPath)) {
-                        return project;
-                    }
-                }
-            }
-
-            return null;
-        } else {
-            Project root = null;
-
-            for (Project project : rootProjects) {
-                if (project.getLocation().isPrefixOf(selectedResources.get(0).getLocation())) {
-                    root = project;
-                    break;
-                }
-            }
-
-            if (root == null) {
-                return null;
-            }
-
-            for (int i = 1; i < selectedResources.size(); i++) {
-                if (!root.getLocation().isPrefixOf(selectedResources.get(i).getLocation())) {
-                    return null;
-                }
-            }
-
-            return root;
+      for (Project rootProject : rootProjects) {
+        if (rootProject.getLocation().equals(resource.getLocation()) && resource.isProject()) {
+          rootProjects.remove(rootProjects.indexOf(rootProject));
+          break;
         }
-    }
+      }
 
-    @Override
-    public void onWindowClosing(WindowActionEvent event) {
-        appStateManager.get().persistWorkspaceState(getWorkspaceId());
-    }
-
-    @Override
-    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-        setWorkspace(event.getWorkspace());
-    }
-
-    @Override
-    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-        appStateManager.get().persistWorkspaceState(getWorkspaceId()).then(ignored -> {
-            for (Project project : rootProjects) {
-                eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
-            }
-
-            rootProjects.clear();
-            resourceManager = null;
-        });
-
-        clearRuntime();
-    }
-
-    private void clearRuntime() {
-        runtime = null;
-    }
-
-    @Override
-    public void onWindowClosed(WindowActionEvent event) {
-    }
-
-    @Override
-    public String getMasterEndpoint() {
-        String fromUrl = queryParameters.getByName("master");
-        if (fromUrl == null || fromUrl.isEmpty())
-            return masterFromIDEConfig();
-        else
-            return fromUrl;
-    }
-
-    @Override
-    public String getDevAgentEndpoint() {
-        String fromUrl = queryParameters.getByName("agent");
-        if (fromUrl == null || fromUrl.isEmpty())
-            return runtime.getDevMachine().getWsAgentBaseUrl();
-        else
-            return fromUrl;
-    }
-
-    @Override
-    public Optional<String> getApplicationWebsocketId() {
-        return Optional.ofNullable(applicationWebsocketId);
-    }
-
-    @Override
-    public void setApplicationWebsocketId(String id) {
-        this.applicationWebsocketId = id;
-    }
-
-    @Override
-    public ActiveRuntime getActiveRuntime() {
-        return runtime;
-    }
-
-    @Override
-    public Map<String, String> getProperties() {
-        if (properties == null) {
-            properties = new HashMap<>();
+      for (Resource selectedResource : selectedResources) {
+        if (selectedResource.getLocation().equals(resource.getLocation())) {
+          selectedResources.remove(selectedResources.indexOf(selectedResource));
+          break;
         }
-        return properties;
+      }
+    } else if (delta.getKind() == UPDATED) {
+
+      for (Project rootProject : rootProjects) {
+        if (rootProject.getLocation().equals(resource.getLocation()) && resource.isProject()) {
+          rootProjects.set(rootProjects.indexOf(rootProject), resource.asProject());
+          break;
+        }
+      }
+
+      for (Resource selectedResource : selectedResources) {
+        if (selectedResource.getLocation().equals(resource.getLocation())) {
+          selectedResources.set(selectedResources.indexOf(selectedResource), resource);
+          break;
+        }
+      }
     }
+  }
+
+  @Override
+  public Path getProjectsRoot() {
+    return projectsRoot;
+  }
+
+  public void setProjectsRoot(Path projectsRoot) {
+    this.projectsRoot = projectsRoot;
+  }
+
+  @Override
+  public void onSelectionChanged(SelectionChangedEvent event) {
+    final Selection<?> selection = event.getSelection();
+    if (selection instanceof Selection.NoSelectionProvided) {
+      return;
+    }
+
+    selectedResources.clear();
+
+    if (selection != null) {
+      for (Object o : selection.getAllElements()) {
+        if (o instanceof HasDataObject && ((HasDataObject) o).getData() instanceof Resource) {
+          selectedResources.add((Resource) ((HasDataObject) o).getData());
+        } else if (o instanceof Resource) {
+          selectedResources.add((Resource) o);
+        }
+      }
+    }
+  }
+
+  @Override
+  public Project[] getProjects() {
+    return rootProjects.toArray(new Project[rootProjects.size()]);
+  }
+
+  @Override
+  public Container getWorkspaceRoot() {
+    checkState(resourceManager != null, "Workspace configuration has not been received yet");
+
+    return resourceManager.getWorkspaceRoot();
+  }
+
+  @Override
+  public Resource getResource() {
+    return selectedResources.isEmpty() ? null : selectedResources.get(0);
+  }
+
+  @Override
+  public Resource[] getResources() {
+    return selectedResources.toArray(new Resource[selectedResources.size()]);
+  }
+
+  @Override
+  public Project getRootProject() {
+    if (rootProjects.isEmpty()) {
+      return null;
+    }
+
+    if (selectedResources.isEmpty()) {
+      EditorAgent editorAgent = editorAgentProvider.get();
+      if (editorAgent == null) {
+        return null;
+      }
+
+      final EditorPartPresenter editor = editorAgent.getActiveEditor();
+      if (editor == null) {
+        return null;
+      }
+
+      final VirtualFile file = editor.getEditorInput().getFile();
+
+      if (file instanceof SyntheticNode) {
+        final Path projectPath = ((SyntheticNode) file).getProject();
+        for (Project project : rootProjects) {
+          if (project.getLocation().equals(projectPath)) {
+            return project;
+          }
+        }
+      }
+
+      return null;
+    } else {
+      Project root = null;
+
+      for (Project project : rootProjects) {
+        if (project.getLocation().isPrefixOf(selectedResources.get(0).getLocation())) {
+          root = project;
+          break;
+        }
+      }
+
+      if (root == null) {
+        return null;
+      }
+
+      for (int i = 1; i < selectedResources.size(); i++) {
+        if (!root.getLocation().isPrefixOf(selectedResources.get(i).getLocation())) {
+          return null;
+        }
+      }
+
+      return root;
+    }
+  }
+
+  @Override
+  public void onWindowClosing(WindowActionEvent event) {
+    appStateManager.get().persistWorkspaceState(getWorkspaceId());
+  }
+
+  @Override
+  public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+    setWorkspace(event.getWorkspace());
+  }
+
+  @Override
+  public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+    appStateManager
+        .get()
+        .persistWorkspaceState(getWorkspaceId())
+        .then(
+            ignored -> {
+              for (Project project : rootProjects) {
+                eventBus.fireEvent(
+                    new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
+              }
+
+              rootProjects.clear();
+              resourceManager = null;
+            });
+
+    clearRuntime();
+  }
+
+  private void clearRuntime() {
+    runtime = null;
+  }
+
+  @Override
+  public void onWindowClosed(WindowActionEvent event) {}
+
+  @Override
+  public String getMasterEndpoint() {
+    String fromUrl = queryParameters.getByName("master");
+    if (fromUrl == null || fromUrl.isEmpty()) return masterFromIDEConfig();
+    else return fromUrl;
+  }
+
+  @Override
+  public String getDevAgentEndpoint() {
+    String fromUrl = queryParameters.getByName("agent");
+    if (fromUrl == null || fromUrl.isEmpty()) return runtime.getDevMachine().getWsAgentBaseUrl();
+    else return fromUrl;
+  }
+
+  @Override
+  public Optional<String> getApplicationWebsocketId() {
+    return Optional.ofNullable(applicationWebsocketId);
+  }
+
+  @Override
+  public void setApplicationWebsocketId(String id) {
+    this.applicationWebsocketId = id;
+  }
+
+  @Override
+  public ActiveRuntime getActiveRuntime() {
+    return runtime;
+  }
+
+  @Override
+  public Map<String, String> getProperties() {
+    if (properties == null) {
+      properties = new HashMap<>();
+    }
+    return properties;
+  }
 }

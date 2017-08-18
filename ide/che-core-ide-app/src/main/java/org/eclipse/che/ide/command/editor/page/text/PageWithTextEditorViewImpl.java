@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.editor.page.text;
 
 import com.google.gwt.core.client.GWT;
@@ -30,53 +30,50 @@ import com.google.inject.Inject;
  */
 public class PageWithTextEditorViewImpl extends Composite implements PageWithTextEditorView {
 
-    private static final PageWithTextEditorViewImplUiBinder UI_BINDER = GWT.create(PageWithTextEditorViewImplUiBinder.class);
+  private static final PageWithTextEditorViewImplUiBinder UI_BINDER =
+      GWT.create(PageWithTextEditorViewImplUiBinder.class);
 
-    @UiField
-    DockLayoutPanel mainPanel;
+  @UiField DockLayoutPanel mainPanel;
 
-    @UiField
-    Label title;
+  @UiField Label title;
 
-    @UiField
-    Hyperlink exploreMacrosLink;
+  @UiField Hyperlink exploreMacrosLink;
 
-    @UiField
-    SimpleLayoutPanel editorPanel;
+  @UiField SimpleLayoutPanel editorPanel;
 
-    /** The delegate to receive events from this view. */
-    private ActionDelegate delegate;
+  /** The delegate to receive events from this view. */
+  private ActionDelegate delegate;
 
-    @Inject
-    public PageWithTextEditorViewImpl() {
-        initWidget(UI_BINDER.createAndBindUi(this));
-    }
+  @Inject
+  public PageWithTextEditorViewImpl() {
+    initWidget(UI_BINDER.createAndBindUi(this));
+  }
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    @Override
-    public SimpleLayoutPanel getEditorContainer() {
-        return editorPanel;
-    }
+  @Override
+  public SimpleLayoutPanel getEditorContainer() {
+    return editorPanel;
+  }
 
-    @Override
-    public void setHeight(int height) {
-        mainPanel.setHeight(height + "px");
-    }
+  @Override
+  public void setHeight(int height) {
+    mainPanel.setHeight(height + "px");
+  }
 
-    @Override
-    public void setEditorTitle(String title) {
-        this.title.setText(title);
-    }
+  @Override
+  public void setEditorTitle(String title) {
+    this.title.setText(title);
+  }
 
-    @UiHandler("exploreMacrosLink")
-    public void handleExploreMacrosLinkClick(ClickEvent event) {
-        delegate.onExploreMacros();
-    }
+  @UiHandler("exploreMacrosLink")
+  public void handleExploreMacrosLinkClick(ClickEvent event) {
+    delegate.onExploreMacros();
+  }
 
-    interface PageWithTextEditorViewImplUiBinder extends UiBinder<Widget, PageWithTextEditorViewImpl> {
-    }
+  interface PageWithTextEditorViewImplUiBinder
+      extends UiBinder<Widget, PageWithTextEditorViewImpl> {}
 }

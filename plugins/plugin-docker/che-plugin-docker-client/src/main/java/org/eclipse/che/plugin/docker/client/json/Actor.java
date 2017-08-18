@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.client.json;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.util.Map;
 
 /**
@@ -20,35 +19,32 @@ import java.util.Map;
  * @author Mykola Morhun
  */
 public class Actor {
-    @SerializedName("ID")
-    private String             id;
-    @SerializedName("Attributes")
-    private Map<String,String> attributes;
+  @SerializedName("ID")
+  private String id;
 
-    public String getId() {
-        return id;
-    }
+  @SerializedName("Attributes")
+  private Map<String, String> attributes;
 
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public Actor withId(String id) {
-        this.id = id;
-        return this;
-    }
+  public Map<String, String> getAttributes() {
+    return attributes;
+  }
 
-    public Actor withAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
-        return this;
-    }
+  public Actor withId(String id) {
+    this.id = id;
+    return this;
+  }
 
-    @Override
-    public String toString() {
-        return "Actor{" +
-               "id='" + id + '\'' +
-               ", attributes=" + attributes +
-               '}';
-    }
+  public Actor withAttributes(Map<String, String> attributes) {
+    this.attributes = attributes;
+    return this;
+  }
 
+  @Override
+  public String toString() {
+    return "Actor{" + "id='" + id + '\'' + ", attributes=" + attributes + '}';
+  }
 }
