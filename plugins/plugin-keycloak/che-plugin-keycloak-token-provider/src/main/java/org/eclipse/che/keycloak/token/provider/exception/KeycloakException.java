@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,25 +7,24 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.keycloak.token.provider.exception;
 
 public class KeycloakException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    public KeycloakException() {
-    }
+  public KeycloakException() {}
 
-    public KeycloakException(String message) {
-        super(message);
-    }
+  public KeycloakException(String message) {
+    super(message);
+  }
 
-    public KeycloakException(Throwable cause) {
-        super(cause);
-    }
+  public KeycloakException(Throwable cause) {
+    super(cause);
+  }
 
-    public KeycloakException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public KeycloakException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

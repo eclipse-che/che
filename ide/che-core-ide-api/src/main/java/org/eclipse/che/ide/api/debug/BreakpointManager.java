@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.debug;
 
 import java.util.List;
@@ -19,18 +19,12 @@ import java.util.List;
  */
 public interface BreakpointManager extends BreakpointManagerObservable {
 
-    /**
-     * Toggle / untoggle breakpoint.
-     */
-    void changeBreakpointState(int lineNumber);
+  /** Toggle / untoggle breakpoint. */
+  void changeBreakpointState(int lineNumber);
 
-    /**
-     * @return all breakpoints
-     */
-    List<Breakpoint> getBreakpointList();
+  /** @return all breakpoints */
+  List<Breakpoint> getBreakpointList();
 
-    /**
-     * Removes all breakpoints.
-     */
-    void deleteAllBreakpoints();
+  /** Removes all breakpoints. */
+  void deleteAllBreakpoints();
 }

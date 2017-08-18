@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.server.rmi;
 
 /**
@@ -16,29 +16,29 @@ package org.eclipse.che.plugin.maven.server.rmi;
  * @author Evgen Vidolob
  */
 public class Ref<T> {
-    private T value;
+  private T value;
 
-    private Ref(T value) {
-        this.value = value;
-    }
+  private Ref(T value) {
+    this.value = value;
+  }
 
-    public static <T> Ref<T> ofNull() {
-        return new Ref<>(null);
-    }
+  public static <T> Ref<T> ofNull() {
+    return new Ref<>(null);
+  }
 
-    public static <T> Ref<T> of(T value) {
-        return new Ref<>(value);
-    }
+  public static <T> Ref<T> of(T value) {
+    return new Ref<>(value);
+  }
 
-    public T getValue() {
-        return value;
-    }
+  public T getValue() {
+    return value;
+  }
 
-    public void setValue(T value) {
-        this.value = value;
-    }
+  public void setValue(T value) {
+    this.value = value;
+  }
 
-    public boolean isNull() {
-        return value == null;
-    }
+  public boolean isNull() {
+    return value == null;
+  }
 }

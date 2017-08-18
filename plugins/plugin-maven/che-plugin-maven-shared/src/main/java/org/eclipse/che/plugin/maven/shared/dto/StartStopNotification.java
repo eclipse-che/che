@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -18,9 +18,9 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Evgen Vidolob
  */
 @DTO
-public interface StartStopNotification extends MavenOutputEventDto{
+public interface StartStopNotification extends MavenOutputEventDto {
 
-    boolean isStart();
+  boolean isStart();
 
-    void setStart(boolean start);
+  void setStart(boolean start);
 }

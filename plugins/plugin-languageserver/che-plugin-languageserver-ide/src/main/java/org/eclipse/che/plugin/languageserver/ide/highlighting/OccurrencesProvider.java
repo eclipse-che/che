@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.languageserver.ide.highlighting;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -31,8 +32,6 @@ import org.eclipse.lsp4j.DocumentHighlight;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 
-import java.util.List;
-
 /**
  * Provides occurrences highlights for the Orion Editor.
  *
@@ -40,64 +39,72 @@ import java.util.List;
  */
 @Singleton
 public class OccurrencesProvider implements OrionOccurrencesHandler {
-    private final EditorAgent               editorAgent;
-    private final TextDocumentServiceClient client;
-    private final DtoBuildHelper            helper;
+  private final EditorAgent editorAgent;
+  private final TextDocumentServiceClient client;
+  private final DtoBuildHelper helper;
 
-    /**
-     * Constructor.
-     *
-     * @param editorAgent
-     * @param client
-     * @param helper
-     */
-    @Inject
-    public OccurrencesProvider(EditorAgent editorAgent, TextDocumentServiceClient client, DtoBuildHelper helper) {
-        this.editorAgent = editorAgent;
-        this.client = client;
-        this.helper = helper;
+  /**
+   * Constructor.
+   *
+   * @param editorAgent
+   * @param client
+   * @param helper
+   */
+  @Inject
+  public OccurrencesProvider(
+      EditorAgent editorAgent, TextDocumentServiceClient client, DtoBuildHelper helper) {
+    this.editorAgent = editorAgent;
+    this.client = client;
+    this.helper = helper;
+  }
+
+  @Override
+  public JsPromise<OrionOccurrenceOverlay[]> computeOccurrences(
+      OrionOccurrenceContextOverlay context) {
+    final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+    if (activeEditor == null || !(activeEditor instanceof TextEditor)) {
+      return null;
     }
-
-    @Override
-    public JsPromise<OrionOccurrenceOverlay[]> computeOccurrences(
-            OrionOccurrenceContextOverlay context) {
-        final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if (activeEditor == null || !(activeEditor instanceof TextEditor)) {
-            return null;
-        }
-        final TextEditor editor = ((TextEditor)activeEditor);
-        if (!(editor.getConfiguration() instanceof LanguageServerEditorConfiguration)) {
-            return null;
-        }
-        final LanguageServerEditorConfiguration configuration = (LanguageServerEditorConfiguration)editor.getConfiguration();
-        if (configuration.getServerCapabilities().getDocumentHighlightProvider() == null ||
-            !configuration.getServerCapabilities().getDocumentHighlightProvider()) {
-            return null;
-        }
-        final Document document = editor.getDocument();
-        final TextDocumentPositionParams paramsDTO = helper.createTDPP(document, context.getStart());
-        Promise<List<DocumentHighlight>> promise = client.documentHighlight(paramsDTO);
-        Promise<OrionOccurrenceOverlay[]> then = promise.then(new Function<List<DocumentHighlight>, OrionOccurrenceOverlay[]>() {
-            @Override
-            public OrionOccurrenceOverlay[] apply(List<DocumentHighlight> highlights) throws FunctionException {
-                final OrionOccurrenceOverlay[] occurrences = new OrionOccurrenceOverlay[highlights.size()];
+    final TextEditor editor = ((TextEditor) activeEditor);
+    if (!(editor.getConfiguration() instanceof LanguageServerEditorConfiguration)) {
+      return null;
+    }
+    final LanguageServerEditorConfiguration configuration =
+        (LanguageServerEditorConfiguration) editor.getConfiguration();
+    if (configuration.getServerCapabilities().getDocumentHighlightProvider() == null
+        || !configuration.getServerCapabilities().getDocumentHighlightProvider()) {
+      return null;
+    }
+    final Document document = editor.getDocument();
+    final TextDocumentPositionParams paramsDTO = helper.createTDPP(document, context.getStart());
+    Promise<List<DocumentHighlight>> promise = client.documentHighlight(paramsDTO);
+    Promise<OrionOccurrenceOverlay[]> then =
+        promise.then(
+            new Function<List<DocumentHighlight>, OrionOccurrenceOverlay[]>() {
+              @Override
+              public OrionOccurrenceOverlay[] apply(List<DocumentHighlight> highlights)
+                  throws FunctionException {
+                final OrionOccurrenceOverlay[] occurrences =
+                    new OrionOccurrenceOverlay[highlights.size()];
                 for (int i = 0; i < occurrences.length; i++) {
-                    DocumentHighlight highlight = highlights.get(i);
-                    final OrionOccurrenceOverlay occurrence = OrionOccurrenceOverlay.create();
-                    Position start = highlight.getRange().getStart();
-                    Position end = highlight.getRange().getEnd();
-                    int startIndex = document.getIndexFromPosition(new TextPosition(start.getLine(), start.getCharacter()));
-                    int endIndex = document.getIndexFromPosition(new TextPosition(end.getLine(), end.getCharacter()));
-                   
-                    occurrence.setStart(startIndex);
-                    occurrence.setEnd(endIndex+1);
-                    occurrences[i]= occurrence;
-                    
+                  DocumentHighlight highlight = highlights.get(i);
+                  final OrionOccurrenceOverlay occurrence = OrionOccurrenceOverlay.create();
+                  Position start = highlight.getRange().getStart();
+                  Position end = highlight.getRange().getEnd();
+                  int startIndex =
+                      document.getIndexFromPosition(
+                          new TextPosition(start.getLine(), start.getCharacter()));
+                  int endIndex =
+                      document.getIndexFromPosition(
+                          new TextPosition(end.getLine(), end.getCharacter()));
+
+                  occurrence.setStart(startIndex);
+                  occurrence.setEnd(endIndex + 1);
+                  occurrences[i] = occurrence;
                 }
                 return occurrences;
-            }
-        });
-        return (JsPromise<OrionOccurrenceOverlay[]>)then;
-
-    }
+              }
+            });
+    return (JsPromise<OrionOccurrenceOverlay[]>) then;
+  }
 }

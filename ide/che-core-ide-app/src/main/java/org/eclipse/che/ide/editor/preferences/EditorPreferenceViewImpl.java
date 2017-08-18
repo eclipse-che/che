@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.preferences;
 
 import com.google.gwt.core.client.GWT;
@@ -23,25 +23,25 @@ import com.google.inject.Inject;
 /** Implementation of the {@link EditorPreferenceView}. */
 public class EditorPreferenceViewImpl extends Composite implements EditorPreferenceView {
 
-    /** The UI binder instance. */
-    private static final EditorPreferenceViewImplUiBinder UIBINDER = GWT.create(EditorPreferenceViewImplUiBinder.class);
+  /** The UI binder instance. */
+  private static final EditorPreferenceViewImplUiBinder UIBINDER =
+      GWT.create(EditorPreferenceViewImplUiBinder.class);
 
-    @UiField
-    FlowPanel   editorPreferencesContainer;
+  @UiField FlowPanel editorPreferencesContainer;
 
-    @Inject
-    public EditorPreferenceViewImpl() {
-        initWidget(UIBINDER.createAndBindUi(this));
-    }
+  @Inject
+  public EditorPreferenceViewImpl() {
+    initWidget(UIBINDER.createAndBindUi(this));
+  }
 
-    @Override
-    public AcceptsOneWidget getEditorPreferencesContainer() {
-        SimplePanel container = new SimplePanel();
-        editorPreferencesContainer.add(container);
-        return container;
-    }
+  @Override
+  public AcceptsOneWidget getEditorPreferencesContainer() {
+    SimplePanel container = new SimplePanel();
+    editorPreferencesContainer.add(container);
+    return container;
+  }
 
-    /** UI binder interface for the {@link EditorPreferenceViewImpl} component. */
-    interface EditorPreferenceViewImplUiBinder extends UiBinder<ScrollPanel, EditorPreferenceViewImpl> {
-    }
+  /** UI binder interface for the {@link EditorPreferenceViewImpl} component. */
+  interface EditorPreferenceViewImplUiBinder
+      extends UiBinder<ScrollPanel, EditorPreferenceViewImpl> {}
 }

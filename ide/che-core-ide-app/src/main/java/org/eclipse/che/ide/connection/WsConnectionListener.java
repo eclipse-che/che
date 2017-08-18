@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.connection;
 
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.ConnectionClosedInformer;
 import org.eclipse.che.ide.api.event.HttpSessionDestroyedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
@@ -25,47 +24,57 @@ import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
 /**
  * @author Evgen Vidolob
- * @deprecated within replacing everrest based Websocket calls with new RPC framework now it is considered as deprecated and will be removed
+ * @deprecated within replacing everrest based Websocket calls with new RPC framework now it is
+ *     considered as deprecated and will be removed
  */
 @Deprecated
 public class WsConnectionListener implements ConnectionClosedHandler, ConnectionOpenedHandler {
 
-    private final EventBus                 eventBus;
-    private final ConnectionClosedInformer connectionClosedInformer;
+  private final EventBus eventBus;
+  private final ConnectionClosedInformer connectionClosedInformer;
 
-    private MessageBus messageBus;
+  private MessageBus messageBus;
 
-    @Inject
-    public WsConnectionListener(EventBus eventBus,
-                                final MessageBusProvider messageBusProvider,
-                                ConnectionClosedInformer connectionClosedInformer) {
-        this.eventBus = eventBus;
-        this.connectionClosedInformer = connectionClosedInformer;
+  @Inject
+  public WsConnectionListener(
+      EventBus eventBus,
+      final MessageBusProvider messageBusProvider,
+      ConnectionClosedInformer connectionClosedInformer) {
+    this.eventBus = eventBus;
+    this.connectionClosedInformer = connectionClosedInformer;
 
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedEvent.Handler() {
-            @Override
-            public void onWorkspaceStarted(WorkspaceStartedEvent workspace) {
-                messageBus = messageBusProvider.getMessageBus();
+    eventBus.addHandler(
+        WorkspaceStartedEvent.TYPE,
+        new WorkspaceStartedEvent.Handler() {
+          @Override
+          public void onWorkspaceStarted(WorkspaceStartedEvent workspace) {
+            messageBus = messageBusProvider.getMessageBus();
 
-                messageBus.addOnCloseHandler(WsConnectionListener.this);
-            }
+            messageBus.addOnCloseHandler(WsConnectionListener.this);
+          }
         });
-    }
+  }
 
-    @Override
-    public void onClose(WebSocketClosedEvent event) {
-        messageBus.removeOnCloseHandler(this);
-        Log.info(getClass(), "WebSocket is closed, the status code is " + event.getCode() + ", the reason is " + event.getReason());
+  @Override
+  public void onClose(WebSocketClosedEvent event) {
+    messageBus.removeOnCloseHandler(this);
+    Log.info(
+        getClass(),
+        "WebSocket is closed, the status code is "
+            + event.getCode()
+            + ", the reason is "
+            + event.getReason());
 
-        if (event.getCode() == WebSocketClosedEvent.CLOSE_NORMAL && "Http session destroyed".equals(event.getReason())) {
-            eventBus.fireEvent(new HttpSessionDestroyedEvent());
-            return;
-        }
-        connectionClosedInformer.onConnectionClosed(event);
+    if (event.getCode() == WebSocketClosedEvent.CLOSE_NORMAL
+        && "Http session destroyed".equals(event.getReason())) {
+      eventBus.fireEvent(new HttpSessionDestroyedEvent());
+      return;
     }
+    connectionClosedInformer.onConnectionClosed(event);
+  }
 
-    @Override
-    public void onOpen() {
-        messageBus.addOnCloseHandler(this);
-    }
+  @Override
+  public void onOpen() {
+    messageBus.addOnCloseHandler(this);
+  }
 }

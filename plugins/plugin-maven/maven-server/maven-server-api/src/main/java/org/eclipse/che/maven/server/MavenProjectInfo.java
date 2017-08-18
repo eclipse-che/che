@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.maven.server;
-
-import org.eclipse.che.maven.data.MavenModel;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.maven.data.MavenModel;
 
 /**
  * Data class. Contains maven project model and active profiles.
@@ -22,27 +21,28 @@ import java.util.Map;
  * @author Evgen Vidolob
  */
 public class MavenProjectInfo implements Serializable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private final MavenModel          mavenModel;
-    private final Map<String, String> mavenMap;
-    private final List<String>        activeProfiles;
+  private final MavenModel mavenModel;
+  private final Map<String, String> mavenMap;
+  private final List<String> activeProfiles;
 
-    public MavenProjectInfo(MavenModel mavenModel, Map<String, String> mavenMap, List<String> activeProfiles) {
-        this.mavenModel = mavenModel;
-        this.mavenMap = mavenMap;
-        this.activeProfiles = activeProfiles;
-    }
+  public MavenProjectInfo(
+      MavenModel mavenModel, Map<String, String> mavenMap, List<String> activeProfiles) {
+    this.mavenModel = mavenModel;
+    this.mavenMap = mavenMap;
+    this.activeProfiles = activeProfiles;
+  }
 
-    public MavenModel getMavenModel() {
-        return mavenModel;
-    }
+  public MavenModel getMavenModel() {
+    return mavenModel;
+  }
 
-    public Map<String, String> getMavenMap() {
-        return mavenMap;
-    }
+  public Map<String, String> getMavenMap() {
+    return mavenMap;
+  }
 
-    public List<String> getActiveProfiles() {
-        return activeProfiles;
-    }
+  public List<String> getActiveProfiles() {
+    return activeProfiles;
+  }
 }

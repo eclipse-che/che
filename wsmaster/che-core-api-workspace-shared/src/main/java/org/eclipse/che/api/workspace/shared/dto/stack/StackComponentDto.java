@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,24 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto.stack;
-
 
 import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Alexander Andrienko
- */
+/** @author Alexander Andrienko */
 @DTO
 public interface StackComponentDto extends StackComponent {
 
-    void setName(String name);
+  void setName(String name);
 
-    StackComponentDto withName(String name);
+  StackComponentDto withName(String name);
 
-    void setVersion(String version);
+  void setVersion(String version);
 
-    StackComponentDto withVersion(String version);
+  StackComponentDto withVersion(String version);
 }

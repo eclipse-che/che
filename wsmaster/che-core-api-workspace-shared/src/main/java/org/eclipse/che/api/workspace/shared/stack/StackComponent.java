@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.stack;
 
 /**
@@ -17,14 +17,9 @@ package org.eclipse.che.api.workspace.shared.stack;
  */
 public interface StackComponent {
 
-    /**
-     * Returns the name of the component.
-     * The name is unique per stack. (e.g. "jdk").
-     */
-    String getName();
+  /** Returns the name of the component. The name is unique per stack. (e.g. "jdk"). */
+  String getName();
 
-    /**
-     * Returns the version of the component. (e.g. "1.8")
-     */
-    String getVersion();
+  /** Returns the version of the component. (e.g. "1.8") */
+  String getVersion();
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.environment.server;
 
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -20,20 +20,14 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
  */
 public interface ContainerNameGenerator {
 
-    /**
-     * Returns generated name for container.
-     *
-     * @param workspaceId
-     *         unique workspace id, see more (@link WorkspaceConfig#getId)
-     * @param machineId
-     *         unique machine id, see more {@link Machine#getId()}
-     * @param ownerName
-     *         name of the user who is docker container owner
-     * @param machineName
-     *         name of the workspace machine, see more {@link MachineConfig#getName()}
-     */
-    String generateContainerName(String workspaceId,
-                                 String machineId,
-                                 String ownerName,
-                                 String machineName);
+  /**
+   * Returns generated name for container.
+   *
+   * @param workspaceId unique workspace id, see more (@link WorkspaceConfig#getId)
+   * @param machineId unique machine id, see more {@link Machine#getId()}
+   * @param ownerName name of the user who is docker container owner
+   * @param machineName name of the workspace machine, see more {@link MachineConfig#getName()}
+   */
+  String generateContainerName(
+      String workspaceId, String machineId, String ownerName, String machineName);
 }

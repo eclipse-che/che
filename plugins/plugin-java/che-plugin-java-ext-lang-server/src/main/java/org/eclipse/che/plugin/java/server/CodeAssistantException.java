@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,35 +7,27 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.java.server;
 
-/**
- *
- */
+/** */
 public class CodeAssistantException extends Exception {
-    /**
-     *
-     */
-    private static final long serialVersionUID = -2413708596186268688L;
+  /** */
+  private static final long serialVersionUID = -2413708596186268688L;
 
-    private int status;
+  private int status;
 
-    public CodeAssistantException(int status, String message) {
-        super(message);
-        this.setStatus(status);
-    }
+  public CodeAssistantException(int status, String message) {
+    super(message);
+    this.setStatus(status);
+  }
 
-    public int getStatus() {
-        return status;
-    }
+  public int getStatus() {
+    return status;
+  }
 
-    /**
-     * @param status
-     *         the status to set
-     */
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
+  /** @param status the status to set */
+  public void setStatus(int status) {
+    this.status = status;
+  }
 }

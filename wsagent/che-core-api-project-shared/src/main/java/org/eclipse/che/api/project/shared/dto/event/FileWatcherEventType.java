@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.shared.dto.event;
 
-/**
- * @author andrew00x
- */
+/** @author andrew00x */
 public enum FileWatcherEventType {
-    CREATED, DELETED, MODIFIED
+  CREATED,
+  DELETED,
+  MODIFIED
 }

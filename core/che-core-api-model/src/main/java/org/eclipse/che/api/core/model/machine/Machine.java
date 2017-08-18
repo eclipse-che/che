@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.model.machine;
 
 import org.eclipse.che.commons.annotation.Nullable;
@@ -19,41 +19,29 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author Alexander Garagatyi
  */
 public interface Machine {
-    /**
-     * Returns configuration used to create this machine
-     */
-    MachineConfig getConfig();
+  /** Returns configuration used to create this machine */
+  MachineConfig getConfig();
 
-    /**
-     * Returns machine identifier. It is unique and mandatory.
-     */
-    String getId();
+  /** Returns machine identifier. It is unique and mandatory. */
+  String getId();
 
-    /**
-     * Returns ID of workspace this machine belongs to. It is mandatory.
-     */
-    String getWorkspaceId();
+  /** Returns ID of workspace this machine belongs to. It is mandatory. */
+  String getWorkspaceId();
 
-    /**
-     * Returns name of environment that started this machine. It is mandatory.
-     */
-    String getEnvName();
+  /** Returns name of environment that started this machine. It is mandatory. */
+  String getEnvName();
 
-    /**
-     * Returns machine owner (users identifier). It is mandatory.
-     */
-    String getOwner();
+  /** Returns machine owner (users identifier). It is mandatory. */
+  String getOwner();
 
-    /**
-     * Runtime status of the machine
-     */
-    MachineStatus getStatus();
+  /** Runtime status of the machine */
+  MachineStatus getStatus();
 
-    /**
-     * Runtime information about machine.
-     * <p>
-     * Is available only when {@link #getStatus()} returns {@link MachineStatus#RUNNING}
-     */
-    @Nullable
-    MachineRuntimeInfo getRuntime();
+  /**
+   * Runtime information about machine.
+   *
+   * <p>Is available only when {@link #getStatus()} returns {@link MachineStatus#RUNNING}
+   */
+  @Nullable
+  MachineRuntimeInfo getRuntime();
 }

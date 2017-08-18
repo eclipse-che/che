@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.dto.definitions;
-
 
 import org.eclipse.che.dto.shared.DTO;
 
-import java.io.Closeable;
 
 /**
  * Keeps DTO interfaces for hierarchy test
@@ -22,50 +20,49 @@ import java.io.Closeable;
  */
 public final class DTOHierarchy {
 
-    public interface Parent {
+  public interface Parent {
 
-        String getParentField();
-    }
+    String getParentField();
+  }
 
-    public interface Child extends Parent {
+  public interface Child extends Parent {
 
-        String getChildField();
-    }
+    String getChildField();
+  }
 
-    @DTO
-    public interface ChildDto extends Child {
+  @DTO
+  public interface ChildDto extends Child {
 
-        String getDtoField();
+    String getDtoField();
 
-        void setDtoField(String dtoField);
+    void setDtoField(String dtoField);
 
-        ChildDto withDtoField(String dtoField);
+    ChildDto withDtoField(String dtoField);
 
-        void setChildField(String childField);
+    void setChildField(String childField);
 
-        ChildDto withChildField(String childField);
+    ChildDto withChildField(String childField);
 
-        void setParentField(String parentField);
+    void setParentField(String parentField);
 
-        ChildDto withParentField(String parentField);
+    ChildDto withParentField(String parentField);
 
-        ChildDto getShadowedField();
+    ChildDto getShadowedField();
 
-        void setShadowedField(ChildDto v);
-    }
+    void setShadowedField(ChildDto v);
+  }
 
-    @DTO
-    public interface GrandchildDto extends ChildDto {
+  @DTO
+  public interface GrandchildDto extends ChildDto {
 
-        GrandchildDto getShadowedField();
+    GrandchildDto getShadowedField();
 
-        void setShadowedField(GrandchildDto v);
-    }
+    void setShadowedField(GrandchildDto v);
+  }
 
-    public interface Child2 extends Parent {
-        String getChild2Field();
-    }
+  public interface Child2 extends Parent {
+    String getChild2Field();
+  }
 
-    public interface GrandchildWithoutDto extends Child, Child2 {
-    }
+  public interface GrandchildWithoutDto extends Child, Child2 {}
 }

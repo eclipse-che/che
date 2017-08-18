@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.user.shared.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.shared.DTO;
-
-import io.swagger.annotations.ApiModelProperty;
-
-import java.util.List;
 
 /**
  * This object used for transporting user data to/from client.
@@ -28,44 +26,44 @@ import java.util.List;
  */
 @DTO
 public interface UserDto extends User {
-    @ApiModelProperty("User ID")
-    String getId();
+  @ApiModelProperty("User ID")
+  String getId();
 
-    void setId(String id);
+  void setId(String id);
 
-    UserDto withId(String id);
+  UserDto withId(String id);
 
-    @ApiModelProperty("User alias which is used for oAuth")
-    List<String> getAliases();
+  @ApiModelProperty("User alias which is used for oAuth")
+  List<String> getAliases();
 
-    void setAliases(List<String> aliases);
+  void setAliases(List<String> aliases);
 
-    UserDto withAliases(List<String> aliases);
+  UserDto withAliases(List<String> aliases);
 
-    @ApiModelProperty("User email")
-    String getEmail();
+  @ApiModelProperty("User email")
+  String getEmail();
 
-    void setEmail(String email);
+  void setEmail(String email);
 
-    UserDto withEmail(String email);
+  UserDto withEmail(String email);
 
-    @ApiModelProperty("User name")
-    String getName();
+  @ApiModelProperty("User name")
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    UserDto withName(String name);
+  UserDto withName(String name);
 
-    @ApiModelProperty("User password")
-    String getPassword();
+  @ApiModelProperty("User password")
+  String getPassword();
 
-    void setPassword(String password);
+  void setPassword(String password);
 
-    UserDto withPassword(String password);
+  UserDto withPassword(String password);
 
-    List<Link> getLinks();
+  List<Link> getLinks();
 
-    void setLinks(List<Link> links);
+  void setLinks(List<Link> links);
 
-    UserDto withLinks(List<Link> links);
+  UserDto withLinks(List<Link> links);
 }

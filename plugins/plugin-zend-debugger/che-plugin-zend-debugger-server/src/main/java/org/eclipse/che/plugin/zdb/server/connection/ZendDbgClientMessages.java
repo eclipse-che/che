@@ -1,20 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2016 Rogue Wave Software, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c) 2016
+ * Rogue Wave Software, Inc. All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v1.0 which accompanies this
+ * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Rogue Wave Software, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Rogue Wave Software, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.plugin.zdb.server.connection;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.AddBreakpointResponse;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.AddFilesResponse;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.AssignValueResponse;
@@ -42,466 +40,455 @@ import org.eclipse.che.plugin.zdb.server.utils.ZendDbgConnectionUtils;
  */
 public class ZendDbgClientMessages {
 
-    // Notification types
-    public static final int NOTIFICATION_CONTINUE_PROCESS_FILE = 2010;
-    public static final int NOTIFICATION_CLOSE_SESSION = 3;
-    // Request types
-    public static final int REQUEST_START = 1;
-    public static final int REQUEST_PAUSE_DEBUGGER = 2;
-    public static final int REQUEST_STEP_INTO = 11;
-    public static final int REQUEST_STEP_OVER = 12;
-    public static final int REQUEST_STEP_OUT = 13;
-    public static final int REQUEST_GO = 14;
-    public static final int REQUEST_ADD_BREAKPOINT = 21;
-    public static final int REQUEST_DELETE_BREAKPOINT = 22;
-    public static final int REQUEST_DELETE_ALL_BREAKPOINTS = 23;
-    public static final int REQUEST_EVAL = 31;
-    public static final int REQUEST_GET_VARIABLE_VALUE = 32;
-    public static final int REQUEST_ASSIGN_VALUE = 33;
-    public static final int REQUEST_GET_CALL_STACK = 34;
-    public static final int REQUEST_GET_STACK_VARIABLE_VALUE = 35;
-    public static final int REQUEST_GET_CWD = 36;
-    public static final int REQUEST_ADD_FILES = 38;
-    public static final int REQUEST_SET_PROTOCOL = 10000;
-    // Response types
-    public static final int RESPONSE_GET_LOCAL_FILE_CONTENT = 11001;
+  // Notification types
+  public static final int NOTIFICATION_CONTINUE_PROCESS_FILE = 2010;
+  public static final int NOTIFICATION_CLOSE_SESSION = 3;
+  // Request types
+  public static final int REQUEST_START = 1;
+  public static final int REQUEST_PAUSE_DEBUGGER = 2;
+  public static final int REQUEST_STEP_INTO = 11;
+  public static final int REQUEST_STEP_OVER = 12;
+  public static final int REQUEST_STEP_OUT = 13;
+  public static final int REQUEST_GO = 14;
+  public static final int REQUEST_ADD_BREAKPOINT = 21;
+  public static final int REQUEST_DELETE_BREAKPOINT = 22;
+  public static final int REQUEST_DELETE_ALL_BREAKPOINTS = 23;
+  public static final int REQUEST_EVAL = 31;
+  public static final int REQUEST_GET_VARIABLE_VALUE = 32;
+  public static final int REQUEST_ASSIGN_VALUE = 33;
+  public static final int REQUEST_GET_CALL_STACK = 34;
+  public static final int REQUEST_GET_STACK_VARIABLE_VALUE = 35;
+  public static final int REQUEST_GET_CWD = 36;
+  public static final int REQUEST_ADD_FILES = 38;
+  public static final int REQUEST_SET_PROTOCOL = 10000;
+  // Response types
+  public static final int RESPONSE_GET_LOCAL_FILE_CONTENT = 11001;
 
-    public interface IDbgClientMessage extends IDbgMessage {
+  public interface IDbgClientMessage extends IDbgMessage {
 
-        /**
-         * Serializes this debug message to an output stream
-         *
-         * @param out
-         *            output stream this message is going to be written to
-         */
-        public void serialize(DataOutputStream out) throws IOException;
+    /**
+     * Serializes this debug message to an output stream
+     *
+     * @param out output stream this message is going to be written to
+     */
+    public void serialize(DataOutputStream out) throws IOException;
+  }
 
+  public interface IDbgClientNotification extends IDbgClientMessage {}
+
+  public interface IDbgClientRequest<T extends IDbgEngineResponse> extends IDbgClientMessage {
+
+    /** Set the client request id. */
+    public void setID(int id);
+
+    /** Return the client request id. */
+    public int getID();
+  }
+
+  public interface IDbgClientResponse extends IDbgClientMessage {
+
+    /** Return the engine response id. */
+    public int getID();
+
+    /** Return the engine response status. */
+    public int getStatus();
+  }
+
+  private abstract static class AbstractClientRequest<T extends IDbgEngineResponse>
+      extends AbstractDbgMessage implements IDbgClientRequest<T> {
+
+    private int id;
+
+    @Override
+    public void setID(int id) {
+      this.id = id;
     }
 
-    public interface IDbgClientNotification extends IDbgClientMessage {
+    @Override
+    public int getID() {
+      return this.id;
     }
 
-    public interface IDbgClientRequest<T extends IDbgEngineResponse> extends IDbgClientMessage {
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      out.writeShort(getType());
+      out.writeInt(getID());
+    }
+  }
 
-        /**
-         * Set the client request id.
-         */
-        public void setID(int id);
+  private abstract static class AbstractClientResponse extends AbstractDbgMessage
+      implements IDbgClientResponse {
 
-        /**
-         * Return the client request id.
-         */
-        public int getID();
+    protected int id;
+    protected int status;
 
+    public AbstractClientResponse(int id) {
+      this.id = id;
     }
 
-    public interface IDbgClientResponse extends IDbgClientMessage {
-
-        /**
-         * Return the engine response id.
-         */
-        public int getID();
-
-        /**
-         * Return the engine response status.
-         */
-        public int getStatus();
-
+    @Override
+    public int getID() {
+      return this.id;
     }
 
-    private static abstract class AbstractClientRequest<T extends IDbgEngineResponse> extends AbstractDbgMessage
-            implements IDbgClientRequest<T> {
-
-        private int id;
-
-        @Override
-        public void setID(int id) {
-            this.id = id;
-        }
-
-        @Override
-        public int getID() {
-            return this.id;
-        }
-
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            out.writeShort(getType());
-            out.writeInt(getID());
-        }
-
+    @Override
+    public int getStatus() {
+      return status;
     }
 
-    private static abstract class AbstractClientResponse extends AbstractDbgMessage implements IDbgClientResponse {
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      out.writeShort(getType());
+      out.writeInt(getID());
+      out.writeInt(getStatus());
+    }
+  }
 
-        protected int id;
-        protected int status;
+  private ZendDbgClientMessages() {}
 
-        public AbstractClientResponse(int id) {
-            this.id = id;
-        }
+  // Client notifications
 
-        @Override
-        public int getID() {
-            return this.id;
-        }
+  public static class ContinueProcessFileNotification extends AbstractDbgMessage
+      implements IDbgClientNotification {
 
-        @Override
-        public int getStatus() {
-            return status;
-        }
-
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            out.writeShort(getType());
-            out.writeInt(getID());
-            out.writeInt(getStatus());
-        }
-
+    @Override
+    public int getType() {
+      return NOTIFICATION_CONTINUE_PROCESS_FILE;
     }
 
-    private ZendDbgClientMessages() {
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      out.writeShort(getType());
+    }
+  }
+
+  public static class CloseSessionNotification extends AbstractDbgMessage
+      implements IDbgClientNotification {
+
+    @Override
+    public int getType() {
+      return NOTIFICATION_CLOSE_SESSION;
     }
 
-    // Client notifications
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      out.writeShort(getType());
+    }
+  }
 
-    public static class ContinueProcessFileNotification extends AbstractDbgMessage implements IDbgClientNotification {
+  // Client requests
 
-        @Override
-        public int getType() {
-            return NOTIFICATION_CONTINUE_PROCESS_FILE;
-        }
+  public static class AddBreakpointRequest extends AbstractClientRequest<AddBreakpointResponse> {
 
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            out.writeShort(getType());
-        }
+    private int kind;
+    private int lifeTime;
+    private int lineNumber;
+    private String fileName;
+
+    public AddBreakpointRequest(int kind, int lifeTime, int line, String fileName) {
+      this.kind = kind;
+      this.lifeTime = lifeTime;
+      this.lineNumber = line;
+      this.fileName = fileName;
     }
 
-    public static class CloseSessionNotification extends AbstractDbgMessage implements IDbgClientNotification {
-
-        @Override
-        public int getType() {
-            return NOTIFICATION_CLOSE_SESSION;
-        }
-
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            out.writeShort(getType());
-        }
+    @Override
+    public int getType() {
+      return REQUEST_ADD_BREAKPOINT;
     }
 
-    // Client requests
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      super.serialize(out);
+      out.writeShort(kind);
+      out.writeShort(lifeTime);
+      ZendDbgConnectionUtils.writeString(out, fileName);
+      out.writeInt(lineNumber);
+    }
+  }
 
-    public static class AddBreakpointRequest extends AbstractClientRequest<AddBreakpointResponse> {
+  public static class AddFilesRequest extends AbstractClientRequest<AddFilesResponse> {
 
-        private int kind;
-        private int lifeTime;
-        private int lineNumber;
-        private String fileName;
+    private Set<String> paths;
 
-        public AddBreakpointRequest(int kind, int lifeTime, int line, String fileName) {
-            this.kind = kind;
-            this.lifeTime = lifeTime;
-            this.lineNumber = line;
-            this.fileName = fileName;
-        }
-
-        @Override
-        public int getType() {
-            return REQUEST_ADD_BREAKPOINT;
-        }
-
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            super.serialize(out);
-            out.writeShort(kind);
-            out.writeShort(lifeTime);
-            ZendDbgConnectionUtils.writeString(out, fileName);
-            out.writeInt(lineNumber);
-        }
+    public AddFilesRequest(Set<String> paths) {
+      this.paths = paths;
     }
 
-    public static class AddFilesRequest extends AbstractClientRequest<AddFilesResponse> {
-
-        private Set<String> paths;
-
-        public AddFilesRequest(Set<String> paths) {
-            this.paths = paths;
-        }
-
-        @Override
-        public int getType() {
-            return REQUEST_ADD_FILES;
-        }
-
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            super.serialize(out);
-            out.writeInt(paths.size());
-            for (String path : paths) {
-                ZendDbgConnectionUtils.writeString(out, path);
-            }
-        }
+    @Override
+    public int getType() {
+      return REQUEST_ADD_FILES;
     }
 
-    public static class AssignValueRequest extends AbstractClientRequest<AssignValueResponse> {
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      super.serialize(out);
+      out.writeInt(paths.size());
+      for (String path : paths) {
+        ZendDbgConnectionUtils.writeString(out, path);
+      }
+    }
+  }
 
-        private String var;
-        private String value;
-        private int depth;
-        private List<String> path;
+  public static class AssignValueRequest extends AbstractClientRequest<AssignValueResponse> {
 
-        public AssignValueRequest(String var, String value, int depth, List<String> path) {
-            this.var = var;
-            this.value = value;
-            this.depth = depth;
-            this.path = path;
-        }
+    private String var;
+    private String value;
+    private int depth;
+    private List<String> path;
 
-        @Override
-        public int getType() {
-            return REQUEST_ASSIGN_VALUE;
-        }
-
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            super.serialize(out);
-            ZendDbgConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
-            ZendDbgConnectionUtils.writeEncodedString(out, value, getTransferEncoding());
-            out.writeInt(depth);
-            out.writeInt(path.size());
-            for (String p : path) {
-                ZendDbgConnectionUtils.writeString(out, p);
-            }
-        }
+    public AssignValueRequest(String var, String value, int depth, List<String> path) {
+      this.var = var;
+      this.value = value;
+      this.depth = depth;
+      this.path = path;
     }
 
-    public static class DeleteAllBreakpointsRequest extends AbstractClientRequest<DeleteAllBreakpointsResponse> {
-
-        @Override
-        public int getType() {
-            return REQUEST_DELETE_ALL_BREAKPOINTS;
-        }
+    @Override
+    public int getType() {
+      return REQUEST_ASSIGN_VALUE;
     }
 
-    public static class DeleteBreakpointRequest extends AbstractClientRequest<DeleteBreakpointResponse> {
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      super.serialize(out);
+      ZendDbgConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
+      ZendDbgConnectionUtils.writeEncodedString(out, value, getTransferEncoding());
+      out.writeInt(depth);
+      out.writeInt(path.size());
+      for (String p : path) {
+        ZendDbgConnectionUtils.writeString(out, p);
+      }
+    }
+  }
 
-        private int breakpointId;
+  public static class DeleteAllBreakpointsRequest
+      extends AbstractClientRequest<DeleteAllBreakpointsResponse> {
 
-        public DeleteBreakpointRequest(int breakpointId) {
-            this.breakpointId = breakpointId;
-        }
+    @Override
+    public int getType() {
+      return REQUEST_DELETE_ALL_BREAKPOINTS;
+    }
+  }
 
-        @Override
-        public int getType() {
-            return REQUEST_DELETE_BREAKPOINT;
-        }
+  public static class DeleteBreakpointRequest
+      extends AbstractClientRequest<DeleteBreakpointResponse> {
 
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            super.serialize(out);
-            out.writeInt(breakpointId);
-        }
+    private int breakpointId;
+
+    public DeleteBreakpointRequest(int breakpointId) {
+      this.breakpointId = breakpointId;
     }
 
-    public static class EvalRequest extends AbstractClientRequest<EvalResponse> {
-
-        private String command;
-
-        public EvalRequest(String command) {
-            this.command = command;
-        }
-
-        @Override
-        public int getType() {
-            return REQUEST_EVAL;
-        }
-
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            super.serialize(out);
-            ZendDbgConnectionUtils.writeEncodedString(out, command, getTransferEncoding());
-        }
+    @Override
+    public int getType() {
+      return REQUEST_DELETE_BREAKPOINT;
     }
 
-    public static class GetCallStackRequest extends AbstractClientRequest<GetCallStackResponse> {
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      super.serialize(out);
+      out.writeInt(breakpointId);
+    }
+  }
 
-        @Override
-        public int getType() {
-            return REQUEST_GET_CALL_STACK;
-        }
+  public static class EvalRequest extends AbstractClientRequest<EvalResponse> {
+
+    private String command;
+
+    public EvalRequest(String command) {
+      this.command = command;
     }
 
-    public static class GetCWDRequest extends AbstractClientRequest<GetCWDResponse> {
-
-        @Override
-        public int getType() {
-            return REQUEST_GET_CWD;
-        }
+    @Override
+    public int getType() {
+      return REQUEST_EVAL;
     }
 
-    public static class GetStackVariableValueRequest extends AbstractClientRequest<GetStackVariableValueResponse> {
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      super.serialize(out);
+      ZendDbgConnectionUtils.writeEncodedString(out, command, getTransferEncoding());
+    }
+  }
 
-        private String var;
-        private int depth;
-        private int layerDepth;
-        private List<String> path;
+  public static class GetCallStackRequest extends AbstractClientRequest<GetCallStackResponse> {
 
-        public GetStackVariableValueRequest(String var, int depth, int layerDepth, List<String> path) {
-            this.var = var;
-            this.depth = depth;
-            this.layerDepth = layerDepth;
-            this.path = path;
-        }
+    @Override
+    public int getType() {
+      return REQUEST_GET_CALL_STACK;
+    }
+  }
 
-        @Override
-        public int getType() {
-            return REQUEST_GET_STACK_VARIABLE_VALUE;
-        }
+  public static class GetCWDRequest extends AbstractClientRequest<GetCWDResponse> {
 
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            super.serialize(out);
-            out.writeInt(layerDepth);
-            ZendDbgConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
-            out.writeInt(depth);
-            out.writeInt(path.size());
-            for (String p : path) {
-                ZendDbgConnectionUtils.writeString(out, p);
-            }
-        }
+    @Override
+    public int getType() {
+      return REQUEST_GET_CWD;
+    }
+  }
+
+  public static class GetStackVariableValueRequest
+      extends AbstractClientRequest<GetStackVariableValueResponse> {
+
+    private String var;
+    private int depth;
+    private int layerDepth;
+    private List<String> path;
+
+    public GetStackVariableValueRequest(String var, int depth, int layerDepth, List<String> path) {
+      this.var = var;
+      this.depth = depth;
+      this.layerDepth = layerDepth;
+      this.path = path;
     }
 
-    public static class GetVariableValueRequest extends AbstractClientRequest<GetVariableValueResponse> {
-
-        private String var;
-        private int depth;
-        private List<String> path;
-
-        public GetVariableValueRequest(String var, int depth, List<String> path) {
-            this.var = var;
-            this.depth = depth;
-            this.path = path;
-        }
-
-        @Override
-        public int getType() {
-            return REQUEST_GET_VARIABLE_VALUE;
-        }
-
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            super.serialize(out);
-            ZendDbgConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
-            out.writeInt(depth);
-            out.writeInt(path.size());
-            for (String p : path) {
-                ZendDbgConnectionUtils.writeString(out, p);
-            }
-        }
+    @Override
+    public int getType() {
+      return REQUEST_GET_STACK_VARIABLE_VALUE;
     }
 
-    public static class GoRequest extends AbstractClientRequest<GoResponse> {
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      super.serialize(out);
+      out.writeInt(layerDepth);
+      ZendDbgConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
+      out.writeInt(depth);
+      out.writeInt(path.size());
+      for (String p : path) {
+        ZendDbgConnectionUtils.writeString(out, p);
+      }
+    }
+  }
 
-        @Override
-        public int getType() {
-            return REQUEST_GO;
-        }
+  public static class GetVariableValueRequest
+      extends AbstractClientRequest<GetVariableValueResponse> {
+
+    private String var;
+    private int depth;
+    private List<String> path;
+
+    public GetVariableValueRequest(String var, int depth, List<String> path) {
+      this.var = var;
+      this.depth = depth;
+      this.path = path;
     }
 
-    public static class PauseDebuggerRequest extends AbstractClientRequest<PauseDebuggerResponse> {
-
-        @Override
-        public int getType() {
-            return REQUEST_PAUSE_DEBUGGER;
-        }
+    @Override
+    public int getType() {
+      return REQUEST_GET_VARIABLE_VALUE;
     }
 
-    public static class SetProtocolRequest extends AbstractClientRequest<SetProtocolResponse> {
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      super.serialize(out);
+      ZendDbgConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
+      out.writeInt(depth);
+      out.writeInt(path.size());
+      for (String p : path) {
+        ZendDbgConnectionUtils.writeString(out, p);
+      }
+    }
+  }
 
-        private int protocolID;
+  public static class GoRequest extends AbstractClientRequest<GoResponse> {
 
-        public SetProtocolRequest(int protocolID) {
-            this.protocolID = protocolID;
-        }
+    @Override
+    public int getType() {
+      return REQUEST_GO;
+    }
+  }
 
-        @Override
-        public int getType() {
-            return REQUEST_SET_PROTOCOL;
-        }
+  public static class PauseDebuggerRequest extends AbstractClientRequest<PauseDebuggerResponse> {
 
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            super.serialize(out);
-            out.writeInt(protocolID);
-        }
+    @Override
+    public int getType() {
+      return REQUEST_PAUSE_DEBUGGER;
+    }
+  }
+
+  public static class SetProtocolRequest extends AbstractClientRequest<SetProtocolResponse> {
+
+    private int protocolID;
+
+    public SetProtocolRequest(int protocolID) {
+      this.protocolID = protocolID;
     }
 
-    public static class StartRequest extends AbstractClientRequest<StartResponse> {
-
-        @Override
-        public int getType() {
-            return REQUEST_START;
-        }
+    @Override
+    public int getType() {
+      return REQUEST_SET_PROTOCOL;
     }
 
-    public static class StepIntoRequest extends AbstractClientRequest<StepIntoResponse> {
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      super.serialize(out);
+      out.writeInt(protocolID);
+    }
+  }
 
-        @Override
-        public int getType() {
-            return REQUEST_STEP_INTO;
-        }
+  public static class StartRequest extends AbstractClientRequest<StartResponse> {
+
+    @Override
+    public int getType() {
+      return REQUEST_START;
+    }
+  }
+
+  public static class StepIntoRequest extends AbstractClientRequest<StepIntoResponse> {
+
+    @Override
+    public int getType() {
+      return REQUEST_STEP_INTO;
+    }
+  }
+
+  public static class StepOutRequest extends AbstractClientRequest<StepOutResponse> {
+
+    @Override
+    public int getType() {
+      return REQUEST_STEP_OUT;
+    }
+  }
+
+  public static class StepOverRequest extends AbstractClientRequest<StepOverResponse> {
+
+    @Override
+    public int getType() {
+      return REQUEST_STEP_OVER;
+    }
+  }
+
+  // Client responses
+
+  public static class GetLocalFileContentResponse extends AbstractClientResponse {
+
+    public static final int STATUS_FAILURE = -1;
+    public static final int STATUS_SUCCESS = 0;
+    public static final int STATUS_FILES_IDENTICAL = 302;
+
+    private byte content[] = null;
+
+    public GetLocalFileContentResponse(int id, int status, byte[] content) {
+      super(id);
+      this.status = status;
+      this.content = content;
     }
 
-    public static class StepOutRequest extends AbstractClientRequest<StepOutResponse> {
-
-        @Override
-        public int getType() {
-            return REQUEST_STEP_OUT;
-        }
+    @Override
+    public void serialize(DataOutputStream out) throws IOException {
+      super.serialize(out);
+      if (content != null) {
+        out.write(content.length);
+        out.write(content);
+      } else {
+        out.writeInt(0);
+      }
     }
 
-    public static class StepOverRequest extends AbstractClientRequest<StepOverResponse> {
-
-        @Override
-        public int getType() {
-            return REQUEST_STEP_OVER;
-        }
+    @Override
+    public int getType() {
+      return RESPONSE_GET_LOCAL_FILE_CONTENT;
     }
-
-    // Client responses
-
-    public static class GetLocalFileContentResponse extends AbstractClientResponse {
-
-        public static final int STATUS_FAILURE = -1;
-        public static final int STATUS_SUCCESS = 0;
-        public static final int STATUS_FILES_IDENTICAL = 302;
-
-        private byte content[] = null;
-
-        public GetLocalFileContentResponse(int id, int status, byte[] content) {
-            super(id);
-            this.status = status;
-            this.content = content;
-        }
-
-        @Override
-        public void serialize(DataOutputStream out) throws IOException {
-            super.serialize(out);
-            if (content != null) {
-                out.write(content.length);
-                out.write(content);
-            } else {
-                out.writeInt(0);
-            }
-        }
-
-        @Override
-        public int getType() {
-            return RESPONSE_GET_LOCAL_FILE_CONTENT;
-        }
-
-    }
-
+  }
 }

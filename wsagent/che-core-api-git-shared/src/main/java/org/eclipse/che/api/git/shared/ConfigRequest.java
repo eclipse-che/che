@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,23 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.git.shared;
 
+import java.util.Map;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.Map;
-
-/**
- * @author andrew00x
- */
+/** @author andrew00x */
 @DTO
 public interface ConfigRequest {
 
-    Map<String, String> getConfigEntries();
+  Map<String, String> getConfigEntries();
 
-    void setConfigEntries(Map<String, String> configEntries);
+  void setConfigEntries(Map<String, String> configEntries);
 
-    ConfigRequest withConfigEntries(Map<String, String> configEntries);
-
+  ConfigRequest withConfigEntries(Map<String, String> configEntries);
 }

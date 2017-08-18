@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.ide.export;
-
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
@@ -25,10 +24,9 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
-import org.eclipse.che.ide.ui.window.Window;
 
 /**
  * Implementation of {@link ExportView}.
@@ -37,106 +35,113 @@ import org.eclipse.che.ide.ui.window.Window;
  */
 @Singleton
 public class ExportViewImpl extends Window implements ExportView {
-    interface ExportViewImplUiBinder extends UiBinder<Widget, ExportViewImpl> {
-    }
+  interface ExportViewImplUiBinder extends UiBinder<Widget, ExportViewImpl> {}
 
-    private static ExportViewImplUiBinder uiBinder = GWT.create(ExportViewImplUiBinder.class);
+  private static ExportViewImplUiBinder uiBinder = GWT.create(ExportViewImplUiBinder.class);
 
-    Button btnExport;
-    Button btnCancel;
+  Button btnExport;
+  Button btnCancel;
 
-    @UiField
-    CheckBox revisionCheckBox;
+  @UiField CheckBox revisionCheckBox;
 
-    @UiField
-    TextBox revisionTextBox;
+  @UiField TextBox revisionTextBox;
 
-    @UiField(provided = true)
-    SubversionExtensionResources             resources;
-    @UiField(provided = true)
-    SubversionExtensionLocalizationConstants constants;
+  @UiField(provided = true)
+  SubversionExtensionResources resources;
 
-    private ExportView.ActionDelegate delegate;
+  @UiField(provided = true)
+  SubversionExtensionLocalizationConstants constants;
 
-    private static final String PLACEHOLDER       = "placeholder";
-    private static final String PLACEHOLDER_DUMMY = "revision to export";
+  private ExportView.ActionDelegate delegate;
 
-    @Inject
-    public ExportViewImpl(SubversionExtensionResources resources,
-                          SubversionExtensionLocalizationConstants constants) {
-        this.resources = resources;
-        this.constants = constants;
+  private static final String PLACEHOLDER = "placeholder";
+  private static final String PLACEHOLDER_DUMMY = "revision to export";
 
-        this.ensureDebugId("svn-export-window");
+  @Inject
+  public ExportViewImpl(
+      SubversionExtensionResources resources, SubversionExtensionLocalizationConstants constants) {
+    this.resources = resources;
+    this.constants = constants;
 
-        this.setTitle("Export");
+    this.ensureDebugId("svn-export-window");
 
-        this.setWidget(uiBinder.createAndBindUi(this));
+    this.setTitle("Export");
 
-        btnCancel = createButton(constants.buttonCancel(), "svn-export-cancel", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    this.setWidget(uiBinder.createAndBindUi(this));
+
+    btnCancel =
+        createButton(
+            constants.buttonCancel(),
+            "svn-export-cancel",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onCancelClicked();
-            }
-        });
-        addButtonToFooter(btnCancel);
+              }
+            });
+    addButtonToFooter(btnCancel);
 
-        btnExport = createButton("Export", "svn-export-export", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    btnExport =
+        createButton(
+            "Export",
+            "svn-export-export",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onExportClicked();
-            }
-        });
-        addButtonToFooter(btnExport);
-    }
+              }
+            });
+    addButtonToFooter(btnExport);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(final ExportView.ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(final ExportView.ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isRevisionSpecified() {
-        return revisionCheckBox.getValue();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public boolean isRevisionSpecified() {
+    return revisionCheckBox.getValue();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getRevision() {
-        return revisionTextBox.getText();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getRevision() {
+    return revisionTextBox.getText();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onClose() {
-        hide();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void onClose() {
+    hide();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onShow() {
-        revisionCheckBox.setValue(false, true);
-        revisionTextBox.setText(null);
-        revisionTextBox.setEnabled(false);
-        revisionTextBox.getElement().setAttribute(PLACEHOLDER, PLACEHOLDER_DUMMY);
-        btnExport.setEnabled(true);
+  /** {@inheritDoc} */
+  @Override
+  public void onShow() {
+    revisionCheckBox.setValue(false, true);
+    revisionTextBox.setText(null);
+    revisionTextBox.setEnabled(false);
+    revisionTextBox.getElement().setAttribute(PLACEHOLDER, PLACEHOLDER_DUMMY);
+    btnExport.setEnabled(true);
 
-        show();
-    }
+    show();
+  }
 
-    @UiHandler("revisionCheckBox")
-    @SuppressWarnings("unused")
-    public void onRevisionCheckBoxChanged(ClickEvent event) {
-        revisionTextBox.setEnabled(revisionCheckBox.getValue());
-        revisionTextBox.setText(null);
-        btnExport.setEnabled(!revisionCheckBox.getValue());
-    }
+  @UiHandler("revisionCheckBox")
+  @SuppressWarnings("unused")
+  public void onRevisionCheckBoxChanged(ClickEvent event) {
+    revisionTextBox.setEnabled(revisionCheckBox.getValue());
+    revisionTextBox.setText(null);
+    btnExport.setEnabled(!revisionCheckBox.getValue());
+  }
 
-    @UiHandler("revisionTextBox")
-    @SuppressWarnings("unused")
-    public void onRevisionTextBoxChanged(KeyUpEvent event) {
-        btnExport.setEnabled(revisionCheckBox.getValue() && !Strings.isNullOrEmpty(revisionTextBox.getText()));
-    }
+  @UiHandler("revisionTextBox")
+  @SuppressWarnings("unused")
+  public void onRevisionTextBoxChanged(KeyUpEvent event) {
+    btnExport.setEnabled(
+        revisionCheckBox.getValue() && !Strings.isNullOrEmpty(revisionTextBox.getText()));
+  }
 }

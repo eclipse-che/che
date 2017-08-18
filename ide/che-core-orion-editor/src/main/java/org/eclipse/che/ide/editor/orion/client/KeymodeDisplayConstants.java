@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.orion.client;
 
 import com.google.gwt.i18n.client.Constants;
 
 public interface KeymodeDisplayConstants extends Constants {
 
-    @DefaultStringValue("Default")
-    String defaultKeymap();
+  @DefaultStringValue("Default")
+  String defaultKeymap();
 
-    @DefaultStringValue("Emacs")
-    String emacs();
+  @DefaultStringValue("Emacs")
+  String emacs();
 
-    @DefaultStringValue("Vi")
-    String vi();
+  @DefaultStringValue("Vi")
+  String vi();
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.event;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -18,11 +18,10 @@ import com.google.gwt.event.shared.EventHandler;
  * @author Artem Zatsarynnyi
  */
 public interface ConfigureProjectHandler extends EventHandler {
-    /**
-     * Called when someone wants to configure the currently opened project.
-     *
-     * @param event
-     *         the fired {@link ConfigureProjectEvent}
-     */
-    void onConfigureProject(ConfigureProjectEvent event);
+  /**
+   * Called when someone wants to configure the currently opened project.
+   *
+   * @param event the fired {@link ConfigureProjectEvent}
+   */
+  void onConfigureProject(ConfigureProjectEvent event);
 }

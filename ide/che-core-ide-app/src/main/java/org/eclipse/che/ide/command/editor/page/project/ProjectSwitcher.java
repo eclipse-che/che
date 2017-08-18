@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.editor.page.project;
 
 import com.google.gwt.core.client.GWT;
@@ -19,7 +19,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-
 import org.eclipse.che.ide.ui.switcher.Switcher;
 
 /**
@@ -29,40 +28,38 @@ import org.eclipse.che.ide.ui.switcher.Switcher;
  */
 public class ProjectSwitcher extends Composite implements HasValue<Boolean> {
 
-    private static final ProjectSwitcherUiBinder UI_BINDER = GWT.create(ProjectSwitcherUiBinder.class);
+  private static final ProjectSwitcherUiBinder UI_BINDER =
+      GWT.create(ProjectSwitcherUiBinder.class);
 
-    @UiField
-    Label label;
+  @UiField Label label;
 
-    @UiField
-    Switcher switcher;
+  @UiField Switcher switcher;
 
-    ProjectSwitcher(String projectName) {
-        initWidget(UI_BINDER.createAndBindUi(this));
+  ProjectSwitcher(String projectName) {
+    initWidget(UI_BINDER.createAndBindUi(this));
 
-        label.setText(projectName);
-    }
+    label.setText(projectName);
+  }
 
-    @Override
-    public Boolean getValue() {
-        return switcher.getValue();
-    }
+  @Override
+  public Boolean getValue() {
+    return switcher.getValue();
+  }
 
-    @Override
-    public void setValue(Boolean value) {
-        switcher.setValue(value);
-    }
+  @Override
+  public void setValue(Boolean value) {
+    switcher.setValue(value);
+  }
 
-    @Override
-    public void setValue(Boolean value, boolean fireEvents) {
-        switcher.setValue(value, fireEvents);
-    }
+  @Override
+  public void setValue(Boolean value, boolean fireEvents) {
+    switcher.setValue(value, fireEvents);
+  }
 
-    @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
-        return switcher.addValueChangeHandler(handler);
-    }
+  @Override
+  public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
+    return switcher.addValueChangeHandler(handler);
+  }
 
-    interface ProjectSwitcherUiBinder extends UiBinder<Widget, ProjectSwitcher> {
-    }
+  interface ProjectSwitcherUiBinder extends UiBinder<Widget, ProjectSwitcher> {}
 }

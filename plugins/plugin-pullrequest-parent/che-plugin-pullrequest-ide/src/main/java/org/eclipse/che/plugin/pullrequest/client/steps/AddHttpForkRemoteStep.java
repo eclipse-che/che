@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.pullrequest.client.steps;
 
+import com.google.inject.Singleton;
+import javax.inject.Inject;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
-import com.google.inject.Singleton;
-
-import javax.inject.Inject;
 
 /**
  * Add HTTP fork remote URL to repository.
@@ -24,17 +23,19 @@ import javax.inject.Inject;
  */
 @Singleton
 public class AddHttpForkRemoteStep implements Step {
-    private final AddForkRemoteStepFactory addForkRemoteStepFactory;
+  private final AddForkRemoteStepFactory addForkRemoteStepFactory;
 
-    @Inject
-    public AddHttpForkRemoteStep(AddForkRemoteStepFactory addForkRemoteStepFactory) {
-        this.addForkRemoteStepFactory = addForkRemoteStepFactory;
-    }
+  @Inject
+  public AddHttpForkRemoteStep(AddForkRemoteStepFactory addForkRemoteStepFactory) {
+    this.addForkRemoteStepFactory = addForkRemoteStepFactory;
+  }
 
-    @Override
-    public void execute(final WorkflowExecutor executor, final Context context) {
-        String remoteUrl = context.getVcsHostingService().makeHttpRemoteUrl(context.getHostUserLogin(), context.getForkedRepositoryName());
-        addForkRemoteStepFactory.create(this, remoteUrl)
-                                .execute(executor, context);
-    }
+  @Override
+  public void execute(final WorkflowExecutor executor, final Context context) {
+    String remoteUrl =
+        context
+            .getVcsHostingService()
+            .makeHttpRemoteUrl(context.getHostUserLogin(), context.getForkedRepositoryName());
+    addForkRemoteStepFactory.create(this, remoteUrl).execute(executor, context);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.machine.shared.dto.event;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
@@ -21,33 +21,33 @@ import org.eclipse.che.dto.shared.DTO;
 @EventOrigin("machine")
 @DTO
 public interface MachineProcessEvent {
-    public enum EventType {
-        STARTED,
-        STOPPED,
-        ERROR
-    }
+  public enum EventType {
+    STARTED,
+    STOPPED,
+    ERROR
+  }
 
-    EventType getEventType();
+  EventType getEventType();
 
-    void setEventType(EventType eventType);
+  void setEventType(EventType eventType);
 
-    MachineProcessEvent withEventType(EventType eventType);
+  MachineProcessEvent withEventType(EventType eventType);
 
-    String getMachineId();
+  String getMachineId();
 
-    void setMachineId(String machineId);
+  void setMachineId(String machineId);
 
-    MachineProcessEvent withMachineId(String machineId);
+  MachineProcessEvent withMachineId(String machineId);
 
-    int getProcessId();
+  int getProcessId();
 
-    void setProcessId(int processId);
+  void setProcessId(int processId);
 
-    MachineProcessEvent withProcessId(int processId);
+  MachineProcessEvent withProcessId(int processId);
 
-    String getError();
+  String getError();
 
-    void setError(String error);
+  void setError(String error);
 
-    MachineProcessEvent withError(String error);
+  MachineProcessEvent withError(String error);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.machine;
 
-import org.eclipse.che.api.core.model.machine.ServerProperties;
-
 import java.util.Objects;
+import org.eclipse.che.api.core.model.machine.ServerProperties;
 
 /**
  * Describe development machine server instance.
@@ -22,58 +21,63 @@ import java.util.Objects;
  */
 public class MachineServerProperties implements ServerProperties {
 
-    private final String path;
-    private final String internalAddress;
-    private final String internalUrl;
+  private final String path;
+  private final String internalAddress;
+  private final String internalUrl;
 
-    public MachineServerProperties(ServerProperties properties) {
-        path = properties.getPath();
-        internalAddress = properties.getInternalAddress();
-        internalUrl = properties.getInternalUrl();
-    }
+  public MachineServerProperties(ServerProperties properties) {
+    path = properties.getPath();
+    internalAddress = properties.getInternalAddress();
+    internalUrl = properties.getInternalUrl();
+  }
 
-    @Override
-    public String getInternalAddress() {
-        return internalAddress;
-    }
+  @Override
+  public String getInternalAddress() {
+    return internalAddress;
+  }
 
-    @Override
-    public String getPath() {
-        return path;
-    }
+  @Override
+  public String getPath() {
+    return path;
+  }
 
-    @Override
-    public String getInternalUrl() {
-        return internalUrl;
-    }
+  @Override
+  public String getInternalUrl() {
+    return internalUrl;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MachineServerProperties)) return false;
-        final MachineServerProperties other = (MachineServerProperties)o;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof MachineServerProperties)) return false;
+    final MachineServerProperties other = (MachineServerProperties) o;
 
-        return Objects.equals(path, other.path) &&
-                       Objects.equals(internalAddress, other.internalAddress) &&
-                       Objects.equals(internalUrl, other.internalUrl);
-    }
+    return Objects.equals(path, other.path)
+        && Objects.equals(internalAddress, other.internalAddress)
+        && Objects.equals(internalUrl, other.internalUrl);
+  }
 
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = hash * 31 + Objects.hashCode(path);
-        hash = hash * 31 + Objects.hashCode(internalAddress);
-        hash = hash * 31 + Objects.hashCode(internalUrl);
-        return hash;
-    }
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = hash * 31 + Objects.hashCode(path);
+    hash = hash * 31 + Objects.hashCode(internalAddress);
+    hash = hash * 31 + Objects.hashCode(internalUrl);
+    return hash;
+  }
 
-    @Override
-    public String toString() {
-        return "MachineServerProperties{" +
-                       "path='" + path + '\'' +
-                       ", internalAddress='" + internalAddress + '\'' +
-                       ", internalUrl='" + internalUrl + '\'' +
-                       '}';
-    }
-
+  @Override
+  public String toString() {
+    return "MachineServerProperties{"
+        + "path='"
+        + path
+        + '\''
+        + ", internalAddress='"
+        + internalAddress
+        + '\''
+        + ", internalUrl='"
+        + internalUrl
+        + '\''
+        + '}';
+  }
 }

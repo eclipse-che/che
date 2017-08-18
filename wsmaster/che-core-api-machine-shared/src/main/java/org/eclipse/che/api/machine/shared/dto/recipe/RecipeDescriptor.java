@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.machine.shared.dto.recipe;
 
+import java.util.List;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
 import org.eclipse.che.dto.shared.DTO;
-
-import java.util.List;
 
 /**
  * Describes recipe
@@ -24,31 +23,31 @@ import java.util.List;
 @DTO
 public interface RecipeDescriptor extends Hyperlinks, ManagedRecipe {
 
-    void setId(String id);
+  void setId(String id);
 
-    RecipeDescriptor withId(String id);
+  RecipeDescriptor withId(String id);
 
-    void setName(String name);
+  void setName(String name);
 
-    RecipeDescriptor withName(String name);
+  RecipeDescriptor withName(String name);
 
-    void setType(String type);
+  void setType(String type);
 
-    RecipeDescriptor withType(String type);
+  RecipeDescriptor withType(String type);
 
-    void setScript(String script);
+  void setScript(String script);
 
-    RecipeDescriptor withScript(String script);
+  RecipeDescriptor withScript(String script);
 
-    void setCreator(String creator);
+  void setCreator(String creator);
 
-    RecipeDescriptor withCreator(String creator);
+  RecipeDescriptor withCreator(String creator);
 
-    void setTags(List<String> tags);
+  void setTags(List<String> tags);
 
-    RecipeDescriptor withTags(List<String> tags);
+  RecipeDescriptor withTags(List<String> tags);
 
-    void setDescription(String description);
+  void setDescription(String description);
 
-    RecipeDescriptor withDescription(String description);
+  RecipeDescriptor withDescription(String description);
 }

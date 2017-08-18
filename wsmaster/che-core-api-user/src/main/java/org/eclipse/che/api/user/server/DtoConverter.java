@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.user.server;
 
 import org.eclipse.che.api.core.model.user.User;
@@ -21,16 +21,15 @@ import org.eclipse.che.dto.server.DtoFactory;
  */
 public final class DtoConverter {
 
-    /**
-     * Converts {@link User} to {@link UserDto}.
-     */
-    public static UserDto asDto(User user) {
-        return DtoFactory.getInstance().createDto(UserDto.class)
-                         .withId(user.getId())
-                         .withEmail(user.getEmail())
-                         .withName(user.getName())
-                         .withAliases(user.getAliases());
-    }
+  /** Converts {@link User} to {@link UserDto}. */
+  public static UserDto asDto(User user) {
+    return DtoFactory.getInstance()
+        .createDto(UserDto.class)
+        .withId(user.getId())
+        .withEmail(user.getEmail())
+        .withName(user.getName())
+        .withAliases(user.getAliases());
+  }
 
-    private DtoConverter() {}
+  private DtoConverter() {}
 }

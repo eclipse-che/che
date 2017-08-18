@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.projecttype;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Vitaly Parfonov
@@ -24,40 +23,40 @@ import java.util.List;
  */
 public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
 
-    private final List<ProjectTypeDto> types;
+  private final List<ProjectTypeDto> types;
 
-    public ProjectTypeRegistryImpl() {
-        this.types = new ArrayList<>();
+  public ProjectTypeRegistryImpl() {
+    this.types = new ArrayList<>();
+  }
+
+  @Nullable
+  @Override
+  public ProjectTypeDto getProjectType(@NotNull String id) {
+    if (types.isEmpty()) {
+      return null;
     }
 
-    @Nullable
-    @Override
-    public ProjectTypeDto getProjectType(@NotNull String id) {
-        if (types.isEmpty()) {
-            return null;
-        }
-
-        for (ProjectTypeDto type : types) {
-            if (id.equals(type.getId())) {
-                return type;
-            }
-        }
-
-        return null;
+    for (ProjectTypeDto type : types) {
+      if (id.equals(type.getId())) {
+        return type;
+      }
     }
 
-    @Override
-    public List<ProjectTypeDto> getProjectTypes() {
-        return types;
-    }
+    return null;
+  }
 
-    @Override
-    public void register(ProjectTypeDto projectType) {
-        types.add(projectType);
-    }
+  @Override
+  public List<ProjectTypeDto> getProjectTypes() {
+    return types;
+  }
 
-    @Override
-    public void registerAll(List<ProjectTypeDto> projectTypesList) {
-        types.addAll(projectTypesList);
-    }
+  @Override
+  public void register(ProjectTypeDto projectType) {
+    types.add(projectType);
+  }
+
+  @Override
+  public void registerAll(List<ProjectTypeDto> projectTypesList) {
+    types.addAll(projectTypesList);
+  }
 }

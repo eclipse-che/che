@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.requirejs;
 
 import com.google.gwt.core.client.JavaScriptObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,13 +21,13 @@ import java.util.Map;
  */
 public class ModuleHolder {
 
-    private Map<String, RequirejsModule> modules = new HashMap<>();
+  private Map<String, RequirejsModule> modules = new HashMap<>();
 
-    public JavaScriptObject getModule(final String key) {
-        return modules.get(key);
-    }
+  public JavaScriptObject getModule(final String key) {
+    return modules.get(key);
+  }
 
-    public void setModule(final String key, final RequirejsModule module) {
-        this.modules.put(key, module);
-    }
+  public void setModule(final String key, final RequirejsModule module) {
+    this.modules.put(key, module);
+  }
 }

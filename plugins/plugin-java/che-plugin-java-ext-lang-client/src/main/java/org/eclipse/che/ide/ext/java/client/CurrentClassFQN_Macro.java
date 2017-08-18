@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client;
+
+import static org.eclipse.che.ide.api.resources.Resource.FILE;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaFile;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -23,9 +25,6 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 
-import static org.eclipse.che.ide.api.resources.Resource.FILE;
-import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaFile;
-
 /**
  * Provides FQN of the Java-class which is opened in active editor.
  *
@@ -34,41 +33,42 @@ import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaFile;
 @Singleton
 public class CurrentClassFQN_Macro implements Macro {
 
-    private static final String KEY = "${current.class.fqn}";
-    private final AppContext appContext;
-    private final JavaLocalizationConstant localizationConstants;
+  private static final String KEY = "${current.class.fqn}";
+  private final AppContext appContext;
+  private final JavaLocalizationConstant localizationConstants;
 
-    @Inject
-    public CurrentClassFQN_Macro(AppContext appContext, JavaLocalizationConstant localizationConstants) {
-        this.appContext = appContext;
-        this.localizationConstants = localizationConstants;
+  @Inject
+  public CurrentClassFQN_Macro(
+      AppContext appContext, JavaLocalizationConstant localizationConstants) {
+    this.appContext = appContext;
+    this.localizationConstants = localizationConstants;
+  }
+
+  @Override
+  public String getName() {
+    return KEY;
+  }
+
+  @Override
+  public String getDescription() {
+    return localizationConstants.macroCurrentClassFQN_Description();
+  }
+
+  @Override
+  public Promise<String> expand() {
+    final Resource[] resources = appContext.getResources();
+
+    if (resources == null || resources.length != 1) {
+      return Promises.resolve("");
     }
 
-    @Override
-    public String getName() {
-        return KEY;
+    final Resource resource = resources[0];
+    final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
+
+    if (resource.getResourceType() == FILE && isJavaFile(resource) && srcFolder.isPresent()) {
+      return Promises.resolve(JavaUtil.resolveFQN((Container) srcFolder.get(), resource));
+    } else {
+      return Promises.resolve("");
     }
-
-    @Override
-    public String getDescription() {
-        return localizationConstants.macroCurrentClassFQN_Description();
-    }
-
-    @Override
-    public Promise<String> expand() {
-        final Resource[] resources = appContext.getResources();
-
-        if (resources == null || resources.length != 1) {
-            return Promises.resolve("");
-        }
-
-        final Resource resource = resources[0];
-        final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
-
-        if (resource.getResourceType() == FILE && isJavaFile(resource) && srcFolder.isPresent()) {
-            return Promises.resolve(JavaUtil.resolveFQN((Container)srcFolder.get(), resource));
-        } else {
-            return Promises.resolve("");
-        }
-    }
+  }
 }

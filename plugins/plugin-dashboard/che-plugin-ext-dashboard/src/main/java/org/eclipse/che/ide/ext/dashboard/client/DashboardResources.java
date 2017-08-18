@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.dashboard.client;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Dashboard extension resources (css styles, images).
@@ -21,12 +20,11 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Oleksii Orel
  */
 public interface DashboardResources extends ClientBundle {
-    interface DashboardCSS extends CssResource {
+  interface DashboardCSS extends CssResource {
 
-        String dashboardArrow();
-    }
+    String dashboardArrow();
+  }
 
-    @Source({"Dashboard.css", "org/eclipse/che/ide/api/ui/style.css"})
-    DashboardCSS dashboardCSS();
-
+  @Source({"Dashboard.css", "org/eclipse/che/ide/api/ui/style.css"})
+  DashboardCSS dashboardCSS();
 }

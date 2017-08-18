@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,38 +7,31 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.core.db.cascade;
 
 /**
- * Context that is used only for sharing the state
- * of the cascading operation among subscribers.
+ * Context that is used only for sharing the state of the cascading operation among subscribers.
  *
  * @author Anton Korneta
  * @author Sergii Leshchenko
  */
 public class CascadeContext {
-    private Exception cause;
+  private Exception cause;
 
-    /**
-     * Returns the cause which has changed the state of the context.
-     */
-    public Exception getCause() {
-        return cause;
-    }
+  /** Returns the cause which has changed the state of the context. */
+  public Exception getCause() {
+    return cause;
+  }
 
-    /**
-     * Returns the state of the context.
-     */
-    public boolean isFailed() {
-        return cause != null;
-    }
+  /** Returns the state of the context. */
+  public boolean isFailed() {
+    return cause != null;
+  }
 
-    /**
-     * Sets the context into failed state.
-     */
-    public CascadeContext fail(Exception cause) {
-        this.cause = cause;
-        return this;
-    }
+  /** Sets the context into failed state. */
+  public CascadeContext fail(Exception cause) {
+    this.cause = cause;
+    return this;
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.machine.server.model.impl;
 
 import org.eclipse.che.api.core.model.machine.MachineLimits;
@@ -18,51 +18,48 @@ import org.eclipse.che.api.core.model.machine.MachineLimits;
  */
 public class MachineLimitsImpl implements MachineLimits {
 
-    private int memory;
+  private int memory;
 
-    public MachineLimitsImpl(MachineLimits machineLimits) {
-        if (machineLimits != null) {
-            memory = machineLimits.getRam();
-        } else {
-            memory = 0;
-        }
+  public MachineLimitsImpl(MachineLimits machineLimits) {
+    if (machineLimits != null) {
+      memory = machineLimits.getRam();
+    } else {
+      memory = 0;
     }
+  }
 
-    public MachineLimitsImpl() {}
+  public MachineLimitsImpl() {}
 
-    public MachineLimitsImpl(int memory) {
-        this.memory = memory;
-    }
+  public MachineLimitsImpl(int memory) {
+    this.memory = memory;
+  }
 
-    @Override
-    public int getRam() {
-        return memory;
-    }
+  @Override
+  public int getRam() {
+    return memory;
+  }
 
-    public void setRam(int memory) {
-        this.memory = memory;
-    }
+  public void setRam(int memory) {
+    this.memory = memory;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MachineLimitsImpl)) return false;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof MachineLimitsImpl)) return false;
 
-        MachineLimitsImpl limits = (MachineLimitsImpl)o;
+    MachineLimitsImpl limits = (MachineLimitsImpl) o;
 
-        return memory == limits.memory;
+    return memory == limits.memory;
+  }
 
-    }
+  @Override
+  public int hashCode() {
+    return memory;
+  }
 
-    @Override
-    public int hashCode() {
-        return memory;
-    }
-
-    @Override
-    public String toString() {
-        return "MachineLimitsImpl{" +
-               "memory=" + memory +
-               '}';
-    }
+  @Override
+  public String toString() {
+    return "MachineLimitsImpl{" + "memory=" + memory + '}';
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.ide.messages;
 
-/**
- * Data class represents base testing messages.
- */
+/** Data class represents base testing messages. */
 public abstract class BaseTestMessage extends ClientTestingMessage {
 
-    /** returns test name */
-    public String getTestName() {
-        return getAttributeValue("name");
-    }
+  /** returns test name */
+  public String getTestName() {
+    return getAttributeValue("name");
+  }
 }

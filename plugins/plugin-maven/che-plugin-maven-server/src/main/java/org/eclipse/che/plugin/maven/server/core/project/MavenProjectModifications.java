@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.server.core.project;
 
 /**
@@ -16,52 +16,52 @@ package org.eclipse.che.plugin.maven.server.core.project;
  * @author Evgen Vidolob
  */
 public class MavenProjectModifications {
-    private boolean packaging;
-    private boolean sources;
-    private boolean dependencies;
-    private boolean plugins;
+  private boolean packaging;
+  private boolean sources;
+  private boolean dependencies;
+  private boolean plugins;
 
-    public boolean isPackaging() {
-        return packaging;
-    }
+  public boolean isPackaging() {
+    return packaging;
+  }
 
-    public void setPackaging(boolean packaging) {
-        this.packaging = packaging;
-    }
+  public void setPackaging(boolean packaging) {
+    this.packaging = packaging;
+  }
 
-    public boolean isSources() {
-        return sources;
-    }
+  public boolean isSources() {
+    return sources;
+  }
 
-    public void setSources(boolean sources) {
-        this.sources = sources;
-    }
+  public void setSources(boolean sources) {
+    this.sources = sources;
+  }
 
-    public boolean isDependencies() {
-        return dependencies;
-    }
+  public boolean isDependencies() {
+    return dependencies;
+  }
 
-    public void setDependencies(boolean dependencies) {
-        this.dependencies = dependencies;
-    }
+  public void setDependencies(boolean dependencies) {
+    this.dependencies = dependencies;
+  }
 
-    public boolean isPlugins() {
-        return plugins;
-    }
+  public boolean isPlugins() {
+    return plugins;
+  }
 
-    public void setPlugins(boolean plugins) {
-        this.plugins = plugins;
-    }
+  public void setPlugins(boolean plugins) {
+    this.plugins = plugins;
+  }
 
-    public MavenProjectModifications addChanges(MavenProjectModifications newMod) {
-        if (newMod != null) {
-            MavenProjectModifications result = new MavenProjectModifications();
-            result.packaging = this.packaging | newMod.packaging;
-            result.sources = this.sources | newMod.sources;
-            result.dependencies = this.dependencies | newMod.dependencies;
-            result.plugins = this.plugins | newMod.plugins;
-            return result;
-        }
-        return this;
+  public MavenProjectModifications addChanges(MavenProjectModifications newMod) {
+    if (newMod != null) {
+      MavenProjectModifications result = new MavenProjectModifications();
+      result.packaging = this.packaging | newMod.packaging;
+      result.sources = this.sources | newMod.sources;
+      result.dependencies = this.dependencies | newMod.dependencies;
+      result.plugins = this.plugins | newMod.plugins;
+      return result;
     }
+    return this;
+  }
 }

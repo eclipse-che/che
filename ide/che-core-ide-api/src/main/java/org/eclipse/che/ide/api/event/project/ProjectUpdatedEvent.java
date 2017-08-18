@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.event.project;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 /**
@@ -21,43 +20,43 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
  * @author Vlad Zhukovskiy
  */
 public class ProjectUpdatedEvent extends GwtEvent<ProjectUpdatedEvent.ProjectUpdatedHandler> {
-    public interface ProjectUpdatedHandler extends EventHandler {
-        void onProjectUpdated(ProjectUpdatedEvent event);
+  public interface ProjectUpdatedHandler extends EventHandler {
+    void onProjectUpdated(ProjectUpdatedEvent event);
+  }
+
+  private static Type<ProjectUpdatedHandler> TYPE;
+
+  public static Type<ProjectUpdatedHandler> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<>();
     }
+    return TYPE;
+  }
 
-    private static Type<ProjectUpdatedHandler> TYPE;
+  private ProjectConfigDto updatedProjectConfig;
+  private String path;
 
-    public static Type<ProjectUpdatedHandler> getType() {
-        if (TYPE == null) {
-            TYPE = new Type<>();
-        }
-        return TYPE;
-    }
+  public ProjectUpdatedEvent(String path, ProjectConfigDto updatedProjectConfig) {
+    this.path = path;
+    this.updatedProjectConfig = updatedProjectConfig;
+  }
 
-    private ProjectConfigDto updatedProjectConfig;
-    private String           path;
+  public ProjectConfigDto getUpdatedProjectDescriptor() {
+    return updatedProjectConfig;
+  }
 
-    public ProjectUpdatedEvent(String path, ProjectConfigDto updatedProjectConfig) {
-        this.path = path;
-        this.updatedProjectConfig = updatedProjectConfig;
-    }
+  public String getPath() {
+    return path;
+  }
 
-    public ProjectConfigDto getUpdatedProjectDescriptor() {
-        return updatedProjectConfig;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Type<ProjectUpdatedHandler> getAssociatedType() {
+    return TYPE;
+  }
 
-    public String getPath() {
-        return path;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Type<ProjectUpdatedHandler> getAssociatedType() {
-        return TYPE;
-    }
-
-    @Override
-    protected void dispatch(ProjectUpdatedHandler handler) {
-        handler.onProjectUpdated(this);
-    }
+  @Override
+  protected void dispatch(ProjectUpdatedHandler handler) {
+    handler.onProjectUpdated(this);
+  }
 }

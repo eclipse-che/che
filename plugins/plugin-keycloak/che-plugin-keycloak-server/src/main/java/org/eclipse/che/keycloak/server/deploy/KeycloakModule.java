@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.keycloak.server.deploy;
 
 import com.google.inject.AbstractModule;
-
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
@@ -19,15 +18,15 @@ import org.eclipse.che.keycloak.server.KeycloakConfigurationService;
 import org.eclipse.che.keycloak.server.KeycloakTokenValidator;
 import org.eclipse.che.keycloak.server.dao.KeycloakProfileDao;
 
-
 public class KeycloakModule extends AbstractModule {
-    @Override
-    protected void configure() {
+  @Override
+  protected void configure() {
 
-        bind(HttpJsonRequestFactory.class).to(org.eclipse.che.keycloak.server.KeycloakHttpJsonRequestFactory.class);
-        bind(TokenValidator.class).to(KeycloakTokenValidator.class);
-        bind(KeycloakConfigurationService.class);
+    bind(HttpJsonRequestFactory.class)
+        .to(org.eclipse.che.keycloak.server.KeycloakHttpJsonRequestFactory.class);
+    bind(TokenValidator.class).to(KeycloakTokenValidator.class);
+    bind(KeycloakConfigurationService.class);
 
-        bind(ProfileDao.class).to(KeycloakProfileDao.class);
-    }
+    bind(ProfileDao.class).to(KeycloakProfileDao.class);
+  }
 }

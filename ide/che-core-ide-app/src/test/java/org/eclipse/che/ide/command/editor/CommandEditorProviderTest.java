@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,50 +7,46 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.editor;
 
-import com.google.inject.Provider;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 
+import com.google.inject.Provider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-
 /** Tests for {@link CommandEditorProvider}. */
 @RunWith(MockitoJUnitRunner.class)
 public class CommandEditorProviderTest {
 
-    @Mock
-    private EditorMessages editorMessages;
+  @Mock private EditorMessages editorMessages;
 
-    @Mock
-    private Provider<CommandEditor> editorProvider;
+  @Mock private Provider<CommandEditor> editorProvider;
 
-    @InjectMocks
-    private CommandEditorProvider provider;
+  @InjectMocks private CommandEditorProvider provider;
 
-    @Test
-    public void shouldReturnId() throws Exception {
-        assertThat(provider.getId()).isNotNull();
-        assertThat(provider.getId()).isNotEmpty();
-    }
+  @Test
+  public void shouldReturnId() throws Exception {
+    assertThat(provider.getId()).isNotNull();
+    assertThat(provider.getId()).isNotEmpty();
+  }
 
-    @Test
-    public void shouldReturnDescriptions() throws Exception {
-        provider.getDescription();
+  @Test
+  public void shouldReturnDescriptions() throws Exception {
+    provider.getDescription();
 
-        verify(editorMessages).editorDescription();
-    }
+    verify(editorMessages).editorDescription();
+  }
 
-    @Test
-    public void shouldReturnEditor() throws Exception {
-        provider.getEditor();
+  @Test
+  public void shouldReturnEditor() throws Exception {
+    provider.getEditor();
 
-        verify(editorProvider).get();
-    }
+    verify(editorProvider).get();
+  }
 }

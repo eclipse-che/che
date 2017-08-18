@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace.create.recipewidget;
 
 import org.eclipse.che.ide.api.mvp.View;
@@ -19,19 +19,18 @@ import org.eclipse.che.ide.api.mvp.View;
  */
 public interface RecipeWidget extends View<RecipeWidget.ActionDelegate> {
 
-    /** Returns special url via which we can get recipe script. */
-    String getRecipeUrl();
+  /** Returns special url via which we can get recipe script. */
+  String getRecipeUrl();
 
-    /** Returns tag name associated to recipe. */
-    String getTagName();
+  /** Returns tag name associated to recipe. */
+  String getTagName();
 
-    interface ActionDelegate {
-        /**
-         * Performs some actions when user clicks on tag.
-         *
-         * @param tag
-         *         tag which was selected
-         */
-        void onTagClicked(RecipeWidget tag);
-    }
+  interface ActionDelegate {
+    /**
+     * Performs some actions when user clicks on tag.
+     *
+     * @param tag tag which was selected
+     */
+    void onTagClicked(RecipeWidget tag);
+  }
 }
