@@ -15,8 +15,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEventHandler;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -34,7 +32,6 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesManager;
 import org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties;
 import org.eclipse.che.ide.editor.synchronization.workingCopy.EditorWorkingCopySynchronizer;
@@ -42,8 +39,6 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.HashSet;
 
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
 import static org.eclipse.che.ide.api.editor.autosave.AutoSaveMode.Mode.ACTIVATED;
 import static org.eclipse.che.ide.api.editor.autosave.AutoSaveMode.Mode.DEACTIVATED;
 import static org.eclipse.che.ide.api.editor.autosave.AutoSaveMode.Mode.SUSPENDED;
@@ -56,16 +51,14 @@ import static org.eclipse.che.ide.api.editor.autosave.AutoSaveMode.Mode.SUSPENDE
 public class AutoSaveModeImpl implements AutoSaveMode, EditorSettingsChangedHandler, ActivePartChangedHandler, EditorOpenedEventHandler {
     private static final int DELAY = 1000;
 
-    private final DtoFactory                    dtoFactory;
-    private final RequestTransmitter            requestTransmitter;
-    private       EventBus                      eventBus;
-    private       EditorPreferencesManager      editorPreferencesManager;
-    private       EditorWorkingCopySynchronizer editorWorkingCopySynchronizer;
-    private       DocumentHandle                documentHandle;
-    private       TextEditor                    editor;
-    private       EditorPartPresenter           activeEditor;
-    private       DirtyRegionQueue              dirtyRegionQueue;
-    private       Mode                          mode;
+    private EventBus                      eventBus;
+    private EditorPreferencesManager      editorPreferencesManager;
+    private EditorWorkingCopySynchronizer editorWorkingCopySynchronizer;
+    private DocumentHandle                documentHandle;
+    private TextEditor                    editor;
+    private EditorPartPresenter           activeEditor;
+    private DirtyRegionQueue              dirtyRegionQueue;
+    private Mode                          mode;
 
     private HashSet<HandlerRegistration> handlerRegistrations = new HashSet<>(4);
 
@@ -81,14 +74,10 @@ public class AutoSaveModeImpl implements AutoSaveMode, EditorSettingsChangedHand
     @Inject
     public AutoSaveModeImpl(EventBus eventBus,
                             EditorPreferencesManager editorPreferencesManager,
-                            EditorWorkingCopySynchronizer editorWorkingCopySynchronizer,
-                            DtoFactory dtoFactory,
-                            RequestTransmitter requestTransmitter) {
+                            EditorWorkingCopySynchronizer editorWorkingCopySynchronizer) {
         this.eventBus = eventBus;
         this.editorPreferencesManager = editorPreferencesManager;
         this.editorWorkingCopySynchronizer = editorWorkingCopySynchronizer;
-        this.dtoFactory = dtoFactory;
-        this.requestTransmitter = requestTransmitter;
 
         mode = ACTIVATED; //autosave is activated by default
 
@@ -252,39 +241,15 @@ public class AutoSaveModeImpl implements AutoSaveMode, EditorSettingsChangedHand
             return;
         }
 
-        requestTransmitter.newRequest()
-                          .endpointId("ws-agent")
-                          .methodName("track:editor-file")
-                          .paramsAsDto(dtoFactory.createDto(FileTrackingOperationDto.class)
-                                                 .withPath(filePath)
-                                                 .withType(SUSPEND)
-                                                 .withOldPath(""))
-                          .sendAndReceiveResultAsEmpty()
-                          .onSuccess(processSuspendSuccess(filePath, projectPath, region));
-    }
-
-    private Runnable processSuspendSuccess(String filePath, String projectPath, DirtyRegion region) {
-        return () -> editorWorkingCopySynchronizer.synchronize(filePath, projectPath, region)
-                                                  .onSuccess(processSyncrhonizeSuccess(filePath, projectPath))
-                                                  .onFailure(jsonRpcError -> {
-                                                      syncLock = false;
-                                                      Log.error(getClass(), jsonRpcError.getMessage());
-                                                  });
-    }
-
-    private Runnable processSyncrhonizeSuccess(String filePath, String projectPath) {
-        return () -> requestTransmitter.newRequest()
-                                       .endpointId("ws-agent")
-                                       .methodName("track:editor-file")
-                                       .paramsAsDto(dtoFactory.createDto(FileTrackingOperationDto.class)
-                                                              .withPath(filePath)
-                                                              .withType(RESUME)
-                                                              .withOldPath(""))
-                                       .sendAndReceiveResultAsEmpty()
-                                       .onSuccess(() -> {
-                                           syncLock = false;
-                                           synchronizeWorkingCopy(filePath, projectPath);
-                                       });
+        editorWorkingCopySynchronizer.synchronize(filePath, projectPath, region)
+                                     .onSuccess(aVoid -> {
+                                         syncLock = false;
+                                         synchronizeWorkingCopy(filePath, projectPath);
+                                     })
+                                     .onFailure(jsonRpcError -> {
+                                         syncLock = false;
+                                         Log.error(getClass(), jsonRpcError.getMessage());
+                                     });
     }
 
     private Project getProject(VirtualFile file) {

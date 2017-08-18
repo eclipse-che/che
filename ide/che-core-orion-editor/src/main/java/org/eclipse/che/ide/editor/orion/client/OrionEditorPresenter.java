@@ -25,6 +25,8 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -41,7 +43,6 @@ import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
-import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
@@ -118,6 +119,7 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
@@ -133,6 +135,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Boolean.parseBoolean;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -187,6 +191,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     private final EditorContextMenu                      contextMenu;
     private final AutoSaveMode                           autoSaveMode;
     private final ClientServerEventService               clientServerEventService;
+    private final RequestTransmitter                     requestTransmitter;
+    private final DtoFactory                             dtoFactory;
 
     private final AnnotationRendering rendering = new AnnotationRendering();
     private HasKeyBindings           keyBindingsManager;
@@ -228,7 +234,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                                 final SignatureHelpView signatureHelpView,
                                 final EditorContextMenu contextMenu,
                                 final AutoSaveMode autoSaveMode,
-                                final ClientServerEventService clientServerEventService) {
+                                final ClientServerEventService clientServerEventService,
+                                final RequestTransmitter requestTransmitter,
+                                final DtoFactory dtoFactory) {
         this.codeAssistantFactory = codeAssistantFactory;
         this.deletedFilesController = deletedFilesController;
         this.breakpointManager = breakpointManager;
@@ -251,6 +259,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         this.contextMenu = contextMenu;
         this.autoSaveMode = autoSaveMode;
         this.clientServerEventService = clientServerEventService;
+        this.requestTransmitter = requestTransmitter;
+        this.dtoFactory = dtoFactory;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -580,17 +590,41 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     @Override
     public void doSave() {
-        doSave(new AsyncCallback<EditorInput>() {
-            @Override
-            public void onSuccess(final EditorInput result) {
-                // do nothing
-            }
+        requestTransmitter.newRequest()
+                          .endpointId("ws-agent")
+                          .methodName("track:editor-file")
+                          .paramsAsDto(dtoFactory.createDto(FileTrackingOperationDto.class)
+                                                 .withPath("")
+                                                 .withOldPath("")
+                                                 .withType(SUSPEND))
+                          .sendAndReceiveResultAsEmpty()
+                          .onSuccess(() -> doSave(new AsyncCallback<EditorInput>() {
+                              @Override
+                              public void onSuccess(final EditorInput result) {
+                                  requestTransmitter.newRequest()
+                                                    .endpointId("ws-agent")
+                                                    .methodName("track:editor-file")
+                                                    .paramsAsDto(dtoFactory.createDto(FileTrackingOperationDto.class)
+                                                                           .withPath("")
+                                                                           .withOldPath("")
+                                                                           .withType(RESUME))
+                                                    .sendAndReceiveResultAsEmpty();
+                              }
 
-            @Override
-            public void onFailure(final Throwable caught) {
-                // do nothing
-            }
-        });
+                              @Override
+                              public void onFailure(final Throwable caught) {
+                                  requestTransmitter.newRequest()
+                                                    .endpointId("ws-agent")
+                                                    .methodName("track:editor-file")
+                                                    .paramsAsDto(dtoFactory.createDto(FileTrackingOperationDto.class)
+                                                                           .withPath("")
+                                                                           .withOldPath("")
+                                                                           .withType(RESUME))
+                                                    .sendAndReceiveResultAsEmpty();
+                              }
+                          }));
+
+
     }
 
     @Override
@@ -985,6 +1019,16 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     }
 
+    @Override
+    public boolean isWrapLines() {
+        return editorWidget.getTextView().getOptions().getWrapMode();
+    }
+
+    @Override
+    public void toggleWrapLines() {
+        editorWidget.getTextView().toggleWrapMode();
+    }
+
     private class AnnotationRendering implements AnnotationModelHandler, ClearAnnotationModelHandler {
 
         @Override
@@ -1082,16 +1126,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                 updateDirtyState(true);
             }));
         }
-    }
-
-    @Override
-    public boolean isWrapLines() {
-        return editorWidget.getTextView().getOptions().getWrapMode();
-    }
-
-    @Override
-    public void toggleWrapLines() {
-        editorWidget.getTextView().toggleWrapMode();
     }
 
 }
