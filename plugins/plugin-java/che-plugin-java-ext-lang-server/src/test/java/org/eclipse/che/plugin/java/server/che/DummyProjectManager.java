@@ -14,7 +14,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 
-
 /**
  * Dummy implementation of ProjectManager used for tests
  *
