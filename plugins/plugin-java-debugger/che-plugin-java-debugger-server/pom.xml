@@ -179,25 +179,9 @@
                         <exclude>**/*.tokens</exclude>
                         <exclude>**/*.g</exclude>
                         <exclude>**/*.txt</exclude>
-                        <exclude>**/*.class</exclude>
                     </excludes>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-dependency-plugin</artifactId>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>analyze</id>-->
-                        <!--<configuration>-->
-                            <!--<ignoredDependencies>-->
-                                <!--<ignoredDependency>org.eclipse.che.core:che-core-api-core</ignoredDependency>-->
-                                <!--<ignoredDependency>org.eclipse.che.plugin:org.eclipse.core.resources</ignoredDependency>-->
-                            <!--</ignoredDependencies>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
         </plugins>
     </build>
     <profiles>

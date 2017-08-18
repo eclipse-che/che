@@ -17,6 +17,7 @@ import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.api.debug.Breakpoint;
@@ -44,6 +45,17 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
          *         variable that is selected
          */
         void onSelectedVariableElement(@NotNull MutableVariable variable);
+
+        /**
+         * Is invoked when a new thread is selected.
+         */
+        void onSelectedThread(long threadId);
+
+        /**
+         * Is invoked when a new frame is selected.
+         */
+        void onSelectedFrame(int frameIndex);
+
     }
 
     /**
@@ -76,12 +88,7 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
      */
     void setThreads(@NotNull List<? extends ThreadDump> threadDumps, long activeThreadId);
 
-    /**
-     * Clears the list of threads.
-     */
-    void clearThreads();
-
-    /**
+   /**
      * Sets the list of frames for selected thread.
      */
     void setFrames(@NotNull List<? extends StackFrameDump> stackFrameDumps);
@@ -92,7 +99,7 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
      * @param name
      *         virtual machine name
      */
-    void setVMName(@NotNull String name);
+    void setVMName(@Nullable String name);
 
     /**
      * Sets title.

@@ -169,11 +169,11 @@ public class DebuggerService {
     }
 
     @GET
-    @Path("{id}/dump")
+    @Path("{id}/stackframedump")
     @Produces(MediaType.APPLICATION_JSON)
     public StackFrameDumpDto getStackFrameDump(@PathParam("id") String sessionId,
-                                               @QueryParam("threadId") @DefaultValue("-1") long threadId,
-                                               @QueryParam("frameIndex") @DefaultValue("-1") int frameIndex) throws DebuggerException {
+                                               @QueryParam("thread") @DefaultValue("-1") long threadId,
+                                               @QueryParam("frame") @DefaultValue("-1") int frameIndex) throws DebuggerException {
         if (threadId == -1) {
             return asDto(debuggerManager.getDebugger(sessionId).dumpStackFrame());
 
@@ -195,8 +195,8 @@ public class DebuggerService {
     @Path("{id}/value")
     @Produces(MediaType.APPLICATION_JSON)
     public SimpleValueDto getValue(@PathParam("id") String sessionId,
-                                   @QueryParam("threadId") @DefaultValue("-1") long threadId,
-                                   @QueryParam("frameIndex") @DefaultValue("-1") int frameIndex,
+                                   @QueryParam("thread") @DefaultValue("-1") long threadId,
+                                   @QueryParam("frame") @DefaultValue("-1") int frameIndex,
                                    @Context UriInfo uriInfo) throws DebuggerException {
         List<String> path = new ArrayList<>();
 
@@ -220,8 +220,8 @@ public class DebuggerService {
     @Path("{id}/value")
     @Consumes(MediaType.APPLICATION_JSON)
     public void setValue(@PathParam("id") String sessionId,
-                         @QueryParam("threadId") @DefaultValue("-1") long threadId,
-                         @QueryParam("frameIndex") @DefaultValue("-1") int frameIndex,
+                         @QueryParam("thread") @DefaultValue("-1") long threadId,
+                         @QueryParam("frame") @DefaultValue("-1") int frameIndex,
                          VariableDto variable) throws DebuggerException {
         if (threadId == -1) {
             debuggerManager.getDebugger(sessionId).setValue(variable);
@@ -234,8 +234,8 @@ public class DebuggerService {
     @Path("{id}/evaluation")
     @Produces(MediaType.TEXT_PLAIN)
     public String expression(@PathParam("id") String sessionId,
-                             @QueryParam("threadId") @DefaultValue("-1") long threadId,
-                             @QueryParam("frameIndex") @DefaultValue("-1") int frameIndex,
+                             @QueryParam("thread") @DefaultValue("-1") long threadId,
+                             @QueryParam("frame") @DefaultValue("-1") int frameIndex,
                              @QueryParam("expression") String expression) throws DebuggerException {
         if (threadId == -1) {
             return debuggerManager.getDebugger(sessionId).evaluate(expression);

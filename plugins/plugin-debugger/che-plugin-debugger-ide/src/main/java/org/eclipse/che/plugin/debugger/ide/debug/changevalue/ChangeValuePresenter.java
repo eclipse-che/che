@@ -35,7 +35,6 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
 
     private Variable variable;
 
-    /** Create presenter. */
     @Inject
     public ChangeValuePresenter(ChangeValueView view,
                                 DebuggerLocalizationConstant constant,
@@ -48,7 +47,6 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
         this.constant = constant;
     }
 
-    /** Show dialog. */
     public void showDialog() {
         variable = debuggerPresenter.getSelectedVariable();
         view.setValueTitle(constant.changeValueViewExpressionFieldTitle(variable.getName()));
@@ -59,25 +57,25 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
         view.showDialog();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onCancelClicked() {
         view.close();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onChangeClicked() {
         Debugger debugger = debuggerManager.getActiveDebugger();
         if (debugger != null) {
             Variable newVariable = new VariableImpl(new SimpleValueImpl(view.getValue()), variable.getVariablePath());
-            debugger.setValue(newVariable);
+            final long threadId = debuggerPresenter.getSelectedThreadId();
+            final int frameIndex = debuggerPresenter.getSelectedFrameIndex();
+
+            debugger.setValue(newVariable, threadId, frameIndex);
         }
 
         view.close();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void onVariableValueChanged() {
         final String value = view.getValue();

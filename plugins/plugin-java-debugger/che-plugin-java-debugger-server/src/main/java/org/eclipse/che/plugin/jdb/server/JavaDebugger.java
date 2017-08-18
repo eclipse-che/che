@@ -388,10 +388,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
             List<JdbStackFrame> frames = new LinkedList<>();
             try {
                 for (StackFrame f : t.frames()) {
-                    frames.add(new JdbStackFrame(f,
-                                                 emptyList(),
-                                                 emptyList(),
-                                                 new JdbLocation(f, new JdbMethod(f, emptyList()))));
+                    frames.add(new JdbStackFrame(f, emptyList(), emptyList(), new JdbLocation(f, new JdbMethod(f))));
                 }
             } catch (IncompatibleThreadStateException ignored) {
                 // Thread isn't suspended. Information isn't available.

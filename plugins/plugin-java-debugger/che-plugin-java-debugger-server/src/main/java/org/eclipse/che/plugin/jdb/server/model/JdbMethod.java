@@ -27,20 +27,13 @@ import java.util.stream.Collectors;
  * @author Anatolii Bazko
  */
 public class JdbMethod implements Method {
-    private final com.sun.jdi.Method     jdiMethod;
-    private final com.sun.jdi.StackFrame jdiStackFrame;
+    private final com.sun.jdi.Method jdiMethod;
 
     private final AtomicReference<List<Variable>> arguments;
 
     public JdbMethod(com.sun.jdi.StackFrame jdiStackFrame) {
-        this.jdiStackFrame = jdiStackFrame;
         this.jdiMethod = jdiStackFrame.location().method();
         this.arguments = new AtomicReference<>();
-    }
-
-    public JdbMethod(com.sun.jdi.StackFrame jdiStackFrame, List<Variable> arguments) {
-        this(jdiStackFrame);
-        this.arguments.set(arguments);
     }
 
     @Override

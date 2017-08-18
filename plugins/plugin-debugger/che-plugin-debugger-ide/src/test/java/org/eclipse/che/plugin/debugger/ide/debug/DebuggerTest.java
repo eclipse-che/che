@@ -80,6 +80,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -536,11 +538,11 @@ public class DebuggerTest extends BaseTest {
         final String json = "json";
         doReturn(json).when(dtoFactory).toJson(mockStackFrameDumpDto);
 
-        doReturn(promiseStackFrameDump).when(service).getStackFrameDump(SESSION_ID);
+        doReturn(promiseStackFrameDump).when(service).getStackFrameDump(SESSION_ID, anyLong(), anyInt());
         doReturn(promiseStackFrameDump).when(promiseStackFrameDump).then((Function<StackFrameDumpDto, Object>)any());
         doReturn(promiseStackFrameDump).when(promiseStackFrameDump).catchError((Operation<PromiseError>)any());
 
-        Promise<StackFrameDump> result = debugger.dumpStackFrame();
+        Promise<StackFrameDump> result = debugger.getStackFrameDump(anyLong(), anyInt());
         assertEquals(promiseStackFrameDump, result);
     }
 
@@ -548,9 +550,9 @@ public class DebuggerTest extends BaseTest {
     public void testGetStackFrameDumpWithoutConnection() throws Exception {
         debugger.setDebugSession(null);
 
-        debugger.dumpStackFrame();
+        debugger.getStackFrameDump(anyLong(), anyInt());
 
-        verify(service, never()).getStackFrameDump(any());
+        verify(service, never()).getStackFrameDump(any(), anyLong(), anyInt());
     }
 
     @Test

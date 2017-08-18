@@ -50,6 +50,8 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -174,7 +176,7 @@ public class DebuggerPresenterTest extends BaseTest {
 
     @Test
     public void testShowAndUpdateView() {
-        presenter.showAndUpdateView();
+        presenter.updateView();
         verify(view).setVMName(eq(""));
     }
 
@@ -283,18 +285,18 @@ public class DebuggerPresenterTest extends BaseTest {
         LocationDto executionPoint = mock(LocationDto.class);
         doReturn(executionPoint).when(dtoFactory).createDto(LocationDto.class);
 
-        doReturn(promiseString).when(debugger).dumpStackFrame();
+        doReturn(promiseString).when(debugger).getStackFrameDump(anyLong(), anyInt());
         doReturn(promiseString).when(promiseString).then((Operation<String>)any());
 
         presenter.onBreakpointStopped(filePath, executionPoint);
 
-        verify(presenter).showAndUpdateView();
+        verify(presenter).updateView();
         verify(view).setExecutionPoint(any(Location.class));
     }
 
     @Test
     public void testOnValueChanged() {
-        doReturn(promiseString).when(debugger).dumpStackFrame();
+        doReturn(promiseString).when(debugger).getStackFrameDump(anyLong(), anyInt());
         doReturn(promiseString).when(promiseString).then((Operation<String>)any());
 
         ArrayList<String> path = new ArrayList<>();

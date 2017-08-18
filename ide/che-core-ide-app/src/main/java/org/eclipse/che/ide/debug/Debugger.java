@@ -96,19 +96,36 @@ public interface Debugger extends DebuggerObservable {
     void suspend();
 
     /**
-     * Evaluates the given expression
+     * Evaluates the given expression inside specific frame.
+     *
+     * @param threadId
+     *      the unique thread id
+     * @param frameIndex
+     *      the frame index in the thread
      */
-    Promise<String> evaluate(String expression);
+    Promise<String> evaluate(String expression, long threadId, int frameIndex);
 
     /**
-     * Gets the value of the given variable.
+     * Gets the value of the given variable inside specific frame.
+     *
+     * @param variable
+     *      the variable to get value from
+     * @param threadId
+     *      the unique thread id
+     * @param frameIndex
+     *      the frame index in the thread
      */
-    Promise<SimpleValue> getValue(Variable variable);
+    Promise<SimpleValue> getValue(Variable variable, long threadId, int frameIndex);
 
     /**
-     * Gets dump the current frame.
+     * Gets stack frame dump.
+     *
+     * @param threadId
+     *      the unique thread id
+     * @param frameIndex
+     *      the frame index in the thread
      */
-    Promise<StackFrameDump> dumpStackFrame();
+    Promise<StackFrameDump> getStackFrameDump(long threadId, int frameIndex);
 
     /**
      * Gets thread dump.
@@ -120,8 +137,12 @@ public interface Debugger extends DebuggerObservable {
      *
      * @param variable
      *      the variable to update
+     * @param threadId
+     *      the unique thread id
+     * @param frameIndex
+     *      the frame index in the thread
      */
-    void setValue(Variable variable);
+    void setValue(Variable variable, long threadId, int frameIndex);
 
     /**
      * Indicates if connection is established with the server.

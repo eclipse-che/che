@@ -88,6 +88,7 @@ public final class DtoConverter {
 
     public static LocationDto asDto(Location location) {
         return newDto(LocationDto.class).withTarget(location.getTarget())
+                                        .withThreadId(location.getThreadId())
                                         .withLineNumber(location.getLineNumber())
                                         .withExternalResourceId(location.getExternalResourceId())
                                         .withResourcePath(location.getResourcePath())

@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.jdb.server.model;
 
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
-import com.sun.jdi.StackFrame;
 
 import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -46,7 +45,7 @@ public class JdbStackFrame implements StackFrameDump {
         this.fields = new AtomicReference<>();
     }
 
-    public JdbStackFrame(StackFrame jdiStackFrame,
+    public JdbStackFrame(com.sun.jdi.StackFrame jdiStackFrame,
                          List<Field> fields,
                          List<Variable> variables,
                          Location location) {

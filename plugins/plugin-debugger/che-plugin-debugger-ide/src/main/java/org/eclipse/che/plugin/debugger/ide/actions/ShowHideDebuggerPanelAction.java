@@ -43,7 +43,7 @@ public class ShowHideDebuggerPanelAction extends Action {
                 debuggerPresenter.showDebuggerPanel();
             }
         } else {
-            debuggerPresenter.showAndUpdateView();
+            debuggerPresenter.updateView();
             debuggerPresenter.showDebuggerPanel();
         }
     }

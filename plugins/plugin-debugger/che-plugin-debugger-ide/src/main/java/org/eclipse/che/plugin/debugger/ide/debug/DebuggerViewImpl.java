@@ -16,9 +16,11 @@ import elemental.events.MouseEvent;
 import elemental.html.TableCellElement;
 import elemental.html.TableElement;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -108,17 +110,16 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
 
         setContentWidget(uiBinder.createAndBindUi(this));
 
-        this.breakpoints = createBreakpointSimpleList();
+        this.breakpoints = createBreakpointList();
         this.breakpointsPanel.add(breakpoints);
 
-        this.frames = createFramesSimpleList();
+        this.frames = createFramesList();
         this.framesPanel.add(frames);
 
         this.variables = Tree.create(rendererResources, new VariableNodeDataAdapter(), new VariableTreeNodeRenderer(rendererResources));
         this.variables.setTreeEventHandler(new Tree.Listener<MutableVariable>() {
             @Override
-            public void onNodeAction(@NotNull TreeNodeElement<MutableVariable> node) {
-            }
+            public void onNodeAction(@NotNull TreeNodeElement<MutableVariable> node) {}
 
             @Override
             public void onNodeClosed(@NotNull TreeNodeElement<MutableVariable> node) {
@@ -126,16 +127,13 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
             }
 
             @Override
-            public void onNodeContextMenu(int mouseX, int mouseY, @NotNull TreeNodeElement<MutableVariable> node) {
-            }
+            public void onNodeContextMenu(int mouseX, int mouseY, @NotNull TreeNodeElement<MutableVariable> node) {}
 
             @Override
-            public void onNodeDragStart(@NotNull TreeNodeElement<MutableVariable> node, @NotNull MouseEvent event) {
-            }
+            public void onNodeDragStart(@NotNull TreeNodeElement<MutableVariable> node, @NotNull MouseEvent event) {}
 
             @Override
-            public void onNodeDragDrop(@NotNull TreeNodeElement<MutableVariable> node, @NotNull MouseEvent event) {
-            }
+            public void onNodeDragDrop(@NotNull TreeNodeElement<MutableVariable> node, @NotNull MouseEvent event) {}
 
             @Override
             public void onNodeExpanded(@NotNull final TreeNodeElement<MutableVariable> node) {
@@ -151,23 +149,20 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
             }
 
             @Override
-            public void onRootContextMenu(int mouseX, int mouseY) {
-            }
+            public void onRootContextMenu(int mouseX, int mouseY) {}
 
             @Override
-            public void onRootDragDrop(@NotNull MouseEvent event) {
-            }
+            public void onRootDragDrop(@NotNull MouseEvent event) {}
 
             @Override
-            public void onKeyboard(@NotNull KeyboardEvent event) {
-            }
+            public void onKeyboard(@NotNull KeyboardEvent event) {}
         });
 
         this.variablesPanel.add(variables);
         minimizeButton.ensureDebugId("debugger-minimizeBut");
     }
 
-    private SimpleList<Breakpoint> createBreakpointSimpleList() {
+    private SimpleList<Breakpoint> createBreakpointList() {
         TableElement breakPointsElement = Elements.createTableElement();
         breakPointsElement.setAttribute("style", "width: 100%");
         SimpleList.ListEventDelegate<Breakpoint> breakpointListEventDelegate = new SimpleList.ListEventDelegate<Breakpoint>() {
@@ -175,9 +170,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
                 breakpoints.getSelectionModel().setSelectedItem(itemData);
             }
 
-            public void onListItemDoubleClicked(Element listItemBase, Breakpoint itemData) {
-                // TODO: implement 'go to breakpoint source' feature
-            }
+            public void onListItemDoubleClicked(Element listItemBase, Breakpoint itemData) {}
         };
 
         SimpleList.ListItemRenderer<Breakpoint> breakpointListItemRenderer = new
@@ -222,13 +215,14 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
                                  breakpointListEventDelegate);
     }
 
-    private SimpleList<StackFrameDump> createFramesSimpleList() {
+    private SimpleList<StackFrameDump> createFramesList() {
         TableElement frameElement = Elements.createTableElement();
         frameElement.setAttribute("style", "width: 100%");
 
         SimpleList.ListEventDelegate<StackFrameDump> frameListEventDelegate = new SimpleList.ListEventDelegate<StackFrameDump>() {
             public void onListItemClicked(Element itemElement, StackFrameDump itemData) {
                 frames.getSelectionModel().setSelectedItem(itemData);
+                delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex());
             }
 
             public void onListItemDoubleClicked(Element listItemBase, StackFrameDump itemData) { }
@@ -242,7 +236,19 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
 
                         SafeHtmlBuilder sb = new SafeHtmlBuilder();
                         sb.appendEscaped(itemData.getLocation().getMethod().getName());
-                        sb.appendEscaped("():");
+                        sb.appendEscaped("(");
+
+                        List<? extends Variable> arguments = itemData.getLocation().getMethod().getArguments();
+                        for (int i = 0; i < arguments.size(); i++) {
+                            String[] classTypeEntries = arguments.get(i).getType().split("\\.");
+                            sb.appendEscaped(classTypeEntries[classTypeEntries.length - 1]);
+
+                            if (i != arguments.size() - 1) {
+                                sb.appendEscaped(", ");
+                            }
+                        }
+
+                        sb.appendEscaped("):");
                         sb.append(itemData.getLocation().getLineNumber());
                         sb.appendEscaped(", ");
                         sb.appendEscaped(itemData.getLocation().getTarget());
@@ -291,31 +297,30 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
 
     @Override
     public void setThreads(List<? extends ThreadDump> threadDumps, long activeThreadId) {
-        clearThreads();
+        threads.clear();
 
         for (int i = 0; i < threadDumps.size(); i++) {
-            ThreadDump threadDump = threadDumps.get(i);
+            ThreadDump td = threadDumps.get(i);
+            String item = "\"" + td.getName() + "\"@" + td.getId() + " in group \"" + td.getGroupName() + "\": " + td.getStatus();
 
-            threads.addItem(threadDump.getName(), String.valueOf(threadDump.getId()));
-            if (threadDump.getId() == activeThreadId) {
+            threads.addItem(item, String.valueOf(td.getId()));
+            if (td.getId() == activeThreadId) {
                 threads.setSelectedIndex(i);
             }
         }
     }
 
     @Override
-    public void clearThreads() {
-        threads.clear();
-    }
-
-    @Override
     public void setFrames(List<? extends StackFrameDump> stackFrameDumps) {
         frames.render(new ArrayList<>(stackFrameDumps));
+        if (!stackFrameDumps.isEmpty()) {
+            frames.getSelectionModel().setSelectedItem(0);
+        }
     }
 
     @Override
-    public void setVMName(@NotNull String name) {
-        vmName.setText(name);
+    public void setVMName(@Nullable String name) {
+        vmName.setText(name == null ? "" : name);
     }
 
     @Override
@@ -341,5 +346,10 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
     @Override
     public AcceptsOneWidget getDebuggerToolbarPanel() {
         return toolbarPanel;
+    }
+
+    @UiHandler({"threads"})
+    void onThreadChanged(ChangeEvent event) {
+        delegate.onSelectedThread(Integer.parseInt(threads.getSelectedValue()));
     }
 }

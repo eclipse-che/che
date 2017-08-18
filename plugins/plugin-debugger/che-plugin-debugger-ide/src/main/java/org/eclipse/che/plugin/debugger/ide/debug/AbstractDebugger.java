@@ -301,22 +301,22 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     @Override
-    public Promise<SimpleValue> getValue(Variable variable) {
+    public Promise<SimpleValue> getValue(Variable variable, long threadId, int frameIndex) {
         if (!isConnected()) {
             return Promises.reject(JsPromiseError.create("Debugger is not connected"));
         }
 
-        Promise<SimpleValueDto> promise = service.getValue(debugSessionDto.getId(), toDto(variable));
+        Promise<SimpleValueDto> promise = service.getValue(debugSessionDto.getId(), toDto(variable), threadId, frameIndex);
         return promise.then((Function<SimpleValueDto, SimpleValue>)SimpleValueImpl::new);
     }
 
     @Override
-    public Promise<StackFrameDump> dumpStackFrame() {
+    public Promise<StackFrameDump> getStackFrameDump(long threadId, int frameIndex) {
         if (!isConnected()) {
             return Promises.reject(JsPromiseError.create("Debugger is not connected"));
         }
 
-        Promise<StackFrameDumpDto> stackFrameDump = service.getStackFrameDump(debugSessionDto.getId());
+        Promise<StackFrameDumpDto> stackFrameDump = service.getStackFrameDump(debugSessionDto.getId(), threadId, frameIndex);
         return stackFrameDump.then((Function<StackFrameDumpDto, StackFrameDump>)StackFrameDumpImpl::new);
     }
 
@@ -584,18 +584,18 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     @Override
-    public Promise<String> evaluate(String expression) {
+    public Promise<String> evaluate(String expression, long threadId, int frameIndex) {
         if (isConnected()) {
-            return service.evaluate(debugSessionDto.getId(), expression);
+            return service.evaluate(debugSessionDto.getId(), expression, threadId, frameIndex);
         }
 
         return Promises.reject(JsPromiseError.create("Debugger is not connected"));
     }
 
     @Override
-    public void setValue(final Variable variable) {
+    public void setValue(final Variable variable,long threadId, int frameIndex) {
         if (isConnected()) {
-            Promise<Void> promise = service.setValue(debugSessionDto.getId(), toDto(variable));
+            Promise<Void> promise = service.setValue(debugSessionDto.getId(), toDto(variable), threadId, frameIndex);
 
             promise.then(it -> {
                 for (DebuggerObserver observer : observers) {

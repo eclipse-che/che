@@ -21,10 +21,7 @@ import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -47,9 +44,9 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -81,11 +78,13 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     private final DebuggerManager              debuggerManager;
     private final WorkspaceAgent               workspaceAgent;
 
-    private MutableVariable    selectedVariable;
-    private List<Variable>     variables;
-    private List<ThreadDump>   threadDump;
-    private DebuggerDescriptor debuggerDescriptor;
-    private Location           executionPoint;
+    private MutableVariable            selectedVariable;
+    private List<Variable>             variables;
+    private List<? extends ThreadDump> threadDump;
+    private DebuggerDescriptor         debuggerDescriptor;
+    private Location                   executionPoint;
+    private long                       selectedThreadId;
+    private int                        selectedFrameIndex;
 
     @Inject
     public DebuggerPresenter(final DebuggerView view,
@@ -105,17 +104,13 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
         this.view.setTitle(TITLE);
         this.constant = constant;
         this.breakpointManager = breakpointManager;
-        this.variables = new ArrayList<>();
-        this.threadDump = new ArrayList<>();
         this.notificationManager = notificationManager;
         this.addRule(ProjectPerspective.PROJECT_PERSPECTIVE_ID);
-
         this.debuggerManager.addObserver(this);
         this.breakpointManager.addObserver(this);
 
-        if (!breakpointManager.getBreakpointList().isEmpty()) {
-            updateBreakpoints();
-        }
+        resetState();
+        updateBreakpoints();
     }
 
     @Override
@@ -141,7 +136,6 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     @Override
     public void go(AcceptsOneWidget container) {
         view.setBreakpoints(breakpointManager.getBreakpointList());
-        view.setVariables(variables);
         container.setWidget(view);
         debuggerToolbar.go(view.getDebuggerToolbarPanel());
     }
@@ -152,20 +146,14 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
         if (rootVariables.isEmpty()) {
             Debugger debugger = debuggerManager.getActiveDebugger();
             if (debugger != null) {
-                Promise<SimpleValue> promise = debugger.getValue(selectedVariable);
+                Promise<SimpleValue> promise = debugger.getValue(selectedVariable, selectedThreadId, selectedFrameIndex);
 
-                promise.then(new Operation<SimpleValue>() {
-                    @Override
-                    public void apply(SimpleValue arg) throws OperationException {
-                        selectedVariable.setValue(arg);
-                        view.setVariablesIntoSelectedVariable(arg.getVariables());
-                        view.updateSelectedVariable();
-                    }
-                }).catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError arg) throws OperationException {
-                        notificationManager.notify(constant.failedToGetVariableValueTitle(), arg.getMessage(), FAIL, FLOAT_MODE);
-                    }
+                promise.then(value -> {
+                    selectedVariable.setValue(value);
+                    view.setVariablesIntoSelectedVariable(value.getVariables());
+                    view.updateSelectedVariable();
+                }).catchError(error -> {
+                    notificationManager.notify(constant.failedToGetVariableValueTitle(), error.getMessage(), FAIL, FLOAT_MODE);
                 });
             }
         }
@@ -174,6 +162,33 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     @Override
     public void onSelectedVariableElement(@NotNull MutableVariable variable) {
         this.selectedVariable = variable;
+    }
+
+    @Override
+    public void onSelectedThread(long threadId) {
+        selectedThreadId = threadId;
+        selectedFrameIndex = 0;
+
+        for (ThreadDump td : threadDump) {
+            if (td.getId() == selectedThreadId) {
+                view.setFrames(td.getFrames());
+            }
+        }
+        updateStackFrameDump();
+    }
+
+    @Override
+    public void onSelectedFrame(int frameIndex) {
+        selectedFrameIndex = frameIndex;
+        updateStackFrameDump();
+    }
+
+    public long getSelectedThreadId() {
+        return selectedThreadId;
+    }
+
+    public int getSelectedFrameIndex() {
+        return selectedFrameIndex;
     }
 
     public void showDebuggerPanel() {
@@ -192,27 +207,30 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
         return partStack != null && partStack.containsPart(this);
     }
 
-    private void resetStates() {
-        variables.clear();
-        threadDump.clear();
-        view.setVariables(variables);
-        view.setVMName("");
-        view.setExecutionPoint(null);
-        view.clearThreads();
-        view.setFrames(Collections.emptyList());
+    private void resetState() {
+        variables = new ArrayList<>();
+        threadDump = new ArrayList<>();
+        selectedThreadId = -1;
+        selectedFrameIndex = -1;
         selectedVariable = null;
         executionPoint = null;
+        debuggerDescriptor = null;
+
+        view.setVariables(emptyList());
+        view.setVMName("");
+        view.setExecutionPoint(null);
+        view.setThreads(emptyList(), -1);
+        view.setFrames(emptyList());
     }
 
-    public void showAndUpdateView() {
+    public void updateView() {
         if (debuggerDescriptor == null) {
             view.setVMName("");
         } else {
             view.setVMName(debuggerDescriptor.getInfo());
         }
-        if (executionPoint != null) {
-            view.setExecutionPoint(executionPoint);
-        }
+
+        view.setExecutionPoint(executionPoint);
         view.setBreakpoints(breakpointManager.getBreakpointList());
 
         updateThreadDump();
@@ -224,7 +242,7 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     protected void updateBreakpoints() {
         view.setBreakpoints(breakpointManager.getBreakpointList());
 
-        if (!isDebuggerPanelPresent()) {
+        if (!breakpointManager.getBreakpointList().isEmpty() && !isDebuggerPanelPresent()) {
             showView();
             showDebuggerPanel();
         }
@@ -236,13 +254,14 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
         }
     }
 
-    private void updateThreadDump() {
+    protected void updateThreadDump() {
         Debugger debugger = debuggerManager.getActiveDebugger();
         if (debugger != null && executionPoint != null) {
             debugger.getThreadDump()
                     .then(threadDump -> {
-                        view.setThreads(threadDump, executionPoint.getThreadId());
-                        view.setFrames(threadDump.get(0).getFrames());
+                        DebuggerPresenter.this.threadDump = threadDump;
+                        view.setThreads(threadDump, selectedThreadId);
+                        onSelectedThread(selectedThreadId);
                     })
                     .catchError(error -> {
                         Log.error(DebuggerPresenter.class, error.getCause());
@@ -250,24 +269,17 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
         }
     }
 
-    private void updateStackFrameDump() {
+    protected void updateStackFrameDump() {
         Debugger debugger = debuggerManager.getActiveDebugger();
         if (debugger != null && executionPoint != null) {
-            Promise<StackFrameDump> promise = debugger.dumpStackFrame();
-            promise.then(new Operation<StackFrameDump>() {
-                @Override
-                public void apply(StackFrameDump arg) throws OperationException {
-                    variables = new ArrayList<>();
-                    variables.addAll(arg.getFields());
-                    variables.addAll(arg.getVariables());
-
-                    view.setVariables(variables);
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError arg) throws OperationException {
-                    Log.error(DebuggerPresenter.class, arg.getCause());
-                }
+            Promise<StackFrameDump> promise = debugger.getStackFrameDump(selectedThreadId, selectedFrameIndex);
+            promise.then(stackFrameDump -> {
+                variables = new ArrayList<>();
+                variables.addAll(stackFrameDump.getFields());
+                variables.addAll(stackFrameDump.getVariables());
+                view.setVariables(variables);
+            }).catchError(error -> {
+                Log.error(DebuggerPresenter.class, error.getCause());
             });
         }
     }
@@ -288,25 +300,19 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
         final String address = debuggerDescriptor.getAddress();
         final StatusNotification notification = notificationManager.notify(constant.debuggerConnectingTitle(address), PROGRESS, FLOAT_MODE);
 
-        connect.then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
-                DebuggerPresenter.this.debuggerDescriptor = debuggerDescriptor;
+        connect.then(aVoid -> {
+            DebuggerPresenter.this.debuggerDescriptor = debuggerDescriptor;
 
-                notification.setTitle(constant.debuggerConnectedTitle());
-                notification.setContent(constant.debuggerConnectedDescription(address));
-                notification.setStatus(SUCCESS);
+            notification.setTitle(constant.debuggerConnectedTitle());
+            notification.setContent(constant.debuggerConnectedDescription(address));
+            notification.setStatus(SUCCESS);
 
-                showAndUpdateView();
-                showDebuggerPanel();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notification.setTitle(constant.failedToConnectToRemoteDebuggerDescription(address, arg.getMessage()));
-                notification.setStatus(FAIL);
-                notification.setDisplayMode(FLOAT_MODE);
-            }
+            updateView();
+            showDebuggerPanel();
+        }).catchError(error -> {
+            notification.setTitle(constant.failedToConnectToRemoteDebuggerDescription(address, error.getMessage()));
+            notification.setStatus(FAIL);
+            notification.setDisplayMode(FLOAT_MODE);
         });
     }
 
@@ -316,11 +322,8 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
         String content = constant.debuggerDisconnectedDescription(address);
         notificationManager.notify(constant.debuggerDisconnectedTitle(), content, SUCCESS, NOT_EMERGE_MODE);
 
-        executionPoint = null;
-        debuggerDescriptor = null;
-
-        resetStates();
-        showAndUpdateView();
+        resetState();
+        updateView();
     }
 
     @Override
@@ -343,33 +346,36 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
 
     @Override
     public void onPreStepInto() {
-        resetStates();
+        resetState();
     }
 
     @Override
     public void onPreStepOut() {
-        resetStates();
+        resetState();
     }
 
     @Override
     public void onPreStepOver() {
-        resetStates();
+        resetState();
     }
 
     @Override
     public void onPreResume() {
-        resetStates();
+        resetState();
     }
 
     @Override
     public void onBreakpointStopped(String filePath, Location location) {
         executionPoint = location;
-        showAndUpdateView();
+        selectedThreadId = executionPoint.getThreadId();
+        selectedFrameIndex = 0;
+
+        updateView();
     }
 
     @Override
     public void onValueChanged(List<String> path, String newValue) {
-        updateStackFrameDump();
+        updateStackFrameDump(); // TODO
     }
 
     @Override

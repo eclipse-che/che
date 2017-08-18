@@ -127,8 +127,8 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     }
 
     @Override
-    public Promise<StackFrameDumpDto> getStackFrameDump(String id) {
-        final String requestUrl = getBaseUrl(id) + "/dump";
+    public Promise<StackFrameDumpDto> getStackFrameDump(String id, long threadId, int frameIndex) {
+        final String requestUrl = getBaseUrl(id) + "/stackframedump?thread=" + threadId + "&frame=" + frameIndex;
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(StackFrameDumpDto.class));
     }
@@ -146,14 +146,13 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     }
 
     @Override
-    public Promise<SimpleValueDto> getValue(String id, VariableDto variableDto) {
-        final String requestUrl = getBaseUrl(id) + "/value";
+    public Promise<SimpleValueDto> getValue(String id, VariableDto variableDto, long threadId, int frameIndex) {
+        final String requestUrl = getBaseUrl(id) + "/value?thread=" + threadId + "&frame=" + frameIndex;
         List<String> path = variableDto.getVariablePath().getPath();
 
         StringBuilder params = new StringBuilder();
         for (int i = 0; i < path.size(); i++) {
-            params.append(i == 0 ? "?" : "&");
-            params.append("path");
+            params.append("&path");
             params.append(i);
             params.append("=");
             params.append(path.get(i));
@@ -164,8 +163,8 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     }
 
     @Override
-    public Promise<Void> setValue(String id, VariableDto variableDto) {
-        final String requestUrl = getBaseUrl(id) + "/value";
+    public Promise<Void> setValue(String id, VariableDto variableDto, long threadId, int frameIndex) {
+        final String requestUrl = getBaseUrl(id) + "/value?thread=" + threadId + "&frame=" + frameIndex;
         return asyncRequestFactory.createPutRequest(requestUrl, variableDto)
                                   .send();
     }
@@ -186,9 +185,9 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     }
 
     @Override
-    public Promise<String> evaluate(String id, String expression) {
-        String requestUrl = getBaseUrl(id) + "/evaluation";
-        String params = "?expression=" + URL.encodeQueryString(expression);
+    public Promise<String> evaluate(String id, String expression, long threadId, int frameIndex) {
+        String requestUrl = getBaseUrl(id) + "/evaluation?thread=" + threadId + "&frame=" + frameIndex;
+        String params = "&expression=" + URL.encodeQueryString(expression);
         return asyncRequestFactory.createGetRequest(requestUrl + params)
                                   .loader(loaderFactory.newLoader())
                                   .send(new StringUnmarshaller());
