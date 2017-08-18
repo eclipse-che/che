@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.commons.proxy;
 
-
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 

@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.projectimport.wizard;
 
-
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 

@@ -10,12 +10,9 @@
  */
 package org.eclipse.che.api.agent.server.filters;
 
-
 import org.everrest.assured.EverrestJetty;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
-
-
 
 /** @author Alexander Garagatyi */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})

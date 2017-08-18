@@ -13,7 +13,6 @@ package org.eclipse.che.api.workspace.server;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 
-
 /**
  * @author Yevhenii Voevodin
  * @author Alexander Garagatyi

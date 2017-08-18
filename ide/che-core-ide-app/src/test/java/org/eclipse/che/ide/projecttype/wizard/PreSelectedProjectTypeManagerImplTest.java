@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.projecttype.wizard;
 
-
 import org.junit.Assert;
 import org.junit.Test;
 

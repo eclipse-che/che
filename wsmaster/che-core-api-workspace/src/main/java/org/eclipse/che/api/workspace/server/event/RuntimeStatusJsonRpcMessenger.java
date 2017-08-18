@@ -17,7 +17,6 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionManager;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 
-
 /** Send workspace events using JSON RPC to the clients */
 @Singleton
 public class RuntimeStatusJsonRpcMessenger {

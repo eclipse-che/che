@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.api.workspace.server;
 
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
