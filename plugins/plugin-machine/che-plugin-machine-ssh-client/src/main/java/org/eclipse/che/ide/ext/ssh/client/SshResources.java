@@ -12,6 +12,5 @@ package org.eclipse.che.ide.ext.ssh.client;
 
 import com.google.gwt.resources.client.ClientBundle;
 
-
 /** @author Evgen Vidolob */
 public interface SshResources extends ClientBundle {}
