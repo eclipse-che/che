@@ -97,8 +97,7 @@ public class ProjectServiceClient {
         final String url = getBaseUrl();
 
         return reqFactory.createGetRequest(url)
-                         .header(ACCEPT, APPLICATION_JSON)
-                         .loader(loaderFactory.newLoader("Getting projects..."))
+                         .header(ACCEPT, MimeType.APPLICATION_JSON)
                          .send(unmarshaller.newListUnmarshaller(ProjectConfigDto.class));
     }
 
@@ -283,7 +282,6 @@ public class ProjectServiceClient {
         final String url = encodeAllowEscapes(getBaseUrl() + FILE + path(path.toString()));
 
         return reqFactory.createGetRequest(url)
-                         .loader(loaderFactory.newLoader("Loading file content..."))
                          .send(new StringUnmarshaller());
     }
 
@@ -303,7 +301,6 @@ public class ProjectServiceClient {
 
         return reqFactory.createRequest(PUT, url, null, false)
                          .data(content)
-                         .loader(loaderFactory.newLoader("Updating file..."))
                          .send();
     }
 
