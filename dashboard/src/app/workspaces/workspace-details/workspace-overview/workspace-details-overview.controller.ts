@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/che-workspace.factory';
+import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 import {NamespaceSelectorSvc} from '../../create-workspace/namespace-selector/namespace-selector.service';
@@ -40,6 +40,7 @@ export class WorkspaceDetailsOverviewController {
   private workspaceDetailsService: WorkspaceDetailsService;
   private namespaceId: string;
   private workspaceName: string;
+  private newWorkspaceName: string = '';
   private usedNamesList: Array<string>;
   private inputmodel: ng.INgModelController;
   private isLoading: boolean;
@@ -61,6 +62,7 @@ export class WorkspaceDetailsOverviewController {
     const routeParams = $route.current.params;
     this.namespaceId = routeParams.namespace;
     this.workspaceName = routeParams.workspaceName;
+    this.newWorkspaceName = angular.copy(this.workspaceDetails.config.name);
 
     this.fillInListOfUsedNames();
   }
@@ -124,7 +126,6 @@ export class WorkspaceDetailsOverviewController {
       this.isLoading = false;
     });
   }
-
 
   /**
    * Triggers form validation.
@@ -238,6 +239,17 @@ export class WorkspaceDetailsOverviewController {
         });
       });
     });
+  }
+
+  /**
+   * Callback when Team button is clicked in Edit mode.
+   * Redirects to billing details or team details.
+   *
+   * @param {string} namespaceId
+   */
+  onNameChange(name: string) {
+    this.workspaceDetails.config.name = name;
+    this.onChange();
   }
 
   /**

@@ -9,12 +9,12 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace, WorkspaceStatus} from '../../../components/api/che-workspace.factory';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import IdeSvc from '../../ide/ide.service';
 import {CreateWorkspaceSvc} from '../create-workspace/create-workspace.service';
-import {IObservable, Observable} from '../../../components/utils/observable';
+import {IObservable, IObservableCallbackFn, Observable} from '../../../components/utils/observable';
 import {WorkspaceDetailsProjectsService} from './workspace-projects/workspace-details-projects.service';
+import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/che-workspace.factory';
 
 interface IPage {
   title: string;
@@ -33,6 +33,7 @@ interface ISection {
  * This class is handling the data for workspace details sections (tabs)
  *
  * @author Ann Shumilova
+ * @author Oleksii Orel
  */
 export class WorkspaceDetailsService {
   /**
@@ -66,7 +67,7 @@ export class WorkspaceDetailsService {
   /**
    * Instance of Observable.
    */
-  private observable: IObservable<any>;
+  private observable: IObservable<che.IWorkspace>;
 
   private pages: IPage[];
   private sections: ISection[];
@@ -96,6 +97,34 @@ export class WorkspaceDetailsService {
 
     this.pages = [];
     this.sections = [];
+    this.observable = new Observable();
+  }
+
+  /**
+   * Subscribes on workspace change actions.
+   *
+   * @param {callback} action the action's callback
+   */
+  subscribeOnWorkspaceChange(action: IObservableCallbackFn<che.IWorkspace>): void {
+    this.observable.subscribe(action);
+  }
+
+  /**
+   * Unsubscribes the workspace change action.
+   *
+   * @param {callback} action the action's callback.
+   */
+  unsubscribeOnWorkspaceChange(action: IObservableCallbackFn<che.IWorkspace>): void {
+    this.observable.unsubscribe(action);
+  }
+
+  /**
+   * Publish new workspace details to subscribers.
+   *
+   * @param {che.IWorkspace} workspaceDetails
+   */
+  publishWorkspaceChange(workspaceDetails: che.IWorkspace): void {
+    this.observable.publish(workspaceDetails);
   }
 
   /**

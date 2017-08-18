@@ -2,7 +2,7 @@
            on-close="editMachineDialogController.cancel()">
   <ng-form name="editMachineForm" class="edit-machine-form">
     <div class="form-input-fields" flex="100" layout="column">
-      <che-input type="text"
+      <che-input-box type="text"
                  che-form="editMachineForm"
                  che-label-name="Name"
                  che-name="name"
@@ -19,7 +19,7 @@
           <div ng-message="maxlength">Machine's name should be less than 128 characters long.</div>
           <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
         </che-error-messages>
-      </che-input>
+      </che-input-box>
       <div layout="row" layout-align="start start" class="ram-slider"
            ng-if="editMachineDialogController.isCompose() && editMachineDialogController.machineRAM">
         <div flex="15">

@@ -7,8 +7,9 @@
       che-name="name"
       che-place-holder="Name of the workspace"
       aria-label="Name of the workspace"
-      ng-model="workspaceDetailsOverviewController.workspaceDetails.config.name"
-      ng-change="workspaceDetailsOverviewController.onChange()"
+      ng-model-options="{ allowInvalid: true }"
+      ng-model="workspaceDetailsOverviewController.newWorkspaceName"
+      che-on-change="workspaceDetailsOverviewController.onNameChange($value)"
       required
       ng-minlength="3"
       ng-maxlength="20"
@@ -17,8 +18,8 @@
       <che-error-messages che-message-scope="workspace-details-settings" che-message-name="Workspace name">
         <div ng-message="required" style="display: none;">A name is required.</div>
         <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
-        <div ng-message="minlength">The name has to be more than 3 characters long.</div>
         <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+        <div ng-message="minlength">The name has to be more than 3 characters long.</div>
         <div ng-message="customValidator">This workspace name is already used.</div>
       </che-error-messages>
     </che-input-box>

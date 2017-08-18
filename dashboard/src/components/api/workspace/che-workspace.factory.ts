@@ -10,14 +10,15 @@
  */
 'use strict';
 
-import {CheWorkspaceAgent} from './che-workspace-agent';
-import {ComposeEnvironmentManager} from './environment/compose-environment-manager';
-import {DockerFileEnvironmentManager} from './environment/docker-file-environment-manager';
-import {DockerImageEnvironmentManager} from './environment/docker-image-environment-manager';
-import {CheEnvironmentRegistry} from './environment/che-environment-registry.factory';
-import {CheJsonRpcMasterApi} from './json-rpc/che-json-rpc-master-api';
-import {CheJsonRpcApi} from './json-rpc/che-json-rpc-api.factory';
-import {CheBranding} from '../branding/che-branding.factory';
+import {CheWorkspaceAgent} from '../che-workspace-agent';
+import {ComposeEnvironmentManager} from '../environment/compose-environment-manager';
+import {DockerFileEnvironmentManager} from '../environment/docker-file-environment-manager';
+import {DockerImageEnvironmentManager} from '../environment/docker-image-environment-manager';
+import {CheEnvironmentRegistry} from '../environment/che-environment-registry.factory';
+import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
+import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
+import {CheBranding} from './../branding/che-branding.factory';
+import {IObservableCallbackFn, Observable} from './../../utils/observable';
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   create: any;
@@ -56,7 +57,6 @@ export class CheWorkspace {
   private $websocket: ng.websocket.IWebSocketProvider;
   private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
   private listeners: Array<any>;
-  private workspaceStatuses: Array<string>;
   private workspaces: Array<che.IWorkspace>;
   private subscribedWorkspacesIds: Array<string>;
   private workspaceAgents: Map<string, CheWorkspaceAgent>;
@@ -67,6 +67,15 @@ export class CheWorkspace {
   private statusDefers: Object;
   private workspaceSettings: any;
   private jsonRpcApiLocation: string;
+  /**
+   * Map with instance of Observable by workspaceId.
+   */
+  private observables: Map<string, Observable<che.IWorkspace>> = new Map();
+  /**
+   * Map with promises.
+   */
+  private workspaceDetailsByKeyPromise: Map<string, ng.IHttpPromise<any>> = new Map();
+
 
   /**
    * Default constructor that is using resource
@@ -75,8 +84,6 @@ export class CheWorkspace {
   constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService, $q: ng.IQService, cheJsonRpcApi: CheJsonRpcApi,
               $websocket: ng.websocket.IWebSocketProvider, $location: ng.ILocationService, proxySettings : string, userDashboardConfig: any,
               lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheBranding: CheBranding) {
-    this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
-
     // keep resource
     this.$q = $q;
     this.$resource = $resource;
@@ -134,6 +141,38 @@ export class CheWorkspace {
       cheBranding.unregisterCallback(CONTEXT_FETCHER_ID);
     };
     cheBranding.registerCallback(CONTEXT_FETCHER_ID, callback.bind(this));
+  }
+
+  /**
+   * Add callback to the list of on workspace change subscribers.
+   *
+   * @param {string} workspaceId
+   * @param {IObservableCallbackFn<che.IWorkspace>} action the callback
+   */
+  subscribeOnWorkspaceChange(workspaceId: string, action: IObservableCallbackFn<che.IWorkspace>): void {
+    if (!workspaceId || !action) {
+      return;
+    }
+    if (!this.observables.has(workspaceId)) {
+      this.observables.set(workspaceId, new Observable());
+    }
+
+    const observable = this.observables.get(workspaceId);
+    observable.subscribe(action);
+  }
+
+  /**
+   * Unregister on workspace change callback.
+   *
+   * @param {string} workspaceId
+   * @param {IObservableCallbackFn<che.IWorkspace>} action the callback
+   */
+  unsubscribeOnWorkspaceChange(workspaceId: string, action: IObservableCallbackFn<che.IWorkspace>): void {
+    const observable = this.observables.get(workspaceId);
+    if (!observable) {
+      return;
+    }
+    observable.unsubscribe(action);
   }
 
   /**
@@ -219,7 +258,7 @@ export class CheWorkspace {
    */
   fetchWorkspacesByNamespace(namespace: string): ng.IPromise<any> {
     let promise = this.$http.get('/api/workspace/namespace/' + namespace);
-    let resultPromise = promise.then((response: {data: che.IWorkspace[]}) => {
+    let resultPromise = promise.then((response: { data: che.IWorkspace[] }) => {
       const workspaces = this.getWorkspacesByNamespace(namespace);
 
       workspaces.length = 0;
@@ -295,19 +334,26 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>}
    */
   fetchWorkspaceDetails(workspaceKey: string): ng.IPromise<any> {
-    let defer = this.$q.defer();
-    let promise: ng.IHttpPromise<any> = this.$http.get('/api/workspace/' + workspaceKey);
+    if (this.workspaceDetailsByKeyPromise.has(workspaceKey)) {
+      return this.workspaceDetailsByKeyPromise.get(workspaceKey);
+    }
+    const defer = this.$q.defer();
+    const promise: ng.IHttpPromise<any> = this.$http.get('/api/workspace/' + workspaceKey);
+    this.workspaceDetailsByKeyPromise.set(workspaceKey, promise);
 
     promise.then((response: ng.IHttpPromiseCallbackArg<che.IWorkspace>) => {
-      let data = response.data;
-      this.updateWorkspacesList(data);
+      const workspace = response.data;
+      this.workspacesById.set(workspace.id, workspace);
+      this.updateWorkspacesList(workspace);
       defer.resolve();
     }, (error: any) => {
-      if (error.status !== 304) {
-        defer.reject(error);
-      } else {
+      if (error.status === 304) {
         defer.resolve();
+        return;
       }
+      defer.reject(error);
+    }).finally(() => {
+      this.workspaceDetailsByKeyPromise.delete(workspaceKey);
     });
 
     return defer.promise;
@@ -421,9 +467,9 @@ export class CheWorkspace {
       return item[0] + ':' + item[1];
     });
     let promise = namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-        namespace: namespace,
-        attribute: attrs
-      }, data).$promise :
+      namespace: namespace,
+      attribute: attrs
+    }, data).$promise :
       this.remoteWorkspaceAPI.create({attribute: attrs}, data).$promise;
     return promise;
   }
@@ -433,9 +479,9 @@ export class CheWorkspace {
       return item[0] + ':' + item[1];
     });
     return namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-        namespace: namespace,
-        attribute: attrs
-      }, workspaceConfig).$promise :
+      namespace: namespace,
+      attribute: attrs
+    }, workspaceConfig).$promise :
       this.remoteWorkspaceAPI.create({attribute: attrs}, workspaceConfig).$promise;
   }
 
@@ -491,11 +537,7 @@ export class CheWorkspace {
     let defer = this.$q.defer();
     let promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId: workspaceId}, data).$promise;
     promise.then((data: che.IWorkspace) => {
-      this.workspacesById.set(data.id, data);
-      this.lodash.remove(this.workspaces, (workspace: che.IWorkspace) => {
-        return workspace.id === data.id;
-      });
-      this.workspaces.push(data);
+      this.updateWorkspacesList(data);
       this.startUpdateWorkspaceStatus(data.id);
       defer.resolve(data);
     }, (error: any) => {
@@ -594,13 +636,13 @@ export class CheWorkspace {
       this.subscribedWorkspacesIds.push(workspaceId);
       this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspaceId, (message: any) => {
         // filter workspace events, which really indicate the status change:
-        if (this.workspaceStatuses.indexOf(message.eventType) >= 0) {
+        if (WorkspaceStatus[<string>message.eventType] >= 0) {
           this.getWorkspaceById(workspaceId).status = message.eventType;
         } else if (message.eventType === 'SNAPSHOT_CREATING') {
-          this.getWorkspaceById(workspaceId).status = 'SNAPSHOTTING';
+          this.getWorkspaceById(workspaceId).status = WorkspaceStatus[WorkspaceStatus.SNAPSHOTTING];
         } else if (message.eventType === 'SNAPSHOT_CREATED') {
           // snapshot can be created for RUNNING workspace only.
-          this.getWorkspaceById(workspaceId).status = 'RUNNING';
+          this.getWorkspaceById(workspaceId).status = WorkspaceStatus[WorkspaceStatus.RUNNING];
         }
 
         if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][message.eventType]) {
@@ -619,10 +661,10 @@ export class CheWorkspace {
   /**
    * Fetches the system settings for workspaces.
    *
-   * @returns {IPromise<TResult>}
+   * @returns {IPromise<any>}
    */
   fetchWorkspaceSettings(): ng.IPromise<any> {
-    let promise = this.remoteWorkspaceAPI.getSettings().$promise;
+    const promise = this.remoteWorkspaceAPI.getSettings().$promise;
     return promise.then((settings: any) => {
       this.workspaceSettings = settings;
       return this.workspaceSettings;
@@ -663,6 +705,10 @@ export class CheWorkspace {
         return _workspace.id === workspace.id;
       });
       this.workspaces.push(workspace);
+      // publish change
+      if (this.observables.has(workspace.id)) {
+        this.observables.get(workspace.id).publish(workspace);
+      }
     }
 
     const workspaceDetails = this.getWorkspaceById(workspace.id);
@@ -675,6 +721,15 @@ export class CheWorkspace {
     }
 
     this.startUpdateWorkspaceStatus(workspace.id);
+
+    const controlStatuses = [WorkspaceStatus.RUNNING, WorkspaceStatus.STOPPED];
+    controlStatuses.forEach((statusIndex: number) => {
+      if (workspace.status !== WorkspaceStatus[statusIndex]) {
+        this.fetchStatusChange(workspace.id, WorkspaceStatus[statusIndex]).then(() => {
+          return this.fetchWorkspaceDetails(workspace.id);
+        });
+      }
+    });
   }
 
   private formJsonRpcApiLocation($location: ng.ILocationService, proxySettings : string, devmode: boolean): string {

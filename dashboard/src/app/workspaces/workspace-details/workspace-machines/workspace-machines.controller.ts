@@ -14,6 +14,7 @@ import {EnvironmentManager} from '../../../../components/api/environment/environ
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
 import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
+import {WorkspaceDetailsService} from '../workspace-details.service';
 
 
 type machine = {
@@ -92,7 +93,7 @@ export class WorkspaceMachinesController {
   /**
    * Callback which is called when workspace is changed.
    */
-  private workspaceOnChange: Function;
+  private onChange: Function;
   /**
    * Callback which is called when change DEV machine.
    */
@@ -102,7 +103,7 @@ export class WorkspaceMachinesController {
    * Default constructor that is using resource injection.
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $log: ng.ILogService, $filter: ng.IFilterService, $scope: ng.IScope, $mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService, $location: ng.ILocationService, cheEnvironmentRegistry: CheEnvironmentRegistry, cheListHelperFactory: che.widget.ICheListHelperFactory) {
+  constructor($q: ng.IQService, $log: ng.ILogService, $filter: ng.IFilterService, $scope: ng.IScope, $mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService, $location: ng.ILocationService, cheEnvironmentRegistry: CheEnvironmentRegistry, cheListHelperFactory: che.widget.ICheListHelperFactory, workspaceDetailsService: WorkspaceDetailsService) {
     this.$q = $q;
     this.$log = $log;
     this.$filter = $filter;
@@ -119,15 +120,13 @@ export class WorkspaceMachinesController {
       });
     };
 
-    const deRegistrationFn = $scope.$watch(() => {
-      return this.workspaceDetails ? this.workspaceDetails.config : null;
-    }, (workspaceConfig: che.IWorkspaceConfig) => {
-      this.updateData(workspaceConfig);
-    }, true);
+    this.updateData(this.workspaceDetails);
+    const action = this.updateData.bind(this);
+    workspaceDetailsService.subscribeOnWorkspaceChange(action);
 
     $scope.$on('$destroy', () => {
+      workspaceDetailsService.unsubscribeOnWorkspaceChange(action);
       cheListHelperFactory.removeHelper(MACHINE_LIST_HELPER_ID);
-      deRegistrationFn();
     });
   }
 
@@ -143,10 +142,14 @@ export class WorkspaceMachinesController {
   /**
    * Update workspace data.
    *
-   * @param workspaceConfig {che.IWorkspaceConfig}
+   * @param workspaceDetails {che.IWorkspace}
    */
-  updateData(workspaceConfig: che.IWorkspaceConfig): void {
-    if (workspaceConfig === null) {
+  updateData(workspaceDetails: che.IWorkspace): void {
+    if (!workspaceDetails) {
+      return;
+    }
+    const workspaceConfig = workspaceDetails.config;
+    if (!workspaceConfig) {
       return;
     }
     if (this.workspaceConfig && angular.equals(this.workspaceConfig, workspaceConfig)) {
@@ -176,7 +179,6 @@ export class WorkspaceMachinesController {
       });
     }
     this.workspaceConfig = angular.copy(workspaceConfig);
-    this.workspaceOnChange();
     this.cheListHelper.setList(this.machinesList, 'name', (machine: machine): boolean => {
       return !machine.isDev;
     });
@@ -184,10 +186,15 @@ export class WorkspaceMachinesController {
 
   /**
    * Update environment.
+   *
+   * @param environment {che.IWorkspaceEnvironment}
    */
-  updateEnvironment(): void {
-    const environment = this.environmentManager.getEnvironment(this.environment, this.machines);
+  updateEnvironment(environment: che.IWorkspaceEnvironment): void {
     this.workspaceDetails.config.environments[this.workspaceDetails.config.defaultEnv] = environment;
+    this.updateData(this.workspaceDetails);
+    if (angular.isFunction(this.onChange)) {
+      this.onChange();
+    }
   }
 
   /**
@@ -217,7 +224,8 @@ export class WorkspaceMachinesController {
           });
           // add ws-agent to current machine agents list
           this.environmentManager.setDev(machine, true);
-          this.updateEnvironment();
+          const environment = this.environmentManager.getEnvironment(this.environment, this.machines);
+          this.updateEnvironment(environment);
           deferred.resolve();
         } else {
           // return ws-agent to current machine
@@ -280,8 +288,9 @@ export class WorkspaceMachinesController {
       bindToController: true,
       clickOutsideToClose: true,
       locals: {
-        environment: this.workspaceDetails.config.environments[this.workspaceDetails.config.defaultEnv],
-        machineName: machineName
+        machineName: machineName,
+        environment: this.environment,
+        onChange: this.updateEnvironment.bind(this)
       },
       templateUrl: 'app/workspaces/workspace-details/workspace-machines/edit-machine-dialog/edit-machine-dialog.html'
     });
@@ -293,8 +302,8 @@ export class WorkspaceMachinesController {
    * @param name
    */
   machineOnDelete(name: string): void {
-    const newEnvironment = this.environmentManager.deleteMachine(this.environment, name);
-    this.workspaceDetails.config.environments[this.workspaceDetails.config.defaultEnv] = newEnvironment;
+    const environment = this.environmentManager.deleteMachine(this.environment, name);
+    this.updateEnvironment(environment);
   }
 
   /**
@@ -359,7 +368,8 @@ export class WorkspaceMachinesController {
 
     if (machine && this.environmentManager.getMemoryLimit(machine).toString() !== memoryLimitBytes.toString()) {
       this.environmentManager.setMemoryLimit(machine, memoryLimitBytes);
-      this.updateEnvironment();
+      const environment = this.environmentManager.getEnvironment(this.environment, this.machines);
+      this.updateEnvironment(environment);
     }
   }
 

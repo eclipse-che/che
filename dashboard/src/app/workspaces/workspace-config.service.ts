@@ -10,7 +10,7 @@
  */
 'use strict';
 
-import {CheWorkspace} from '../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 import {NamespaceSelectorSvc} from './create-workspace/namespace-selector/namespace-selector.service';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
 import {StackSelectorSvc} from './create-workspace/stack-selector/stack-selector.service';
@@ -75,7 +75,7 @@ export class WorkspaceConfigService {
    *
    * @return {ng.IPromise<any>}
    */
-  resolveCreateWorkspaceRoute(): ng.IPromise<any> {
+  resolveWorkspaceRoute(): ng.IPromise<any> {
     const namespaceIdDefer = this.$q.defer(),
           workspacesDefer = this.$q.defer();
 

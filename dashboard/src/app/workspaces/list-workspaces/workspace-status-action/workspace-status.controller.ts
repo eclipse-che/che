@@ -10,7 +10,7 @@
  */
 'use strict';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
-import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
 
 /**
  * @ngdoc controller

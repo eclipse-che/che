@@ -20,11 +20,11 @@
  * `<workspace-machines></workspace-machines>` for displaying workspace machines entry.
  *
  * @param {che.IWorkspace=} workspace-details  the workspace details
- * @param {Function=} workspace-on-change  the callback which is called when workspace is changed.
+ * @param {Function=} on-change  the callback which is called when workspace is changed.
  *
  * @usage
  *   <workspace-machines  workspace-details="ctrl.workspaceDetails"
- *                        workspace-on-change="ctrl.onChange()"></workspace-machines>
+ *                        on-change="ctrl.onChange()"></workspace-machines>
  *
  * @author Oleksii Orel
  */
@@ -45,8 +45,8 @@ export class WorkspaceMachines implements ng.IDirective {
    */
   constructor() {
     this.scope = {
-      workspaceDetails: '=',
-      workspaceOnChange: '&'
+      onChange: '&',
+      workspaceDetails: '='
     };
   }
 }

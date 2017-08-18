@@ -10,7 +10,7 @@
  */
 'use strict';
 import {DiagnosticCallback} from '../diagnostic-callback';
-import {CheWorkspace} from '../../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import {DiagnosticsRunningWorkspaceCheck} from './diagnostics-workspace-check-workspace.factory';
 import {CheBranding} from '../../../components/branding/che-branding.factory';
 

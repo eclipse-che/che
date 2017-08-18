@@ -51,11 +51,9 @@ import {RamSettingsController} from './create-workspace/ram-settings/ram-setting
 import {RamSettings} from './create-workspace/ram-settings/ram-settings.directive';
 import {RamSettingsMachineItemController} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.controller';
 import {RamSettingsMachineItem} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.directive';
-
 import {NamespaceSelectorController} from './create-workspace/namespace-selector/namespace-selector.controller';
 import {NamespaceSelectorSvc} from './create-workspace/namespace-selector/namespace-selector.service';
 import {NamespaceSelector} from './create-workspace/namespace-selector/namespace-selector.directive';
-
 import {ProjectSourceSelectorController} from './create-workspace/project-source-selector/project-source-selector.controller';
 import {ProjectSourceSelectorService} from './create-workspace/project-source-selector/project-source-selector.service';
 import {ProjectSourceSelector} from './create-workspace/project-source-selector/project-source-selector.directive';
@@ -85,12 +83,10 @@ import {EditProjectService} from './create-workspace/project-source-selector/edi
 import {ProjectMetadataController} from './create-workspace/project-source-selector/edit-project/project-metadata/project-metadata.controller';
 import {ProjectMetadataService} from './create-workspace/project-source-selector/edit-project/project-metadata/project-metadata.service';
 import {ProjectMetadata} from './create-workspace/project-source-selector/edit-project/project-metadata/project-metadata.directive';
-
 import {CheWorkspaceRamAllocationSliderController} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
 import {WorkspaceStatus} from './workspace-status/workspace-status.directive';
 import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indicator.directive';
-
 import {CheStackLibraryFilterController} from './create-workspace/stack-selector/stack-library-filter/che-stack-library-filter.controller';
 import {CheStackLibraryFilter}     from './create-workspace/stack-selector/stack-library-filter/che-stack-library-filter.directive';
 import {WorkspaceEnvironmentsController} from './workspace-details/environments/environments.controller';
@@ -100,32 +96,25 @@ import {WorkspaceMachineConfig} from './workspace-details/environments/machine-c
 import {EditMachineNameDialogController} from  './workspace-details/environments/machine-config/edit-machine-name-dialog/edit-machine-name-dialog.controller';
 import {DeleteDevMachineDialogController} from './workspace-details/environments/machine-config/delete-dev-machine-dialog/delete-dev-machine-dialog.controller';
 import {DevMachineLabel} from './workspace-details/environments/machine-config/dev-machine-label/dev-machine-label.directive';
-
 import {ListEnvVariablesController} from './workspace-details/environments/list-env-variables/list-env-variables.controller';
 import {ListEnvVariables} from './workspace-details/environments/list-env-variables/list-env-variables.directive';
 import {EditVariableDialogController} from  './workspace-details/environments/list-env-variables/edit-variable-dialog/edit-variable-dialog.controller';
-
 import {ListServersController} from './workspace-details/environments/list-servers/list-servers.controller';
 import {ListServers} from './workspace-details/environments/list-servers/list-servers.directive';
 import {EditServerDialogController} from  './workspace-details/environments/list-servers/edit-server-dialog/edit-server-dialog.controller';
-
 import {ListCommandsController} from './workspace-details/list-commands/list-commands.controller';
 import {ListCommands} from './workspace-details/list-commands/list-commands.directive';
 import {EditCommandDialogController} from  './workspace-details/list-commands/edit-command-dialog/edit-command-dialog.controller';
-
 import {ListAgentsController} from  './workspace-details/environments/list-agents/list-agents.controller';
 import {AddMachineDialogController} from  './workspace-details/environments/add-machine-dialog/add-machine-dialog.controller';
 import {ListAgents} from  './workspace-details/environments/list-agents/list-agents.directive';
-
 import {StackSelectorScopeFilter} from './create-workspace/stack-selector/stack-selector-scope.filter';
 import {StackSelectorSearchFilter} from './create-workspace/stack-selector/stack-selector-search.filter';
 import {StackSelectorTagsFilter} from './create-workspace/stack-selector/stack-selector-tags.filter';
 import {CheWorkspaceStatusButton} from './workspace-details/status-button/workspace-status-button.directive';
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
-
 import {WorkspaceConfigService} from './workspace-config.service';
-
 import {WorkspaceMachines} from './workspace-details/workspace-machines/workspace-machines.directive';
 import {WorkspaceMachinesController} from './workspace-details/workspace-machines/workspace-machines.controller';
 import {WorkspaceMachineItem} from './workspace-details/workspace-machines/machine-item/workspace-machine-item.directive';
@@ -143,6 +132,7 @@ import {MachineServers} from './workspace-details/workspace-machine-servers/mach
 import {EditMachineServerDialogController} from './workspace-details/workspace-machine-servers/edit-machine-server-dialog/edit-server-dialog.controller';
 import {MachineAgents} from './workspace-details/workspace-machine-agents/machine-agents.directive';
 import {MachineAgentsController} from './workspace-details/workspace-machine-agents/machine-agents.controller';
+import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 
 
 /**
@@ -333,8 +323,12 @@ export class WorkspacesConfig {
         controller: 'WorkspaceDetailsController',
         controllerAs: 'workspaceDetailsController',
         resolve: {
-          initData: ['workspaceConfigService', (workspaceConfigService: WorkspaceConfigService) => {
-            return workspaceConfigService.resolveCreateWorkspaceRoute();
+          initData: ['$route', 'cheWorkspace', 'workspaceConfigService', ($route: ng.route.IRouteService, cheWorkspace: CheWorkspace, workspaceConfigService: WorkspaceConfigService) => {
+            return workspaceConfigService.resolveWorkspaceRoute().then(() => {
+              const {namespace, workspaceName} = $route.current.params;
+              const workspaceDetails = cheWorkspace.getWorkspaceByName(namespace, workspaceName);
+              return {namespaceId: namespace, workspaceName: workspaceName, workspaceDetails: workspaceDetails};
+            });
           }]
         }
       })
@@ -345,7 +339,7 @@ export class WorkspacesConfig {
         controllerAs: 'createWorkspaceController',
         resolve: {
           initData: ['workspaceConfigService', (workspaceConfigService: WorkspaceConfigService) => {
-            return workspaceConfigService.resolveCreateWorkspaceRoute();
+            return workspaceConfigService.resolveWorkspaceRoute();
           }]
         }
       });

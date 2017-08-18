@@ -14,6 +14,7 @@ import {CheAPI} from '../../../../components/api/che-api.factory';
 import {StackSelectorSvc} from '../../create-workspace/stack-selector/stack-selector.service';
 import {RandomSvc} from '../../../../components/utils/random.service';
 import {WorkspaceDetailsProjectsService} from './workspace-details-projects.service';
+import {WorkspaceDetailsService} from '../workspace-details.service';
 
 /**
  * @ngdoc controller
@@ -65,7 +66,7 @@ export class WorkspaceDetailsProjectsCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI: CheAPI, $mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory, stackSelectorSvc: StackSelectorSvc, randomSvc: RandomSvc, workspaceDetailsProjectsService: WorkspaceDetailsProjectsService) {
+  constructor(cheAPI: CheAPI, $mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory, stackSelectorSvc: StackSelectorSvc, randomSvc: RandomSvc, workspaceDetailsProjectsService: WorkspaceDetailsProjectsService, workspaceDetailsService: WorkspaceDetailsService) {
     this.$mdDialog = $mdDialog;
     this.confirmDialogService = confirmDialogService;
     this.stackSelectorSvc = stackSelectorSvc;
@@ -83,12 +84,6 @@ export class WorkspaceDetailsProjectsCtrl {
 
     this.projectFilter = {name: ''};
 
-    const workspaceProjectsWatcher = $scope.$watch(() => {
-      return this.workspaceDetails.config.projects;
-    }, () => {
-      this.updateProjectsData();
-    }, true);
-
     const workspaceEditWatcher = $scope.$on('edit-workspace-details', (event: ng.IAngularEvent, data: {status: string}) => {
       if (data.status === 'saved' || data.status === 'cancelled') {
         this.workspaceDetailsProjectsService.clearProjectTemplates();
@@ -96,11 +91,15 @@ export class WorkspaceDetailsProjectsCtrl {
       }
     });
 
+    this.updateProjectsData(this.workspaceDetails);
+    const action = this.updateProjectsData.bind(this);
+    workspaceDetailsService.subscribeOnWorkspaceChange(action);
+
     $scope.$on('$destroy', () => {
+      workspaceDetailsService.unsubscribeOnWorkspaceChange(action);
       this.workspaceDetailsProjectsService.clearProjectTemplates();
 
-      // unregister watchers
-      workspaceProjectsWatcher();
+      // unregister watcher
       workspaceEditWatcher();
     });
   }
@@ -117,12 +116,14 @@ export class WorkspaceDetailsProjectsCtrl {
 
   /**
    * Creates list of existing projects and not imported ones.
+   *
+   * @param {che.IWorkspace} workspaceDetails
    */
-  updateProjectsData(): void {
-    if (!this.workspaceDetails) {
+  updateProjectsData(workspaceDetails: che.IWorkspace): void {
+    if (!workspaceDetails) {
       return;
     }
-
+    this.workspaceDetails = workspaceDetails;
     this.stackSelectorSvc.setStackId(this.workspaceDetails.attributes.stackId);
     this.cheListHelper.setList(this.workspaceDetails.config.projects, 'name');
   }

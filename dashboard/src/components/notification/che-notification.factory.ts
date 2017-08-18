@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheUIElementsInjectorService} from '../injector/che-ui-elements-injector.service';
+import {CheUIElementsInjectorService} from '../service/injector/che-ui-elements-injector.service';
 
 const NOTIFICATION_CONTAINER_ELEMENT_ID = 'che-notification-container';
 const ERROR_NOTIFICATION_DISPLAY_TIME = 10000;

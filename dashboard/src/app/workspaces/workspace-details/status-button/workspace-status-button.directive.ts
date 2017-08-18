@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/che-workspace.factory';
+import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
 
 interface IWorkspaceStatusButtonScope extends ng.IScope {
   isDisabled: boolean;

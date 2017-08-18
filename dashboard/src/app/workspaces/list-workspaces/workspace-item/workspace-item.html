@@ -66,9 +66,9 @@
              uib-tooltip="Configure workspace">
             <span class="fa fa-cog"></span>
           </a>
-          <a ng-href="#/create-project?workspaceId={{workspaceItemCtrl.workspace.id}}" uib-tooltip="Add project">
+          <span ng-click="workspaceItemCtrl.redirectToWorkspaceDetails('Projects');" uib-tooltip="Add project">
             <span class="fa fa-plus-square-o"></span>
-          </a>
+          </span>
         </span>
       </div>
     </div>

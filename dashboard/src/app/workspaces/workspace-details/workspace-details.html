@@ -31,10 +31,9 @@
       </md-tab-label>
       <md-tab-body>
         <ng-form name="workspaceOverviewForm">
-          <workspace-details-overview ng-if="workspaceDetailsController.workspaceDetails"
-                                      ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Overview, workspaceOverviewForm)"
+          <workspace-details-overview ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Overview, workspaceOverviewForm)"
                                       overview-form="workspaceOverviewForm"
-                                      on-change="workspaceDetailsController.switchEditMode()"
+                                      on-change="workspaceDetailsController.checkEditMode()"
                                       workspace-details="workspaceDetailsController.workspaceDetails"></workspace-details-overview>
         </ng-form>
       </md-tab-body>
@@ -48,7 +47,7 @@
       <md-tab-body>
         <workspace-details-projects
           workspace-details="workspaceDetailsController.workspaceDetails"
-          projects-on-change="workspaceDetailsController.switchEditMode()"></workspace-details-projects>
+          projects-on-change="workspaceDetailsController.checkEditMode()"></workspace-details-projects>
       </md-tab-body>
     </md-tab>
 
@@ -59,7 +58,7 @@
       </md-tab-label>
       <md-tab-body>
         <workspace-machines workspace-details="workspaceDetailsController.workspaceDetails"
-                            workspace-on-change="workspaceDetailsController.switchEditMode()"></workspace-machines>
+                            on-change="workspaceDetailsController.checkEditMode()"></workspace-machines>
       </md-tab-body>
     </md-tab>
 
@@ -71,7 +70,7 @@
       <md-tab-body>
         <che-machine-selector content-title="Workspace Agents"
                               workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.switchEditMode()">
+                              on-change="workspaceDetailsController.checkEditMode()">
           <che-machine-agents environment-manager="environmentManager"
                               selected-machine="machine"
                               on-change="onChange()"></che-machine-agents>
@@ -87,7 +86,7 @@
       <md-tab-body>
         <che-machine-selector content-title="Servers"
                               workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.switchEditMode()">
+                              on-change="workspaceDetailsController.checkEditMode()">
           <che-machine-servers environment-manager="environmentManager"
                                selected-machine="machine"
                                on-change="onChange()"></che-machine-servers>
@@ -103,7 +102,7 @@
       <md-tab-body>
         <che-machine-selector content-title="Environment variables"
                               workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.switchEditMode()">
+                              on-change="workspaceDetailsController.checkEditMode()">
           <che-env-variables environment-manager="environmentManager"
                              selected-machine="machine"
                              on-change="onChange()"></che-env-variables>
@@ -152,5 +151,4 @@
                              workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"
                              workspace-edit-mode-on-cancel="workspaceDetailsController.cancelConfigChanges()"></workspace-edit-mode-overlay>
 
-<md-content ng-show="workspaceDetailsController.invalidWorkspace">{{workspaceDetailsController.invalidWorkspace}}
-</md-content>
+<md-content ng-show="workspaceDetailsController.invalidWorkspace">{{workspaceDetailsController.invalidWorkspace}}</md-content>

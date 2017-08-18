@@ -12,6 +12,7 @@
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
+import {WorkspaceDetailsService} from '../workspace-details.service';
 
 interface IMachineSelectorScope extends ng.IScope {
   setMachine?: (machine: IEnvironmentManagerMachine) => void;
@@ -75,18 +76,16 @@ export class MachineSelectorController {
    * Default constructor that is using resource injection.
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+  constructor($scope: ng.IScope, cheEnvironmentRegistry: CheEnvironmentRegistry, workspaceDetailsService: WorkspaceDetailsService) {
     this.$scope = $scope;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
-    const deRegistrationFn = $scope.$watch(() => {
-      return this.workspaceDetails;
-    }, (workspaceDetails: che.IWorkspace) => {
-      this.init(workspaceDetails);
-    }, true);
+    this.init(this.workspaceDetails);
+    const action = this.init.bind(this);
+    workspaceDetailsService.subscribeOnWorkspaceChange(action);
 
     $scope.$on('$destroy', () => {
-      deRegistrationFn();
+      workspaceDetailsService.subscribeOnWorkspaceChange(action);
     });
   }
 
@@ -95,7 +94,7 @@ export class MachineSelectorController {
    * @param workspaceDetails {che.IWorkspace}
    */
   init(workspaceDetails: che.IWorkspace): void {
-    if (!workspaceDetails) {
+    if (!workspaceDetails || !workspaceDetails.config) {
       return;
     }
     const workspaceConfig: che.IWorkspaceConfig = angular.copy(workspaceDetails.config);

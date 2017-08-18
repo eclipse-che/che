@@ -9,19 +9,16 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-
+import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/che-workspace.factory';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
-import {CheWorkspace, WorkspaceStatus} from '../../../components/api/che-workspace.factory';
 import {WorkspaceDetailsService} from './workspace-details.service';
-import {CheUser} from '../../../components/api/che-user.factory';
+import IdeSvc from '../../ide/ide.service';
 
-/**
- * @ngdoc controller
- * @name workspaces.workspace.details.controller:WorkspaceDetailsController
- * @description This class is handling the controller for workspace to create and edit.
- * @author Ann Shumilova
- * @author Oleksii Kurinnyi
- */
+export  interface IInitData {
+  namespaceId: string;
+  workspaceName: string;
+  workspaceDetails: che.IWorkspace;
+}
 
 const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Agents', 'Servers', 'Env_Variables', 'Config'];
 
@@ -31,86 +28,61 @@ const STOPPING = WorkspaceStatus[WorkspaceStatus.STOPPING];
 const STOPPED = WorkspaceStatus[WorkspaceStatus.STOPPED];
 const SNAPSHOTTING = WorkspaceStatus[WorkspaceStatus.SNAPSHOTTING];
 
+/**
+ * @ngdoc controller
+ * @name workspaces.workspace.details.controller:WorkspaceDetailsController
+ * @description This class is handling the controller for workspace to create and edit.
+ * @author Ann Shumilova
+ * @author Oleksii Kurinnyi
+ * @author Oleksii Orel
+ */
 export class WorkspaceDetailsController {
-  $location: ng.ILocationService;
-  $log: ng.ILogService;
-  $q: ng.IQService;
-  $scope: ng.IScope;
-  cheNotification: CheNotification;
-  cheWorkspace: CheWorkspace;
-  workspaceDetailsService: WorkspaceDetailsService;
-  cheUser: CheUser;
-  loading: boolean = false;
-  saving: boolean = false;
-  isCreationFlow: boolean = true;
-  selectedTabIndex: number;
-  namespaceId: string = '';
-  onNamespaceChanged: Function;
-  workspaceId: string = '';
-  workspaceName: string = '';
-  newName: string = '';
-  stackId: string = '';
-  workspaceDetails: che.IWorkspace = null;
-  originWorkspaceDetails: che.IWorkspace = null;
-  machinesViewStatus: any = {};
-  errorMessage: string = '';
-  invalidWorkspace: string = '';
-  editMode: boolean = false;
-  editModeMessage: string = '';
-  showApplyMessage: boolean = false;
-  workspaceImportedRecipe: che.IRecipe;
-  forms: Map<string, any> = new Map();
-  tab: { [key: string]: string } = {};
+  private $scope: ng.IScope;
+  private $log: ng.ILogService;
+  private $location: ng.ILocationService;
+  private cheNotification: CheNotification;
+  private cheWorkspace: CheWorkspace;
+  private ideSvc: IdeSvc;
+  private workspaceDetailsService: WorkspaceDetailsService;
+  private loading: boolean = false;
+  private selectedTabIndex: number;
+  private namespaceId: string = '';
+  private workspaceId: string = '';
+  private workspaceName: string = '';
+  private newName: string = '';
+  private workspaceDetails: che.IWorkspace;
+  private originWorkspaceDetails: any = {};
+  private editMode: boolean = false;
+  private showApplyMessage: boolean = false;
+  private workspaceImportedRecipe: che.IRecipe;
+  private forms: Map<string, ng.IFormController> = new Map();
+  private tab: { [key: string]: string } = {};
+  private saving: boolean = false;
+  private editModeMessage: string = '';
+  private errorMessage: string = '';
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService,
-              $log: ng.ILogService,
-              $q: ng.IQService,
-              $route: ng.route.IRouteService,
-              $scope: ng.IScope,
-              cheNotification: CheNotification,
-              cheWorkspace: CheWorkspace,
-              workspaceDetailsService: WorkspaceDetailsService,
-              cheUser: CheUser) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $scope: ng.IScope, cheNotification: CheNotification, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, initData: IInitData) {
     this.$log = $log;
-    this.$location = $location;
-    this.$q = $q;
     this.$scope = $scope;
+    this.$location = $location;
     this.cheNotification = cheNotification;
     this.cheWorkspace = cheWorkspace;
+    this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
-    this.cheUser = cheUser;
 
-    // prepare data
-    const {namespace, workspaceName} = $route.current.params;
-    this.namespaceId = namespace;
-    this.workspaceName = workspaceName;
+    this.namespaceId = initData.namespaceId;
+    this.workspaceName = initData.workspaceName;
+    this.workspaceId = initData.workspaceDetails.id;
+
+    const action = this.updateWorkspaceData.bind(this);
+    this.cheWorkspace.subscribeOnWorkspaceChange(initData.workspaceDetails.id, action);
+    this.updateWorkspaceData(initData.workspaceDetails);
+
     this.updateTabs();
-    this.loading = true;
-    this.fetchWorkspaceDetails().then(() => {
-      this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespaceId, this.workspaceName);
-      this.updateWorkspaceData();
-    }).finally(() => {
-      this.loading = false;
-    });
-
-    const workspaceStatusDeRegistrationFn = $scope.$watch(() => {
-      return this.saving === false && this.getWorkspaceStatus();
-    }, (newStatus: string, oldStatus: string) => {
-      if (oldStatus === SNAPSHOTTING) {
-        // status was not changed
-        return;
-      }
-      if (newStatus === RUNNING || newStatus === STOPPED) {
-        this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId).then(() => {
-          this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespaceId, this.workspaceName);
-          this.updateWorkspaceData();
-        });
-      }
-    });
 
     this.updateSelectedTab(this.$location.search().tab);
     const searchDeRegistrationFn = $scope.$watch(() => {
@@ -121,7 +93,7 @@ export class WorkspaceDetailsController {
       }
     }, true);
     $scope.$on('$destroy', () => {
-      workspaceStatusDeRegistrationFn();
+      this.cheWorkspace.unsubscribeOnWorkspaceChange(this.workspaceId, action);
       searchDeRegistrationFn();
     });
   }
@@ -182,41 +154,18 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Fetches the workspace details.
+   * Prepare workspaces data.
    *
-   * @returns {Promise}
+   * @param workspaceDetails {che.IWorkspace}
    */
-  fetchWorkspaceDetails(): ng.IPromise<any> {
-    let defer = this.$q.defer();
-
-    if (this.cheWorkspace.getWorkspaceByName(this.namespaceId, this.workspaceName)) {
-      defer.resolve();
-    } else {
-      this.cheWorkspace.fetchWorkspaceDetails(this.namespaceId + '/' + this.workspaceName).then(() => {
-        defer.resolve();
-      }, (error: any) => {
-        if (error.status === 304) {
-          defer.resolve();
-        } else {
-          this.invalidWorkspace = error.statusText;
-          defer.reject(error);
-        }
-      });
+  updateWorkspaceData(workspaceDetails: che.IWorkspace): void {
+    this.originWorkspaceDetails = angular.copy(workspaceDetails);
+    this.checkEditMode();
+    if (this.workspaceDetails && this.editMode) {
+      return;
     }
-    return defer.promise;
-  }
-
-  /**
-   * Creates copy of workspace config.
-   */
-  updateWorkspaceData(): void {
-    if (this.loading) {
-      this.loading = false;
-    }
-    this.workspaceId = this.workspaceDetails.id;
-    this.workspaceName = this.workspaceDetails.config.name;
-    this.originWorkspaceDetails = angular.copy(this.workspaceDetails);
-    this.switchEditMode();
+    this.workspaceDetails = angular.copy(workspaceDetails);
+    this.workspaceDetailsService.publishWorkspaceChange(workspaceDetails);
   }
 
   /**
@@ -264,18 +213,14 @@ export class WorkspaceDetailsController {
     }
     this.workspaceDetails.config = config;
     this.workspaceImportedRecipe = config.environments[config.defaultEnv].recipe;
-    this.switchEditMode();
+    this.checkEditMode();
   }
 
-  /**
-   * Callback when environment has been changed.
-   */
-  updateWorkspaceConfigEnvironment(): void {
-    this.workspaceImportedRecipe = null;
-    this.switchEditMode();
-  }
 
-  switchEditMode(): void {
+  checkEditMode(): void {
+    if (!this.originWorkspaceDetails || !this.workspaceDetails) {
+      return;
+    }
     this.editMode = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
 
     if (this.editMode === false) {
@@ -283,7 +228,7 @@ export class WorkspaceDetailsController {
       this.showApplyMessage = false;
       return;
     }
-
+    this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
     this.editModeMessage = 'Changes will be applied and workspace restarted';
     const needRunningStatus = this.workspaceDetailsService.needRunningToUpdate();
     if (needRunningStatus) {
@@ -312,15 +257,12 @@ export class WorkspaceDetailsController {
       this.saving = false;
       this.loading = false;
 
-      this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespaceId, this.workspaceName);
-      this.updateWorkspaceData();
-
       this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceName).search({tab: this.tab[this.selectedTabIndex]});
     }, (error: any) => {
       this.$scope.$broadcast('edit-workspace-details', {status: 'failed'});
       this.cheNotification.showError('Update workspace failed.', error);
 
-      this.switchEditMode();
+      this.checkEditMode();
 
       this.saving = false;
       this.loading = false;
@@ -332,8 +274,8 @@ export class WorkspaceDetailsController {
    */
   cancelConfigChanges(): void {
     this.workspaceDetails = angular.copy(this.originWorkspaceDetails);
-
-    this.updateWorkspaceData();
+    this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
+    this.editMode = false;
 
     this.$scope.$broadcast('edit-workspace-details', {status: 'cancelled'});
   }
@@ -383,6 +325,4 @@ export class WorkspaceDetailsController {
 
     return tabs.some((tabKey: string) => this.checkFormsNotValid(tabKey));
   }
-
 }
-

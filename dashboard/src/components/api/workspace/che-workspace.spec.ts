@@ -10,8 +10,8 @@
  */
 'use strict';
 import {CheWorkspace} from './che-workspace.factory';
-import {CheAPIBuilder} from './builder/che-api-builder.factory';
-import {CheHttpBackend} from './test/che-http-backend';
+import {CheAPIBuilder} from '../builder/che-api-builder.factory';
+import {CheHttpBackend} from '../test/che-http-backend';
 
 /**
  * Test of the CheWorkspace
