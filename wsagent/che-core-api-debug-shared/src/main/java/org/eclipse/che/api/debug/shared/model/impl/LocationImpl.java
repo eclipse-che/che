@@ -13,7 +13,7 @@ package org.eclipse.che.api.debug.shared.model.impl;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Method;
 
-import java.util.Objects;
+import static com.google.common.base.Objects.equal;
 
 /**
  * @author Anatoliy Bazko
@@ -26,6 +26,7 @@ public class LocationImpl implements Location {
     private final int     externalResourceId;
     private final String  resourceProjectPath;
     private final Method  method;
+    private final long    threadId;
 
     public LocationImpl(String target,
                         int lineNumber,
@@ -33,7 +34,8 @@ public class LocationImpl implements Location {
                         boolean externalResource,
                         int externalResourceId,
                         String resourceProjectPath,
-                        Method method) {
+                        Method method,
+                        long threadId) {
         this.target = target;
         this.lineNumber = lineNumber;
         this.resourcePath = resourcePath;
@@ -41,14 +43,15 @@ public class LocationImpl implements Location {
         this.externalResourceId = externalResourceId;
         this.resourceProjectPath = resourceProjectPath;
         this.method = method;
+        this.threadId = threadId;
     }
 
     public LocationImpl(String target, int lineNumber) {
-        this(target, lineNumber, null, false, 0, null, null);
+        this(target, lineNumber, null, false, 0, null, null, -1);
     }
 
     public LocationImpl(String target) {
-        this(target, 0, null, false, 0, null, null);
+        this(target, 0, null, false, 0, null, null, -1);
     }
 
     @Override
@@ -87,6 +90,11 @@ public class LocationImpl implements Location {
     }
 
     @Override
+    public long getThreadId() {
+        return threadId;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof LocationImpl)) return false;
@@ -94,15 +102,17 @@ public class LocationImpl implements Location {
         return lineNumber == location.lineNumber &&
                externalResource == location.externalResource &&
                externalResourceId == location.externalResourceId &&
-               Objects.equals(target, location.target) &&
-               Objects.equals(resourcePath, location.resourcePath) &&
-               Objects.equals(resourceProjectPath, location.resourceProjectPath) &&
-               Objects.equals(method, location.method);
+               threadId == location.threadId &&
+               equal(target, location.target) &&
+               equal(resourcePath, location.resourcePath) &&
+               equal(resourceProjectPath, location.resourceProjectPath) &&
+               equal(method, location.method);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(target, lineNumber, resourcePath, externalResource, externalResourceId, resourceProjectPath, method);
+        return com.google.common.base.Objects
+                .hashCode(target, lineNumber, resourcePath, externalResource, externalResourceId, resourceProjectPath, method, threadId);
     }
 
     @Override
@@ -115,6 +125,7 @@ public class LocationImpl implements Location {
                ", externalResourceId=" + externalResourceId +
                ", resourceProjectPath='" + resourceProjectPath + '\'' +
                ", method=" + method +
+               ", threadId=" + threadId +
                '}';
     }
 }

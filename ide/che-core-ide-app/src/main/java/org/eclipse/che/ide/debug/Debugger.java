@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
-import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -107,6 +109,11 @@ public interface Debugger extends DebuggerObservable {
      * Gets dump the current frame.
      */
     Promise<StackFrameDump> dumpStackFrame();
+
+    /**
+     * Gets thread dump.
+     */
+    Promise<List<ThreadDumpDto>> getThreadDump();
 
     /**
      * Updates the value of the given variable.

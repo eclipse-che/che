@@ -14,6 +14,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
@@ -67,6 +69,22 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
      *         available breakpoints
      */
     void setBreakpoints(@NotNull List<Breakpoint> breakPoints);
+
+    /**
+     * Sets the list of the threads and select the one
+     * with {@link ThreadDump#getId()} equal to {@code activeThreadId}.
+     */
+    void setThreads(@NotNull List<? extends ThreadDump> threadDumps, long activeThreadId);
+
+    /**
+     * Clears the list of threads.
+     */
+    void clearThreads();
+
+    /**
+     * Sets the list of frames for selected thread.
+     */
+    void setFrames(@NotNull List<? extends StackFrameDump> stackFrameDumps);
 
     /**
      * Sets java virtual machine name and version.

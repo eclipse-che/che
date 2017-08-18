@@ -51,4 +51,9 @@ public interface Location {
      */
     @Nullable
     Method getMethod();
+
+    /**
+     * Returns thread id.
+     */
+    long getThreadId();
 }

@@ -22,6 +22,7 @@ import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
@@ -173,7 +174,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                     }
 
                     if (currentLocation != null) {
-                        openCurrentFile();
+                        openCurrentFile(currentLocation);
                     }
 
                     startCheckingEvents();
@@ -189,11 +190,10 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     private void onEventListReceived(@NotNull DebuggerEventDto event) {
-        LocationDto newLocationDto;
-
         switch (event.getType()) {
             case SUSPEND:
-                newLocationDto = ((SuspendEventDto)event).getLocation();
+                currentLocation = ((SuspendEventDto)event).getLocation();
+                openCurrentFile(currentLocation);
                 break;
             case BREAKPOINT_ACTIVATED:
                 BreakpointDto breakpointDto = ((BreakpointActivatedEventDto)event).getBreakpoint();
@@ -207,42 +207,31 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                 return;
         }
 
-        if (newLocationDto != null) {
-            currentLocation = newLocationDto;
-            openCurrentFile();
-        }
-
         preserveDebuggerState();
     }
 
-    private void openCurrentFile() {
+    private void openCurrentFile(Location location) {
         //todo we need add possibility to handle few files
         try {
-            activeFileHandler.openFile(currentLocation,
+            activeFileHandler.openFile(location,
                                        new AsyncCallback<VirtualFile>() {
                                            @Override
                                            public void onFailure(Throwable caught) {
                                                for (DebuggerObserver observer : observers) {
-                                                   observer.onBreakpointStopped(currentLocation.getTarget(),
-                                                                                currentLocation.getTarget(),
-                                                                                currentLocation.getLineNumber());
+                                                   observer.onBreakpointStopped(location.getTarget(), location);
                                                }
                                            }
 
                                            @Override
                                            public void onSuccess(VirtualFile result) {
                                                for (DebuggerObserver observer : observers) {
-                                                   observer.onBreakpointStopped(result.getLocation().toString(),
-                                                                                currentLocation.getTarget(),
-                                                                                currentLocation.getLineNumber());
+                                                   observer.onBreakpointStopped(result.getLocation().toString(), location);
                                                }
                                            }
                                        });
         } catch (Exception e) {
             for (DebuggerObserver observer : observers) {
-                observer.onBreakpointStopped(currentLocation.getTarget(),
-                                             currentLocation.getTarget(),
-                                             currentLocation.getLineNumber());
+                observer.onBreakpointStopped(location.getTarget(), location);
             }
         }
     }
@@ -329,6 +318,15 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
         Promise<StackFrameDumpDto> stackFrameDump = service.getStackFrameDump(debugSessionDto.getId());
         return stackFrameDump.then((Function<StackFrameDumpDto, StackFrameDump>)StackFrameDumpImpl::new);
+    }
+
+    @Override
+    public Promise<List<ThreadDumpDto>> getThreadDump() {
+        if (!isConnected()) {
+            return Promises.reject(JsPromiseError.create("Debugger is not connected"));
+        }
+
+        return service.getThreadDump(debugSessionDto.getId());
     }
 
     @Override

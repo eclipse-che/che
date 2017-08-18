@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
+import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 
@@ -73,7 +74,7 @@ public interface DebuggerObserver {
     /**
      * Event happens when debugger stopped at breakpoint.
      */
-    void onBreakpointStopped(String filePath, String className, int lineNumber);
+    void onBreakpointStopped(String filePath, Location location);
 
     /**
      * Event happens when value changed.

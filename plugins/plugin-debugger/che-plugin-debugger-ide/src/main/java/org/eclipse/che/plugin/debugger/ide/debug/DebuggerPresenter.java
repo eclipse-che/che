@@ -19,8 +19,8 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
-import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -47,6 +47,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -82,6 +83,7 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
 
     private MutableVariable    selectedVariable;
     private List<Variable>     variables;
+    private List<ThreadDump>   threadDump;
     private DebuggerDescriptor debuggerDescriptor;
     private Location           executionPoint;
 
@@ -104,6 +106,7 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
         this.constant = constant;
         this.breakpointManager = breakpointManager;
         this.variables = new ArrayList<>();
+        this.threadDump = new ArrayList<>();
         this.notificationManager = notificationManager;
         this.addRule(ProjectPerspective.PROJECT_PERSPECTIVE_ID);
 
@@ -191,9 +194,12 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
 
     private void resetStates() {
         variables.clear();
+        threadDump.clear();
         view.setVariables(variables);
         view.setVMName("");
         view.setExecutionPoint(null);
+        view.clearThreads();
+        view.setFrames(Collections.emptyList());
         selectedVariable = null;
         executionPoint = null;
     }
@@ -208,6 +214,8 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
             view.setExecutionPoint(executionPoint);
         }
         view.setBreakpoints(breakpointManager.getBreakpointList());
+
+        updateThreadDump();
         updateStackFrameDump();
 
         showView();
@@ -225,6 +233,20 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     public void showView() {
         if (partStack == null || !partStack.containsPart(this)) {
             workspaceAgent.openPart(this, PartStackType.INFORMATION);
+        }
+    }
+
+    private void updateThreadDump() {
+        Debugger debugger = debuggerManager.getActiveDebugger();
+        if (debugger != null && executionPoint != null) {
+            debugger.getThreadDump()
+                    .then(threadDump -> {
+                        view.setThreads(threadDump, executionPoint.getThreadId());
+                        view.setFrames(threadDump.get(0).getFrames());
+                    })
+                    .catchError(error -> {
+                        Log.error(DebuggerPresenter.class, error.getCause());
+                    });
         }
     }
 
@@ -340,8 +362,8 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     }
 
     @Override
-    public void onBreakpointStopped(String filePath, String className, int lineNumber) {
-        executionPoint = new LocationImpl(className, lineNumber);
+    public void onBreakpointStopped(String filePath, Location location) {
+        executionPoint = location;
         showAndUpdateView();
     }
 

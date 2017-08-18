@@ -278,9 +278,7 @@ public class DebuggerPresenterTest extends BaseTest {
 
     @Test
     public void testOnBreakpointStopped() {
-        String filePath = "filePath";
-        String className = "className";
-        int lineNumber = 40;
+        final String filePath = "filePath";
 
         LocationDto executionPoint = mock(LocationDto.class);
         doReturn(executionPoint).when(dtoFactory).createDto(LocationDto.class);
@@ -288,7 +286,7 @@ public class DebuggerPresenterTest extends BaseTest {
         doReturn(promiseString).when(debugger).dumpStackFrame();
         doReturn(promiseString).when(promiseString).then((Operation<String>)any());
 
-        presenter.onBreakpointStopped(filePath, className, lineNumber);
+        presenter.onBreakpointStopped(filePath, executionPoint);
 
         verify(presenter).showAndUpdateView();
         verify(view).setExecutionPoint(any(Location.class));

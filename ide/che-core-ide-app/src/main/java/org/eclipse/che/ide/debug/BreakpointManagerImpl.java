@@ -14,6 +14,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -601,8 +602,8 @@ public class BreakpointManagerImpl implements BreakpointManager,
     }
 
     @Override
-    public void onBreakpointStopped(String filePath, String className, int lineNumber) {
-        setCurrentBreakpoint(filePath, lineNumber - 1);
+    public void onBreakpointStopped(String filePath, Location location) {
+        setCurrentBreakpoint(filePath, location.getLineNumber() - 1);
     }
 
     @Override

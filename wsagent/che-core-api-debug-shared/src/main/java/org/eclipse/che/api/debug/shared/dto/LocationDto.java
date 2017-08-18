@@ -48,4 +48,11 @@ public interface LocationDto extends Location {
     void setMethod(MethodDto method);
 
     LocationDto withMethod(MethodDto method);
+
+    @Override
+    long getThreadId();
+
+    void setThreadId(long threadId);
+
+    LocationDto withThreadId(long threadId);
 }

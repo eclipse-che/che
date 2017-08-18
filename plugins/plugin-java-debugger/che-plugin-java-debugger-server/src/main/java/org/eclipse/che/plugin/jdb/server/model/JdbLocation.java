@@ -26,51 +26,58 @@ import org.eclipse.che.plugin.jdb.server.utils.JavaDebuggerUtils;
 public class JdbLocation implements Location {
     private static final JavaDebuggerUtils debuggerUtil = new JavaDebuggerUtils();
 
-    private final Method   method;
-    private final Location location;
+    private final Method     method;
+    private final Location   internal;
+    private final StackFrame jdiStackFrame;
 
     public JdbLocation(StackFrame stackFrame) {
         this(stackFrame, new JdbMethod(stackFrame));
     }
 
-    public JdbLocation(StackFrame stackFrame, Method method) {
-        this.location = getLocation(stackFrame.location());
+    public JdbLocation(StackFrame jdiStackFrame, Method method) {
+        this.jdiStackFrame = jdiStackFrame;
+        this.internal = getLocation(jdiStackFrame.location());
         this.method = method;
     }
 
     @Override
     public String getTarget() {
-        return location.getTarget();
+        return internal.getTarget();
     }
 
     @Override
     public int getLineNumber() {
-        return location.getLineNumber();
+        return internal.getLineNumber();
     }
 
     @Override
     public String getResourcePath() {
-        return location.getResourcePath();
+        return internal.getResourcePath();
     }
 
     @Override
     public boolean isExternalResource() {
-        return location.isExternalResource();
+        return internal.isExternalResource();
     }
 
     @Override
     public int getExternalResourceId() {
-        return location.getExternalResourceId();
+        return internal.getExternalResourceId();
     }
 
     @Override
     public String getResourceProjectPath() {
-        return location.getResourceProjectPath();
+        return internal.getResourceProjectPath();
     }
 
     @Override
     public Method getMethod() {
         return method;
+    }
+
+    @Override
+    public long getThreadId() {
+        return jdiStackFrame.thread().uniqueID();
     }
 
     private Location getLocation(com.sun.jdi.Location jdiLocation) {
