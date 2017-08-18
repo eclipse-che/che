@@ -296,9 +296,6 @@
                                             <log>Listening for transport dt_socket at address: 8001</log>
                                             <time>20000</time>
                                         </wait>
-                                        <restartPolicy>
-                                            <name>always</name>
-                                        </restartPolicy>
                                     </run>
                                 </image>
                             </images>
