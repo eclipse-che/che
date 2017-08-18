@@ -18,7 +18,9 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -42,6 +44,7 @@ public class OpenShiftConnectorTest {
     private static final String   CHE_WORKSPACE_CPU_LIMIT = "1";
     private static final boolean  SECURE_ROUTES = false;
     private static final boolean  CREATE_WORKSPACE_DIRS = true;
+    private static final String   CHE_HOST_CLUSTER_IP = "172.0.0.1";
 
 
     @Mock
@@ -65,6 +68,30 @@ public class OpenShiftConnectorTest {
 
     private OpenShiftConnector                 openShiftConnector;
 
+    @BeforeMethod
+    public void setUp() {
+        openShiftConnector = new OpenShiftConnector(dockerConnectorConfiguration,
+                dockerConnectionFactory,
+                authManager,
+                dockerApiVersionPathPrefixProvider,
+                openShiftPvcHelper,
+                openShiftRouteCreator,
+                openShiftDeploymentCleaner,
+                eventService,
+                CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS,
+                CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
+                OPENSHIFT_LIVENESS_PROBE_DELAY,
+                OPENSHIFT_LIVENESS_PROBE_TIMEOUT,
+                OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM,
+                OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY,
+                OPENSHIFT_DEFAULT_WORKSPACE_STORAGE,
+                OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE,
+                CHE_WORKSPACE_CPU_LIMIT,
+                null,
+                SECURE_ROUTES,
+                CREATE_WORKSPACE_DIRS);
+    }
+
     @Test
     public void shouldGetWorkspaceIDWhenAValidOneIsProvidedInCreateContainerParams() throws IOException {
         //Given
@@ -75,29 +102,67 @@ public class OpenShiftConnectorTest {
         when(containerConfig.getEnv()).thenReturn(CONTAINER_ENV_VARIABLES);
 
         //When
-        openShiftConnector = new OpenShiftConnector(dockerConnectorConfiguration,
-                                                    dockerConnectionFactory,
-                                                    authManager,
-                                                    dockerApiVersionPathPrefixProvider,
-                                                    openShiftPvcHelper,
-                                                    openShiftRouteCreator,
-                                                    openShiftDeploymentCleaner,
-                                                    eventService,
-                                                    CHE_DEFAULT_SERVER_EXTERNAL_ADDRESS,
-                                                    CHE_DEFAULT_OPENSHIFT_PROJECT_NAME,
-                                                    OPENSHIFT_LIVENESS_PROBE_DELAY,
-                                                    OPENSHIFT_LIVENESS_PROBE_TIMEOUT,
-                                                    OPENSHIFT_DEFAULT_WORKSPACE_PERSISTENT_VOLUME_CLAIM,
-                                                    OPENSHIFT_DEFAULT_WORKSPACE_QUANTITY,
-                                                    OPENSHIFT_DEFAULT_WORKSPACE_STORAGE,
-                                                    OPENSHIFT_DEFAULT_WORKSPACE_PROJECTS_STORAGE,
-                                                    CHE_WORKSPACE_CPU_LIMIT,
-                                                    null,
-                                                    SECURE_ROUTES,
-                                                    CREATE_WORKSPACE_DIRS);
         String workspaceID = openShiftConnector.getCheWorkspaceId(createContainerParams);
 
         //Then
         assertEquals(workspaceID, expectedWorkspaceID);
+    }
+
+    @Test
+    public void shouldReplaceCheApiEnvVarWithClusterIpInSetClusterIpEnvVar() {
+        OpenShiftConnector connector = Mockito.spy(openShiftConnector);
+        Mockito.doReturn(CHE_HOST_CLUSTER_IP).when(connector).getCheHostClusterIp();
+
+        // Given
+        String[] envVars = new String[] { "ENV_VAR1=value1",
+                                          "CHE_API=http://che-host:8080/wsmaster/api",
+                                          "ENV_VAR2=value2" };
+        String[] expected = new String[] { "ENV_VAR1=value1",
+                                           "CHE_API=http://" + CHE_HOST_CLUSTER_IP + ":8080/wsmaster/api",
+                                           "ENV_VAR2=value2" };
+
+        // When
+        connector.setClusterIpEnvVar(envVars);
+
+        // Then
+        assertEquals(envVars, expected, "Should replace 'che-host' with clusterIP for CHE_API env var.");
+    }
+
+    @Test
+    public void setClusterIpEnvVarShoudlDoNothingWhenEnvVarDoesNotContainCheHost() {
+        OpenShiftConnector connector = Mockito.spy(openShiftConnector);
+        Mockito.doReturn(CHE_HOST_CLUSTER_IP).when(connector).getCheHostClusterIp();
+
+        // Given
+        String[] envVars = new String[] { "ENV_VAR1=value1",
+                                          "CHE_API=http://che-service:8080/wsmaster/api",
+                                          "ENV_VAR2=value2" };
+        String[] expected = new String[] { "ENV_VAR1=value1",
+                                           "CHE_API=http://che-service:8080/wsmaster/api",
+                                           "ENV_VAR2=value2" };
+
+        // When
+        connector.setClusterIpEnvVar(envVars);
+
+        // Then
+        assertEquals(envVars, expected, "Should replace 'che-host' with clusterIP for CHE_API env var.");
+    }
+
+    @Test
+    public void setClusterIpEnvVarShoudlDoNothingWhenNoCheApiEnvVar() {
+        OpenShiftConnector connector = Mockito.spy(openShiftConnector);
+        Mockito.doReturn(CHE_HOST_CLUSTER_IP).when(connector).getCheHostClusterIp();
+
+        // Given
+        String[] envVars = new String[] { "ENV_VAR1=value1",
+                                          "ENV_VAR2=value2" };
+        String[] expected = new String[] { "ENV_VAR1=value1",
+                                           "ENV_VAR2=value2" };
+
+        // When
+        connector.setClusterIpEnvVar(envVars);
+
+        // Then
+        assertEquals(envVars, expected, "Should replace 'che-host' with clusterIP for CHE_API env var.");
     }
 }
