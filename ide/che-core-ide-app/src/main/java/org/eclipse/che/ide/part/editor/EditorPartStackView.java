@@ -158,14 +158,31 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
 
         tabsPanelWidth = tabsPanel.getOffsetWidth();
 
-        int childrenWidth = 0;
+        // determine whether all widgets are visible
+        boolean allWidgetVisible = true;
         for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
             Widget w = tabsPanel.getWidget(i);
-            childrenWidth += w.getOffsetWidth();
+            if (plusPanel == w) {
+                continue;
+            }
+
+            if (!w.isVisible()) {
+                allWidgetVisible = false;
+                break;
+            }
         }
 
-        if (childrenWidth < tabsPanelWidth) {
-            return;
+        // do nothing if all widgets are visible and sum of children width less then panel width
+        if (allWidgetVisible) {
+            int childrenWidth = 0;
+            for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
+                Widget w = tabsPanel.getWidget(i);
+                childrenWidth += w.getOffsetWidth();
+            }
+
+            if (childrenWidth < tabsPanelWidth) {
+                return;
+            }
         }
 
         // hide all widgets except plus button
@@ -286,7 +303,9 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
 
         delegate.onRequestFocus();
 
-        ensureActiveTabVisible();
+        // reset timer and schedule it again
+        ensureActiveTabVisibleTimer.cancel();
+        ensureActiveTabVisibleTimer.schedule(200);
     }
 
     /** {@inheritDoc} */
