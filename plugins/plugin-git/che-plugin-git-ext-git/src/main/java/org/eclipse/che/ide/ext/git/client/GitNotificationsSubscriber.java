@@ -22,47 +22,46 @@ import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
-/** Subscribes on receiving notifications about changing the current git branch. */
+/** Subscribes on receiving notifications from git. */
 @Singleton
-public class GitCheckoutNotificationsSubscriber {
+public class GitNotificationsSubscriber {
 
     private final EventBus           eventBus;
     private final AppContext         appContext;
     private final RequestTransmitter requestTransmitter;
 
     @Inject
-    public GitCheckoutNotificationsSubscriber(EventBus eventBus, AppContext appContext, RequestTransmitter requestTransmitter) {
+    public GitNotificationsSubscriber(EventBus eventBus, AppContext appContext, RequestTransmitter requestTransmitter) {
         this.eventBus = eventBus;
         this.appContext = appContext;
         this.requestTransmitter = requestTransmitter;
     }
 
-    void initialize() {
-        eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> subscribe());
+    void subscribe() {
+        eventBus.addHandler(WsAgentServerRunningEvent.TYPE, event -> initialize());
 
-        // in case ws-agent is already running
-        eventBus.addHandler(BasicIDEInitializedEvent.TYPE, event -> {
-            if (appContext.getWorkspace().getStatus() == RUNNING) {
-                subscribe();
-            }
-        });
+        if (appContext.getWorkspace().getStatus() == RUNNING) {
+            initialize();
+        }
     }
 
-    private void subscribe() {
+    private void initialize() {
+        initializeGitCheckoutWatcher();
+        initializeGitChangeWatcher();
+        initializeGitIndexWatcher();
+    }
+
+    private void initializeGitCheckoutWatcher() {
         requestTransmitter.newRequest()
                           .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                           .methodName("track/git-checkout")
                           .noParams()
                           .sendAndSkipResult();
-
-        // TODO (spi ide)
-        initializeGitChangeWatcher();
-        initializeGitIndexWatcher();
     }
 
     private void initializeGitChangeWatcher() {
         requestTransmitter.newRequest()
-                          .endpointId("ws-agent")
+                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                           .methodName("track/git-change")
                           .noParams()
                           .sendAndSkipResult();
@@ -70,7 +69,7 @@ public class GitCheckoutNotificationsSubscriber {
 
     private void initializeGitIndexWatcher() {
         requestTransmitter.newRequest()
-                          .endpointId("ws-agent")
+                          .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                           .methodName("track/git-index")
                           .noParams()
                           .sendAndSkipResult();

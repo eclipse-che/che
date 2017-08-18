@@ -81,8 +81,8 @@ public class GitExtension {
                         CompareWithBranchAction compareWithBranchAction,
                         CompareWithRevisionAction compareWithRevisionAction,
                         KeyBindingAgent keyBinding,
-                        GitCheckoutNotificationsSubscriber gitCheckoutNotificationsSubscriber) {
-        gitCheckoutNotificationsSubscriber.initialize();
+                        GitNotificationsSubscriber gitNotificationsSubscriber) {
+        gitNotificationsSubscriber.subscribe();
 
         resources.gitCSS().ensureInjected();
 
