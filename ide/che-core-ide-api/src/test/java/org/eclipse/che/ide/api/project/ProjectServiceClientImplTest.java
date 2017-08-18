@@ -151,8 +151,6 @@ public class ProjectServiceClientImplTest {
 
     verify(requestFactory).createGetRequest(any());
     verify(asyncRequest).header(ACCEPT, MimeType.APPLICATION_JSON);
-    verify(loaderFactory).newLoader("Getting projects...");
-    verify(asyncRequest).loader(messageLoader);
     verify(unmarshaller).newListUnmarshaller(ProjectConfigDto.class);
     verify(asyncRequest).send(unmarshallablePrjsConf);
   }
@@ -259,8 +257,6 @@ public class ProjectServiceClientImplTest {
     client.getFileContent(resourcePath);
 
     verify(requestFactory).createGetRequest(any());
-    verify(loaderFactory).newLoader("Loading file content...");
-    verify(asyncRequest).loader(messageLoader);
     verify(asyncRequest).send(any(StringUnmarshaller.class));
   }
 
@@ -270,8 +266,6 @@ public class ProjectServiceClientImplTest {
 
     verify(requestFactory).createRequest(eq(PUT), any(), any(), eq(false));
     verify(asyncRequest).data(TEXT);
-    verify(loaderFactory).newLoader("Updating file...");
-    verify(asyncRequest).loader(messageLoader);
     verify(asyncRequest).send();
   }
 
