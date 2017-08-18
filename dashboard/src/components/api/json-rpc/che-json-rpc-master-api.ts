@@ -16,8 +16,6 @@ enum MasterChannels {
   ENVIRONMENT_OUTPUT, ENVIRONMENT_STATUS, WS_AGENT_OUTPUT, WORKSPACE_STATUS
 }
 
-const websocketMasterApi: string = '/wsmaster/websocket';
-
 /**
  * Client API for workspace master interactions.
  *
@@ -66,7 +64,7 @@ export class CheJsonRpcMasterApi {
    * @returns {IPromise<IHttpPromiseCallbackArg<any>>}
    */
   connect(entrypoint: string): ng.IPromise<any> {
-    return this.cheJsonRpcApi.connect(entrypoint + websocketMasterApi).then(() => {
+    return this.cheJsonRpcApi.connect(entrypoint).then(() => {
       return this.fetchClientId();
     });
   }
