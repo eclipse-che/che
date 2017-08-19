@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
@@ -31,6 +32,7 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -69,14 +71,15 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
                                                                 BreakpointManagerObserver {
     private static final String TITLE = "Debug";
 
-    private final DebuggerResources            debuggerResources;
-    private final ToolbarPresenter             debuggerToolbar;
-    private final BreakpointManager            breakpointManager;
-    private final NotificationManager          notificationManager;
-    private final DebuggerLocalizationConstant constant;
-    private final DebuggerView                 view;
-    private final DebuggerManager              debuggerManager;
-    private final WorkspaceAgent               workspaceAgent;
+    private final DebuggerResources              debuggerResources;
+    private final ToolbarPresenter               debuggerToolbar;
+    private final BreakpointManager              breakpointManager;
+    private final NotificationManager            notificationManager;
+    private final DebuggerLocalizationConstant   constant;
+    private final DebuggerView                   view;
+    private final DebuggerManager                debuggerManager;
+    private final WorkspaceAgent                 workspaceAgent;
+    private final DebuggerResourceHandlerManager resourceHandlerManager;
 
     private MutableVariable            selectedVariable;
     private List<Variable>             variables;
@@ -94,12 +97,14 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
                              final DebuggerResources debuggerResources,
                              final @DebuggerToolbar ToolbarPresenter debuggerToolbar,
                              final DebuggerManager debuggerManager,
-                             final WorkspaceAgent workspaceAgent) {
+                             final WorkspaceAgent workspaceAgent,
+                             final DebuggerResourceHandlerManager resourceHandlerManager) {
         this.view = view;
         this.debuggerResources = debuggerResources;
         this.debuggerToolbar = debuggerToolbar;
         this.debuggerManager = debuggerManager;
         this.workspaceAgent = workspaceAgent;
+        this.resourceHandlerManager = resourceHandlerManager;
         this.view.setDelegate(this);
         this.view.setTitle(TITLE);
         this.constant = constant;
@@ -178,9 +183,32 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     }
 
     @Override
-    public void onSelectedFrame(int frameIndex) {
+    public void onSelectedFrame(int frameIndex, boolean jumpTo) {
+        if (selectedFrameIndex != frameIndex) {
+            updateStackFrameDump();
+        }
+
         selectedFrameIndex = frameIndex;
-        updateStackFrameDump();
+
+        if (jumpTo) {
+            for (ThreadDump td : threadDump) {
+                if (td.getId() == selectedThreadId) {
+                    final StackFrameDump stackFrameDump = td.getFrames().get(selectedFrameIndex);
+
+                    Debugger debugger = debuggerManager.getActiveDebugger();
+                    if (debugger != null) {
+                        DebuggerResourceHandler handler = resourceHandlerManager.get(debugger.getDebuggerType());
+                        handler.open(stackFrameDump.getLocation(), new AsyncCallback<VirtualFile>() {
+                            @Override
+                            public void onFailure(Throwable caught) {}
+
+                            @Override
+                            public void onSuccess(VirtualFile result) {}
+                        });
+                    }
+                }
+            }
+        }
     }
 
     public long getSelectedThreadId() {

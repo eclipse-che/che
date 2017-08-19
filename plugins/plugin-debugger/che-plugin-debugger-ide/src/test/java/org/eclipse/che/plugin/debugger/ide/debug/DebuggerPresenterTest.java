@@ -124,7 +124,7 @@ public class DebuggerPresenterTest extends BaseTest {
         doReturn(ERROR_MESSAGE).when(promiseError).getMessage();
 
         presenter = spy(new DebuggerPresenter(view, constant, breakpointManager, notificationManager, debuggerResources, debuggerToolbar,
-                                              debuggerManager, workspaceAgent));
+                                              debuggerManager, workspaceAgent, resourceHandlerManager));
         doNothing().when(presenter).showDebuggerPanel();
 
         presenter.onSelectedVariableElement(selectedVariable);

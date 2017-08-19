@@ -118,7 +118,7 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private EventBus                   eventBus;
     @Mock
-    private ActiveFileHandler          activeFileHandler;
+    private DebuggerResourceHandler    debuggerResourceHandler;
     @Mock
     private DebuggerManager            debuggerManager;
     @Mock
@@ -188,7 +188,7 @@ public class DebuggerTest extends BaseTest {
         doReturn(Path.valueOf(PATH)).when(file).getLocation();
 
         debugger = new TestDebugger(service, transmitter, configurator, dtoFactory, localStorageProvider, eventBus,
-                                    activeFileHandler, debuggerManager, notificationManager, "id");
+                                    debuggerResourceHandler, debuggerManager, notificationManager, "id");
         doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
         doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -617,7 +617,7 @@ public class DebuggerTest extends BaseTest {
                             DtoFactory dtoFactory,
                             LocalStorageProvider localStorageProvider,
                             EventBus eventBus,
-                            ActiveFileHandler activeFileHandler,
+                            DebuggerResourceHandler debuggerResourceHandler,
                             DebuggerManager debuggerManager,
                             NotificationManager notificationManager,
                             String id) {
@@ -627,7 +627,7 @@ public class DebuggerTest extends BaseTest {
                   dtoFactory,
                   localStorageProvider,
                   eventBus,
-                  activeFileHandler,
+                  debuggerResourceHandler,
                   debuggerManager,
                   notificationManager,
                   breakpointManager,

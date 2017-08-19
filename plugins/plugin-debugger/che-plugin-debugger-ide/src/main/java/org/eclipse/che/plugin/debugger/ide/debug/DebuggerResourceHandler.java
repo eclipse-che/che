@@ -23,7 +23,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
  *
  * @author Anatoliy Bazko
  */
-public interface ActiveFileHandler {
+public interface DebuggerResourceHandler {
 
     /**
      * Opens resource is being debugged and scrolls to the position {@link Location#getLineNumber()}.
@@ -31,9 +31,9 @@ public interface ActiveFileHandler {
      * and {@link AsyncCallback#onFailure(Throwable)} otherwise.
      *
      * @param location
-     *         the location of the resource is being debugged
+     *         the location of the resource
      * @param callback
      *         the callback
      */
-    void openFile(Location location, AsyncCallback<VirtualFile> callback);
+    void open(Location location, AsyncCallback<VirtualFile> callback);
 }

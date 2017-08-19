@@ -17,7 +17,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -37,7 +36,7 @@ import java.util.List;
  * @author Anatoliy Bazko
  */
 @Singleton
-public class BasicActiveFileHandler implements ActiveFileHandler {
+public class BasicActiveFileHandler implements DebuggerResourceHandler {
 
     private final EditorAgent editorAgent;
     private final AppContext  appContext;
@@ -57,10 +56,10 @@ public class BasicActiveFileHandler implements ActiveFileHandler {
      * {@link BasicActiveFileHandler#findInWorkspace(Location, AsyncCallback)}
      * {@link BasicActiveFileHandler#searchSource(Location, AsyncCallback)}
      *
-     * @see ActiveFileHandler#openFile(Location, AsyncCallback)
+     * @see DebuggerResourceHandler#open(Location, AsyncCallback)
      */
     @Override
-    public void openFile(final Location location, final AsyncCallback<VirtualFile> callback) {
+    public void open(final Location location, final AsyncCallback<VirtualFile> callback) {
         findInOpenedEditors(location, new AsyncCallback<VirtualFile>() {
             @Override
             public void onSuccess(VirtualFile result) {

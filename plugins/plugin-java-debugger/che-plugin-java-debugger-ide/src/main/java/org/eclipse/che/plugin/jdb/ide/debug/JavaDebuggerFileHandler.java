@@ -47,7 +47,7 @@ public class JavaDebuggerFileHandler extends BasicActiveFileHandler {
     }
 
     @Override
-    public void openFile(Location location, AsyncCallback<VirtualFile> callback) {
+    public void open(Location location, AsyncCallback<VirtualFile> callback) {
         findInOpenedEditors(location, new AsyncCallback<VirtualFile>() {
             @Override
             public void onSuccess(VirtualFile result) {

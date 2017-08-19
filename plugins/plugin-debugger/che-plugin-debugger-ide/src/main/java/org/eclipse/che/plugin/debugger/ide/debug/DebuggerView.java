@@ -53,9 +53,13 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
 
         /**
          * Is invoked when a new frame is selected.
+         *
+         * @param frameIndex
+         *      the frame index inside thread
+         * @param jumpTo
+         *      indicates if it is necessary to open location in the editor belonging to the current frame
          */
-        void onSelectedFrame(int frameIndex);
-
+        void onSelectedFrame(int frameIndex, boolean jumpTo);
     }
 
     /**
@@ -88,7 +92,7 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
      */
     void setThreads(@NotNull List<? extends ThreadDump> threadDumps, long activeThreadId);
 
-   /**
+    /**
      * Sets the list of frames for selected thread.
      */
     void setFrames(@NotNull List<? extends StackFrameDump> stackFrameDumps);

@@ -222,10 +222,12 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
         SimpleList.ListEventDelegate<StackFrameDump> frameListEventDelegate = new SimpleList.ListEventDelegate<StackFrameDump>() {
             public void onListItemClicked(Element itemElement, StackFrameDump itemData) {
                 frames.getSelectionModel().setSelectedItem(itemData);
-                delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex());
+                delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex(), false);
             }
 
-            public void onListItemDoubleClicked(Element listItemBase, StackFrameDump itemData) { }
+            public void onListItemDoubleClicked(Element listItemBase, StackFrameDump itemData) {
+                delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex(), true);
+            }
         };
 
         SimpleList.ListItemRenderer<StackFrameDump> frameListItemRenderer = new
@@ -251,7 +253,16 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
                         sb.appendEscaped("):");
                         sb.append(itemData.getLocation().getLineNumber());
                         sb.appendEscaped(", ");
-                        sb.appendEscaped(itemData.getLocation().getTarget());
+
+                        String classFqn = itemData.getLocation().getTarget();
+                        int classNameIndex = classFqn.lastIndexOf(".");
+                        String className = classFqn.substring(classNameIndex + 1);
+                        String packageName = classFqn.substring(0, classNameIndex);
+
+                        sb.appendEscaped(className);
+                        sb.appendEscaped(" (");
+                        sb.appendEscaped(packageName);
+                        sb.appendEscaped(") ");
 
                         label.setInnerHTML(sb.toSafeHtml().asString());
                         itemElement.appendChild(label);

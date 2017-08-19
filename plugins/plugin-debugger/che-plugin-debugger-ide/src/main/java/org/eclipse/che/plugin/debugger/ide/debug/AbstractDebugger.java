@@ -105,7 +105,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     private final DebuggerServiceClient      service;
     private final LocalStorageProvider       localStorageProvider;
     private final EventBus                   eventBus;
-    private final ActiveFileHandler          activeFileHandler;
+    private final DebuggerResourceHandler    debuggerResourceHandler;
     private final DebuggerManager            debuggerManager;
     private final BreakpointManager          breakpointManager;
     private final String                     debuggerType;
@@ -121,7 +121,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                             DtoFactory dtoFactory,
                             LocalStorageProvider localStorageProvider,
                             EventBus eventBus,
-                            ActiveFileHandler activeFileHandler,
+                            DebuggerResourceHandler debuggerResourceHandler,
                             DebuggerManager debuggerManager,
                             NotificationManager notificationManager,
                             BreakpointManager breakpointManager,
@@ -133,7 +133,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         this.dtoFactory = dtoFactory;
         this.localStorageProvider = localStorageProvider;
         this.eventBus = eventBus;
-        this.activeFileHandler = activeFileHandler;
+        this.debuggerResourceHandler = debuggerResourceHandler;
         this.debuggerManager = debuggerManager;
         this.notificationManager = notificationManager;
         this.breakpointManager = breakpointManager;
@@ -213,8 +213,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     private void openCurrentFile(Location location) {
         //todo we need add possibility to handle few files
         try {
-            activeFileHandler.openFile(location,
-                                       new AsyncCallback<VirtualFile>() {
+            debuggerResourceHandler.open(location,
+                                         new AsyncCallback<VirtualFile>() {
                                            @Override
                                            public void onFailure(Throwable caught) {
                                                for (DebuggerObserver observer : observers) {
