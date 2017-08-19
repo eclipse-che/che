@@ -93,6 +93,7 @@
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-permission</artifactId>
@@ -181,6 +182,11 @@
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-ssh</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

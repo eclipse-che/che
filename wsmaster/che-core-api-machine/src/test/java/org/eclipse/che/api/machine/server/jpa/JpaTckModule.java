@@ -49,7 +49,12 @@ public class JpaTckModule extends TckModule {
             .setDriver(Driver.class)
             .runningOn(server)
             .addEntityClasses(
-                RecipeImpl.class, SnapshotImpl.class, AccountImpl.class, TestWorkspaceEntity.class)
+                UserImpl.class,
+                RecipeImpl.class,
+                SnapshotImpl.class,
+                AccountImpl.class,
+                RecipePermissionsImpl.class,
+                TestWorkspaceEntity.class)
             .setExceptionHandler(H2ExceptionHandler.class)
             .build());
     bind(DBInitializer.class).asEagerSingleton();
@@ -57,6 +62,8 @@ public class JpaTckModule extends TckModule {
         .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
     bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
 
+    bind(new TypeLiteral<TckRepository<UserImpl>>() {})
+        .toInstance(new JpaTckRepository<>(UserImpl.class));
     bind(new TypeLiteral<TckRepository<RecipeImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipeImpl.class));
     bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {})
@@ -72,12 +79,9 @@ public class JpaTckModule extends TckModule {
         .to(JpaRecipePermissionsDao.class);
     bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
-    bind(new TypeLiteral<TckRepository<UserImpl>>() {})
-        .toInstance(new JpaTckRepository<>(UserImpl.class));
 
     bind(RecipeDao.class).to(JpaRecipeDao.class);
     bind(SnapshotDao.class).to(JpaSnapshotDao.class);
-
   }
 
   private static class TestWorkspacesTckRepository extends JpaTckRepository<Workspace> {
