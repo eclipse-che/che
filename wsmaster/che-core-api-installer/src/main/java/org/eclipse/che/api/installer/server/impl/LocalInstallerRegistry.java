@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.core.util.Version;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
@@ -169,14 +169,14 @@ public class LocalInstallerRegistry implements InstallerRegistry {
       return installerFqn;
     }
 
-    Optional<Version> latestVersion =
+    Optional<ComparableVersion> latestVersion =
         getVersions(installerFqn.getId())
             .stream()
             .map(
                 v -> {
                   try {
-                    return Version.parse(v);
-                  } catch (IllegalArgumentException e) {
+                    return new ComparableVersion(v);
+                  } catch (Exception e) {
                     LOG.error(
                         format(
                             "Invalid version '%s' for installer '%s'. Skipped.",
@@ -185,7 +185,7 @@ public class LocalInstallerRegistry implements InstallerRegistry {
                   }
                 })
             .filter(Objects::nonNull)
-            .max(Version::compareTo);
+            .max(ComparableVersion::compareTo);
 
     if (!latestVersion.isPresent()) {
       throw new InstallerNotFoundException(

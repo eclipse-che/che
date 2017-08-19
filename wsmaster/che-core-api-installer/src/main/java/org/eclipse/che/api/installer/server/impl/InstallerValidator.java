@@ -13,7 +13,7 @@ package org.eclipse.che.api.installer.server.impl;
 import static java.lang.String.format;
 
 import com.google.inject.Singleton;
-import org.eclipse.che.api.core.util.Version;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
@@ -33,8 +33,8 @@ public class InstallerValidator {
 
   private void validateVersion(Installer installer) throws InstallerException {
     try {
-      Version.validate(installer.getVersion());
-    } catch (IllegalArgumentException e) {
+      new ComparableVersion(installer.getVersion());
+    } catch (Exception e) {
       throw new InstallerException(
           format(
               "Installer '%s' has illegal version format '%s'.",
