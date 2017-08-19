@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.commons.test.db;
 
-import org.h2.jdbcx.JdbcDataSource;
-import org.h2.tools.RunScript;
-
-import javax.sql.DataSource;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.h2.jdbcx.JdbcDataSource;
+import org.h2.tools.RunScript;
 
 /**
  * Provides utility methods to work with h2 in tests.
@@ -25,36 +24,33 @@ import java.sql.SQLException;
  */
 public final class H2TestHelper {
 
-    public static final String DEFAULT_IN_MEMORY_DB_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
+  public static final String DEFAULT_IN_MEMORY_DB_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
 
-    /**
-     * Creates new default datasource to in memory database
-     * with url {@value #DEFAULT_IN_MEMORY_DB_URL}.
-     * Boots database if this is invoked first time, database
-     * won't be shutdown until 'SHUTDOWN' query is executed
-     * or {@link #shutdownDefault()} is called directly.
-     *
-     * @return datasource to the in memory database
-     * @deprecated use {@link H2DBTestServer}.
-     */
-    @Deprecated
-    public static DataSource inMemoryDefault() {
-        final JdbcDataSource dataSource = new JdbcDataSource();
-        dataSource.setUrl(DEFAULT_IN_MEMORY_DB_URL);
-        return dataSource;
-    }
+  /**
+   * Creates new default datasource to in memory database with url {@value
+   * #DEFAULT_IN_MEMORY_DB_URL}. Boots database if this is invoked first time, database won't be
+   * shutdown until 'SHUTDOWN' query is executed or {@link #shutdownDefault()} is called directly.
+   *
+   * @return datasource to the in memory database
+   * @deprecated use {@link H2DBTestServer}.
+   */
+  @Deprecated
+  public static DataSource inMemoryDefault() {
+    final JdbcDataSource dataSource = new JdbcDataSource();
+    dataSource.setUrl(DEFAULT_IN_MEMORY_DB_URL);
+    return dataSource;
+  }
 
-    /**
-     * Shutdowns default in memory database with url {@value #DEFAULT_IN_MEMORY_DB_URL}.
-     *
-     * @throws SQLException
-     *         when any sql error occurs
-     * @deprecated use {@link H2DBTestServer}.
-     */
-    @Deprecated
-    public static void shutdownDefault() throws SQLException {
-        try (Connection conn = inMemoryDefault().getConnection()) {
-            RunScript.execute(conn, new StringReader("SHUTDOWN"));
-        }
+  /**
+   * Shutdowns default in memory database with url {@value #DEFAULT_IN_MEMORY_DB_URL}.
+   *
+   * @throws SQLException when any sql error occurs
+   * @deprecated use {@link H2DBTestServer}.
+   */
+  @Deprecated
+  public static void shutdownDefault() throws SQLException {
+    try (Connection conn = inMemoryDefault().getConnection()) {
+      RunScript.execute(conn, new StringReader("SHUTDOWN"));
     }
+  }
 }

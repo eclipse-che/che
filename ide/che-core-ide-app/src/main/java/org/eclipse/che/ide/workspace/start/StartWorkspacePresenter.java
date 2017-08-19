@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,25 +7,23 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace.start;
+
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
+import java.util.List;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
-import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
-
-import java.util.List;
-
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
  * The class contains business logic which allows start existing workspace which was stopped before.
@@ -33,108 +31,108 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegate, WorkspaceWidget.ActionDelegate {
+public class StartWorkspacePresenter
+    implements StartWorkspaceView.ActionDelegate, WorkspaceWidget.ActionDelegate {
 
-    private final StartWorkspaceView                  view;
-    private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
-    private final WorkspaceWidgetFactory              widgetFactory;
-    private final CreateWorkspacePresenter            createWorkspacePresenter;
-    private final BrowserAddress                      browserAddress;
+  private final StartWorkspaceView view;
+  private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
+  private final WorkspaceWidgetFactory widgetFactory;
+  private final CreateWorkspacePresenter createWorkspacePresenter;
+  private final BrowserAddress browserAddress;
 
-    private WorkspaceDto                              selectedWorkspace;
-    private Callback<Component, Exception>            callback;
-    private List<WorkspaceDto>                        workspaces;
+  private WorkspaceDto selectedWorkspace;
+  private Callback<Component, Exception> callback;
+  private List<WorkspaceDto> workspaces;
 
-    @Inject
-    public StartWorkspacePresenter(StartWorkspaceView view,
-                                   Provider<DefaultWorkspaceComponent> wsComponentProvider,
-                                   WorkspaceWidgetFactory widgetFactory,
-                                   CreateWorkspacePresenter createWorkspacePresenter,
-                                   BrowserAddress browserAddress) {
-        this.view = view;
-        this.view.setDelegate(this);
+  @Inject
+  public StartWorkspacePresenter(
+      StartWorkspaceView view,
+      Provider<DefaultWorkspaceComponent> wsComponentProvider,
+      WorkspaceWidgetFactory widgetFactory,
+      CreateWorkspacePresenter createWorkspacePresenter,
+      BrowserAddress browserAddress) {
+    this.view = view;
+    this.view.setDelegate(this);
 
-        this.wsComponentProvider = wsComponentProvider;
-        this.widgetFactory = widgetFactory;
-        this.createWorkspacePresenter = createWorkspacePresenter;
-        this.browserAddress = browserAddress;
-    }
+    this.wsComponentProvider = wsComponentProvider;
+    this.widgetFactory = widgetFactory;
+    this.createWorkspacePresenter = createWorkspacePresenter;
+    this.browserAddress = browserAddress;
+  }
 
-    /**
-     * Shows special dialog which contains workspaces which can be started at this time.
-     *
-     * @param callback
-     *         callback which is necessary to notify that workspace component started or failed
-     * @param workspaces
-     *         available workspaces which will be displayed
-     */
-    public void show(List<WorkspaceDto> workspaces, Callback<Component, Exception> callback) {
-        this.callback = callback;
-        this.workspaces = workspaces;
+  /**
+   * Shows special dialog which contains workspaces which can be started at this time.
+   *
+   * @param callback callback which is necessary to notify that workspace component started or
+   *     failed
+   * @param workspaces available workspaces which will be displayed
+   */
+  public void show(List<WorkspaceDto> workspaces, Callback<Component, Exception> callback) {
+    this.callback = callback;
+    this.workspaces = workspaces;
 
-        view.clearWorkspacesPanel();
+    view.clearWorkspacesPanel();
 
-        String workspaceName = browserAddress.getWorkspaceName();
+    String workspaceName = browserAddress.getWorkspaceName();
 
-        createWsWidgets(workspaces);
+    createWsWidgets(workspaces);
 
-        for (WorkspaceDto workspace : workspaces) {
-            if (workspaceName.equals(workspace.getConfig().getName())) {
-                selectedWorkspace = workspace;
-
-                break;
-            }
-        }
-
-        view.setWsName(workspaceName);
-
-        view.show();
-    }
-
-    private void createWsWidgets(List<WorkspaceDto> workspaces) {
-        for (WorkspaceDto workspace : workspaces) {
-            WorkspaceWidget widget = widgetFactory.create(workspace);
-            widget.setDelegate(this);
-
-            view.addWorkspace(widget);
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onWorkspaceSelected(WorkspaceDto workspace) {
+    for (WorkspaceDto workspace : workspaces) {
+      if (workspaceName.equals(workspace.getConfig().getName())) {
         selectedWorkspace = workspace;
 
-        String wsName = workspace.getConfig().getDefaultEnv();
-
-        view.setWsName(wsName);
-
-        view.setEnableStartButton(!wsName.isEmpty());
-
-        if (RUNNING.equals(workspace.getStatus())) {
-            DefaultWorkspaceComponent workspaceComponent = wsComponentProvider.get();
-
-            workspaceComponent.setCurrentWorkspace(workspace);
-
-            workspaceComponent.startWorkspace(workspace, callback);
-
-            view.hide();
-        }
+        break;
+      }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onCreateWorkspaceClicked() {
-        view.hide();
-        createWorkspacePresenter.show(workspaces, callback);
-    }
+    view.setWsName(workspaceName);
 
-    /** {@inheritDoc} */
-    @Override
-    public void onStartWorkspaceClicked() {
-        DefaultWorkspaceComponent workspaceComponent = wsComponentProvider.get();
-        workspaceComponent.startWorkspace(selectedWorkspace, callback);
-        view.hide();
-    }
+    view.show();
+  }
 
+  private void createWsWidgets(List<WorkspaceDto> workspaces) {
+    for (WorkspaceDto workspace : workspaces) {
+      WorkspaceWidget widget = widgetFactory.create(workspace);
+      widget.setDelegate(this);
+
+      view.addWorkspace(widget);
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onWorkspaceSelected(WorkspaceDto workspace) {
+    selectedWorkspace = workspace;
+
+    String wsName = workspace.getConfig().getDefaultEnv();
+
+    view.setWsName(wsName);
+
+    view.setEnableStartButton(!wsName.isEmpty());
+
+    if (RUNNING.equals(workspace.getStatus())) {
+      DefaultWorkspaceComponent workspaceComponent = wsComponentProvider.get();
+
+      workspaceComponent.setCurrentWorkspace(workspace);
+
+      workspaceComponent.startWorkspace(workspace, callback);
+
+      view.hide();
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onCreateWorkspaceClicked() {
+    view.hide();
+    createWorkspacePresenter.show(workspaces, callback);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onStartWorkspaceClicked() {
+    DefaultWorkspaceComponent workspaceComponent = wsComponentProvider.get();
+    workspaceComponent.startWorkspace(selectedWorkspace, callback);
+    view.hide();
+  }
 }

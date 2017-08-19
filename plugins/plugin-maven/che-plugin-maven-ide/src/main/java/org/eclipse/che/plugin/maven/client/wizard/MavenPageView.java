@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,64 +7,60 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.client.wizard;
 
 import com.google.inject.ImplementedBy;
-
+import java.util.List;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.plugin.maven.client.MavenArchetype;
 
-import java.util.List;
-
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 @ImplementedBy(MavenPageViewImpl.class)
 public interface MavenPageView extends View<MavenPageView.ActionDelegate> {
-    String getPackaging();
+  String getPackaging();
 
-    void setPackaging(String packaging);
+  void setPackaging(String packaging);
 
-    MavenArchetype getArchetype();
+  MavenArchetype getArchetype();
 
-    void setArchetypes(List<MavenArchetype> archetypes);
+  void setArchetypes(List<MavenArchetype> archetypes);
 
-    String getGroupId();
+  String getGroupId();
 
-    void setGroupId(String group);
+  void setGroupId(String group);
 
-    String getArtifactId();
+  String getArtifactId();
 
-    void setArtifactId(String artifact);
+  void setArtifactId(String artifact);
 
-    String getVersion();
+  String getVersion();
 
-    void setVersion(String value);
+  void setVersion(String value);
 
-    void setPackagingVisibility(boolean visible);
+  void setPackagingVisibility(boolean visible);
 
-    void setArchetypeSectionVisibility(boolean visible);
+  void setArchetypeSectionVisibility(boolean visible);
 
-    void enableArchetypes(boolean enabled);
+  void enableArchetypes(boolean enabled);
 
-    boolean isGenerateFromArchetypeSelected();
+  boolean isGenerateFromArchetypeSelected();
 
-    void showArtifactIdMissingIndicator(boolean doShow);
+  void showArtifactIdMissingIndicator(boolean doShow);
 
-    void showGroupIdMissingIndicator(boolean doShow);
+  void showGroupIdMissingIndicator(boolean doShow);
 
-    void showVersionMissingIndicator(boolean doShow);
+  void showVersionMissingIndicator(boolean doShow);
 
-    void clearArchetypes();
+  void clearArchetypes();
 
-    public interface ActionDelegate {
-        void onCoordinatesChanged();
+  public interface ActionDelegate {
+    void onCoordinatesChanged();
 
-        void packagingChanged(String packaging);
+    void packagingChanged(String packaging);
 
-        void generateFromArchetypeChanged(boolean isGenerateFromArchetype);
+    void generateFromArchetypeChanged(boolean isGenerateFromArchetype);
 
-        void archetypeChanged(MavenArchetype archetype);
-    }
+    void archetypeChanged(MavenArchetype archetype);
+  }
 }

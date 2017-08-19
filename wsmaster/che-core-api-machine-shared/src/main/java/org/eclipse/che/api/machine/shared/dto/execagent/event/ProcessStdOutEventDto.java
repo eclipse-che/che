@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,20 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.machine.shared.dto.execagent.event;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface ProcessStdOutEventDto extends DtoWithPid {
-    ProcessStdOutEventDto withPid(int pid);
+  ProcessStdOutEventDto withPid(int pid);
 
-    String getTime();
+  String getTime();
 
-    ProcessStdOutEventDto withTime(String time);
+  ProcessStdOutEventDto withTime(String time);
 
-    String getText();
+  String getText();
 
-    ProcessStdOutEventDto withText(String text);
+  ProcessStdOutEventDto withText(String text);
 }

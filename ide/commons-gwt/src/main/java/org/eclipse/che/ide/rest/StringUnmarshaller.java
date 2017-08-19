@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.rest;
 
 import com.google.gwt.http.client.Response;
@@ -18,17 +18,17 @@ import com.google.gwt.http.client.Response;
  * @author Vitaly Parfonov
  */
 public class StringUnmarshaller implements Unmarshallable<String> {
-    protected String builder;
+  protected String builder;
 
-    /** {@inheritDoc} */
-    @Override
-    public void unmarshal(Response response) {
-        builder = response.getText();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void unmarshal(Response response) {
+    builder = response.getText();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getPayload() {
-        return builder;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getPayload() {
+    return builder;
+  }
 }

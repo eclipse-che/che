@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.navigation.action;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -25,48 +28,36 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Valeriy Svydenko
- */
+/** @author Valeriy Svydenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class FileStructureActionTest {
-    @Mock
-    private FileStructurePresenter   fileStructurePresenter;
-    @Mock
-    private EditorAgent              editorAgent;
-    @Mock
-    private JavaLocalizationConstant locale;
-    @Mock
-    private EditorPartPresenter      editorPartPresenter;
-    @Mock
-    private JavaResources            resources;
+  @Mock private FileStructurePresenter fileStructurePresenter;
+  @Mock private EditorAgent editorAgent;
+  @Mock private JavaLocalizationConstant locale;
+  @Mock private EditorPartPresenter editorPartPresenter;
+  @Mock private JavaResources resources;
 
-    @InjectMocks
-    private FileStructureAction action;
+  @InjectMocks private FileStructureAction action;
 
-    @Before
-    public void setUp() {
-        when(editorAgent.getActiveEditor()).thenReturn(editorPartPresenter);
-    }
+  @Before
+  public void setUp() {
+    when(editorAgent.getActiveEditor()).thenReturn(editorPartPresenter);
+  }
 
-    @Test
-    public void constructorShouldBePerformed() throws Exception {
-        verify(locale).fileStructureActionName();
-        verify(locale).fileStructureActionDescription();
-        verify(resources).fileNavigation();
-    }
+  @Test
+  public void constructorShouldBePerformed() throws Exception {
+    verify(locale).fileStructureActionName();
+    verify(locale).fileStructureActionDescription();
+    verify(resources).fileNavigation();
+  }
 
-    @Test
-    public void actionShouldBePerformed() throws Exception {
-        ActionEvent e = mock(ActionEvent.class);
+  @Test
+  public void actionShouldBePerformed() throws Exception {
+    ActionEvent e = mock(ActionEvent.class);
 
-        action.actionPerformed(e);
+    action.actionPerformed(e);
 
-        verify(editorAgent).getActiveEditor();
-        verify(fileStructurePresenter).show(editorPartPresenter);
-    }
+    verify(editorAgent).getActiveEditor();
+    verify(fileStructurePresenter).show(editorPartPresenter);
+  }
 }

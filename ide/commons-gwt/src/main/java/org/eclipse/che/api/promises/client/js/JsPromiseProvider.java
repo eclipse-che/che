@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.promises.client.js;
-
-import elemental.js.util.JsArrayOf;
-import elemental.util.ArrayOf;
-import elemental.util.Collections;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayMixed;
-
+import elemental.js.util.JsArrayOf;
+import elemental.util.ArrayOf;
+import elemental.util.Collections;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
@@ -30,72 +28,72 @@ import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
  */
 public class JsPromiseProvider implements PromiseProvider {
 
-    /** {@inheritDoc} */
-    @Override
-    public native <V> Promise<V> create(Executor<V> executor) /*-{
+  /** {@inheritDoc} */
+  @Override
+  public native <V> Promise<V> create(Executor<V> executor) /*-{
         return new Promise(executor);
     }-*/;
 
-    /** {@inheritDoc} */
-    @Override
-    public <V> Promise<V> create(AsyncPromiseHelper.RequestCall<V> call) {
-        return AsyncPromiseHelper.createFromAsyncRequest(call);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public <V> Promise<V> create(AsyncPromiseHelper.RequestCall<V> call) {
+    return AsyncPromiseHelper.createFromAsyncRequest(call);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public native Promise<JsArrayMixed> all(ArrayOf<Promise<?>> promises) /*-{
+  /** {@inheritDoc} */
+  @Override
+  public native Promise<JsArrayMixed> all(ArrayOf<Promise<?>> promises) /*-{
         return Promise.all(promises);
     }-*/;
 
-    /** {@inheritDoc} */
-    @Override
-    public Promise<JsArrayMixed> all(Promise<?>... promises) {
-        final JsArrayOf<Promise<?>> promisesArray = JavaScriptObject.createArray().cast();
-        for (final Promise<?> promise : promises) {
-            promisesArray.push(promise);
-        }
-        return all(promisesArray);
+  /** {@inheritDoc} */
+  @Override
+  public Promise<JsArrayMixed> all(Promise<?>... promises) {
+    final JsArrayOf<Promise<?>> promisesArray = JavaScriptObject.createArray().cast();
+    for (final Promise<?> promise : promises) {
+      promisesArray.push(promise);
     }
+    return all(promisesArray);
+  }
 
-    @Override
-    public Promise<ArrayOf<?>> all2(ArrayOf<Promise<?>> promises) {
-        return internalAll(promises);
+  @Override
+  public Promise<ArrayOf<?>> all2(ArrayOf<Promise<?>> promises) {
+    return internalAll(promises);
+  }
+
+  @Override
+  public Promise<ArrayOf<?>> all2(Promise<?>... promises) {
+    ArrayOf<Promise<?>> arrayOf = Collections.arrayOf();
+    for (Promise<?> promise : promises) {
+      arrayOf.push(promise);
     }
+    return internalAll(arrayOf);
+  }
 
-    @Override
-    public Promise<ArrayOf<?>> all2(Promise<?>... promises) {
-        ArrayOf<Promise<?>> arrayOf = Collections.arrayOf();
-        for (Promise<?> promise : promises) {
-            arrayOf.push(promise);
-        }
-        return internalAll(arrayOf);
-    }
-
-    private native Promise<ArrayOf<?>> internalAll(ArrayOf<Promise<?>> promises) /*-{
+  private native Promise<ArrayOf<?>> internalAll(ArrayOf<Promise<?>> promises) /*-{
         return Promise.all(promises);
     }-*/;
 
-    /** {@inheritDoc} */
-    @Override
-    public native <U> Promise<U> reject(String message) /*-{
+  /** {@inheritDoc} */
+  @Override
+  public native <U> Promise<U> reject(String message) /*-{
         return Promise.reject(new Error(message));
     }-*/;
 
-    /** {@inheritDoc} */
-    @Override
-    public native <U> Promise<U> resolve(U value) /*-{
+  /** {@inheritDoc} */
+  @Override
+  public native <U> Promise<U> resolve(U value) /*-{
         return Promise.resolve(value);
     }-*/;
 
-    /** {@inheritDoc} */
-    @Override
-    public <U> Promise<U> reject(Throwable reason) {
-        return reject(JsPromiseError.create(reason));
-    }
+  /** {@inheritDoc} */
+  @Override
+  public <U> Promise<U> reject(Throwable reason) {
+    return reject(JsPromiseError.create(reason));
+  }
 
-    /** {@inheritDoc} */
-    public final native <U> JsPromise<U> reject(PromiseError reason) /*-{
+  /** {@inheritDoc} */
+  public final native <U> JsPromise<U> reject(PromiseError reason) /*-{
         return Promise.reject(reason);
     }-*/;
 }

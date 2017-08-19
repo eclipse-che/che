@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,10 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.machine.execagent;
-
-import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,43 +16,44 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
 
+public abstract class AbstractExecAgentEventHandler<P extends DtoWithPid>
+    implements BiConsumer<String, P> {
 
-public abstract class AbstractExecAgentEventHandler<P extends DtoWithPid> implements BiConsumer<String, P> {
+  private final Map<String, Set<Consumer<P>>> operationRegistry = new HashMap<>();
 
-    private final Map<String, Set<Consumer<P>>> operationRegistry = new HashMap<>();
+  protected void handle(String endpointId, P params) {
+    int pid = params.getPid();
+    String key = endpointId + '@' + pid;
 
-    protected void handle(String endpointId, P params) {
-        int pid = params.getPid();
-        String key = endpointId + '@' + pid;
-
-        if (!operationRegistry.containsKey(key)) {
-            return;
-        }
-
-        for (Consumer<P> consumer : operationRegistry.get(key)) {
-            consumer.accept(params);
-        }
+    if (!operationRegistry.containsKey(key)) {
+      return;
     }
 
-    public void registerConsumer(String endpointId, int pid, Consumer<P> consumer) {
-        String key = endpointId + '@' + pid;
-        if (!operationRegistry.containsKey(key)) {
-            operationRegistry.put(key, new HashSet<>());
-        }
+    for (Consumer<P> consumer : operationRegistry.get(key)) {
+      consumer.accept(params);
+    }
+  }
 
-        operationRegistry.get(key).add(consumer);
+  public void registerConsumer(String endpointId, int pid, Consumer<P> consumer) {
+    String key = endpointId + '@' + pid;
+    if (!operationRegistry.containsKey(key)) {
+      operationRegistry.put(key, new HashSet<>());
     }
 
-    public void unregisterConsumer(String endpointId, int pid, Consumer<P> consumer) {
-        String key = endpointId + '@' + pid;
-        if (operationRegistry.containsKey(key)) {
-            operationRegistry.get(key).remove(consumer);
-        }
-    }
+    operationRegistry.get(key).add(consumer);
+  }
 
-    public void unregisterConsumers(String endpointId, int pid) {
-        String key = endpointId + '@' + pid;
-        operationRegistry.remove(key);
+  public void unregisterConsumer(String endpointId, int pid, Consumer<P> consumer) {
+    String key = endpointId + '@' + pid;
+    if (operationRegistry.containsKey(key)) {
+      operationRegistry.get(key).remove(consumer);
     }
+  }
+
+  public void unregisterConsumers(String endpointId, int pid) {
+    String key = endpointId + '@' + pid;
+    operationRegistry.remove(key);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.settings.property;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions;
-
-import javax.validation.constraints.NotNull;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPARING_IDENTICAL_VALUES;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPILER_UNUSED_IMPORT;
@@ -39,56 +29,63 @@ import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarning
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.UNUSED_PRIVATE_MEMBER;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.USAGE_OF_RAW_TYPE;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
+import org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions;
+
 /**
  * The class contains compiler properties ids which match to properties' names.
  *
  * @author Dmitry Shnurenko
  */
-
 @Singleton
 class PropertyNameManager {
 
-    private final Map<ErrorWarningsOptions, String> names;
+  private final Map<ErrorWarningsOptions, String> names;
 
-    @Inject
-    public PropertyNameManager(JavaLocalizationConstant locale) {
-        names = new HashMap<>();
+  @Inject
+  public PropertyNameManager(JavaLocalizationConstant locale) {
+    names = new HashMap<>();
 
-        names.put(COMPILER_UNUSED_LOCAL, locale.propertyUnusedLocal());
-        names.put(COMPILER_UNUSED_IMPORT, locale.propertyUnusedImport());
-        names.put(DEAD_CODE, locale.propertyDeadCode());
-        names.put(METHOD_WITH_CONSTRUCTOR_NAME, locale.propertyWithConstructorName());
-        names.put(UNNECESSARY_ELSE_STATEMENT, locale.propertyUnnecessaryElse());
-        names.put(COMPARING_IDENTICAL_VALUES, locale.comparingIdenticalValues());
-        names.put(NO_EFFECT_ASSIGNMENT, locale.noEffectAssignment());
-        names.put(MISSING_SERIAL_VERSION_UID, locale.missingSerialVersionUid());
-        names.put(TYPE_PARAMETER_HIDE_ANOTHER_TYPE, locale.typeParameterHideAnotherType());
-        names.put(FIELD_HIDES_ANOTHER_VARIABLE, locale.fieldHidesAnotherField());
-        names.put(MISSING_DEFAULT_CASE, locale.missingSwitchDefaultCase());
-        names.put(UNUSED_PRIVATE_MEMBER, locale.unusedPrivateMember());
-        names.put(UNCHECKED_TYPE_OPERATION, locale.uncheckedTypeOperation());
-        names.put(USAGE_OF_RAW_TYPE, locale.usageRawType());
-        names.put(MISSING_OVERRIDE_ANNOTATION, locale.missingOverrideAnnotation());
-        names.put(NULL_POINTER_ACCESS, locale.nullPointerAccess());
-        names.put(POTENTIAL_NULL_POINTER_ACCESS, locale.potentialNullPointerAccess());
-        names.put(REDUNDANT_NULL_CHECK, locale.redundantNullCheck());
+    names.put(COMPILER_UNUSED_LOCAL, locale.propertyUnusedLocal());
+    names.put(COMPILER_UNUSED_IMPORT, locale.propertyUnusedImport());
+    names.put(DEAD_CODE, locale.propertyDeadCode());
+    names.put(METHOD_WITH_CONSTRUCTOR_NAME, locale.propertyWithConstructorName());
+    names.put(UNNECESSARY_ELSE_STATEMENT, locale.propertyUnnecessaryElse());
+    names.put(COMPARING_IDENTICAL_VALUES, locale.comparingIdenticalValues());
+    names.put(NO_EFFECT_ASSIGNMENT, locale.noEffectAssignment());
+    names.put(MISSING_SERIAL_VERSION_UID, locale.missingSerialVersionUid());
+    names.put(TYPE_PARAMETER_HIDE_ANOTHER_TYPE, locale.typeParameterHideAnotherType());
+    names.put(FIELD_HIDES_ANOTHER_VARIABLE, locale.fieldHidesAnotherField());
+    names.put(MISSING_DEFAULT_CASE, locale.missingSwitchDefaultCase());
+    names.put(UNUSED_PRIVATE_MEMBER, locale.unusedPrivateMember());
+    names.put(UNCHECKED_TYPE_OPERATION, locale.uncheckedTypeOperation());
+    names.put(USAGE_OF_RAW_TYPE, locale.usageRawType());
+    names.put(MISSING_OVERRIDE_ANNOTATION, locale.missingOverrideAnnotation());
+    names.put(NULL_POINTER_ACCESS, locale.nullPointerAccess());
+    names.put(POTENTIAL_NULL_POINTER_ACCESS, locale.potentialNullPointerAccess());
+    names.put(REDUNDANT_NULL_CHECK, locale.redundantNullCheck());
+  }
+
+  /**
+   * Returns property name using special id. Method can throw {@link IllegalArgumentException} if
+   * name not found.
+   *
+   * @param propertyId id for which name will be returned
+   * @return name of property
+   */
+  @NotNull
+  public String getName(@NotNull ErrorWarningsOptions propertyId) {
+    String name = names.get(propertyId);
+
+    if (name == null) {
+      throw new IllegalArgumentException(getClass() + "property name is not found...");
     }
 
-    /**
-     * Returns property name using special id. Method can throw {@link IllegalArgumentException} if name not found.
-     *
-     * @param propertyId
-     *         id for which name will be returned
-     * @return name of property
-     */
-    @NotNull
-    public String getName(@NotNull ErrorWarningsOptions propertyId) {
-        String name = names.get(propertyId);
-
-        if (name == null) {
-            throw new IllegalArgumentException(getClass() + "property name is not found...");
-        }
-
-        return name;
-    }
+    return name;
+  }
 }

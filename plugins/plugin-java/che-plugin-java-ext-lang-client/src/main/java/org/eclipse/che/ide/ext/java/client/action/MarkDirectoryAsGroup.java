@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.action;
+
+import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
@@ -22,8 +23,6 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 
-import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
-
 /**
  * Group for the actions which are configured build path.
  *
@@ -31,26 +30,27 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
  */
 @Singleton
 public class MarkDirectoryAsGroup extends DefaultActionGroup {
-    private final AppContext appContext;
+  private final AppContext appContext;
 
-    @Inject
-    public MarkDirectoryAsGroup(ActionManager actionManager, AppContext appContext, JavaLocalizationConstant locale) {
-        super(locale.markDirectoryAs(), true, actionManager);
+  @Inject
+  public MarkDirectoryAsGroup(
+      ActionManager actionManager, AppContext appContext, JavaLocalizationConstant locale) {
+    super(locale.markDirectoryAs(), true, actionManager);
 
-        this.appContext = appContext;
+    this.appContext = appContext;
+  }
+
+  @Override
+  public void update(ActionEvent e) {
+    final Resource resource = appContext.getResource();
+
+    if (resource == null) {
+      e.getPresentation().setEnabledAndVisible(false);
+      return;
     }
 
-    @Override
-    public void update(ActionEvent e) {
-        final Resource resource = appContext.getResource();
+    final Optional<Project> project = resource.getRelatedProject();
 
-        if (resource == null) {
-            e.getPresentation().setEnabledAndVisible(false);
-            return;
-        }
-
-        final Optional<Project> project = resource.getRelatedProject();
-
-        e.getPresentation().setEnabledAndVisible(project.isPresent() && project.get().isTypeOf(JAVAC));
-    }
+    e.getPresentation().setEnabledAndVisible(project.isPresent() && project.get().isTypeOf(JAVAC));
+  }
 }

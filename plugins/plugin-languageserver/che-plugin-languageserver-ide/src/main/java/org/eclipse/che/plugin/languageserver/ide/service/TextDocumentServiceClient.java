@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.languageserver.ide.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -41,215 +42,226 @@ import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
-import java.util.List;
-
-
 @Singleton
 public class TextDocumentServiceClient {
 
-    private final RequestTransmitter requestTransmitter;
+  private final RequestTransmitter requestTransmitter;
 
-    @Inject
-    public TextDocumentServiceClient(RequestTransmitter requestTransmitter) {
-        this.requestTransmitter = requestTransmitter;
-    }
+  @Inject
+  public TextDocumentServiceClient(RequestTransmitter requestTransmitter) {
+    this.requestTransmitter = requestTransmitter;
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#completion(TextDocumentPositionParams)}
-     *
-     * @param position
-     * @return
-     */
-    public Promise<ExtendedCompletionList> completion(TextDocumentPositionParams position) {
-        return transmitDtoAndReceiveDto(position, "textDocument/completion", ExtendedCompletionList.class);
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#completion(TextDocumentPositionParams)}
+   *
+   * @param position
+   * @return
+   */
+  public Promise<ExtendedCompletionList> completion(TextDocumentPositionParams position) {
+    return transmitDtoAndReceiveDto(
+        position, "textDocument/completion", ExtendedCompletionList.class);
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#resolveCompletionItem(CompletionItem)}
-     *
-     * @param completionItem
-     * @return
-     */
-    public Promise<ExtendedCompletionItem> resolveCompletionItem(ExtendedCompletionItem completionItem) {
-        return transmitDtoAndReceiveDto(completionItem, "textDocument/completionItem/resolve", ExtendedCompletionItem.class);
+  /**
+   * GWT client implementation of {@link TextDocumentService#resolveCompletionItem(CompletionItem)}
+   *
+   * @param completionItem
+   * @return
+   */
+  public Promise<ExtendedCompletionItem> resolveCompletionItem(
+      ExtendedCompletionItem completionItem) {
+    return transmitDtoAndReceiveDto(
+        completionItem, "textDocument/completionItem/resolve", ExtendedCompletionItem.class);
+  }
 
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#documentSymbol(DocumentSymbolParams)}
+   *
+   * @param params
+   * @return
+   */
+  public Promise<List<SymbolInformation>> documentSymbol(DocumentSymbolParams params) {
+    return transmitDtoAndReceiveDtoList(
+        params, "textDocument/documentSymbol", SymbolInformation.class);
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#documentSymbol(DocumentSymbolParams)}
-     *
-     * @param params
-     * @return
-     */
-    public Promise<List<SymbolInformation>> documentSymbol(DocumentSymbolParams params) {
-        return transmitDtoAndReceiveDtoList(params, "textDocument/documentSymbol", SymbolInformation.class);
+  /**
+   * GWT client implementation of {@link TextDocumentService#references(ReferenceParams)}
+   *
+   * @param params
+   * @return
+   */
+  public Promise<List<Location>> references(ReferenceParams params) {
+    return transmitDtoAndReceiveDtoList(params, "textDocument/references", Location.class);
+  }
 
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#references(ReferenceParams)}
+   *
+   * @param params
+   * @return
+   */
+  public Promise<List<Location>> definition(TextDocumentPositionParams params) {
+    return transmitDtoAndReceiveDtoList(params, "textDocument/definition", Location.class);
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#references(ReferenceParams)}
-     *
-     * @param params
-     * @return
-     */
-    public Promise<List<Location>> references(ReferenceParams params) {
-        return transmitDtoAndReceiveDtoList(params, "textDocument/references", Location.class);
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#hover(TextDocumentPositionParams)}
+   *
+   * @param params
+   * @return
+   */
+  public Promise<Hover> hover(TextDocumentPositionParams params) {
+    return transmitDtoAndReceiveDto(params, "textDocument/hover", Hover.class);
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#references(ReferenceParams)}
-     *
-     * @param params
-     * @return
-     */
-    public Promise<List<Location>> definition(TextDocumentPositionParams params) {
-        return transmitDtoAndReceiveDtoList(params, "textDocument/definition", Location.class);
-    }
+  /**
+   * GWT client implementation of {@link
+   * TextDocumentService#signatureHelp(TextDocumentPositionParams)}
+   *
+   * @param params
+   * @return
+   */
+  public Promise<SignatureHelp> signatureHelp(TextDocumentPositionParams params) {
+    return transmitDtoAndReceiveDto(params, "textDocument/signatureHelp", SignatureHelp.class);
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#hover(TextDocumentPositionParams)}
-     *
-     * @param params
-     * @return
-     */
-    public Promise<Hover> hover(TextDocumentPositionParams params) {
-        return transmitDtoAndReceiveDto(params, "textDocument/hover", Hover.class);
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#formatting(DocumentFormattingParams)}
+   *
+   * @param params
+   * @return
+   */
+  public Promise<List<TextEdit>> formatting(DocumentFormattingParams params) {
+    return transmitDtoAndReceiveDtoList(params, "textDocument/formatting", TextEdit.class);
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#signatureHelp(TextDocumentPositionParams)}
-     *
-     * @param params
-     * @return
-     */
-    public Promise<SignatureHelp> signatureHelp(TextDocumentPositionParams params) {
-        return transmitDtoAndReceiveDto(params, "textDocument/signatureHelp", SignatureHelp.class);
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#formatting(DocumentFormattingParams)}
+   *
+   * @param params
+   * @return
+   */
+  public Promise<List<TextEdit>> rangeFormatting(DocumentRangeFormattingParams params) {
+    return transmitDtoAndReceiveDtoList(params, "textDocument/rangeFormatting", TextEdit.class);
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#formatting(DocumentFormattingParams)}
-     *
-     * @param params
-     * @return
-     */
-    public Promise<List<TextEdit>> formatting(DocumentFormattingParams params) {
-        return transmitDtoAndReceiveDtoList(params, "textDocument/formatting", TextEdit.class);
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#formatting(DocumentFormattingParams)}
+   *
+   * @param params
+   * @return
+   */
+  public Promise<List<TextEdit>> onTypeFormatting(DocumentOnTypeFormattingParams params) {
+    return transmitDtoAndReceiveDtoList(params, "textDocument/onTypeFormatting", TextEdit.class);
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#formatting(DocumentFormattingParams)}
-     *
-     * @param params
-     * @return
-     */
-    public Promise<List<TextEdit>> rangeFormatting(DocumentRangeFormattingParams params) {
-        return transmitDtoAndReceiveDtoList(params, "textDocument/rangeFormatting", TextEdit.class);
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#didChange(DidChangeTextDocumentParams)}
+   *
+   * @param params
+   * @return
+   */
+  public void didChange(DidChangeTextDocumentParams params) {
+    transmitDtoAndReceiveNothing(params, "textDocument/didChange");
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#formatting(DocumentFormattingParams)}
-     *
-     * @param params
-     * @return
-     */
-    public Promise<List<TextEdit>> onTypeFormatting(DocumentOnTypeFormattingParams params) {
-        return transmitDtoAndReceiveDtoList(params, "textDocument/onTypeFormatting", TextEdit.class);
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#didOpen(DidOpenTextDocumentParams)}
+   *
+   * @param params
+   * @return
+   */
+  public void didOpen(DidOpenTextDocumentParams params) {
+    transmitDtoAndReceiveNothing(params, "textDocument/didOpen");
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#didChange(DidChangeTextDocumentParams)}
-     *
-     * @param params
-     * @return
-     */
-    public void didChange(DidChangeTextDocumentParams params) {
-        transmitDtoAndReceiveNothing(params, "textDocument/didChange");
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#didClose(DidCloseTextDocumentParams)}
+   *
+   * @param params
+   * @return
+   */
+  public void didClose(DidCloseTextDocumentParams params) {
+    transmitDtoAndReceiveNothing(params, "textDocument/didClose");
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#didOpen(DidOpenTextDocumentParams)}
-     *
-     * @param params
-     * @return
-     */
-    public void didOpen(DidOpenTextDocumentParams params) {
-        transmitDtoAndReceiveNothing(params, "textDocument/didOpen");
-    }
+  /**
+   * GWT client implementation of {@link TextDocumentService#didSave(DidSaveTextDocumentParams)}
+   *
+   * @param params
+   * @return
+   */
+  public void didSave(DidSaveTextDocumentParams params) {
+    transmitDtoAndReceiveNothing(params, "textDocument/didSave");
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#didClose(DidCloseTextDocumentParams)}
-     *
-     * @param params
-     * @return
-     */
-    public void didClose(DidCloseTextDocumentParams params) {
-        transmitDtoAndReceiveNothing(params, "textDocument/didClose");
-    }
+  /**
+   * GWT client implementation of {@link
+   * TextDocumentService#documentHighlight(TextDocumentPositionParams position)}
+   *
+   * @param params
+   * @return a {@link Promise} of an array of {@link DocumentHighlight} which will be computed by
+   *     the language server.
+   */
+  public Promise<List<DocumentHighlight>> documentHighlight(TextDocumentPositionParams params) {
+    return transmitDtoAndReceiveDtoList(
+        params, "textDocument/documentHighlight", DocumentHighlight.class);
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#didSave(DidSaveTextDocumentParams)}
-     *
-     * @param params
-     * @return
-     */
-    public void didSave(DidSaveTextDocumentParams params) {
-        transmitDtoAndReceiveNothing(params, "textDocument/didSave");
-    }
+  public Promise<List<Command>> codeAction(CodeActionParams params) {
+    return transmitDtoAndReceiveDtoList(params, "textDocument/codeAction", Command.class);
+  }
 
-    /**
-     * GWT client implementation of {@link TextDocumentService#documentHighlight(TextDocumentPositionParams
-     * position)}
-     *
-     * @param params
-     * @return a {@link Promise} of an array of {@link DocumentHighlight} which will be computed by the language server.
-     */
-    public Promise<List<DocumentHighlight>> documentHighlight(TextDocumentPositionParams params) {
-        return transmitDtoAndReceiveDtoList(params, "textDocument/documentHighlight", DocumentHighlight.class);
-    }
+  private <T> Promise<T> transmitDtoAndReceiveDto(
+      Object jsonSerializable, String name, Class<T> resultDtoClass) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId("ws-agent")
+                .methodName(name)
+                .paramsAsDto(jsonSerializable)
+                .sendAndReceiveResultAsDto(resultDtoClass)
+                .onSuccess(resolve::apply)
+                .onFailure(error -> reject.apply(getPromiseError(error))));
+  }
 
-    public Promise<List<Command>> codeAction(CodeActionParams params) {
-        return transmitDtoAndReceiveDtoList(params, "textDocument/codeAction", Command.class);
-    }
+  private <T> Promise<List<T>> transmitDtoAndReceiveDtoList(
+      Object jsonSerializable, String name, Class<T> resultDtoClass) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId("ws-agent")
+                .methodName(name)
+                .paramsAsDto(jsonSerializable)
+                .sendAndReceiveResultAsListOfDto(resultDtoClass)
+                .onSuccess(resolve::apply)
+                .onFailure(error -> reject.apply(getPromiseError(error))));
+  }
 
-    private <T> Promise<T> transmitDtoAndReceiveDto(Object jsonSerializable, String name, Class<T> resultDtoClass) {
-        return Promises.create((resolve, reject) -> requestTransmitter.newRequest()
-                                                                      .endpointId("ws-agent")
-                                                                      .methodName(name)
-                                                                      .paramsAsDto(jsonSerializable)
-                                                                      .sendAndReceiveResultAsDto(resultDtoClass)
-                                                                      .onSuccess(resolve::apply)
-                                                                      .onFailure(error -> reject.apply(getPromiseError(error))));
-    }
+  private void transmitDtoAndReceiveNothing(Object jsonSerializable, String name) {
+    requestTransmitter
+        .newRequest()
+        .endpointId("ws-agent")
+        .methodName(name)
+        .paramsAsDto(jsonSerializable)
+        .sendAndSkipResult();
+  }
 
-    private <T> Promise<List<T>> transmitDtoAndReceiveDtoList(Object jsonSerializable, String name, Class<T> resultDtoClass) {
-        return Promises.create((resolve, reject) -> requestTransmitter.newRequest()
-                                                                      .endpointId("ws-agent")
-                                                                      .methodName(name)
-                                                                      .paramsAsDto(jsonSerializable)
-                                                                      .sendAndReceiveResultAsListOfDto(resultDtoClass)
-                                                                      .onSuccess(resolve::apply)
-                                                                      .onFailure(error -> reject.apply(getPromiseError(error))));
-    }
+  private PromiseError getPromiseError(JsonRpcError jsonRpcError) {
+    return new PromiseError() {
+      @Override
+      public String getMessage() {
+        return jsonRpcError.getMessage();
+      }
 
-    private void transmitDtoAndReceiveNothing(Object jsonSerializable, String name) {
-        requestTransmitter.newRequest()
-                          .endpointId("ws-agent")
-                          .methodName(name)
-                          .paramsAsDto(jsonSerializable)
-                          .sendAndSkipResult();
-    }
-
-    private PromiseError getPromiseError(JsonRpcError jsonRpcError) {
-        return new PromiseError() {
-            @Override
-            public String getMessage() {
-                return jsonRpcError.getMessage();
-            }
-
-            @Override
-            public Throwable getCause() {
-                return new JsonRpcException(jsonRpcError.getCode(), jsonRpcError.getMessage());
-            }
-        };
-    }
+      @Override
+      public Throwable getCause() {
+        return new JsonRpcException(jsonRpcError.getCode(), jsonRpcError.getMessage());
+      }
+    };
+  }
 }

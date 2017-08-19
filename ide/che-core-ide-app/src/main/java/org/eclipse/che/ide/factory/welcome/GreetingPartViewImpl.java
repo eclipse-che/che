@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.factory.welcome;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -15,45 +15,43 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 
-/**
- * @author Vitaliy Guliy
- */
+/** @author Vitaliy Guliy */
 @Singleton
-public class GreetingPartViewImpl extends BaseView<GreetingPartView.ActionDelegate> implements GreetingPartView {
+public class GreetingPartViewImpl extends BaseView<GreetingPartView.ActionDelegate>
+    implements GreetingPartView {
 
-    private Frame frame;
+  private Frame frame;
 
-    @Inject
-    public GreetingPartViewImpl(PartStackUIResources resources) {
-        super(resources);
+  @Inject
+  public GreetingPartViewImpl(PartStackUIResources resources) {
+    super(resources);
 
-        frame = new Frame();
-        frame.setWidth("100%");
-        frame.setHeight("100%");
-        frame.getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
-        frame.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
+    frame = new Frame();
+    frame.setWidth("100%");
+    frame.setHeight("100%");
+    frame.getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
+    frame.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
 
-        frame.getElement().setAttribute("id", "greetingFrame");
-        frame.getElement().setAttribute("tabindex", "0");
+    frame.getElement().setAttribute("id", "greetingFrame");
+    frame.getElement().setAttribute("tabindex", "0");
 
-        setContentWidget(frame);
+    setContentWidget(frame);
 
-        frame.addLoadHandler(event -> frame.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE));
+    frame.addLoadHandler(
+        event -> frame.getElement().getStyle().setVisibility(Style.Visibility.VISIBLE));
 
-        handleFrameEvents(frame.getElement());
-    }
+    handleFrameEvents(frame.getElement());
+  }
 
-    /**
-     * Adds handlers to the greeting frame and window to catch mouse clicking on the frame.
-     *
-     * @param frame
-     *         native frame object
-     */
-    private native void handleFrameEvents(final JavaScriptObject frame) /*-{
+  /**
+   * Adds handlers to the greeting frame and window to catch mouse clicking on the frame.
+   *
+   * @param frame native frame object
+   */
+  private native void handleFrameEvents(final JavaScriptObject frame) /*-{
         var instance = this;
         frame["hovered"] = false;
 
@@ -72,32 +70,29 @@ public class GreetingPartViewImpl extends BaseView<GreetingPartView.ActionDelega
         }, false);
     }-*/;
 
-    @Override
-    public void showGreeting(String url) {
-        frame.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
+  @Override
+  public void showGreeting(String url) {
+    frame.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
 
-        if (url == null || url.trim().isEmpty()) {
-            frame.setUrl("about:blank");
-        } else {
-            frame.setUrl(url);
-        }
+    if (url == null || url.trim().isEmpty()) {
+      frame.setUrl("about:blank");
+    } else {
+      frame.setUrl(url);
     }
+  }
 
-    /**
-     * Ensures the view is activated when clicking the mouse.
-     */
-    private void activatePart() {
-        if (!isFocused()) {
-            setFocus(true);
-            if (delegate != null) {
-                delegate.onActivate();
-            }
-        }
+  /** Ensures the view is activated when clicking the mouse. */
+  private void activatePart() {
+    if (!isFocused()) {
+      setFocus(true);
+      if (delegate != null) {
+        delegate.onActivate();
+      }
     }
+  }
 
-    @Override
-    protected void focusView() {
-        frame.getElement().focus();
-    }
-
+  @Override
+  protected void focusView() {
+    frame.getElement().focus();
+  }
 }

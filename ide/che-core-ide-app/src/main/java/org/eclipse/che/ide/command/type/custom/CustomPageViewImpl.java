@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.type.custom;
 
 import com.google.gwt.core.client.GWT;
@@ -27,51 +27,50 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class CustomPageViewImpl implements CustomPageView {
 
-    private static final CustomPageViewImplUiBinder UI_BINDER = GWT.create(CustomPageViewImplUiBinder.class);
+  private static final CustomPageViewImplUiBinder UI_BINDER =
+      GWT.create(CustomPageViewImplUiBinder.class);
 
-    private final FlowPanel rootElement;
+  private final FlowPanel rootElement;
 
-    @UiField
-    TextArea commandLine;
+  @UiField TextArea commandLine;
 
-    private ActionDelegate delegate;
+  private ActionDelegate delegate;
 
-    public CustomPageViewImpl() {
-        rootElement = UI_BINDER.createAndBindUi(this);
-    }
+  public CustomPageViewImpl() {
+    rootElement = UI_BINDER.createAndBindUi(this);
+  }
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    @Override
-    public Widget asWidget() {
-        return rootElement;
-    }
+  @Override
+  public Widget asWidget() {
+    return rootElement;
+  }
 
-    @Override
-    public String getCommandLine() {
-        return commandLine.getValue();
-    }
+  @Override
+  public String getCommandLine() {
+    return commandLine.getValue();
+  }
 
-    @Override
-    public void setCommandLine(String commandLine) {
-        this.commandLine.setValue(commandLine);
-    }
+  @Override
+  public void setCommandLine(String commandLine) {
+    this.commandLine.setValue(commandLine);
+  }
 
-    @UiHandler({"commandLine"})
-    void onKeyUp(KeyUpEvent event) {
-        // commandLine value may not be updated immediately after keyUp
-        // therefore use the timer with zero delay
-        new Timer() {
-            @Override
-            public void run() {
-                delegate.onCommandLineChanged();
-            }
-        }.schedule(0);
-    }
+  @UiHandler({"commandLine"})
+  void onKeyUp(KeyUpEvent event) {
+    // commandLine value may not be updated immediately after keyUp
+    // therefore use the timer with zero delay
+    new Timer() {
+      @Override
+      public void run() {
+        delegate.onCommandLineChanged();
+      }
+    }.schedule(0);
+  }
 
-    interface CustomPageViewImplUiBinder extends UiBinder<FlowPanel, CustomPageViewImpl> {
-    }
+  interface CustomPageViewImplUiBinder extends UiBinder<FlowPanel, CustomPageViewImpl> {}
 }

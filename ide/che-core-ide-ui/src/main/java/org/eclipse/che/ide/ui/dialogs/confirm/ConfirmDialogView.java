@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,59 +7,56 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.dialogs.confirm;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * The view interface for the confirmation dialog component.
- * 
+ *
  * @author Mickaël Leduque
  * @author Artem Zatsarynnyi
  */
 public interface ConfirmDialogView {
 
-    /** Sets the action delegate. */
-    void setDelegate(ActionDelegate delegate);
+  /** Sets the action delegate. */
+  void setDelegate(ActionDelegate delegate);
 
-    /**
-     * Displays the dialog window.
-     * Sets "accept" button in the focus.
-     */
-    void showDialog();
+  /** Displays the dialog window. Sets "accept" button in the focus. */
+  void showDialog();
 
-    /** Closes the dialog window. */
-    void closeDialog();
+  /** Closes the dialog window. */
+  void closeDialog();
 
-    /** Fill the window with its content. */
-    void setContent(IsWidget content);
+  /** Fill the window with its content. */
+  void setContent(IsWidget content);
 
-    /** Sets the window title. */
-    void setTitle(String title);
+  /** Sets the window title. */
+  void setTitle(String title);
 
-    /** Overwrites label of Ok button */
-    void setOkButtonLabel(String label);
+  /** Overwrites label of Ok button */
+  void setOkButtonLabel(String label);
 
-    /** Overwrites label of Cancel button */
-    void setCancelButtonLabel(String label);
+  /** Overwrites label of Cancel button */
+  void setCancelButtonLabel(String label);
 
-    /** Returns {@code true} if OK button is in the focus and {@code false} - otherwise. */
-    boolean isOkButtonInFocus();
+  /** Returns {@code true} if OK button is in the focus and {@code false} - otherwise. */
+  boolean isOkButtonInFocus();
 
-    /** Returns {@code true} if Cancel button is in the focus and {@code false} - otherwise. */
-    boolean isCancelButtonInFocus();
+  /** Returns {@code true} if Cancel button is in the focus and {@code false} - otherwise. */
+  boolean isCancelButtonInFocus();
 
-    /** The interface for the action delegate. */
-    interface ActionDelegate {
+  /** The interface for the action delegate. */
+  interface ActionDelegate {
 
-        /** Defines what's done when the user clicks cancel. */
-        void cancelled();
+    /** Defines what's done when the user clicks cancel. */
+    void cancelled();
 
-        /** Defines what's done when the user clicks OK. */
-        void accepted();
+    /** Defines what's done when the user clicks OK. */
+    void accepted();
 
-        /** Performs any actions appropriate in response to the user having clicked the Enter key. */
-        void onEnterClicked();
-    }
+    /** Performs any actions appropriate in response to the user having clicked the Enter key. */
+    void onEnterClicked();
+  }
 }

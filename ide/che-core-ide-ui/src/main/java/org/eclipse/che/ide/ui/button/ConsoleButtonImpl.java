@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.button;
 
 import com.google.gwt.core.client.GWT;
@@ -24,96 +24,95 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.ui.tooltip.TooltipWidget;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * @author Andrey Plotnikov
  * @author Valeriy Svydenko
  */
-public class ConsoleButtonImpl extends Composite implements ConsoleButton, ClickHandler, MouseOverHandler, MouseOutHandler {
+public class ConsoleButtonImpl extends Composite
+    implements ConsoleButton, ClickHandler, MouseOverHandler, MouseOutHandler {
 
-    interface ConsoleButtonImplUiBinder extends UiBinder<Widget, ConsoleButtonImpl> {
+  interface ConsoleButtonImplUiBinder extends UiBinder<Widget, ConsoleButtonImpl> {}
+
+  public static final int TOP_TOOLTIP_SHIFT = 35;
+  private static final ConsoleButtonImplUiBinder UI_BINDER =
+      GWT.create(ConsoleButtonImplUiBinder.class);
+
+  @UiField SimpleLayoutPanel image;
+
+  private final ButtonResources resources;
+  private final TooltipWidget tooltip;
+  private final SVGImage icon;
+
+  private ActionDelegate delegate;
+
+  @Inject
+  public ConsoleButtonImpl(
+      ButtonResources resources,
+      TooltipWidget tooltip,
+      @NotNull @Assisted String prompt,
+      @NotNull @Assisted SVGResource image) {
+    this.resources = resources;
+    this.tooltip = tooltip;
+    this.tooltip.setDescription(prompt);
+
+    resources.buttonCss().ensureInjected();
+
+    initWidget(UI_BINDER.createAndBindUi(this));
+
+    icon = new SVGImage(image);
+    icon.getElement().setAttribute("class", resources.buttonCss().mainButtonIcon());
+
+    setCheckedStatus(false);
+
+    addDomHandler(this, ClickEvent.getType());
+    addDomHandler(this, MouseOutEvent.getType());
+    addDomHandler(this, MouseOverEvent.getType());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setCheckedStatus(boolean isChecked) {
+    ButtonResources.Css buttonCss = resources.buttonCss();
+
+    if (isChecked) {
+      icon.removeClassNameBaseVal(buttonCss.whiteColor());
+      icon.addClassNameBaseVal(buttonCss.activeConsoleButton());
+    } else {
+      icon.removeClassNameBaseVal(buttonCss.activeConsoleButton());
+      icon.addClassNameBaseVal(buttonCss.whiteColor());
     }
 
-    public static final  int                       TOP_TOOLTIP_SHIFT = 35;
-    private static final ConsoleButtonImplUiBinder UI_BINDER         = GWT.create(ConsoleButtonImplUiBinder.class);
+    image.getElement().appendChild(icon.getSvgElement().getElement());
+  }
 
-    @UiField
-    SimpleLayoutPanel image;
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    private final ButtonResources resources;
-    private final TooltipWidget tooltip;
-    private final SVGImage icon;
+  /** {@inheritDoc} */
+  @Override
+  public void onClick(ClickEvent clickEvent) {
+    delegate.onButtonClicked();
+  }
 
-    private ActionDelegate delegate;
+  /** {@inheritDoc} */
+  @Override
+  public void onMouseOut(MouseOutEvent mouseOutEvent) {
+    tooltip.hide();
+  }
 
-    @Inject
-    public ConsoleButtonImpl(ButtonResources resources,
-                             TooltipWidget tooltip,
-                             @NotNull @Assisted String prompt,
-                             @NotNull @Assisted SVGResource image) {
-        this.resources = resources;
-        this.tooltip = tooltip;
-        this.tooltip.setDescription(prompt);
+  /** {@inheritDoc} */
+  @Override
+  public void onMouseOver(MouseOverEvent mouseOverEvent) {
+    tooltip.setPopupPosition(getAbsoluteLeft(), getAbsoluteTop() + TOP_TOOLTIP_SHIFT);
 
-        resources.buttonCss().ensureInjected();
-
-        initWidget(UI_BINDER.createAndBindUi(this));
-
-        icon = new SVGImage(image);
-        icon.getElement().setAttribute("class", resources.buttonCss().mainButtonIcon());
-
-        setCheckedStatus(false);
-
-        addDomHandler(this, ClickEvent.getType());
-        addDomHandler(this, MouseOutEvent.getType());
-        addDomHandler(this, MouseOverEvent.getType());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setCheckedStatus(boolean isChecked) {
-        ButtonResources.Css buttonCss = resources.buttonCss();
-
-        if (isChecked) {
-            icon.removeClassNameBaseVal(buttonCss.whiteColor());
-            icon.addClassNameBaseVal(buttonCss.activeConsoleButton());
-        } else {
-            icon.removeClassNameBaseVal(buttonCss.activeConsoleButton());
-            icon.addClassNameBaseVal(buttonCss.whiteColor());
-        }
-
-        image.getElement().appendChild(icon.getSvgElement().getElement());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onClick(ClickEvent clickEvent) {
-        delegate.onButtonClicked();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onMouseOut(MouseOutEvent mouseOutEvent) {
-        tooltip.hide();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onMouseOver(MouseOverEvent mouseOverEvent) {
-        tooltip.setPopupPosition(getAbsoluteLeft(), getAbsoluteTop() + TOP_TOOLTIP_SHIFT);
-
-        tooltip.show();
-    }
+    tooltip.show();
+  }
 }

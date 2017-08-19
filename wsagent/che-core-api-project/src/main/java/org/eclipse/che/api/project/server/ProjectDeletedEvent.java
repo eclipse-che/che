@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
@@ -20,20 +20,18 @@ import org.eclipse.che.api.core.notification.EventOrigin;
 @EventOrigin("project")
 public class ProjectDeletedEvent {
 
-    private String projectPath;
+  private String projectPath;
 
-    public ProjectDeletedEvent(String projectPath) {
-        this.projectPath = projectPath;
-    }
+  public ProjectDeletedEvent(String projectPath) {
+    this.projectPath = projectPath;
+  }
 
-    public String getProjectPath() {
-        return projectPath;
-    }
+  public String getProjectPath() {
+    return projectPath;
+  }
 
-    @Override
-    public String toString() {
-        return "ProjectDeletedEvent{" +
-               "projectPath='" + projectPath + '\'' +
-               '}';
-    }
+  @Override
+  public String toString() {
+    return "ProjectDeletedEvent{" + "projectPath='" + projectPath + '\'' + '}';
+  }
 }

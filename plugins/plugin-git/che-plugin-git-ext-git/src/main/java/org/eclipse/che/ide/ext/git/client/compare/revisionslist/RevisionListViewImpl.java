@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.compare.revisionslist;
 
 import com.google.gwt.cell.client.TextCell;
@@ -28,16 +28,13 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ui.window.Window;
-
-import javax.validation.constraints.NotNull;
-
-import java.util.List;
 
 /**
  * The implementation of {@link RevisionListView}.
@@ -46,168 +43,183 @@ import java.util.List;
  */
 @Singleton
 public class RevisionListViewImpl extends Window implements RevisionListView {
-    interface RevisionListViewImplUiBinder extends UiBinder<Widget, RevisionListViewImpl> {
+  interface RevisionListViewImplUiBinder extends UiBinder<Widget, RevisionListViewImpl> {}
+
+  private static RevisionListViewImplUiBinder uiBinder =
+      GWT.create(RevisionListViewImplUiBinder.class);
+
+  Button btnClose;
+  Button btnCompare;
+
+  @UiField ScrollPanel revisionsPanel;
+  @UiField TextArea description;
+
+  @UiField(provided = true)
+  final GitLocalizationConstant locale;
+
+  @UiField(provided = true)
+  final GitResources res;
+
+  private ActionDelegate delegate;
+  private CellTable<Revision> revisions;
+  private SingleSelectionModel<Revision> selectionModel;
+
+  private final DateTimeFormatter dateTimeFormatter;
+
+  @Inject
+  protected RevisionListViewImpl(
+      GitResources resources,
+      GitLocalizationConstant locale,
+      DateTimeFormatter dateTimeFormatter,
+      org.eclipse.che.ide.Resources coreRes) {
+    this.res = resources;
+    this.locale = locale;
+    this.dateTimeFormatter = dateTimeFormatter;
+    this.ensureDebugId("git-compare-revision-window");
+
+    Widget widget = uiBinder.createAndBindUi(this);
+
+    this.setTitle(locale.compareWithRevisionTitle());
+    this.setWidget(widget);
+
+    description.setReadOnly(true);
+
+    createRevisionsTable(coreRes);
+    createButtons();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setRevisions(@NotNull List<Revision> revisions) {
+    this.revisions.setRowData(revisions);
+    if (selectionModel.getSelectedObject() == null) {
+      delegate.onRevisionUnselected();
     }
+  }
 
-    private static RevisionListViewImplUiBinder uiBinder = GWT.create(RevisionListViewImplUiBinder.class);
+  /** {@inheritDoc} */
+  @Override
+  public void setEnableCompareButton(boolean enabled) {
+    btnCompare.setEnabled(enabled);
+  }
 
-    Button btnClose;
-    Button btnCompare;
+  /** {@inheritDoc} */
+  @Override
+  public void setDescription(String description) {
+    this.description.setText(description);
+  }
 
-    @UiField
-    ScrollPanel revisionsPanel;
-    @UiField
-    TextArea    description;
+  /** {@inheritDoc} */
+  @Override
+  public void close() {
+    onClose();
+  }
 
-    @UiField(provided = true)
-    final GitLocalizationConstant locale;
-    @UiField(provided = true)
-    final GitResources            res;
+  @Override
+  protected void onClose() {
+    selectionModel.clear();
+    super.onClose();
+  }
 
-    private ActionDelegate                 delegate;
-    private CellTable<Revision>            revisions;
-    private SingleSelectionModel<Revision> selectionModel;
+  /** {@inheritDoc} */
+  @Override
+  public void showDialog() {
+    this.show();
+  }
 
-    private final DateTimeFormatter dateTimeFormatter;
-
-    @Inject
-    protected RevisionListViewImpl(GitResources resources,
-                                   GitLocalizationConstant locale,
-                                   DateTimeFormatter dateTimeFormatter,
-                                   org.eclipse.che.ide.Resources coreRes) {
-        this.res = resources;
-        this.locale = locale;
-        this.dateTimeFormatter = dateTimeFormatter;
-        this.ensureDebugId("git-compare-revision-window");
-
-        Widget widget = uiBinder.createAndBindUi(this);
-
-        this.setTitle(locale.compareWithRevisionTitle());
-        this.setWidget(widget);
-
-        description.setReadOnly(true);
-
-        createRevisionsTable(coreRes);
-        createButtons();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setRevisions(@NotNull List<Revision> revisions) {
-        this.revisions.setRowData(revisions);
-        if (selectionModel.getSelectedObject() == null) {
-            delegate.onRevisionUnselected();
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableCompareButton(boolean enabled) {
-        btnCompare.setEnabled(enabled);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setDescription(String description) {
-        this.description.setText(description);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void close() {
-        onClose();
-    }
-
-    @Override
-    protected void onClose() {
-        selectionModel.clear();
-        super.onClose();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void showDialog() {
-        this.show();
-    }
-
-    private void createRevisionsTable(org.eclipse.che.ide.Resources coreRes) {
-        Column<Revision, String> idColumn = new Column<Revision, String>(new TextCell()) {
-            @Override
-            public String getValue(Revision revision) {
-                return revision.getId().substring(0, 8) + "...";
-            }
+  private void createRevisionsTable(org.eclipse.che.ide.Resources coreRes) {
+    Column<Revision, String> idColumn =
+        new Column<Revision, String>(new TextCell()) {
+          @Override
+          public String getValue(Revision revision) {
+            return revision.getId().substring(0, 8) + "...";
+          }
         };
-        Column<Revision, String> timeColumn = new Column<Revision, String>(new TextCell()) {
-            @Override
-            public String getValue(Revision revision) {
-                return dateTimeFormatter.getFormattedDate(revision.getCommitTime());
-            }
+    Column<Revision, String> timeColumn =
+        new Column<Revision, String>(new TextCell()) {
+          @Override
+          public String getValue(Revision revision) {
+            return dateTimeFormatter.getFormattedDate(revision.getCommitTime());
+          }
         };
-        Column<Revision, String> authorColumn = new Column<Revision, String>(new TextCell()) {
-            @Override
-            public String getValue(Revision revision) {
-                return revision.getCommitter().getName();
-            }
+    Column<Revision, String> authorColumn =
+        new Column<Revision, String>(new TextCell()) {
+          @Override
+          public String getValue(Revision revision) {
+            return revision.getCommitter().getName();
+          }
         };
-        Column<Revision, String> titleColumn = new Column<Revision, String>(new TextCell()) {
-            @Override
-            public String getValue(Revision revision) {
-                return revision.getMessage().substring(0, 50);
-            }
+    Column<Revision, String> titleColumn =
+        new Column<Revision, String>(new TextCell()) {
+          @Override
+          public String getValue(Revision revision) {
+            return revision.getMessage().substring(0, 50);
+          }
         };
 
-        revisions = new CellTable<>(15, coreRes);
+    revisions = new CellTable<>(15, coreRes);
 
-        revisions.setWidth("100%");
+    revisions.setWidth("100%");
 
-        revisions.addColumn(idColumn, locale.viewCompareRevisionTableIdTitle());
-        revisions.addColumn(timeColumn, locale.viewCompareRevisionTableTimeTitle());
-        revisions.addColumn(authorColumn, locale.viewCompareRevisionTableAuthorTitle());
-        revisions.addColumn(titleColumn, locale.viewCompareRevisionTableTitleTitle());
+    revisions.addColumn(idColumn, locale.viewCompareRevisionTableIdTitle());
+    revisions.addColumn(timeColumn, locale.viewCompareRevisionTableTimeTitle());
+    revisions.addColumn(authorColumn, locale.viewCompareRevisionTableAuthorTitle());
+    revisions.addColumn(titleColumn, locale.viewCompareRevisionTableTitleTitle());
 
-        selectionModel = new SingleSelectionModel<Revision>();
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                description.setText(selectionModel.getSelectedObject().getMessage());
-                delegate.onRevisionSelected(selectionModel.getSelectedObject());
-            }
+    selectionModel = new SingleSelectionModel<Revision>();
+    selectionModel.addSelectionChangeHandler(
+        new SelectionChangeEvent.Handler() {
+          @Override
+          public void onSelectionChange(SelectionChangeEvent event) {
+            description.setText(selectionModel.getSelectedObject().getMessage());
+            delegate.onRevisionSelected(selectionModel.getSelectedObject());
+          }
         });
-        revisions.setSelectionModel(selectionModel);
+    revisions.setSelectionModel(selectionModel);
 
-        revisions.addDomHandler(new DoubleClickHandler() {
-            @Override
-            public void onDoubleClick(DoubleClickEvent event) {
-                delegate.onRevisionDoubleClicked();
-            }
-        }, DoubleClickEvent.getType());
+    revisions.addDomHandler(
+        new DoubleClickHandler() {
+          @Override
+          public void onDoubleClick(DoubleClickEvent event) {
+            delegate.onRevisionDoubleClicked();
+          }
+        },
+        DoubleClickEvent.getType());
 
-        this.revisionsPanel.add(revisions);
-    }
+    this.revisionsPanel.add(revisions);
+  }
 
-    private void createButtons() {
-        btnClose = createButton(locale.buttonClose(), "git-compare-revision-close", new ClickHandler() {
+  private void createButtons() {
+    btnClose =
+        createButton(
+            locale.buttonClose(),
+            "git-compare-revision-close",
+            new ClickHandler() {
 
-            @Override
-            public void onClick(ClickEvent event) {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onCloseClicked();
-            }
-        });
-        addButtonToFooter(btnClose);
+              }
+            });
+    addButtonToFooter(btnClose);
 
-        btnCompare = createButton(locale.buttonCompare(), "git-compare-revision-compare", new ClickHandler() {
+    btnCompare =
+        createButton(
+            locale.buttonCompare(),
+            "git-compare-revision-compare",
+            new ClickHandler() {
 
-            @Override
-            public void onClick(ClickEvent event) {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onCompareClicked();
-            }
-        });
-        addButtonToFooter(btnCompare);
-    }
+              }
+            });
+    addButtonToFooter(btnCompare);
+  }
 }

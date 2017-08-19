@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,25 +7,24 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.event.project;
 
 import com.google.gwt.event.shared.EventHandler;
 
 /**
  * Special handler which is called when selected other project.
- * @deprecated since 4.6.0 replaced by {@link org.eclipse.che.ide.api.event.SelectionChangedHandler}
  *
+ * @deprecated since 4.6.0 replaced by {@link org.eclipse.che.ide.api.event.SelectionChangedHandler}
  * @author Dmitry Shnurenko
  */
 @Deprecated
 public interface CurrentProjectChangedHandler extends EventHandler {
 
-    /**
-     * Performs some actions when user clicks on different project.
-     *
-     * @param event
-     *         contains information about project which was selected
-     */
-    void onCurrentProjectChanged(CurrentProjectChangedEvent event);
+  /**
+   * Performs some actions when user clicks on different project.
+   *
+   * @param event contains information about project which was selected
+   */
+  void onCurrentProjectChanged(CurrentProjectChangedEvent event);
 }

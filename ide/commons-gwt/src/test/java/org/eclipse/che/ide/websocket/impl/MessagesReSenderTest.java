@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.websocket.impl;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,12 +23,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Tests for {@link MessagesReSender}
  *
@@ -30,45 +30,42 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class MessagesReSenderTest {
-    @Mock
-    private WebSocketConnectionManager connectionManager;
-    @Mock
-    private UrlResolver                urlResolver;
-    @InjectMocks
-    private MessagesReSender           reSender;
+  @Mock private WebSocketConnectionManager connectionManager;
+  @Mock private UrlResolver urlResolver;
+  @InjectMocks private MessagesReSender reSender;
 
-    @Before
-    public void setUp() throws Exception {
-        when(urlResolver.getUrl("endpointId")).thenReturn("url");
-        when(urlResolver.resolve("url")).thenReturn("endpointId");
-    }
+  @Before
+  public void setUp() throws Exception {
+    when(urlResolver.getUrl("endpointId")).thenReturn("url");
+    when(urlResolver.resolve("url")).thenReturn("endpointId");
+  }
 
-    @Test
-    public void shouldResendAllMessages() {
-        reSender.add("endpointId", "1");
-        reSender.add("endpointId", "2");
-        reSender.add("endpointId", "3");
+  @Test
+  public void shouldResendAllMessages() {
+    reSender.add("endpointId", "1");
+    reSender.add("endpointId", "2");
+    reSender.add("endpointId", "3");
 
-        when(connectionManager.isConnectionOpen("url")).thenReturn(true);
+    when(connectionManager.isConnectionOpen("url")).thenReturn(true);
 
-        reSender.reSend("url");
-        verify(connectionManager, times(3)).sendMessage(eq("url"), anyString());
-    }
+    reSender.reSend("url");
+    verify(connectionManager, times(3)).sendMessage(eq("url"), anyString());
+  }
 
-    @Test
-    public void shouldStopSendingIfSessionIsClosed() {
-        reSender.add("endpointId", "1");
-        reSender.add("endpointId", "2");
-        reSender.add("endpointId", "3");
+  @Test
+  public void shouldStopSendingIfSessionIsClosed() {
+    reSender.add("endpointId", "1");
+    reSender.add("endpointId", "2");
+    reSender.add("endpointId", "3");
 
-        final int[] i = {0};
-        when(connectionManager.isConnectionOpen("url")).thenAnswer(invocation -> (i[0]++ <= 1));
-        reSender.reSend("url");
-        verify(connectionManager, times(2)).sendMessage(eq("url"), anyString());
+    final int[] i = {0};
+    when(connectionManager.isConnectionOpen("url")).thenAnswer(invocation -> (i[0]++ <= 1));
+    reSender.reSend("url");
+    verify(connectionManager, times(2)).sendMessage(eq("url"), anyString());
 
-        when(connectionManager.isConnectionOpen("url")).thenReturn(true);
-        reSender.reSend("url");
+    when(connectionManager.isConnectionOpen("url")).thenReturn(true);
+    reSender.reSend("url");
 
-        verify(connectionManager, times(3)).sendMessage(eq("url"), anyString());
-    }
+    verify(connectionManager, times(3)).sendMessage(eq("url"), anyString());
+  }
 }

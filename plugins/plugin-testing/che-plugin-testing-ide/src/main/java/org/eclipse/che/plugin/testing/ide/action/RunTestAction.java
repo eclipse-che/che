@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.ide.action;
+
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -25,50 +29,45 @@ import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.view2.TestResultPresenter;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
 /** Action that allows to run tests from current editor. */
 @Singleton
 public class RunTestAction extends RunDebugTestAbstractAction {
-    @Inject
-    public RunTestAction(EventBus eventBus,
-                         TestServiceClient client,
-                         DtoFactory dtoFactory,
-                         TestResources testResources,
-                         AppContext appContext,
-                         NotificationManager notificationManager,
-                         DebugConfigurationsManager debugConfigurationsManager,
-                         TestingHandler testingHandler,
-                         TestResultPresenter testResultPresenter) {
-        super(eventBus,
-              testResultPresenter,
-              testingHandler,
-              debugConfigurationsManager,
-              client,
-              dtoFactory,
-              appContext,
-              notificationManager,
-              singletonList(PROJECT_PERSPECTIVE_ID),
-              "Run Test",
-              "Run Test",
-              testResources.testIcon());
-    }
+  @Inject
+  public RunTestAction(
+      EventBus eventBus,
+      TestServiceClient client,
+      DtoFactory dtoFactory,
+      TestResources testResources,
+      AppContext appContext,
+      NotificationManager notificationManager,
+      DebugConfigurationsManager debugConfigurationsManager,
+      TestingHandler testingHandler,
+      TestResultPresenter testResultPresenter) {
+    super(
+        eventBus,
+        testResultPresenter,
+        testingHandler,
+        debugConfigurationsManager,
+        client,
+        dtoFactory,
+        appContext,
+        notificationManager,
+        singletonList(PROJECT_PERSPECTIVE_ID),
+        "Run Test",
+        "Run Test",
+        testResources.testIcon());
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        Pair<String, String> frameworkAndTestName = getTestingFrameworkAndTestName();
-        actionPerformed(frameworkAndTestName, false);
-    }
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Pair<String, String> frameworkAndTestName = getTestingFrameworkAndTestName();
+    actionPerformed(frameworkAndTestName, false);
+  }
 
-    @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
-        Presentation presentation = event.getPresentation();
-        presentation.setVisible(isEditorInFocus);
-        presentation.setEnabled(isEnable);
-    }
-
+  @Override
+  public void updateInPerspective(@NotNull ActionEvent event) {
+    Presentation presentation = event.getPresentation();
+    presentation.setVisible(isEditorInFocus);
+    presentation.setEnabled(isEnable);
+  }
 }

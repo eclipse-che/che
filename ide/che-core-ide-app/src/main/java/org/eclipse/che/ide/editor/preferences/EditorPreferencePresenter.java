@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,66 +7,68 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.preferences;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
-
 import java.util.Set;
+import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
 
 /** Preference page presenter for the editors. */
 @Singleton
-public class EditorPreferencePresenter extends AbstractPreferencePagePresenter implements EditorPreferenceSection.ParentPresenter {
+public class EditorPreferencePresenter extends AbstractPreferencePagePresenter
+    implements EditorPreferenceSection.ParentPresenter {
 
-    /** The editor preferences page view. */
-    private final EditorPreferenceView view;
-    private final Set<EditorPreferenceSection> editorPreferenceSections;
+  /** The editor preferences page view. */
+  private final EditorPreferenceView view;
 
-    @Inject
-    public EditorPreferencePresenter(final EditorPreferenceView view,
-                                     final EditorPrefLocalizationConstant constant,
-                                     final Set<EditorPreferenceSection> editorPreferenceSections) {
-        super(constant.editorTypeTitle(), constant.editorTypeCategory());
+  private final Set<EditorPreferenceSection> editorPreferenceSections;
 
-        this.view = view;
-        this.editorPreferenceSections = editorPreferenceSections;
+  @Inject
+  public EditorPreferencePresenter(
+      final EditorPreferenceView view,
+      final EditorPrefLocalizationConstant constant,
+      final Set<EditorPreferenceSection> editorPreferenceSections) {
+    super(constant.editorTypeTitle(), constant.editorTypeCategory());
 
-        editorPreferenceSections.forEach(section -> section.setParent(this));
-    }
+    this.view = view;
+    this.editorPreferenceSections = editorPreferenceSections;
 
-    @Override
-    public boolean isDirty() {
-        return editorPreferenceSections.stream().anyMatch(EditorPreferenceSection::isDirty);
-    }
+    editorPreferenceSections.forEach(section -> section.setParent(this));
+  }
 
-    @Override
-    public void go(final AcceptsOneWidget container) {
-        AcceptsOneWidget preferencesContainer = view.getEditorPreferencesContainer();
+  @Override
+  public boolean isDirty() {
+    return editorPreferenceSections.stream().anyMatch(EditorPreferenceSection::isDirty);
+  }
 
-        editorPreferenceSections.forEach(section -> section.go(preferencesContainer));
+  @Override
+  public void go(final AcceptsOneWidget container) {
+    AcceptsOneWidget preferencesContainer = view.getEditorPreferencesContainer();
 
-        container.setWidget(view);
-    }
+    editorPreferenceSections.forEach(section -> section.go(preferencesContainer));
 
-    @Override
-    public void signalDirtyState() {
-        delegate.onDirtyChanged();
-    }
+    container.setWidget(view);
+  }
 
-    @Override
-    public void storeChanges() {
-        editorPreferenceSections.stream()
-                                .filter(EditorPreferenceSection::isDirty)
-                                .forEach(EditorPreferenceSection::storeChanges);
-    }
+  @Override
+  public void signalDirtyState() {
+    delegate.onDirtyChanged();
+  }
 
-    @Override
-    public void revertChanges() {
-        editorPreferenceSections.stream().forEach(EditorPreferenceSection::refresh);
-        signalDirtyState();
-    }
+  @Override
+  public void storeChanges() {
+    editorPreferenceSections
+        .stream()
+        .filter(EditorPreferenceSection::isDirty)
+        .forEach(EditorPreferenceSection::storeChanges);
+  }
+
+  @Override
+  public void revertChanges() {
+    editorPreferenceSections.stream().forEach(EditorPreferenceSection::refresh);
+    signalDirtyState();
+  }
 }

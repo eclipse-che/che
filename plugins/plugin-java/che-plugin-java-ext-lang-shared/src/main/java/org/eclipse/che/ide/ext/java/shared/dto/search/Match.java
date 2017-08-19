@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.shared.dto.search;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -21,37 +21,39 @@ import org.eclipse.che.ide.ext.java.shared.dto.Region;
 @DTO
 public interface Match {
 
-    /**
-     * Match region in file.
-     * @return the match region.
-     */
-    Region getFileMatchRegion();
+  /**
+   * Match region in file.
+   *
+   * @return the match region.
+   */
+  Region getFileMatchRegion();
 
-    void setFileMatchRegion(Region region);
+  void setFileMatchRegion(Region region);
 
-    /**
-     * String content of matched line.
-     * @return the line content
-     */
-    String getMatchedLine();
+  /**
+   * String content of matched line.
+   *
+   * @return the line content
+   */
+  String getMatchedLine();
 
-    void setMatchedLine(String matchedLine);
+  void setMatchedLine(String matchedLine);
 
-    /**
-     * Match region in matched line.
-     * Used for UI purpose, to highlight matched word in matched line.
-     * @return the match region.
-     */
-    Region getMatchInLine();
+  /**
+   * Match region in matched line. Used for UI purpose, to highlight matched word in matched line.
+   *
+   * @return the match region.
+   */
+  Region getMatchInLine();
 
-    void setMatchInLine(Region region);
+  void setMatchInLine(Region region);
 
-    /**
-     * The line number of matched line.
-     * @return the line number.
-     */
-    int getMatchLineNumber();
+  /**
+   * The line number of matched line.
+   *
+   * @return the line number.
+   */
+  int getMatchLineNumber();
 
-    void setMatchLineNumber(int lineNumber);
-
+  void setMatchLineNumber(int lineNumber);
 }

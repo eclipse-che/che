@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.parts;
 
 /**
@@ -17,16 +17,13 @@ package org.eclipse.che.ide.api.parts;
  */
 public interface Focusable {
 
-    /**
-     * Explicitly focus/unfocus this view. Only one view can be focused at a time.
-     */
-    void setFocus(boolean focused);
+  /** Explicitly focus/unfocus this view. Only one view can be focused at a time. */
+  void setFocus(boolean focused);
 
-    /**
-     * Check is this view focused.
-     *
-     * @return <b>true</b> if view has focus, otherwise return <b>false</b>
-     */
-    boolean isFocused();
-
+  /**
+   * Check is this view focused.
+   *
+   * @return <b>true</b> if view has focus, otherwise return <b>false</b>
+   */
+  boolean isFocused();
 }

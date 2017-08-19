@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.client.json;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,134 +18,157 @@ import java.util.Map;
 
 /** @author andrew00x */
 public class NetworkSettings {
-    @SerializedName("IPAddress")
-    private String   ipAddress;
-    @SerializedName("IPPrefixLen")
-    private int      ipPrefixLen;
-    private String   gateway;
-    private String   bridge;
-    private String[] portMapping;
-    private String   macAddress;
-    private int      linkLocalIPv6PrefixLen;
-    private String   globalIPv6Address;
-    private int      globalIPv6PrefixLen;
-    @SerializedName("IPv6Gateway")
-    private String   ipV6Gateway;
-    private String   linkLocalIPv6Address;
+  @SerializedName("IPAddress")
+  private String ipAddress;
 
-    private Map<String, List<PortBinding>> ports = new HashMap<>();
+  @SerializedName("IPPrefixLen")
+  private int ipPrefixLen;
 
-    public String getIpAddress() {
-        return ipAddress;
-    }
+  private String gateway;
+  private String bridge;
+  private String[] portMapping;
+  private String macAddress;
+  private int linkLocalIPv6PrefixLen;
+  private String globalIPv6Address;
+  private int globalIPv6PrefixLen;
 
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
+  @SerializedName("IPv6Gateway")
+  private String ipV6Gateway;
 
-    public int getIpPrefixLen() {
-        return ipPrefixLen;
-    }
+  private String linkLocalIPv6Address;
 
-    public void setIpPrefixLen(int iPPrefixLen) {
-        this.ipPrefixLen = iPPrefixLen;
-    }
+  private Map<String, List<PortBinding>> ports = new HashMap<>();
 
-    public String getGateway() {
-        return gateway;
-    }
+  public String getIpAddress() {
+    return ipAddress;
+  }
 
-    public void setGateway(String gateway) {
-        this.gateway = gateway;
-    }
+  public void setIpAddress(String ipAddress) {
+    this.ipAddress = ipAddress;
+  }
 
-    public String getBridge() {
-        return bridge;
-    }
+  public int getIpPrefixLen() {
+    return ipPrefixLen;
+  }
 
-    public void setBridge(String bridge) {
-        this.bridge = bridge;
-    }
+  public void setIpPrefixLen(int iPPrefixLen) {
+    this.ipPrefixLen = iPPrefixLen;
+  }
 
-    public String[] getPortMapping() {
-        return portMapping;
-    }
+  public String getGateway() {
+    return gateway;
+  }
 
-    public void setPortMapping(String[] portMapping) {
-        this.portMapping = portMapping;
-    }
+  public void setGateway(String gateway) {
+    this.gateway = gateway;
+  }
 
-    public String getMacAddress() {
-        return macAddress;
-    }
+  public String getBridge() {
+    return bridge;
+  }
 
-    public void setMacAddress(String macAddress) {
-        this.macAddress = macAddress;
-    }
+  public void setBridge(String bridge) {
+    this.bridge = bridge;
+  }
 
-    public Map<String, List<PortBinding>> getPorts() {
-        return ports;
-    }
+  public String[] getPortMapping() {
+    return portMapping;
+  }
 
-    public void setPorts(Map<String, List<PortBinding>> ports) {
-        this.ports = ports;
-    }
+  public void setPortMapping(String[] portMapping) {
+    this.portMapping = portMapping;
+  }
 
-    public int getLinkLocalIPv6PrefixLen() {
-        return linkLocalIPv6PrefixLen;
-    }
+  public String getMacAddress() {
+    return macAddress;
+  }
 
-    public void setLinkLocalIPv6PrefixLen(int linkLocalIPv6PrefixLen) {
-        this.linkLocalIPv6PrefixLen = linkLocalIPv6PrefixLen;
-    }
+  public void setMacAddress(String macAddress) {
+    this.macAddress = macAddress;
+  }
 
-    public String getGlobalIPv6Address() {
-        return globalIPv6Address;
-    }
+  public Map<String, List<PortBinding>> getPorts() {
+    return ports;
+  }
 
-    public void setGlobalIPv6Address(String globalIPv6Address) {
-        this.globalIPv6Address = globalIPv6Address;
-    }
+  public void setPorts(Map<String, List<PortBinding>> ports) {
+    this.ports = ports;
+  }
 
-    public int getGlobalIPv6PrefixLen() {
-        return globalIPv6PrefixLen;
-    }
+  public int getLinkLocalIPv6PrefixLen() {
+    return linkLocalIPv6PrefixLen;
+  }
 
-    public void setGlobalIPv6PrefixLen(int globalIPv6PrefixLen) {
-        this.globalIPv6PrefixLen = globalIPv6PrefixLen;
-    }
+  public void setLinkLocalIPv6PrefixLen(int linkLocalIPv6PrefixLen) {
+    this.linkLocalIPv6PrefixLen = linkLocalIPv6PrefixLen;
+  }
 
-    public String getIpV6Gateway() {
-        return ipV6Gateway;
-    }
+  public String getGlobalIPv6Address() {
+    return globalIPv6Address;
+  }
 
-    public void setIpV6Gateway(String ipV6Gateway) {
-        this.ipV6Gateway = ipV6Gateway;
-    }
+  public void setGlobalIPv6Address(String globalIPv6Address) {
+    this.globalIPv6Address = globalIPv6Address;
+  }
 
-    public String getLinkLocalIPv6Address() {
-        return linkLocalIPv6Address;
-    }
+  public int getGlobalIPv6PrefixLen() {
+    return globalIPv6PrefixLen;
+  }
 
-    public void setLinkLocalIPv6Address(String linkLocalIPv6Address) {
-        this.linkLocalIPv6Address = linkLocalIPv6Address;
-    }
+  public void setGlobalIPv6PrefixLen(int globalIPv6PrefixLen) {
+    this.globalIPv6PrefixLen = globalIPv6PrefixLen;
+  }
 
-    @Override
-    public String toString() {
-        return "NetworkSettings{" +
-               "ipAddress='" + ipAddress + '\'' +
-               ", ipPrefixLen=" + ipPrefixLen +
-               ", gateway='" + gateway + '\'' +
-               ", bridge='" + bridge + '\'' +
-               ", portMapping=" + Arrays.toString(portMapping) +
-               ", macAddress='" + macAddress + '\'' +
-               ", linkLocalIPv6PrefixLen=" + linkLocalIPv6PrefixLen +
-               ", globalIPv6Address='" + globalIPv6Address + '\'' +
-               ", globalIPv6PrefixLen=" + globalIPv6PrefixLen +
-               ", ipV6Gateway='" + ipV6Gateway + '\'' +
-               ", linkLocalIPv6Address='" + linkLocalIPv6Address + '\'' +
-               ", ports=" + ports +
-               '}';
-    }
+  public String getIpV6Gateway() {
+    return ipV6Gateway;
+  }
+
+  public void setIpV6Gateway(String ipV6Gateway) {
+    this.ipV6Gateway = ipV6Gateway;
+  }
+
+  public String getLinkLocalIPv6Address() {
+    return linkLocalIPv6Address;
+  }
+
+  public void setLinkLocalIPv6Address(String linkLocalIPv6Address) {
+    this.linkLocalIPv6Address = linkLocalIPv6Address;
+  }
+
+  @Override
+  public String toString() {
+    return "NetworkSettings{"
+        + "ipAddress='"
+        + ipAddress
+        + '\''
+        + ", ipPrefixLen="
+        + ipPrefixLen
+        + ", gateway='"
+        + gateway
+        + '\''
+        + ", bridge='"
+        + bridge
+        + '\''
+        + ", portMapping="
+        + Arrays.toString(portMapping)
+        + ", macAddress='"
+        + macAddress
+        + '\''
+        + ", linkLocalIPv6PrefixLen="
+        + linkLocalIPv6PrefixLen
+        + ", globalIPv6Address='"
+        + globalIPv6Address
+        + '\''
+        + ", globalIPv6PrefixLen="
+        + globalIPv6PrefixLen
+        + ", ipV6Gateway='"
+        + ipV6Gateway
+        + '\''
+        + ", linkLocalIPv6Address='"
+        + linkLocalIPv6Address
+        + '\''
+        + ", ports="
+        + ports
+        + '}';
+  }
 }

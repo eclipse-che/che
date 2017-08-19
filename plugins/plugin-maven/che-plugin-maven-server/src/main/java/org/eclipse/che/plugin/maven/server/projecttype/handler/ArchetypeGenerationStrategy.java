@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,22 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.server.projecttype.handler;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Iterables.getFirst;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_GENERATION_STRATEGY;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_VERSION;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.GROUP_ID;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
@@ -22,20 +35,6 @@ import org.eclipse.che.plugin.maven.generator.archetype.ArchetypeGenerator;
 import org.eclipse.che.plugin.maven.generator.archetype.MavenArchetypeImpl;
 import org.eclipse.che.plugin.maven.shared.MavenArchetype;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.collect.Iterables.getFirst;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_GENERATION_STRATEGY;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_VERSION;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.GROUP_ID;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
-
 /**
  * Generates Maven project using maven-archetype-plugin.
  *
@@ -44,72 +43,79 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
 @Singleton
 public class ArchetypeGenerationStrategy implements GeneratorStrategy {
 
-    private final VirtualFileSystem vfs;
-    private final ArchetypeGenerator archetypeGenerator;
+  private final VirtualFileSystem vfs;
+  private final ArchetypeGenerator archetypeGenerator;
 
-    @Inject
-    public ArchetypeGenerationStrategy(ArchetypeGenerator archetypeGenerator,
-                                       VirtualFileSystemProvider vfsProvider) throws ServerException {
-        this.archetypeGenerator = archetypeGenerator;
-        vfs = vfsProvider.getVirtualFileSystem();
+  @Inject
+  public ArchetypeGenerationStrategy(
+      ArchetypeGenerator archetypeGenerator, VirtualFileSystemProvider vfsProvider)
+      throws ServerException {
+    this.archetypeGenerator = archetypeGenerator;
+    vfs = vfsProvider.getVirtualFileSystem();
+  }
+
+  public String getId() {
+    return ARCHETYPE_GENERATION_STRATEGY;
+  }
+
+  @Override
+  public void generateProject(
+      final Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
+      throws ForbiddenException, ConflictException, ServerException {
+
+    AttributeValue artifactId = attributes.get(ARTIFACT_ID);
+    AttributeValue groupId = attributes.get(GROUP_ID);
+    AttributeValue version = attributes.get(VERSION);
+    if (groupId == null || artifactId == null || version == null) {
+      throw new ServerException("Missed some required attribute (groupId, artifactId or version)");
     }
 
-    public String getId() {
-        return ARCHETYPE_GENERATION_STRATEGY;
+    String archetypeGroupId = null;
+    String archetypeArtifactId = null;
+    String archetypeVersion = null;
+    String archetypeRepository = null;
+    Map<String, String> archetypeProperties = new HashMap<>();
+    options.remove(
+        "type"); //TODO: remove prop 'type' now it use only for detecting generation strategy
+    for (Entry<String, String> entry : options.entrySet()) {
+      switch (entry.getKey()) {
+        case "archetypeGroupId":
+          archetypeGroupId = entry.getValue();
+          break;
+        case "archetypeArtifactId":
+          archetypeArtifactId = entry.getValue();
+          break;
+        case "archetypeVersion":
+          archetypeVersion = entry.getValue();
+          break;
+        case "archetypeRepository":
+          archetypeRepository = entry.getValue();
+          break;
+        default:
+          archetypeProperties.put(entry.getKey(), entry.getValue());
+      }
     }
 
-
-    @Override
-    public void generateProject(final Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
-            throws ForbiddenException, ConflictException, ServerException {
-
-        AttributeValue artifactId = attributes.get(ARTIFACT_ID);
-        AttributeValue groupId = attributes.get(GROUP_ID);
-        AttributeValue version = attributes.get(VERSION);
-        if (groupId == null || artifactId == null || version == null) {
-            throw new ServerException("Missed some required attribute (groupId, artifactId or version)");
-        }
-
-        String archetypeGroupId = null;
-        String archetypeArtifactId = null;
-        String archetypeVersion = null;
-        String archetypeRepository = null;
-        Map<String, String> archetypeProperties = new HashMap<>();
-        options.remove("type"); //TODO: remove prop 'type' now it use only for detecting generation strategy
-        for (Entry<String, String> entry : options.entrySet()) {
-            switch (entry.getKey()) {
-                case "archetypeGroupId":
-                    archetypeGroupId = entry.getValue();
-                    break;
-                case "archetypeArtifactId":
-                    archetypeArtifactId = entry.getValue();
-                    break;
-                case "archetypeVersion":
-                    archetypeVersion = entry.getValue();
-                    break;
-                case "archetypeRepository":
-                    archetypeRepository = entry.getValue();
-                    break;
-                default:
-                    archetypeProperties.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        if (isNullOrEmpty(archetypeGroupId) || isNullOrEmpty(archetypeArtifactId) ||  isNullOrEmpty(archetypeVersion)) {
-            throw new ServerException("Missed some required option (archetypeGroupId, archetypeArtifactId or archetypeVersion)");
-        }
-
-        MavenArchetype mavenArchetype = new MavenArchetypeImpl(archetypeGroupId,
-                                                               archetypeArtifactId,
-                                                               archetypeVersion,
-                                                               archetypeRepository,
-                                                               archetypeProperties);
-
-
-        final MavenArtifact mavenArtifact = new MavenArtifact();
-        mavenArtifact.setGroupId(getFirst(groupId.getList(), projectPath.getName()));
-        mavenArtifact.setArtifactId(getFirst(artifactId.getList(), projectPath.getName()));
-        mavenArtifact.setVersion(getFirst(version.getList(), DEFAULT_VERSION));
-        archetypeGenerator.generateFromArchetype(vfs.getRoot().toIoFile(), mavenArchetype, mavenArtifact);
+    if (isNullOrEmpty(archetypeGroupId)
+        || isNullOrEmpty(archetypeArtifactId)
+        || isNullOrEmpty(archetypeVersion)) {
+      throw new ServerException(
+          "Missed some required option (archetypeGroupId, archetypeArtifactId or archetypeVersion)");
     }
+
+    MavenArchetype mavenArchetype =
+        new MavenArchetypeImpl(
+            archetypeGroupId,
+            archetypeArtifactId,
+            archetypeVersion,
+            archetypeRepository,
+            archetypeProperties);
+
+    final MavenArtifact mavenArtifact = new MavenArtifact();
+    mavenArtifact.setGroupId(getFirst(groupId.getList(), projectPath.getName()));
+    mavenArtifact.setArtifactId(getFirst(artifactId.getList(), projectPath.getName()));
+    mavenArtifact.setVersion(getFirst(version.getList(), DEFAULT_VERSION));
+    archetypeGenerator.generateFromArchetype(
+        vfs.getRoot().toIoFile(), mavenArchetype, mavenArtifact);
+  }
 }

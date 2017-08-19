@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.java.server.rest;
 
 import com.google.inject.Inject;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.ide.ext.java.shared.dto.search.FindUsagesRequest;
@@ -22,33 +21,32 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 
-/**
- * Json RPC service for all java project related searches.
- */
+/** Json RPC service for all java project related searches. */
 public class SearchJsonRpcService {
-    private final SearchManager manager;
+  private final SearchManager manager;
 
-    @Inject
-    public SearchJsonRpcService(SearchManager manager) {
-        this.manager = manager;
-    }
+  @Inject
+  public SearchJsonRpcService(SearchManager manager) {
+    this.manager = manager;
+  }
 
-    @Inject
-    private void configureFindUsagesRequest(RequestHandlerConfigurator requestHandlerConfigurator) {
-        requestHandlerConfigurator.newConfiguration()
-                                  .methodName("javaSearch/findUsages")
-                                  .paramsAsDto(FindUsagesRequest.class)
-                                  .resultAsDto(FindUsagesResponse.class)
-                                  .withFunction(this::findUsages);
-    }
+  @Inject
+  private void configureFindUsagesRequest(RequestHandlerConfigurator requestHandlerConfigurator) {
+    requestHandlerConfigurator
+        .newConfiguration()
+        .methodName("javaSearch/findUsages")
+        .paramsAsDto(FindUsagesRequest.class)
+        .resultAsDto(FindUsagesResponse.class)
+        .withFunction(this::findUsages);
+  }
 
-    private FindUsagesResponse findUsages(FindUsagesRequest request) {
-        try {
-            JavaModel javaModel = JavaModelManager.getJavaModelManager().getJavaModel();
-            IJavaProject javaProject = javaModel.getJavaProject(request.getProjectPath());
-            return manager.findUsage(javaProject, request.getFQN(), request.getOffset());
-        } catch (SearchException e) {
-            throw new JsonRpcException(-27000, e.getMessage());
-        }
+  private FindUsagesResponse findUsages(FindUsagesRequest request) {
+    try {
+      JavaModel javaModel = JavaModelManager.getJavaModelManager().getJavaModel();
+      IJavaProject javaProject = javaModel.getJavaProject(request.getProjectPath());
+      return manager.findUsage(javaProject, request.getFQN(), request.getOffset());
+    } catch (SearchException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
     }
+  }
 }

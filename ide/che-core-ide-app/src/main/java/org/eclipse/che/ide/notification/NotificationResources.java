@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.notification;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -20,67 +19,67 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  *
  * @author Andrey Plotnikov
  * @author Vlad Zhukovskyi
- **/
+ */
 public interface NotificationResources extends ClientBundle {
-    interface NotificationCss extends CssResource {
+  interface NotificationCss extends CssResource {
 
-        String notificationPanel();
+    String notificationPanel();
 
-        String notificationPanelContainer();
+    String notificationPanelContainer();
 
-        String notification();
+    String notification();
 
-        String notificationIconWrapper();
+    String notificationIconWrapper();
 
-        String notificationContentWrapper();
+    String notificationContentWrapper();
 
-        String notificationTitleWrapper();
+    String notificationTitleWrapper();
 
-        String notificationMessageWrapper();
+    String notificationMessageWrapper();
 
-        String notificationCloseButtonWrapper();
+    String notificationCloseButtonWrapper();
 
-        String notificationStatusProgress();
+    String notificationStatusProgress();
 
-        String notificationStatusSuccess();
+    String notificationStatusSuccess();
 
-        String notificationStatusFail();
+    String notificationStatusFail();
 
-        String notificationStatusWarning();
-        
-        String notificationPopup();
+    String notificationStatusWarning();
 
-        String notificationPopupContentWrapper();
+    String notificationPopup();
 
-        String notificationPopupIconWrapper();
+    String notificationPopupContentWrapper();
 
-        String notificationPopupCloseButtonWrapper();
+    String notificationPopupIconWrapper();
 
-        String notificationPopupTitleWrapper();
+    String notificationPopupCloseButtonWrapper();
 
-        String notificationPopupMessageWrapper();
+    String notificationPopupTitleWrapper();
 
-        String notificationPopupPanel();
+    String notificationPopupMessageWrapper();
 
-        String notificationPopupPlaceholder();
+    String notificationPopupPanel();
 
-        String notificationShowingAnimation();
+    String notificationPopupPlaceholder();
 
-        String notificationHidingAnimation();
-    }
+    String notificationShowingAnimation();
 
-    @Source({"notification.css", "org/eclipse/che/ide/api/ui/style.css"})
-    NotificationCss notificationCss();
+    String notificationHidingAnimation();
+  }
 
-    @Source("success.svg")
-    SVGResource success();
+  @Source({"notification.css", "org/eclipse/che/ide/api/ui/style.css"})
+  NotificationCss notificationCss();
 
-    @Source("fail.svg")
-    SVGResource fail();
+  @Source("success.svg")
+  SVGResource success();
 
-    @Source("progress.svg")
-    SVGResource progress();
+  @Source("fail.svg")
+  SVGResource fail();
 
-    @Source("warning.svg")
-    SVGResource warning();
+  @Source("progress.svg")
+  SVGResource progress();
+
+  @Source("warning.svg")
+  SVGResource warning();
 }

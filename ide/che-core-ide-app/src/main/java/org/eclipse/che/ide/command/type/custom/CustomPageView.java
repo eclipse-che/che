@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.type.custom;
 
 import com.google.inject.ImplementedBy;
-
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
@@ -22,16 +21,16 @@ import org.eclipse.che.ide.api.mvp.View;
 @ImplementedBy(CustomPageViewImpl.class)
 public interface CustomPageView extends View<CustomPageView.ActionDelegate> {
 
-    /** Returns value of the 'Command line' field. */
-    String getCommandLine();
+  /** Returns value of the 'Command line' field. */
+  String getCommandLine();
 
-    /** Sets value of the 'Command line' field. */
-    void setCommandLine(String commandLine);
+  /** Sets value of the 'Command line' field. */
+  void setCommandLine(String commandLine);
 
-    /** Action handler for the view actions/controls. */
-    interface ActionDelegate {
+  /** Action handler for the view actions/controls. */
+  interface ActionDelegate {
 
-        /** Called when value of the 'Command line' field has been changed. */
-        void onCommandLineChanged();
-    }
+    /** Called when value of the 'Command line' field has been changed. */
+    void onCommandLineChanged();
+  }
 }

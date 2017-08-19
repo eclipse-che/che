@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.pull;
 
+import java.util.List;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.ide.api.mvp.View;
-
-import java.util.List;
 
 /**
  * The view of {@link PullPresenter}.
@@ -21,97 +20,91 @@ import java.util.List;
  * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
  */
 public interface PullView extends View<PullView.ActionDelegate> {
-    /** Needs for delegate some function into Pull view. */
-    interface ActionDelegate {
-        /** Performs any actions appropriate in response to the user having pressed the Pull button. */
-        void onPullClicked();
-
-        /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
-        void onCancelClicked();
-
-        /** Performs any actions appropriate in response to the remote branch value changed. */
-        void onRemoteBranchChanged();
-
-        /** Performs any actions appropriate in response to the repository value changed. */
-        void onRemoteRepositoryChanged();
-    }
+  /** Needs for delegate some function into Pull view. */
+  interface ActionDelegate {
+    /** Performs any actions appropriate in response to the user having pressed the Pull button. */
+    void onPullClicked();
 
     /**
-     * Returns selected repository name.
-     *
-     * @return repository name.
+     * Performs any actions appropriate in response to the user having pressed the Cancel button.
      */
-    String getRepositoryName();
+    void onCancelClicked();
 
-    /**
-     * Returns selected repository url.
-     *
-     * @return repository url.
-     */
-    String getRepositoryUrl();
+    /** Performs any actions appropriate in response to the remote branch value changed. */
+    void onRemoteBranchChanged();
 
-    /**
-     * Sets available repositories.
-     *
-     * @param repositories
-     *         available repositories
-     */
-    void setRepositories(List<Remote> repositories);
+    /** Performs any actions appropriate in response to the repository value changed. */
+    void onRemoteRepositoryChanged();
+  }
 
-    /** @return local branch */
-    String getLocalBranch();
+  /**
+   * Returns selected repository name.
+   *
+   * @return repository name.
+   */
+  String getRepositoryName();
 
-    /**
-     * Selects pointed local branch
-     *
-     * @param branch
-     *         local branch to select
-     */
-    void selectLocalBranch(String branch);
+  /**
+   * Returns selected repository url.
+   *
+   * @return repository url.
+   */
+  String getRepositoryUrl();
 
-    /**
-     * Selects pointed remote branch
-     *
-     * @param branch
-     *         remote branch to select
-     */
-    void selectRemoteBranch(String branch);
+  /**
+   * Sets available repositories.
+   *
+   * @param repositories available repositories
+   */
+  void setRepositories(List<Remote> repositories);
 
-    /**
-     * Set local branches into view.
-     *
-     * @param branches
-     *         local branches
-     */
-    void setLocalBranches(List<String> branches);
+  /** @return local branch */
+  String getLocalBranch();
 
-    /** @return remote branches */
-    String getRemoteBranch();
+  /**
+   * Selects pointed local branch
+   *
+   * @param branch local branch to select
+   */
+  void selectLocalBranch(String branch);
 
-    /**
-     * Set remote branches into view.
-     *
-     * @param branches
-     *         remote branches
-     */
-    void setRemoteBranches(List<String> branches);
+  /**
+   * Selects pointed remote branch
+   *
+   * @param branch remote branch to select
+   */
+  void selectRemoteBranch(String branch);
 
-    /**
-     * Returns the value of 'pull with rebase' flag.
-     */
-    boolean getRebase();
+  /**
+   * Set local branches into view.
+   *
+   * @param branches local branches
+   */
+  void setLocalBranches(List<String> branches);
 
-    /**
-     * Change the enable state of the push button.
-     *
-     * @param enabled
-     *         <code>true</code> to enable the button, <code>false</code> to disable it
-     */
-    void setEnablePullButton(boolean enabled);
+  /** @return remote branches */
+  String getRemoteBranch();
 
-    /** Close dialog. */
-    void close();
+  /**
+   * Set remote branches into view.
+   *
+   * @param branches remote branches
+   */
+  void setRemoteBranches(List<String> branches);
 
-    /** Show dialog. */
-    void showDialog();
+  /** Returns the value of 'pull with rebase' flag. */
+  boolean getRebase();
+
+  /**
+   * Change the enable state of the push button.
+   *
+   * @param enabled <code>true</code> to enable the button, <code>false</code> to disable it
+   */
+  void setEnablePullButton(boolean enabled);
+
+  /** Close dialog. */
+  void close();
+
+  /** Show dialog. */
+  void showDialog();
 }

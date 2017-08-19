@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.compare;
 
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED;
@@ -24,33 +24,34 @@ import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.UPDAT
  */
 public class FileStatus {
 
-    /**
-     * Git statuses.
-     */
-    public enum Status {
-        MODIFIED, ADDED, DELETED, COPIED, UPDATED_BUT_UNMERGED, UNMODIFIED
-    }
+  /** Git statuses. */
+  public enum Status {
+    MODIFIED,
+    ADDED,
+    DELETED,
+    COPIED,
+    UPDATED_BUT_UNMERGED,
+    UNMODIFIED
+  }
 
-    /**
-     * determining git status of changed file.
-     *
-     * @param status
-     *         String representation of git status
-     */
-    public static Status defineStatus(String status) {
-        switch (status) {
-            case "M":
-                return MODIFIED;
-            case "D":
-                return DELETED;
-            case "A":
-                return ADDED;
-            case "C":
-                return COPIED;
-            case "U":
-                return UPDATED_BUT_UNMERGED;
-        }
-        return UNMODIFIED;
+  /**
+   * determining git status of changed file.
+   *
+   * @param status String representation of git status
+   */
+  public static Status defineStatus(String status) {
+    switch (status) {
+      case "M":
+        return MODIFIED;
+      case "D":
+        return DELETED;
+      case "A":
+        return ADDED;
+      case "C":
+        return COPIED;
+      case "U":
+        return UPDATED_BUT_UNMERGED;
     }
-
+    return UNMODIFIED;
+  }
 }

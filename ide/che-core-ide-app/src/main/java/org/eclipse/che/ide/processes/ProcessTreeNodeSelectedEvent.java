@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.processes;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -20,38 +20,35 @@ import com.google.gwt.event.shared.GwtEvent;
  */
 public class ProcessTreeNodeSelectedEvent extends GwtEvent<ProcessTreeNodeSelectedEvent.Handler> {
 
-    public interface Handler extends EventHandler {
+  public interface Handler extends EventHandler {
 
-        /**
-         * Implement this method to handle selecting the process tree node.
-         *
-         * @param event
-         *          the event
-         */
-        void onProcessTreeNodeSelected(ProcessTreeNodeSelectedEvent event);
+    /**
+     * Implement this method to handle selecting the process tree node.
+     *
+     * @param event the event
+     */
+    void onProcessTreeNodeSelected(ProcessTreeNodeSelectedEvent event);
+  }
 
-    }
+  public static final Type<ProcessTreeNodeSelectedEvent.Handler> TYPE = new Type<>();
 
-    public static final Type<ProcessTreeNodeSelectedEvent.Handler> TYPE = new Type<>();
+  private ProcessTreeNode processTreeNode;
 
-    private ProcessTreeNode processTreeNode;
+  public ProcessTreeNodeSelectedEvent(ProcessTreeNode processTreeNode) {
+    this.processTreeNode = processTreeNode;
+  }
 
-    public ProcessTreeNodeSelectedEvent(ProcessTreeNode processTreeNode) {
-        this.processTreeNode = processTreeNode;
-    }
+  public ProcessTreeNode getProcessTreeNode() {
+    return processTreeNode;
+  }
 
-    public ProcessTreeNode getProcessTreeNode() {
-        return processTreeNode;
-    }
+  @Override
+  public Type<Handler> getAssociatedType() {
+    return TYPE;
+  }
 
-    @Override
-    public Type<Handler> getAssociatedType() {
-        return TYPE;
-    }
-
-    @Override
-    protected void dispatch(Handler handler) {
-        handler.onProcessTreeNodeSelected(this);
-    }
-
+  @Override
+  protected void dispatch(Handler handler) {
+    handler.onProcessTreeNodeSelected(this);
+  }
 }

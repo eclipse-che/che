@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.ide;
 
-import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.plugin.svn.shared.SubversionTypeConstant;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.List;
-import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.plugin.svn.shared.SubversionTypeConstant;
 
 /**
  * Utility class for svn based operations.
@@ -26,19 +24,17 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class SvnUtil {
 
-    /**
-     * Checks whether the given {@code project} is under svn version control system.
-     *
-     * @param project
-     *         the project to check
-     * @return true if project is under svn, otherwise false
-     */
-    public static boolean isUnderSvn(Project project) {
-        checkArgument(project != null, "Null project occurred");
+  /**
+   * Checks whether the given {@code project} is under svn version control system.
+   *
+   * @param project the project to check
+   * @return true if project is under svn, otherwise false
+   */
+  public static boolean isUnderSvn(Project project) {
+    checkArgument(project != null, "Null project occurred");
 
-        final List<String> mixins = project.getMixins();
+    final List<String> mixins = project.getMixins();
 
-        return mixins != null && mixins.contains(SubversionTypeConstant.SUBVERSION_MIXIN_TYPE);
-    }
-
+    return mixins != null && mixins.contains(SubversionTypeConstant.SUBVERSION_MIXIN_TYPE);
+  }
 }

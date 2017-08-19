@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.vfs.util;
 
 import java.io.FilterInputStream;
@@ -16,19 +16,17 @@ import java.io.InputStream;
 
 /**
  * Wrapper for InputStream which prevent close of wrapped stream.
- * <p/>
- * For example,  useful if need read content of ZipEntry but prevent close ZipInputStream.
+ *
+ * <p>For example, useful if need read content of ZipEntry but prevent close ZipInputStream.
  *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
  */
 public final class NotClosableInputStream extends FilterInputStream {
-    public NotClosableInputStream(InputStream delegate) {
-        super(delegate);
-    }
+  public NotClosableInputStream(InputStream delegate) {
+    super(delegate);
+  }
 
-    /** @see java.io.InputStream#close() */
-    @Override
-    public void close() throws IOException {
-    }
+  /** @see java.io.InputStream#close() */
+  @Override
+  public void close() throws IOException {}
 }
-

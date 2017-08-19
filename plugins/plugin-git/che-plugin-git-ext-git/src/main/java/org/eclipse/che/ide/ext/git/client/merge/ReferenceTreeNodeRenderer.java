@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.merge;
 
-import elemental.dom.Node;
+import com.google.gwt.resources.client.CssResource;
 import elemental.dom.Element;
+import elemental.dom.Node;
 import elemental.html.SpanElement;
-
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ui.tree.NodeRenderer;
 import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.dom.Elements;
-import com.google.gwt.resources.client.CssResource;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
@@ -28,63 +27,62 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  * @author Andrey Plotnikov
  */
 public class ReferenceTreeNodeRenderer implements NodeRenderer<Reference> {
-    public interface Css extends CssResource {
-        @ClassName("reference-root")
-        String referenceRoot();
+  public interface Css extends CssResource {
+    @ClassName("reference-root")
+    String referenceRoot();
 
-        @ClassName("reference-label")
-        String referenceLabel();
+    @ClassName("reference-label")
+    String referenceLabel();
+  }
+
+  public interface Resources extends Tree.Resources {
+    @Source("Merge.css")
+    Css referenceCss();
+  }
+
+  private final Css css;
+
+  private final GitResources gitResources;
+
+  public ReferenceTreeNodeRenderer(Resources res, GitResources gitResources) {
+    this.css = res.referenceCss();
+    this.css.ensureInjected();
+    this.gitResources = gitResources;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Element getNodeKeyTextContainer(SpanElement treeNodeLabel) {
+    return (Element) treeNodeLabel.getChildNodes().item(1);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public SpanElement renderNodeContents(Reference data) {
+    SpanElement root = Elements.createSpanElement(css.referenceRoot());
+
+    SVGImage icon;
+    if (data.getFullName().equals(MergePresenter.LOCAL_BRANCHES_TITLE)) {
+      icon = new SVGImage(gitResources.checkoutReference());
+    } else if (data.getFullName().equals(MergePresenter.REMOTE_BRANCHES_TITLE)) {
+      icon = new SVGImage(gitResources.remote());
+    } else {
+      icon = new SVGImage(gitResources.branches());
     }
 
-    public interface Resources extends Tree.Resources {
-        @Source("Merge.css")
-        Css referenceCss();
+    SpanElement label = Elements.createSpanElement(css.referenceLabel());
+    String content = data.getDisplayName();
+    label.setTextContent(content);
 
-    }
+    root.appendChild((Node) icon.getSvgElement().getElement());
+    root.appendChild(label);
 
-    private final Css css;
+    return root;
+  }
 
-    private final GitResources gitResources;
-
-    public ReferenceTreeNodeRenderer(Resources res, GitResources gitResources) {
-        this.css = res.referenceCss();
-        this.css.ensureInjected();
-        this.gitResources = gitResources;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Element getNodeKeyTextContainer(SpanElement treeNodeLabel) {
-        return (Element)treeNodeLabel.getChildNodes().item(1);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public SpanElement renderNodeContents(Reference data) {
-        SpanElement root = Elements.createSpanElement(css.referenceRoot());
-
-        SVGImage icon;
-        if (data.getFullName().equals(MergePresenter.LOCAL_BRANCHES_TITLE)) {
-            icon = new SVGImage(gitResources.checkoutReference());
-        } else if (data.getFullName().equals(MergePresenter.REMOTE_BRANCHES_TITLE)) {
-            icon = new SVGImage(gitResources.remote());
-        } else {
-            icon = new SVGImage(gitResources.branches());
-        }
-
-        SpanElement label = Elements.createSpanElement(css.referenceLabel());
-        String content = data.getDisplayName();
-        label.setTextContent(content);
-
-        root.appendChild((Node)icon.getSvgElement().getElement());
-        root.appendChild(label);
-
-        return root;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void updateNodeContents(TreeNodeElement<Reference> treeNode) {
-        // do nothing
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void updateNodeContents(TreeNodeElement<Reference> treeNode) {
+    // do nothing
+  }
 }

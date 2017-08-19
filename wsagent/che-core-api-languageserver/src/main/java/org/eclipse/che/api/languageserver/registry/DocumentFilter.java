@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,31 +7,30 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.languageserver.registry;
 
 public class DocumentFilter {
 
-    private final String pathRegex;
-    private final String languageId;
-    private final String scheme;
+  private final String pathRegex;
+  private final String languageId;
+  private final String scheme;
 
-    public DocumentFilter(String languageId, String pathRegex, String scheme) {
-        this.pathRegex = pathRegex;
-        this.languageId = languageId;
-        this.scheme = scheme;
-    }
-    
-    public String getLanguageId() {
-        return languageId;
-    }
+  public DocumentFilter(String languageId, String pathRegex, String scheme) {
+    this.pathRegex = pathRegex;
+    this.languageId = languageId;
+    this.scheme = scheme;
+  }
 
-    public String getPathRegex() {
-        return pathRegex;
-    }
+  public String getLanguageId() {
+    return languageId;
+  }
 
-    public String getScheme() {
-        return scheme;
-    }
+  public String getPathRegex() {
+    return pathRegex;
+  }
 
+  public String getScheme() {
+    return scheme;
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.model.workspace;
 
 import java.util.List;
@@ -19,18 +19,12 @@ import java.util.Map;
  * @author Alexander Garagatyi
  */
 public interface ExtendedMachine {
-    /**
-     * Returns list of agents that should be deployed into machine.
-     */
-    List<String> getAgents();
+  /** Returns list of agents that should be deployed into machine. */
+  List<String> getAgents();
 
-    /**
-     * Returns mapping of references to configurations of servers deployed into machine.
-     */
-    Map<String, ? extends ServerConf2> getServers();
+  /** Returns mapping of references to configurations of servers deployed into machine. */
+  Map<String, ? extends ServerConf2> getServers();
 
-    /**
-     * Returns attributes of resources of machine.
-     */
-    Map<String, String> getAttributes();
+  /** Returns attributes of resources of machine. */
+  Map<String, String> getAttributes();
 }

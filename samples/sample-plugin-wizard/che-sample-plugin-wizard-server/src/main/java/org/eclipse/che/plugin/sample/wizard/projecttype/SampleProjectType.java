@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,27 +7,27 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.sample.wizard.projecttype;
+
+import static org.eclipse.che.plugin.sample.wizard.shared.Constants.COMPILER_VERSION_ATRIBUTE;
+import static org.eclipse.che.plugin.sample.wizard.shared.Constants.C_LANG;
+import static org.eclipse.che.plugin.sample.wizard.shared.Constants.LANGUAGE;
+import static org.eclipse.che.plugin.sample.wizard.shared.Constants.X_PROJECT_TYPE_ID;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 
-import static org.eclipse.che.plugin.sample.wizard.shared.Constants.COMPILER_VERSION_ATRIBUTE;
-import static org.eclipse.che.plugin.sample.wizard.shared.Constants.C_LANG;
-import static org.eclipse.che.plugin.sample.wizard.shared.Constants.X_PROJECT_TYPE_ID;
-import static org.eclipse.che.plugin.sample.wizard.shared.Constants.LANGUAGE;
-
-
 /**
  * C wizard type
+ *
  * @author Vitalii Parfonov
  */
 public class SampleProjectType extends ProjectTypeDef {
-    @Inject
-    public SampleProjectType() {
-        super(X_PROJECT_TYPE_ID, "Sample Project Type", true, false, true);
-        addConstantDefinition(LANGUAGE, "language", C_LANG);
-        addVariableDefinition(COMPILER_VERSION_ATRIBUTE, "GCC compiler version", false);
-    }
+  @Inject
+  public SampleProjectType() {
+    super(X_PROJECT_TYPE_ID, "Sample Project Type", true, false, true);
+    addConstantDefinition(LANGUAGE, "language", C_LANG);
+    addVariableDefinition(COMPILER_VERSION_ATRIBUTE, "GCC compiler version", false);
+  }
 }

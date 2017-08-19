@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,43 +7,43 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.github.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface GitHubIssueComment {
-    /**
-     * Get comment id.
-     *
-     * @return {@link String} id
-     */
-    String getId();
+  /**
+   * Get comment id.
+   *
+   * @return {@link String} id
+   */
+  String getId();
 
-    void setId(String id);
+  void setId(String id);
 
-    GitHubIssueComment withId(String id);
+  GitHubIssueComment withId(String id);
 
-    /**
-     * Get comment URL.
-     *
-     * @return {@link String} url
-     */
-    String getUrl();
+  /**
+   * Get comment URL.
+   *
+   * @return {@link String} url
+   */
+  String getUrl();
 
-    void setUrl(String url);
+  void setUrl(String url);
 
-    GitHubIssueComment withUrl(String url);
+  GitHubIssueComment withUrl(String url);
 
-    /**
-     * Get comment body.
-     *
-     * @return {@link String} body
-     */
-    String getBody();
+  /**
+   * Get comment body.
+   *
+   * @return {@link String} body
+   */
+  String getBody();
 
-    void setBody(String body);
+  void setBody(String body);
 
-    GitHubIssueComment withBody(String body);
+  GitHubIssueComment withBody(String body);
 }

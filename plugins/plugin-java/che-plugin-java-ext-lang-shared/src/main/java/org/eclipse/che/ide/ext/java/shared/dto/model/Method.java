@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.shared.dto.model;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -20,23 +20,21 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface Method extends Member {
-    /**
-     * Returns the simple name of this method.
-     * For a constructor, this returns the simple name of the declaring type.
-     * Note: This holds whether the constructor appears in a source or binary type
-     * (even though class files internally define constructor names to be <code>"&lt;init&gt;"</code>).
-     * For the class initialization methods in binary types, this returns
-     * the special name <code>"&lt;clinit&gt;"</code>.
-     * This is a handle-only method.
-     * @return the simple name of this method
-     */
-    String getElementName();
+  /**
+   * Returns the simple name of this method. For a constructor, this returns the simple name of the
+   * declaring type. Note: This holds whether the constructor appears in a source or binary type
+   * (even though class files internally define constructor names to be <code>"&lt;init&gt;"</code>
+   * ). For the class initialization methods in binary types, this returns the special name <code>
+   * "&lt;clinit&gt;"</code>. This is a handle-only method.
+   *
+   * @return the simple name of this method
+   */
+  String getElementName();
 
-    void setElementName(String elementName);
+  void setElementName(String elementName);
 
-    /** @return name of the return type */
-    String getReturnType();
+  /** @return name of the return type */
+  String getReturnType();
 
-    void setReturnType(String returnType);
-
+  void setReturnType(String returnType);
 }

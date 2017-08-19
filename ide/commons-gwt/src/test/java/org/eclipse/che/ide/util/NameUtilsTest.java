@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.util;
+
+import static org.junit.Assert.*;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Tests for the NameUtils class
@@ -23,65 +23,53 @@ import static org.junit.Assert.*;
  */
 public class NameUtilsTest {
 
-    private static String[] VALID_FILENAMES = new String[]{
-            "README",
-            "readme.md",
-            "che.xml",
-            "évacuation.html",
-            "私の自転車.png",
-            "I love maths.jpeg"
-    };
+  private static String[] VALID_FILENAMES =
+      new String[] {
+        "README", "readme.md", "che.xml", "évacuation.html", "私の自転車.png", "I love maths.jpeg"
+      };
 
-    private static String[] INVALID_FILENAMES = new String[]{
-            "\0",
-            "a/b",
-            "/",
-            "\\",
-            "*",
-            "?",
-            "|",
-            "<",
-            ">",
-            "I<3Math.png",
-            ""
-    };
+  private static String[] INVALID_FILENAMES =
+      new String[] {"\0", "a/b", "/", "\\", "*", "?", "|", "<", ">", "I<3Math.png", ""};
 
-    @Test(dataProvider = "ValidFilenames")
-    public void validFilenamesShouldGetValidated(String validFilename) {
-        assertTrue(validFilename + " is supposed to be valid", NameUtils.checkFileName(validFilename));
+  @Test(dataProvider = "ValidFilenames")
+  public void validFilenamesShouldGetValidated(String validFilename) {
+    assertTrue(validFilename + " is supposed to be valid", NameUtils.checkFileName(validFilename));
+  }
+
+  @Test(dataProvider = "InvalidFilenames")
+  public void invalidFilenamesShouldNotGetValidated(String invalidFileName) {
+    assertFalse(
+        invalidFileName + " is supposed to be invalid", NameUtils.checkFileName(invalidFileName));
+  }
+
+  @Test(dataProvider = "ValidFilenames")
+  public void validFolderNamesShouldGetValidated(String validFolderName) {
+    assertTrue(
+        validFolderName + " is supposed to be valid", NameUtils.checkFileName(validFolderName));
+  }
+
+  @Test(dataProvider = "InvalidFilenames")
+  public void invalidFolderNamesShouldNotGetValidated(String invalidFolderName) {
+    assertFalse(
+        invalidFolderName + " is supposed to be invalid",
+        NameUtils.checkFileName(invalidFolderName));
+  }
+
+  @DataProvider(name = "ValidFilenames")
+  public Object[][] getValidFilenames() {
+    return toDataProviderData(VALID_FILENAMES);
+  }
+
+  @DataProvider(name = "InvalidFilenames")
+  public Object[][] getInvalidFilenames() {
+    return toDataProviderData(INVALID_FILENAMES);
+  }
+
+  private Object[][] toDataProviderData(String[] strings) {
+    Object[][] data = new Object[strings.length][];
+    for (int i = 0; i < strings.length; i++) {
+      data[i] = new Object[] {strings[i]};
     }
-
-    @Test(dataProvider = "InvalidFilenames")
-    public void invalidFilenamesShouldNotGetValidated(String invalidFileName) {
-        assertFalse(invalidFileName + " is supposed to be invalid", NameUtils.checkFileName(invalidFileName));
-    }
-
-    @Test(dataProvider = "ValidFilenames")
-    public void validFolderNamesShouldGetValidated(String validFolderName) {
-        assertTrue(validFolderName + " is supposed to be valid", NameUtils.checkFileName(validFolderName));
-    }
-
-    @Test(dataProvider = "InvalidFilenames")
-    public void invalidFolderNamesShouldNotGetValidated(String invalidFolderName) {
-        assertFalse(invalidFolderName + " is supposed to be invalid", NameUtils.checkFileName(invalidFolderName));
-    }
-
-    @DataProvider(name = "ValidFilenames")
-    public Object[][] getValidFilenames() {
-        return toDataProviderData(VALID_FILENAMES);
-    }
-
-    @DataProvider(name = "InvalidFilenames")
-    public Object[][] getInvalidFilenames() {
-        return toDataProviderData(INVALID_FILENAMES);
-    }
-
-    private Object[][] toDataProviderData(String[] strings) {
-        Object[][] data = new Object[strings.length][];
-        for (int i = 0; i < strings.length; i++) {
-            data[i] = new Object[] { strings[i] };
-        }
-        return data;
-    }
-
+    return data;
+  }
 }

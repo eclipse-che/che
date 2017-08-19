@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui;
 
 import com.google.gwt.i18n.client.Messages;
@@ -20,12 +20,12 @@ import com.google.gwt.i18n.client.Messages;
  */
 public interface UILocalizationConstant extends Messages {
 
-    @DefaultMessage("OK")
-    String okButtonText();
+  @DefaultMessage("OK")
+  String okButtonText();
 
-    @DefaultMessage("Cancel")
-    String cancelButtonText();
+  @DefaultMessage("Cancel")
+  String cancelButtonText();
 
-    @DefaultMessage("Value is not valid")
-    String validationErrorMessage();
+  @DefaultMessage("Value is not valid")
+  String validationErrorMessage();
 }

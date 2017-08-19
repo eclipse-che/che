@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.machine.shared.dto.event;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
@@ -22,43 +22,43 @@ import org.eclipse.che.dto.shared.DTO;
 @EventOrigin("machine")
 @DTO
 public interface MachineStatusEvent {
-    enum EventType {
-        CREATING,
-        RUNNING,
-        DESTROYING,
-        DESTROYED,
-        ERROR
-    }
+  enum EventType {
+    CREATING,
+    RUNNING,
+    DESTROYING,
+    DESTROYED,
+    ERROR
+  }
 
-    boolean isDev();
+  boolean isDev();
 
-    MachineStatusEvent withDev(boolean isDev);
+  MachineStatusEvent withDev(boolean isDev);
 
-    void setDev(boolean isDev);
+  void setDev(boolean isDev);
 
-    EventType getEventType();
+  EventType getEventType();
 
-    void setEventType(EventType eventType);
+  void setEventType(EventType eventType);
 
-    MachineStatusEvent withEventType(EventType eventType);
+  MachineStatusEvent withEventType(EventType eventType);
 
-    String getMachineId();
+  String getMachineId();
 
-    void setMachineId(String machineId);
+  void setMachineId(String machineId);
 
-    MachineStatusEvent withMachineId(String machineId);
+  MachineStatusEvent withMachineId(String machineId);
 
-    String getError();
+  String getError();
 
-    void setError(String error);
+  void setError(String error);
 
-    MachineStatusEvent withError(String error);
+  MachineStatusEvent withError(String error);
 
-    String getWorkspaceId();
+  String getWorkspaceId();
 
-    MachineStatusEvent withWorkspaceId(String workspaceId);
+  MachineStatusEvent withWorkspaceId(String workspaceId);
 
-    String getMachineName();
+  String getMachineName();
 
-    MachineStatusEvent withMachineName(String machineName);
+  MachineStatusEvent withMachineName(String machineName);
 }

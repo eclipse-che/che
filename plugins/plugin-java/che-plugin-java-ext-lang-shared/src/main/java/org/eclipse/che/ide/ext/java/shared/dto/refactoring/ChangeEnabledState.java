@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,20 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.shared.dto.refactoring;
 
 import org.eclipse.che.dto.shared.DTO;
 
 /**
  * DTO for disable/enable corresponding refactoring change.
+ *
  * @author Evgen Vidolob
  */
 @DTO
 public interface ChangeEnabledState extends RefactoringChange {
 
-    boolean isEnabled();
+  boolean isEnabled();
 
-    void setEnabled(boolean enabled);
-
+  void setEnabled(boolean enabled);
 }

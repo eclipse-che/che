@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.machine.server.exception;
 
 import org.eclipse.che.api.core.ServerException;
@@ -19,19 +19,19 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
  */
 @SuppressWarnings("serial")
 public class MachineException extends ServerException {
-    public MachineException(String message) {
-        super(message);
-    }
+  public MachineException(String message) {
+    super(message);
+  }
 
-    public MachineException(ServiceError serviceError) {
-        super(serviceError);
-    }
+  public MachineException(ServiceError serviceError) {
+    super(serviceError);
+  }
 
-    public MachineException(Throwable cause) {
-        super(cause);
-    }
+  public MachineException(Throwable cause) {
+    super(cause);
+  }
 
-    public MachineException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public MachineException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

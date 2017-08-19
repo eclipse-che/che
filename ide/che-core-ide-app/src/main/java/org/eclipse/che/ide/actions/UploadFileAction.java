@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -21,12 +25,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.upload.file.UploadFilePresenter;
-
-import javax.validation.constraints.NotNull;
-
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Upload file Action
@@ -38,35 +36,43 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class UploadFileAction extends AbstractPerspectiveAction {
 
-    private final UploadFilePresenter  presenter;
-    private final AppContext           appContext;
+  private final UploadFilePresenter presenter;
+  private final AppContext appContext;
 
-    @Inject
-    public UploadFileAction(UploadFilePresenter presenter,
-                            CoreLocalizationConstant locale,
-                            Resources resources,
-                            AppContext appContext) {
-        super(singletonList(PROJECT_PERSPECTIVE_ID), locale.uploadFileName(), locale.uploadFileDescription(), null, resources.uploadFile());
-        this.presenter = presenter;
-        this.appContext = appContext;
-    }
+  @Inject
+  public UploadFileAction(
+      UploadFilePresenter presenter,
+      CoreLocalizationConstant locale,
+      Resources resources,
+      AppContext appContext) {
+    super(
+        singletonList(PROJECT_PERSPECTIVE_ID),
+        locale.uploadFileName(),
+        locale.uploadFileDescription(),
+        null,
+        resources.uploadFile());
+    this.presenter = presenter;
+    this.appContext = appContext;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        final Resource[] resources = appContext.getResources();
+  /** {@inheritDoc} */
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    final Resource[] resources = appContext.getResources();
 
-        checkState(resources != null && resources.length == 1 && resources[0] instanceof Container);
+    checkState(resources != null && resources.length == 1 && resources[0] instanceof Container);
 
-        presenter.showDialog((Container)resources[0]);
-    }
+    presenter.showDialog((Container) resources[0]);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void updateInPerspective(@NotNull ActionEvent e) {
-        final Resource[] resources = appContext.getResources();
+  /** {@inheritDoc} */
+  @Override
+  public void updateInPerspective(@NotNull ActionEvent e) {
+    final Resource[] resources = appContext.getResources();
 
-        e.getPresentation().setVisible(true);
-        e.getPresentation().setEnabled(resources != null && resources.length == 1 && resources[0] instanceof Container);
-    }
+    e.getPresentation().setVisible(true);
+    e.getPresentation()
+        .setEnabled(
+            resources != null && resources.length == 1 && resources[0] instanceof Container);
+  }
 }
