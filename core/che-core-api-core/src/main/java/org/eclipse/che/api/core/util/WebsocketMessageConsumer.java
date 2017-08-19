@@ -1,18 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.api.core.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import java.io.IOException;
 
 /**
@@ -21,16 +19,16 @@ import java.io.IOException;
  * @author Alexander Garagatyi
  */
 public class WebsocketMessageConsumer<T> extends AbstractMessageConsumer<T> {
-    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+  private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
-    private final LineConsumer messageSender;
+  private final LineConsumer messageSender;
 
-    public WebsocketMessageConsumer(String channel) {
-        this.messageSender = new WebsocketLineConsumer(channel);
-    }
+  public WebsocketMessageConsumer(String channel) {
+    this.messageSender = new WebsocketLineConsumer(channel);
+  }
 
-    @Override
-    public void consume(T message) throws IOException {
-        messageSender.writeLine(GSON.toJson(message));
-    }
+  @Override
+  public void consume(T message) throws IOException {
+    messageSender.writeLine(GSON.toJson(message));
+  }
 }

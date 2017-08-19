@@ -1,13 +1,12 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.api.core.model.project;
 
 import java.util.List;
@@ -18,18 +17,17 @@ import java.util.Map;
  * @author Dmitry Shnurenko
  */
 public interface ProjectConfig {
-    String getName();
+  String getName();
 
-    String getPath();
+  String getPath();
 
-    String getDescription();
+  String getDescription();
 
-    String getType();
+  String getType();
 
-    List<String> getMixins();
+  List<String> getMixins();
 
-    Map<String, List<String>> getAttributes();
+  Map<String, List<String>> getAttributes();
 
-    SourceStorage getSource();
-
+  SourceStorage getSource();
 }

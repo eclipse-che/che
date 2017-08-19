@@ -1,13 +1,12 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.java.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -19,24 +18,24 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface Region {
-    /**
-     * Returns the length of the region.
-     *
-     * @return the length of the region
-     */
-    int getLength();
+  /**
+   * Returns the length of the region.
+   *
+   * @return the length of the region
+   */
+  int getLength();
 
-    void setLength(int length);
-    /**
-     * Returns the offset of the region.
-     *
-     * @return the offset of the region
-     */
-    int getOffset();
+  void setLength(int length);
+  /**
+   * Returns the offset of the region.
+   *
+   * @return the offset of the region
+   */
+  int getOffset();
 
-    void setOffset(int offset);
+  void setOffset(int offset);
 
-    Region withOffset(int offset);
+  Region withOffset(int offset);
 
-    Region withLength(int length);
+  Region withLength(int length);
 }

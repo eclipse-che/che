@@ -1,13 +1,12 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.api.promises.async;
 
 import org.eclipse.che.api.promises.client.Promise;
@@ -20,22 +19,21 @@ import org.eclipse.che.api.promises.client.Promise;
 @SuppressWarnings("unchecked")
 public class ThrottledDelayer<T> extends Delayer<Promise<T>> {
 
-    private final Throttler throttler;
+  private final Throttler throttler;
 
-    public ThrottledDelayer(int defaultDelay) {
-        super(defaultDelay);
-        throttler = new Throttler();
-    }
+  public ThrottledDelayer(int defaultDelay) {
+    super(defaultDelay);
+    throttler = new Throttler();
+  }
 
-
-    @Override
-    public Promise trigger(final Task<Promise<T>> task) {
-        return super.trigger(new Task<Promise<T>>() {
-            @Override
-            public Promise<T> run() {
-                return throttler.queue(task);
-            }
+  @Override
+  public Promise trigger(final Task<Promise<T>> task) {
+    return super.trigger(
+        new Task<Promise<T>>() {
+          @Override
+          public Promise<T> run() {
+            return throttler.queue(task);
+          }
         });
-    }
-
+  }
 }

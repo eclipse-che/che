@@ -20,46 +20,45 @@ import java.util.NoSuchElementException;
 /**
  * Implementation that iterates array without gaps in index,
  *
- * @param <T>
- *         items type
+ * @param <T> items type
  */
 public class ArrayIterator<T> implements Iterator<T> {
 
-    private       int      index;
-    private final Array<T> items;
-    private       boolean  hasRemovedSinceNextCall;
+  private int index;
+  private final Array<T> items;
+  private boolean hasRemovedSinceNextCall;
 
-    public ArrayIterator(Array<T> items) {
-        this.items = items;
+  public ArrayIterator(Array<T> items) {
+    this.items = items;
+  }
+
+  @Override
+  public boolean hasNext() {
+    return index < items.size();
+  }
+
+  @Override
+  public T next() {
+    if (index == items.size()) {
+      throw new NoSuchElementException();
     }
 
-    @Override
-    public boolean hasNext() {
-        return index < items.size();
+    T result = items.get(index);
+    index++;
+
+    hasRemovedSinceNextCall = false;
+
+    return result;
+  }
+
+  @Override
+  public void remove() {
+    if (hasRemovedSinceNextCall || index == 0) {
+      throw new IllegalStateException();
     }
 
-    @Override
-    public T next() {
-        if (index == items.size()) {
-            throw new NoSuchElementException();
-        }
-
-        T result = items.get(index);
-        index++;
-
-        hasRemovedSinceNextCall = false;
-
-        return result;
-    }
-
-    @Override
-    public void remove() {
-        if (hasRemovedSinceNextCall || index == 0) {
-            throw new IllegalStateException();
-        }
-
-        index--;
-        items.remove(index);
-        hasRemovedSinceNextCall = true;
-    }
+    index--;
+    items.remove(index);
+    hasRemovedSinceNextCall = true;
+  }
 }

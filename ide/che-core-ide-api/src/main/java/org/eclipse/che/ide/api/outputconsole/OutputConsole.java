@@ -1,60 +1,53 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.api.outputconsole;
 
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * Describes requirements for the console for displaying output. 
+ * Describes requirements for the console for displaying output.
  *
  * @author Roman Nikitenko
  */
 public interface OutputConsole extends Presenter {
 
-    /** Return title for the console. */
-    String getTitle();
+  /** Return title for the console. */
+  String getTitle();
 
-    /**
-     * Returns the title SVG image resource of this console.
-     *
-     * @return the title SVG image resource
-     */
-    SVGResource getTitleIcon();
+  /**
+   * Returns the title SVG image resource of this console.
+   *
+   * @return the title SVG image resource
+   */
+  SVGResource getTitleIcon();
 
-    /** Checks whether the console is finished outputting or not. */
-    boolean isFinished();
+  /** Checks whether the console is finished outputting or not. */
+  boolean isFinished();
 
-    /** Stop process. */
-    void stop();
+  /** Stop process. */
+  void stop();
 
-    /** Called when console is closed. */
-    void close();
+  /** Called when console is closed. */
+  void close();
 
-    /**
-     * Action Delegate interface.
-     */
-    interface ActionDelegate {
+  /** Action Delegate interface. */
+  interface ActionDelegate {
 
-        /** Is called when new is printed */
-        void onConsoleOutput(OutputConsole console);
+    /** Is called when new is printed */
+    void onConsoleOutput(OutputConsole console);
 
-        /** Is called when user asked to download output */
-        void onDownloadOutput(OutputConsole console);
+    /** Is called when user asked to download output */
+    void onDownloadOutput(OutputConsole console);
+  }
 
-    }
-
-    /**
-     * Sets action delegate.
-     */
-    void addActionDelegate(ActionDelegate actionDelegate);
-
+  /** Sets action delegate. */
+  void addActionDelegate(ActionDelegate actionDelegate);
 }

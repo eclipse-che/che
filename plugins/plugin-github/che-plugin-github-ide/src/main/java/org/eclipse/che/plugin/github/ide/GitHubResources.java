@@ -1,17 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.plugin.github.ide;
 
-import org.eclipse.che.plugin.github.ide.importer.page.GithubImporterPageViewImpl;
 import com.google.gwt.resources.client.ClientBundle;
+import org.eclipse.che.plugin.github.ide.importer.page.GithubImporterPageViewImpl;
 
 /**
  * @author Ann Zhuleva
@@ -19,6 +18,6 @@ import com.google.gwt.resources.client.ClientBundle;
  */
 public interface GitHubResources extends ClientBundle {
 
-    @Source({"importer/page/GithubImporterPage.css", "org/eclipse/che/ide/api/ui/style.css"})
-    GithubImporterPageViewImpl.GithubStyle githubImporterPageStyle();
+  @Source({"importer/page/GithubImporterPage.css", "org/eclipse/che/ide/api/ui/style.css"})
+  GithubImporterPageViewImpl.GithubStyle githubImporterPageStyle();
 }

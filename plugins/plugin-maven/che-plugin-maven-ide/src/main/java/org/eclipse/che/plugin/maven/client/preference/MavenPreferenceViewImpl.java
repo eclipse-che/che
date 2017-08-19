@@ -1,13 +1,12 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.plugin.maven.client.preference;
 
 import com.google.gwt.core.client.GWT;
@@ -20,7 +19,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 
 /**
@@ -31,44 +29,43 @@ import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 @Singleton
 public class MavenPreferenceViewImpl implements MavenPreferenceView {
 
-    private static MavenPreferenceViewImplUiBinder uiBinder = GWT.create(MavenPreferenceViewImplUiBinder.class);
-    private final FlowPanel rootElement;
+  private static MavenPreferenceViewImplUiBinder uiBinder =
+      GWT.create(MavenPreferenceViewImplUiBinder.class);
+  private final FlowPanel rootElement;
 
-    @UiField(provided = true)
-    final   MavenLocalizationConstant locale;
-    private ActionDelegate            delegate;
+  @UiField(provided = true)
+  final MavenLocalizationConstant locale;
 
-    @UiField
-    CheckBox showArtifactId;
+  private ActionDelegate delegate;
 
-    @Inject
-    public MavenPreferenceViewImpl(MavenLocalizationConstant locale) {
-        this.locale = locale;
+  @UiField CheckBox showArtifactId;
 
-        rootElement = uiBinder.createAndBindUi(this);
-    }
+  @Inject
+  public MavenPreferenceViewImpl(MavenLocalizationConstant locale) {
+    this.locale = locale;
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+    rootElement = uiBinder.createAndBindUi(this);
+  }
 
-    @Override
-    public Widget asWidget() {
-        return rootElement;
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
+  @Override
+  public Widget asWidget() {
+    return rootElement;
+  }
 
-    @Override
-    public void setSelectedShowArtifactIdCheckBox(boolean selected) {
-        showArtifactId.setValue(selected);
-    }
+  @Override
+  public void setSelectedShowArtifactIdCheckBox(boolean selected) {
+    showArtifactId.setValue(selected);
+  }
 
-    @UiHandler("showArtifactId")
-    void handleShowArtifactIdCheckBoxSelection(ClickEvent event) {
-        delegate.onArtifactIdCheckBoxValueChanged(showArtifactId.getValue());
-    }
+  @UiHandler("showArtifactId")
+  void handleShowArtifactIdCheckBoxSelection(ClickEvent event) {
+    delegate.onArtifactIdCheckBoxValueChanged(showArtifactId.getValue());
+  }
 
-    interface MavenPreferenceViewImplUiBinder extends UiBinder<FlowPanel, MavenPreferenceViewImpl> {
-    }
+  interface MavenPreferenceViewImplUiBinder extends UiBinder<FlowPanel, MavenPreferenceViewImpl> {}
 }
