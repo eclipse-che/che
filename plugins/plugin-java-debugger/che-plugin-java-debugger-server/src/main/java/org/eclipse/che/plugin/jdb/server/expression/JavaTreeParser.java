@@ -1,11 +1,12 @@
-/**
- * ***************************************************************************** Copyright (c)
- * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- * <p>Contributors: Red Hat, Inc. - initial API and implementation
- * *****************************************************************************
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
  */
 // $ANTLR 3.3 Nov 30, 2010 12:50:56 org/eclipse/che/ide/ext/java/jdi/server/expression/JavaTreeParser.g 2013-02-07 15:54:13
 
