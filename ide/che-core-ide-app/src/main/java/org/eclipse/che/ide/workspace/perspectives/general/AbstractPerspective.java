@@ -386,6 +386,7 @@ public abstract class AbstractPerspective
             loadPartStackState(
                 partStacks.get(TOOLING), rightPartController, partStackState, perspectiveMaximized);
             break;
+          default:
         }
       }
     }
