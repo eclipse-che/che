@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
-
+ */
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
+import java.util.Collections;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.ide.api.editor.codeassist.Completion;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -31,204 +40,180 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-/**
- *
- */
+/** */
 @RunWith(GwtMockitoTestRunner.class)
 public class CompletionItemBasedCompletionProposalTest {
 
-    @Mock
-    private TextDocumentServiceClient documentServiceClient;
-    @Mock
-    private LanguageServerResources   resources;
-    @Mock
-    private Icon                      icon;
-    @Mock
-    private ServerCapabilities        serverCapabilities;
-    @Mock
-    private ExtendedCompletionItem    completionItem;
-    @Mock
-    private CompletionOptions         completionOptions;
-    @Mock
-    private Document document;
-    @Mock
-    private CompletionItem completion;
+  @Mock private TextDocumentServiceClient documentServiceClient;
+  @Mock private LanguageServerResources resources;
+  @Mock private Icon icon;
+  @Mock private ServerCapabilities serverCapabilities;
+  @Mock private ExtendedCompletionItem completionItem;
+  @Mock private CompletionOptions completionOptions;
+  @Mock private Document document;
+  @Mock private CompletionItem completion;
 
-    private CompletionItemBasedCompletionProposal proposal;
+  private CompletionItemBasedCompletionProposal proposal;
 
+  @Before
+  public void setUp() throws Exception {
+    proposal =
+        new CompletionItemBasedCompletionProposal(
+            completionItem,
+            "",
+            documentServiceClient,
+            resources,
+            icon,
+            serverCapabilities,
+            Collections.emptyList(),
+            0);
+    when(completionItem.getItem()).thenReturn(completion);
+  }
 
-    @Before
-    public void setUp() throws Exception {
-        proposal = new CompletionItemBasedCompletionProposal(completionItem,
-                                                             "",
-                                                             documentServiceClient,
-                                                             resources,
-                                                             icon,
-                                                             serverCapabilities,
-                                                             Collections.emptyList(),
-                                                             0);
-        when(completionItem.getItem()).thenReturn(completion);
-    }
+  @Test
+  public void shouldReturnNotNullCompletion() throws Exception {
+    when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
+    when(completionOptions.getResolveProvider()).thenReturn(false);
 
+    Completion[] completions = new Completion[1];
+    proposal.getCompletion(completion -> completions[0] = completion);
 
-    @Test
-    public void shouldReturnNotNullCompletion() throws Exception {
-        when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
-        when(completionOptions.getResolveProvider()).thenReturn(false);
+    assertNotNull(completions[0]);
+  }
 
-        Completion[] completions = new Completion[1];
-        proposal.getCompletion(completion -> completions[0] = completion);
+  @Test
+  public void shouldUseInsertText() throws Exception {
+    when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
+    when(completionOptions.getResolveProvider()).thenReturn(false);
 
-        assertNotNull(completions[0]);
-    }
+    when(document.getCursorOffset()).thenReturn(5);
+    when(completion.getInsertText()).thenReturn("foo");
 
-    @Test
-    public void shouldUseInsertText() throws Exception {
-        when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
-        when(completionOptions.getResolveProvider()).thenReturn(false);
+    Completion[] completions = new Completion[1];
+    proposal.getCompletion(completion -> completions[0] = completion);
 
-        when(document.getCursorOffset()).thenReturn(5);
-        when(completion.getInsertText()).thenReturn("foo");
+    completions[0].apply(document);
 
-        Completion[] completions = new Completion[1];
-        proposal.getCompletion(completion -> completions[0] = completion);
+    verify(document).getCursorOffset();
+    verify(document, times(1)).replace(eq(5), eq(0), eq("foo"));
+    verifyNoMoreInteractions(document);
+  }
 
-        completions[0].apply(document);
+  @Test
+  public void shouldUseLabelIfInsertTextIsNull() throws Exception {
+    when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
+    when(completionOptions.getResolveProvider()).thenReturn(false);
 
-        verify(document).getCursorOffset();
-        verify(document, times(1)).replace(eq(5), eq(0), eq("foo"));
-        verifyNoMoreInteractions(document);
-    }
+    when(document.getCursorOffset()).thenReturn(5);
+    when(completion.getInsertText()).thenReturn(null);
+    when(completion.getLabel()).thenReturn("bar");
 
-    @Test
-    public void shouldUseLabelIfInsertTextIsNull() throws Exception {
-        when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
-        when(completionOptions.getResolveProvider()).thenReturn(false);
+    Completion[] completions = new Completion[1];
+    proposal.getCompletion(completion -> completions[0] = completion);
 
-        when(document.getCursorOffset()).thenReturn(5);
-        when(completion.getInsertText()).thenReturn(null);
-        when(completion.getLabel()).thenReturn("bar");
+    completions[0].apply(document);
 
-        Completion[] completions = new Completion[1];
-        proposal.getCompletion(completion -> completions[0] = completion);
+    verify(document).getCursorOffset();
+    verify(document, times(1)).replace(eq(5), eq(0), eq("bar"));
+    verifyNoMoreInteractions(document);
+  }
 
-        completions[0].apply(document);
+  @Test
+  public void shouldUseTextEditFirst() throws Exception {
+    TextEdit textEdit = mock(TextEdit.class);
+    Range range = mock(Range.class);
+    Position startPosition = mock(Position.class);
+    Position endPosition = mock(Position.class);
 
-        verify(document).getCursorOffset();
-        verify(document, times(1)).replace(eq(5), eq(0), eq("bar"));
-        verifyNoMoreInteractions(document);
-    }
+    when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
+    when(completionOptions.getResolveProvider()).thenReturn(false);
 
-    @Test
-    public void shouldUseTextEditFirst() throws Exception {
-        TextEdit textEdit = mock(TextEdit.class);
-        Range range = mock(Range.class);
-        Position startPosition = mock(Position.class);
-        Position endPosition = mock(Position.class);
+    when(document.getCursorOffset()).thenReturn(5);
+    when(completion.getInsertText()).thenReturn("foo");
+    when(completion.getLabel()).thenReturn("bar");
+    when(completion.getTextEdit()).thenReturn(textEdit);
 
-        when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
-        when(completionOptions.getResolveProvider()).thenReturn(false);
+    when(textEdit.getRange()).thenReturn(range);
+    when(textEdit.getNewText()).thenReturn("fooBar");
 
-        when(document.getCursorOffset()).thenReturn(5);
-        when(completion.getInsertText()).thenReturn("foo");
-        when(completion.getLabel()).thenReturn("bar");
-        when(completion.getTextEdit()).thenReturn(textEdit);
+    when(range.getStart()).thenReturn(startPosition);
+    when(range.getEnd()).thenReturn(endPosition);
 
-        when(textEdit.getRange()).thenReturn(range);
-        when(textEdit.getNewText()).thenReturn("fooBar");
+    when(startPosition.getLine()).thenReturn(1);
+    when(startPosition.getCharacter()).thenReturn(5);
 
-        when(range.getStart()).thenReturn(startPosition);
-        when(range.getEnd()).thenReturn(endPosition);
+    when(endPosition.getLine()).thenReturn(1);
+    when(endPosition.getCharacter()).thenReturn(5);
 
-        when(startPosition.getLine()).thenReturn(1);
-        when(startPosition.getCharacter()).thenReturn(5);
+    when(document.getIndexFromPosition(any())).thenReturn(5);
 
-        when(endPosition.getLine()).thenReturn(1);
-        when(endPosition.getCharacter()).thenReturn(5);
+    Completion[] completions = new Completion[1];
+    proposal.getCompletion(completion -> completions[0] = completion);
 
-        when(document.getIndexFromPosition(any())).thenReturn(5);
+    completions[0].apply(document);
 
-        Completion[] completions = new Completion[1];
-        proposal.getCompletion(completion -> completions[0] = completion);
+    verify(document, times(2)).getIndexFromPosition(any());
+    verify(document, times(1)).replace(eq(5), eq(0), eq("fooBar"));
+    verifyNoMoreInteractions(document);
+  }
 
-        completions[0].apply(document);
+  @Test
+  public void shouldPlaceCursorInRightPositionWithTextEdit() throws Exception {
+    TextEdit textEdit = mock(TextEdit.class);
+    Range range = mock(Range.class);
+    Position startPosition = mock(Position.class);
+    Position endPosition = mock(Position.class);
 
-        verify(document, times(2)).getIndexFromPosition(any());
-        verify(document, times(1)).replace(eq(5), eq(0), eq("fooBar"));
-        verifyNoMoreInteractions(document);
-    }
+    when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
+    when(completionOptions.getResolveProvider()).thenReturn(false);
 
-    @Test
-    public void shouldPlaceCursorInRightPositionWithTextEdit() throws Exception {
-        TextEdit textEdit = mock(TextEdit.class);
-        Range range = mock(Range.class);
-        Position startPosition = mock(Position.class);
-        Position endPosition = mock(Position.class);
+    when(document.getCursorOffset()).thenReturn(5);
+    when(completion.getInsertText()).thenReturn("foo");
+    when(completion.getLabel()).thenReturn("bar");
+    when(completion.getTextEdit()).thenReturn(textEdit);
 
-        when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
-        when(completionOptions.getResolveProvider()).thenReturn(false);
+    when(textEdit.getRange()).thenReturn(range);
+    when(textEdit.getNewText()).thenReturn("fooBar");
 
-        when(document.getCursorOffset()).thenReturn(5);
-        when(completion.getInsertText()).thenReturn("foo");
-        when(completion.getLabel()).thenReturn("bar");
-        when(completion.getTextEdit()).thenReturn(textEdit);
+    when(range.getStart()).thenReturn(startPosition);
+    when(range.getEnd()).thenReturn(endPosition);
 
-        when(textEdit.getRange()).thenReturn(range);
-        when(textEdit.getNewText()).thenReturn("fooBar");
+    when(startPosition.getLine()).thenReturn(1);
+    when(startPosition.getCharacter()).thenReturn(5);
 
-        when(range.getStart()).thenReturn(startPosition);
-        when(range.getEnd()).thenReturn(endPosition);
+    when(endPosition.getLine()).thenReturn(1);
+    when(endPosition.getCharacter()).thenReturn(5);
 
-        when(startPosition.getLine()).thenReturn(1);
-        when(startPosition.getCharacter()).thenReturn(5);
+    when(document.getIndexFromPosition(any())).thenReturn(5);
 
-        when(endPosition.getLine()).thenReturn(1);
-        when(endPosition.getCharacter()).thenReturn(5);
+    Completion[] completions = new Completion[1];
+    proposal.getCompletion(completion -> completions[0] = completion);
 
-        when(document.getIndexFromPosition(any())).thenReturn(5);
+    completions[0].apply(document);
+    LinearRange selection = completions[0].getSelection(document);
 
-        Completion[] completions = new Completion[1];
-        proposal.getCompletion(completion -> completions[0] = completion);
+    assertEquals(11, selection.getStartOffset());
+    assertEquals(0, selection.getLength());
+  }
 
-        completions[0].apply(document);
-        LinearRange selection = completions[0].getSelection(document);
+  @Test
+  public void shouldPlaceCursorInRightPositionWithInsertedText() throws Exception {
 
-        assertEquals(11, selection.getStartOffset());
-        assertEquals(0, selection.getLength());
+    when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
+    when(completionOptions.getResolveProvider()).thenReturn(false);
 
-    }
+    when(document.getCursorOffset()).thenReturn(5);
+    when(completion.getInsertText()).thenReturn("foo");
 
-    @Test
-    public void shouldPlaceCursorInRightPositionWithInsertedText() throws Exception {
+    when(document.getIndexFromPosition(any())).thenReturn(5);
 
-        when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
-        when(completionOptions.getResolveProvider()).thenReturn(false);
+    Completion[] completions = new Completion[1];
+    proposal.getCompletion(completion -> completions[0] = completion);
 
-        when(document.getCursorOffset()).thenReturn(5);
-        when(completion.getInsertText()).thenReturn("foo");
+    completions[0].apply(document);
+    LinearRange selection = completions[0].getSelection(document);
 
-        when(document.getIndexFromPosition(any())).thenReturn(5);
-
-        Completion[] completions = new Completion[1];
-        proposal.getCompletion(completion -> completions[0] = completion);
-
-        completions[0].apply(document);
-        LinearRange selection = completions[0].getSelection(document);
-
-        assertEquals(8, selection.getStartOffset());
-        assertEquals(0, selection.getLength());
-    }
-
+    assertEquals(8, selection.getStartOffset());
+    assertEquals(0, selection.getLength());
+  }
 }
