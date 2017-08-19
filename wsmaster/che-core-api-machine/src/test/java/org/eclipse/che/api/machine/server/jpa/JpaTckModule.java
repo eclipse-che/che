@@ -17,8 +17,13 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.machine.server.spi.tck.RecipePermissionsDaoTest;
+import org.eclipse.che.api.permission.server.AbstractPermissionsDomain;
+import org.eclipse.che.api.permission.server.spi.PermissionsDao;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
@@ -61,8 +66,18 @@ public class JpaTckModule extends TckModule {
     bind(new TypeLiteral<TckRepository<AccountImpl>>() {})
         .toInstance(new JpaTckRepository<>(AccountImpl.class));
 
+    bind(new TypeLiteral<AbstractPermissionsDomain<RecipePermissionsImpl>>() {})
+        .to(RecipePermissionsDaoTest.TestDomain.class);
+    bind(new TypeLiteral<PermissionsDao<RecipePermissionsImpl>>() {})
+        .to(JpaRecipePermissionsDao.class);
+    bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {})
+        .toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
+    bind(new TypeLiteral<TckRepository<UserImpl>>() {})
+        .toInstance(new JpaTckRepository<>(UserImpl.class));
+
     bind(RecipeDao.class).to(JpaRecipeDao.class);
     bind(SnapshotDao.class).to(JpaSnapshotDao.class);
+
   }
 
   private static class TestWorkspacesTckRepository extends JpaTckRepository<Workspace> {

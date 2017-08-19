@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,44 +7,41 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.permission.shared.dto;
 
+import java.util.List;
 import org.eclipse.che.api.permission.shared.model.Permissions;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 @DTO
 public interface PermissionsDto extends Permissions {
-    @Override
-    String getUserId();
+  @Override
+  String getUserId();
 
-    void setUserId (String userId);
+  void setUserId(String userId);
 
-    PermissionsDto withUserId(String userId);
+  PermissionsDto withUserId(String userId);
 
-    @Override
-    String getDomainId();
+  @Override
+  String getDomainId();
 
-    void setDomainId(String domainId);
+  void setDomainId(String domainId);
 
-    PermissionsDto withDomainId(String domainId);
+  PermissionsDto withDomainId(String domainId);
 
-    @Override
-    String getInstanceId();
+  @Override
+  String getInstanceId();
 
-    void setInstanceId(String instanceId);
+  void setInstanceId(String instanceId);
 
-    PermissionsDto withInstanceId(String instanceId);
+  PermissionsDto withInstanceId(String instanceId);
 
-    @Override
-    List<String> getActions();
+  @Override
+  List<String> getActions();
 
-    void setActions(List<String> actions);
+  void setActions(List<String> actions);
 
-    PermissionsDto withActions(List<String> actions);
+  PermissionsDto withActions(List<String> actions);
 }

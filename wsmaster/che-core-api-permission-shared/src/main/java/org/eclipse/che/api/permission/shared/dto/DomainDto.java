@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,37 +7,34 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.permission.shared.dto;
 
+import java.util.List;
 import org.eclipse.che.api.permission.shared.model.PermissionsDomain;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 @DTO
 public interface DomainDto extends PermissionsDomain {
-    @Override
-    String getId();
+  @Override
+  String getId();
 
-    void setId(String id);
+  void setId(String id);
 
-    DomainDto withId(String id);
+  DomainDto withId(String id);
 
-    @Override
-    List<String> getAllowedActions();
+  @Override
+  List<String> getAllowedActions();
 
-    void setAllowedActions(List<String> allowedActions);
+  void setAllowedActions(List<String> allowedActions);
 
-    DomainDto withAllowedActions(List<String> allowedActions);
+  DomainDto withAllowedActions(List<String> allowedActions);
 
-    @Override
-    Boolean isInstanceRequired();
+  @Override
+  Boolean isInstanceRequired();
 
-    void setInstanceRequired(Boolean isInstanceRequired);
+  void setInstanceRequired(Boolean isInstanceRequired);
 
-    DomainDto withInstanceRequired(Boolean isInstanceRequired);
+  DomainDto withInstanceRequired(Boolean isInstanceRequired);
 }

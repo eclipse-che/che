@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.permission.server.account;
 
 /**
@@ -16,18 +16,12 @@ package org.eclipse.che.api.permission.server.account;
  * @author Sergii Leshchenko
  */
 public enum AccountOperation {
-    /**
-     * When user creates workspace that will belong to account.
-     */
-    CREATE_WORKSPACE,
+  /** When user creates workspace that will belong to account. */
+  CREATE_WORKSPACE,
 
-    /**
-     * When user does any operation with existing workspace.
-     */
-    MANAGE_WORKSPACES,
+  /** When user does any operation with existing workspace. */
+  MANAGE_WORKSPACES,
 
-    /**
-     * When user retrieves information about account resources(like available, total, etc).
-     */
-    SEE_RESOURCE_INFORMATION
+  /** When user retrieves information about account resources(like available, total, etc). */
+  SEE_RESOURCE_INFORMATION
 }

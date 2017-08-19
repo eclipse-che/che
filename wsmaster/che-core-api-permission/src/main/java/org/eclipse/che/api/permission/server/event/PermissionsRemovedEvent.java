@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.permission.server.event;
+
+import static org.eclipse.che.api.permission.shared.event.EventType.PERMISSIONS_REMOVED;
 
 import org.eclipse.che.api.permission.shared.event.EventType;
 import org.eclipse.che.api.permission.shared.event.PermissionsEvent;
 import org.eclipse.che.api.permission.shared.model.Permissions;
 import org.eclipse.che.commons.annotation.Nullable;
-
-import static org.eclipse.che.api.permission.shared.event.EventType.PERMISSIONS_REMOVED;
 
 /**
  * Defines permissions added events.
@@ -24,28 +24,27 @@ import static org.eclipse.che.api.permission.shared.event.EventType.PERMISSIONS_
  */
 public class PermissionsRemovedEvent implements PermissionsEvent {
 
-    private final String      initiator;
-    private final Permissions permissions;
+  private final String initiator;
+  private final Permissions permissions;
 
-    public PermissionsRemovedEvent(String initiator, Permissions permissions) {
-        this.initiator = initiator;
-        this.permissions = permissions;
-    }
+  public PermissionsRemovedEvent(String initiator, Permissions permissions) {
+    this.initiator = initiator;
+    this.permissions = permissions;
+  }
 
-    @Override
-    public EventType getType() {
-        return PERMISSIONS_REMOVED;
-    }
+  @Override
+  public EventType getType() {
+    return PERMISSIONS_REMOVED;
+  }
 
-    @Override
-    public Permissions getPermissions() {
-        return permissions;
-    }
+  @Override
+  public Permissions getPermissions() {
+    return permissions;
+  }
 
-    @Nullable
-    @Override
-    public String getInitiator() {
-        return initiator;
-    }
-
+  @Nullable
+  @Override
+  public String getInitiator() {
+    return initiator;
+  }
 }

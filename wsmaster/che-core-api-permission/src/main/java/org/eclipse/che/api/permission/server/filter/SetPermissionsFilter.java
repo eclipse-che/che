@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.permission.server.filter;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
+import javax.inject.Inject;
+import javax.ws.rs.Path;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -22,11 +26,6 @@ import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
 
-import javax.inject.Inject;
-import javax.ws.rs.Path;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-
 /**
  * Restricts access to setting permissions of instance by users' setPermissions permission
  *
@@ -35,36 +34,31 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @Filter
 @Path("/permissions/")
 public class SetPermissionsFilter extends CheMethodInvokerFilter {
-    @Inject
-    private SuperPrivilegesChecker superPrivilegesChecker;
+  @Inject private SuperPrivilegesChecker superPrivilegesChecker;
 
-    @Inject
-    private InstanceParameterValidator instanceValidator;
+  @Inject private InstanceParameterValidator instanceValidator;
 
-    @Inject
-    private DomainsPermissionsCheckers domainsPermissionsChecker;
+  @Inject private DomainsPermissionsCheckers domainsPermissionsChecker;
 
-    @Override
-    public void filter(GenericResourceMethod genericResourceMethod, Object[] args) throws BadRequestException,
-                                                                                          ForbiddenException,
-                                                                                          NotFoundException,
-                                                                                          ServerException {
-        if (genericResourceMethod.getMethod().getName().equals("storePermissions")) {
-            final PermissionsDto permissions = (PermissionsDto)args[0];
-            checkArgument(permissions != null, "Permissions descriptor required");
-            final String domain = permissions.getDomainId();
-            checkArgument(!isNullOrEmpty(domain), "Domain required");
-            instanceValidator.validate(domain, permissions.getInstanceId());
-            if (superPrivilegesChecker.isPrivilegedToManagePermissions(permissions.getDomainId())) {
-                return;
-            }
-            domainsPermissionsChecker.getSetChecker(domain).check(permissions);
-        }
+  @Override
+  public void filter(GenericResourceMethod genericResourceMethod, Object[] args)
+      throws BadRequestException, ForbiddenException, NotFoundException, ServerException {
+    if (genericResourceMethod.getMethod().getName().equals("storePermissions")) {
+      final PermissionsDto permissions = (PermissionsDto) args[0];
+      checkArgument(permissions != null, "Permissions descriptor required");
+      final String domain = permissions.getDomainId();
+      checkArgument(!isNullOrEmpty(domain), "Domain required");
+      instanceValidator.validate(domain, permissions.getInstanceId());
+      if (superPrivilegesChecker.isPrivilegedToManagePermissions(permissions.getDomainId())) {
+        return;
+      }
+      domainsPermissionsChecker.getSetChecker(domain).check(permissions);
     }
+  }
 
-    private void checkArgument(boolean expression, String message) throws BadRequestException {
-        if (!expression) {
-            throw new BadRequestException(message);
-        }
+  private void checkArgument(boolean expression, String message) throws BadRequestException {
+    if (!expression) {
+      throw new BadRequestException(message);
     }
+  }
 }

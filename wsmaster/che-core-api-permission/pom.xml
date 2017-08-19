@@ -103,11 +103,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>javax.persistence</artifactId>
             <scope>provided</scope>
@@ -202,7 +197,7 @@
                 </dependencies>
                 <configuration>
                     <dtoPackages>
-                        <package>org.ecipse.che.api.permission.shared.dto</package>
+                        <package>org.eclipse.che.api.permission.shared.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.ecipse.che.api.permission.server.dto.DtoServerImpls</genClassName>

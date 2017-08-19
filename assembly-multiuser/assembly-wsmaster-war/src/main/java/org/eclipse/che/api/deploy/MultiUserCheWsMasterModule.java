@@ -12,6 +12,7 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
 import javax.sql.DataSource;
+import org.eclipse.che.api.permission.server.jpa.SystemPermissionsJpaModule;
 import org.eclipse.che.inject.DynaModule;
 
 @DynaModule
@@ -20,5 +21,10 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
+    bind(org.eclipse.che.api.system.server.SystemServicePermissionsFilter.class);
+    install(new SystemPermissionsJpaModule());
+    install(new com.codenvy.api.permission.server.PermissionsModule());
+    install(new org.eclipse.che.api.workspace.server.WorkspaceApiPermissionsModule());
+
   }
 }

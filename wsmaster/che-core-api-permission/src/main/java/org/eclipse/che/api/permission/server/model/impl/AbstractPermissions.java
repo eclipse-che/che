@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.permission.server.model.impl;
 
-
-import org.eclipse.che.api.permission.shared.model.Permissions;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.FetchType;
@@ -26,9 +25,8 @@ import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import org.eclipse.che.api.permission.shared.model.Permissions;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 /**
  * Represents user's permissions to access to some resources
@@ -38,120 +36,114 @@ import java.util.Objects;
 @MappedSuperclass
 public abstract class AbstractPermissions implements Permissions {
 
-    @Id
-    @GeneratedValue
-    @Column(name = "id")
-    protected String id;
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  protected String id;
 
-    @Column(name = "userid")
-    protected String userId;
+  @Column(name = "userid")
+  protected String userId;
 
-    @OneToOne
-    @JoinColumn(name = "userid", insertable = false, updatable = false)
-    private UserImpl user;
+  @OneToOne
+  @JoinColumn(name = "userid", insertable = false, updatable = false)
+  private UserImpl user;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Column(name = "actions")
-    protected List<String> actions;
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Column(name = "actions")
+  protected List<String> actions;
 
-    @Transient
-    private String userIdHolder;
+  @Transient private String userIdHolder;
 
-    public AbstractPermissions() {
+  public AbstractPermissions() {}
+
+  public AbstractPermissions(Permissions permissions) {
+    this(permissions.getUserId(), permissions.getActions());
+  }
+
+  public AbstractPermissions(String userId, List<String> actions) {
+    this.userIdHolder = userId;
+    this.userId = userId;
+    if (actions != null) {
+      this.actions = new ArrayList<>(actions);
     }
+  }
 
-    public AbstractPermissions(Permissions permissions) {
-        this(permissions.getUserId(), permissions.getActions());
+  /** Returns used id */
+  @Override
+  public String getUserId() {
+    return userIdHolder;
+  }
+
+  public void setUserId(String userId) {
+    this.userIdHolder = userId;
+  }
+
+  /** Returns instance id */
+  @Override
+  public abstract String getInstanceId();
+
+  /** Returns domain id */
+  @Override
+  public abstract String getDomainId();
+
+  /** List of actions which user can perform for particular instance */
+  @Override
+  public List<String> getActions() {
+    return actions;
+  }
+
+  @PreUpdate
+  @PrePersist
+  private void prePersist() {
+    if ("*".equals(userIdHolder)) {
+      userId = null;
+    } else {
+      userId = userIdHolder;
     }
+  }
 
-    public AbstractPermissions(String userId, List<String> actions) {
-        this.userIdHolder = userId;
-        this.userId = userId;
-        if (actions != null) {
-            this.actions = new ArrayList<>(actions);
-        }
+  @PostLoad
+  private void postLoad() {
+    if (userId == null) {
+      userIdHolder = "*";
+    } else {
+      userIdHolder = userId;
     }
+  }
 
-    /**
-     * Returns used id
-     */
-    @Override
-    public String getUserId() {
-        return userIdHolder;
-    }
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (!(obj instanceof AbstractPermissions)) return false;
+    final AbstractPermissions other = (AbstractPermissions) obj;
+    return Objects.equals(id, other.id)
+        && Objects.equals(getUserId(), other.getUserId())
+        && Objects.equals(getInstanceId(), other.getInstanceId())
+        && Objects.equals(getDomainId(), other.getDomainId())
+        && Objects.equals(getActions(), other.getActions());
+  }
 
-    public void setUserId(String userId) {
-        this.userIdHolder = userId;
-    }
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 31 * hash + Objects.hashCode(id);
+    hash = 31 * hash + Objects.hashCode(getUserId());
+    hash = 31 * hash + Objects.hashCode(getInstanceId());
+    hash = 31 * hash + Objects.hashCode(getDomainId());
+    hash = 31 * hash + Objects.hashCode(getActions());
+    return hash;
+  }
 
-    /**
-     * Returns instance id
-     */
-    @Override
-    public abstract String getInstanceId();
-
-    /**
-     * Returns domain id
-     */
-    @Override
-    public abstract String getDomainId();
-
-    /**
-     * List of actions which user can perform for particular instance
-     */
-    @Override
-    public List<String> getActions() {
-        return actions;
-    }
-
-    @PreUpdate
-    @PrePersist
-    private void prePersist() {
-        if ("*".equals(userIdHolder)) {
-            userId = null;
-        } else {
-            userId = userIdHolder;
-        }
-    }
-
-    @PostLoad
-    private void postLoad() {
-        if (userId == null) {
-            userIdHolder = "*";
-        } else {
-            userIdHolder = userId;
-        }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof AbstractPermissions)) return false;
-        final AbstractPermissions other = (AbstractPermissions)obj;
-        return Objects.equals(id, other.id) &&
-               Objects.equals(getUserId(), other.getUserId()) &&
-               Objects.equals(getInstanceId(), other.getInstanceId()) &&
-               Objects.equals(getDomainId(), other.getDomainId()) &&
-               Objects.equals(getActions(), other.getActions());
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(id);
-        hash = 31 * hash + Objects.hashCode(getUserId());
-        hash = 31 * hash + Objects.hashCode(getInstanceId());
-        hash = 31 * hash + Objects.hashCode(getDomainId());
-        hash = 31 * hash + Objects.hashCode(getActions());
-        return hash;
-    }
-
-    @Override
-    public String toString() {
-        return "AbstractPermissions{" +
-               "id='" + id + '\'' +
-               ", user=" + user +
-               ", actions=" + actions +
-               '}';
-    }
+  @Override
+  public String toString() {
+    return "AbstractPermissions{"
+        + "id='"
+        + id
+        + '\''
+        + ", user="
+        + user
+        + ", actions="
+        + actions
+        + '}';
+  }
 }

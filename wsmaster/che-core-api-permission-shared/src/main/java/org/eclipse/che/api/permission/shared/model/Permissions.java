@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.permission.shared.model;
 
-import org.eclipse.che.commons.annotation.Nullable;
-
 import java.util.List;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Represents users' permissions to access to some resources
@@ -20,28 +19,24 @@ import java.util.List;
  * @author Sergii Leschenko
  */
 public interface Permissions {
-    /**
-     * Returns user id
-     *
-     * <p>Note: also supported '*' for marking all users
-     */
-    String getUserId();
+  /**
+   * Returns user id
+   *
+   * <p>Note: also supported '*' for marking all users
+   */
+  String getUserId();
 
-    /**
-     * Returns domain id
-     */
-    String getDomainId();
+  /** Returns domain id */
+  String getDomainId();
 
-    /**
-     * Returns instance id. It is optional and can be null if domain supports it
-     *
-     * @see PermissionsDomain#isInstanceRequired()
-     */
-    @Nullable
-    String getInstanceId();
+  /**
+   * Returns instance id. It is optional and can be null if domain supports it
+   *
+   * @see PermissionsDomain#isInstanceRequired()
+   */
+  @Nullable
+  String getInstanceId();
 
-    /**
-     * List of actions which user can perform for particular instance
-     */
-    List<String> getActions();
+  /** List of actions which user can perform for particular instance */
+  List<String> getActions();
 }

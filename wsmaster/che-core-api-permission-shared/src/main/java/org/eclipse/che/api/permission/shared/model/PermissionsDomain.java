@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.permission.shared.model;
 
 import java.util.List;
@@ -19,18 +19,12 @@ import java.util.List;
  * @author gazarenkov
  */
 public interface PermissionsDomain {
-    /**
-     * @return id of permissions domain
-     */
-    String getId();
+  /** @return id of permissions domain */
+  String getId();
 
-    /**
-     * @return true if domain requires non nullable value for instance field or false otherwise
-     */
-    Boolean isInstanceRequired();
+  /** @return true if domain requires non nullable value for instance field or false otherwise */
+  Boolean isInstanceRequired();
 
-    /**
-     * @return list actions which are allowed for domain
-     */
-    List<String> getAllowedActions();
+  /** @return list actions which are allowed for domain */
+  List<String> getAllowedActions();
 }
