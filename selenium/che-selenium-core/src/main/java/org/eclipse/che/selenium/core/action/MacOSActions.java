@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.core.action;
 
-
 import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.List;
