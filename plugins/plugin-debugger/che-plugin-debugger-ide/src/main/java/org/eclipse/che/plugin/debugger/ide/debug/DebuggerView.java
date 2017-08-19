@@ -52,12 +52,10 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
 
     /**
      * Is invoked when a new frame is selected.
+     *  @param frameIndex the frame index inside thread
      *
-     * @param frameIndex the frame index inside thread
-     * @param jumpTo indicates if it is necessary to open location in the editor belonging to the
-     *     current frame
      */
-    void onSelectedFrame(int frameIndex, boolean jumpTo);
+    void onSelectedFrame(int frameIndex);
   }
 
   /**

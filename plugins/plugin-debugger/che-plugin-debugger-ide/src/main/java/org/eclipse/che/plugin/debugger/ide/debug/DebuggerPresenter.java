@@ -193,32 +193,30 @@ public class DebuggerPresenter extends BasePresenter
   }
 
   @Override
-  public void onSelectedFrame(int frameIndex, boolean jumpTo) {
+  public void onSelectedFrame(int frameIndex) {
     if (selectedFrameIndex != frameIndex) {
       updateStackFrameDump();
     }
 
     selectedFrameIndex = frameIndex;
 
-    if (jumpTo) {
-      for (ThreadDump td : threadDump) {
-        if (td.getId() == selectedThreadId) {
-          final StackFrameDump stackFrameDump = td.getFrames().get(selectedFrameIndex);
+    for (ThreadDump td : threadDump) {
+      if (td.getId() == selectedThreadId) {
+        final StackFrameDump stackFrameDump = td.getFrames().get(selectedFrameIndex);
 
-          Debugger debugger = debuggerManager.getActiveDebugger();
-          if (debugger != null) {
-            DebuggerResourceHandler handler =
-                resourceHandlerManager.getOrDefault(debugger.getDebuggerType());
-            handler.open(
-                stackFrameDump.getLocation(),
-                new AsyncCallback<VirtualFile>() {
-                  @Override
-                  public void onFailure(Throwable caught) {}
+        Debugger debugger = debuggerManager.getActiveDebugger();
+        if (debugger != null) {
+          DebuggerResourceHandler handler =
+              resourceHandlerManager.getOrDefault(debugger.getDebuggerType());
+          handler.open(
+              stackFrameDump.getLocation(),
+              new AsyncCallback<VirtualFile>() {
+                @Override
+                public void onFailure(Throwable caught) {}
 
-                  @Override
-                  public void onSuccess(VirtualFile result) {}
-                });
-          }
+                @Override
+                public void onSuccess(VirtualFile result) {}
+              });
         }
       }
     }

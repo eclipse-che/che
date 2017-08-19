@@ -17,7 +17,7 @@ import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerFactory;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
 import org.eclipse.che.plugin.jdb.ide.debug.JavaDebugger;
-import org.eclipse.che.plugin.jdb.ide.debug.JavaDebuggerFileHandler;
+import org.eclipse.che.plugin.jdb.ide.debug.JavaDebuggerResourceHandler;
 import org.eclipse.che.plugin.jdb.ide.fqn.JavaClassFqnResolver;
 import org.eclipse.che.plugin.jdb.ide.fqn.JavaFqnResolver;
 
@@ -42,11 +42,11 @@ public class JavaDebuggerExtension {
       JavaFqnResolver javaFqnResolver,
       JavaClassFqnResolver javaClassFqnResolver,
       DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
-      JavaDebuggerFileHandler javaDebuggerFileHandler) {
+      JavaDebuggerResourceHandler javaDebuggerResourceHandler) {
     debuggerManager.registeredDebugger(JavaDebugger.ID, javaDebugger);
     resolverFactory.addResolver("java", javaFqnResolver);
     resolverFactory.addResolver("class", javaClassFqnResolver);
     
-    debuggerResourceHandlerFactory.register(JavaDebugger.ID, javaDebuggerFileHandler);
+    debuggerResourceHandlerFactory.register(JavaDebugger.ID, javaDebuggerResourceHandler);
   }
 }

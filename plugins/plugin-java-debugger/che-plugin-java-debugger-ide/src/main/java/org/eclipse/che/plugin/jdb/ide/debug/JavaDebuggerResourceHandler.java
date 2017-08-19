@@ -29,13 +29,13 @@ import org.eclipse.che.plugin.debugger.ide.debug.DefaultDebuggerResourceHandler;
  * @author Anatoliy Bazko
  */
 @Singleton
-public class JavaDebuggerFileHandler extends DefaultDebuggerResourceHandler {
+public class JavaDebuggerResourceHandler extends DefaultDebuggerResourceHandler {
 
   private final JavaNavigationService javaNavigationService;
   private final JavaNodeFactory nodeFactory;
 
   @Inject
-  public JavaDebuggerFileHandler(
+  public JavaDebuggerResourceHandler(
       EditorAgent editorAgent,
       AppContext appContext,
       JavaNavigationService javaNavigationService,

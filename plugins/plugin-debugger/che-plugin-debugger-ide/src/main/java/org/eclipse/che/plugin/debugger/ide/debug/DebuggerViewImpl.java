@@ -199,9 +199,8 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
             String path = itemData.getPath();
             sb.appendEscaped(
                 path.substring(path.lastIndexOf("/") + 1)
-                    + " - [line: "
-                    + String.valueOf(itemData.getLineNumber() + 1)
-                    + "]");
+                    + ":"
+                    + String.valueOf(itemData.getLineNumber() + 1));
             sb.appendHtmlConstant("</td></tr></table>");
 
             label.setInnerHTML(sb.toSafeHtml().asString());
@@ -230,11 +229,11 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
         new SimpleList.ListEventDelegate<StackFrameDump>() {
           public void onListItemClicked(Element itemElement, StackFrameDump itemData) {
             frames.getSelectionModel().setSelectedItem(itemData);
-            delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex(), false);
+            delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex());
           }
 
           public void onListItemDoubleClicked(Element listItemBase, StackFrameDump itemData) {
-            delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex(), true);
+            delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex());
           }
         };
 
