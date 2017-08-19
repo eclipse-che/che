@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.ide.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.user.AskCredentialsDialogImpl;
@@ -61,41 +60,45 @@ import org.eclipse.che.plugin.svn.ide.update.UpdateToRevisionViewImpl;
 @ExtensionGinModule
 public class SubversionGinModule extends AbstractGinModule {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void configure() {
-        bind(SubversionClientService.class).to(SubversionClientServiceImpl.class).in(Singleton.class);
+  /** {@inheritDoc} */
+  @Override
+  protected void configure() {
+    bind(SubversionClientService.class).to(SubversionClientServiceImpl.class).in(Singleton.class);
 
-        GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class).addBinding()
-                      .to(SubversionImportWizardRegistrar.class);
+    GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class)
+        .addBinding()
+        .to(SubversionImportWizardRegistrar.class);
 
-        bind(SubversionProjectImporterView.class).to(SubversionProjectImporterViewImpl.class).in(Singleton.class);
+    bind(SubversionProjectImporterView.class)
+        .to(SubversionProjectImporterViewImpl.class)
+        .in(Singleton.class);
 
-        bind(SubversionOutputConsoleView.class).to(SubversionOutputConsoleViewImpl.class);
-        bind(UpdateToRevisionView.class).to(UpdateToRevisionViewImpl.class).in(Singleton.class);
-        bind(SwitchView.class).to(SwitchViewImpl.class).in(Singleton.class);
-        bind(LocationSelectorView.class).to(LocationSelectorViewImpl.class).in(Singleton.class);
-        bind(ResolveView.class).to(ResolveViewImpl.class).in(Singleton.class);
-        bind(ExportView.class).to(ExportViewImpl.class).in(Singleton.class);
-        bind(ShowLogsView.class).to(ShowLogsViewImpl.class).in(Singleton.class);
-        bind(PropertyEditorView.class).to(PropertyEditorViewImpl.class).in(Singleton.class);
+    bind(SubversionOutputConsoleView.class).to(SubversionOutputConsoleViewImpl.class);
+    bind(UpdateToRevisionView.class).to(UpdateToRevisionViewImpl.class).in(Singleton.class);
+    bind(SwitchView.class).to(SwitchViewImpl.class).in(Singleton.class);
+    bind(LocationSelectorView.class).to(LocationSelectorViewImpl.class).in(Singleton.class);
+    bind(ResolveView.class).to(ResolveViewImpl.class).in(Singleton.class);
+    bind(ExportView.class).to(ExportViewImpl.class).in(Singleton.class);
+    bind(ShowLogsView.class).to(ShowLogsViewImpl.class).in(Singleton.class);
+    bind(PropertyEditorView.class).to(PropertyEditorViewImpl.class).in(Singleton.class);
 
-        bind(CommitView.class).to(CommitViewImpl.class).in(Singleton.class);
-        bind(DiffViewerView.class).to(DiffViewerViewImpl.class).in(Singleton.class);
+    bind(CommitView.class).to(CommitViewImpl.class).in(Singleton.class);
+    bind(DiffViewerView.class).to(DiffViewerViewImpl.class).in(Singleton.class);
 
-        //Rebind original AskCredentialsDialogImpl that binded in CoreGinModule, it will affect all application not only Subversion
-        //functionality. But need to  make SVN plugin real  plugable. For this dialog used only in SVN plugin if in future we need provide
-        //several implementations in same time need provide different mechanism of binding.
-        bind(AskCredentialsDialogImpl.class).to(SubversionCredentialsDialogImpl.class);
+    //Rebind original AskCredentialsDialogImpl that binded in CoreGinModule, it will affect all application not only Subversion
+    //functionality. But need to  make SVN plugin real  plugable. For this dialog used only in SVN plugin if in future we need provide
+    //several implementations in same time need provide different mechanism of binding.
+    bind(AskCredentialsDialogImpl.class).to(SubversionCredentialsDialogImpl.class);
 
-        install(new GinFactoryModuleBuilder().implement(ChoiceDialog.class, ChoiceDialogPresenter.class)
-                                             .build(ChoiceDialogFactory.class));
-        bind(ChoiceDialogView.class).to(ChoiceDialogViewImpl.class);
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(ChoiceDialog.class, ChoiceDialogPresenter.class)
+            .build(ChoiceDialogFactory.class));
+    bind(ChoiceDialogView.class).to(ChoiceDialogViewImpl.class);
 
-        install(new GinFactoryModuleBuilder().implement(SubversionOutputConsole.class, SubversionOutputConsolePresenter.class)
-                                             .build(SubversionOutputConsoleFactory.class));
-    }
-
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(SubversionOutputConsole.class, SubversionOutputConsolePresenter.class)
+            .build(SubversionOutputConsoleFactory.class));
+  }
 }

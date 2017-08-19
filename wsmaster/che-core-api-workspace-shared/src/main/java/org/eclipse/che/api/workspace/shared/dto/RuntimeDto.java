@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,56 +7,52 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto;
 
+import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-import java.util.Map;
-
-/**
- * @author Alexander Garagatyi
- */
+/** @author Alexander Garagatyi */
 @DTO
 public interface RuntimeDto extends Runtime, Hyperlinks {
 
-    @Override
-    String getActiveEnv();
+  @Override
+  String getActiveEnv();
 
-    void setActiveEnv(String activeEnv);
+  void setActiveEnv(String activeEnv);
 
-    RuntimeDto withActiveEnv(String activeEnvName);
+  RuntimeDto withActiveEnv(String activeEnvName);
 
-    @Override
-    Map<String, MachineDto> getMachines();
+  @Override
+  Map<String, MachineDto> getMachines();
 
-    void setMachines(Map<String, MachineDto> machines);
+  void setMachines(Map<String, MachineDto> machines);
 
-    RuntimeDto withMachines(Map<String, MachineDto> machines);
+  RuntimeDto withMachines(Map<String, MachineDto> machines);
 
-    @Override
-    String getOwner();
+  @Override
+  String getOwner();
 
-    RuntimeDto withOwner(String owner);
+  RuntimeDto withOwner(String owner);
 
-    String getUserToken();
+  String getUserToken();
 
-    RuntimeDto withUserToken(String userToken);
+  RuntimeDto withUserToken(String userToken);
 
-    void setUserToken(String userToken);
+  void setUserToken(String userToken);
 
-    @Override
-    List<WarningDto> getWarnings();
+  @Override
+  List<WarningDto> getWarnings();
 
-    void setWarnings(List<WarningDto> warnings);
+  void setWarnings(List<WarningDto> warnings);
 
-    RuntimeDto withWarnings(List<WarningDto> warnings);
+  RuntimeDto withWarnings(List<WarningDto> warnings);
 
-    @Override
-    RuntimeDto withLinks(List<Link> links);
-
+  @Override
+  RuntimeDto withLinks(List<Link> links);
 }

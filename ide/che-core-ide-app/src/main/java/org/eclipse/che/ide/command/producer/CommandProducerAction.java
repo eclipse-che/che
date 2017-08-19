@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.producer;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.command.CommandExecutor;
@@ -27,27 +26,28 @@ import org.eclipse.che.ide.api.command.CommandProducer;
  */
 public class CommandProducerAction extends Action {
 
-    private final CommandProducer commandProducer;
-    private final CommandExecutor commandExecutor;
+  private final CommandProducer commandProducer;
+  private final CommandExecutor commandExecutor;
 
-    @Inject
-    public CommandProducerAction(@Assisted String name,
-                                 @Assisted CommandProducer commandProducer,
-                                 CommandExecutor commandExecutor) {
-        super(name);
+  @Inject
+  public CommandProducerAction(
+      @Assisted String name,
+      @Assisted CommandProducer commandProducer,
+      CommandExecutor commandExecutor) {
+    super(name);
 
-        this.commandProducer = commandProducer;
-        this.commandExecutor = commandExecutor;
-    }
+    this.commandProducer = commandProducer;
+    this.commandExecutor = commandExecutor;
+  }
 
-    @Override
-    public void update(ActionEvent e) {
-        e.getPresentation().setEnabledAndVisible(commandProducer.isApplicable());
-    }
+  @Override
+  public void update(ActionEvent e) {
+    e.getPresentation().setEnabledAndVisible(commandProducer.isApplicable());
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        CommandImpl command = commandProducer.createCommand();
-        commandExecutor.executeCommand(command);
-    }
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    CommandImpl command = commandProducer.createCommand();
+    commandExecutor.executeCommand(command);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,51 +7,46 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.client.params;
-
-import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-/**
- * @author Mykola Morhun
- */
+import org.testng.annotations.Test;
+
+/** @author Mykola Morhun */
 public class RemoveImageParamsTest {
-    
-    private static final String  IMAGE          = "image";
-    private static final Boolean FORCE          = Boolean.FALSE;
 
-    private RemoveImageParams removeImageParams;
+  private static final String IMAGE = "image";
+  private static final Boolean FORCE = Boolean.FALSE;
 
-    @Test
-    public void shouldCreateParamsObjectWithRequiredParameters() {
-        removeImageParams = RemoveImageParams.create(IMAGE);
+  private RemoveImageParams removeImageParams;
 
-        assertEquals(removeImageParams.getImage(), IMAGE);
+  @Test
+  public void shouldCreateParamsObjectWithRequiredParameters() {
+    removeImageParams = RemoveImageParams.create(IMAGE);
 
-        assertNull(removeImageParams.isForce());
-    }
+    assertEquals(removeImageParams.getImage(), IMAGE);
 
-    @Test
-    public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        removeImageParams = RemoveImageParams.create(IMAGE)
-                                             .withForce(FORCE);
+    assertNull(removeImageParams.isForce());
+  }
 
-        assertEquals(removeImageParams.getImage(), IMAGE);
-        assertEquals(removeImageParams.isForce(), FORCE);
-    }
+  @Test
+  public void shouldCreateParamsObjectWithAllPossibleParameters() {
+    removeImageParams = RemoveImageParams.create(IMAGE).withForce(FORCE);
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNullPointerExceptionIfImageRequiredParameterIsNull() {
-        removeImageParams = RemoveImageParams.create(null);
-    }
+    assertEquals(removeImageParams.getImage(), IMAGE);
+    assertEquals(removeImageParams.isForce(), FORCE);
+  }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNullPointerExceptionIfImageRequiredParameterResetWithNull() {
-        removeImageParams = RemoveImageParams.create(IMAGE)
-                                             .withImage(null);
-    }
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionIfImageRequiredParameterIsNull() {
+    removeImageParams = RemoveImageParams.create(null);
+  }
 
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionIfImageRequiredParameterResetWithNull() {
+    removeImageParams = RemoveImageParams.create(IMAGE).withImage(null);
+  }
 }

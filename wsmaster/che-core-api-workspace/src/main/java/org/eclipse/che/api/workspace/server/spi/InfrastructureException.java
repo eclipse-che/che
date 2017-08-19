@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,27 +7,26 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.server.spi;
 
 /**
- * An exception thrown by {@link RuntimeInfrastructure} and related components.
- * Indicates that an infrastructure operation can't be performed or
- * an error occurred during operation execution.
+ * An exception thrown by {@link RuntimeInfrastructure} and related components. Indicates that an
+ * infrastructure operation can't be performed or an error occurred during operation execution.
  *
  * @author Yevhenii Voevodin
  */
 public class InfrastructureException extends Exception {
 
-    public InfrastructureException(String message) {
-        super(message);
-    }
+  public InfrastructureException(String message) {
+    super(message);
+  }
 
-    public InfrastructureException(Exception e) {
-        super(e);
-    }
+  public InfrastructureException(Exception e) {
+    super(e);
+  }
 
-    public InfrastructureException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public InfrastructureException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

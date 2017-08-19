@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.resources;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
-import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
-import org.eclipse.che.ide.ui.smartTree.data.settings.impl.DummySettingsProvider;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
@@ -29,31 +25,38 @@ import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
 import org.eclipse.che.ide.resources.impl.ClipboardManagerImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
+import org.eclipse.che.ide.ui.smartTree.data.settings.impl.DummySettingsProvider;
 
 /** GIN module for configuring Resource API components. */
 public class ResourceApiModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        install(new GinFactoryModuleBuilder().build(ResourceManager.ResourceFactory.class));
-        install(new GinFactoryModuleBuilder().build(ResourceManager.ResourceManagerFactory.class));
-        install(new GinFactoryModuleBuilder().build(ResourceNode.NodeFactory.class));
+  @Override
+  protected void configure() {
+    install(new GinFactoryModuleBuilder().build(ResourceManager.ResourceFactory.class));
+    install(new GinFactoryModuleBuilder().build(ResourceManager.ResourceManagerFactory.class));
+    install(new GinFactoryModuleBuilder().build(ResourceNode.NodeFactory.class));
 
-        GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class).addBinding().to(ResourceInterceptor.NoOpInterceptor.class);
+    GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class)
+        .addBinding()
+        .to(ResourceInterceptor.NoOpInterceptor.class);
 
-        GinMultibinder<NodeInterceptor> nodeInterceptors = GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
-        nodeInterceptors.addBinding().to(DefaultNodeInterceptor.class);
+    GinMultibinder<NodeInterceptor> nodeInterceptors =
+        GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
+    nodeInterceptors.addBinding().to(DefaultNodeInterceptor.class);
 
-        bind(SettingsProvider.class).to(DummySettingsProvider.class).in(Singleton.class);
+    bind(SettingsProvider.class).to(DummySettingsProvider.class).in(Singleton.class);
 
-        GinMultibinder<NodeIconProvider> themeBinder = GinMultibinder.newSetBinder(binder(), NodeIconProvider.class);
-        themeBinder.addBinding().to(FileIconProvider.class);
-        themeBinder.addBinding().to(DockerfileIconProvider.class);
+    GinMultibinder<NodeIconProvider> themeBinder =
+        GinMultibinder.newSetBinder(binder(), NodeIconProvider.class);
+    themeBinder.addBinding().to(FileIconProvider.class);
+    themeBinder.addBinding().to(DockerfileIconProvider.class);
 
-        bind(TreeResourceRevealer.class);
+    bind(TreeResourceRevealer.class);
 
-        bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
+    bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
 
-        GinMultibinder.newSetBinder(binder(), RenamingSupport.class);
-    }
+    GinMultibinder.newSetBinder(binder(), RenamingSupport.class);
+  }
 }

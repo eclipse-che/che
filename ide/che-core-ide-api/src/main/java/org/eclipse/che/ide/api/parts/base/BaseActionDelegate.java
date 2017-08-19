@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.parts.base;
 
 /**
@@ -17,15 +17,12 @@ package org.eclipse.che.ide.api.parts.base;
  */
 public interface BaseActionDelegate {
 
-    /**
-     * Toggles maximized state of the part.
-     */
-    void onToggleMaximize();
+  /** Toggles maximized state of the part. */
+  void onToggleMaximize();
 
-    /**
-     * Activate Part when clicking the mouse.
-     * Is used when the Part contains frames and mouse events are blocked.
-     */
-    void onActivate();
-
+  /**
+   * Activate Part when clicking the mouse. Is used when the Part contains frames and mouse events
+   * are blocked.
+   */
+  void onActivate();
 }

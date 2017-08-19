@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,48 +7,47 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.workspace.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 /** Fired when some machine goes into a failed state. */
 public class MachineFailedEvent extends GwtEvent<MachineFailedEvent.Handler> {
 
-    public static final Type<MachineFailedEvent.Handler> TYPE = new Type<>();
+  public static final Type<MachineFailedEvent.Handler> TYPE = new Type<>();
 
-    private final MachineImpl machine;
-    private final String      error;
+  private final MachineImpl machine;
+  private final String error;
 
-    public MachineFailedEvent(MachineImpl machine, String error) {
-        this.machine = machine;
-        this.error = error;
-    }
+  public MachineFailedEvent(MachineImpl machine, String error) {
+    this.machine = machine;
+    this.error = error;
+  }
 
-    /** Returns the failed machine. */
-    public MachineImpl getMachine() {
-        return machine;
-    }
+  /** Returns the failed machine. */
+  public MachineImpl getMachine() {
+    return machine;
+  }
 
-    /** Returns the error message describes the reason of fail. */
-    public String getError() {
-        return error;
-    }
+  /** Returns the error message describes the reason of fail. */
+  public String getError() {
+    return error;
+  }
 
-    @Override
-    public Type<Handler> getAssociatedType() {
-        return TYPE;
-    }
+  @Override
+  public Type<Handler> getAssociatedType() {
+    return TYPE;
+  }
 
-    @Override
-    protected void dispatch(Handler handler) {
-        handler.onMachineFailed(this);
-    }
+  @Override
+  protected void dispatch(Handler handler) {
+    handler.onMachineFailed(this);
+  }
 
-    public interface Handler extends EventHandler {
-        void onMachineFailed(MachineFailedEvent event);
-    }
+  public interface Handler extends EventHandler {
+    void onMachineFailed(MachineFailedEvent event);
+  }
 }

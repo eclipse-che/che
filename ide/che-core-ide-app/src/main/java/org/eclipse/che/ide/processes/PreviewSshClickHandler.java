@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.processes;
 
 import javax.validation.constraints.NotNull;
@@ -20,12 +20,10 @@ import javax.validation.constraints.NotNull;
  */
 public interface PreviewSshClickHandler {
 
-    /**
-     * Will be called when user clicks 'Preview SSH' button
-     *
-     * @param machineId
-     *         id of machine in which ssh keys are located
-     *
-     */
-    void onPreviewSshClick(@NotNull String machineId);
+  /**
+   * Will be called when user clicks 'Preview SSH' button
+   *
+   * @param machineId id of machine in which ssh keys are located
+   */
+  void onPreviewSshClick(@NotNull String machineId);
 }

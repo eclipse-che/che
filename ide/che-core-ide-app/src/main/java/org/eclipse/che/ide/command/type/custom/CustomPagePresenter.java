@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.type.custom;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandPage;
 
 /**
  * Page allows to edit arbitrary command.
@@ -25,58 +24,57 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 @Singleton
 public class CustomPagePresenter implements CustomPageView.ActionDelegate, CommandPage {
 
-    private final CustomPageView view;
+  private final CustomPageView view;
 
-    private CommandImpl editedCommand;
+  private CommandImpl editedCommand;
 
-    // initial value of the 'command line' parameter
-    private String commandLineInitial;
+  // initial value of the 'command line' parameter
+  private String commandLineInitial;
 
-    private DirtyStateListener listener;
+  private DirtyStateListener listener;
 
-    @Inject
-    public CustomPagePresenter(CustomPageView view) {
-        this.view = view;
+  @Inject
+  public CustomPagePresenter(CustomPageView view) {
+    this.view = view;
 
-        view.setDelegate(this);
-    }
+    view.setDelegate(this);
+  }
 
-    @Override
-    public void resetFrom(CommandImpl command) {
-        editedCommand = command;
-        commandLineInitial = command.getCommandLine();
-    }
+  @Override
+  public void resetFrom(CommandImpl command) {
+    editedCommand = command;
+    commandLineInitial = command.getCommandLine();
+  }
 
-    @Override
-    public void go(AcceptsOneWidget container) {
-        container.setWidget(view);
+  @Override
+  public void go(AcceptsOneWidget container) {
+    container.setWidget(view);
 
-        view.setCommandLine(editedCommand.getCommandLine());
-    }
+    view.setCommandLine(editedCommand.getCommandLine());
+  }
 
-    @Override
-    public void onSave() {
-        commandLineInitial = editedCommand.getCommandLine();
-    }
+  @Override
+  public void onSave() {
+    commandLineInitial = editedCommand.getCommandLine();
+  }
 
-    @Override
-    public boolean isDirty() {
-        return !commandLineInitial.equals(editedCommand.getCommandLine());
-    }
+  @Override
+  public boolean isDirty() {
+    return !commandLineInitial.equals(editedCommand.getCommandLine());
+  }
 
-    @Override
-    public void setDirtyStateListener(DirtyStateListener listener) {
-        this.listener = listener;
-    }
+  @Override
+  public void setDirtyStateListener(DirtyStateListener listener) {
+    this.listener = listener;
+  }
 
-    @Override
-    public void setFieldStateActionDelegate(FieldStateActionDelegate delegate) {
-    }
+  @Override
+  public void setFieldStateActionDelegate(FieldStateActionDelegate delegate) {}
 
-    @Override
-    public void onCommandLineChanged() {
-        editedCommand.setCommandLine(view.getCommandLine());
+  @Override
+  public void onCommandLineChanged() {
+    editedCommand.setCommandLine(view.getCommandLine());
 
-        listener.onDirtyStateChanged();
-    }
+    listener.onDirtyStateChanged();
+  }
 }

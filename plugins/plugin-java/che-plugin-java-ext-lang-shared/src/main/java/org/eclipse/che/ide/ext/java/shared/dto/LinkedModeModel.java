@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,24 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.shared.dto;
 
+import java.util.List;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 @DTO
 public interface LinkedModeModel {
 
-    void setGroups(List<LinkedPositionGroup> groups);
+  void setGroups(List<LinkedPositionGroup> groups);
 
-    List<LinkedPositionGroup> getGroups();
+  List<LinkedPositionGroup> getGroups();
 
-    void setEscapePosition(int offset);
+  void setEscapePosition(int offset);
 
-    int getEscapePosition();
+  int getEscapePosition();
 }

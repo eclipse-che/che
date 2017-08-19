@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.parts;
 
 import com.google.gwt.event.shared.GwtEvent;
@@ -18,26 +18,26 @@ import com.google.gwt.event.shared.GwtEvent;
  * @author Nikolay Zamosenchuk
  */
 public class ActivePartChangedEvent extends GwtEvent<ActivePartChangedHandler> {
-    public static Type<ActivePartChangedHandler> TYPE = new Type<>();
+  public static Type<ActivePartChangedHandler> TYPE = new Type<>();
 
-    private final PartPresenter activePart;
+  private final PartPresenter activePart;
 
-    public ActivePartChangedEvent(PartPresenter activePart) {
-        this.activePart = activePart;
-    }
+  public ActivePartChangedEvent(PartPresenter activePart) {
+    this.activePart = activePart;
+  }
 
-    @Override
-    public Type<ActivePartChangedHandler> getAssociatedType() {
-        return TYPE;
-    }
+  @Override
+  public Type<ActivePartChangedHandler> getAssociatedType() {
+    return TYPE;
+  }
 
-    /** @return instance of Active Part */
-    public PartPresenter getActivePart() {
-        return activePart;
-    }
+  /** @return instance of Active Part */
+  public PartPresenter getActivePart() {
+    return activePart;
+  }
 
-    @Override
-    protected void dispatch(ActivePartChangedHandler handler) {
-        handler.onActivePartChanged(this);
-    }
+  @Override
+  protected void dispatch(ActivePartChangedHandler handler) {
+    handler.onActivePartChanged(this);
+  }
 }

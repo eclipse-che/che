@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
+import com.google.inject.Inject;
+import java.util.Arrays;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -21,11 +24,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 
-import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-
-import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
 /**
  * Undo Action
  *
@@ -34,39 +32,43 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
  */
 public class UndoAction extends AbstractPerspectiveAction {
 
-    private       EditorAgent          editorAgent;
+  private EditorAgent editorAgent;
 
-    @Inject
-    public UndoAction(EditorAgent editorAgent,
-                      CoreLocalizationConstant localization,
-                      Resources resources) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.undoName(), localization.undoDescription(), null, resources.undo());
-        this.editorAgent = editorAgent;
+  @Inject
+  public UndoAction(
+      EditorAgent editorAgent, CoreLocalizationConstant localization, Resources resources) {
+    super(
+        Arrays.asList(PROJECT_PERSPECTIVE_ID),
+        localization.undoName(),
+        localization.undoDescription(),
+        null,
+        resources.undo());
+    this.editorAgent = editorAgent;
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+
+    if (activeEditor != null && activeEditor instanceof UndoableEditor) {
+      final HandlesUndoRedo undoRedo = ((UndoableEditor) activeEditor).getUndoRedo();
+      if (undoRedo != null) {
+        undoRedo.undo();
+      }
     }
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+  @Override
+  public void updateInPerspective(@NotNull ActionEvent event) {
+    EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
 
-        if (activeEditor != null && activeEditor instanceof UndoableEditor) {
-            final HandlesUndoRedo undoRedo = ((UndoableEditor)activeEditor).getUndoRedo();
-            if (undoRedo != null) {
-                undoRedo.undo();
-            }
-        }
+    boolean mustEnable = false;
+    if (activeEditor != null && activeEditor instanceof UndoableEditor) {
+      final HandlesUndoRedo undoRedo = ((UndoableEditor) activeEditor).getUndoRedo();
+      if (undoRedo != null) {
+        mustEnable = undoRedo.undoable();
+      }
     }
-
-    @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
-        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-
-        boolean mustEnable = false;
-        if (activeEditor != null && activeEditor instanceof UndoableEditor) {
-            final HandlesUndoRedo undoRedo = ((UndoableEditor)activeEditor).getUndoRedo();
-            if (undoRedo != null) {
-                mustEnable = undoRedo.undoable();
-            }
-        }
-        event.getPresentation().setEnabled(mustEnable);
-    }
+    event.getPresentation().setEnabled(mustEnable);
+  }
 }

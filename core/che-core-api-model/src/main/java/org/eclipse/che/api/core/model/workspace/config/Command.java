@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.model.workspace.config;
 
 import java.util.Map;
@@ -20,29 +20,26 @@ import java.util.Map;
  */
 public interface Command {
 
-    /**
-     * Returns command name (i.e. 'start tomcat')
-     * The name should be unique per user in one workspace,
-     * which means that user may create only one command with the same name in the same workspace
-     */
-    String getName();
+  /**
+   * Returns command name (i.e. 'start tomcat') The name should be unique per user in one workspace,
+   * which means that user may create only one command with the same name in the same workspace
+   */
+  String getName();
 
-    /**
-     * Returns command line (i.e. 'mvn clean install') which is going to be executed
-     * <p>
-     * Serves as a base for {@link Process} creation.
-     */
-    String getCommandLine();
+  /**
+   * Returns command line (i.e. 'mvn clean install') which is going to be executed
+   *
+   * <p>Serves as a base for {@link Process} creation.
+   */
+  String getCommandLine();
 
-    /**
-     * Returns command type (i.e. 'maven')
-     */
-    String getType();
+  /** Returns command type (i.e. 'maven') */
+  String getType();
 
-    /**
-     * Returns attributes related to this command.
-     *
-     * @return command attributes
-     */
-    Map<String, String> getAttributes();
+  /**
+   * Returns attributes related to this command.
+   *
+   * @return command attributes
+   */
+  Map<String, String> getAttributes();
 }

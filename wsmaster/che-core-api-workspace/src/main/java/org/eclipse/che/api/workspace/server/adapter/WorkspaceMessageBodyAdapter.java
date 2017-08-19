@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.server.adapter;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
-
+import java.util.Set;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-
-import javax.inject.Singleton;
-import java.util.Set;
 
 /**
  * Adapts an old format of {@link Workspace#getConfig()} to a new one.
@@ -27,13 +25,13 @@ import java.util.Set;
 @Singleton
 public class WorkspaceMessageBodyAdapter extends WorkspaceConfigMessageBodyAdapter {
 
-    @Override
-    public Set<Class<?>> getTriggers() {
-        return ImmutableSet.of(Workspace.class, WorkspaceDto.class);
-    }
+  @Override
+  public Set<Class<?>> getTriggers() {
+    return ImmutableSet.of(Workspace.class, WorkspaceDto.class);
+  }
 
-    @Override
-    protected JsonObject getWorkspaceConfigObj(JsonObject root) {
-        return root.getAsJsonObject("config");
-    }
+  @Override
+  protected JsonObject getWorkspaceConfigObj(JsonObject root) {
+    return root.getAsJsonObject("config");
+  }
 }

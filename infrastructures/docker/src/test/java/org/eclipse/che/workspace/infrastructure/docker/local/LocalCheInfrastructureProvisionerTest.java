@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.workspace.infrastructure.docker.local;
+
+import static org.mockito.Matchers.eq;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -29,72 +31,65 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.mockito.Matchers.eq;
-
-/**
- * @author Alexander Garagatyi
- */
+/** @author Alexander Garagatyi */
 @Listeners(MockitoTestNGListener.class)
 public class LocalCheInfrastructureProvisionerTest {
-    @Mock
-    private ContainerSystemSettingsProvisionersApplier settingsProvisioners;
-    @Mock
-    private ExcludeFoldersFromSnapshotProvisioner      snapshotProvisioner;
-    @Mock
-    private ProjectsVolumeProvisioner                  projectsVolumeProvisioner;
-    @Mock
-    private LocalInstallersConfigProvisioner           installerConfigProvisioner;
-    @Mock
-    private LabelsProvisioner                          labelsProvisioner;
-    @Mock
-    private DockerApiHostEnvVariableProvisioner        dockerApiEnvProvisioner;
-    @Mock
-    private ToolingServersEnvVarsProvisioner           toolingServersEnvVarsProvisioner;
-    @Mock
-    private EnvironmentImpl                            environment;
-    @Mock
-    private DockerEnvironment                          dockerEnvironment;
-    @Mock
-    private RuntimeIdentity                            runtimeIdentity;
-    @InjectMocks
-    private LocalCheInfrastructureProvisioner          provisioner;
+  @Mock private ContainerSystemSettingsProvisionersApplier settingsProvisioners;
+  @Mock private ExcludeFoldersFromSnapshotProvisioner snapshotProvisioner;
+  @Mock private ProjectsVolumeProvisioner projectsVolumeProvisioner;
+  @Mock private LocalInstallersConfigProvisioner installerConfigProvisioner;
+  @Mock private LabelsProvisioner labelsProvisioner;
+  @Mock private DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner;
+  @Mock private ToolingServersEnvVarsProvisioner toolingServersEnvVarsProvisioner;
+  @Mock private EnvironmentImpl environment;
+  @Mock private DockerEnvironment dockerEnvironment;
+  @Mock private RuntimeIdentity runtimeIdentity;
+  @InjectMocks private LocalCheInfrastructureProvisioner provisioner;
 
-    private Object[] allInnerProvisioners;
+  private Object[] allInnerProvisioners;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        allInnerProvisioners = new Object[] {
-                settingsProvisioners,
-                snapshotProvisioner,
-                projectsVolumeProvisioner,
-                installerConfigProvisioner,
-                labelsProvisioner,
-                dockerApiEnvProvisioner,
-                toolingServersEnvVarsProvisioner
+  @BeforeMethod
+  public void setUp() throws Exception {
+    allInnerProvisioners =
+        new Object[] {
+          settingsProvisioners,
+          snapshotProvisioner,
+          projectsVolumeProvisioner,
+          installerConfigProvisioner,
+          labelsProvisioner,
+          dockerApiEnvProvisioner,
+          toolingServersEnvVarsProvisioner
         };
-    }
+  }
 
-    @Test
-    public void shouldCallProvisionersInSpecificOrder() throws Exception {
-        // when
-        provisioner.provision(environment, dockerEnvironment, runtimeIdentity);
+  @Test
+  public void shouldCallProvisionersInSpecificOrder() throws Exception {
+    // when
+    provisioner.provision(environment, dockerEnvironment, runtimeIdentity);
 
-        // then
-        InOrder inOrder = Mockito.inOrder((Object[])allInnerProvisioners);
-        inOrder.verify(snapshotProvisioner)
-               .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-        inOrder.verify(installerConfigProvisioner)
-               .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-        inOrder.verify(projectsVolumeProvisioner)
-               .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-        inOrder.verify(settingsProvisioners)
-               .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-        inOrder.verify(labelsProvisioner)
-               .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-        inOrder.verify(dockerApiEnvProvisioner)
-               .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-        inOrder.verify(toolingServersEnvVarsProvisioner)
-               .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
-        inOrder.verifyNoMoreInteractions();
-    }
+    // then
+    InOrder inOrder = Mockito.inOrder((Object[]) allInnerProvisioners);
+    inOrder
+        .verify(snapshotProvisioner)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(installerConfigProvisioner)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(projectsVolumeProvisioner)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(settingsProvisioners)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(labelsProvisioner)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(dockerApiEnvProvisioner)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(toolingServersEnvVarsProvisioner)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder.verifyNoMoreInteractions();
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,20 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace;
-
-import elemental.json.Json;
-import elemental.json.JsonObject;
-import elemental.util.ArrayOf;
-import elemental.util.Collections;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
+import elemental.json.Json;
+import elemental.json.JsonObject;
+import elemental.util.ArrayOf;
+import elemental.util.Collections;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.constraints.Constraints;
@@ -38,155 +38,158 @@ import org.eclipse.che.ide.menu.StatusPanelGroupPresenter;
 import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 
-import javax.validation.constraints.NotNull;
-import java.util.Map;
-
 /**
- * Root Presenter that implements Workspace logic. Descendant Presenters are injected
- * via constructor and exposed to corresponding UI containers. It contains Menu,
- * Toolbar and WorkBench Presenter to expose their views into corresponding places and to
- * maintain their interactions.
+ * Root Presenter that implements Workspace logic. Descendant Presenters are injected via
+ * constructor and exposed to corresponding UI containers. It contains Menu, Toolbar and WorkBench
+ * Presenter to expose their views into corresponding places and to maintain their interactions.
  *
  * @author Nikolay Zamosenchuk
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelegate, WorkspaceAgent, PerspectiveTypeListener,
-                                           StateComponent {
+public class WorkspacePresenter
+    implements Presenter,
+        WorkspaceView.ActionDelegate,
+        WorkspaceAgent,
+        PerspectiveTypeListener,
+        StateComponent {
 
-    private final WorkspaceView                view;
-    private final String                       defaultPerspectiveId;
-    private final PromiseProvider              promises;
-    private final MainMenuPresenter            mainMenu;
-    private final StatusPanelGroupPresenter    bottomMenu;
-    private final ToolbarPresenter             toolbarPresenter;
-    private final Provider<PerspectiveManager> perspectiveManagerProvider;
+  private final WorkspaceView view;
+  private final String defaultPerspectiveId;
+  private final PromiseProvider promises;
+  private final MainMenuPresenter mainMenu;
+  private final StatusPanelGroupPresenter bottomMenu;
+  private final ToolbarPresenter toolbarPresenter;
+  private final Provider<PerspectiveManager> perspectiveManagerProvider;
 
-    private Perspective activePerspective;
+  private Perspective activePerspective;
 
-    @Inject
-    public WorkspacePresenter(WorkspaceView view,
-                              Provider<PerspectiveManager> perspectiveManagerProvider,
-                              MainMenuPresenter mainMenu,
-                              StatusPanelGroupPresenter bottomMenu,
-                              @MainToolbar ToolbarPresenter toolbarPresenter,
-                              @Named("defaultPerspectiveId") String defaultPerspectiveId,
-                              PromiseProvider promises) {
-        this.view = view;
-        this.defaultPerspectiveId = defaultPerspectiveId;
-        this.promises = promises;
-        this.view.setDelegate(this);
+  @Inject
+  public WorkspacePresenter(
+      WorkspaceView view,
+      Provider<PerspectiveManager> perspectiveManagerProvider,
+      MainMenuPresenter mainMenu,
+      StatusPanelGroupPresenter bottomMenu,
+      @MainToolbar ToolbarPresenter toolbarPresenter,
+      @Named("defaultPerspectiveId") String defaultPerspectiveId,
+      PromiseProvider promises) {
+    this.view = view;
+    this.defaultPerspectiveId = defaultPerspectiveId;
+    this.promises = promises;
+    this.view.setDelegate(this);
 
-        this.toolbarPresenter = toolbarPresenter;
-        this.mainMenu = mainMenu;
-        this.bottomMenu = bottomMenu;
+    this.toolbarPresenter = toolbarPresenter;
+    this.mainMenu = mainMenu;
+    this.bottomMenu = bottomMenu;
 
-        this.perspectiveManagerProvider = perspectiveManagerProvider;
-        perspectiveManagerProvider.get().addListener(this);
+    this.perspectiveManagerProvider = perspectiveManagerProvider;
+    perspectiveManagerProvider.get().addListener(this);
 
-        onPerspectiveChanged();
+    onPerspectiveChanged();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void go(AcceptsOneWidget container) {
+    mainMenu.go(view.getMenuPanel());
+    toolbarPresenter.go(view.getToolbarPanel());
+
+    container.setWidget(view);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onPerspectiveChanged() {
+    activePerspective = perspectiveManagerProvider.get().getActivePerspective();
+
+    if (activePerspective == null) {
+      throw new IllegalStateException(
+          "Current perspective isn't defined "
+              + perspectiveManagerProvider.get().getPerspectiveId());
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void go(AcceptsOneWidget container) {
-        mainMenu.go(view.getMenuPanel());
-        toolbarPresenter.go(view.getToolbarPanel());
+    activePerspective.go(view.getPerspectivePanel());
+  }
 
-        container.setWidget(view);
+  public void setActivePart(@NotNull PartPresenter part, @NotNull PartStackType type) {
+    activePerspective.setActivePart(part, type);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setActivePart(PartPresenter part) {
+    activePerspective.setActivePart(part);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void openPart(PartPresenter part, PartStackType type) {
+    openPart(part, type, null);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void openPart(PartPresenter part, PartStackType type, Constraints constraint) {
+    activePerspective.addPart(part, type, constraint);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void hidePart(PartPresenter part) {
+    activePerspective.hidePart(part);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void removePart(PartPresenter part) {
+    activePerspective.removePart(part);
+  }
+
+  /**
+   * Retrieves the instance of the {@link org.eclipse.che.ide.api.parts.PartStack} for given {@link
+   * PartStackType}
+   *
+   * @param type one of the enumerated type {@link org.eclipse.che.ide.api.parts.PartStackType}
+   * @return the part stack found, else null
+   */
+  public PartStack getPartStack(PartStackType type) {
+    return activePerspective.getPartStack(type);
+  }
+
+  @Override
+  public JsonObject getState() {
+    JsonObject state = Json.createObject();
+    JsonObject perspectivesJs = Json.createObject();
+    state.put("perspectives", perspectivesJs);
+    Map<String, Perspective> perspectives = perspectiveManagerProvider.get().getPerspectives();
+    for (Map.Entry<String, Perspective> entry : perspectives.entrySet()) {
+      //store only default perspective
+      if (entry.getKey().equals(defaultPerspectiveId)) {
+        perspectivesJs.put(entry.getKey(), entry.getValue().getState());
+      }
     }
+    return state;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onPerspectiveChanged() {
-        activePerspective = perspectiveManagerProvider.get().getActivePerspective();
-
-        if (activePerspective == null) {
-            throw new IllegalStateException("Current perspective isn't defined " + perspectiveManagerProvider.get().getPerspectiveId());
+  @Override
+  public Promise<Void> loadState(JsonObject state) {
+    if (state.hasKey("perspectives")) {
+      JsonObject perspectives = state.getObject("perspectives");
+      Map<String, Perspective> perspectiveMap = perspectiveManagerProvider.get().getPerspectives();
+      ArrayOf<Promise<?>> perspectivePromises = Collections.arrayOf();
+      for (String key : perspectives.keys()) {
+        if (perspectiveMap.containsKey(key)) {
+          perspectivePromises.push(perspectiveMap.get(key).loadState(perspectives.getObject(key)));
         }
-
-        activePerspective.go(view.getPerspectivePanel());
+      }
+      return promises.all2(perspectivePromises).thenPromise(ignored -> promises.resolve(null));
     }
 
-    public void setActivePart(@NotNull PartPresenter part, @NotNull PartStackType type) {
-        activePerspective.setActivePart(part, type);
-    }
+    return promises.resolve(null);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setActivePart(PartPresenter part) {
-        activePerspective.setActivePart(part);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void openPart(PartPresenter part, PartStackType type) {
-        openPart(part, type, null);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void openPart(PartPresenter part, PartStackType type, Constraints constraint) {
-        activePerspective.addPart(part, type, constraint);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void hidePart(PartPresenter part) {
-        activePerspective.hidePart(part);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void removePart(PartPresenter part) {
-        activePerspective.removePart(part);
-    }
-
-    /**
-     * Retrieves the instance of the {@link org.eclipse.che.ide.api.parts.PartStack} for given {@link PartStackType}
-     *
-     * @param type
-     *         one of the enumerated type {@link org.eclipse.che.ide.api.parts.PartStackType}
-     * @return the part stack found, else null
-     */
-    public PartStack getPartStack(PartStackType type) {
-        return activePerspective.getPartStack(type);
-    }
-
-    @Override
-    public JsonObject getState() {
-        JsonObject state = Json.createObject();
-        JsonObject perspectivesJs = Json.createObject();
-        state.put("perspectives", perspectivesJs);
-        Map<String, Perspective> perspectives = perspectiveManagerProvider.get().getPerspectives();
-        for (Map.Entry<String, Perspective> entry : perspectives.entrySet()) {
-            //store only default perspective
-            if (entry.getKey().equals(defaultPerspectiveId)) {
-                perspectivesJs.put(entry.getKey(), entry.getValue().getState());
-            }
-        }
-        return state;
-    }
-
-    @Override
-    public Promise<Void> loadState(JsonObject state) {
-        if (state.hasKey("perspectives")) {
-            JsonObject perspectives = state.getObject("perspectives");
-            Map<String, Perspective> perspectiveMap = perspectiveManagerProvider.get().getPerspectives();
-            ArrayOf<Promise<?>> perspectivePromises = Collections.arrayOf();
-            for (String key : perspectives.keys()) {
-                if (perspectiveMap.containsKey(key)) {
-                    perspectivePromises.push(perspectiveMap.get(key).loadState(perspectives.getObject(key)));
-                }
-            }
-            return promises.all2(perspectivePromises).thenPromise(ignored -> promises.resolve(null));
-        }
-
-        return promises.resolve(null);
-    }
-
-    @Override
-    public String getId() {
-        return "workspace";
-    }
+  @Override
+  public String getId() {
+    return "workspace";
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.embedjsexample.ide.view;
 
 import com.google.gwt.core.client.GWT;
@@ -18,27 +18,24 @@ import com.google.gwt.user.client.ui.Widget;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.plugin.embedjsexample.ide.view.client.jso.HelloWorldViewOverlay;
 
-/**
- * @author Mathias Schaefer <mathias.schaefer@eclipsesource.com>
- */
-public class HelloWorldViewImpl extends BaseView<HelloWorldView.ActionDelegate> implements HelloWorldView {
+/** @author Mathias Schaefer <mathias.schaefer@eclipsesource.com> */
+public class HelloWorldViewImpl extends BaseView<HelloWorldView.ActionDelegate>
+    implements HelloWorldView {
 
-    interface HelloWorldViewImplUiBinder extends UiBinder<Widget, HelloWorldViewImpl> {
-    }
+  interface HelloWorldViewImplUiBinder extends UiBinder<Widget, HelloWorldViewImpl> {}
 
-    private final static HelloWorldViewImplUiBinder UI_BINDER = GWT.create(HelloWorldViewImplUiBinder.class);
+  private static final HelloWorldViewImplUiBinder UI_BINDER =
+      GWT.create(HelloWorldViewImplUiBinder.class);
 
-    @UiField
-    FlowPanel helloWorldPanel;
+  @UiField FlowPanel helloWorldPanel;
 
-    public HelloWorldViewImpl() {
-        setContentWidget(UI_BINDER.createAndBindUi(this));
-    }
+  public HelloWorldViewImpl() {
+    setContentWidget(UI_BINDER.createAndBindUi(this));
+  }
 
-    @Override
-    public void sayHello(String content) {
-        HelloWorldViewOverlay.sayHello(helloWorldPanel.getElement(), content);
-        helloWorldPanel.setVisible(true);
-    }
-
+  @Override
+  public void sayHello(String content) {
+    HelloWorldViewOverlay.sayHello(helloWorldPanel.getElement(), content);
+    helloWorldPanel.setVisible(true);
+  }
 }

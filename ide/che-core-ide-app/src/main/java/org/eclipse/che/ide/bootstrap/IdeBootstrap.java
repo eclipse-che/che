@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.bootstrap;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -23,54 +22,58 @@ import org.eclipse.che.ide.util.loging.Log;
 @Singleton
 public class IdeBootstrap {
 
-    private final DialogFactory dialogFactory;
+  private final DialogFactory dialogFactory;
 
-    @Inject
-    IdeBootstrap(DialogFactory dialogFactory) {
-        this.dialogFactory = dialogFactory;
+  @Inject
+  IdeBootstrap(DialogFactory dialogFactory) {
+    this.dialogFactory = dialogFactory;
+  }
+
+  @Inject
+  void bootstrap(
+      ExtensionInitializer extensionInitializer,
+      IdeInitializationStrategyProvider initializationStrategyProvider) {
+    try {
+      IdeInitializationStrategy strategy = initializationStrategyProvider.get();
+
+      strategy
+          .init()
+          .then(
+              aVoid -> {
+                extensionInitializer.startExtensions();
+
+                Scheduler.get().scheduleDeferred(this::notifyShowIDE);
+              })
+          .catchError(handleError())
+          .catchError(handleErrorFallback());
+    } catch (Exception e) {
+      onInitializationFailed("IDE initialization failed. " + e.getMessage());
     }
+  }
 
-    @Inject
-    void bootstrap(ExtensionInitializer extensionInitializer, IdeInitializationStrategyProvider initializationStrategyProvider) {
-        try {
-            IdeInitializationStrategy strategy = initializationStrategyProvider.get();
+  /** Handle an error with IDE UI. */
+  private Operation<PromiseError> handleError() {
+    return err -> {
+      dialogFactory.createMessageDialog("IDE initialization failed", err.getMessage(), null).show();
+      Log.error(IdeBootstrap.class, err);
+    };
+  }
 
-            strategy.init()
-                    .then(aVoid -> {
-                        extensionInitializer.startExtensions();
+  /** Handle an error without IDE UI, as a fallback (when DialogFactory can't be used). */
+  private Operation<PromiseError> handleErrorFallback() {
+    return err -> onInitializationFailed(err.getMessage());
+  }
 
-                        Scheduler.get().scheduleDeferred(this::notifyShowIDE);
-                    })
-                    .catchError(handleError())
-                    .catchError(handleErrorFallback());
-        } catch (Exception e) {
-            onInitializationFailed("IDE initialization failed. " + e.getMessage());
-        }
-    }
-
-    /** Handle an error with IDE UI. */
-    private Operation<PromiseError> handleError() {
-        return err -> {
-            dialogFactory.createMessageDialog("IDE initialization failed", err.getMessage(), null).show();
-            Log.error(IdeBootstrap.class, err);
-        };
-    }
-
-    /** Handle an error without IDE UI, as a fallback (when DialogFactory can't be used). */
-    private Operation<PromiseError> handleErrorFallback() {
-        return err -> onInitializationFailed(err.getMessage());
-    }
-
-    /** Informs parent window (e.g. Dashboard) that IDE application is ready to be shown. */
-    private native void notifyShowIDE() /*-{
+  /** Informs parent window (e.g. Dashboard) that IDE application is ready to be shown. */
+  private native void notifyShowIDE() /*-{
         $wnd.parent.postMessage("show-ide", "*");
     }-*/;
 
-    /**
-     * Tries to call initializationFailed function which is defined in
-     * IDE.jsp for handling IDE initialization errors.
-     */
-    private native void onInitializationFailed(String reason) /*-{
+  /**
+   * Tries to call initializationFailed function which is defined in IDE.jsp for handling IDE
+   * initialization errors.
+   */
+  private native void onInitializationFailed(String reason) /*-{
         try {
             $wnd.IDE.eventHandlers.initializationFailed(reason);
             this.@org.eclipse.che.ide.bootstrap.IdeBootstrap::notifyShowIDE()();

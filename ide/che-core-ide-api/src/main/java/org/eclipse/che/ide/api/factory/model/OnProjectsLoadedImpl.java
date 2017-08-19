@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,65 +7,60 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.factory.model;
 
-import org.eclipse.che.api.core.model.factory.Action;
-import org.eclipse.che.api.core.model.factory.OnProjectsLoaded;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
+import org.eclipse.che.api.core.model.factory.Action;
+import org.eclipse.che.api.core.model.factory.OnProjectsLoaded;
 
 /** Data object for {@link OnProjectsLoaded}. */
 public class OnProjectsLoadedImpl implements OnProjectsLoaded {
 
-    private List<ActionImpl> actions;
+  private List<ActionImpl> actions;
 
-    public OnProjectsLoadedImpl(List<? extends Action> actions) {
-        if (actions != null) {
-            this.actions = actions.stream()
-                                  .map(ActionImpl::new)
-                                  .collect(toList());
-        }
+  public OnProjectsLoadedImpl(List<? extends Action> actions) {
+    if (actions != null) {
+      this.actions = actions.stream().map(ActionImpl::new).collect(toList());
     }
+  }
 
-    public OnProjectsLoadedImpl(OnProjectsLoaded onProjectsLoaded) {
-        this(onProjectsLoaded.getActions());
-    }
+  public OnProjectsLoadedImpl(OnProjectsLoaded onProjectsLoaded) {
+    this(onProjectsLoaded.getActions());
+  }
 
-    @Override
-    public List<ActionImpl> getActions() {
-        if (actions == null) {
-            return new ArrayList<>();
-        }
-        return actions;
+  @Override
+  public List<ActionImpl> getActions() {
+    if (actions == null) {
+      return new ArrayList<>();
     }
+    return actions;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof OnProjectsLoadedImpl)) {
-            return false;
-        }
-        final OnProjectsLoadedImpl that = (OnProjectsLoadedImpl)obj;
-        return getActions().equals(that.getActions());
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
+    if (!(obj instanceof OnProjectsLoadedImpl)) {
+      return false;
+    }
+    final OnProjectsLoadedImpl that = (OnProjectsLoadedImpl) obj;
+    return getActions().equals(that.getActions());
+  }
 
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + getActions().hashCode();
-        return hash;
-    }
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 31 * hash + getActions().hashCode();
+    return hash;
+  }
 
-    @Override
-    public String toString() {
-        return "OnProjectsLoadedImpl{" +
-               "actions=" + actions +
-               '}';
-    }
+  @Override
+  public String toString() {
+    return "OnProjectsLoadedImpl{" + "actions=" + actions + '}';
+  }
 }

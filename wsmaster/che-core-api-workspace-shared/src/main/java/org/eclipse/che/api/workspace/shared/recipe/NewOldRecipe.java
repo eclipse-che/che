@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.recipe;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Describes new recipe
@@ -22,23 +21,23 @@ import java.util.List;
 @DTO
 public interface NewOldRecipe extends ManagedOldRecipe {
 
-    void setType(String type);
+  void setType(String type);
 
-    NewOldRecipe withType(String type);
+  NewOldRecipe withType(String type);
 
-    void setName(String name);
+  void setName(String name);
 
-    NewOldRecipe withName(String name);
+  NewOldRecipe withName(String name);
 
-    void setScript(String script);
+  void setScript(String script);
 
-    NewOldRecipe withScript(String script);
+  NewOldRecipe withScript(String script);
 
-    void setTags(List<String> tags);
+  void setTags(List<String> tags);
 
-    NewOldRecipe withTags(List<String> tags);
+  NewOldRecipe withTags(List<String> tags);
 
-    void setDescription(String description);
+  void setDescription(String description);
 
-    NewOldRecipe withDescription(String description);
+  NewOldRecipe withDescription(String description);
 }

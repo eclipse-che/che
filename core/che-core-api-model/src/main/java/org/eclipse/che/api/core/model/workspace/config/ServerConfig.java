@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.model.workspace.config;
 
 /**
@@ -16,37 +16,36 @@ package org.eclipse.che.api.core.model.workspace.config;
  * @author Alexander Garagatyi
  */
 public interface ServerConfig {
-    /**
-     * Port used by server.
-     *
-     * <p>It may contain protocol(tcp or udp) after '/' symbol.
-     * If protocol is missed tcp will be used by default.
-     * Example:
-     * <ul>
-     *     <li>8080/tcp</li>
-     *     <li>8080/udp</li>
-     *     <li>8080</li>
-     * </ul>
-     */
-    String getPort();
+  /**
+   * Port used by server.
+   *
+   * <p>It may contain protocol(tcp or udp) after '/' symbol. If protocol is missed tcp will be used
+   * by default. Example:
+   *
+   * <ul>
+   *   <li>8080/tcp
+   *   <li>8080/udp
+   *   <li>8080
+   * </ul>
+   */
+  String getPort();
 
-    /**
-     * Protocol for configuring preview url of this server.
-     * <p>
-     * Example:
-     * <ul>
-     *     <li>http</li>
-     *     <li>https</li>
-     *     <li>tcp</li>
-     *     <li>udp</li>
-     *     <li>ws</li>
-     *     <li>wss</li>
-     * </ul>
-     */
-    String getProtocol();
+  /**
+   * Protocol for configuring preview url of this server.
+   *
+   * <p>Example:
+   *
+   * <ul>
+   *   <li>http
+   *   <li>https
+   *   <li>tcp
+   *   <li>udp
+   *   <li>ws
+   *   <li>wss
+   * </ul>
+   */
+  String getProtocol();
 
-    /**
-     * Path used by server.
-     */
-    String getPath();
+  /** Path used by server. */
+  String getPath();
 }

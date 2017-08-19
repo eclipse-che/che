@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,32 +7,31 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.project.wizard;
 
+import com.google.inject.Provider;
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.WizardPage;
-import com.google.inject.Provider;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
- * Defines the requirements for an object that provides an information
- * for registering project importer into project import wizard.
- * <p/>
- * Implementations of this interface need to be registered using
- * a multibinder in order to be picked up by project wizard.
+ * Defines the requirements for an object that provides an information for registering project
+ * importer into project import wizard.
+ *
+ * <p>Implementations of this interface need to be registered using a multibinder in order to be
+ * picked up by project wizard.
  *
  * @author Artem Zatsarynnyi
  */
 public interface ImportWizardRegistrar {
 
-    /** Returns ID of the project importer that should be registered in project import wizard. */
-    @NotNull
-    String getImporterId();
+  /** Returns ID of the project importer that should be registered in project import wizard. */
+  @NotNull
+  String getImporterId();
 
-    /** Returns pages that should be used in project import wizard. */
-    @NotNull
-    List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages();
+  /** Returns pages that should be used in project import wizard. */
+  @NotNull
+  List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages();
 }

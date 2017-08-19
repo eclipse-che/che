@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,76 +7,82 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.pullrequest.client.steps;
 
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingServiceProvider;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
 import org.eclipse.che.plugin.pullrequest.shared.dto.Repository;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
-
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
-
-import javax.validation.constraints.NotNull;
 
 public class WaitForkOnRemoteStep implements Step {
-    private static final int POLL_FREQUENCY_MS = 1000;
+  private static final int POLL_FREQUENCY_MS = 1000;
 
-    private final VcsHostingServiceProvider vcsHostingServiceProvider;
-    private final Step                      nextStep;
-    private       Timer                     timer;
+  private final VcsHostingServiceProvider vcsHostingServiceProvider;
+  private final Step nextStep;
+  private Timer timer;
 
-    @AssistedInject
-    public WaitForkOnRemoteStep(@NotNull final VcsHostingServiceProvider vcsHostingServiceProvider,
-                                @NotNull final @Assisted Step nextStep) {
-        this.vcsHostingServiceProvider = vcsHostingServiceProvider;
-        this.nextStep = nextStep;
+  @AssistedInject
+  public WaitForkOnRemoteStep(
+      @NotNull final VcsHostingServiceProvider vcsHostingServiceProvider,
+      @NotNull final @Assisted Step nextStep) {
+    this.vcsHostingServiceProvider = vcsHostingServiceProvider;
+    this.nextStep = nextStep;
+  }
+
+  @Override
+  public void execute(@NotNull final WorkflowExecutor executor, final Context context) {
+    if (timer == null) {
+      timer =
+          new Timer() {
+            @Override
+            public void run() {
+              checkRepository(
+                  context,
+                  new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(final Throwable caught) {
+                      timer.schedule(POLL_FREQUENCY_MS);
+                    }
+
+                    @Override
+                    public void onSuccess(final Void result) {
+                      executor.done(WaitForkOnRemoteStep.this, context);
+                    }
+                  });
+            }
+          };
     }
 
-    @Override
-    public void execute(@NotNull final WorkflowExecutor executor, final Context context) {
-        if (timer == null) {
-            timer = new Timer() {
-                @Override
-                public void run() {
-                    checkRepository(context, new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            timer.schedule(POLL_FREQUENCY_MS);
-                        }
+    timer.schedule(POLL_FREQUENCY_MS);
+  }
 
-                        @Override
-                        public void onSuccess(final Void result) {
-                            executor.done(WaitForkOnRemoteStep.this, context);
-                        }
-                    });
-                }
-            };
-        }
-
-        timer.schedule(POLL_FREQUENCY_MS);
-    }
-
-    private void checkRepository(final Context context, final AsyncCallback<Void> callback) {
-        context.getVcsHostingService().getRepository(context.getHostUserLogin(), context.getForkedRepositoryName())
-               .then(new Operation<Repository>() {
-                   @Override
-                   public void apply(Repository arg) throws OperationException {
-                       callback.onSuccess(null);
-                   }
-               })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError arg) throws OperationException {
-                       callback.onFailure(arg.getCause());
-                   }
-               });
-    }
+  private void checkRepository(final Context context, final AsyncCallback<Void> callback) {
+    context
+        .getVcsHostingService()
+        .getRepository(context.getHostUserLogin(), context.getForkedRepositoryName())
+        .then(
+            new Operation<Repository>() {
+              @Override
+              public void apply(Repository arg) throws OperationException {
+                callback.onSuccess(null);
+              }
+            })
+        .catchError(
+            new Operation<PromiseError>() {
+              @Override
+              public void apply(PromiseError arg) throws OperationException {
+                callback.onFailure(arg.getCause());
+              }
+            });
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.orion.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -19,21 +19,20 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class OrionContentAssistOverlay extends JavaScriptObject {
 
-    protected OrionContentAssistOverlay() {
-    }
+  protected OrionContentAssistOverlay() {}
 
-    /** Checks whether the content assist is active or not. */
-    public final native boolean isActive() /*-{
+  /** Checks whether the content assist is active or not. */
+  public final native boolean isActive() /*-{
         return this.isActive();
     }-*/;
 
-    /** Activates the content assist. */
-    public final native void activate() /*-{
+  /** Activates the content assist. */
+  public final native void activate() /*-{
         this.activate();
     }-*/;
 
-    /** Deactivates the content assist. */
-    public final native void deactivate() /*-{
+  /** Deactivates the content assist. */
+  public final native void deactivate() /*-{
         this.deactivate();
     }-*/;
 }

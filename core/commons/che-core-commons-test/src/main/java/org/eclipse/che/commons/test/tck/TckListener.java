@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.commons.test.tck;
+
+import static java.lang.String.format;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.ConfigurationException;
@@ -17,36 +19,30 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
-
-import org.testng.ITestContext;
-import org.testng.ITestNGMethod;
-
 import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.lang.String.format;
+import org.testng.ITestContext;
+import org.testng.ITestNGMethod;
 
 /**
- * The listener is designed to instantiate {@link TckModule tck modules}
- * using {@link ServiceLoader} mechanism. The components  provided by those
- * modules will be injected into a test class whether it's necessary to do so.
- * For each test class will be used new instance of injector.
- * Listener requires tck test to be in own separated suite, if it finds more tests
- * in suite it'll throw {@link IllegalArgumentException} on suite start.
- * After test suite is finished listener'll try to find test specific or common
- * instance of {@link TckResourcesCleaner}. It is optional and can be bound in modules.
+ * The listener is designed to instantiate {@link TckModule tck modules} using {@link ServiceLoader}
+ * mechanism. The components provided by those modules will be injected into a test class whether
+ * it's necessary to do so. For each test class will be used new instance of injector. Listener
+ * requires tck test to be in own separated suite, if it finds more tests in suite it'll throw
+ * {@link IllegalArgumentException} on suite start. After test suite is finished listener'll try to
+ * find test specific or common instance of {@link TckResourcesCleaner}. It is optional and can be
+ * bound in modules.
  *
- * <p>The listener expects at least one implementation of {@code TckModule}
- * to be configured, if it doesn't find any of the {@code TckModule}
- * implementations then it will report an appropriate exception
- * and TckTest will fail(as it requires components to be injected into it).
- * If it finds more than one {@code TckModule} implementation it will
- * use all of the found.
+ * <p>The listener expects at least one implementation of {@code TckModule} to be configured, if it
+ * doesn't find any of the {@code TckModule} implementations then it will report an appropriate
+ * exception and TckTest will fail(as it requires components to be injected into it). If it finds
+ * more than one {@code TckModule} implementation it will use all of the found.
  *
  * <p>The usage example:
+ *
  * <pre>
  * package org.eclipse.mycomponent;
  *
@@ -91,6 +87,7 @@ import static java.lang.String.format;
  * </pre>
  *
  * <p>Configuring:
+ *
  * <pre>
  * <i>META-INF/services/org.eclipse.che.commons.test.tck.TckModule</i>
  * org.eclipse.mycomponent.MyTckModule
@@ -106,82 +103,85 @@ import static java.lang.String.format;
  * @see TckResourcesCleaner
  */
 public class TckListener extends TestListenerAdapter {
-    private Injector injector;
-    private Object   instance;
+  private Injector injector;
+  private Object instance;
 
-    @Override
-    public void onStart(ITestContext context) {
-        final Set<Object> instances = Stream.of(context.getAllTestMethods())
-                                            .map(ITestNGMethod::getInstance)
-                                            .collect(Collectors.toSet());
+  @Override
+  public void onStart(ITestContext context) {
+    final Set<Object> instances =
+        Stream.of(context.getAllTestMethods())
+            .map(ITestNGMethod::getInstance)
+            .collect(Collectors.toSet());
 
-        if (instances.size() != 1) {
-            throw new IllegalStateException("Tck test should be one and only one in suite.");
-        }
+    if (instances.size() != 1) {
+      throw new IllegalStateException("Tck test should be one and only one in suite.");
+    }
 
-        instance = instances.iterator().next();
+    instance = instances.iterator().next();
 
-        injector = Guice.createInjector(createModule(context, instance.getClass().getName()));
-        injector.injectMembers(instance);
+    injector = Guice.createInjector(createModule(context, instance.getClass().getName()));
+    injector.injectMembers(instance);
+  }
+
+  @Override
+  public void onFinish(ITestContext context) {
+    if (injector == null || instance == null) {
+      throw new IllegalStateException("Looks like onFinish method is invoked before onStart.");
+    }
+
+    // try to get test specific resources cleaner
+    TckResourcesCleaner resourcesCleaner =
+        getResourcesCleaner(
+            injector,
+            Key.get(TckResourcesCleaner.class, Names.named(instance.getClass().getName())));
+    if (resourcesCleaner == null) {
+      // try to get common resources cleaner
+      resourcesCleaner = getResourcesCleaner(injector, Key.get(TckResourcesCleaner.class));
+    }
+
+    if (resourcesCleaner != null) {
+      resourcesCleaner.clean();
+    }
+  }
+
+  private TckResourcesCleaner getResourcesCleaner(Injector injector, Key<TckResourcesCleaner> key) {
+    try {
+      return injector.getInstance(key);
+    } catch (ConfigurationException ignored) {
+    }
+    return null;
+  }
+
+  private Module createModule(ITestContext testContext, String name) {
+    final Iterator<TckModule> moduleIterator = ServiceLoader.load(TckModule.class).iterator();
+    if (!moduleIterator.hasNext()) {
+      throw new IllegalStateException(
+          format(
+              "Couldn't find a TckModule configuration. "
+                  + "You probably forgot to configure resources/META-INF/services/%s, or even "
+                  + "provide an implementation of the TckModule which is required by the jpa test class %s",
+              TckModule.class.getName(), name));
+    }
+    return new CompoundModule(testContext, moduleIterator);
+  }
+
+  private static class CompoundModule extends AbstractModule {
+    private final ITestContext testContext;
+    private final Iterator<TckModule> moduleIterator;
+
+    private CompoundModule(ITestContext testContext, Iterator<TckModule> moduleIterator) {
+      this.testContext = testContext;
+      this.moduleIterator = moduleIterator;
     }
 
     @Override
-    public void onFinish(ITestContext context) {
-        if (injector == null || instance == null) {
-            throw new IllegalStateException("Looks like onFinish method is invoked before onStart.");
-        }
-
-        // try to get test specific resources cleaner
-        TckResourcesCleaner resourcesCleaner = getResourcesCleaner(injector,
-                                                          Key.get(TckResourcesCleaner.class,
-                                                                  Names.named(instance.getClass().getName())));
-        if (resourcesCleaner == null) {
-            // try to get common resources cleaner
-            resourcesCleaner = getResourcesCleaner(injector, Key.get(TckResourcesCleaner.class));
-        }
-
-        if (resourcesCleaner != null) {
-            resourcesCleaner.clean();
-        }
+    protected void configure() {
+      bind(ITestContext.class).toInstance(testContext);
+      while (moduleIterator.hasNext()) {
+        final TckModule module = moduleIterator.next();
+        module.setTestContext(testContext);
+        install(module);
+      }
     }
-
-    private TckResourcesCleaner getResourcesCleaner(Injector injector, Key<TckResourcesCleaner> key) {
-        try {
-            return injector.getInstance(key);
-        } catch (ConfigurationException ignored) {
-        }
-        return null;
-    }
-
-    private Module createModule(ITestContext testContext, String name) {
-        final Iterator<TckModule> moduleIterator = ServiceLoader.load(TckModule.class).iterator();
-        if (!moduleIterator.hasNext()) {
-            throw new IllegalStateException(format("Couldn't find a TckModule configuration. " +
-                                                   "You probably forgot to configure resources/META-INF/services/%s, or even " +
-                                                   "provide an implementation of the TckModule which is required by the jpa test class %s",
-                                                   TckModule.class.getName(),
-                                                   name));
-        }
-        return new CompoundModule(testContext, moduleIterator);
-    }
-
-    private static class CompoundModule extends AbstractModule {
-        private final ITestContext        testContext;
-        private final Iterator<TckModule> moduleIterator;
-
-        private CompoundModule(ITestContext testContext, Iterator<TckModule> moduleIterator) {
-            this.testContext = testContext;
-            this.moduleIterator = moduleIterator;
-        }
-
-        @Override
-        protected void configure() {
-            bind(ITestContext.class).toInstance(testContext);
-            while (moduleIterator.hasNext()) {
-                final TckModule module = moduleIterator.next();
-                module.setTestContext(testContext);
-                install(module);
-            }
-        }
-    }
+  }
 }

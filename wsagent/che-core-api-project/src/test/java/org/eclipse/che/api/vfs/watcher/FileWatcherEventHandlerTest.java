@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.vfs.watcher;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.nio.file.Path;
-import java.util.function.Consumer;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
@@ -29,107 +18,111 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * Tests for {@link FileWatcherEventHandler}
- */
+import java.nio.file.Path;
+import java.util.function.Consumer;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+/** Tests for {@link FileWatcherEventHandler} */
 @RunWith(MockitoJUnitRunner.class)
 public class FileWatcherEventHandlerTest {
-    private static final String PROJECT_FILE = "/project/file";
+  private static final String PROJECT_FILE = "/project/file";
 
-    @Rule
-    public TemporaryFolder rootFolder = new TemporaryFolder();
+  @Rule public TemporaryFolder rootFolder = new TemporaryFolder();
 
-    FileWatcherEventHandler handler;
+  FileWatcherEventHandler handler;
 
-    @Mock
-    Consumer<String> create;
-    @Mock
-    Consumer<String> modify;
-    @Mock
-    Consumer<String> delete;
+  @Mock Consumer<String> create;
+  @Mock Consumer<String> modify;
+  @Mock Consumer<String> delete;
 
-    Path root;
+  Path root;
 
-    @Before
-    public void setUp() throws Exception {
-        root = rootFolder.getRoot().toPath();
+  @Before
+  public void setUp() throws Exception {
+    root = rootFolder.getRoot().toPath();
 
-        handler = new FileWatcherEventHandler(rootFolder.getRoot());
-    }
+    handler = new FileWatcherEventHandler(rootFolder.getRoot());
+  }
 
-    @Test
-    public void shouldHandleRegisteredPathWhenCreate() throws Exception {
-        Path path = root.resolve(PROJECT_FILE);
-        handler.register(path, create, modify, delete);
+  @Test
+  public void shouldHandleRegisteredPathWhenCreate() throws Exception {
+    Path path = root.resolve(PROJECT_FILE);
+    handler.register(path, create, modify, delete);
 
-        handler.handle(path, ENTRY_CREATE);
+    handler.handle(path, ENTRY_CREATE);
 
-        verify(create).accept(toInternalPath(root, path));
-    }
+    verify(create).accept(toInternalPath(root, path));
+  }
 
-    @Test
-    public void shouldHandleRegisteredPathWhenModify() throws Exception {
-        Path path = root.resolve(PROJECT_FILE);
-        handler.register(path, create, modify, delete);
+  @Test
+  public void shouldHandleRegisteredPathWhenModify() throws Exception {
+    Path path = root.resolve(PROJECT_FILE);
+    handler.register(path, create, modify, delete);
 
-        handler.handle(path, ENTRY_MODIFY);
+    handler.handle(path, ENTRY_MODIFY);
 
-        verify(modify).accept(toInternalPath(root, path));
-    }
+    verify(modify).accept(toInternalPath(root, path));
+  }
 
-    @Test
-    public void shouldHandleRegisteredPathWhenDelete() throws Exception {
-        Path path = root.resolve(PROJECT_FILE);
-        handler.register(path, create, modify, delete);
+  @Test
+  public void shouldHandleRegisteredPathWhenDelete() throws Exception {
+    Path path = root.resolve(PROJECT_FILE);
+    handler.register(path, create, modify, delete);
 
-        handler.handle(path, ENTRY_DELETE);
+    handler.handle(path, ENTRY_DELETE);
 
-        verify(delete).accept(toInternalPath(root, path));
-    }
+    verify(delete).accept(toInternalPath(root, path));
+  }
 
-    @Test
-    public void shouldHandleRegisteredPathWhenCreateFileForFileAndForParent() throws Exception {
-        Path path = root.resolve(PROJECT_FILE);
-        handler.register(path, create, modify, delete);
-        handler.register(path.getParent(), create, modify, delete);
+  @Test
+  public void shouldHandleRegisteredPathWhenCreateFileForFileAndForParent() throws Exception {
+    Path path = root.resolve(PROJECT_FILE);
+    handler.register(path, create, modify, delete);
+    handler.register(path.getParent(), create, modify, delete);
 
-        handler.handle(path, ENTRY_CREATE);
+    handler.handle(path, ENTRY_CREATE);
 
-        verify(create, times(2)).accept(toInternalPath(root, path));
-    }
+    verify(create, times(2)).accept(toInternalPath(root, path));
+  }
 
-    @Test
-    public void shouldNotHandleNotRegisteredPath() throws Exception {
-        Path path = root.resolve(PROJECT_FILE);
-        handler.register(path.resolve("one"), create, modify, delete);
-        handler.register(path.resolve("two"), create, modify, delete);
+  @Test
+  public void shouldNotHandleNotRegisteredPath() throws Exception {
+    Path path = root.resolve(PROJECT_FILE);
+    handler.register(path.resolve("one"), create, modify, delete);
+    handler.register(path.resolve("two"), create, modify, delete);
 
-        handler.handle(path, ENTRY_CREATE);
+    handler.handle(path, ENTRY_CREATE);
 
-        verify(create, never()).accept(toInternalPath(root, path));
-    }
+    verify(create, never()).accept(toInternalPath(root, path));
+  }
 
-    @Test
-    public void shouldNotHandleUnRegisteredPath() throws Exception {
-        Path path = root.resolve(PROJECT_FILE);
-        int id = handler.register(path, create, modify, delete);
+  @Test
+  public void shouldNotHandleUnRegisteredPath() throws Exception {
+    Path path = root.resolve(PROJECT_FILE);
+    int id = handler.register(path, create, modify, delete);
 
-        handler.unRegister(id);
+    handler.unRegister(id);
 
-        handler.handle(path, ENTRY_CREATE);
+    handler.handle(path, ENTRY_CREATE);
 
-        verify(create, never()).accept(toInternalPath(root, path));
-    }
+    verify(create, never()).accept(toInternalPath(root, path));
+  }
 
-    @Test
-    public void shouldNotHandleUnRegisteredFileButShouldHandleFilesParent() throws Exception {
-        Path path = root.resolve(PROJECT_FILE);
-        handler.register(path.getParent(), create, modify, delete);
-        int id = handler.register(path, create, modify, delete);
-        handler.unRegister(id);
+  @Test
+  public void shouldNotHandleUnRegisteredFileButShouldHandleFilesParent() throws Exception {
+    Path path = root.resolve(PROJECT_FILE);
+    handler.register(path.getParent(), create, modify, delete);
+    int id = handler.register(path, create, modify, delete);
+    handler.unRegister(id);
 
-        handler.handle(path, ENTRY_CREATE);
+    handler.handle(path, ENTRY_CREATE);
 
-        verify(create).accept(toInternalPath(root, path));
-    }
+    verify(create).accept(toInternalPath(root, path));
+  }
 }

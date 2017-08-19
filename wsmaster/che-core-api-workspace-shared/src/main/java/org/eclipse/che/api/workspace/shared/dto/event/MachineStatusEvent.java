@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -24,28 +24,24 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface MachineStatusEvent {
 
-    MachineStatus getEventType();
+  MachineStatus getEventType();
 
-    void setEventType(MachineStatus eventType);
+  void setEventType(MachineStatus eventType);
 
-    MachineStatusEvent withEventType(MachineStatus eventType);
+  MachineStatusEvent withEventType(MachineStatus eventType);
 
-    String getError();
+  String getError();
 
-    void setError(String error);
+  void setError(String error);
 
-    MachineStatusEvent withError(String error);
+  MachineStatusEvent withError(String error);
 
+  String getMachineName();
 
-    String getMachineName();
+  MachineStatusEvent withMachineName(String machineName);
 
-    MachineStatusEvent withMachineName(String machineName);
+  /** @return runtime identity */
+  RuntimeIdentityDto getIdentity();
 
-    /**
-     * @return runtime identity
-     */
-    RuntimeIdentityDto getIdentity();
-
-    MachineStatusEvent withIdentity(RuntimeIdentityDto identity);
-
+  MachineStatusEvent withIdentity(RuntimeIdentityDto identity);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.projectimport.wizard;
-
-import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
-
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
-import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
-import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 
 import static com.google.common.base.Strings.nullToEmpty;
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_PROGRESS;
@@ -28,6 +16,17 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+
+import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
+import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 
 /**
  * Json RPC based implementation of the {@link ProjectNotificationSubscriber} which notifies user
@@ -38,69 +37,76 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
  */
 public class ProjectImportOutputJsonRpcNotifier implements ProjectNotificationSubscriber {
 
-    private final NotificationManager        notificationManager;
-    private final CoreLocalizationConstant   locale;
-    private final RequestHandlerConfigurator configurator;
-    private final RequestHandlerManager      requestHandlerManager;
+  private final NotificationManager notificationManager;
+  private final CoreLocalizationConstant locale;
+  private final RequestHandlerConfigurator configurator;
+  private final RequestHandlerManager requestHandlerManager;
 
-    private StatusNotification singletonNotification;
-    private String             projectName;
+  private StatusNotification singletonNotification;
+  private String projectName;
 
-    @Inject
-    public ProjectImportOutputJsonRpcNotifier(NotificationManager notificationManager,
-                                              CoreLocalizationConstant locale,
-                                              EventBus eventBus,
-                                              RequestHandlerConfigurator configurator,
-                                              RequestHandlerManager requestHandlerManager) {
-        this.notificationManager = notificationManager;
-        this.locale = locale;
-        this.configurator = configurator;
-        this.requestHandlerManager = requestHandlerManager;
+  @Inject
+  public ProjectImportOutputJsonRpcNotifier(
+      NotificationManager notificationManager,
+      CoreLocalizationConstant locale,
+      EventBus eventBus,
+      RequestHandlerConfigurator configurator,
+      RequestHandlerManager requestHandlerManager) {
+    this.notificationManager = notificationManager;
+    this.locale = locale;
+    this.configurator = configurator;
+    this.requestHandlerManager = requestHandlerManager;
 
-        eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> {
-            requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
-            if (singletonNotification != null) {
-                singletonNotification.setStatus(FAIL);
-                singletonNotification.setContent("");
-            }
+    eventBus.addHandler(
+        WsAgentServerStoppedEvent.TYPE,
+        e -> {
+          requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
+          if (singletonNotification != null) {
+            singletonNotification.setStatus(FAIL);
+            singletonNotification.setContent("");
+          }
         });
-    }
+  }
 
-    @Override
-    public void subscribe(String projectName, StatusNotification notification) {
-        this.projectName = projectName;
-        this.singletonNotification = notification;
+  @Override
+  public void subscribe(String projectName, StatusNotification notification) {
+    this.projectName = projectName;
+    this.singletonNotification = notification;
 
-        configurator.newConfiguration()
-                    .methodName(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName)
-                    .paramsAsDto(ImportProgressRecordDto.class)
-                    .noResult()
-                    .withConsumer(progressRecord -> {
-                        singletonNotification.setTitle(locale.importingProject(ProjectImportOutputJsonRpcNotifier.this.projectName));
-                        singletonNotification.setContent(nullToEmpty(progressRecord.getLine()));
-                    });
-    }
+    configurator
+        .newConfiguration()
+        .methodName(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName)
+        .paramsAsDto(ImportProgressRecordDto.class)
+        .noResult()
+        .withConsumer(
+            progressRecord -> {
+              singletonNotification.setTitle(
+                  locale.importingProject(ProjectImportOutputJsonRpcNotifier.this.projectName));
+              singletonNotification.setContent(nullToEmpty(progressRecord.getLine()));
+            });
+  }
 
-    @Override
-    public void subscribe(String projectName) {
-        singletonNotification = notificationManager.notify(locale.importingProject(projectName), PROGRESS, FLOAT_MODE);
-        subscribe(projectName, singletonNotification);
-    }
+  @Override
+  public void subscribe(String projectName) {
+    singletonNotification =
+        notificationManager.notify(locale.importingProject(projectName), PROGRESS, FLOAT_MODE);
+    subscribe(projectName, singletonNotification);
+  }
 
-    @Override
-    public void onSuccess() {
-        requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
+  @Override
+  public void onSuccess() {
+    requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
 
-        singletonNotification.setStatus(SUCCESS);
-        singletonNotification.setTitle(locale.importProjectMessageSuccess(projectName));
-        singletonNotification.setContent("");
-    }
+    singletonNotification.setStatus(SUCCESS);
+    singletonNotification.setTitle(locale.importProjectMessageSuccess(projectName));
+    singletonNotification.setContent("");
+  }
 
-    @Override
-    public void onFailure(String errorMessage) {
-        requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
+  @Override
+  public void onFailure(String errorMessage) {
+    requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
 
-        singletonNotification.setStatus(FAIL);
-        singletonNotification.setContent(errorMessage);
-    }
+    singletonNotification.setStatus(FAIL);
+    singletonNotification.setContent(errorMessage);
+  }
 }

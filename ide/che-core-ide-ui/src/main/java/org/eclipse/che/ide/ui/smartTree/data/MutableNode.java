@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.smartTree.data;
 
 /**
@@ -16,11 +16,10 @@ package org.eclipse.che.ide.ui.smartTree.data;
  * @author Vlad Zhukovskiy
  */
 public interface MutableNode {
-    /**
-     * Set current node status into leaf.
-     *
-     * @param leaf
-     *         true if node should be transformed into leaf
-     */
-    void setLeaf(boolean leaf);
+  /**
+   * Set current node status into leaf.
+   *
+   * @param leaf true if node should be transformed into leaf
+   */
+  void setLeaf(boolean leaf);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -30,33 +29,35 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 @Singleton
 public class CollapseAllAction extends Action implements ActivePartChangedHandler {
 
-    private ProjectExplorerPresenter projectExplorer;
+  private ProjectExplorerPresenter projectExplorer;
 
-    private PartPresenter activePart;
+  private PartPresenter activePart;
 
-    @Inject
-    public CollapseAllAction(ProjectExplorerPresenter projectExplorer,
-                             EventBus eventBus,
-                             CoreLocalizationConstant localizationConstant) {
-        super(localizationConstant.collapseAllActionTitle(), localizationConstant.collapseAllActionDescription());
-        this.projectExplorer = projectExplorer;
+  @Inject
+  public CollapseAllAction(
+      ProjectExplorerPresenter projectExplorer,
+      EventBus eventBus,
+      CoreLocalizationConstant localizationConstant) {
+    super(
+        localizationConstant.collapseAllActionTitle(),
+        localizationConstant.collapseAllActionDescription());
+    this.projectExplorer = projectExplorer;
 
-        eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
-    }
+    eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+  }
 
-    @Override
-    public void update(ActionEvent e) {
-        e.getPresentation().setEnabledAndVisible(activePart instanceof ProjectExplorerPresenter);
-    }
+  @Override
+  public void update(ActionEvent e) {
+    e.getPresentation().setEnabledAndVisible(activePart instanceof ProjectExplorerPresenter);
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        projectExplorer.collapseAll();
-    }
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    projectExplorer.collapseAll();
+  }
 
-    @Override
-    public void onActivePartChanged(ActivePartChangedEvent event) {
-        activePart = event.getActivePart();
-    }
-
+  @Override
+  public void onActivePartChanged(ActivePartChangedEvent event) {
+    activePart = event.getActivePart();
+  }
 }

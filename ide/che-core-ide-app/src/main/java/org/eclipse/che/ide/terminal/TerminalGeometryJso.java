@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,24 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.terminal;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-/**
- * @author Alexander Andrienko
- */
+/** @author Alexander Andrienko */
 public class TerminalGeometryJso extends JavaScriptObject {
 
-    protected TerminalGeometryJso() {
-    }
+  protected TerminalGeometryJso() {}
 
-    public final native int getCols() /*-{
+  public final native int getCols() /*-{
         return this.cols;
     }-*/;
 
-    public final native int getRows() /*-{
+  public final native int getRows() /*-{
         return this.rows;
     }-*/;
 }

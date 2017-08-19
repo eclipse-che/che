@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.extension;
 
 /**
@@ -16,37 +16,36 @@ package org.eclipse.che.ide.api.extension;
  * @author <a href="mailto:nzamosenchuk@exoplatform.com">Nikolay Zamosenchuk</a>
  */
 public class DependencyDescription {
-    private String id;
+  private String id;
 
-    private String version;
+  private String version;
 
-    /**
-     * Create {@link DependencyDescription} instance
-     *
-     * @param id
-     * @param version
-     */
-    public DependencyDescription(String id, String version) {
-        this.id = id;
-        this.version = version;
-    }
+  /**
+   * Create {@link DependencyDescription} instance
+   *
+   * @param id
+   * @param version
+   */
+  public DependencyDescription(String id, String version) {
+    this.id = id;
+    this.version = version;
+  }
 
-    /**
-     * Get required extension id
-     *
-     * @return
-     */
-    public String getId() {
-        return id;
-    }
+  /**
+   * Get required extension id
+   *
+   * @return
+   */
+  public String getId() {
+    return id;
+  }
 
-    /**
-     * Get version of the used dependency
-     *
-     * @return
-     */
-    public String getVersion() {
-        return version;
-    }
-
+  /**
+   * Get version of the used dependency
+   *
+   * @return
+   */
+  public String getVersion() {
+    return version;
+  }
 }

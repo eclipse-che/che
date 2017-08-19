@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ToggleAction;
@@ -30,39 +29,39 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 @Singleton
 public class ShowConsoleTreeAction extends ToggleAction implements ActivePartChangedHandler {
 
-    private final ProcessesPanelPresenter processesPanelPresenter;
+  private final ProcessesPanelPresenter processesPanelPresenter;
 
-    private PartPresenter activePart;
+  private PartPresenter activePart;
 
-    @Inject
-    public ShowConsoleTreeAction(final EventBus eventBus,
-                                 final ProcessesPanelPresenter processesPanelPresenter,
-                                 final CoreLocalizationConstant machineLocalizationConstant) {
-        super(machineLocalizationConstant.actionShowConsoleTreeTitle());
+  @Inject
+  public ShowConsoleTreeAction(
+      final EventBus eventBus,
+      final ProcessesPanelPresenter processesPanelPresenter,
+      final CoreLocalizationConstant machineLocalizationConstant) {
+    super(machineLocalizationConstant.actionShowConsoleTreeTitle());
 
-        this.processesPanelPresenter = processesPanelPresenter;
+    this.processesPanelPresenter = processesPanelPresenter;
 
-        eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
-    }
+    eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+  }
 
-    @Override
-    public boolean isSelected(ActionEvent e) {
-        return processesPanelPresenter.isProcessesTreeVisible();
-    }
+  @Override
+  public boolean isSelected(ActionEvent e) {
+    return processesPanelPresenter.isProcessesTreeVisible();
+  }
 
-    @Override
-    public void setSelected(ActionEvent e, boolean state) {
-        processesPanelPresenter.setProcessesTreeVisible(state);
-    }
+  @Override
+  public void setSelected(ActionEvent e, boolean state) {
+    processesPanelPresenter.setProcessesTreeVisible(state);
+  }
 
-    @Override
-    public void onActivePartChanged(ActivePartChangedEvent event) {
-        activePart = event.getActivePart();
-    }
+  @Override
+  public void onActivePartChanged(ActivePartChangedEvent event) {
+    activePart = event.getActivePart();
+  }
 
-    @Override
-    public void update(ActionEvent e) {
-        e.getPresentation().setEnabledAndVisible(activePart instanceof ProcessesPanelPresenter);
-    }
-
+  @Override
+  public void update(ActionEvent e) {
+    e.getPresentation().setEnabledAndVisible(activePart instanceof ProcessesPanelPresenter);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.recipe;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Describes recipe update.
@@ -22,27 +21,27 @@ import java.util.List;
 @DTO
 public interface OldRecipeUpdate extends ManagedOldRecipe {
 
-    void setId(String id);
+  void setId(String id);
 
-    OldRecipeUpdate withId(String id);
+  OldRecipeUpdate withId(String id);
 
-    void setName(String name);
+  void setName(String name);
 
-    OldRecipeUpdate withName(String name);
+  OldRecipeUpdate withName(String name);
 
-    void setType(String type);
+  void setType(String type);
 
-    OldRecipeUpdate withType(String type);
+  OldRecipeUpdate withType(String type);
 
-    void setScript(String script);
+  void setScript(String script);
 
-    OldRecipeUpdate withScript(String script);
+  OldRecipeUpdate withScript(String script);
 
-    void setTags(List<String> tags);
+  void setTags(List<String> tags);
 
-    OldRecipeUpdate withTags(List<String> tags);
+  OldRecipeUpdate withTags(List<String> tags);
 
-    void setDescription(String description);
+  void setDescription(String description);
 
-    OldRecipeUpdate withDescription(String description);
+  OldRecipeUpdate withDescription(String description);
 }

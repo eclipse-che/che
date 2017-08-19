@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,37 +7,35 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.server.event;
-
-import org.eclipse.che.api.core.notification.RemoteSubscriptionManager;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Map;
 
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
 
-/**
- * Send workspace events using JSON RPC to the clients
- */
+import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.eclipse.che.api.core.notification.RemoteSubscriptionManager;
+import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+
+/** Send workspace events using JSON RPC to the clients */
 @Singleton
 public class MachineStatusJsonRpcMessenger {
-    private final RemoteSubscriptionManager remoteSubscriptionManager;
+  private final RemoteSubscriptionManager remoteSubscriptionManager;
 
-    @Inject
-    public MachineStatusJsonRpcMessenger(RemoteSubscriptionManager remoteSubscriptionManager) {
-        this.remoteSubscriptionManager = remoteSubscriptionManager;
-    }
+  @Inject
+  public MachineStatusJsonRpcMessenger(RemoteSubscriptionManager remoteSubscriptionManager) {
+    this.remoteSubscriptionManager = remoteSubscriptionManager;
+  }
 
-    @PostConstruct
-    private void postConstruct() {
-        remoteSubscriptionManager.register(MACHINE_STATUS_CHANGED_METHOD, MachineStatusEvent.class, this::predicate);
-    }
+  @PostConstruct
+  private void postConstruct() {
+    remoteSubscriptionManager.register(
+        MACHINE_STATUS_CHANGED_METHOD, MachineStatusEvent.class, this::predicate);
+  }
 
-    private boolean predicate(MachineStatusEvent event, Map<String, String> scope) {
-        return event.getIdentity().getWorkspaceId().equals(scope.get("workspaceId"));
-    }
+  private boolean predicate(MachineStatusEvent event, Map<String, String> scope) {
+    return event.getIdentity().getWorkspaceId().equals(scope.get("workspaceId"));
+  }
 }

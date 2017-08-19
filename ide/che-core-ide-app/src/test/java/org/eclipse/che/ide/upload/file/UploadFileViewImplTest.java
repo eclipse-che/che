@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,10 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.upload.file;
 
-import org.eclipse.che.ide.CoreLocalizationConstant;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.ui.Button;
@@ -20,17 +24,11 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwtmockito.GwtMockito;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.WsAgentURLModifier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Testing {@link UploadFileViewImpl} functionality.
@@ -40,81 +38,81 @@ import static org.mockito.Mockito.when;
 @RunWith(GwtMockitoTestRunner.class)
 public class UploadFileViewImplTest {
 
-    private UploadFileViewImpl view;
+  private UploadFileViewImpl view;
 
-    UploadFileViewImpl.UploadFileViewBinder binder;
-    CoreLocalizationConstant                locale;
-    WsAgentURLModifier                      wsAgentURLModifier;
+  UploadFileViewImpl.UploadFileViewBinder binder;
+  CoreLocalizationConstant locale;
+  WsAgentURLModifier wsAgentURLModifier;
 
-    @Before
-    public void setup() {
-        GwtMockito.initMocks(this);
-        binder = GWT.create(UploadFileViewImpl.UploadFileViewBinder.class);
-        locale = GWT.create(CoreLocalizationConstant.class);
-        wsAgentURLModifier = GWT.create(WsAgentURLModifier.class);
-        UploadFilePresenter presenter = mock(UploadFilePresenter.class);
-        view = new UploadFileViewImpl(binder, locale, wsAgentURLModifier);
-        view.setDelegate(presenter);
-    }
+  @Before
+  public void setup() {
+    GwtMockito.initMocks(this);
+    binder = GWT.create(UploadFileViewImpl.UploadFileViewBinder.class);
+    locale = GWT.create(CoreLocalizationConstant.class);
+    wsAgentURLModifier = GWT.create(WsAgentURLModifier.class);
+    UploadFilePresenter presenter = mock(UploadFilePresenter.class);
+    view = new UploadFileViewImpl(binder, locale, wsAgentURLModifier);
+    view.setDelegate(presenter);
+  }
 
-    @Test
-    public void getFileNameShouldBeExecuted() {
-        view.file = mock(FileUpload.class);
-        when(view.file.getFilename()).thenReturn("fileName");
+  @Test
+  public void getFileNameShouldBeExecuted() {
+    view.file = mock(FileUpload.class);
+    when(view.file.getFilename()).thenReturn("fileName");
 
-        view.getFileName();
+    view.getFileName();
 
-        verify(view.file).getFilename();
-    }
+    verify(view.file).getFilename();
+  }
 
-    @Test
-    public void submitShouldBeExecuted() {
-        view.submitForm = mock(FormPanel.class);
+  @Test
+  public void submitShouldBeExecuted() {
+    view.submitForm = mock(FormPanel.class);
 
-        view.submit();
+    view.submit();
 
-        verify(view.submitForm).submit();
-    }
+    verify(view.submitForm).submit();
+  }
 
-    @Test
-    public void setActionShouldBeExecuted() {
-        view.submitForm = mock(FormPanel.class);
-        final String url = "url";
-        when(wsAgentURLModifier.modify(url)).thenReturn(url);
-        view.setAction(url);
+  @Test
+  public void setActionShouldBeExecuted() {
+    view.submitForm = mock(FormPanel.class);
+    final String url = "url";
+    when(wsAgentURLModifier.modify(url)).thenReturn(url);
+    view.setAction(url);
 
-        verify(view.submitForm).setAction(eq(url));
-        verify(view.submitForm).setMethod(eq(FormPanel.METHOD_POST));
-    }
+    verify(view.submitForm).setAction(eq(url));
+    verify(view.submitForm).setMethod(eq(FormPanel.METHOD_POST));
+  }
 
-    @Test
-    public void setEncodingShouldBeExecuted() {
-        view.submitForm = mock(FormPanel.class);
+  @Test
+  public void setEncodingShouldBeExecuted() {
+    view.submitForm = mock(FormPanel.class);
 
-        view.setEncoding(FormPanel.ENCODING_MULTIPART);
+    view.setEncoding(FormPanel.ENCODING_MULTIPART);
 
-        verify(view.submitForm).setEncoding(eq(FormPanel.ENCODING_MULTIPART));
-    }
+    verify(view.submitForm).setEncoding(eq(FormPanel.ENCODING_MULTIPART));
+  }
 
-    @Test
-    public void setEnabledUploadButtonShouldBeExecuted() {
-        view.btnUpload = mock(Button.class);
+  @Test
+  public void setEnabledUploadButtonShouldBeExecuted() {
+    view.btnUpload = mock(Button.class);
 
-        view.setEnabledUploadButton(true);
-        verify(view.btnUpload).setEnabled(eq(true));
-    }
+    view.setEnabledUploadButton(true);
+    verify(view.btnUpload).setEnabled(eq(true));
+  }
 
-    @Test
-    public void closeShouldBeExecuted() {
-        view.uploadPanel = mock(FlowPanel.class);
-        view.file = mock(FileUpload.class);
-        view.overwrite = mock(CheckBox.class);
-        view.btnUpload = mock(Button.class);
+  @Test
+  public void closeShouldBeExecuted() {
+    view.uploadPanel = mock(FlowPanel.class);
+    view.file = mock(FileUpload.class);
+    view.overwrite = mock(CheckBox.class);
+    view.btnUpload = mock(Button.class);
 
-        view.closeDialog();
+    view.closeDialog();
 
-        verify(view.uploadPanel).remove((FileUpload)anyObject());
-        verify(view.btnUpload).setEnabled(eq(false));
-        verify(view.overwrite).setValue(eq(false));
-    }
+    verify(view.uploadPanel).remove((FileUpload) anyObject());
+    verify(view.btnUpload).setEnabled(eq(false));
+    verify(view.overwrite).setValue(eq(false));
+  }
 }

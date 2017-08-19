@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.installer.shared.model;
-
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 
 /**
  * An entity that might additionally injected into machine and brings functionality.
@@ -22,47 +21,33 @@ import java.util.Map;
  */
 public interface Installer {
 
-    /**
-     * Returns the id of the installer.
-     */
-    String getId();
+  /** Returns the id of the installer. */
+  String getId();
 
-    /**
-     * Returns the name of the installer.
-     */
-    String getName();
+  /** Returns the name of the installer. */
+  String getName();
 
-    /**
-     * Returns the version of the installer.
-     */
-    String getVersion();
+  /** Returns the version of the installer. */
+  String getVersion();
 
-    /**
-     * Returns the description of the installer.
-     */
-    String getDescription();
+  /** Returns the description of the installer. */
+  String getDescription();
 
-    /**
-     * Returns the depending installers, that must be applied before.
-     *
-     * <p>Values can be installer id with version separated with ':' symbol
-     * or just id then latest version will be used.
-     * Values examples: org.exec-agent:v1.0, org.exec-agent, org.exec-agent:latest.
-     */
-    List<String> getDependencies();
+  /**
+   * Returns the depending installers, that must be applied before.
+   *
+   * <p>Values can be installer id with version separated with ':' symbol or just id then latest
+   * version will be used. Values examples: org.exec-agent:v1.0, org.exec-agent,
+   * org.exec-agent:latest.
+   */
+  List<String> getDependencies();
 
-    /**
-     * Returns the script to be applied when machine is started.
-     */
-    String getScript();
+  /** Returns the script to be applied when machine is started. */
+  String getScript();
 
-    /**
-     * Returns any machine specific properties.
-     */
-    Map<String, String> getProperties();
+  /** Returns any machine specific properties. */
+  Map<String, String> getProperties();
 
-    /**
-     * Returns Che servers in the machine.
-     */
-    Map<String, ? extends ServerConfig> getServers();
+  /** Returns Che servers in the machine. */
+  Map<String, ? extends ServerConfig> getServers();
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.factory.server.jpa;
 
 import com.google.inject.TypeLiteral;
-
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.factory.server.model.impl.ActionImpl;
 import org.eclipse.che.api.factory.server.model.impl.ButtonImpl;
@@ -51,39 +50,46 @@ import org.h2.Driver;
  */
 public class FactoryTckModule extends TckModule {
 
-    @Override
-    protected void configure() {
-        H2DBTestServer server = H2DBTestServer.startDefault();
-        install(new PersistTestModuleBuilder().setDriver(Driver.class)
-                                              .runningOn(server)
-                                              .addEntityClasses(UserImpl.class,
-                                                                AccountImpl.class,
-                                                                FactoryImpl.class,
-                                                                OnAppClosedImpl.class,
-                                                                OnProjectsLoadedImpl.class,
-                                                                OnAppLoadedImpl.class,
-                                                                ActionImpl.class,
-                                                                ButtonImpl.class,
-                                                                IdeImpl.class,
-                                                                WorkspaceConfigImpl.class,
-                                                                ProjectConfigImpl.class,
-                                                                EnvironmentImpl.class,
-                                                                RecipeImpl.class,
-                                                                MachineImpl.class,
-                                                                MachineConfigImpl.class,
-                                                                SourceStorageImpl.class,
-                                                                ServerConfigImpl.class,
-                                                                CommandImpl.class)
-                                              .addEntityClass("org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
-                                              .setExceptionHandler(H2ExceptionHandler.class)
-                                              .build());
-        bind(DBInitializer.class).asEagerSingleton();
-        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
-        bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
+  @Override
+  protected void configure() {
+    H2DBTestServer server = H2DBTestServer.startDefault();
+    install(
+        new PersistTestModuleBuilder()
+            .setDriver(Driver.class)
+            .runningOn(server)
+            .addEntityClasses(
+                UserImpl.class,
+                AccountImpl.class,
+                FactoryImpl.class,
+                OnAppClosedImpl.class,
+                OnProjectsLoadedImpl.class,
+                OnAppLoadedImpl.class,
+                ActionImpl.class,
+                ButtonImpl.class,
+                IdeImpl.class,
+                WorkspaceConfigImpl.class,
+                ProjectConfigImpl.class,
+                EnvironmentImpl.class,
+                RecipeImpl.class,
+                MachineImpl.class,
+                MachineConfigImpl.class,
+                SourceStorageImpl.class,
+                ServerConfigImpl.class,
+                CommandImpl.class)
+            .addEntityClass(
+                "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+            .setExceptionHandler(H2ExceptionHandler.class)
+            .build());
+    bind(DBInitializer.class).asEagerSingleton();
+    bind(SchemaInitializer.class)
+        .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
+    bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
 
-        bind(FactoryDao.class).to(JpaFactoryDao.class);
+    bind(FactoryDao.class).to(JpaFactoryDao.class);
 
-        bind(new TypeLiteral<TckRepository<FactoryImpl>>() {}).toInstance(new JpaTckRepository<>(FactoryImpl.class));
-        bind(new TypeLiteral<TckRepository<UserImpl>>() {}).toInstance(new JpaTckRepository<>(UserImpl.class));
-    }
+    bind(new TypeLiteral<TckRepository<FactoryImpl>>() {})
+        .toInstance(new JpaTckRepository<>(FactoryImpl.class));
+    bind(new TypeLiteral<TckRepository<UserImpl>>() {})
+        .toInstance(new JpaTckRepository<>(UserImpl.class));
+  }
 }

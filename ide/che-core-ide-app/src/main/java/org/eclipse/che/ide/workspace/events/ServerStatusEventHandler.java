@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace.events;
+
+import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOPPED;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -29,74 +35,74 @@ import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
-import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
-import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOPPED;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
-
 /**
- * Receives notifications about changing servers' statuses.
- * After a notification is received it is processed and
- * an appropriate event is fired on the {@link EventBus}.
+ * Receives notifications about changing servers' statuses. After a notification is received it is
+ * processed and an appropriate event is fired on the {@link EventBus}.
  */
 @Singleton
 class ServerStatusEventHandler {
 
-    private final WorkspaceServiceClient workspaceServiceClient;
-    private final AppContext             appContext;
-    private final EventBus               eventBus;
+  private final WorkspaceServiceClient workspaceServiceClient;
+  private final AppContext appContext;
+  private final EventBus eventBus;
 
-    @Inject
-    ServerStatusEventHandler(RequestHandlerConfigurator configurator,
-                             WorkspaceServiceClient workspaceServiceClient,
-                             AppContext appContext,
-                             EventBus eventBus) {
-        this.workspaceServiceClient = workspaceServiceClient;
-        this.appContext = appContext;
-        this.eventBus = eventBus;
+  @Inject
+  ServerStatusEventHandler(
+      RequestHandlerConfigurator configurator,
+      WorkspaceServiceClient workspaceServiceClient,
+      AppContext appContext,
+      EventBus eventBus) {
+    this.workspaceServiceClient = workspaceServiceClient;
+    this.appContext = appContext;
+    this.eventBus = eventBus;
 
-        configurator.newConfiguration()
-                    .methodName(SERVER_STATUS_CHANGED_METHOD)
-                    .paramsAsDto(ServerStatusEvent.class)
-                    .noResult()
-                    .withBiConsumer((endpointId, event) -> {
-                        Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
+    configurator
+        .newConfiguration()
+        .methodName(SERVER_STATUS_CHANGED_METHOD)
+        .paramsAsDto(ServerStatusEvent.class)
+        .noResult()
+        .withBiConsumer(
+            (endpointId, event) -> {
+              Log.debug(getClass(), "Received notification from endpoint: " + endpointId);
 
-                        processStatus(event);
-                    });
-    }
+              processStatus(event);
+            });
+  }
 
-    private void processStatus(ServerStatusEvent event) {
-        workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
-            // Update workspace model in AppContext before firing an event.
-            // Because AppContext always must return an actual workspace model.
-            ((AppContextImpl)appContext).setWorkspace(workspace);
+  private void processStatus(ServerStatusEvent event) {
+    workspaceServiceClient
+        .getWorkspace(appContext.getWorkspaceId())
+        .then(
+            workspace -> {
+              // Update workspace model in AppContext before firing an event.
+              // Because AppContext always must return an actual workspace model.
+              ((AppContextImpl) appContext).setWorkspace(workspace);
 
-            if (event.getStatus() == RUNNING) {
-                eventBus.fireEvent(new ServerRunningEvent(event.getServerName(), event.getMachineName()));
-
-                // fire events for the often used servers
-                if (SERVER_WS_AGENT_HTTP_REFERENCE.equals(event.getServerName())) {
-                    eventBus.fireEvent(new WsAgentServerRunningEvent(event.getMachineName()));
-                } else if (SERVER_TERMINAL_REFERENCE.equals(event.getServerName())) {
-                    eventBus.fireEvent(new TerminalAgentServerRunningEvent(event.getMachineName()));
-                } else if (SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE.equals(event.getServerName())) {
-                    eventBus.fireEvent(new ExecAgentServerRunningEvent(event.getMachineName()));
-                }
-            } else if (event.getStatus() == STOPPED) {
-                eventBus.fireEvent(new ServerStoppedEvent(event.getServerName(), event.getMachineName()));
+              if (event.getStatus() == RUNNING) {
+                eventBus.fireEvent(
+                    new ServerRunningEvent(event.getServerName(), event.getMachineName()));
 
                 // fire events for the often used servers
                 if (SERVER_WS_AGENT_HTTP_REFERENCE.equals(event.getServerName())) {
-                    eventBus.fireEvent(new WsAgentServerStoppedEvent(event.getMachineName()));
+                  eventBus.fireEvent(new WsAgentServerRunningEvent(event.getMachineName()));
                 } else if (SERVER_TERMINAL_REFERENCE.equals(event.getServerName())) {
-                    eventBus.fireEvent(new TerminalAgentServerStoppedEvent(event.getMachineName()));
+                  eventBus.fireEvent(new TerminalAgentServerRunningEvent(event.getMachineName()));
                 } else if (SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE.equals(event.getServerName())) {
-                    eventBus.fireEvent(new ExecAgentServerStoppedEvent(event.getMachineName()));
+                  eventBus.fireEvent(new ExecAgentServerRunningEvent(event.getMachineName()));
                 }
-            }
-        });
-    }
+              } else if (event.getStatus() == STOPPED) {
+                eventBus.fireEvent(
+                    new ServerStoppedEvent(event.getServerName(), event.getMachineName()));
+
+                // fire events for the often used servers
+                if (SERVER_WS_AGENT_HTTP_REFERENCE.equals(event.getServerName())) {
+                  eventBus.fireEvent(new WsAgentServerStoppedEvent(event.getMachineName()));
+                } else if (SERVER_TERMINAL_REFERENCE.equals(event.getServerName())) {
+                  eventBus.fireEvent(new TerminalAgentServerStoppedEvent(event.getMachineName()));
+                } else if (SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE.equals(event.getServerName())) {
+                  eventBus.fireEvent(new ExecAgentServerStoppedEvent(event.getMachineName()));
+                }
+              }
+            });
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.toolbar.previews;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
@@ -20,53 +27,44 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 /** Tests for {@link PreviewUrl}. */
 @RunWith(MockitoJUnitRunner.class)
 public class PreviewUrlTest {
 
-    private static final String PREVIEW_URL  = "http://preview.com/param";
-    private static final String MACHINE_NAME = "dev-machine";
-    private static final String SERVER_PORT  = "8080";
+  private static final String PREVIEW_URL = "http://preview.com/param";
+  private static final String MACHINE_NAME = "dev-machine";
+  private static final String SERVER_PORT = "8080";
 
-    @Mock
-    private AppContext appContext;
+  @Mock private AppContext appContext;
 
-    private PreviewUrl previewUrl;
+  private PreviewUrl previewUrl;
 
-    @Before
-    public void setUp() {
-        ServerImpl server = mock(ServerImpl.class);
-        when(server.getUrl()).thenReturn("http://preview.com");
+  @Before
+  public void setUp() {
+    ServerImpl server = mock(ServerImpl.class);
+    when(server.getUrl()).thenReturn("http://preview.com");
 
-        Map<String, ServerImpl> servers = new HashMap<>();
-        servers.put(SERVER_PORT + "/tcp", server);
+    Map<String, ServerImpl> servers = new HashMap<>();
+    servers.put(SERVER_PORT + "/tcp", server);
 
-        MachineImpl devMachine = mock(MachineImpl.class);
-        when(devMachine.getName()).thenReturn(MACHINE_NAME);
-        when(devMachine.getServers()).thenReturn(servers);
+    MachineImpl devMachine = mock(MachineImpl.class);
+    when(devMachine.getName()).thenReturn(MACHINE_NAME);
+    when(devMachine.getServers()).thenReturn(servers);
 
-        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
-        when(workspace.getDevMachine()).thenReturn(Optional.of(devMachine));
-        when(appContext.getWorkspace()).thenReturn(workspace);
+    WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+    when(workspace.getDevMachine()).thenReturn(Optional.of(devMachine));
+    when(appContext.getWorkspace()).thenReturn(workspace);
 
-        previewUrl = new PreviewUrl(PREVIEW_URL, appContext);
-    }
+    previewUrl = new PreviewUrl(PREVIEW_URL, appContext);
+  }
 
-    @Test
-    public void testGetUrl() throws Exception {
-        assertEquals(PREVIEW_URL, previewUrl.getUrl());
-    }
+  @Test
+  public void testGetUrl() throws Exception {
+    assertEquals(PREVIEW_URL, previewUrl.getUrl());
+  }
 
-    @Test
-    public void testGetDisplayName() throws Exception {
-        assertEquals(MACHINE_NAME + ':' + SERVER_PORT + "/param", previewUrl.getDisplayName());
-    }
+  @Test
+  public void testGetDisplayName() throws Exception {
+    assertEquals(MACHINE_NAME + ':' + SERVER_PORT + "/param", previewUrl.getDisplayName());
+  }
 }

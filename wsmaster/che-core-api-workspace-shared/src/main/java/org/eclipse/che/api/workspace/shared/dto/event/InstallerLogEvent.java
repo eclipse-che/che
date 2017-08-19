@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
@@ -20,49 +20,44 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface InstallerLogEvent {
 
-    enum Stream {
-        STDOUT,
-        STDERR
-    }
+  enum Stream {
+    STDOUT,
+    STDERR
+  }
 
-    String getText();
+  String getText();
 
-    void setText(String text);
+  void setText(String text);
 
-    InstallerLogEvent withText(String text);
+  InstallerLogEvent withText(String text);
 
+  InstallerLogEvent.Stream getStream();
 
-    InstallerLogEvent.Stream getStream();
+  void setStream(InstallerLogEvent.Stream stream);
 
-    void setStream(InstallerLogEvent.Stream stream);
+  InstallerLogEvent withStream(InstallerLogEvent.Stream stream);
 
-    InstallerLogEvent withStream(InstallerLogEvent.Stream stream);
+  String getInstaller();
 
+  void setInstaller(String installer);
 
-    String getInstaller();
+  InstallerLogEvent withInstaller(String installer);
 
-    void setInstaller(String installer);
+  String getMachineName();
 
-    InstallerLogEvent withInstaller(String installer);
+  void setMachineName(String machineName);
 
+  InstallerLogEvent withMachineName(String machineName);
 
-    String getMachineName();
+  RuntimeIdentityDto getRuntimeId();
 
-    void setMachineName(String machineName);
+  void setRuntimeId(RuntimeIdentityDto runtimeId);
 
-    InstallerLogEvent withMachineName(String machineName);
+  InstallerLogEvent withRuntimeId(RuntimeIdentityDto runtimeId);
 
+  String getTime();
 
-    RuntimeIdentityDto getRuntimeId();
+  void setTime(String time);
 
-    void setRuntimeId(RuntimeIdentityDto runtimeId);
-
-    InstallerLogEvent withRuntimeId(RuntimeIdentityDto runtimeId);
-
-
-    String getTime();
-
-    void setTime(String time);
-
-    InstallerLogEvent withTime(String time);
+  InstallerLogEvent withTime(String time);
 }

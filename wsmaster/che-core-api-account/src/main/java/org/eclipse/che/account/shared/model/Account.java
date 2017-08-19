@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,25 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.account.shared.model;
 
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 public interface Account {
-    /**
-     * Returns account id
-     */
-    String getId();
+  /** Returns account id */
+  String getId();
 
-    /**
-     * Returns name of account
-     */
-    String getName();
+  /** Returns name of account */
+  String getName();
 
-    /**
-     * Returns type of account
-     */
-    String getType();
+  /** Returns type of account */
+  String getType();
 }

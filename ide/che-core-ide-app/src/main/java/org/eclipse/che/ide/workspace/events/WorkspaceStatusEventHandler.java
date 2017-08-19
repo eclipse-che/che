@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace.events;
+
+import static com.google.common.base.Strings.nullToEmpty;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -24,56 +30,55 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
-import static com.google.common.base.Strings.nullToEmpty;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
-import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STATUS_CHANGED_METHOD;
-
 /**
- * Receives notifications about changing workspace's status.
- * After a notification is received it is processed and
- * an appropriate event is fired on the {@link EventBus}.
+ * Receives notifications about changing workspace's status. After a notification is received it is
+ * processed and an appropriate event is fired on the {@link EventBus}.
  */
 @Singleton
 class WorkspaceStatusEventHandler {
 
-    private final WorkspaceServiceClient workspaceServiceClient;
-    private final AppContext             appContext;
-    private final EventBus               eventBus;
+  private final WorkspaceServiceClient workspaceServiceClient;
+  private final AppContext appContext;
+  private final EventBus eventBus;
 
-    @Inject
-    WorkspaceStatusEventHandler(RequestHandlerConfigurator configurator,
-                                WorkspaceServiceClient workspaceServiceClient,
-                                AppContext appContext,
-                                EventBus eventBus) {
-        this.workspaceServiceClient = workspaceServiceClient;
-        this.appContext = appContext;
-        this.eventBus = eventBus;
+  @Inject
+  WorkspaceStatusEventHandler(
+      RequestHandlerConfigurator configurator,
+      WorkspaceServiceClient workspaceServiceClient,
+      AppContext appContext,
+      EventBus eventBus) {
+    this.workspaceServiceClient = workspaceServiceClient;
+    this.appContext = appContext;
+    this.eventBus = eventBus;
 
-        configurator.newConfiguration()
-                    .methodName(WORKSPACE_STATUS_CHANGED_METHOD)
-                    .paramsAsDto(WorkspaceStatusEvent.class)
-                    .noResult()
-                    .withBiConsumer((endpointId, event) -> processStatus(event));
-    }
+    configurator
+        .newConfiguration()
+        .methodName(WORKSPACE_STATUS_CHANGED_METHOD)
+        .paramsAsDto(WorkspaceStatusEvent.class)
+        .noResult()
+        .withBiConsumer((endpointId, event) -> processStatus(event));
+  }
 
-    private void processStatus(WorkspaceStatusEvent event) {
-        workspaceServiceClient.getWorkspace(appContext.getWorkspaceId()).then(workspace -> {
-            // Update workspace model in AppContext before firing an event.
-            // Because AppContext always must return an actual workspace model.
-            ((AppContextImpl)appContext).setWorkspace(workspace);
+  private void processStatus(WorkspaceStatusEvent event) {
+    workspaceServiceClient
+        .getWorkspace(appContext.getWorkspaceId())
+        .then(
+            workspace -> {
+              // Update workspace model in AppContext before firing an event.
+              // Because AppContext always must return an actual workspace model.
+              ((AppContextImpl) appContext).setWorkspace(workspace);
 
-            if (event.getStatus() == STARTING) {
+              if (event.getStatus() == STARTING) {
                 eventBus.fireEvent(new WorkspaceStartingEvent());
-            } else if (event.getStatus() == RUNNING) {
+              } else if (event.getStatus() == RUNNING) {
                 eventBus.fireEvent(new WorkspaceRunningEvent());
-            } else if (event.getStatus() == STOPPING) {
+              } else if (event.getStatus() == STOPPING) {
                 eventBus.fireEvent(new WorkspaceStoppingEvent());
-            } else if (event.getStatus() == STOPPED) {
-                eventBus.fireEvent(new WorkspaceStoppedEvent(event.getError() != null, nullToEmpty(event.getError())));
-            }
-        });
-    }
+              } else if (event.getStatus() == STOPPED) {
+                eventBus.fireEvent(
+                    new WorkspaceStoppedEvent(
+                        event.getError() != null, nullToEmpty(event.getError())));
+              }
+            });
+  }
 }

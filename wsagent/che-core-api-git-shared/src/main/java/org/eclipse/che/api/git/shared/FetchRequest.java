@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.git.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Request to fetch data from remote repository.
@@ -21,49 +20,55 @@ import java.util.List;
  */
 @DTO
 public interface FetchRequest {
-    /** @return list of refspec to fetch */
-    List<String> getRefSpec();
-    
-    void setRefSpec(List<String> refSpec);
-    
-    FetchRequest withRefSpec(List<String> refSpec);
+  /** @return list of refspec to fetch */
+  List<String> getRefSpec();
 
-    /** @return remote name. If <code>null</code> then 'origin' will be used */
-    String getRemote();
-    
-    void setRemote(String remote);
-    
-    FetchRequest withRemote(String remote);
+  void setRefSpec(List<String> refSpec);
 
-    /** @return <code>true</code> if local refs must be deleted if they deleted in remote repository and <code>false</code> otherwise */
-    boolean isRemoveDeletedRefs();
-    
-    void setRemoveDeletedRefs(boolean isRemoveDeletedRefs);
-    
-    FetchRequest withRemoveDeletedRefs(boolean isRemoveDeletedRefs);
+  FetchRequest withRefSpec(List<String> refSpec);
 
-    /** @return time (in seconds) to wait without data transfer occurring before aborting fetching data from remote repository */
-    int getTimeout();
-    
-    void setTimeout(int timeout);
-    
-    FetchRequest withTimeout(int timeout);
+  /** @return remote name. If <code>null</code> then 'origin' will be used */
+  String getRemote();
 
-    /** Returns user name for authentication */
-    String getUsername();
+  void setRemote(String remote);
 
-    /** Set user name for authentication. */
-    void setUsername(String username);
+  FetchRequest withRemote(String remote);
 
-    /** @return {@link FetchRequest} with specified user name for authentication */
-    FetchRequest withUsername(String username);
+  /**
+   * @return <code>true</code> if local refs must be deleted if they deleted in remote repository
+   *     and <code>false</code> otherwise
+   */
+  boolean isRemoveDeletedRefs();
 
-    /** @return password for authentication */
-    String getPassword();
+  void setRemoveDeletedRefs(boolean isRemoveDeletedRefs);
 
-    /** Set password for authentication. */
-    void setPassword(String password);
+  FetchRequest withRemoveDeletedRefs(boolean isRemoveDeletedRefs);
 
-    /** @return {@link FetchRequest} with specified password for authentication */
-    FetchRequest withPassword(String password);
+  /**
+   * @return time (in seconds) to wait without data transfer occurring before aborting fetching data
+   *     from remote repository
+   */
+  int getTimeout();
+
+  void setTimeout(int timeout);
+
+  FetchRequest withTimeout(int timeout);
+
+  /** Returns user name for authentication */
+  String getUsername();
+
+  /** Set user name for authentication. */
+  void setUsername(String username);
+
+  /** @return {@link FetchRequest} with specified user name for authentication */
+  FetchRequest withUsername(String username);
+
+  /** @return password for authentication */
+  String getPassword();
+
+  /** Set password for authentication. */
+  void setPassword(String password);
+
+  /** @return {@link FetchRequest} with specified password for authentication */
+  FetchRequest withPassword(String password);
 }

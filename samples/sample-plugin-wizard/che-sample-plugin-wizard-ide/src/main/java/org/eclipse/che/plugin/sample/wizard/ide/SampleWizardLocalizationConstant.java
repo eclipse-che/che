@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.sample.wizard.ide;
 
 import com.google.gwt.i18n.client.Messages;
@@ -20,24 +20,23 @@ import com.google.gwt.i18n.client.Messages;
  */
 public interface SampleWizardLocalizationConstant extends Messages {
 
+  @Key("ok")
+  @DefaultMessage("Ok")
+  String buttonOk();
 
-    @Key("ok")
-    @DefaultMessage("Ok")
-    String buttonOk();
+  @Key("cancel")
+  @DefaultMessage("Cancel")
+  String buttonCancel();
 
-    @Key("cancel")
-    @DefaultMessage("Cancel")
-    String buttonCancel();
+  @Key("title")
+  @DefaultMessage("Enter file name and included header")
+  String title();
 
-    @Key("title")
-    @DefaultMessage("Enter file name and included header")
-    String title();
+  @Key("action.description")
+  @DefaultMessage("Create new X file")
+  String createXFileWithIncludedHeader();
 
-    @Key("action.description")
-    @DefaultMessage("Create new X file")
-    String createXFileWithIncludedHeader();
-
-    @Key("action.title")
-    @DefaultMessage("New X file")
-    String newXFile();
+  @Key("action.title")
+  @DefaultMessage("New X file")
+  String newXFile();
 }

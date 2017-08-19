@@ -16,46 +16,45 @@ package org.eclipse.che.ide.collections;
 
 /**
  * String Map interface for use in DTOs.
- * <p/>
- * On the client it is safe to cast this to a
- * {@link Jso}.
- * <p/>
- * On the server this is an instance of a wrapper object
- * {@link com.codenvy.ide.collections.java.JsonStringMapAdapter}.
+ *
+ * <p>On the client it is safe to cast this to a {@link Jso}.
+ *
+ * <p>On the server this is an instance of a wrapper object {@link
+ * com.codenvy.ide.collections.java.JsonStringMapAdapter}.
  */
 public interface StringMap<T> {
-    /**
-     * Callback to support iterating through the fields on this map.
-     *
-     * @param <T>
-     */
-    public interface IterationCallback<T> {
-        void onIteration(String key, T value);
-    }
+  /**
+   * Callback to support iterating through the fields on this map.
+   *
+   * @param <T>
+   */
+  public interface IterationCallback<T> {
+    void onIteration(String key, T value);
+  }
 
-    T get(String key);
+  T get(String key);
 
-    Array<String> getKeys();
+  Array<String> getKeys();
 
-    boolean isEmpty();
+  boolean isEmpty();
 
-    void iterate(IterationCallback<T> callback);
+  void iterate(IterationCallback<T> callback);
 
-    void put(String key, T value);
+  void put(String key, T value);
 
-    void putAll(StringMap<T> otherMap);
+  void putAll(StringMap<T> otherMap);
 
-    /** Removes the item with the given key, and returns it. */
-    T remove(String key);
+  /** Removes the item with the given key, and returns it. */
+  T remove(String key);
 
-    boolean containsKey(String key);
+  boolean containsKey(String key);
 
-    int size();
+  int size();
 
-    /**
-     * Returns an array containing all the values in this map.
-     *
-     * @return a snapshot of the values contained in the map
-     */
-    Array<T> getValues();
+  /**
+   * Returns an array containing all the values in this map.
+   *
+   * @return a snapshot of the values contained in the map
+   */
+  Array<T> getValues();
 }

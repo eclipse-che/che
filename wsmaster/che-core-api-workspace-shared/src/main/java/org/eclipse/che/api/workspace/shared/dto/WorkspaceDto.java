@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,58 +7,55 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto;
 
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.Map;
-
-/**
- * @author Yevhenii Voevodin
- */
+/** @author Yevhenii Voevodin */
 @DTO
 public interface WorkspaceDto extends Workspace {
 
-    @Override
-    WorkspaceConfigDto getConfig();
+  @Override
+  WorkspaceConfigDto getConfig();
 
-    void setConfig(WorkspaceConfigDto config);
+  void setConfig(WorkspaceConfigDto config);
 
-    WorkspaceDto withConfig(WorkspaceConfigDto config);
+  WorkspaceDto withConfig(WorkspaceConfigDto config);
 
-    @Override
-    RuntimeDto getRuntime();
+  @Override
+  RuntimeDto getRuntime();
 
-    void setRuntime(RuntimeDto runtime);
+  void setRuntime(RuntimeDto runtime);
 
-    WorkspaceDto withRuntime(RuntimeDto runtime);
+  WorkspaceDto withRuntime(RuntimeDto runtime);
 
-    void setId(String id);
+  void setId(String id);
 
-    WorkspaceDto withId(String id);
+  WorkspaceDto withId(String id);
 
-    void setNamespace(String namespace);
+  void setNamespace(String namespace);
 
-    WorkspaceDto withNamespace(String owner);
+  WorkspaceDto withNamespace(String owner);
 
-    void setStatus(WorkspaceStatus status);
+  void setStatus(WorkspaceStatus status);
 
-    WorkspaceDto withStatus(WorkspaceStatus status);
+  WorkspaceDto withStatus(WorkspaceStatus status);
 
-    void setTemporary(boolean isTemporary);
+  void setTemporary(boolean isTemporary);
 
-    WorkspaceDto withTemporary(boolean isTemporary);
+  WorkspaceDto withTemporary(boolean isTemporary);
 
-    void setAttributes(Map<String, String> attributes);
+  void setAttributes(Map<String, String> attributes);
 
-    WorkspaceDto withAttributes(Map<String, String> attributes);
+  WorkspaceDto withAttributes(Map<String, String> attributes);
 
-    Map<String, String> getLinks();
+  Map<String, String> getLinks();
 
-    void setLinks(Map<String, String> links);
+  void setLinks(Map<String, String> links);
 
-    WorkspaceDto withLinks(Map<String, String> links);
+  WorkspaceDto withLinks(Map<String, String> links);
 }

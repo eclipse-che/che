@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,22 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace;
-
-import com.google.inject.Inject;
-
-import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
-import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.workspace.CurrentWorkspaceManager;
-
-import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+
+import com.google.inject.Inject;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
+import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.app.AppContext;
 
 /**
  * The class contains business logic to stop workspace.
@@ -31,29 +28,35 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
  */
 public class StopWorkspaceAction extends AbstractPerspectiveAction {
 
-    private final CurrentWorkspaceManager workspaceManager;
-    private final AppContext             appContext;
+  private final CurrentWorkspaceManager workspaceManager;
+  private final AppContext appContext;
 
-    @Inject
-    public StopWorkspaceAction(CoreLocalizationConstant locale,
-                               AppContext appContext,
-                               CurrentWorkspaceManager workspaceManager) {
-        super(singletonList(PROJECT_PERSPECTIVE_ID), locale.stopWsTitle(), locale.stopWsDescription(), null, null);
-        this.appContext = appContext;
-        this.workspaceManager = workspaceManager;
-    }
+  @Inject
+  public StopWorkspaceAction(
+      CoreLocalizationConstant locale,
+      AppContext appContext,
+      CurrentWorkspaceManager workspaceManager) {
+    super(
+        singletonList(PROJECT_PERSPECTIVE_ID),
+        locale.stopWsTitle(),
+        locale.stopWsDescription(),
+        null,
+        null);
+    this.appContext = appContext;
+    this.workspaceManager = workspaceManager;
+  }
 
-    @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setVisible(true);
-        event.getPresentation().setEnabled(appContext.getWorkspace().getRuntime() != null);
-    }
+  @Override
+  public void updateInPerspective(@NotNull ActionEvent event) {
+    event.getPresentation().setVisible(true);
+    event.getPresentation().setEnabled(appContext.getWorkspace().getRuntime() != null);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        checkNotNull(appContext.getWorkspace().getId(), "Workspace id should not be null");
+  /** {@inheritDoc} */
+  @Override
+  public void actionPerformed(ActionEvent event) {
+    checkNotNull(appContext.getWorkspace().getId(), "Workspace id should not be null");
 
-        workspaceManager.stopWorkspace();
-    }
+    workspaceManager.stopWorkspace();
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core;
-
-import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.TreeSet;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -23,6 +18,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.TreeSet;
+import org.testng.annotations.Test;
+
 /**
  * Tests for {@link Page}.
  *
@@ -30,214 +29,223 @@ import static org.testng.Assert.assertTrue;
  */
 public class PageTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Required non-negative value of items before")
-    public void shouldThrowIllegalArgumentWhenItemsBeforeIsNegative() throws Exception {
-        new Page<>(emptyList(), -1, 1, 10);
-    }
+  @Test(
+    expectedExceptions = IllegalArgumentException.class,
+    expectedExceptionsMessageRegExp = "Required non-negative value of items before"
+  )
+  public void shouldThrowIllegalArgumentWhenItemsBeforeIsNegative() throws Exception {
+    new Page<>(emptyList(), -1, 1, 10);
+  }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Required positive value of page size")
-    public void shouldThrowIllegalArgumentWhenPageSizeIsNotPositive() throws Exception {
-        new Page<>(emptyList(), 1, 0, 10);
-    }
+  @Test(
+    expectedExceptions = IllegalArgumentException.class,
+    expectedExceptionsMessageRegExp = "Required positive value of page size"
+  )
+  public void shouldThrowIllegalArgumentWhenPageSizeIsNotPositive() throws Exception {
+    new Page<>(emptyList(), 1, 0, 10);
+  }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Required non-negative value of total items")
-    public void shouldThrowIllegalArgumentWhenTotalCountIsNegative() throws Exception {
-        new Page<>(emptyList(), 1, 1, -1);
-    }
+  @Test(
+    expectedExceptions = IllegalArgumentException.class,
+    expectedExceptionsMessageRegExp = "Required non-negative value of total items"
+  )
+  public void shouldThrowIllegalArgumentWhenTotalCountIsNegative() throws Exception {
+    new Page<>(emptyList(), 1, 1, -1);
+  }
 
-    @Test(expectedExceptions = NullPointerException.class,
-          expectedExceptionsMessageRegExp = "Required non-null items")
-    public void shouldThrownNPEWhenItemsListIsNull() throws Exception {
-        new Page<>(null, 1, 1, 1);
-    }
+  @Test(
+    expectedExceptions = NullPointerException.class,
+    expectedExceptionsMessageRegExp = "Required non-null items"
+  )
+  public void shouldThrownNPEWhenItemsListIsNull() throws Exception {
+    new Page<>(null, 1, 1, 1);
+  }
 
-    @Test
-    public void pageShouldBeEmptyWhenItIsCreatedWithAneEmptyItemsCollection() throws Exception {
-        assertTrue(new Page<>(emptyList(), 1, 1, 1).isEmpty());
-    }
+  @Test
+  public void pageShouldBeEmptyWhenItIsCreatedWithAneEmptyItemsCollection() throws Exception {
+    assertTrue(new Page<>(emptyList(), 1, 1, 1).isEmpty());
+  }
 
-    @Test
-    public void testMiddleDataWindowPage() throws Exception {
-        // item1. <= skipped                <- first page start
-        // item2. <= skipped
-        // item3. <- page start             <- first page end
-        // item4.
-        // item5. <- page end               <- last page start
-        // item6.
-        // item7.                           <- last page end
-        final Page<String> page = new Page<>(asList("item3", "item4", "item5"), 2, 3, 7);
+  @Test
+  public void testMiddleDataWindowPage() throws Exception {
+    // item1. <= skipped                <- first page start
+    // item2. <= skipped
+    // item3. <- page start             <- first page end
+    // item4.
+    // item5. <- page end               <- last page start
+    // item6.
+    // item7.                           <- last page end
+    final Page<String> page = new Page<>(asList("item3", "item4", "item5"), 2, 3, 7);
 
+    assertFalse(page.isEmpty(), "non-empty page");
+    assertEquals(page.getItemsCount(), 3, "items size ");
+    assertEquals(page.getSize(), 3, "page size");
+    assertEquals(page.getTotalItemsCount(), 7, "total elements count");
 
-        assertFalse(page.isEmpty(), "non-empty page");
-        assertEquals(page.getItemsCount(), 3, "items size ");
-        assertEquals(page.getSize(), 3, "page size");
-        assertEquals(page.getTotalItemsCount(), 7, "total elements count");
+    final Page.PageRef firstRef = page.getFirstPageRef();
+    assertEquals(firstRef.getPageSize(), 3, "first page size");
+    assertEquals(firstRef.getItemsBefore(), 0, "first page skip items");
 
-        final Page.PageRef firstRef = page.getFirstPageRef();
-        assertEquals(firstRef.getPageSize(), 3, "first page size");
-        assertEquals(firstRef.getItemsBefore(), 0, "first page skip items");
+    final Page.PageRef lastRef = page.getLastPageRef();
+    assertEquals(lastRef.getPageSize(), 3, "last page size");
+    assertEquals(lastRef.getItemsBefore(), 6, "last page skip items");
 
-        final Page.PageRef lastRef = page.getLastPageRef();
-        assertEquals(lastRef.getPageSize(), 3, "last page size");
-        assertEquals(lastRef.getItemsBefore(), 6, "last page skip items");
+    assertEquals(page.getNumber(), -1, "page number");
 
-        assertEquals(page.getNumber(), -1, "page number");
+    assertFalse(page.hasPreviousPage(), "has previous page");
 
-        assertFalse(page.hasPreviousPage(), "has previous page");
+    assertFalse(page.hasNextPage(), "page has next page");
 
-        assertFalse(page.hasNextPage(), "page has next page");
+    assertEquals(page.getItems(), asList("item3", "item4", "item5"));
+    assertEquals(page.getItems(i -> i.substring(4)), asList("3", "4", "5"));
+    assertEquals(
+        new ArrayList<>(page.fill(new TreeSet<>(reverseOrder()))),
+        asList("item5", "item4", "item3"));
+  }
 
-        assertEquals(page.getItems(), asList("item3", "item4", "item5"));
-        assertEquals(page.getItems(i -> i.substring(4)), asList("3", "4", "5"));
-        assertEquals(new ArrayList<>(page.fill(new TreeSet<>(reverseOrder()))), asList("item5", "item4", "item3"));
-    }
+  @Test
+  public void testMiddlePage() throws Exception {
+    //        item1.                      <- previous page start      <- first page start
+    //        item2.
+    //        item3.                      <- previous page end        <- first page end
+    //        item4. <- page start
+    //        item5.
+    //        item6. <- page end
+    //        item7.                      <- next page start
+    //        item8.
+    //        item9.                      <- next page end
+    //        item.10                                                 <- last page start/end
+    final Page<String> page = new Page<>(asList("item4", "item5", "item6"), 3, 3, 10);
 
-    @Test
-    public void testMiddlePage() throws Exception {
-        //        item1.                      <- previous page start      <- first page start
-        //        item2.
-        //        item3.                      <- previous page end        <- first page end
-        //        item4. <- page start
-        //        item5.
-        //        item6. <- page end
-        //        item7.                      <- next page start
-        //        item8.
-        //        item9.                      <- next page end
-        //        item.10                                                 <- last page start/end
-        final Page<String> page = new Page<>(asList("item4", "item5", "item6"), 3, 3, 10);
+    assertFalse(page.isEmpty(), "non-empty page");
+    assertEquals(page.getItemsCount(), 3, "items size");
+    assertEquals(page.getSize(), 3, "page size");
+    assertEquals(page.getTotalItemsCount(), 10, "total elements count");
 
+    final Page.PageRef firstRef = page.getFirstPageRef();
+    assertEquals(firstRef.getPageSize(), 3, "first page size");
+    assertEquals(firstRef.getItemsBefore(), 0, "first page skip items");
 
-        assertFalse(page.isEmpty(), "non-empty page");
-        assertEquals(page.getItemsCount(), 3, "items size");
-        assertEquals(page.getSize(), 3, "page size");
-        assertEquals(page.getTotalItemsCount(), 10, "total elements count");
+    final Page.PageRef lastRef = page.getLastPageRef();
+    assertEquals(lastRef.getPageSize(), 3, "last page size");
+    assertEquals(lastRef.getItemsBefore(), 9, "last page skip items");
 
-        final Page.PageRef firstRef = page.getFirstPageRef();
-        assertEquals(firstRef.getPageSize(), 3, "first page size");
-        assertEquals(firstRef.getItemsBefore(), 0, "first page skip items");
+    assertEquals(page.getNumber(), 2, "page number");
 
-        final Page.PageRef lastRef = page.getLastPageRef();
-        assertEquals(lastRef.getPageSize(), 3, "last page size");
-        assertEquals(lastRef.getItemsBefore(), 9, "last page skip items");
+    assertTrue(page.hasPreviousPage(), "has previous page");
+    final Page.PageRef prevRef = page.getPreviousPageRef();
+    assertEquals(prevRef.getItemsBefore(), 0, "items before prev page");
+    assertEquals(prevRef.getPageSize(), 3, "prev page size");
 
-        assertEquals(page.getNumber(), 2, "page number");
+    assertTrue(page.hasNextPage(), "page has next page");
+    final Page.PageRef nextRef = page.getNextPageRef();
+    assertEquals(nextRef.getItemsBefore(), 6, "items before next page");
+    assertEquals(nextRef.getPageSize(), 3, "next page size");
 
-        assertTrue(page.hasPreviousPage(), "has previous page");
-        final Page.PageRef prevRef = page.getPreviousPageRef();
-        assertEquals(prevRef.getItemsBefore(), 0, "items before prev page");
-        assertEquals(prevRef.getPageSize(), 3, "prev page size");
+    assertEquals(page.getItems(), asList("item4", "item5", "item6"));
+    assertEquals(page.getItems(i -> i.substring(4)), asList("4", "5", "6"));
+    assertEquals(
+        new ArrayList<>(page.fill(new TreeSet<>(reverseOrder()))),
+        asList("item6", "item5", "item4"));
+  }
 
-        assertTrue(page.hasNextPage(), "page has next page");
-        final Page.PageRef nextRef = page.getNextPageRef();
-        assertEquals(nextRef.getItemsBefore(), 6, "items before next page");
-        assertEquals(nextRef.getPageSize(), 3, "next page size");
+  @Test
+  public void testFirstPage() throws Exception {
+    // item1. <- page start
+    // item2.
+    // item3.
+    // item4.
+    // item5. <- page end
+    // item6.                           <- last page start
+    // item7.                           <- last page end
+    final Page<String> page =
+        new Page<>(asList("item1", "item2", "item3", "item4", "item5"), 0, 5, 7);
 
-        assertEquals(page.getItems(), asList("item4", "item5", "item6"));
-        assertEquals(page.getItems(i -> i.substring(4)), asList("4", "5", "6"));
-        assertEquals(new ArrayList<>(page.fill(new TreeSet<>(reverseOrder()))), asList("item6", "item5", "item4"));
-    }
+    assertFalse(page.isEmpty(), "page is empty");
+    assertEquals(page.getItemsCount(), 5, "items items count");
+    assertEquals(page.getSize(), 5, "page size");
+    assertEquals(page.getTotalItemsCount(), 7, "total items");
 
-    @Test
-    public void testFirstPage() throws Exception {
-        // item1. <- page start
-        // item2.
-        // item3.
-        // item4.
-        // item5. <- page end
-        // item6.                           <- last page start
-        // item7.                           <- last page end
-        final Page<String> page = new Page<>(asList("item1", "item2", "item3", "item4", "item5"), 0, 5, 7);
+    final Page.PageRef firstRef = page.getFirstPageRef();
+    assertEquals(firstRef.getPageSize(), 5, "first page size");
+    assertEquals(firstRef.getItemsBefore(), 0, "first page skip items");
 
+    final Page.PageRef lastRef = page.getLastPageRef();
+    assertEquals(lastRef.getPageSize(), 5, "last page size");
+    assertEquals(lastRef.getItemsBefore(), 5, "last page skip items");
 
-        assertFalse(page.isEmpty(), "page is empty");
-        assertEquals(page.getItemsCount(), 5, "items items count");
-        assertEquals(page.getSize(), 5, "page size");
-        assertEquals(page.getTotalItemsCount(), 7, "total items");
+    assertEquals(page.getNumber(), 1, "page number");
 
-        final Page.PageRef firstRef = page.getFirstPageRef();
-        assertEquals(firstRef.getPageSize(), 5, "first page size");
-        assertEquals(firstRef.getItemsBefore(), 0, "first page skip items");
+    assertFalse(page.hasPreviousPage(), "has previous page");
 
-        final Page.PageRef lastRef = page.getLastPageRef();
-        assertEquals(lastRef.getPageSize(), 5, "last page size");
-        assertEquals(lastRef.getItemsBefore(), 5, "last page skip items");
+    assertTrue(page.hasNextPage(), "page has next page");
+    final Page.PageRef nextRef = page.getNextPageRef();
+    assertEquals(nextRef.getPageSize(), 5, "next page size");
+    assertEquals(nextRef.getItemsBefore(), 5, "next page skip items");
 
-        assertEquals(page.getNumber(), 1, "page number");
+    assertEquals(page.getItems(), asList("item1", "item2", "item3", "item4", "item5"));
+  }
 
-        assertFalse(page.hasPreviousPage(), "has previous page");
+  @Test
+  public void testLastPage() throws Exception {
+    // item1.                   <- first page start
+    // item2.
+    // item3.                   <- first page end
+    // item4.                   <- prev page start
+    // item5.
+    // item6.                   <- prev page end
+    // item7. <- page start
+    // item8. <- page end
+    final Page<String> page = new Page<>(asList("item7", "item8"), 6, 3, 8);
 
-        assertTrue(page.hasNextPage(), "page has next page");
-        final Page.PageRef nextRef = page.getNextPageRef();
-        assertEquals(nextRef.getPageSize(), 5, "next page size");
-        assertEquals(nextRef.getItemsBefore(), 5, "next page skip items");
+    assertFalse(page.isEmpty(), "page is empty");
+    assertEquals(page.getItemsCount(), 2, "items count");
+    assertEquals(page.getSize(), 3, "page size");
+    assertEquals(page.getTotalItemsCount(), 8, "total items");
 
-        assertEquals(page.getItems(), asList("item1", "item2", "item3", "item4", "item5"));
-    }
+    final Page.PageRef firstRef = page.getFirstPageRef();
+    assertEquals(firstRef.getPageSize(), 3, "first page size");
+    assertEquals(firstRef.getItemsBefore(), 0, "first page skip items");
 
-    @Test
-    public void testLastPage() throws Exception {
-        // item1.                   <- first page start
-        // item2.
-        // item3.                   <- first page end
-        // item4.                   <- prev page start
-        // item5.
-        // item6.                   <- prev page end
-        // item7. <- page start
-        // item8. <- page end
-        final Page<String> page = new Page<>(asList("item7", "item8"), 6, 3, 8);
+    final Page.PageRef lastRef = page.getLastPageRef();
+    assertEquals(lastRef.getPageSize(), 3, "last page size");
+    assertEquals(lastRef.getItemsBefore(), 6, "last page skip items");
 
-        assertFalse(page.isEmpty(), "page is empty");
-        assertEquals(page.getItemsCount(), 2, "items count");
-        assertEquals(page.getSize(), 3, "page size");
-        assertEquals(page.getTotalItemsCount(), 8, "total items");
+    assertEquals(page.getNumber(), 3, "page number");
 
-        final Page.PageRef firstRef = page.getFirstPageRef();
-        assertEquals(firstRef.getPageSize(), 3, "first page size");
-        assertEquals(firstRef.getItemsBefore(), 0, "first page skip items");
+    assertTrue(page.hasPreviousPage(), "has previous page");
+    final Page.PageRef prevRef = page.getPreviousPageRef();
+    assertEquals(prevRef.getPageSize(), 3, "prev page size");
+    assertEquals(prevRef.getItemsBefore(), 3, "prev page skip items");
 
-        final Page.PageRef lastRef = page.getLastPageRef();
-        assertEquals(lastRef.getPageSize(), 3, "last page size");
-        assertEquals(lastRef.getItemsBefore(), 6, "last page skip items");
+    assertFalse(page.hasNextPage(), "has next page");
 
-        assertEquals(page.getNumber(), 3, "page number");
+    assertEquals(page.getItems(), asList("item7", "item8"));
+  }
 
-        assertTrue(page.hasPreviousPage(), "has previous page");
-        final Page.PageRef prevRef = page.getPreviousPageRef();
-        assertEquals(prevRef.getPageSize(), 3, "prev page size");
-        assertEquals(prevRef.getItemsBefore(), 3, "prev page skip items");
+  @Test
+  public void testSmallPage() throws Exception {
+    final Page<String> page = new Page<>(singleton("item1"), 0, 1, 1);
 
-        assertFalse(page.hasNextPage(), "has next page");
+    assertFalse(page.isEmpty(), "page is empty");
+    assertEquals(page.getItemsCount(), 1, "items count");
+    assertEquals(page.getSize(), 1, "page size");
+    assertEquals(page.getTotalItemsCount(), 1, "total items");
 
-        assertEquals(page.getItems(), asList("item7", "item8"));
-    }
+    final Page.PageRef firstRef = page.getFirstPageRef();
+    assertEquals(firstRef.getPageSize(), 1, "first page size");
+    assertEquals(firstRef.getItemsBefore(), 0, "first page skip items");
 
-    @Test
-    public void testSmallPage() throws Exception {
-        final Page<String> page = new Page<>(singleton("item1"), 0, 1, 1);
+    final Page.PageRef lastRef = page.getLastPageRef();
+    assertEquals(lastRef.getPageSize(), 1, "last page size");
+    assertEquals(lastRef.getItemsBefore(), 0, "last page skip items");
 
+    assertEquals(page.getNumber(), 1, "page number");
 
-        assertFalse(page.isEmpty(), "page is empty");
-        assertEquals(page.getItemsCount(), 1, "items count");
-        assertEquals(page.getSize(), 1, "page size");
-        assertEquals(page.getTotalItemsCount(), 1, "total items");
+    assertFalse(page.hasPreviousPage(), "has previous page");
 
-        final Page.PageRef firstRef = page.getFirstPageRef();
-        assertEquals(firstRef.getPageSize(), 1, "first page size");
-        assertEquals(firstRef.getItemsBefore(), 0, "first page skip items");
+    assertFalse(page.hasNextPage(), "page has next page");
 
-        final Page.PageRef lastRef = page.getLastPageRef();
-        assertEquals(lastRef.getPageSize(), 1, "last page size");
-        assertEquals(lastRef.getItemsBefore(), 0, "last page skip items");
-
-        assertEquals(page.getNumber(), 1, "page number");
-
-        assertFalse(page.hasPreviousPage(), "has previous page");
-
-        assertFalse(page.hasNextPage(), "page has next page");
-
-        assertEquals(page.getItems(), singleton("item1"));
-    }
+    assertEquals(page.getItems(), singleton("item1"));
+  }
 }

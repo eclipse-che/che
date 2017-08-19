@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.system.server;
 
+import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDOWN;
+import static org.eclipse.che.api.system.shared.SystemStatus.RUNNING;
+import static org.testng.Assert.assertEquals;
+
+import java.util.EnumSet;
 import org.eclipse.che.api.system.shared.dto.SystemServiceEventDto;
 import org.eclipse.che.api.system.shared.dto.SystemServiceItemStoppedEventDto;
 import org.eclipse.che.api.system.shared.dto.SystemStatusChangedEventDto;
@@ -20,12 +25,6 @@ import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedE
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
 import org.testng.annotations.Test;
 
-import java.util.EnumSet;
-
-import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDOWN;
-import static org.eclipse.che.api.system.shared.SystemStatus.RUNNING;
-import static org.testng.Assert.assertEquals;
-
 /**
  * Tests {@link DtoConverter}.
  *
@@ -33,56 +32,59 @@ import static org.testng.Assert.assertEquals;
  */
 public class DtoConverterTest {
 
-    @Test
-    public void convertsSystemStatusChangedEvent() {
-        SystemStatusChangedEvent event = new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN);
+  @Test
+  public void convertsSystemStatusChangedEvent() {
+    SystemStatusChangedEvent event = new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN);
 
-        SystemStatusChangedEventDto dto = DtoConverter.asDto(event);
+    SystemStatusChangedEventDto dto = DtoConverter.asDto(event);
 
-        assertEquals(dto.getType(), EventType.STATUS_CHANGED);
-        assertEquals(dto.getPrevStatus(), event.getPrevStatus());
-        assertEquals(dto.getStatus(), event.getStatus());
-    }
+    assertEquals(dto.getType(), EventType.STATUS_CHANGED);
+    assertEquals(dto.getPrevStatus(), event.getPrevStatus());
+    assertEquals(dto.getStatus(), event.getStatus());
+  }
 
-    @Test
-    public void convertsSystemServiceStoppingEvent() {
-        StoppingSystemServiceEvent event = new StoppingSystemServiceEvent("service1");
+  @Test
+  public void convertsSystemServiceStoppingEvent() {
+    StoppingSystemServiceEvent event = new StoppingSystemServiceEvent("service1");
 
-        SystemServiceEventDto dto = DtoConverter.asDto(event);
+    SystemServiceEventDto dto = DtoConverter.asDto(event);
 
-        assertEquals(dto.getType(), EventType.STOPPING_SERVICE);
-        assertEquals(dto.getService(), event.getServiceName());
-    }
+    assertEquals(dto.getType(), EventType.STOPPING_SERVICE);
+    assertEquals(dto.getService(), event.getServiceName());
+  }
 
-    @Test
-    public void convertsSystemServiceStoppedEvent() {
-        SystemServiceStoppedEvent event = new SystemServiceStoppedEvent("service1");
+  @Test
+  public void convertsSystemServiceStoppedEvent() {
+    SystemServiceStoppedEvent event = new SystemServiceStoppedEvent("service1");
 
-        SystemServiceEventDto dto = DtoConverter.asDto(event);
+    SystemServiceEventDto dto = DtoConverter.asDto(event);
 
-        assertEquals(dto.getType(), EventType.SERVICE_STOPPED);
-        assertEquals(dto.getService(), event.getServiceName());
-    }
+    assertEquals(dto.getType(), EventType.SERVICE_STOPPED);
+    assertEquals(dto.getService(), event.getServiceName());
+  }
 
-    @Test
-    public void convertsSystemServiceItemStoppedEvent() {
-        SystemServiceItemStoppedEvent event = new SystemServiceItemStoppedEvent("service1", "workspace1", 3, 5);
+  @Test
+  public void convertsSystemServiceItemStoppedEvent() {
+    SystemServiceItemStoppedEvent event =
+        new SystemServiceItemStoppedEvent("service1", "workspace1", 3, 5);
 
-        SystemServiceItemStoppedEventDto dto = DtoConverter.asDto(event);
+    SystemServiceItemStoppedEventDto dto = DtoConverter.asDto(event);
 
-        assertEquals(dto.getType(), EventType.SERVICE_ITEM_STOPPED);
-        assertEquals(dto.getService(), event.getServiceName());
-        assertEquals(dto.getItem(), event.getItem());
-        assertEquals(dto.getCurrent(), event.getCurrent());
-        assertEquals(dto.getTotal(), event.getTotal());
-    }
+    assertEquals(dto.getType(), EventType.SERVICE_ITEM_STOPPED);
+    assertEquals(dto.getService(), event.getServiceName());
+    assertEquals(dto.getItem(), event.getItem());
+    assertEquals(dto.getCurrent(), event.getCurrent());
+    assertEquals(dto.getTotal(), event.getTotal());
+  }
 
-    @Test
-    public void allEventTypesAreHandled() {
-        EnumSet<EventType> handled = EnumSet.of(EventType.STATUS_CHANGED,
-                                                EventType.STOPPING_SERVICE,
-                                                EventType.SERVICE_ITEM_STOPPED,
-                                                EventType.SERVICE_STOPPED);
-        assertEquals(handled, EnumSet.allOf(EventType.class));
-    }
+  @Test
+  public void allEventTypesAreHandled() {
+    EnumSet<EventType> handled =
+        EnumSet.of(
+            EventType.STATUS_CHANGED,
+            EventType.STOPPING_SERVICE,
+            EventType.SERVICE_ITEM_STOPPED,
+            EventType.SERVICE_STOPPED);
+    assertEquals(handled, EnumSet.allOf(EventType.class));
+  }
 }

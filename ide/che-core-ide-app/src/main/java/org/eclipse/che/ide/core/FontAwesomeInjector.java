@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.core;
 
 import com.google.gwt.core.client.GWT;
@@ -23,11 +23,11 @@ import com.google.inject.Singleton;
 @Singleton
 public class FontAwesomeInjector {
 
-    public FontAwesomeInjector() {
-        LinkElement link = Document.get().createLinkElement();
-        link.setRel("stylesheet");
-        link.setHref(GWT.getModuleBaseForStaticFiles() + "font-awesome-4.5.0/css/font-awesome.min.css");
+  public FontAwesomeInjector() {
+    LinkElement link = Document.get().createLinkElement();
+    link.setRel("stylesheet");
+    link.setHref(GWT.getModuleBaseForStaticFiles() + "font-awesome-4.5.0/css/font-awesome.min.css");
 
-        Document.get().getHead().appendChild(link);
-    }
+    Document.get().getHead().appendChild(link);
+  }
 }

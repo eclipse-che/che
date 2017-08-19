@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
-
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactoryImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -35,38 +34,38 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.proxy.ProxySe
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ServersEnvVarsProvisioningModule;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.volume.ExtraVolumesProvisioner;
 
-/**
- * @author Alexander Garagatyi
- */
+/** @author Alexander Garagatyi */
 public class DockerInfraModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        Multibinder<ContainerSystemSettingsProvisioner> settingsProvisioners =
-                Multibinder.newSetBinder(binder(), ContainerSystemSettingsProvisioner.class);
-        settingsProvisioners.addBinding().to(DnsSettingsProvisioner.class);
-        settingsProvisioners.addBinding().to(ExtraHostsProvisioner.class);
-        settingsProvisioners.addBinding().to(ProxySettingsProvisioner.class);
-        settingsProvisioners.addBinding().to(ExtraVolumesProvisioner.class);
-        settingsProvisioners.addBinding().to(SwapLimitProvisioner.class);
-        settingsProvisioners.addBinding().to(DefaultRAMProvisioner.class);
-        settingsProvisioners.addBinding().to(PidLimitProvisioner.class);
-        settingsProvisioners.addBinding().to(CGroupParentProvisioner.class);
-        settingsProvisioners.addBinding().to(CpuLimitsProvisioner.class);
-        settingsProvisioners.addBinding().to(PrivilegedModeProvisioner.class);
+  @Override
+  protected void configure() {
+    Multibinder<ContainerSystemSettingsProvisioner> settingsProvisioners =
+        Multibinder.newSetBinder(binder(), ContainerSystemSettingsProvisioner.class);
+    settingsProvisioners.addBinding().to(DnsSettingsProvisioner.class);
+    settingsProvisioners.addBinding().to(ExtraHostsProvisioner.class);
+    settingsProvisioners.addBinding().to(ProxySettingsProvisioner.class);
+    settingsProvisioners.addBinding().to(ExtraVolumesProvisioner.class);
+    settingsProvisioners.addBinding().to(SwapLimitProvisioner.class);
+    settingsProvisioners.addBinding().to(DefaultRAMProvisioner.class);
+    settingsProvisioners.addBinding().to(PidLimitProvisioner.class);
+    settingsProvisioners.addBinding().to(CGroupParentProvisioner.class);
+    settingsProvisioners.addBinding().to(CpuLimitsProvisioner.class);
+    settingsProvisioners.addBinding().to(PrivilegedModeProvisioner.class);
 
-        install(new DockerEnvironmentTypeModule());
-        install(new ContainerSystemSettingsProvisioningModule());
-        install(new ServersEnvVarsProvisioningModule());
+    install(new DockerEnvironmentTypeModule());
+    install(new ContainerSystemSettingsProvisioningModule());
+    install(new ServersEnvVarsProvisioningModule());
 
-        Multibinder<RuntimeInfrastructure> mb = Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
-        mb.addBinding().to(DockerRuntimeInfrastructure.class);
+    Multibinder<RuntimeInfrastructure> mb =
+        Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
+    mb.addBinding().to(DockerRuntimeInfrastructure.class);
 
-        bind(DockerRegistryDynamicAuthResolver.class).to(NoOpDockerRegistryDynamicAuthResolverImpl.class);
+    bind(DockerRegistryDynamicAuthResolver.class)
+        .to(NoOpDockerRegistryDynamicAuthResolverImpl.class);
 
-        install(new FactoryModuleBuilder().build(DockerRuntimeFactory.class));
-        install(new FactoryModuleBuilder().build(DockerBootstrapperFactory.class));
-        install(new FactoryModuleBuilder().build(DockerRuntimeContextFactory.class));
+    install(new FactoryModuleBuilder().build(DockerRuntimeFactory.class));
+    install(new FactoryModuleBuilder().build(DockerBootstrapperFactory.class));
+    install(new FactoryModuleBuilder().build(DockerRuntimeContextFactory.class));
 
-        bind(ServerCheckerFactory.class).to(ServerCheckerFactoryImpl.class);
-    }
+    bind(ServerCheckerFactory.class).to(ServerCheckerFactoryImpl.class);
+  }
 }

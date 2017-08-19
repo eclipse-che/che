@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.maven.tools;
 
-import org.eclipse.che.commons.xml.Element;
-import org.eclipse.che.commons.xml.NewElement;
+import static org.eclipse.che.commons.xml.NewElement.createElement;
 
 import java.util.List;
-
-import static org.eclipse.che.commons.xml.NewElement.createElement;
+import org.eclipse.che.commons.xml.Element;
+import org.eclipse.che.commons.xml.NewElement;
 
 /**
  * Section for management of default dependency information for use in a group of POMs.
@@ -24,47 +23,43 @@ import static org.eclipse.che.commons.xml.NewElement.createElement;
  */
 public class DependencyManagement {
 
-    private Dependencies dependencies;
+  private Dependencies dependencies;
 
-    Element dmElement;
+  Element dmElement;
 
-    public DependencyManagement() {
+  public DependencyManagement() {}
+
+  DependencyManagement(Element element, List<Dependency> dependencies) {
+    this.dmElement = element;
+    this.dependencies = new Dependencies(element, dependencies);
+  }
+
+  /**
+   * Returns list of dependencies or empty list if project doesn't have dependencies.
+   *
+   * <p><b>Note: update methods should not be used on returned list</b>
+   *
+   * @see #dependencies()
+   */
+  public List<Dependency> getDependencies() {
+    return dependencies().get();
+  }
+
+  /** Returns returns {@link Dependencies} instance which helps to manage project dependencies */
+  public Dependencies dependencies() {
+    if (dependencies == null) {
+      dependencies = new Dependencies(dmElement);
     }
+    return dependencies;
+  }
 
-    DependencyManagement(Element element, List<Dependency> dependencies) {
-        this.dmElement = element;
-        this.dependencies = new Dependencies(element, dependencies);
+  void remove() {
+    if (dmElement != null) {
+      dmElement.remove();
     }
+  }
 
-    /**
-     * Returns list of dependencies or empty list if project doesn't have dependencies.
-     * <p/>
-     * <b>Note: update methods should not be used on returned list</b>
-     *
-     * @see #dependencies()
-     */
-    public List<Dependency> getDependencies() {
-        return dependencies().get();
-    }
-
-    /**
-     * Returns returns {@link Dependencies} instance which
-     * helps to manage project dependencies
-     */
-    public Dependencies dependencies() {
-        if (dependencies == null) {
-            dependencies = new Dependencies(dmElement);
-        }
-        return dependencies;
-    }
-
-    void remove() {
-        if (dmElement != null) {
-            dmElement.remove();
-        }
-    }
-
-    NewElement asXMLElement() {
-        return createElement("dependencyManagement", dependencies.asXMLElement());
-    }
+  NewElement asXMLElement() {
+    return createElement("dependencyManagement", dependencies.asXMLElement());
+  }
 }

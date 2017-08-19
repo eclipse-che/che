@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,41 +7,35 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author gazarenkov
- */
+/** @author gazarenkov */
 @DTO
 public interface ServerStatusEvent {
 
-    ServerStatus getStatus();
+  ServerStatus getStatus();
 
-    ServerStatusEvent withStatus(ServerStatus status);
+  ServerStatusEvent withStatus(ServerStatus status);
 
+  String getServerName();
 
-    String getServerName();
+  ServerStatusEvent withServerName(String serverName);
 
-    ServerStatusEvent withServerName(String serverName);
+  String getServerUrl();
 
-    String getServerUrl();
+  ServerStatusEvent withServerUrl(String serverUrl);
 
-    ServerStatusEvent withServerUrl(String serverUrl);
+  String getMachineName();
 
-    String getMachineName();
+  ServerStatusEvent withMachineName(String machineName);
 
-    ServerStatusEvent withMachineName(String machineName);
+  /** @return runtime identity */
+  RuntimeIdentityDto getIdentity();
 
-    /**
-     * @return runtime identity
-     */
-    RuntimeIdentityDto getIdentity();
-
-    ServerStatusEvent withIdentity(RuntimeIdentityDto identity);
-
+  ServerStatusEvent withIdentity(RuntimeIdentityDto identity);
 }

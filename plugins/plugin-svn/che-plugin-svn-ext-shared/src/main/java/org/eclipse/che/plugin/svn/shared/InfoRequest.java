@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,81 +7,83 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.shared;
 
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
-
-import javax.validation.constraints.NotNull;
 
 @DTO
 public interface InfoRequest {
 
-    /**************************************************************************
-     *
-     *  Project path
-     *
-     **************************************************************************/
+  /**
+   * ************************************************************************
+   *
+   * <p>Project path
+   *
+   * <p>************************************************************************
+   */
+  String getProjectPath();
 
-    String getProjectPath();
+  void setProjectPath(@NotNull final String projectPath);
 
-    void setProjectPath(@NotNull final String projectPath);
+  InfoRequest withProjectPath(@NotNull final String projectPath);
 
-    InfoRequest withProjectPath(@NotNull final String projectPath);
+  /**
+   * ************************************************************************
+   *
+   * <p>Target
+   *
+   * <p>************************************************************************
+   */
+  String getTarget();
 
-    /**************************************************************************
-     *
-     *  Target
-     *
-     **************************************************************************/
+  void setTarget(@NotNull final String target);
 
-    String getTarget();
+  InfoRequest withTarget(@NotNull final String target);
 
-    void setTarget(@NotNull final String target);
+  /**
+   * ************************************************************************
+   *
+   * <p>Revision
+   *
+   * <p>************************************************************************
+   */
+  String getRevision();
 
-    InfoRequest withTarget(@NotNull final String target);
+  void setRevision(@NotNull final String revision);
 
-    /**************************************************************************
-     *
-     *  Revision
-     *
-     **************************************************************************/
+  InfoRequest withRevision(@NotNull final String revision);
 
-    String getRevision();
+  /**
+   * ************************************************************************
+   *
+   * <p>Children
+   *
+   * <p>************************************************************************
+   */
+  boolean getChildren();
 
-    void setRevision(@NotNull final String revision);
+  void setChildren(@NotNull final boolean children);
 
-    InfoRequest withRevision(@NotNull final String revision);
+  InfoRequest withChildren(@NotNull final boolean children);
 
-    /**************************************************************************
-     *
-     *  Children
-     *
-     **************************************************************************/
+  /** @return user name for authentication */
+  String getUsername();
 
-    boolean getChildren();
+  /** Set user name for authentication. */
+  void setUsername(@Nullable final String username);
 
-    void setChildren(@NotNull final boolean children);
+  /** @return {@link CheckoutRequest} with specified user name for authentication */
+  InfoRequest withUsername(@Nullable final String username);
 
-    InfoRequest withChildren(@NotNull final boolean children);
+  /** @return password for authentication */
+  String getPassword();
 
-    /** @return user name for authentication */
-    String getUsername();
+  /** Set password for authentication. */
+  void setPassword(@Nullable final String password);
 
-    /** Set user name for authentication. */
-    void setUsername(@Nullable final String username);
-
-    /** @return {@link CheckoutRequest} with specified user name for authentication */
-    InfoRequest withUsername(@Nullable final String username);
-
-    /** @return password for authentication */
-    String getPassword();
-
-    /** Set password for authentication. */
-    void setPassword(@Nullable final String password);
-
-    /** @return {@link CheckoutRequest} with specified password for authentication */
-    InfoRequest withPassword(@Nullable final String password);
-
+  /** @return {@link CheckoutRequest} with specified password for authentication */
+  InfoRequest withPassword(@Nullable final String password);
 }

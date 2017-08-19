@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.pullrequest.client.vcs;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
@@ -31,195 +34,239 @@ import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
-import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-/**
- * Git backed implementation for {@link VcsService}.
- */
+/** Git backed implementation for {@link VcsService}. */
 @Singleton
 public class GitVcsService implements VcsService {
-    private static final String BRANCH_UP_TO_DATE_ERROR_MESSAGE = "Everything up-to-date";
+  private static final String BRANCH_UP_TO_DATE_ERROR_MESSAGE = "Everything up-to-date";
 
-    private final GitServiceClient service;
-    private final DtoFactory       dtoFactory;
-    private final AppContext       appContext;
+  private final GitServiceClient service;
+  private final DtoFactory dtoFactory;
+  private final AppContext appContext;
 
-    @Inject
-    public GitVcsService(final DtoFactory dtoFactory,
-                         final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                         final GitServiceClient service,
-                         final AppContext appContext) {
-        this.dtoFactory = dtoFactory;
-        this.service = service;
-        this.appContext = appContext;
-    }
+  @Inject
+  public GitVcsService(
+      final DtoFactory dtoFactory,
+      final DtoUnmarshallerFactory dtoUnmarshallerFactory,
+      final GitServiceClient service,
+      final AppContext appContext) {
+    this.dtoFactory = dtoFactory;
+    this.service = service;
+    this.appContext = appContext;
+  }
 
-    @Override
-    public void addRemote(@NotNull final ProjectConfig project, @NotNull final String remote, @NotNull final String remoteUrl,
-                          @NotNull final AsyncCallback<Void> callback) {
-        service.remoteAdd(appContext.getRootProject().getLocation(), remote, remoteUrl)
-               .then(arg -> {
-                   callback.onSuccess(null);
-               })
-               .catchError(error -> {
-                   callback.onFailure(error.getCause());
-               });
-    }
+  @Override
+  public void addRemote(
+      @NotNull final ProjectConfig project,
+      @NotNull final String remote,
+      @NotNull final String remoteUrl,
+      @NotNull final AsyncCallback<Void> callback) {
+    service
+        .remoteAdd(appContext.getRootProject().getLocation(), remote, remoteUrl)
+        .then(
+            arg -> {
+              callback.onSuccess(null);
+            })
+        .catchError(
+            error -> {
+              callback.onFailure(error.getCause());
+            });
+  }
 
-    @Override
-    public void checkoutBranch(@NotNull final ProjectConfig project, @NotNull final String name,
-                               final boolean createNew, @NotNull final AsyncCallback<String> callback) {
+  @Override
+  public void checkoutBranch(
+      @NotNull final ProjectConfig project,
+      @NotNull final String name,
+      final boolean createNew,
+      @NotNull final AsyncCallback<String> callback) {
 
-        service.checkout(appContext.getRootProject().getLocation(),
-                         dtoFactory.createDto(CheckoutRequest.class)
-                                   .withName(name)
-                                   .withCreateNew(createNew))
-               .then(callback::onSuccess)
-               .catchError(error -> {
-                   callback.onFailure(error.getCause());
-               });
-    }
+    service
+        .checkout(
+            appContext.getRootProject().getLocation(),
+            dtoFactory.createDto(CheckoutRequest.class).withName(name).withCreateNew(createNew))
+        .then(callback::onSuccess)
+        .catchError(
+            error -> {
+              callback.onFailure(error.getCause());
+            });
+  }
 
-    @Override
-    public void commit(@NotNull final ProjectConfig project, final boolean includeUntracked, @NotNull final String commitMessage,
-                       @NotNull final AsyncCallback<Void> callback) {
-        service.add(appContext.getRootProject().getLocation(), !includeUntracked, null)
-               .then(arg -> {
-                   service.commit(appContext.getRootProject().getLocation(), commitMessage, true, false)
-                          .then(revision -> {
-                              callback.onSuccess(null);
-                          })
-                          .catchError(error -> {
-                              callback.onFailure(error.getCause());
-                          });
-               })
-               .catchError(error -> {
-                   callback.onFailure(error.getCause());
-               });
-    }
-
-    @Override
-    public void deleteRemote(@NotNull final ProjectConfig project, @NotNull final String remote,
-                             @NotNull final AsyncCallback<Void> callback) {
-        service.remoteDelete(appContext.getRootProject().getLocation(), remote)
-               .then(arg -> {
-                   callback.onSuccess(null);
-               })
-               .catchError(error -> {
-                   callback.onFailure(error.getCause());
-               });
-    }
-
-    @Override
-    public Promise<String> getBranchName(ProjectConfig project) {
-        return service.getStatus(Path.valueOf(project.getPath()))
-                      .then((Function<Status, String>)status -> status.getBranchName());
-    }
-
-    @Override
-    public void hasUncommittedChanges(@NotNull final ProjectConfig project, @NotNull final AsyncCallback<Boolean> callback) {
-        service.getStatus(Path.valueOf(project.getPath()))
-               .then(status -> {
-                   callback.onSuccess(!status.isClean());
-               })
-               .catchError(err -> {
-                   callback.onFailure(err.getCause());
-               });
-    }
-
-    @Override
-    public void isLocalBranchWithName(@NotNull final ProjectConfig project, @NotNull final String branchName,
-                                      @NotNull final AsyncCallback<Boolean> callback) {
-
-        listLocalBranches(project, new AsyncCallback<List<Branch>>() {
-            @Override
-            public void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-
-            @Override
-            public void onSuccess(final List<Branch> branches) {
-                for (final Branch oneBranch : branches) {
-                    if (oneBranch.getDisplayName().equals(branchName)) {
-                        callback.onSuccess(true);
-                        return;
-                    }
-                }
-                callback.onSuccess(false);
-            }
-        });
-    }
-
-    @Override
-    public void listLocalBranches(@NotNull final ProjectConfig project, @NotNull final AsyncCallback<List<Branch>> callback) {
-        listBranches(project, null, callback);
-    }
-
-    @Override
-    public Promise<List<Remote>> listRemotes(ProjectConfig project) {
-        return service.remoteList(appContext.getRootProject().getLocation(), null, false);
-    }
-
-    @Override
-    public Promise<PushResponse> pushBranch(final ProjectConfig project, final String remote, final String localBranchName) {
-        return service.push(appContext.getRootProject().getLocation(), Collections.singletonList(localBranchName), remote, true)
-                      .catchErrorPromise(error -> {
-                          if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(error.getMessage())) {
-                              return Promises.reject(JsPromiseError.create(new BranchUpToDateException(localBranchName)));
-                          } else {
-                              return Promises.reject(error);
-                          }
+  @Override
+  public void commit(
+      @NotNull final ProjectConfig project,
+      final boolean includeUntracked,
+      @NotNull final String commitMessage,
+      @NotNull final AsyncCallback<Void> callback) {
+    service
+        .add(appContext.getRootProject().getLocation(), !includeUntracked, null)
+        .then(
+            arg -> {
+              service
+                  .commit(appContext.getRootProject().getLocation(), commitMessage, true, false)
+                  .then(
+                      revision -> {
+                        callback.onSuccess(null);
+                      })
+                  .catchError(
+                      error -> {
+                        callback.onFailure(error.getCause());
                       });
-    }
+            })
+        .catchError(
+            error -> {
+              callback.onFailure(error.getCause());
+            });
+  }
 
-    /**
-     * List branches of a given type.
-     *
-     * @param project
-     *         the project descriptor.
-     * @param listMode
-     *         null -> list local branches; "r" -> list remote branches; "a" -> list all branches.
-     * @param callback
-     *         callback when the operation is done.
-     */
-    private void listBranches(final ProjectConfig project, final BranchListMode listMode, final AsyncCallback<List<Branch>> callback) {
-        service.branchList(Path.valueOf(project.getPath()), listMode)
-               .then(branches -> {
-                   final List<Branch> result = branches.stream().map(this::fromGitBranch).collect(Collectors.toList());
-                   callback.onSuccess(result);
-               })
-               .catchError(error -> {
-                   callback.onFailure(error.getCause());
-               });
-    }
+  @Override
+  public void deleteRemote(
+      @NotNull final ProjectConfig project,
+      @NotNull final String remote,
+      @NotNull final AsyncCallback<Void> callback) {
+    service
+        .remoteDelete(appContext.getRootProject().getLocation(), remote)
+        .then(
+            arg -> {
+              callback.onSuccess(null);
+            })
+        .catchError(
+            error -> {
+              callback.onFailure(error.getCause());
+            });
+  }
 
-    /**
-     * Converts a git branch DTO to an abstracted {@link org.eclipse.che.api.git.shared.Branch} object.
-     *
-     * @param gitBranch
-     *         the object to convert.
-     * @return the converted object.
-     */
-    private Branch fromGitBranch(final Branch gitBranch) {
-        final Branch branch = GitVcsService.this.dtoFactory.createDto(Branch.class);
-        branch.withActive(gitBranch.isActive()).withRemote(gitBranch.isRemote())
-              .withName(gitBranch.getName()).withDisplayName(gitBranch.getDisplayName());
-        return branch;
-    }
+  @Override
+  public Promise<String> getBranchName(ProjectConfig project) {
+    return service
+        .getStatus(Path.valueOf(project.getPath()))
+        .then((Function<Status, String>) status -> status.getBranchName());
+  }
 
-    /**
-     * Converts a git remote DTO to an abstracted {@link org.eclipse.che.api.git.shared.Remote} object.
-     *
-     * @param gitRemote
-     *         the object to convert.
-     * @return the converted object.
-     */
-    private Remote fromGitRemote(final Remote gitRemote) {
-        final Remote remote = GitVcsService.this.dtoFactory.createDto(Remote.class);
-        remote.withName(gitRemote.getName()).withUrl(gitRemote.getUrl());
-        return remote;
-    }
+  @Override
+  public void hasUncommittedChanges(
+      @NotNull final ProjectConfig project, @NotNull final AsyncCallback<Boolean> callback) {
+    service
+        .getStatus(Path.valueOf(project.getPath()))
+        .then(
+            status -> {
+              callback.onSuccess(!status.isClean());
+            })
+        .catchError(
+            err -> {
+              callback.onFailure(err.getCause());
+            });
+  }
+
+  @Override
+  public void isLocalBranchWithName(
+      @NotNull final ProjectConfig project,
+      @NotNull final String branchName,
+      @NotNull final AsyncCallback<Boolean> callback) {
+
+    listLocalBranches(
+        project,
+        new AsyncCallback<List<Branch>>() {
+          @Override
+          public void onFailure(final Throwable exception) {
+            callback.onFailure(exception);
+          }
+
+          @Override
+          public void onSuccess(final List<Branch> branches) {
+            for (final Branch oneBranch : branches) {
+              if (oneBranch.getDisplayName().equals(branchName)) {
+                callback.onSuccess(true);
+                return;
+              }
+            }
+            callback.onSuccess(false);
+          }
+        });
+  }
+
+  @Override
+  public void listLocalBranches(
+      @NotNull final ProjectConfig project, @NotNull final AsyncCallback<List<Branch>> callback) {
+    listBranches(project, null, callback);
+  }
+
+  @Override
+  public Promise<List<Remote>> listRemotes(ProjectConfig project) {
+    return service.remoteList(appContext.getRootProject().getLocation(), null, false);
+  }
+
+  @Override
+  public Promise<PushResponse> pushBranch(
+      final ProjectConfig project, final String remote, final String localBranchName) {
+    return service
+        .push(
+            appContext.getRootProject().getLocation(),
+            Collections.singletonList(localBranchName),
+            remote,
+            true)
+        .catchErrorPromise(
+            error -> {
+              if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(error.getMessage())) {
+                return Promises.reject(
+                    JsPromiseError.create(new BranchUpToDateException(localBranchName)));
+              } else {
+                return Promises.reject(error);
+              }
+            });
+  }
+
+  /**
+   * List branches of a given type.
+   *
+   * @param project the project descriptor.
+   * @param listMode null -> list local branches; "r" -> list remote branches; "a" -> list all
+   *     branches.
+   * @param callback callback when the operation is done.
+   */
+  private void listBranches(
+      final ProjectConfig project,
+      final BranchListMode listMode,
+      final AsyncCallback<List<Branch>> callback) {
+    service
+        .branchList(Path.valueOf(project.getPath()), listMode)
+        .then(
+            branches -> {
+              final List<Branch> result =
+                  branches.stream().map(this::fromGitBranch).collect(Collectors.toList());
+              callback.onSuccess(result);
+            })
+        .catchError(
+            error -> {
+              callback.onFailure(error.getCause());
+            });
+  }
+
+  /**
+   * Converts a git branch DTO to an abstracted {@link org.eclipse.che.api.git.shared.Branch}
+   * object.
+   *
+   * @param gitBranch the object to convert.
+   * @return the converted object.
+   */
+  private Branch fromGitBranch(final Branch gitBranch) {
+    final Branch branch = GitVcsService.this.dtoFactory.createDto(Branch.class);
+    branch
+        .withActive(gitBranch.isActive())
+        .withRemote(gitBranch.isRemote())
+        .withName(gitBranch.getName())
+        .withDisplayName(gitBranch.getDisplayName());
+    return branch;
+  }
+
+  /**
+   * Converts a git remote DTO to an abstracted {@link org.eclipse.che.api.git.shared.Remote}
+   * object.
+   *
+   * @param gitRemote the object to convert.
+   * @return the converted object.
+   */
+  private Remote fromGitRemote(final Remote gitRemote) {
+    final Remote remote = GitVcsService.this.dtoFactory.createDto(Remote.class);
+    remote.withName(gitRemote.getName()).withUrl(gitRemote.getUrl());
+    return remote;
+  }
 }

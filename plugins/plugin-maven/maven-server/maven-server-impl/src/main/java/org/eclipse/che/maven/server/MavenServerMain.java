@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.maven.server;
 
+import java.rmi.RemoteException;
 import org.eclipse.che.rmi.RmiServer;
 
-import java.rmi.RemoteException;
-
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public class MavenServerMain extends RmiServer {
-    public static void main(String[] args) throws RemoteException {
-        start(new MavenRemoteServerImpl());
-    }
+  public static void main(String[] args) throws RemoteException {
+    start(new MavenRemoteServerImpl());
+  }
 }

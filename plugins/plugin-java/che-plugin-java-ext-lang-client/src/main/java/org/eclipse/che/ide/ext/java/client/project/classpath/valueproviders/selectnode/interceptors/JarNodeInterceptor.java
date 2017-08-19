@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors;
 
 import com.google.inject.Singleton;
-
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Interceptor for showing only folder nodes.
@@ -27,33 +25,33 @@ import java.util.List;
  */
 @Singleton
 public class JarNodeInterceptor implements ClasspathNodeInterceptor {
-    private final static String JAR = ".jar";
+  private static final String JAR = ".jar";
 
-    @Override
-    public Promise<List<Node>> intercept(Node parent, List<Node> children) {
-        List<Node> nodes = new ArrayList<>();
+  @Override
+  public Promise<List<Node>> intercept(Node parent, List<Node> children) {
+    List<Node> nodes = new ArrayList<>();
 
-        for (Node child : children) {
-            if (!child.isLeaf() || child.getName().endsWith(JAR)) {
-                nodes.add(child);
-            }
-        }
-
-        return Promises.resolve(nodes);
+    for (Node child : children) {
+      if (!child.isLeaf() || child.getName().endsWith(JAR)) {
+        nodes.add(child);
+      }
     }
 
-    @Override
-    public int getPriority() {
-        return NORM_PRIORITY;
-    }
+    return Promises.resolve(nodes);
+  }
 
-    @Override
-    public boolean isNodeValid(Node node) {
-        return node.getName().endsWith(JAR);
-    }
+  @Override
+  public int getPriority() {
+    return NORM_PRIORITY;
+  }
 
-    @Override
-    public int getKind() {
-        return ClasspathEntryKind.LIBRARY;
-    }
+  @Override
+  public boolean isNodeValid(Node node) {
+    return node.getName().endsWith(JAR);
+  }
+
+  @Override
+  public int getKind() {
+    return ClasspathEntryKind.LIBRARY;
+  }
 }

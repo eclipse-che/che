@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,21 +7,20 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.ide.ext.git.client.GitServiceClient;
-import org.eclipse.che.ide.ext.git.client.GitServiceClientImpl;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.ext.git.client.GitChangesHandler;
 import org.eclipse.che.ide.ext.git.client.GitCheckoutHandler;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
+import org.eclipse.che.ide.ext.git.client.GitServiceClientImpl;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexView;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexViewImpl;
 import org.eclipse.che.ide.ext.git.client.branch.BranchView;
@@ -68,36 +67,42 @@ import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesViewImpl;
 @ExtensionGinModule
 public class GitGinModule extends AbstractGinModule {
 
-    /** {@inheritDoc} */
-    @Override
-    protected void configure() {
-        bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
+  /** {@inheritDoc} */
+  @Override
+  protected void configure() {
+    bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
 
-        GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class).addBinding().to(GitImportWizardRegistrar.class);
-        GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class).addBinding().to(CommitterPreferencePresenter.class);
+    GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class)
+        .addBinding()
+        .to(GitImportWizardRegistrar.class);
+    GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class)
+        .addBinding()
+        .to(CommitterPreferencePresenter.class);
 
-        bind(AddToIndexView.class).to(AddToIndexViewImpl.class).in(Singleton.class);
-        bind(ResetToCommitView.class).to(ResetToCommitViewImpl.class).in(Singleton.class);
-        bind(RemoveFromIndexView.class).to(RemoveFromIndexViewImpl.class).in(Singleton.class);
-        bind(RevisionListView.class).to(RevisionListViewImpl.class).in(Singleton.class);
-        bind(CommitView.class).to(CommitViewImpl.class).in(Singleton.class);
-        bind(ChangesListView.class).to(ChangesListViewImpl.class).in(Singleton.class);
-        bind(BranchView.class).to(BranchViewImpl.class).in(Singleton.class);
-        bind(BranchListView.class).to(BranchListViewImpl.class).in(Singleton.class);
-        bind(MergeView.class).to(MergeViewImpl.class).in(Singleton.class);
-        bind(ResetFilesView.class).to(ResetFilesViewImpl.class).in(Singleton.class);
-        bind(RemoteView.class).to(RemoteViewImpl.class).in(Singleton.class);
-        bind(AddRemoteRepositoryView.class).to(AddRemoteRepositoryViewImpl.class).in(Singleton.class);
-        bind(PushToRemoteView.class).to(PushToRemoteViewImpl.class).in(Singleton.class);
-        bind(FetchView.class).to(FetchViewImpl.class).in(Singleton.class);
-        bind(PullView.class).to(PullViewImpl.class).in(Singleton.class);
-        bind(HistoryView.class).to(HistoryViewImpl.class).in(Singleton.class);
-        bind(GitOutputPartView.class).to(GitOutputPartViewImpl.class);
-        bind(ChangesPanelView.class).to(ChangesPanelViewImpl.class);
-        install(new GinFactoryModuleBuilder().implement(GitOutputConsole.class, GitOutputConsolePresenter.class)
-                                             .build(GitOutputConsoleFactory.class));
+    bind(AddToIndexView.class).to(AddToIndexViewImpl.class).in(Singleton.class);
+    bind(ResetToCommitView.class).to(ResetToCommitViewImpl.class).in(Singleton.class);
+    bind(RemoveFromIndexView.class).to(RemoveFromIndexViewImpl.class).in(Singleton.class);
+    bind(RevisionListView.class).to(RevisionListViewImpl.class).in(Singleton.class);
+    bind(CommitView.class).to(CommitViewImpl.class).in(Singleton.class);
+    bind(ChangesListView.class).to(ChangesListViewImpl.class).in(Singleton.class);
+    bind(BranchView.class).to(BranchViewImpl.class).in(Singleton.class);
+    bind(BranchListView.class).to(BranchListViewImpl.class).in(Singleton.class);
+    bind(MergeView.class).to(MergeViewImpl.class).in(Singleton.class);
+    bind(ResetFilesView.class).to(ResetFilesViewImpl.class).in(Singleton.class);
+    bind(RemoteView.class).to(RemoteViewImpl.class).in(Singleton.class);
+    bind(AddRemoteRepositoryView.class).to(AddRemoteRepositoryViewImpl.class).in(Singleton.class);
+    bind(PushToRemoteView.class).to(PushToRemoteViewImpl.class).in(Singleton.class);
+    bind(FetchView.class).to(FetchViewImpl.class).in(Singleton.class);
+    bind(PullView.class).to(PullViewImpl.class).in(Singleton.class);
+    bind(HistoryView.class).to(HistoryViewImpl.class).in(Singleton.class);
+    bind(GitOutputPartView.class).to(GitOutputPartViewImpl.class);
+    bind(ChangesPanelView.class).to(ChangesPanelViewImpl.class);
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(GitOutputConsole.class, GitOutputConsolePresenter.class)
+            .build(GitOutputConsoleFactory.class));
 
-        bind(GitCheckoutHandler.class).asEagerSingleton();
-        bind(GitChangesHandler.class).asEagerSingleton();
-    }
+    bind(GitCheckoutHandler.class).asEagerSingleton();
+    bind(GitChangesHandler.class).asEagerSingleton();
+  }
 }

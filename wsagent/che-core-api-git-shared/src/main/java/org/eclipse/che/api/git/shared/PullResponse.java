@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.git.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -20,11 +20,11 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface PullResponse {
 
-    /** set output message */
-    void setCommandOutput(String commandOutput);
+  /** set output message */
+  void setCommandOutput(String commandOutput);
 
-    /** @return output message */
-    String getCommandOutput();
+  /** @return output message */
+  String getCommandOutput();
 
-    PullResponse withCommandOutput(String commandOutput);
+  PullResponse withCommandOutput(String commandOutput);
 }

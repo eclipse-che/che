@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,69 +7,69 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.git.shared;
 
+import java.util.List;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
-/**
- * @author andrew00x
- */
+/** @author andrew00x */
 @DTO
 public interface MergeResult {
-    public enum MergeStatus {
-        FAST_FORWARD("Fast-forward"),
-        ALREADY_UP_TO_DATE("Already up-to-date"),
-        FAILED("Failed"),
-        MERGED("Merged"),
-        CONFLICTING("Conflicting"),
-        NOT_SUPPORTED("Not-yet-supported");
+  public enum MergeStatus {
+    FAST_FORWARD("Fast-forward"),
+    ALREADY_UP_TO_DATE("Already up-to-date"),
+    FAILED("Failed"),
+    MERGED("Merged"),
+    CONFLICTING("Conflicting"),
+    NOT_SUPPORTED("Not-yet-supported");
 
-        private final String value;
+    private final String value;
 
-        private MergeStatus(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
+    private MergeStatus(String value) {
+      this.value = value;
     }
 
-    /** @return head after the merge */
-    String getNewHead();
+    public String getValue() {
+      return value;
+    }
+  }
 
-    void setNewHead(String newHead);
+  /** @return head after the merge */
+  String getNewHead();
 
-    MergeResult withNewHead(String newHead);
+  void setNewHead(String newHead);
 
-    /** @return status of merge */
-    MergeStatus getMergeStatus();
+  MergeResult withNewHead(String newHead);
 
-    void setMergeStatus(MergeStatus mergeStatus);
+  /** @return status of merge */
+  MergeStatus getMergeStatus();
 
-    MergeResult withMergeStatus(MergeStatus mergeStatus);
+  void setMergeStatus(MergeStatus mergeStatus);
 
-    /** @return list of merged commits or empty list if no commits where merged. */
-    List<String> getMergedCommits();
+  MergeResult withMergeStatus(MergeStatus mergeStatus);
 
-    void setMergedCommits(List<String> mergedCommits);
+  /** @return list of merged commits or empty list if no commits where merged. */
+  List<String> getMergedCommits();
 
-    MergeResult withMergedCommits(List<String> mergedCommits);
+  void setMergedCommits(List<String> mergedCommits);
 
-    /** @return files that have conflicts or empty list if there are no conflicts. */
-    List<String> getConflicts();
+  MergeResult withMergedCommits(List<String> mergedCommits);
 
-    void setConflicts(List<String> conflicts);
+  /** @return files that have conflicts or empty list if there are no conflicts. */
+  List<String> getConflicts();
 
-    MergeResult withConflicts(List<String> conflicts);
+  void setConflicts(List<String> conflicts);
 
-    /** @return list of files that failed to merge (not files that have conflicts) or empty list if there are no failed files. */
-    List<String> getFailed();
+  MergeResult withConflicts(List<String> conflicts);
 
-    void setFailed(List<String> failed);
+  /**
+   * @return list of files that failed to merge (not files that have conflicts) or empty list if
+   *     there are no failed files.
+   */
+  List<String> getFailed();
 
-    MergeResult withFailed(List<String> failed);
+  void setFailed(List<String> failed);
+
+  MergeResult withFailed(List<String> failed);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,78 +7,74 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.tree;
-
-import com.google.common.annotations.Beta;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
-import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
-import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.resources.tree.ResourceNode;
-
-import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
-/**
- * @author Vlad Zhukovskiy
- */
+import com.google.common.annotations.Beta;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import java.util.List;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
+
+/** @author Vlad Zhukovskiy */
 @Beta
 @Singleton
 public class LibraryNodeProvider implements NodeInterceptor {
 
-    private final JavaNodeFactory  nodeFactory;
-    private final PromiseProvider  promises;
-    private final SettingsProvider settingsProvider;
+  private final JavaNodeFactory nodeFactory;
+  private final PromiseProvider promises;
+  private final SettingsProvider settingsProvider;
 
-    @Inject
-    public LibraryNodeProvider(JavaNodeFactory nodeFactory,
-                               PromiseProvider promises,
-                               SettingsProvider settingsProvider) {
-        this.nodeFactory = nodeFactory;
-        this.promises = promises;
-        this.settingsProvider = settingsProvider;
-    }
+  @Inject
+  public LibraryNodeProvider(
+      JavaNodeFactory nodeFactory, PromiseProvider promises, SettingsProvider settingsProvider) {
+    this.nodeFactory = nodeFactory;
+    this.promises = promises;
+    this.settingsProvider = settingsProvider;
+  }
 
-    @Override
-    public Promise<List<Node>> intercept(Node parent, List<Node> children) {
-        if (parent instanceof ResourceNode) {
+  @Override
+  public Promise<List<Node>> intercept(Node parent, List<Node> children) {
+    if (parent instanceof ResourceNode) {
 
-            final Resource resource = ((ResourceNode)parent).getData();
+      final Resource resource = ((ResourceNode) parent).getData();
 
-            if (resource.getResourceType() != PROJECT) {
-                return promises.resolve(children);
-            }
-
-            final Project project = (Project)resource;
-
-            if (isJavaProject(project) && isDisplayLibraries(project)) {
-                final List<Node> intercepted = newArrayList(children);
-
-                intercepted.add(nodeFactory.newLibrariesNode(project.getLocation(), settingsProvider.getSettings()));
-
-                return promises.resolve(intercepted);
-            }
-        }
-
+      if (resource.getResourceType() != PROJECT) {
         return promises.resolve(children);
+      }
+
+      final Project project = (Project) resource;
+
+      if (isJavaProject(project) && isDisplayLibraries(project)) {
+        final List<Node> intercepted = newArrayList(children);
+
+        intercepted.add(
+            nodeFactory.newLibrariesNode(project.getLocation(), settingsProvider.getSettings()));
+
+        return promises.resolve(intercepted);
+      }
     }
 
-    @Override
-    public int getPriority() {
-        return NORM_PRIORITY;
-    }
+    return promises.resolve(children);
+  }
 
-    public boolean isDisplayLibraries(Project project) {
-        return true;
-    }
+  @Override
+  public int getPriority() {
+    return NORM_PRIORITY;
+  }
+
+  public boolean isDisplayLibraries(Project project) {
+    return true;
+  }
 }

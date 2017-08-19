@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,30 +7,28 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author gazarenkov
- */
+/** @author gazarenkov */
 @DTO
 public interface RuntimeIdentityDto extends RuntimeIdentity {
 
-    @Override
-    String getWorkspaceId();
+  @Override
+  String getWorkspaceId();
 
-    RuntimeIdentityDto withWorkspaceId(String workspaceId);
+  RuntimeIdentityDto withWorkspaceId(String workspaceId);
 
-    @Override
-    String getEnvName();
+  @Override
+  String getEnvName();
 
-    RuntimeIdentityDto withEnvName(String envName);
+  RuntimeIdentityDto withEnvName(String envName);
 
-    @Override
-    String getOwner();
+  @Override
+  String getOwner();
 
-    RuntimeIdentityDto withOwner(String owner);
+  RuntimeIdentityDto withOwner(String owner);
 }

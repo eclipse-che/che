@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.selection;
 
 import com.google.gwt.event.shared.GwtEvent;
@@ -18,30 +18,27 @@ import com.google.gwt.event.shared.GwtEvent;
  * @author Nikolay Zamosenchuk
  */
 public class SelectionChangedEvent extends GwtEvent<SelectionChangedHandler> {
-    public static Type<SelectionChangedHandler> TYPE = new Type<>();
+  public static Type<SelectionChangedHandler> TYPE = new Type<>();
 
-    private final Selection<?> selection;
+  private final Selection<?> selection;
 
-    /**
-     * @param selection
-     *         new selection
-     */
-    public SelectionChangedEvent(Selection<?> selection) {
-        this.selection = selection;
-    }
+  /** @param selection new selection */
+  public SelectionChangedEvent(Selection<?> selection) {
+    this.selection = selection;
+  }
 
-    @Override
-    public Type<SelectionChangedHandler> getAssociatedType() {
-        return TYPE;
-    }
+  @Override
+  public Type<SelectionChangedHandler> getAssociatedType() {
+    return TYPE;
+  }
 
-    /** @return current selection */
-    public Selection<?> getSelection() {
-        return selection;
-    }
+  /** @return current selection */
+  public Selection<?> getSelection() {
+    return selection;
+  }
 
-    @Override
-    protected void dispatch(SelectionChangedHandler handler) {
-        handler.onSelectionChanged(this);
-    }
+  @Override
+  protected void dispatch(SelectionChangedHandler handler) {
+    handler.onSelectionChanged(this);
+  }
 }

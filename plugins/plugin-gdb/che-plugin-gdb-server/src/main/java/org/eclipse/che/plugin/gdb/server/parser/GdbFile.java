@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.gdb.server.parser;
-
-import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 
 /**
  * 'file' command parser.
@@ -22,30 +21,28 @@ import java.util.regex.Pattern;
  */
 public class GdbFile {
 
-    private static final Pattern GDB_FILE = Pattern.compile("Reading symbols from (.*)...done.*");
+  private static final Pattern GDB_FILE = Pattern.compile("Reading symbols from (.*)...done.*");
 
-    private final String file;
+  private final String file;
 
-    private GdbFile(String file) {
-        this.file = file;
+  private GdbFile(String file) {
+    this.file = file;
+  }
+
+  public String getFile() {
+    return file;
+  }
+
+  /** Factory method. */
+  public static GdbFile parse(GdbOutput gdbOutput) throws GdbParseException {
+    String output = gdbOutput.getOutput();
+
+    Matcher matcher = GDB_FILE.matcher(output);
+    if (matcher.find()) {
+      String file = matcher.group(1);
+      return new GdbFile(file);
     }
 
-    public String getFile() {
-        return file;
-    }
-
-    /**
-     * Factory method.
-     */
-    public static GdbFile parse(GdbOutput gdbOutput) throws GdbParseException {
-        String output = gdbOutput.getOutput();
-
-        Matcher matcher = GDB_FILE.matcher(output);
-        if (matcher.find()) {
-            String file = matcher.group(1);
-            return new GdbFile(file);
-        }
-
-        throw new GdbParseException(GdbFile.class, output);
-    }
+    throw new GdbParseException(GdbFile.class, output);
+  }
 }

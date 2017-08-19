@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.everrest;
 
 import org.everrest.core.impl.method.MethodInvokerDecorator;
@@ -21,8 +21,8 @@ import org.everrest.core.method.MethodInvoker;
  * @see WebSocketMethodInvokerDecorator
  */
 public class WebSocketMethodInvokerDecoratorFactory implements MethodInvokerDecoratorFactory {
-    @Override
-    public MethodInvokerDecorator makeDecorator(MethodInvoker invoker) {
-        return new WebSocketMethodInvokerDecorator(invoker);
-    }
+  @Override
+  public MethodInvokerDecorator makeDecorator(MethodInvoker invoker) {
+    return new WebSocketMethodInvokerDecorator(invoker);
+  }
 }

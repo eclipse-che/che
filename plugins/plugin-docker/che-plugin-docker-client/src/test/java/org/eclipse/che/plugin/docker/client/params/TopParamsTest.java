@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,51 +7,46 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.client.params;
-
-import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-/**
- * @author Mykola Morhun
- */
+import org.testng.annotations.Test;
+
+/** @author Mykola Morhun */
 public class TopParamsTest {
 
-    private static final String   CONTAINER = "container";
-    private static final String[] PS_ARGS = {"arg1", "arg2"};
+  private static final String CONTAINER = "container";
+  private static final String[] PS_ARGS = {"arg1", "arg2"};
 
-    private TopParams topParams;
+  private TopParams topParams;
 
-    @Test
-    public void shouldCreateParamsObjectWithRequiredParameters() {
-        topParams = TopParams.create(CONTAINER);
+  @Test
+  public void shouldCreateParamsObjectWithRequiredParameters() {
+    topParams = TopParams.create(CONTAINER);
 
-        assertEquals(topParams.getContainer(), CONTAINER);
+    assertEquals(topParams.getContainer(), CONTAINER);
 
-        assertNull(topParams.getPsArgs());
-    }
+    assertNull(topParams.getPsArgs());
+  }
 
-    @Test
-    public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        topParams = TopParams.create(CONTAINER)
-                             .withPsArgs(PS_ARGS);
+  @Test
+  public void shouldCreateParamsObjectWithAllPossibleParameters() {
+    topParams = TopParams.create(CONTAINER).withPsArgs(PS_ARGS);
 
-        assertEquals(topParams.getContainer(), CONTAINER);
-        assertEquals(topParams.getPsArgs(), PS_ARGS);
-    }
+    assertEquals(topParams.getContainer(), CONTAINER);
+    assertEquals(topParams.getPsArgs(), PS_ARGS);
+  }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        topParams = TopParams.create(null);
-    }
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
+    topParams = TopParams.create(null);
+  }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNullPointerExceptionIfContainerRequiredParameterResetWithNull() {
-        topParams = TopParams.create(CONTAINER)
-                             .withContainer(null);
-    }
-
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionIfContainerRequiredParameterResetWithNull() {
+    topParams = TopParams.create(CONTAINER).withContainer(null);
+  }
 }

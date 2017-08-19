@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,20 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.vfs;
 
 /**
  * Filter for virtual files.
  *
  * @author andrew00x
- *
- * @deprecated VFS components are now considered deprecated and will be replaced by standard JDK routines.
+ * @deprecated VFS components are now considered deprecated and will be replaced by standard JDK
+ *     routines.
  */
 @Deprecated
 public interface VirtualFileFilter {
-    /** Tests whether specified file should be included in result. */
-    boolean accept(VirtualFile file);
+  /** Tests whether specified file should be included in result. */
+  boolean accept(VirtualFile file);
 
-    VirtualFileFilter ACCEPT_ALL = file -> true;
+  VirtualFileFilter ACCEPT_ALL = file -> true;
 }

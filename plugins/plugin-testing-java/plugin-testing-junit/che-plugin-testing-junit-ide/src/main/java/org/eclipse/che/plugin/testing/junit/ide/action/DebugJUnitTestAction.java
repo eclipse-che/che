@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.junit.ide.action;
+
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
@@ -26,42 +28,38 @@ import org.eclipse.che.plugin.testing.ide.view2.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
 
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
-/**
- * The action for activation debugger for JUnit test.
- */
+/** The action for activation debugger for JUnit test. */
 public class DebugJUnitTestAction extends RunDebugTestAbstractAction {
-    @Inject
-    public DebugJUnitTestAction(JUnitTestResources resources,
-                                EventBus eventBus,
-                                TestServiceClient client,
-                                TestingHandler testingHandler,
-                                DtoFactory dtoFactory,
-                                NotificationManager notificationManager,
-                                DebugConfigurationsManager debugConfigurationsManager,
-                                AppContext appContext,
-                                TestResultPresenter testResultPresenter,
-                                JUnitTestLocalizationConstant localization) {
-        super(eventBus,
-              testResultPresenter,
-              testingHandler,
-              debugConfigurationsManager,
-              client,
-              dtoFactory,
-              appContext,
-              notificationManager,
-              singletonList(PROJECT_PERSPECTIVE_ID),
-              localization.actionDebugDescription(),
-              localization.actionDebugTestTitle(),
-              resources.testIcon());
-    }
+  @Inject
+  public DebugJUnitTestAction(
+      JUnitTestResources resources,
+      EventBus eventBus,
+      TestServiceClient client,
+      TestingHandler testingHandler,
+      DtoFactory dtoFactory,
+      NotificationManager notificationManager,
+      DebugConfigurationsManager debugConfigurationsManager,
+      AppContext appContext,
+      TestResultPresenter testResultPresenter,
+      JUnitTestLocalizationConstant localization) {
+    super(
+        eventBus,
+        testResultPresenter,
+        testingHandler,
+        debugConfigurationsManager,
+        client,
+        dtoFactory,
+        appContext,
+        notificationManager,
+        singletonList(PROJECT_PERSPECTIVE_ID),
+        localization.actionDebugDescription(),
+        localization.actionDebugTestTitle(),
+        resources.testIcon());
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        Pair<String, String> frameworkAndTestName = Pair.of(JUNIT_FRAMEWORK_NAME, null);
-        actionPerformed(frameworkAndTestName, true);
-    }
-
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Pair<String, String> frameworkAndTestName = Pair.of(JUNIT_FRAMEWORK_NAME, null);
+    actionPerformed(frameworkAndTestName, true);
+  }
 }

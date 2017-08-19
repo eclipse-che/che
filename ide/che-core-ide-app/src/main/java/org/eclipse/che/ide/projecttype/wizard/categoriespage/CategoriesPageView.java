@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,65 +7,62 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.projecttype.wizard.categoriespage;
 
 import com.google.inject.ImplementedBy;
-
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.resource.Path;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 @ImplementedBy(CategoriesPageViewImpl.class)
 public interface CategoriesPageView extends View<CategoriesPageView.ActionDelegate> {
 
-    void selectProjectType(String projectTypeId);
+  void selectProjectType(String projectTypeId);
 
-    void setCategories(Map<String, Set<ProjectTypeDto>> typesByCategory,
-                       Map<String, Set<ProjectTemplateDescriptor>> templatesByCategory);
+  void setCategories(
+      Map<String, Set<ProjectTypeDto>> typesByCategory,
+      Map<String, Set<ProjectTemplateDescriptor>> templatesByCategory);
 
-    void updateCategories(boolean includeTemplates);
+  void updateCategories(boolean includeTemplates);
 
-    void reset();
+  void reset();
 
-    void setConfigOptions(List<String> options);
+  void setConfigOptions(List<String> options);
 
-    void setName(String name);
+  void setName(String name);
 
-    void setDescription(String description);
+  void setDescription(String description);
 
-    void removeNameError();
+  void removeNameError();
 
-    void showNameError();
+  void showNameError();
 
-    /**Sets focus to the Select Path button.*/
-    void focusSelectPathButton();
+  /** Sets focus to the Select Path button. */
+  void focusSelectPathButton();
 
-    void focusName();
+  void focusName();
 
-    void setProjectTypes(List<ProjectTypeDto> availableProjectTypes);
+  void setProjectTypes(List<ProjectTypeDto> availableProjectTypes);
 
-    void setNameFieldReadOnly(boolean readOnly);
+  void setNameFieldReadOnly(boolean readOnly);
 
-    void setParentPath(Path path);
+  void setParentPath(Path path);
 
-    interface ActionDelegate {
-        void projectNameChanged(String name);
+  interface ActionDelegate {
+    void projectNameChanged(String name);
 
-        void projectDescriptionChanged(String projectDescriptionValue);
+    void projectDescriptionChanged(String projectDescriptionValue);
 
-        void projectTemplateSelected(ProjectTemplateDescriptor template);
+    void projectTemplateSelected(ProjectTemplateDescriptor template);
 
-        void projectTypeSelected(ProjectTypeDto typeDescriptor);
+    void projectTypeSelected(ProjectTypeDto typeDescriptor);
 
-        void selectPathClicked();
-    }
+    void selectPathClicked();
+  }
 }
