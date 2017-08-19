@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.nodejsdbg.server.parser;
-
-import org.eclipse.che.plugin.nodejsdbg.server.NodeJsOutput;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.eclipse.che.plugin.nodejsdbg.server.NodeJsOutput;
 
 /**
  * {@code scripts} command parser.
@@ -23,46 +22,48 @@ import java.util.regex.Pattern;
  * @author Anatoliy Bazko
  */
 public class NodeJsScriptsParser implements NodeJsOutputParser<NodeJsScriptsParser.Scripts> {
-    private static final Pattern SCRIPT = Pattern.compile(".* ([0-9]*): (.*)");
+  private static final Pattern SCRIPT = Pattern.compile(".* ([0-9]*): (.*)");
 
-    public static final NodeJsScriptsParser INSTANCE = new NodeJsScriptsParser();
+  public static final NodeJsScriptsParser INSTANCE = new NodeJsScriptsParser();
 
-    @Override
-    public boolean match(NodeJsOutput nodeJsOutput) {
-        for (String line : nodeJsOutput.getOutput().split("\n")) {
-            Matcher matcher = SCRIPT.matcher(line);
-            if (!matcher.find()) {
-                return false;
-            }
-        }
-
-        return !nodeJsOutput.isEmpty();
+  @Override
+  public boolean match(NodeJsOutput nodeJsOutput) {
+    for (String line : nodeJsOutput.getOutput().split("\n")) {
+      Matcher matcher = SCRIPT.matcher(line);
+      if (!matcher.find()) {
+        return false;
+      }
     }
 
-    @Override
-    public Scripts parse(NodeJsOutput nodeJsOutput) {
-        Map<Integer, String> scripts = new HashMap<>();
+    return !nodeJsOutput.isEmpty();
+  }
 
-        for (String line : nodeJsOutput.getOutput().split("\n")) {
-            Matcher matcher = SCRIPT.matcher(line);
-            if (matcher.find()) {
-                int number = Integer.parseInt(matcher.group(1));
-                String script = matcher.group(2);
+  @Override
+  public Scripts parse(NodeJsOutput nodeJsOutput) {
+    Map<Integer, String> scripts = new HashMap<>();
 
-                scripts.put(number, script);
-            }
-        }
+    for (String line : nodeJsOutput.getOutput().split("\n")) {
+      Matcher matcher = SCRIPT.matcher(line);
+      if (matcher.find()) {
+        int number = Integer.parseInt(matcher.group(1));
+        String script = matcher.group(2);
 
-        return new Scripts(scripts);
+        scripts.put(number, script);
+      }
     }
 
-    public static class Scripts {
-        private final Map<Integer, String> scripts;
+    return new Scripts(scripts);
+  }
 
-        public Scripts(Map<Integer, String> scripts) {this.scripts = scripts;}
+  public static class Scripts {
+    private final Map<Integer, String> scripts;
 
-        public Map<Integer, String> getAll() {
-            return scripts;
-        }
+    public Scripts(Map<Integer, String> scripts) {
+      this.scripts = scripts;
     }
+
+    public Map<Integer, String> getAll() {
+      return scripts;
+    }
+  }
 }

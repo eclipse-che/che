@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.dependenciesupdater;
 
 import org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult;
@@ -22,13 +22,11 @@ import org.eclipse.che.ide.websocket.rest.RequestCallback;
 /* Never used will be removed in next release */
 public interface JavaClasspathServiceClient {
 
-    /**
-     * Update project dependencies.
-     *
-     * @param projectPath
-     *         path to the project to update its dependencies
-     * @param callback
-     *         the callback to use for the response
-     */
-    void updateDependencies(String projectPath, RequestCallback<ClassPathBuilderResult> callback);
+  /**
+   * Update project dependencies.
+   *
+   * @param projectPath path to the project to update its dependencies
+   * @param callback the callback to use for the response
+   */
+  void updateDependencies(String projectPath, RequestCallback<ClassPathBuilderResult> callback);
 }

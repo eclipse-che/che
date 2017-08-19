@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.theme;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
 
@@ -24,12 +23,12 @@ import org.eclipse.che.ide.api.theme.ThemeAgent;
  */
 public class ThemeApiModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        bind(ThemeAgent.class).to(ThemeAgentImpl.class).in(Singleton.class);
+  @Override
+  protected void configure() {
+    bind(ThemeAgent.class).to(ThemeAgentImpl.class).in(Singleton.class);
 
-        GinMultibinder<Theme> themeBinder = GinMultibinder.newSetBinder(binder(), Theme.class);
-        themeBinder.addBinding().to(DarkTheme.class);
-        themeBinder.addBinding().to(LightTheme.class);
-    }
+    GinMultibinder<Theme> themeBinder = GinMultibinder.newSetBinder(binder(), Theme.class);
+    themeBinder.addBinding().to(DarkTheme.class);
+    themeBinder.addBinding().to(LightTheme.class);
+  }
 }

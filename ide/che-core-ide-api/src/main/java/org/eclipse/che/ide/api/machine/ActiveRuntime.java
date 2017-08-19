@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,58 +7,53 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.machine;
-
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 
-/**
- * @author Vitalii Parfonov
- */
-
+/** @author Vitalii Parfonov */
 public class ActiveRuntime implements WorkspaceRuntime {
 
-    protected WorkspaceRuntime workspaceRuntime;
-    private String id;
-    private String rootFolder;
-    private DevMachine devMachine;
-    private List<MachineEntity> machines;
+  protected WorkspaceRuntime workspaceRuntime;
+  private String id;
+  private String rootFolder;
+  private DevMachine devMachine;
+  private List<MachineEntity> machines;
 
-    public ActiveRuntime(WorkspaceRuntime workspaceRuntime) {
-        this.workspaceRuntime = workspaceRuntime;
-        if (workspaceRuntime != null) {
-            id = workspaceRuntime.getActiveEnv();
-            rootFolder = workspaceRuntime.getRootFolder();
-            devMachine = new DevMachine(workspaceRuntime.getDevMachine());
-            machines = new ArrayList<>();
-            for(Machine machine : workspaceRuntime.getMachines()) {
-                machines.add(new MachineEntityImpl(machine));
-            }
-        }
+  public ActiveRuntime(WorkspaceRuntime workspaceRuntime) {
+    this.workspaceRuntime = workspaceRuntime;
+    if (workspaceRuntime != null) {
+      id = workspaceRuntime.getActiveEnv();
+      rootFolder = workspaceRuntime.getRootFolder();
+      devMachine = new DevMachine(workspaceRuntime.getDevMachine());
+      machines = new ArrayList<>();
+      for (Machine machine : workspaceRuntime.getMachines()) {
+        machines.add(new MachineEntityImpl(machine));
+      }
     }
+  }
 
+  @Override
+  public String getActiveEnv() {
+    return id;
+  }
 
-    @Override
-    public String getActiveEnv() {
-        return id;
-    }
+  @Override
+  public String getRootFolder() {
+    return rootFolder;
+  }
 
-    @Override
-    public String getRootFolder() {
-        return rootFolder;
-    }
+  @Override
+  public DevMachine getDevMachine() {
+    return devMachine;
+  }
 
-    @Override
-    public DevMachine getDevMachine() {
-        return devMachine;
-    }
-
-    @Override
-    public List<MachineEntity> getMachines() {
-        return machines;
-    }
+  @Override
+  public List<MachineEntity> getMachines() {
+    return machines;
+  }
 }

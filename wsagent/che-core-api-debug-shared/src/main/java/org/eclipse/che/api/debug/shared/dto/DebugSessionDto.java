@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,40 +7,37 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.debug.shared.dto;
 
+import java.util.List;
 import org.eclipse.che.api.debug.shared.model.DebugSession;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
-/**
- * @author Anatoliy Bazko
- */
+/** @author Anatoliy Bazko */
 @DTO
 public interface DebugSessionDto extends DebugSession {
-    DebuggerInfoDto getDebuggerInfo();
+  DebuggerInfoDto getDebuggerInfo();
 
-    void setDebuggerInfo(DebuggerInfoDto debuggerInfo);
+  void setDebuggerInfo(DebuggerInfoDto debuggerInfo);
 
-    DebugSessionDto withDebuggerInfo(DebuggerInfoDto debuggerInfo);
+  DebugSessionDto withDebuggerInfo(DebuggerInfoDto debuggerInfo);
 
-    String getId();
+  String getId();
 
-    void setId(String id);
+  void setId(String id);
 
-    DebugSessionDto withId(String id);
+  DebugSessionDto withId(String id);
 
-    String getType();
+  String getType();
 
-    void setType(String type);
+  void setType(String type);
 
-    DebugSessionDto withType(String type);
+  DebugSessionDto withType(String type);
 
-    List<BreakpointDto> getBreakpoints();
+  List<BreakpointDto> getBreakpoints();
 
-    void setBreakpoints(List<BreakpointDto> breakpoints);
+  void setBreakpoints(List<BreakpointDto> breakpoints);
 
-    DebugSessionDto withBreakpoints(List<BreakpointDto> breakpoints);
+  DebugSessionDto withBreakpoints(List<BreakpointDto> breakpoints);
 }

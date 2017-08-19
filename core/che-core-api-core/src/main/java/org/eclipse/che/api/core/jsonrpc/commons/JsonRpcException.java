@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,33 +7,32 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.jsonrpc.commons;
 
 /**
- * Specific to JSON RPC exception that is to be raised when
- * any JSON RPC related error is met. According to the spec
- * there should be an error code and an error message.
+ * Specific to JSON RPC exception that is to be raised when any JSON RPC related error is met.
+ * According to the spec there should be an error code and an error message.
  */
 public class JsonRpcException extends RuntimeException {
-    private final int    code;
-    private final String id;
+  private final int code;
+  private final String id;
 
-    public JsonRpcException(int code, String message) {
-        this(code, message, null);
-    }
+  public JsonRpcException(int code, String message) {
+    this(code, message, null);
+  }
 
-    JsonRpcException(int code, String message, String id) {
-        super(message);
-        this.code = code;
-        this.id = id;
-    }
+  JsonRpcException(int code, String message, String id) {
+    super(message);
+    this.code = code;
+    this.id = id;
+  }
 
-    public int getCode() {
-        return code;
-    }
+  public int getCode() {
+    return code;
+  }
 
-    public String getId() {
-        return id;
-    }
+  public String getId() {
+    return id;
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.jdb.ide.debug;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -32,63 +31,71 @@ import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
 @Singleton
 public class JavaDebuggerFileHandler extends BasicActiveFileHandler {
 
-    private final JavaNavigationService javaNavigationService;
-    private final JavaNodeFactory       nodeFactory;
+  private final JavaNavigationService javaNavigationService;
+  private final JavaNodeFactory nodeFactory;
 
-    @Inject
-    public JavaDebuggerFileHandler(EditorAgent editorAgent,
-                                   AppContext appContext,
-                                   JavaNavigationService javaNavigationService,
-                                   JavaNodeFactory nodeFactory) {
-        super(editorAgent, appContext);
+  @Inject
+  public JavaDebuggerFileHandler(
+      EditorAgent editorAgent,
+      AppContext appContext,
+      JavaNavigationService javaNavigationService,
+      JavaNodeFactory nodeFactory) {
+    super(editorAgent, appContext);
 
-        this.javaNavigationService = javaNavigationService;
-        this.nodeFactory = nodeFactory;
-    }
+    this.javaNavigationService = javaNavigationService;
+    this.nodeFactory = nodeFactory;
+  }
 
-    @Override
-    public void openFile(Location location, AsyncCallback<VirtualFile> callback) {
-        findInOpenedEditors(location, new AsyncCallback<VirtualFile>() {
-            @Override
-            public void onSuccess(VirtualFile result) {
-                callback.onSuccess(result);
+  @Override
+  public void openFile(Location location, AsyncCallback<VirtualFile> callback) {
+    findInOpenedEditors(
+        location,
+        new AsyncCallback<VirtualFile>() {
+          @Override
+          public void onSuccess(VirtualFile result) {
+            callback.onSuccess(result);
+          }
+
+          @Override
+          public void onFailure(Throwable caught) {
+            if (location.isExternalResource()) {
+              openExternalResource(location, callback);
+            } else {
+              findSourceToOpen(location, callback);
             }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                if (location.isExternalResource()) {
-                    openExternalResource(location, callback);
-                } else {
-                    findSourceToOpen(location, callback);
-                }
-            }
+          }
         });
-    }
+  }
 
-    private void openExternalResource(final Location location, final AsyncCallback<VirtualFile> callback) {
-        final String className = extractOuterClassFqn(location.getTarget());
-        final int libId = location.getExternalResourceId();
-        final Path projectPath = new Path(location.getResourceProjectPath());
+  private void openExternalResource(
+      final Location location, final AsyncCallback<VirtualFile> callback) {
+    final String className = extractOuterClassFqn(location.getTarget());
+    final int libId = location.getExternalResourceId();
+    final Path projectPath = new Path(location.getResourceProjectPath());
 
-        javaNavigationService.getEntry(projectPath, libId, className)
-                             .then(jarEntry -> {
-                                 final JarFileNode file = nodeFactory.newJarFileNode(jarEntry, libId, projectPath, null);
-                                 openFileAndScrollToLine(file, location.getLineNumber(), callback);
-                             })
-                             .catchError(error -> {
-                                 callback.onFailure(error.getCause());
-                             });
-    }
+    javaNavigationService
+        .getEntry(projectPath, libId, className)
+        .then(
+            jarEntry -> {
+              final JarFileNode file =
+                  nodeFactory.newJarFileNode(jarEntry, libId, projectPath, null);
+              openFileAndScrollToLine(file, location.getLineNumber(), callback);
+            })
+        .catchError(
+            error -> {
+              callback.onFailure(error.getCause());
+            });
+  }
 
-    private String extractOuterClassFqn(String fqn) {
-        //handle fqn in case of nested classes
-        if (fqn.contains("$")) {
-            return fqn.substring(0, fqn.indexOf("$"));
-        }
-        //handle fqn in case lambda expressions
-        if (fqn.contains("$$")) {
-            return fqn.substring(0, fqn.indexOf("$$"));
-        }
-        return fqn;
+  private String extractOuterClassFqn(String fqn) {
+    //handle fqn in case of nested classes
+    if (fqn.contains("$")) {
+      return fqn.substring(0, fqn.indexOf("$"));
     }
+    //handle fqn in case lambda expressions
+    if (fqn.contains("$$")) {
+      return fqn.substring(0, fqn.indexOf("$$"));
+    }
+    return fqn;
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.rest.annotations;
 
 import java.lang.annotation.ElementType;
@@ -17,20 +17,25 @@ import java.lang.annotation.Target;
 
 /**
  * Description of service or its parameters.
- * <p/>
- * It may be applied to:
+ *
+ * <p>It may be applied to:
+ *
  * <ul>
- * <li>sub-classes of {@link org.eclipse.che.api.core.rest.Service Service}. In this case value of this annotation is copied to the field
- * {@link org.eclipse.che.api.core.rest.shared.dto.ServiceDescriptor#getDescription()}</li>
- * <li>parameter of RESTful method annotated with {@link javax.ws.rs.QueryParam &#64;QueryParam}. In this case value of this annotation is
- * copied to the field {@link org.eclipse.che.api.core.rest.shared.dto.LinkParameter#getDescription()}</li>
- * <li>entity parameter (not annotated with JAX-RS annotations) of RESTful method. Entity parameters are described in section 3.3.2.1 of
- * JAX-RS specification 1.0. In this case value of this annotation is copied to the filed of {@link
- * org.eclipse.che.api.core.rest.shared.dto.RequestBodyDescriptor#getDescription()}</li>
+ *   <li>sub-classes of {@link org.eclipse.che.api.core.rest.Service Service}. In this case value of
+ *       this annotation is copied to the field {@link
+ *       org.eclipse.che.api.core.rest.shared.dto.ServiceDescriptor#getDescription()}
+ *   <li>parameter of RESTful method annotated with {@link javax.ws.rs.QueryParam &#64;QueryParam}.
+ *       In this case value of this annotation is copied to the field {@link
+ *       org.eclipse.che.api.core.rest.shared.dto.LinkParameter#getDescription()}
+ *   <li>entity parameter (not annotated with JAX-RS annotations) of RESTful method. Entity
+ *       parameters are described in section 3.3.2.1 of JAX-RS specification 1.0. In this case value
+ *       of this annotation is copied to the filed of {@link
+ *       org.eclipse.che.api.core.rest.shared.dto.RequestBodyDescriptor#getDescription()}
  * </ul>
- * <p/>
- * For example: There is EchoService. Let's see on the values of Description annotations. Here we have two: at class and at method's
- * parameter.
+ *
+ * <p>For example: There is EchoService. Let's see on the values of Description annotations. Here we
+ * have two: at class and at method's parameter.
+ *
  * <pre>
  * &#064Path("echo")
  * &#064Description("echo service")
@@ -45,9 +50,11 @@ import java.lang.annotation.Target;
  *     }
  * }
  * </pre>
- * <p/>
- * Request to URL '${base_uri}/echo' gets next output:
- * <p/>
+ *
+ * <p>Request to URL '${base_uri}/echo' gets next output:
+ *
+ * <p>
+ *
  * <pre>
  * {
  *   "description":"echo service",
@@ -71,6 +78,7 @@ import java.lang.annotation.Target;
  *   ]
  * }
  * </pre>
+ *
  * See two descriptions in JSON output.
  *
  * @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a>
@@ -81,6 +89,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Description {
-    /** @return the description */
-    String value();
+  /** @return the description */
+  String value();
 }

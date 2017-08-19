@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.part.explorer.project.macro;
-
-import com.google.common.base.Joiner;
-import com.google.gwtmockito.GwtMockitoTestRunner;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
+
+import com.google.common.base.Joiner;
+import com.google.gwtmockito.GwtMockitoTestRunner;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Unit tests for the {@link ExplorerCurrentFileNameMacro}
@@ -29,44 +28,44 @@ import static org.mockito.Mockito.verify;
 @RunWith(GwtMockitoTestRunner.class)
 public class ExplorerCurrentFileNameMacroTest extends AbstractExplorerMacroTest {
 
-    private ExplorerCurrentFileNameMacro provider;
+  private ExplorerCurrentFileNameMacro provider;
 
-    @Before
-    public void init() throws Exception {
-        super.init();
-        provider = new ExplorerCurrentFileNameMacro(projectExplorer, promiseProvider, localizationConstants);
-    }
+  @Before
+  public void init() throws Exception {
+    super.init();
+    provider =
+        new ExplorerCurrentFileNameMacro(projectExplorer, promiseProvider, localizationConstants);
+  }
 
-    @Test
-    public void testGetKey() throws Exception {
-        assertSame(provider.getName(), ExplorerCurrentFileNameMacro.KEY);
-    }
+  @Test
+  public void testGetKey() throws Exception {
+    assertSame(provider.getName(), ExplorerCurrentFileNameMacro.KEY);
+  }
 
-    @Test
-    public void getValue() throws Exception {
-        initWithOneFile();
+  @Test
+  public void getValue() throws Exception {
+    initWithOneFile();
 
-        provider.expand();
+    provider.expand();
 
-        verify(promiseProvider).resolve(eq(FILE_1_NAME));
-    }
+    verify(promiseProvider).resolve(eq(FILE_1_NAME));
+  }
 
-    @Test
-    public void getMultipleValues() throws Exception {
-        initWithTwoFiles();
+  @Test
+  public void getMultipleValues() throws Exception {
+    initWithTwoFiles();
 
-        provider.expand();
+    provider.expand();
 
-        verify(promiseProvider).resolve(eq(Joiner.on(", ").join(FILE_1_NAME, FILE_2_NAME)));
-    }
+    verify(promiseProvider).resolve(eq(Joiner.on(", ").join(FILE_1_NAME, FILE_2_NAME)));
+  }
 
-    @Test
-    public void getEmptyValues() throws Exception {
-        initWithNoFiles();
+  @Test
+  public void getEmptyValues() throws Exception {
+    initWithNoFiles();
 
-        provider.expand();
+    provider.expand();
 
-        verify(promiseProvider).resolve(eq(""));
-    }
-
+    verify(promiseProvider).resolve(eq(""));
+  }
 }

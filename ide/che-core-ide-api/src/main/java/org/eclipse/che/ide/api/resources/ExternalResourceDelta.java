@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,26 +7,28 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.resources;
-
-import com.google.common.annotations.Beta;
-
-import org.eclipse.che.ide.resource.Path;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.annotations.Beta;
+import org.eclipse.che.ide.resource.Path;
+
 /**
- * Delta which describes changes which has made outside system resource management.
- * For example some refactoring mechanisms may includes from many preparing steps and after applying refactoring resource
- * management should know what exactly happened with resources in the third-party components.
- * <p/>
- * When third-party component performs any changes in the resources, resource management should be informed about external
- * changes by creating instances of current delta and calling {@link Container#synchronize(ResourceDelta...)}.
- * <p/>
- * Given resource paths should be absolute.
- * <p/>
- * Example of usage:
+ * Delta which describes changes which has made outside system resource management. For example some
+ * refactoring mechanisms may includes from many preparing steps and after applying refactoring
+ * resource management should know what exactly happened with resources in the third-party
+ * components.
+ *
+ * <p>When third-party component performs any changes in the resources, resource management should
+ * be informed about external changes by creating instances of current delta and calling {@link
+ * Container#synchronize(ResourceDelta...)}.
+ *
+ * <p>Given resource paths should be absolute.
+ *
+ * <p>Example of usage:
+ *
  * <pre>
  *     ResourceDelta deltaUpdate = new ExternalResourceDelta(Path.valueOf("/some/path_1"), ResourceDelta.UPDATED);
  *     ResourceDelta deltaRemove = new ExternalResourceDelta(Path.valueOf("/some/path_2"), ResourceDelta.REMOVED);
@@ -50,59 +52,62 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Beta
 public class ExternalResourceDelta implements ResourceDelta {
 
-    private Path newPath;
-    private Path oldPath;
+  private Path newPath;
+  private Path oldPath;
 
-    protected static int KIND_MASK = 0xF;
-    protected int status;
+  protected static int KIND_MASK = 0xF;
+  protected int status;
 
-    public ExternalResourceDelta(Path path, int status) {
-        this(path, null, status);
-    }
+  public ExternalResourceDelta(Path path, int status) {
+    this(path, null, status);
+  }
 
-    public ExternalResourceDelta(Path newPath, Path oldPath, int status) {
-        this.newPath = checkNotNull(newPath);
-        this.oldPath = oldPath;
-        this.status = status;
-    }
+  public ExternalResourceDelta(Path newPath, Path oldPath, int status) {
+    this.newPath = checkNotNull(newPath);
+    this.oldPath = oldPath;
+    this.status = status;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getKind() {
-        return status & KIND_MASK;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getKind() {
+    return status & KIND_MASK;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getFlags() {
-        return status & ~KIND_MASK;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public int getFlags() {
+    return status & ~KIND_MASK;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Path getFromPath() {
-        return oldPath;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Path getFromPath() {
+    return oldPath;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Path getToPath() {
-        return newPath;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Path getToPath() {
+    return newPath;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Resource getResource() {
-        return null;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Resource getResource() {
+    return null;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String toString() {
-        return "ExternalResourceDelta{" +
-               "newPath=" + newPath +
-               ", oldPath=" + oldPath +
-               ", status=" + status +
-               '}';
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String toString() {
+    return "ExternalResourceDelta{"
+        + "newPath="
+        + newPath
+        + ", oldPath="
+        + oldPath
+        + ", status="
+        + status
+        + '}';
+  }
 }

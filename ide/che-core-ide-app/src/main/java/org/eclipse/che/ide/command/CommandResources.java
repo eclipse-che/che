@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.DataResource;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -23,77 +22,77 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 public interface CommandResources extends ClientBundle {
 
-    /** Resource is used as CSS constant's value for setting 'background-image' property. */
-    @DataResource.MimeType("image/svg+xml")
-    @Source("magnifier.svg")
-    DataResource magnifier();
+  /** Resource is used as CSS constant's value for setting 'background-image' property. */
+  @DataResource.MimeType("image/svg+xml")
+  @Source("magnifier.svg")
+  DataResource magnifier();
 
-    @Source("explorer/explorer-part.svg")
-    SVGResource explorerPart();
+  @Source("explorer/explorer-part.svg")
+  SVGResource explorerPart();
 
-    @Source("explorer/add-command-button.svg")
-    SVGResource addCommand();
+  @Source("explorer/add-command-button.svg")
+  SVGResource addCommand();
 
-    @Source("explorer/duplicate-command-button.svg")
-    SVGResource duplicateCommand();
+  @Source("explorer/duplicate-command-button.svg")
+  SVGResource duplicateCommand();
 
-    @Source("explorer/remove-command-button.svg")
-    SVGResource removeCommand();
+  @Source("explorer/remove-command-button.svg")
+  SVGResource removeCommand();
 
-    @Source({"explorer/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
-    ExplorerCSS commandsExplorerCss();
+  @Source({"explorer/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
+  ExplorerCSS commandsExplorerCss();
 
-    @Source({"palette/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
-    PaletteCSS commandsPaletteCss();
+  @Source({"palette/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
+  PaletteCSS commandsPaletteCss();
 
-    @Source({"toolbar/processes/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
-    ToolbarCSS commandToolbarCss();
+  @Source({"toolbar/processes/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
+  ToolbarCSS commandToolbarCss();
 
-    @Source({"editor/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
-    EditorCSS editorCss();
+  @Source({"editor/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
+  EditorCSS editorCss();
 
-    @Source({"type/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
-    CommandTypeChooserCSS commandTypeChooserCss();
+  @Source({"type/styles.css", "org/eclipse/che/ide/api/ui/style.css"})
+  CommandTypeChooserCSS commandTypeChooserCss();
 
-    interface ExplorerCSS extends CssResource {
-        String commandGoalNode();
+  interface ExplorerCSS extends CssResource {
+    String commandGoalNode();
 
-        String commandNode();
+    String commandNode();
 
-        String commandNodeText();
+    String commandNodeText();
 
-        String commandNodeButtonsPanel();
-    }
+    String commandNodeButtonsPanel();
+  }
 
-    interface PaletteCSS extends CssResource {
-        String filterField();
-    }
+  interface PaletteCSS extends CssResource {
+    String filterField();
+  }
 
-    interface ToolbarCSS extends CssResource {
-        String toolbarButton();
+  interface ToolbarCSS extends CssResource {
+    String toolbarButton();
 
-        String processesListLabel();
+    String processesListLabel();
 
-        String processWidgetText();
+    String processWidgetText();
 
-        String processWidgetMachineNameLabel();
+    String processWidgetMachineNameLabel();
 
-        String processWidgetCommandNameLabel();
+    String processWidgetCommandNameLabel();
 
-        String processWidgetPidLabel();
+    String processWidgetPidLabel();
 
-        String processWidgetActionButton();
+    String processWidgetActionButton();
 
-        String previewUrlWidget();
-    }
+    String previewUrlWidget();
+  }
 
-    interface EditorCSS extends CssResource {
-        String sectionLabel();
+  interface EditorCSS extends CssResource {
+    String sectionLabel();
 
-        String section();
-    }
+    String section();
+  }
 
-    interface CommandTypeChooserCSS extends CssResource {
-        String chooserPopup();
-    }
+  interface CommandTypeChooserCSS extends CssResource {
+    String chooserPopup();
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,62 +7,60 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.toolbar;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public interface ToolbarResources extends ClientBundle {
 
-    interface Css extends CssResource {
+  interface Css extends CssResource {
 
-        String iconButtonPanel();
+    String iconButtonPanel();
 
-        String iconButtonIcon();
+    String iconButtonIcon();
 
-        String iconButtonIconInner();
+    String iconButtonIconInner();
 
-        String popupButtonIconInner();
+    String popupButtonIconInner();
 
-        String toolbarPanel();
+    String toolbarPanel();
 
-        String iconButtonPanelDown();
+    String iconButtonPanelDown();
 
-        String iconButtonPanelSelectedDown();
+    String iconButtonPanelSelectedDown();
 
-        String toolbarDelimiter();
+    String toolbarDelimiter();
 
-        String toolbarActionGroupPanel();
+    String toolbarActionGroupPanel();
 
-        String iconButtonPanelSelected();
+    String iconButtonPanelSelected();
 
-        String disabled();
+    String disabled();
 
-        String popupButtonPanel();
+    String popupButtonPanel();
 
-        String popupButtonPanelDown();
+    String popupButtonPanelDown();
 
-        String popupButtonIcon();
+    String popupButtonIcon();
 
-        String tooltip();
+    String tooltip();
 
-        String tooltipBody();
+    String tooltipBody();
 
-        String tooltipArrow();
+    String tooltipArrow();
 
-        String caret();
+    String caret();
 
-        String leftToolbarPart();
+    String leftToolbarPart();
 
-        String centerToolbarPart();
+    String centerToolbarPart();
 
-        String rightToolbarPart();
-    }
+    String rightToolbarPart();
+  }
 
-    @Source({"toolbar.css", "org/eclipse/che/ide/api/ui/style.css"})
-    Css toolbar();
+  @Source({"toolbar.css", "org/eclipse/che/ide/api/ui/style.css"})
+  Css toolbar();
 }

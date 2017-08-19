@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.machine;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
-
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.ide.machine.chooser.MachineChooserView;
 import org.eclipse.che.ide.machine.chooser.MachineChooserViewImpl;
@@ -26,11 +25,15 @@ import org.eclipse.che.requirejs.ModuleHolder;
  */
 public class MachineApiModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        bind(MachineChooserView.class).to(MachineChooserViewImpl.class);
-        bind(ModuleHolder.class).in(Singleton.class);
-        bindConstant().annotatedWith(Names.named("machine.extension.api_port")).to(Constants.WS_AGENT_PORT);
-        bind(RecipeScriptDownloadServiceClient.class).to(RecipeScriptDownloadServiceClientImpl.class).in(Singleton.class);
-    }
+  @Override
+  protected void configure() {
+    bind(MachineChooserView.class).to(MachineChooserViewImpl.class);
+    bind(ModuleHolder.class).in(Singleton.class);
+    bindConstant()
+        .annotatedWith(Names.named("machine.extension.api_port"))
+        .to(Constants.WS_AGENT_PORT);
+    bind(RecipeScriptDownloadServiceClient.class)
+        .to(RecipeScriptDownloadServiceClientImpl.class)
+        .in(Singleton.class);
+  }
 }

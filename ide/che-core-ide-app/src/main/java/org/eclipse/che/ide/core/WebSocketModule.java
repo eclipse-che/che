@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.core;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcMessageReceiver;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
@@ -30,13 +29,15 @@ import org.eclipse.che.ide.websocket.impl.WebSocketFactory;
  */
 public class WebSocketModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        bind(WebSocketEndpoint.class).to(BasicWebSocketEndpoint.class);
-        bind(WebSocketMessageTransmitter.class).to(BasicWebSocketMessageTransmitter.class);
-        bind(WebSocketMessageReceiver.class).to(JsonRpcMessageReceiver.class);
+  @Override
+  protected void configure() {
+    bind(WebSocketEndpoint.class).to(BasicWebSocketEndpoint.class);
+    bind(WebSocketMessageTransmitter.class).to(BasicWebSocketMessageTransmitter.class);
+    bind(WebSocketMessageReceiver.class).to(JsonRpcMessageReceiver.class);
 
-        install(new GinFactoryModuleBuilder().implement(WebSocketConnection.class, DelayableWebSocketConnection.class)
-                                             .build(WebSocketFactory.class));
-    }
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(WebSocketConnection.class, DelayableWebSocketConnection.class)
+            .build(WebSocketFactory.class));
+  }
 }

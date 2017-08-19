@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.upload.folder;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -23,12 +23,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.ui.window.Window;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * The implementation of {@link UploadFolderFromZipView}.
@@ -37,169 +35,176 @@ import javax.validation.constraints.NotNull;
  */
 public class UploadFolderFromZipViewImpl extends Window implements UploadFolderFromZipView {
 
-    public interface UploadFolderFromZipViewBinder extends UiBinder<Widget, UploadFolderFromZipViewImpl> {
-    }
+  public interface UploadFolderFromZipViewBinder
+      extends UiBinder<Widget, UploadFolderFromZipViewImpl> {}
 
-    private final WsAgentURLModifier wsAgentURLModifier;
+  private final WsAgentURLModifier wsAgentURLModifier;
 
-    Button                   btnCancel;
-    Button                   btnUpload;
-    FileUpload               file;
-    ActionDelegate           delegate;
-    CoreLocalizationConstant constant;
+  Button btnCancel;
+  Button btnUpload;
+  FileUpload file;
+  ActionDelegate delegate;
+  CoreLocalizationConstant constant;
 
-    @UiField
-    FormPanel submitForm;
-    @UiField
-    CheckBox  overwrite;
-    @UiField
-    CheckBox  skipFirstLevel;
-    @UiField
-    FlowPanel uploadPanel;
+  @UiField FormPanel submitForm;
+  @UiField CheckBox overwrite;
+  @UiField CheckBox skipFirstLevel;
+  @UiField FlowPanel uploadPanel;
 
-    /** Create view. */
-    @Inject
-    public UploadFolderFromZipViewImpl(UploadFolderFromZipViewBinder uploadFileViewBinder,
-                                       CoreLocalizationConstant locale,
-                                       org.eclipse.che.ide.Resources resources,
-                                       WsAgentURLModifier wsAgentURLModifier) {
-        this.constant = locale;
-        this.setTitle(locale.uploadZipFolderTitle());
-        setWidget(uploadFileViewBinder.createAndBindUi(this));
-        bind();
+  /** Create view. */
+  @Inject
+  public UploadFolderFromZipViewImpl(
+      UploadFolderFromZipViewBinder uploadFileViewBinder,
+      CoreLocalizationConstant locale,
+      org.eclipse.che.ide.Resources resources,
+      WsAgentURLModifier wsAgentURLModifier) {
+    this.constant = locale;
+    this.setTitle(locale.uploadZipFolderTitle());
+    setWidget(uploadFileViewBinder.createAndBindUi(this));
+    bind();
 
-        btnCancel = createButton(locale.cancel(), "file-uploadFolder-cancel", new ClickHandler() {
+    btnCancel =
+        createButton(
+            locale.cancel(),
+            "file-uploadFolder-cancel",
+            new ClickHandler() {
 
-            @Override
-            public void onClick(ClickEvent event) {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onCancelClicked();
-            }
-        });
-        addButtonToFooter(btnCancel);
+              }
+            });
+    addButtonToFooter(btnCancel);
 
-        btnUpload = createButton(locale.uploadButton(), "file-uploadFolder-upload", new ClickHandler() {
+    btnUpload =
+        createButton(
+            locale.uploadButton(),
+            "file-uploadFolder-upload",
+            new ClickHandler() {
 
-            @Override
-            public void onClick(ClickEvent event) {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onUploadClicked();
-            }
+              }
+            });
+    btnUpload.addStyleName(resources.Css().buttonLoader());
+    addButtonToFooter(btnUpload);
+    this.wsAgentURLModifier = wsAgentURLModifier;
+  }
+
+  /** Bind handlers. */
+  private void bind() {
+    submitForm.addSubmitCompleteHandler(
+        new FormPanel.SubmitCompleteHandler() {
+          @Override
+          public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+            delegate.onSubmitComplete(event.getResults());
+          }
         });
-        btnUpload.addStyleName(resources.Css().buttonLoader());
-        addButtonToFooter(btnUpload);
-        this.wsAgentURLModifier = wsAgentURLModifier;
-    }
+  }
 
-    /** Bind handlers. */
-    private void bind() {
-        submitForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-            @Override
-            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                delegate.onSubmitComplete(event.getResults());
-            }
+  /** {@inheritDoc} */
+  @Override
+  public void showDialog() {
+    addFileUploadForm();
+    show();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void closeDialog() {
+    hide();
+    onClose();
+    btnUpload.setEnabled(false);
+    overwrite.setValue(false);
+    skipFirstLevel.setValue(false);
+  }
+
+  @Override
+  public void setLoaderVisibility(boolean isVisible) {
+    if (isVisible) {
+      btnUpload.setHTML("<i></i>");
+      btnUpload.setEnabled(false);
+    } else {
+      btnUpload.setText(constant.uploadButton());
+      btnUpload.setEnabled(true);
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setEnabledUploadButton(boolean enabled) {
+    btnUpload.setEnabled(enabled);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setEncoding(@NotNull String encodingType) {
+    submitForm.setEncoding(encodingType);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setAction(@NotNull String url) {
+    submitForm.setAction(wsAgentURLModifier.modify(url));
+    submitForm.setMethod(FormPanel.METHOD_POST);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void submit() {
+    overwrite.setFormValue(overwrite.getValue().toString());
+    skipFirstLevel.setFormValue(skipFirstLevel.getValue().toString());
+    submitForm.submit();
+    btnUpload.setEnabled(false);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  @NotNull
+  public String getFileName() {
+    String fileName = file.getFilename();
+    if (fileName.contains("/")) {
+      return fileName.substring(fileName.lastIndexOf("/") + 1);
+    }
+    if (fileName.contains("\\")) {
+      return fileName.substring(fileName.lastIndexOf("\\") + 1);
+    }
+    return fileName;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean isOverwriteFileSelected() {
+    return overwrite.getValue();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected void onClose() {
+    uploadPanel.remove(file);
+    super.onClose();
+  }
+
+  private void addFileUploadForm() {
+    file = new FileUpload();
+    file.setHeight("22px");
+    file.setWidth("100%");
+    file.setName("file");
+    file.ensureDebugId("file-uploadFile-ChooseFile");
+    file.addChangeHandler(
+        new ChangeHandler() {
+          @Override
+          public void onChange(ChangeEvent event) {
+            delegate.onFileNameChanged();
+          }
         });
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void showDialog() {
-        addFileUploadForm();
-        show();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void closeDialog() {
-        hide();
-        onClose();
-        btnUpload.setEnabled(false);
-        overwrite.setValue(false);
-        skipFirstLevel.setValue(false);
-    }
-
-    @Override
-    public void setLoaderVisibility(boolean isVisible) {
-        if (isVisible) {
-            btnUpload.setHTML("<i></i>");
-            btnUpload.setEnabled(false);
-        } else {
-            btnUpload.setText(constant.uploadButton());
-            btnUpload.setEnabled(true);
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnabledUploadButton(boolean enabled) {
-        btnUpload.setEnabled(enabled);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEncoding(@NotNull String encodingType) {
-        submitForm.setEncoding(encodingType);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setAction(@NotNull String url) {
-        submitForm.setAction(wsAgentURLModifier.modify(url));
-        submitForm.setMethod(FormPanel.METHOD_POST);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void submit() {
-        overwrite.setFormValue(overwrite.getValue().toString());
-        skipFirstLevel.setFormValue(skipFirstLevel.getValue().toString());
-        submitForm.submit();
-        btnUpload.setEnabled(false);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    @NotNull
-    public String getFileName() {
-        String fileName = file.getFilename();
-        if (fileName.contains("/")) {
-            return fileName.substring(fileName.lastIndexOf("/") + 1);
-        }
-        if (fileName.contains("\\")) {
-            return fileName.substring(fileName.lastIndexOf("\\") + 1);
-        }
-        return fileName;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isOverwriteFileSelected() {
-        return overwrite.getValue();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-        uploadPanel.remove(file);
-        super.onClose();
-    }
-
-    private void addFileUploadForm() {
-        file = new FileUpload();
-        file.setHeight("22px");
-        file.setWidth("100%");
-        file.setName("file");
-        file.ensureDebugId("file-uploadFile-ChooseFile");
-        file.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                delegate.onFileNameChanged();
-            }
-        });
-        uploadPanel.insert(file, 0);
-    }
+    uploadPanel.insert(file, 0);
+  }
 }

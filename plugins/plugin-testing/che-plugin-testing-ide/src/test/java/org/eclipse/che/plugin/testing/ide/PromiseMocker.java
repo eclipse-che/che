@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.ide;
 
 import static org.mockito.Mockito.mock;
@@ -26,53 +26,63 @@ import org.mockito.Matchers;
  * @author David Festal
  */
 public class PromiseMocker<T> {
-    final private Promise<T> promise;
-    
-    public PromiseMocker(Promise<T> promise) {
-        this.promise = promise;
-    }
+  private final Promise<T> promise;
 
-    @SuppressWarnings("unchecked")
-    public PromiseMocker() {
-        this.promise = (Promise<T>) mock(Promise.class);
-    }
+  public PromiseMocker(Promise<T> promise) {
+    this.promise = promise;
+  }
 
-    public Promise<T> getPromise() {
-        return promise;
-    }
-    public <B> PromiseMocker<T> applyOnThenPromise(T value) {
-        when(promise.thenPromise(Matchers.<Function<T, Promise<B>>> any())).then(new FunctionAnswer<Function<T, Promise<B>>, Promise<B>>(function -> {
-            try {
-                return function.apply(value);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }));
-        return this;
-    }
-    
-    public PromiseMocker<T> applyOnThenOperation(T value) {
-        when(promise.then(Matchers.<Operation<T>> any())).then(new FunctionAnswer<Operation<T>, Promise<T>>( op -> {
-            try {
-                op.apply(value);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-            return promise;
-        }));
-        return this;
-    }
-    
-    public PromiseMocker<T> applyOnCatchErrorOperation(PromiseError error) {
-        when(promise.catchError(Matchers.<Operation<PromiseError>> any())).then(new FunctionAnswer<Operation<PromiseError>, Promise<T>>(op -> {
-            try {
-                op.apply(error);
-            } catch (OperationException e) {
-                e.printStackTrace();
-            }
-            return promise;
-        }));
-        return this;
-    }
+  @SuppressWarnings("unchecked")
+  public PromiseMocker() {
+    this.promise = (Promise<T>) mock(Promise.class);
+  }
+
+  public Promise<T> getPromise() {
+    return promise;
+  }
+
+  public <B> PromiseMocker<T> applyOnThenPromise(T value) {
+    when(promise.thenPromise(Matchers.<Function<T, Promise<B>>>any()))
+        .then(
+            new FunctionAnswer<Function<T, Promise<B>>, Promise<B>>(
+                function -> {
+                  try {
+                    return function.apply(value);
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                  }
+                  return null;
+                }));
+    return this;
+  }
+
+  public PromiseMocker<T> applyOnThenOperation(T value) {
+    when(promise.then(Matchers.<Operation<T>>any()))
+        .then(
+            new FunctionAnswer<Operation<T>, Promise<T>>(
+                op -> {
+                  try {
+                    op.apply(value);
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                  }
+                  return promise;
+                }));
+    return this;
+  }
+
+  public PromiseMocker<T> applyOnCatchErrorOperation(PromiseError error) {
+    when(promise.catchError(Matchers.<Operation<PromiseError>>any()))
+        .then(
+            new FunctionAnswer<Operation<PromiseError>, Promise<T>>(
+                op -> {
+                  try {
+                    op.apply(error);
+                  } catch (OperationException e) {
+                    e.printStackTrace();
+                  }
+                  return promise;
+                }));
+    return this;
+  }
 }

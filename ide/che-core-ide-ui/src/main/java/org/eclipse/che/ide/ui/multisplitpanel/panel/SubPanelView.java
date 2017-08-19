@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.multisplitpanel.panel;
 
 import com.google.gwt.user.client.ui.IsWidget;
-
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
@@ -24,54 +23,50 @@ import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
  */
 public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
 
-    /**
-     * Split panel horizontally on two sub-panels
-     * and set the given {@code widget} for additional panel.
-     */
-    void splitHorizontally(SubPanelView view);
+  /**
+   * Split panel horizontally on two sub-panels and set the given {@code widget} for additional
+   * panel.
+   */
+  void splitHorizontally(SubPanelView view);
 
-    /**
-     * Split panel vertically on two sub-panels
-     * and set the given {@code widget} for additional panel.
-     */
-    void splitVertically(SubPanelView view);
+  /**
+   * Split panel vertically on two sub-panels and set the given {@code widget} for additional panel.
+   */
+  void splitVertically(SubPanelView view);
 
-    /**
-     * Add the given {@code widget} to this panel.
-     *
-     * @param widget
-     *         widget to add
-     * @param removable
-     *         whether the {@code widget} may be removed by user from the UI
-     */
-    void addWidget(WidgetToShow widget, boolean removable);
+  /**
+   * Add the given {@code widget} to this panel.
+   *
+   * @param widget widget to add
+   * @param removable whether the {@code widget} may be removed by user from the UI
+   */
+  void addWidget(WidgetToShow widget, boolean removable);
 
-    /** Show (activate) the {@code widget} if it exists on this panel. */
-    void activateWidget(WidgetToShow widget);
+  /** Show (activate) the {@code widget} if it exists on this panel. */
+  void activateWidget(WidgetToShow widget);
 
-    /**
-     * Remove the given {@code widget} from this panel.
-     *
-     * @param widget
-     *         widget to remove
-     */
-    void removeWidget(WidgetToShow widget);
+  /**
+   * Remove the given {@code widget} from this panel.
+   *
+   * @param widget widget to remove
+   */
+  void removeWidget(WidgetToShow widget);
 
-    /** Close panel. */
-    void closePanel();
+  /** Close panel. */
+  void closePanel();
 
-    /** Set parent {@link SubPanelView} in case this panel is 'child' of another panel. */
-    void setParentPanel(@Nullable SubPanelView parentPanel);
+  /** Set parent {@link SubPanelView} in case this panel is 'child' of another panel. */
+  void setParentPanel(@Nullable SubPanelView parentPanel);
 
-    interface ActionDelegate {
+  interface ActionDelegate {
 
-        /** Called when the {@code widget} gains the focus. */
-        void onWidgetFocused(IsWidget widget);
+    /** Called when the {@code widget} gains the focus. */
+    void onWidgetFocused(IsWidget widget);
 
-        /** Called when the widget tab has been double clicked. */
-        void onWidgetDoubleClicked(IsWidget widget);
+    /** Called when the widget tab has been double clicked. */
+    void onWidgetDoubleClicked(IsWidget widget);
 
-        /** Called when the {@code widget} is going to be removed from the panel. */
-        void onWidgetRemoving(IsWidget widget, SubPanel.RemoveCallback removeCallback);
-    }
+    /** Called when the {@code widget} is going to be removed from the panel. */
+    void onWidgetRemoving(IsWidget widget, SubPanel.RemoveCallback removeCallback);
+  }
 }

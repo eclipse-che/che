@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,25 +7,25 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.orion.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class OrionTextThemeOverlay extends JavaScriptObject {
 
-    protected OrionTextThemeOverlay() {
-    }
+  protected OrionTextThemeOverlay() {}
 
-    public final static void setDefaultTheme(String className, String themeHref) {
-        setTheme("default", className, themeHref);
-    }
+  public static final void setDefaultTheme(String className, String themeHref) {
+    setTheme("default", className, themeHref);
+  }
 
-    public final static OrionTextThemeOverlay getDefautTheme() {
-        return getTheme("default");
-    }
+  public static final OrionTextThemeOverlay getDefautTheme() {
+    return getTheme("default");
+  }
 
-    public final static native void setTheme(String themeName, String className, String themeHref) /*-{
+  public static final native void setTheme(
+      String themeName, String className, String themeHref) /*-{
         $wnd.require([ "orion/editor/textTheme" ], function(mTextTheme) {
             var basePath = @com.google.gwt.core.client.GWT::getModuleBaseForStaticFiles()();
             var theme = mTextTheme.TextTheme.getTheme(themeName);
@@ -33,13 +33,13 @@ public class OrionTextThemeOverlay extends JavaScriptObject {
         });
     }-*/;
 
-    /**
-     * Returns the instance of TextTheme by name. If it doesn't exist, it is created.
-     * 
-     * @param themeName the name of the theme
-     * @return a javascript object describing the theme
-     */
-    public final static native OrionTextThemeOverlay getTheme(String themeName) /*-{
+  /**
+   * Returns the instance of TextTheme by name. If it doesn't exist, it is created.
+   *
+   * @param themeName the name of the theme
+   * @return a javascript object describing the theme
+   */
+  public static final native OrionTextThemeOverlay getTheme(String themeName) /*-{
         $wnd.require([ "orion/editor/textTheme" ], function(mTextTheme) {
             var theme = mTextTheme.TextTheme.getTheme(themeName);
             return theme;

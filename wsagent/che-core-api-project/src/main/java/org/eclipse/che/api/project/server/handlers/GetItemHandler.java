@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.server.handlers;
 
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 
-/**
- * @author gazarenkov
- */
+/** @author gazarenkov */
 public interface GetItemHandler extends ProjectHandler {
 
-    void onGetItem(VirtualFileEntry virtualFile);
+  void onGetItem(VirtualFileEntry virtualFile);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.client.dto;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.Map;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Implementation of docker model ConfigFile object
@@ -23,9 +22,9 @@ import java.util.Map;
 @DTO
 public interface AuthConfigs {
 
-    Map<String, AuthConfig> getConfigs();
+  Map<String, AuthConfig> getConfigs();
 
-    void setConfigs(Map<String, AuthConfig> configs);
+  void setConfigs(Map<String, AuthConfig> configs);
 
-    AuthConfigs withConfigs(Map<String, AuthConfig> configs);
+  AuthConfigs withConfigs(Map<String, AuthConfig> configs);
 }

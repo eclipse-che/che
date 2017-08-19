@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.orion.compare;
 
-import elemental.events.CustomEvent;
-import elemental.events.Event;
-import elemental.events.EventListener;
-import elemental.html.Window;
-import elemental.js.html.JsIFrameElement;
-import elemental.json.Json;
+import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -26,15 +21,18 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Frame;
-
+import elemental.events.CustomEvent;
+import elemental.events.Event;
+import elemental.events.EventListener;
+import elemental.html.Window;
+import elemental.js.html.JsIFrameElement;
+import elemental.json.Json;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
-
-import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 
 /**
  * Widget for compering (diff) for two files.
@@ -44,110 +42,117 @@ import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.cr
  */
 public class CompareWidget extends Composite {
 
-    private Frame           frame;
-    private JsIFrameElement iFrame;
-    private Promise<Window> framePromise;
-    private CompareConfig   compareConfig;
+  private Frame frame;
+  private JsIFrameElement iFrame;
+  private Promise<Window> framePromise;
+  private CompareConfig compareConfig;
 
-    /**
-     * Callback for receiving content.
-     */
-    public interface ContentCallBack {
-        void onContentReceived(String content);
-    }
+  /** Callback for receiving content. */
+  public interface ContentCallBack {
+    void onContentReceived(String content);
+  }
 
-    public CompareWidget(final CompareConfig compareConfig, final String themeId, LoaderFactory loaderFactory) {
-        this.compareConfig = compareConfig;
-        this.frame = new Frame(GWT.getModuleBaseURL() + "/Compare.html");
-        initWidget(frame);
-        setSize("100%", "100%");
-        final MessageLoader loader = loaderFactory.newLoader();
-        loader.show();
-        frame.getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
-        AsyncPromiseHelper.RequestCall<Window> call = new AsyncPromiseHelper.RequestCall<Window>() {
-            @Override
-            public void makeCall(final AsyncCallback<Window> callback) {
-                frame.addLoadHandler(new LoadHandler() {
-                    @Override
-                    public void onLoad(LoadEvent event) {
-                        frame.getElement().cast();
-                        iFrame = frame.getElement().cast();
-                        callback.onSuccess(iFrame.getContentWindow());
-                    }
+  public CompareWidget(
+      final CompareConfig compareConfig, final String themeId, LoaderFactory loaderFactory) {
+    this.compareConfig = compareConfig;
+    this.frame = new Frame(GWT.getModuleBaseURL() + "/Compare.html");
+    initWidget(frame);
+    setSize("100%", "100%");
+    final MessageLoader loader = loaderFactory.newLoader();
+    loader.show();
+    frame.getElement().getStyle().setBorderStyle(Style.BorderStyle.NONE);
+    AsyncPromiseHelper.RequestCall<Window> call =
+        new AsyncPromiseHelper.RequestCall<Window>() {
+          @Override
+          public void makeCall(final AsyncCallback<Window> callback) {
+            frame.addLoadHandler(
+                new LoadHandler() {
+                  @Override
+                  public void onLoad(LoadEvent event) {
+                    frame.getElement().cast();
+                    iFrame = frame.getElement().cast();
+                    callback.onSuccess(iFrame.getContentWindow());
+                  }
                 });
-            }
+          }
         };
-        framePromise = createFromAsyncRequest(call);
-        framePromise.then(arg -> {
-            sendThemeId(arg, themeId);
+    framePromise = createFromAsyncRequest(call);
+    framePromise.then(
+        arg -> {
+          sendThemeId(arg, themeId);
         });
-        framePromise.then(arg -> {
-            final EventListener eventListener = evt -> {
+    framePromise.then(
+        arg -> {
+          final EventListener eventListener =
+              evt -> {
                 sendConfig(arg, compareConfig);
                 loader.hide();
-            };
-            arg.getDocument().addEventListener("onThemeLoaded", eventListener, false);
+              };
+          arg.getDocument().addEventListener("onThemeLoaded", eventListener, false);
         });
-    }
+  }
 
-    private void sendThemeId(Window arg, String themeId) {
-        JSONObject obj = new JSONObject();
-        obj.put("type", new JSONString("theme"));
-        obj.put("message", new JSONString(themeId));
-        arg.postMessage(obj.toString(), "*");
-    }
+  private void sendThemeId(Window arg, String themeId) {
+    JSONObject obj = new JSONObject();
+    obj.put("type", new JSONString("theme"));
+    obj.put("message", new JSONString(themeId));
+    arg.postMessage(obj.toString(), "*");
+  }
 
-    private void sendConfig(Window arg, CompareConfig compareConfig) {
-        String message = "{\"type\": \"config\", \"message\":" + Json.create(compareConfig.toJson()).toJson() + "}";
-        arg.postMessage(message, "*");
-    }
+  private void sendConfig(Window arg, CompareConfig compareConfig) {
+    String message =
+        "{\"type\": \"config\", \"message\":" + Json.create(compareConfig.toJson()).toJson() + "}";
+    arg.postMessage(message, "*");
+  }
 
-    /**
-     * Reload compare according to configuration.
-     */
-    public void reload() {
-        framePromise.then(new Operation<Window>() {
-            @Override
-            public void apply(Window arg) throws OperationException {
-                sendConfig(arg, compareConfig);
-            }
+  /** Reload compare according to configuration. */
+  public void reload() {
+    framePromise.then(
+        new Operation<Window>() {
+          @Override
+          public void apply(Window arg) throws OperationException {
+            sendConfig(arg, compareConfig);
+          }
         });
-    }
+  }
 
-    /**
-     * Refresh compare parts.
-     */
-    public void refresh() {
-        framePromise.then(new Operation<Window>() {
-            @Override
-            public void apply(Window arg) throws OperationException {
-                JSONObject obj = new JSONObject();
-                obj.put("type", new JSONString("refresh"));
-                arg.postMessage(obj.toString(), "*");
-            }
+  /** Refresh compare parts. */
+  public void refresh() {
+    framePromise.then(
+        new Operation<Window>() {
+          @Override
+          public void apply(Window arg) throws OperationException {
+            JSONObject obj = new JSONObject();
+            obj.put("type", new JSONString("refresh"));
+            arg.postMessage(obj.toString(), "*");
+          }
         });
-    }
+  }
 
-    /**
-     * get content of editable part of compare widget.
-     *
-     * @param contentCallBack callBack with received contents
-     */
-    public void getContent(final ContentCallBack contentCallBack) {
-        framePromise.then(new Operation<Window>() {
-            @Override
-            public void apply(final Window arg) throws OperationException {
-                JSONObject obj = new JSONObject();
-                obj.put("type", new JSONString("getNewContentRequest"));
-                arg.postMessage(obj.toString(), "*");
+  /**
+   * get content of editable part of compare widget.
+   *
+   * @param contentCallBack callBack with received contents
+   */
+  public void getContent(final ContentCallBack contentCallBack) {
+    framePromise.then(
+        new Operation<Window>() {
+          @Override
+          public void apply(final Window arg) throws OperationException {
+            JSONObject obj = new JSONObject();
+            obj.put("type", new JSONString("getNewContentRequest"));
+            arg.postMessage(obj.toString(), "*");
 
-                arg.addEventListener("getNewContentResponse", new EventListener() {
-                    @Override
-                    public void handleEvent(Event evt) {
-                        contentCallBack.onContentReceived(((CustomEvent)evt).getDetail().toString());
-                    }
-                }, false);
-            }
+            arg.addEventListener(
+                "getNewContentResponse",
+                new EventListener() {
+                  @Override
+                  public void handleEvent(Event evt) {
+                    contentCallBack.onContentReceived(((CustomEvent) evt).getDetail().toString());
+                  }
+                },
+                false);
+          }
         });
-    }
+  }
 }

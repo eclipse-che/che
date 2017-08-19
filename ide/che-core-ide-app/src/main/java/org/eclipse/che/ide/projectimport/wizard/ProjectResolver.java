@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.projectimport.wizard;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.List;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
@@ -27,10 +29,6 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.projecttype.wizard.presenter.ProjectWizardPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
-
 /**
  * The class contains business logic which allows resolve project type and call updater.
  *
@@ -40,59 +38,68 @@ import static com.google.common.collect.Lists.newArrayList;
 @Singleton
 public class ProjectResolver {
 
-    private final ProjectTypeRegistry    projectTypeRegistry;
-    private final PromiseProvider        promiseProvider;
-    private final ProjectWizardPresenter projectWizard;
+  private final ProjectTypeRegistry projectTypeRegistry;
+  private final PromiseProvider promiseProvider;
+  private final ProjectWizardPresenter projectWizard;
 
-    @Inject
-    public ProjectResolver(ProjectTypeRegistry projectTypeRegistry,
-                           PromiseProvider promiseProvider,
-                           ProjectWizardPresenter projectWizard) {
-        this.projectTypeRegistry = projectTypeRegistry;
-        this.promiseProvider = promiseProvider;
-        this.projectWizard = projectWizard;
-    }
+  @Inject
+  public ProjectResolver(
+      ProjectTypeRegistry projectTypeRegistry,
+      PromiseProvider promiseProvider,
+      ProjectWizardPresenter projectWizard) {
+    this.projectTypeRegistry = projectTypeRegistry;
+    this.promiseProvider = promiseProvider;
+    this.projectWizard = projectWizard;
+  }
 
-    public Promise<Project> resolve(final Project project) {
-        return project.resolve().thenPromise(new Function<List<SourceEstimation>, Promise<Project>>() {
-            @Override
-            public Promise<Project> apply(List<SourceEstimation> estimations) throws FunctionException {
+  public Promise<Project> resolve(final Project project) {
+    return project
+        .resolve()
+        .thenPromise(
+            new Function<List<SourceEstimation>, Promise<Project>>() {
+              @Override
+              public Promise<Project> apply(List<SourceEstimation> estimations)
+                  throws FunctionException {
                 if (estimations == null || estimations.isEmpty()) {
-                    return promiseProvider.resolve(project);
+                  return promiseProvider.resolve(project);
                 }
 
                 final List<String> primeTypes = newArrayList();
                 for (SourceEstimation estimation : estimations) {
-                    if (projectTypeRegistry.getProjectType(estimation.getType()).isPrimaryable()) {
-                        primeTypes.add(estimation.getType());
-                    }
+                  if (projectTypeRegistry.getProjectType(estimation.getType()).isPrimaryable()) {
+                    primeTypes.add(estimation.getType());
+                  }
                 }
 
                 final MutableProjectConfig config = new MutableProjectConfig(project);
                 final SourceStorage source = project.getSource();
 
-                if (source != null && source.getParameters() != null && source.getParameters().containsKey("keepDir")) {
-                    config.setType(Constants.BLANK_ID);
+                if (source != null
+                    && source.getParameters() != null
+                    && source.getParameters().containsKey("keepDir")) {
+                  config.setType(Constants.BLANK_ID);
                 } else if (primeTypes.isEmpty()) {
-                    return promiseProvider.resolve(project);
+                  return promiseProvider.resolve(project);
                 } else if (primeTypes.size() == 1) {
-                    config.setType(primeTypes.get(0));
+                  config.setType(primeTypes.get(0));
                 } else {
-                    config.setType(Constants.BLANK_ID);
-                    projectWizard.show(config);
+                  config.setType(Constants.BLANK_ID);
+                  projectWizard.show(config);
 
-                    return promiseProvider.resolve(project);
+                  return promiseProvider.resolve(project);
                 }
 
                 return project.update().withBody(config).send();
-            }
-        }).catchErrorPromise(new Function<PromiseError, Promise<Project>>() {
-            @Override
-            public Promise<Project> apply(PromiseError error) throws FunctionException {
+              }
+            })
+        .catchErrorPromise(
+            new Function<PromiseError, Promise<Project>>() {
+              @Override
+              public Promise<Project> apply(PromiseError error) throws FunctionException {
                 Log.warn(ProjectResolver.class, error.getMessage());
 
                 return promiseProvider.resolve(project);
-            }
-        });
-    }
+              }
+            });
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,284 +7,247 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.github.ide.importer.page;
 
+import com.google.inject.ImplementedBy;
+import java.util.List;
+import java.util.Set;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.plugin.github.ide.load.ProjectData;
 
-import com.google.inject.ImplementedBy;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.Set;
-
-/**
- * @author Roman Nikitenko
- */
+/** @author Roman Nikitenko */
 @ImplementedBy(GithubImporterPageViewImpl.class)
 public interface GithubImporterPageView extends View<GithubImporterPageView.ActionDelegate> {
 
-    interface ActionDelegate {
-        /**
-         * Performs any actions appropriate in response to the user having changed the project's name.
-         */
-        void onProjectNameChanged(@NotNull String name);
-
-        /**
-         * Performs any actions appropriate in response to the user having changed the project's URL.
-         */
-        void onProjectUrlChanged(@NotNull String url);
-
-        /** Performs any actions appropriate in response to the user has selected recursive checkbox. */
-        void onRecursiveSelected(boolean recursiveSelected);
-
-        /**
-         * Performs any actions appropriate in response to the user having changed the project's description.
-         */
-        void onProjectDescriptionChanged(@NotNull String projectDescriptionValue);
-
-        /**
-         * Performs any actions appropriate in response to the user having clicked the 'LoadRepo' key.
-         */
-        void onLoadRepoClicked();
-
-        /**
-         * Performs any actions appropriate in response to the user having selected a repository.
-         *
-         * @param repository
-         *         selected repository
-         */
-        void onRepositorySelected(@NotNull ProjectData repository);
-
-        /**
-         * Performs any actions appropriate in response to the user having changed account field.
-         */
-        void onAccountChanged();
-
-        /** Perform actions when selecting Keep Directory checkbox. */
-        void onKeepDirectorySelected(boolean keepDirectory);
-
-        /** Perform actions when changing the name of a directory. */
-        void onKeepDirectoryNameChanged(@NotNull String url);
-
-        /** Perform actions when selecting Branch checkbox. */
-        void onBranchCheckBoxSelected(boolean isSelected);
-
-        /** Perform actions when changing the name of a branch. */
-        void onBranchNameChanged(@NotNull String branchName);
-    }
-
+  interface ActionDelegate {
     /**
-     * Marks URL field containing valid value.
+     * Performs any actions appropriate in response to the user having changed the project's name.
      */
-    void markURLValid();
+    void onProjectNameChanged(@NotNull String name);
 
     /**
-     * Marks URL field containing invalid value.
+     * Performs any actions appropriate in response to the user having changed the project's URL.
      */
-    void markURLInvalid();
+    void onProjectUrlChanged(@NotNull String url);
+
+    /** Performs any actions appropriate in response to the user has selected recursive checkbox. */
+    void onRecursiveSelected(boolean recursiveSelected);
 
     /**
-     * Removes mark from URL field.
+     * Performs any actions appropriate in response to the user having changed the project's
+     * description.
      */
-    void unmarkURL();
+    void onProjectDescriptionChanged(@NotNull String projectDescriptionValue);
 
     /**
-     * Displays error message under URL field.
+     * Performs any actions appropriate in response to the user having clicked the 'LoadRepo' key.
+     */
+    void onLoadRepoClicked();
+
+    /**
+     * Performs any actions appropriate in response to the user having selected a repository.
      *
-     * @param message
-     *         message
+     * @param repository selected repository
      */
-    void setURLErrorMessage(@NotNull String message);
+    void onRepositorySelected(@NotNull ProjectData repository);
 
-    /**
-     * Marks name field containing valid value.
-     */
-    void markNameValid();
+    /** Performs any actions appropriate in response to the user having changed account field. */
+    void onAccountChanged();
 
-    /**
-     * Marks name field containing invalid value.
-     */
-    void markNameInvalid();
+    /** Perform actions when selecting Keep Directory checkbox. */
+    void onKeepDirectorySelected(boolean keepDirectory);
 
-    /**
-     * Removes mark from Name field.
-     */
-    void unmarkName();
+    /** Perform actions when changing the name of a directory. */
+    void onKeepDirectoryNameChanged(@NotNull String url);
 
-    /**
-     * Set the project's URL.
-     *
-     * @param url
-     *         the project's URL to set
-     */
-    void setProjectUrl(@NotNull String url);
+    /** Perform actions when selecting Branch checkbox. */
+    void onBranchCheckBoxSelected(boolean isSelected);
 
-    /**
-     * Get the project's name value.
-     *
-     * @return {@link String} project's name
-     */
-    @NotNull
-    String getProjectName();
+    /** Perform actions when changing the name of a branch. */
+    void onBranchNameChanged(@NotNull String branchName);
+  }
 
-    /**
-     * Set the project's name value.
-     *
-     * @param projectName
-     *         project's name to set
-     */
-    void setProjectName(@NotNull String projectName);
+  /** Marks URL field containing valid value. */
+  void markURLValid();
 
-    /**
-     * Set the project's description value.
-     *
-     * @param projectDescription
-     *         project's description to set
-     */
-    void setProjectDescription(@NotNull String projectDescription);
+  /** Marks URL field containing invalid value. */
+  void markURLInvalid();
 
-    /**
-     * Focuses URL field.
-     */
-    void focusInUrlInput();
+  /** Removes mark from URL field. */
+  void unmarkURL();
 
-    /**
-     * Set the enable state of the inputs.
-     *
-     * @param isEnabled
-     *         <code>true</code> if enabled, <code>false</code> if disabled
-     */
-    void setInputsEnableState(boolean isEnabled);
+  /**
+   * Displays error message under URL field.
+   *
+   * @param message message
+   */
+  void setURLErrorMessage(@NotNull String message);
 
-    /**
-     * Set available repositories for account.
-     *
-     * @param repositories
-     *         available repositories
-     */
-    void setRepositories(@NotNull List<ProjectData> repositories);
+  /** Marks name field containing valid value. */
+  void markNameValid();
 
-    /** @return account name */
-    @NotNull
-    String getAccountName();
+  /** Marks name field containing invalid value. */
+  void markNameInvalid();
 
-    /**
-     * Set available account names.
-     *
-     * @param names
-     *         available names
-     */
-    void setAccountNames(@NotNull Set<String> names);
+  /** Removes mark from Name field. */
+  void unmarkName();
 
-    /**
-     * Close github panel.
-     */
-    void closeGithubPanel();
+  /**
+   * Set the project's URL.
+   *
+   * @param url the project's URL to set
+   */
+  void setProjectUrl(@NotNull String url);
 
-    /**
-     * Show github panel.
-     */
-    void showGithubPanel();
+  /**
+   * Get the project's name value.
+   *
+   * @return {@link String} project's name
+   */
+  @NotNull
+  String getProjectName();
 
-    /**
-     * Reset the page.
-     */
-    void reset();
+  /**
+   * Set the project's name value.
+   *
+   * @param projectName project's name to set
+   */
+  void setProjectName(@NotNull String projectName);
 
-    /**
-     * Set the visibility state of the loader.
-     *
-     * @param isVisible
-     *         <code>true</code> if visible.
-     */
-    void setLoaderVisibility(boolean isVisible);
+  /**
+   * Set the project's description value.
+   *
+   * @param projectDescription project's description to set
+   */
+  void setProjectDescription(@NotNull String projectDescription);
 
-    /**
-     * Returns whether user wants to checkout a special directory.
-     *
-     * @return <b>true</b> if user has checked the Keep Director checkbox, otherwise returns <b>false</b>
-     */
-    boolean keepDirectory();
+  /** Focuses URL field. */
+  void focusInUrlInput();
 
-    /**
-     *  Sets new value of Keep Directory checkbox.
-     *
-     * @param checked <b>true</b> to check the field or <b>false</b> to leave it unchecked
-     */
-    void setKeepDirectoryChecked(boolean checked);
+  /**
+   * Set the enable state of the inputs.
+   *
+   * @param isEnabled <code>true</code> if enabled, <code>false</code> if disabled
+   */
+  void setInputsEnableState(boolean isEnabled);
 
-    /**
-     * Returns the name of a directory to checkout.
-     *
-     * @return name of a directory to checkout
-     */
-    String getDirectoryName();
+  /**
+   * Set available repositories for account.
+   *
+   * @param repositories available repositories
+   */
+  void setRepositories(@NotNull List<ProjectData> repositories);
 
-    /**
-     * Sets new value of Directory name field.
-     *
-     * @param directoryName new value of directory name field
-     */
-    void setDirectoryName(String directoryName);
+  /** @return account name */
+  @NotNull
+  String getAccountName();
 
-    /**
-     * Enables or disables Directory name field.
-     *
-     * @param enable true or false to enable or disable the field
-     */
-    void enableDirectoryNameField(boolean enable);
+  /**
+   * Set available account names.
+   *
+   * @param names available names
+   */
+  void setAccountNames(@NotNull Set<String> names);
 
-    /***
-     * Highlights Directory name field to notify its value is invalid.
-     *
-     * @param highlight <b>true</b> to highlight the field or <b>false</b> to remove highlighting
-     */
-    void highlightDirectoryNameField(boolean highlight);
+  /** Close github panel. */
+  void closeGithubPanel();
 
-    /**
-     * Focuses directory name field.
-     */
-    void focusDirectoryNameField();
+  /** Show github panel. */
+  void showGithubPanel();
 
-    /**
-     *  Sets whether user wants to checkout to a special branch.
-     *
-     * @param selected <b>true</b> to check the field or <b>false</b> to leave it unchecked
-     */
-    void setBranchCheckBoxSelected(boolean selected);
+  /** Reset the page. */
+  void reset();
 
-    /**
-     * Returns whether user wants to checkout to a special branch.
-     *
-     * @return <b>true</b> if user has selected the Branch checkbox, otherwise returns <b>false</b>
-     */
-    boolean isBranchCheckBoxSelected();
+  /**
+   * Set the visibility state of the loader.
+   *
+   * @param isVisible <code>true</code> if visible.
+   */
+  void setLoaderVisibility(boolean isVisible);
 
-    /**
-     * Sets new value of Branch name field.
-     *
-     * @param branchName new value of Branch name field
-     */
-    void setBranchName(String branchName);
+  /**
+   * Returns whether user wants to checkout a special directory.
+   *
+   * @return <b>true</b> if user has checked the Keep Director checkbox, otherwise returns
+   *     <b>false</b>
+   */
+  boolean keepDirectory();
 
-    /**
-     * Returns the name of a branch to checkout.
-     *
-     * @return name of a branch to checkout
-     */
-    String getBranchName();
+  /**
+   * Sets new value of Keep Directory checkbox.
+   *
+   * @param checked <b>true</b> to check the field or <b>false</b> to leave it unchecked
+   */
+  void setKeepDirectoryChecked(boolean checked);
 
-    /**
-     * Enables or disables Branch name field.
-     *
-     * @param enabled <b>true</b> or <b>false</b> to enable or disable the field
-     */
-    void enableBranchNameField(boolean enabled);
+  /**
+   * Returns the name of a directory to checkout.
+   *
+   * @return name of a directory to checkout
+   */
+  String getDirectoryName();
 
-    /**
-     * Focuses Branch name field.
-     */
-    void focusBranchNameField();
+  /**
+   * Sets new value of Directory name field.
+   *
+   * @param directoryName new value of directory name field
+   */
+  void setDirectoryName(String directoryName);
+
+  /**
+   * Enables or disables Directory name field.
+   *
+   * @param enable true or false to enable or disable the field
+   */
+  void enableDirectoryNameField(boolean enable);
+
+  /**
+   * * Highlights Directory name field to notify its value is invalid.
+   *
+   * @param highlight <b>true</b> to highlight the field or <b>false</b> to remove highlighting
+   */
+  void highlightDirectoryNameField(boolean highlight);
+
+  /** Focuses directory name field. */
+  void focusDirectoryNameField();
+
+  /**
+   * Sets whether user wants to checkout to a special branch.
+   *
+   * @param selected <b>true</b> to check the field or <b>false</b> to leave it unchecked
+   */
+  void setBranchCheckBoxSelected(boolean selected);
+
+  /**
+   * Returns whether user wants to checkout to a special branch.
+   *
+   * @return <b>true</b> if user has selected the Branch checkbox, otherwise returns <b>false</b>
+   */
+  boolean isBranchCheckBoxSelected();
+
+  /**
+   * Sets new value of Branch name field.
+   *
+   * @param branchName new value of Branch name field
+   */
+  void setBranchName(String branchName);
+
+  /**
+   * Returns the name of a branch to checkout.
+   *
+   * @return name of a branch to checkout
+   */
+  String getBranchName();
+
+  /**
+   * Enables or disables Branch name field.
+   *
+   * @param enabled <b>true</b> or <b>false</b> to enable or disable the field
+   */
+  void enableBranchNameField(boolean enabled);
+
+  /** Focuses Branch name field. */
+  void focusBranchNameField();
 }

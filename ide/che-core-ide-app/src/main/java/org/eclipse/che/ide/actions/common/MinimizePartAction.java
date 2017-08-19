@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions.common;
 
 import com.google.inject.Inject;
@@ -21,38 +21,40 @@ import org.eclipse.che.ide.api.parts.PartStack;
 
 /**
  * Action to minimize active part and corresponding part stack.
- * 
+ *
  * @author Vitaliy Guliy
  */
 public class MinimizePartAction extends Action implements ActivePartChangedHandler {
 
-    private PartStack activePartStack;
+  private PartStack activePartStack;
 
-    @Inject
-    public MinimizePartAction(final EventBus eventBus,
-                              final CoreLocalizationConstant coreLocalizationConstant) {
-        super(coreLocalizationConstant.actionMinimizePartTitle(), coreLocalizationConstant.actionMinimizePartDescription());
-        eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+  @Inject
+  public MinimizePartAction(
+      final EventBus eventBus, final CoreLocalizationConstant coreLocalizationConstant) {
+    super(
+        coreLocalizationConstant.actionMinimizePartTitle(),
+        coreLocalizationConstant.actionMinimizePartDescription());
+    eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+  }
+
+  @Override
+  public void update(ActionEvent e) {
+    if (activePartStack == null) {
+      e.getPresentation().setEnabledAndVisible(false);
+      return;
     }
 
-    @Override
-    public void update(ActionEvent e) {
-        if (activePartStack == null) {
-            e.getPresentation().setEnabledAndVisible(false);
-            return;
-        }
+    e.getPresentation()
+        .setEnabledAndVisible(PartStack.State.NORMAL == activePartStack.getPartStackState());
+  }
 
-        e.getPresentation().setEnabledAndVisible(PartStack.State.NORMAL == activePartStack.getPartStackState());
-    }
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    activePartStack.minimize();
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        activePartStack.minimize();
-    }
-
-    @Override
-    public void onActivePartChanged(ActivePartChangedEvent event) {
-        activePartStack = event.getActivePart().getPartStack();
-    }
-
+  @Override
+  public void onActivePartChanged(ActivePartChangedEvent event) {
+    activePartStack = event.getActivePart().getPartStack();
+  }
 }

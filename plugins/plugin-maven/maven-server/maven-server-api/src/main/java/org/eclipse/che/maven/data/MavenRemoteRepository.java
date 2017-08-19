@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.maven.data;
 
 import java.io.Serializable;
@@ -19,63 +19,64 @@ import java.util.Objects;
  * @author Evgen Vidolob
  */
 public class MavenRemoteRepository implements Serializable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private final String                id;
-    private final String                name;
-    private final String                url;
-    private final String                layout;
-    private final MavenRepositoryPolicy releasesPolicy;
-    private final MavenRepositoryPolicy snapshotsPolicy;
+  private final String id;
+  private final String name;
+  private final String url;
+  private final String layout;
+  private final MavenRepositoryPolicy releasesPolicy;
+  private final MavenRepositoryPolicy snapshotsPolicy;
 
-    public MavenRemoteRepository(String id,
-                                 String name,
-                                 String url,
-                                 String layout,
-                                 MavenRepositoryPolicy releasesPolicy,
-                                 MavenRepositoryPolicy snapshotsPolicy) {
-        this.id = id;
-        this.name = name;
-        this.url = url;
-        this.layout = layout;
-        this.releasesPolicy = releasesPolicy;
-        this.snapshotsPolicy = snapshotsPolicy;
-    }
+  public MavenRemoteRepository(
+      String id,
+      String name,
+      String url,
+      String layout,
+      MavenRepositoryPolicy releasesPolicy,
+      MavenRepositoryPolicy snapshotsPolicy) {
+    this.id = id;
+    this.name = name;
+    this.url = url;
+    this.layout = layout;
+    this.releasesPolicy = releasesPolicy;
+    this.snapshotsPolicy = snapshotsPolicy;
+  }
 
-    public String getId() {
-        return id;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getUrl() {
-        return url;
-    }
+  public String getUrl() {
+    return url;
+  }
 
-    public String getLayout() {
-        return layout;
-    }
+  public String getLayout() {
+    return layout;
+  }
 
-    public MavenRepositoryPolicy getReleasesPolicy() {
-        return releasesPolicy;
-    }
+  public MavenRepositoryPolicy getReleasesPolicy() {
+    return releasesPolicy;
+  }
 
-    public MavenRepositoryPolicy getSnapshotsPolicy() {
-        return snapshotsPolicy;
-    }
+  public MavenRepositoryPolicy getSnapshotsPolicy() {
+    return snapshotsPolicy;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MavenRemoteRepository that = (MavenRemoteRepository)o;
-        return Objects.equals(id, that.id);
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    MavenRemoteRepository that = (MavenRemoteRepository) o;
+    return Objects.equals(id, that.id);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 }

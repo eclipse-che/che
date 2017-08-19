@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * Message for translating value of percent of resolving from <b>MavenServerNotifier</b>.
- */
+/** Message for translating value of percent of resolving from <b>MavenServerNotifier</b>. */
 @DTO
 public interface PercentMessageDto extends MavenOutputEventDto {
 
-    double getPercent();
+  double getPercent();
 
-    void setPercent(double percent);
+  void setPercent(double percent);
 
-    PercentMessageDto withPercent(double percent);
+  PercentMessageDto withPercent(double percent);
 }

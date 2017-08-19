@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.client.comunnication.progressor.background;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.mockito.Mockito.verify;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 import org.junit.Before;
@@ -19,37 +20,32 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
-import static org.mockito.Mockito.verify;
-
 /** @author Valeriy Svydenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class DependencyResolverActionTest {
-    @Mock
-    private BackgroundLoaderPresenter dependencyResolver;
-    @Mock
-    private MavenLocalizationConstant locale;
-    @Mock
-    private Presentation              presentation;
+  @Mock private BackgroundLoaderPresenter dependencyResolver;
+  @Mock private MavenLocalizationConstant locale;
+  @Mock private Presentation presentation;
 
-    private DependencyResolverAction action;
+  private DependencyResolverAction action;
 
-    @Before
-    public void setUp() throws Exception {
-        action = new DependencyResolverAction(dependencyResolver, locale);
-    }
+  @Before
+  public void setUp() throws Exception {
+    action = new DependencyResolverAction(dependencyResolver, locale);
+  }
 
-    @Test
-    public void constructorShouldBePerformed() throws Exception {
-        verify(locale).loaderActionName();
-        verify(locale).loaderActionDescription();
+  @Test
+  public void constructorShouldBePerformed() throws Exception {
+    verify(locale).loaderActionName();
+    verify(locale).loaderActionDescription();
 
-        verify(dependencyResolver).hide();
-    }
+    verify(dependencyResolver).hide();
+  }
 
-    @Test
-    public void customComponentShouldBeCreated() throws Exception {
-        action.createCustomComponent(presentation);
+  @Test
+  public void customComponentShouldBeCreated() throws Exception {
+    action.createCustomComponent(presentation);
 
-        verify(dependencyResolver).getCustomComponent();
-    }
+    verify(dependencyResolver).getCustomComponent();
+  }
 }

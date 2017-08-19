@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,160 +7,168 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * Definition of subversion item.
- */
+/** Definition of subversion item. */
 @DTO
 public interface SubversionItem {
 
-    /**************************************************************************
-     *
-     *  Path
-     *
-     **************************************************************************/
+  /**
+   * ************************************************************************
+   *
+   * <p>Path
+   *
+   * <p>************************************************************************
+   */
+  String getPath();
 
-    String getPath();
+  void setPath(String path);
 
-    void setPath(String path);
+  SubversionItem withPath(String path);
 
-    SubversionItem withPath(String path);
+  /**
+   * ************************************************************************
+   *
+   * <p>Name
+   *
+   * <p>************************************************************************
+   */
+  String getName();
 
-    /**************************************************************************
-     *
-     *  Name
-     *
-     **************************************************************************/
+  void setName(String name);
 
-    String getName();
+  SubversionItem withName(String name);
 
-    void setName(String name);
+  /**
+   * ************************************************************************
+   *
+   * <p>URL
+   *
+   * <p>************************************************************************
+   */
+  String getURL();
 
-    SubversionItem withName(String name);
+  void setURL(String url);
 
-    /**************************************************************************
-     *
-     *  URL
-     *
-     **************************************************************************/
+  SubversionItem withURL(String url);
 
-    String getURL();
+  /**
+   * ************************************************************************
+   *
+   * <p>Relative URL
+   *
+   * <p>************************************************************************
+   */
+  String getRelativeURL();
 
-    void setURL(String url);
+  void setRelativeURL(String relativeURL);
 
-    SubversionItem withURL(String url);
+  SubversionItem withRelativeURL(String relativeURL);
 
-    /**************************************************************************
-     *
-     *  Relative URL
-     *
-     **************************************************************************/
+  /**
+   * ************************************************************************
+   *
+   * <p>Repository Root
+   *
+   * <p>************************************************************************
+   */
+  String getRepositoryRoot();
 
-    String getRelativeURL();
+  void setRepositoryRoot(String repositoryRoot);
 
-    void setRelativeURL(String relativeURL);
+  SubversionItem withRepositoryRoot(String repositoryRoot);
 
-    SubversionItem withRelativeURL(String relativeURL);
+  /**
+   * ************************************************************************
+   *
+   * <p>Repository UUID
+   *
+   * <p>************************************************************************
+   */
+  String getRepositoryUUID();
 
-    /**************************************************************************
-     *
-     *  Repository Root
-     *
-     **************************************************************************/
+  void setRepositoryUUID(String repositoryUUID);
 
-    String getRepositoryRoot();
+  SubversionItem withRepositoryUUID(String repositoryUUID);
 
-    void setRepositoryRoot(String repositoryRoot);
+  /**
+   * ************************************************************************
+   *
+   * <p>Revision
+   *
+   * <p>************************************************************************
+   */
+  String getRevision();
 
-    SubversionItem withRepositoryRoot(String repositoryRoot);
+  void setRevision(String revision);
 
-    /**************************************************************************
-     *
-     *  Repository UUID
-     *
-     **************************************************************************/
+  SubversionItem withRevision(String revision);
 
-    String getRepositoryUUID();
+  /**
+   * ************************************************************************
+   *
+   * <p>Node Kind
+   *
+   * <p>************************************************************************
+   */
+  String getNodeKind();
 
-    void setRepositoryUUID(String repositoryUUID);
+  void setNodeKind(String nodeKind);
 
-    SubversionItem withRepositoryUUID(String repositoryUUID);
+  SubversionItem withNodeKind(String nodeKind);
 
-    /**************************************************************************
-     *
-     *  Revision
-     *
-     **************************************************************************/
+  /**
+   * ************************************************************************
+   *
+   * <p>Schedule
+   *
+   * <p>************************************************************************
+   */
+  String getSchedule();
 
-    String getRevision();
+  void setSchedule(String schedule);
 
-    void setRevision(String revision);
+  SubversionItem withSchedule(String schedule);
 
-    SubversionItem withRevision(String revision);
+  /**
+   * ************************************************************************
+   *
+   * <p>Last Changed Revision
+   *
+   * <p>************************************************************************
+   */
+  String getLastChangedRev();
 
-    /**************************************************************************
-     *
-     *  Node Kind
-     *
-     **************************************************************************/
+  void setLastChangedRev(String lastChangedRev);
 
-    String getNodeKind();
+  SubversionItem withLastChangedRev(String lastChangedRev);
 
-    void setNodeKind(String nodeKind);
+  /**
+   * ************************************************************************
+   *
+   * <p>Last Changed Date
+   *
+   * <p>************************************************************************
+   */
+  String getLastChangedDate();
 
-    SubversionItem withNodeKind(String nodeKind);
+  void setLastChangedDate(String lastChangedDate);
 
-    /**************************************************************************
-     *
-     *  Schedule
-     *
-     **************************************************************************/
+  SubversionItem withLastChangedDate(String lastChangedDate);
 
-    String getSchedule();
+  /**
+   * ************************************************************************
+   *
+   * <p>Project URL
+   *
+   * <p>************************************************************************
+   */
+  String getProjectUri();
 
-    void setSchedule(String schedule);
+  void setProjectUri(String projectUri);
 
-    SubversionItem withSchedule(String schedule);
-
-    /**************************************************************************
-     *
-     *  Last Changed Revision
-     *
-     **************************************************************************/
-
-    String getLastChangedRev();
-
-    void setLastChangedRev(String lastChangedRev);
-
-    SubversionItem withLastChangedRev(String lastChangedRev);
-
-    /**************************************************************************
-     *
-     *  Last Changed Date
-     *
-     **************************************************************************/
-
-    String getLastChangedDate();
-
-    void setLastChangedDate(String lastChangedDate);
-
-    SubversionItem withLastChangedDate(String lastChangedDate);
-
-
-    /**************************************************************************
-     *
-     *  Project URL
-     *
-     **************************************************************************/
-
-    String getProjectUri();
-
-    void setProjectUri(String projectUri);
-
-    SubversionItem withProjectUri(String projectUri);
-
+  SubversionItem withProjectUri(String projectUri);
 }
