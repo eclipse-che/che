@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.miscellaneous;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
+import com.google.inject.Inject;
+import java.net.URL;
+import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
@@ -28,63 +32,58 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.net.URL;
-import java.nio.file.Paths;
-
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-
 /**
  * //
  *
  * @author Musienko Maxim
  */
 public class CheckWsAgentAfterStopProcessTest {
-    private final static String PROJECT_NAME              = CheckWsAgentAfterStopProcessTest.class.getSimpleName();
-    private final static String nameCommandForKillWsAgent = "killWsAgent";
-    private final static String killPIDWSAgentCommand     =
-            "kill -9 $(ps ax | grep java | grep ws-agent | grep conf | grep -v grep | awk '{print $1}')";
+  private static final String PROJECT_NAME = CheckWsAgentAfterStopProcessTest.class.getSimpleName();
+  private static final String nameCommandForKillWsAgent = "killWsAgent";
+  private static final String killPIDWSAgentCommand =
+      "kill -9 $(ps ax | grep java | grep ws-agent | grep conf | grep -v grep | awk '{print $1}')";
 
-    @Inject
-    private TestWorkspace            workspace;
-    @Inject
-    private Ide                      ide;
-    @Inject
-    private ProjectExplorer          projectExplorer;
-    @Inject
-    private Events                   events;
-    @Inject
-    private ToastLoader              toastLoader;
-    @Inject
-    private TestCommandServiceClient testCommandServiceClient;
-    @Inject
-    private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestWorkspace workspace;
+  @Inject private Ide ide;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Events events;
+  @Inject private ToastLoader toastLoader;
+  @Inject private TestCommandServiceClient testCommandServiceClient;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        URL resource = getClass().getResource("/projects/guess-project");
-        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING
-                .toString()
-        );
-        testCommandServiceClient.createCommand(killPIDWSAgentCommand, nameCommandForKillWsAgent, TestCommandsConstants.CUSTOM,
-                                               workspace.getId());
-        ide.open(workspace);
-    }
+  @BeforeClass
+  public void setUp() throws Exception {
+    URL resource = getClass().getResource("/projects/guess-project");
+    testProjectServiceClient.importProject(
+        workspace.getId(),
+        Paths.get(resource.toURI()),
+        PROJECT_NAME,
+        ProjectTemplates.MAVEN_SPRING.toString());
+    testCommandServiceClient.createCommand(
+        killPIDWSAgentCommand,
+        nameCommandForKillWsAgent,
+        TestCommandsConstants.CUSTOM,
+        workspace.getId());
+    ide.open(workspace);
+  }
 
-
-    @Test
-    public void checkDialogAfterKillingProcess() throws Exception {
-        String expectedMessageOInDialog =
-                "Workspace agent is no longer responding. To fix the problem, restart the workspace.";
-        projectExplorer.waitItem(PROJECT_NAME);
-        toastLoader.waitAppeareanceAndClosing();
-        projectExplorer.invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, nameCommandForKillWsAgent);
-        new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC * 3).until
-                (ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[text()='" + expectedMessageOInDialog + "']")));
-        new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until
-                (ExpectedConditions.visibilityOfElementLocated(By.id("ask-dialog-first"))).click();
-        projectExplorer.waitItem(PROJECT_NAME);
-        events.clickProjectEventsTab();
-        events.waitExpectedMessage(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
-    }
+  @Test
+  public void checkDialogAfterKillingProcess() throws Exception {
+    String expectedMessageOInDialog =
+        "Workspace agent is no longer responding. To fix the problem, restart the workspace.";
+    projectExplorer.waitItem(PROJECT_NAME);
+    toastLoader.waitAppeareanceAndClosing();
+    projectExplorer.invokeCommandWithContextMenu(
+        ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, nameCommandForKillWsAgent);
+    new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC * 3)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//span[text()='" + expectedMessageOInDialog + "']")));
+    new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id("ask-dialog-first")))
+        .click();
+    projectExplorer.waitItem(PROJECT_NAME);
+    events.clickProjectEventsTab();
+    events.waitExpectedMessage(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
+  }
 }

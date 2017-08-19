@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.core.user;
 
 /**
@@ -16,34 +16,24 @@ package org.eclipse.che.selenium.core.user;
  * @author Anatolii Bazko
  */
 public interface TestUser {
-    /**
-     * Returns user's email.
-     */
-    String getEmail();
+  /** Returns user's email. */
+  String getEmail();
 
-    /**
-     * Returns user's password.
-     */
-    String getPassword();
+  /** Returns user's password. */
+  String getPassword();
 
-    /**
-     * Returns the current authentication token of the user.
-     * Will be changed after login/logout procedure.
-     */
-    String getAuthToken();
+  /**
+   * Returns the current authentication token of the user. Will be changed after login/logout
+   * procedure.
+   */
+  String getAuthToken();
 
-    /**
-     * Return user's name.
-     */
-    String getName();
+  /** Return user's name. */
+  String getName();
 
-    /**
-     * Return user's id.
-     */
-    String getId();
+  /** Return user's id. */
+  String getId();
 
-    /**
-     * Deletes user and its stuff.
-     */
-    void delete();
+  /** Deletes user and its stuff. */
+  void delete();
 }

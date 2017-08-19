@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,50 +7,50 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.core.client;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.Map;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 
-import java.util.Map;
-
-/**
- * @author Musienko Maxim
- */
+/** @author Musienko Maxim */
 @Singleton
 public class TestProfileServiceClient {
-    private final String                 apiEndpoint;
-    private final HttpJsonRequestFactory requestFactory;
-    private final TestUser defaultTestUser;
+  private final String apiEndpoint;
+  private final HttpJsonRequestFactory requestFactory;
+  private final TestUser defaultTestUser;
 
-    @Inject
-    public TestProfileServiceClient(TestApiEndpointUrlProvider apiEndpointProvider,
-                                    HttpJsonRequestFactory requestFactory,
-                                    DefaultTestUser defaultTestUser) {
-        this.apiEndpoint = apiEndpointProvider.get().toString();
-        this.requestFactory = requestFactory;
-        this.defaultTestUser = defaultTestUser;
-    }
+  @Inject
+  public TestProfileServiceClient(
+      TestApiEndpointUrlProvider apiEndpointProvider,
+      HttpJsonRequestFactory requestFactory,
+      DefaultTestUser defaultTestUser) {
+    this.apiEndpoint = apiEndpointProvider.get().toString();
+    this.requestFactory = requestFactory;
+    this.defaultTestUser = defaultTestUser;
+  }
 
-    public void setAttributes(Map<String, String> attributes, String authToken) throws Exception {
-        requestFactory.fromUrl(apiEndpoint + "profile/attributes")
-                      .setAuthorizationHeader(authToken)
-                      .usePutMethod()
-                      .setBody(attributes)
-                      .request();
-    }
+  public void setAttributes(Map<String, String> attributes, String authToken) throws Exception {
+    requestFactory
+        .fromUrl(apiEndpoint + "profile/attributes")
+        .setAuthorizationHeader(authToken)
+        .usePutMethod()
+        .setBody(attributes)
+        .request();
+  }
 
-    public void setUserNames(String name, String lastName) throws Exception {
-        Map<String, String> attributes = ImmutableMap.of("firstName", name,
-                                                         "lastName", lastName);
+  public void setUserNames(String name, String lastName) throws Exception {
+    Map<String, String> attributes =
+        ImmutableMap.of(
+            "firstName", name,
+            "lastName", lastName);
 
-        setAttributes(attributes, defaultTestUser.getAuthToken());
-    }
+    setAttributes(attributes, defaultTestUser.getAuthToken());
+  }
 }

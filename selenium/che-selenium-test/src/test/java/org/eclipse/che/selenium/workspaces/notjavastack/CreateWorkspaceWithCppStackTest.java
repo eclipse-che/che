@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.workspaces.notjavastack;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 
+import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -28,62 +29,48 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-
-/**
- * @author Andrey Chizhikov
- */
+/** @author Andrey Chizhikov */
 public class CreateWorkspaceWithCppStackTest {
-    private final String WORKSPACE = NameGenerator.generate("WsCpp", 4);
+  private final String WORKSPACE = NameGenerator.generate("WsCpp", 4);
 
-    @Inject
-    private DefaultTestUser            defaultTestUser;
-    @Inject
-    private NavigationBar              navigationBar;
-    @Inject
-    private CreateWorkspace            createWorkspace;
-    @Inject
-    private Dashboard                  dashboard;
-    @Inject
-    private DashboardWorkspace         dashboardWorkspace;
-    @Inject
-    private ProjectExplorer            projectExplorer;
-    @Inject
-    private Loader                     loader;
-    @Inject
-    private MachineTerminal            terminal;
-    @Inject
-    private SeleniumWebDriver          seleniumWebDriver;
-    @Inject
-    private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private NavigationBar navigationBar;
+  @Inject private CreateWorkspace createWorkspace;
+  @Inject private Dashboard dashboard;
+  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Loader loader;
+  @Inject private MachineTerminal terminal;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
-    @BeforeClass
-    public void setUp() {
-        dashboard.open();
-    }
+  @BeforeClass
+  public void setUp() {
+    dashboard.open();
+  }
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
-    }
+  @AfterClass
+  public void tearDown() throws Exception {
+    workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
+  }
 
-    @Test
-    public void createWorkspaceWithCppStackTest() {
-        navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
-        dashboardWorkspace.waitToolbarTitleName("Workspaces");
-        dashboardWorkspace.clickOnNewWorkspaceBtn();
+  @Test
+  public void createWorkspaceWithCppStackTest() {
+    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
+    dashboardWorkspace.waitToolbarTitleName("Workspaces");
+    dashboardWorkspace.clickOnNewWorkspaceBtn();
 
-        createWorkspace.waitToolbar();
-        createWorkspace.typeWorkspaceName(WORKSPACE);
-        createWorkspace.selectStack(TestStacksConstants.CPP.getId());
-        createWorkspace.setMachineRAM("2");
-        createWorkspace.clickCreate();
+    createWorkspace.waitToolbar();
+    createWorkspace.typeWorkspaceName(WORKSPACE);
+    createWorkspace.selectStack(TestStacksConstants.CPP.getId());
+    createWorkspace.setMachineRAM("2");
+    createWorkspace.clickCreate();
 
-        dashboard.waitNotificationIsClosed();
-        seleniumWebDriver.switchFromDashboardIframeToIde();
+    dashboard.waitNotificationIsClosed();
+    seleniumWebDriver.switchFromDashboardIframeToIde();
 
-        projectExplorer.waitProjectExplorer();
-        loader.waitOnClosed();
-        terminal.waitTerminalConsole(PREPARING_WS_TIMEOUT_SEC);
-    }
+    projectExplorer.waitProjectExplorer();
+    loader.waitOnClosed();
+    terminal.waitTerminalConsole(PREPARING_WS_TIMEOUT_SEC);
+  }
 }

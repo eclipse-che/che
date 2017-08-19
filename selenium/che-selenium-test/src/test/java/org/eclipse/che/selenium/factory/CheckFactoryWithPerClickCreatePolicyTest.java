@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.factory;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.testng.Assert.assertEquals;
 
+import com.google.inject.Inject;
 import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
@@ -24,59 +26,50 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.testng.Assert.assertEquals;
-
-/**
- * @author Mihail Kuznyetsov
- */
+/** @author Mihail Kuznyetsov */
 public class CheckFactoryWithPerClickCreatePolicyTest {
-    @Inject
-    private ProjectExplorer         projectExplorer;
-    @Inject
-    private Dashboard               dashboard;
-    @Inject
-    private NotificationsPopupPanel notificationsPopupPanel;
-    @Inject
-    private TestFactoryInitializer  testFactoryInitializer;
-    @Inject
-    private SeleniumWebDriver       seleniumWebDriver;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Dashboard dashboard;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private TestFactoryInitializer testFactoryInitializer;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
-    private TestFactory testFactory;
+  private TestFactory testFactory;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        TestFactoryInitializer.TestFactoryBuilder factoryBuilder = testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
-        factoryBuilder.setPolicies(newDto(PoliciesDto.class).withCreate("perClick"));
-        testFactory = factoryBuilder.build();
-    }
+  @BeforeClass
+  public void setUp() throws Exception {
+    TestFactoryInitializer.TestFactoryBuilder factoryBuilder =
+        testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
+    factoryBuilder.setPolicies(newDto(PoliciesDto.class).withCreate("perClick"));
+    testFactory = factoryBuilder.build();
+  }
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        testFactory.delete();
-    }
+  @AfterClass
+  public void tearDown() throws Exception {
+    testFactory.delete();
+  }
 
-    @Test
-    public void checkFactoryAcceptingWithPerClickPolicy() throws Exception {
-        dashboard.open();
+  @Test
+  public void checkFactoryAcceptingWithPerClickPolicy() throws Exception {
+    dashboard.open();
 
-        // accept factory
-        testFactory.open(seleniumWebDriver);
+    // accept factory
+    testFactory.open(seleniumWebDriver);
 
-        seleniumWebDriver.switchFromDashboardIframeToIde();
-        projectExplorer.waitProjectExplorer();
-        notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
+    seleniumWebDriver.switchFromDashboardIframeToIde();
+    projectExplorer.waitProjectExplorer();
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
 
-        String workspaceUrl = seleniumWebDriver.getCurrentUrl();
+    String workspaceUrl = seleniumWebDriver.getCurrentUrl();
 
-        // accept factory
-        testFactory.open(seleniumWebDriver);
-        seleniumWebDriver.switchFromDashboardIframeToIde();
-        projectExplorer.waitProjectExplorer();
+    // accept factory
+    testFactory.open(seleniumWebDriver);
+    seleniumWebDriver.switchFromDashboardIframeToIde();
+    projectExplorer.waitProjectExplorer();
 
-        notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
 
-        // factory has been accepted in another workspace
-        assertEquals(workspaceUrl + "_1", seleniumWebDriver.getCurrentUrl());
-    }
+    // factory has been accepted in another workspace
+    assertEquals(workspaceUrl + "_1", seleniumWebDriver.getCurrentUrl());
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.pageobject;
+
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -23,426 +26,383 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-
-/**
- * @author Musienko Maxim
- */
+/** @author Musienko Maxim */
 @Singleton
 public class ImportProjectFromLocation {
 
-    private final SeleniumWebDriver seleniumWebDriver;
-    private final Loader            loader;
+  private final SeleniumWebDriver seleniumWebDriver;
+  private final Loader loader;
 
-    @Inject
-    public ImportProjectFromLocation(SeleniumWebDriver seleniumWebDriver, Loader loader) {
-        this.seleniumWebDriver = seleniumWebDriver;
-        this.loader = loader;
-        PageFactory.initElements(seleniumWebDriver, this);
-    }
+  @Inject
+  public ImportProjectFromLocation(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+    this.seleniumWebDriver = seleniumWebDriver;
+    this.loader = loader;
+    PageFactory.initElements(seleniumWebDriver, this);
+  }
 
-    private interface Locators {
-        String MAIN_FORM_ID                  = "gwt-debug-importProjectWizard-window";
-        String SKIP_ROOT_FOLDER_CHECK_BOX_ID = "gwt-debug-zipImporter-skipFirstLevel-label";
-        String KEEP_FOLLOWING_DIRECTORY      = "gwt-debug-file-importProject-keepDirectory";
-        String KEEP_DIRECTORY_CHECK_BOX      = "gwt-debug-file-importProject-keepDirectory-input";
-        String DIRECTORY_NAME                = "gwt-debug-file-importProject-keepDirectoryName";
-        String GITHUB_SOURCE_CONTROL_ID      = "gwt-debug-projectWizard-GITHUB";
-        String GIT_SOURCE_CONTROL_ID         = "gwt-debug-projectWizard-GIT";
-        String GIT_SOURCE_CONTROL_ZIP        = "gwt-debug-projectWizard-ZIP";
-        String URL_FIELD_ID_                 = "gwt-debug-file-importProject-projectUrl";
-        String NAME_FIELD_ID                 = "gwt-debug-file-importProject-projectName";
-        String GITHUB_ACCOUNT                = "gwt-debug-githubImporter-accountName";
-        String LOAD_REPO_BTN_ID              = "gwt-debug-githubImporter-loadRepo";
-        String IMPORT_BTN_ID                 = "importProjectWizard-importButton";
-        String CLOSE_ICON_CSS                = "div#gwt-debug-importProjectWizard-window svg[width='8px'][height='8px']";
-        String CATEGORY_PANEL_XPATH          = "//table[@id='gwt-debug-githubImporter-repositories']//div[text()='%s']";
-        String BRANCH_NAME                   = "gwt-debug-file-importProject-branchName";
-        String IMPORT_PROJECT_BRANCH         = "gwt-debug-file-importProject-branch-label";
-        String IMPORT_BRANCH_CHECK_BOX       = "gwt-debug-file-importProject-branch-input";
-        String IMPORT_RECURSIVELY            = "gwt-debug-file-importProject-recursive-label";
-        String IMPORT_RECURSIVELY_CHECK_BOX  = "gwt-debug-file-importProject-recursive-input";
-        String SUBVERSION_SOURCE_FIELD       = "gwt-debug-projectWizard-SUBVERSION";
-        String RELATIVE_PATH                 = "gwt-debug-file-importProject-relativePath";
-        String SVN_USER_NAME                 = "gwt-debug-file-importProject-username";
-        String SVN_PASSWORD                  = "gwt-debug-file-importProject-password";
-    }
+  private interface Locators {
+    String MAIN_FORM_ID = "gwt-debug-importProjectWizard-window";
+    String SKIP_ROOT_FOLDER_CHECK_BOX_ID = "gwt-debug-zipImporter-skipFirstLevel-label";
+    String KEEP_FOLLOWING_DIRECTORY = "gwt-debug-file-importProject-keepDirectory";
+    String KEEP_DIRECTORY_CHECK_BOX = "gwt-debug-file-importProject-keepDirectory-input";
+    String DIRECTORY_NAME = "gwt-debug-file-importProject-keepDirectoryName";
+    String GITHUB_SOURCE_CONTROL_ID = "gwt-debug-projectWizard-GITHUB";
+    String GIT_SOURCE_CONTROL_ID = "gwt-debug-projectWizard-GIT";
+    String GIT_SOURCE_CONTROL_ZIP = "gwt-debug-projectWizard-ZIP";
+    String URL_FIELD_ID_ = "gwt-debug-file-importProject-projectUrl";
+    String NAME_FIELD_ID = "gwt-debug-file-importProject-projectName";
+    String GITHUB_ACCOUNT = "gwt-debug-githubImporter-accountName";
+    String LOAD_REPO_BTN_ID = "gwt-debug-githubImporter-loadRepo";
+    String IMPORT_BTN_ID = "importProjectWizard-importButton";
+    String CLOSE_ICON_CSS =
+        "div#gwt-debug-importProjectWizard-window svg[width='8px'][height='8px']";
+    String CATEGORY_PANEL_XPATH =
+        "//table[@id='gwt-debug-githubImporter-repositories']//div[text()='%s']";
+    String BRANCH_NAME = "gwt-debug-file-importProject-branchName";
+    String IMPORT_PROJECT_BRANCH = "gwt-debug-file-importProject-branch-label";
+    String IMPORT_BRANCH_CHECK_BOX = "gwt-debug-file-importProject-branch-input";
+    String IMPORT_RECURSIVELY = "gwt-debug-file-importProject-recursive-label";
+    String IMPORT_RECURSIVELY_CHECK_BOX = "gwt-debug-file-importProject-recursive-input";
+    String SUBVERSION_SOURCE_FIELD = "gwt-debug-projectWizard-SUBVERSION";
+    String RELATIVE_PATH = "gwt-debug-file-importProject-relativePath";
+    String SVN_USER_NAME = "gwt-debug-file-importProject-username";
+    String SVN_PASSWORD = "gwt-debug-file-importProject-password";
+  }
 
-    @FindBy(id = Locators.MAIN_FORM_ID)
-    WebElement mainForm;
+  @FindBy(id = Locators.MAIN_FORM_ID)
+  WebElement mainForm;
 
-    @FindBy(id = Locators.KEEP_DIRECTORY_CHECK_BOX)
-    WebElement keepDirCheckBox;
+  @FindBy(id = Locators.KEEP_DIRECTORY_CHECK_BOX)
+  WebElement keepDirCheckBox;
 
-    @FindBy(id = Locators.KEEP_FOLLOWING_DIRECTORY)
-    WebElement keepFollowingDir;
+  @FindBy(id = Locators.KEEP_FOLLOWING_DIRECTORY)
+  WebElement keepFollowingDir;
 
-    @FindBy(id = Locators.DIRECTORY_NAME)
-    WebElement directoryName;
+  @FindBy(id = Locators.DIRECTORY_NAME)
+  WebElement directoryName;
 
-    @FindBy(id = Locators.SKIP_ROOT_FOLDER_CHECK_BOX_ID)
-    WebElement skipRootFolderOfArchive;
+  @FindBy(id = Locators.SKIP_ROOT_FOLDER_CHECK_BOX_ID)
+  WebElement skipRootFolderOfArchive;
 
+  @FindBy(id = Locators.GITHUB_SOURCE_CONTROL_ID)
+  WebElement gitHubSourceItem;
 
-    @FindBy(id = Locators.GITHUB_SOURCE_CONTROL_ID)
-    WebElement gitHubSourceItem;
+  @FindBy(id = Locators.GIT_SOURCE_CONTROL_ID)
+  WebElement gitSourceItem;
 
-    @FindBy(id = Locators.GIT_SOURCE_CONTROL_ID)
-    WebElement gitSourceItem;
+  @FindBy(id = Locators.GIT_SOURCE_CONTROL_ZIP)
+  WebElement gitSourceZip;
 
-    @FindBy(id = Locators.GIT_SOURCE_CONTROL_ZIP)
-    WebElement gitSourceZip;
+  @FindBy(id = Locators.URL_FIELD_ID_)
+  WebElement urlField;
 
-    @FindBy(id = Locators.URL_FIELD_ID_)
-    WebElement urlField;
+  @FindBy(id = Locators.NAME_FIELD_ID)
+  WebElement nameField;
 
-    @FindBy(id = Locators.NAME_FIELD_ID)
-    WebElement nameField;
+  @FindBy(css = Locators.CLOSE_ICON_CSS)
+  WebElement closeIcon;
 
+  @FindBy(id = Locators.IMPORT_BTN_ID)
+  WebElement importBtn;
 
-    @FindBy(css = Locators.CLOSE_ICON_CSS)
-    WebElement closeIcon;
+  @FindBy(id = Locators.LOAD_REPO_BTN_ID)
+  WebElement loadRepoBtn;
 
-    @FindBy(id = Locators.IMPORT_BTN_ID)
-    WebElement importBtn;
+  @FindBy(id = Locators.GITHUB_ACCOUNT)
+  WebElement githubAccountList;
 
-    @FindBy(id = Locators.LOAD_REPO_BTN_ID)
-    WebElement loadRepoBtn;
+  @FindBy(id = Locators.BRANCH_NAME)
+  WebElement branchName;
 
-    @FindBy(id = Locators.GITHUB_ACCOUNT)
-    WebElement githubAccountList;
+  @FindBy(id = Locators.IMPORT_PROJECT_BRANCH)
+  WebElement importBranch;
 
-    @FindBy(id = Locators.BRANCH_NAME)
-    WebElement branchName;
+  @FindBy(id = Locators.IMPORT_BRANCH_CHECK_BOX)
+  WebElement importBranchCheckBox;
 
-    @FindBy(id = Locators.IMPORT_PROJECT_BRANCH)
-    WebElement importBranch;
+  @FindBy(id = Locators.SUBVERSION_SOURCE_FIELD)
+  WebElement svnSourceField;
 
-    @FindBy(id = Locators.IMPORT_BRANCH_CHECK_BOX)
-    WebElement importBranchCheckBox;
+  @FindBy(id = Locators.RELATIVE_PATH)
+  WebElement svnRelativePath;
 
-    @FindBy(id = Locators.SUBVERSION_SOURCE_FIELD)
-    WebElement svnSourceField;
+  @FindBy(id = Locators.SVN_USER_NAME)
+  WebElement svnUserName;
 
-    @FindBy(id = Locators.RELATIVE_PATH)
-    WebElement svnRelativePath;
+  @FindBy(id = Locators.SVN_PASSWORD)
+  WebElement svnPassword;
 
-    @FindBy(id = Locators.SVN_USER_NAME)
-    WebElement svnUserName;
+  @FindBy(id = Locators.IMPORT_RECURSIVELY)
+  WebElement importRecursively;
 
-    @FindBy(id = Locators.SVN_PASSWORD)
-    WebElement svnPassword;
+  @FindBy(id = Locators.IMPORT_RECURSIVELY_CHECK_BOX)
+  WebElement importRecursivelyCheckBox;
 
-    @FindBy(id = Locators.IMPORT_RECURSIVELY)
-    WebElement importRecursively;
+  /** wait while main widget will appear */
+  public void waitMainForm() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(mainForm));
+  }
 
-    @FindBy(id = Locators.IMPORT_RECURSIVELY_CHECK_BOX)
-    WebElement importRecursivelyCheckBox;
+  /** wait while all elements of the form appear */
+  public void waitMainFormIsClosed() {
+    new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC)
+        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM_ID)));
+  }
 
-    /**
-     * wait while main widget will appear
-     */
-    public void waitMainForm() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(mainForm));
-    }
+  /** wait while all elements of the form appear */
+  public void waitMainFormIsClosed(int timeout) {
+    new WebDriverWait(seleniumWebDriver, timeout)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.MAIN_FORM_ID)));
+  }
 
+  /**
+   * type user uri into URL: field
+   *
+   * @param uri
+   */
+  public void typeURi(String uri) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(urlField))
+        .clear();
+    loader.waitOnClosed();
+    urlField.sendKeys(uri);
+  }
 
-    /**
-     * wait while all elements of the form appear
-     */
-    public void waitMainFormIsClosed() {
-        new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC).until(ExpectedConditions.invisibilityOfElementLocated(
-                By.id(Locators.MAIN_FORM_ID)));
-    }
+  /** click on 'Import recursively' checkbox */
+  public void clickOnImportRecursivelyCheckbox() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.elementToBeClickable(importRecursively))
+        .click();
+  }
 
-    /**
-     * wait while all elements of the form appear
-     */
-    public void waitMainFormIsClosed(int timeout) {
-        new WebDriverWait(seleniumWebDriver, timeout).until(ExpectedConditions.visibilityOfElementLocated(
-                By.id(Locators.MAIN_FORM_ID)));
-    }
+  /** wait the 'Import recursively' checkbox is selected */
+  public void waitImportRecursivelyIsSelected() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until((WebDriver webDriver) -> importRecursivelyCheckBox.getAttribute("checked") != null);
+  }
 
-    /**
-     * type user uri into URL: field
-     *
-     * @param uri
-     */
-    public void typeURi(String uri) {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(urlField)).clear();
-        loader.waitOnClosed();
-        urlField.sendKeys(uri);
-    }
+  /** wait the 'Import recursively' checkbox is not selected */
+  public void waitImportRecursivelyIsNotSelected() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until((WebDriver webDriver) -> importRecursivelyCheckBox.getAttribute("checked") == null);
+  }
 
-    /**
-     * click on 'Import recursively' checkbox
-     */
-    public void clickOnImportRecursivelyCheckbox() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until
-                (ExpectedConditions.elementToBeClickable(importRecursively)).click();
-    }
+  /**
+   * type a name of the project
+   *
+   * @param nameOfProject
+   */
+  public void typeProjectName(String nameOfProject) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(nameField));
+    nameField.clear();
+    loader.waitOnClosed();
+    nameField.sendKeys(nameOfProject);
+  }
 
-    /**
-     * wait the 'Import recursively' checkbox is selected
-     */
-    public void waitImportRecursivelyIsSelected() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until
-                ((WebDriver webDriver) -> importRecursivelyCheckBox.getAttribute("checked") != null);
-    }
+  /** click on 'Import' button and wait what the 'Import project' window was closed */
+  public void clickImportBtn() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(importBtn))
+        .click();
+    waitMainFormIsClosed();
+  }
 
-    /**
-     * wait the 'Import recursively' checkbox is not selected
-     */
-    public void waitImportRecursivelyIsNotSelected() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until
-                ((WebDriver webDriver) -> importRecursivelyCheckBox.getAttribute("checked") == null);
-    }
+  /** click on 'Import' button */
+  public void clickImportBtnWithoutWait() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(importBtn))
+        .click();
+  }
 
-    /**
-     * type a name of the project
-     *
-     * @param nameOfProject
-     */
-    public void typeProjectName(String nameOfProject) {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(nameField));
-        nameField.clear();
-        loader.waitOnClosed();
-        nameField.sendKeys(nameOfProject);
-    }
+  /** click on Git field */
+  public void selectGitSourceItem() {
+    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(gitSourceItem));
+    loader.waitOnClosed();
+    gitSourceItem.click();
+    loader.waitOnClosed();
+  }
 
-    /**
-     * click on 'Import' button and wait what the 'Import project' window was closed
-     */
-    public void clickImportBtn() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(importBtn)).click();
-        waitMainFormIsClosed();
-    }
+  /** click on GitHub field */
+  public void selectGitHubSourceItem() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(gitHubSourceItem))
+        .click();
+  }
 
-    /**
-     * click on 'Import' button
-     */
-    public void clickImportBtnWithoutWait() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(importBtn)).click();
-    }
+  /**
+   * wait main form, select Git field type uri and name of importing project click on button import
+   *
+   * @param uri is user uri into URL: field
+   * @param nameOfProject is name of project into name: field
+   */
+  public void waitAndTypeImporterAsGitInfo(String uri, String nameOfProject) {
+    waitMainForm();
+    selectGitSourceItem();
+    loader.waitOnClosed();
+    typeURi(uri);
+    loader.waitOnClosed();
+    typeProjectName(nameOfProject);
+    loader.waitOnClosed();
+    clickImportBtn();
+    waitMainFormIsClosed();
+    loader.waitOnClosed();
+  }
 
-    /**
-     * click on Git field
-     */
-    public void selectGitSourceItem() {
-        new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(gitSourceItem));
-        loader.waitOnClosed();
-        gitSourceItem.click();
-        loader.waitOnClosed();
-    }
+  /** click on 'Keep following directory' */
+  public void clickOnKeepDirectoryCheckbox() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.elementToBeClickable(keepFollowingDir))
+        .click();
+  }
 
-    /**
-     * click on GitHub field
-     */
-    public void selectGitHubSourceItem() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(gitHubSourceItem))
-                                                                       .click();
-    }
+  /** wait the 'Keep following directory' checkbox is selected */
+  public void waitKeepDirectoryIsSelected() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until((WebDriver webDriver) -> keepDirCheckBox.getAttribute("checked") != null);
+  }
 
-    /**
-     * wait main form,  select Git field
-     * type uri and name of importing project
-     * click on button import
-     *
-     * @param uri
-     *         is user uri into URL: field
-     * @param nameOfProject
-     *         is name of project into name: field
-     */
-    public void waitAndTypeImporterAsGitInfo(String uri, String nameOfProject) {
-        waitMainForm();
-        selectGitSourceItem();
-        loader.waitOnClosed();
-        typeURi(uri);
-        loader.waitOnClosed();
-        typeProjectName(nameOfProject);
-        loader.waitOnClosed();
-        clickImportBtn();
-        waitMainFormIsClosed();
-        loader.waitOnClosed();
-    }
+  /** wait the 'Keep following directory' checkbox is not selected */
+  public void waitKeepDirectoryIsNotSelected() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until((WebDriver webDriver) -> keepDirCheckBox.getAttribute("checked") == null);
+  }
 
-    /**
-     * click on 'Keep following directory'
-     */
-    public void clickOnKeepDirectoryCheckbox() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until
-                (ExpectedConditions.elementToBeClickable(keepFollowingDir)).click();
-    }
+  /**
+   * select specified item into github account dropdown list
+   *
+   * @param item item for selection
+   */
+  public void selectItemInAccountList(String item) {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(githubAccountList));
+    new Select(githubAccountList).selectByValue(item);
+  }
 
-    /**
-     * wait the 'Keep following directory' checkbox is selected
-     */
-    public void waitKeepDirectoryIsSelected() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until
-                ((WebDriver webDriver) -> keepDirCheckBox.getAttribute("checked") != null);
-    }
+  /**
+   * type a name of the directory
+   *
+   * @param nameOfDirectory
+   */
+  public void typeDirectoryName(String nameOfDirectory) {
+    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(directoryName));
+    directoryName.clear();
+    directoryName.sendKeys(nameOfDirectory);
+  }
 
-    /**
-     * wait the 'Keep following directory' checkbox is not selected
-     */
-    public void waitKeepDirectoryIsNotSelected() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until
-                ((WebDriver webDriver) -> keepDirCheckBox.getAttribute("checked") == null);
-    }
+  /** select project by name in project list */
+  public void selectProjectByName(String projectName) {
+    String locator = String.format(Locators.CATEGORY_PANEL_XPATH, projectName);
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+        .click();
+  }
 
-    /**
-     * select specified item into github account dropdown list
-     *
-     * @param item
-     *         item for selection
-     */
-    public void selectItemInAccountList(String item) {
-        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(githubAccountList));
-        new Select(githubAccountList).selectByValue(item);
-    }
+  public void waitLoadRepoBtn() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(loadRepoBtn));
+  }
 
-    /**
-     * type a name of the directory
-     *
-     * @param nameOfDirectory
-     */
-    public void typeDirectoryName(String nameOfDirectory) {
-        new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(directoryName));
-        directoryName.clear();
-        directoryName.sendKeys(nameOfDirectory);
+  public void clickLoadRepoBtn() {
+    waitLoadRepoBtn();
+    loadRepoBtn.click();
+  }
 
-    }
+  /**
+   * type a name of the branch
+   *
+   * @param branch is name of the branch
+   */
+  public void typeBranchName(String branch) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(branchName));
+    branchName.clear();
+    branchName.sendKeys(branch);
+  }
 
-    /**
-     * select project by name in project list
-     */
-    public void selectProjectByName(String projectName) {
-        String locator = String.format(Locators.CATEGORY_PANEL_XPATH, projectName);
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-                .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator))).click();
+  /** click on 'Branch' */
+  public void clickBranchCheckbox() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.elementToBeClickable(importBranch))
+        .click();
+  }
 
-    }
+  /** wait the 'Branch' checkbox is selected */
+  public void waitBranchIsSelected() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until((WebDriver webDriver) -> importBranchCheckBox.getAttribute("checked") != null);
+  }
 
-    public void waitLoadRepoBtn() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(loadRepoBtn));
-    }
+  /** wait the 'Branch' checkbox is not selected */
+  public void waitBranchIsNotSelected() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until((WebDriver webDriver) -> importBranchCheckBox.getAttribute("checked") == null);
+  }
 
-    public void clickLoadRepoBtn() {
-        waitLoadRepoBtn();
-        loadRepoBtn.click();
-    }
+  /**
+   * type a relative path of Subversion repository URL into the 'Relative Path:' field
+   *
+   * @param path is the relative path the Subversion repository URL
+   */
+  public void typePathOfSvnRepoUrl(String path) {
+    new WebDriverWait(seleniumWebDriver, 10)
+        .until(ExpectedConditions.visibilityOf(svnRelativePath));
+    svnRelativePath.clear();
+    svnRelativePath.sendKeys(path);
+  }
 
-    /**
-     * type a name of the branch
-     *
-     * @param branch
-     *         is name of the branch
-     */
-    public void typeBranchName(String branch) {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(branchName));
-        branchName.clear();
-        branchName.sendKeys(branch);
-    }
+  /**
+   * wait main form, select the 'SUBVERSION' field type uri and name of importing project click on
+   * button import
+   *
+   * @param uri is user uri into URL: field
+   * @param nameOfProject is name of project into name: field
+   */
+  public void waitAndTypeImporterAsSvnInfo(String uri, String nameOfProject)
+      throws InterruptedException {
+    waitMainForm();
+    selectSvnSourceField();
+    typeURi(uri);
+    typeProjectName(nameOfProject);
+    clickImportBtn();
+    waitMainFormIsClosed();
+    loader.waitOnClosed();
+  }
 
-    /**
-     * click on 'Branch'
-     */
-    public void clickBranchCheckbox() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until
-                (ExpectedConditions.elementToBeClickable(importBranch)).click();
-    }
+  /** wait and click on the 'SUBVERSION' source control field */
+  public void selectSvnSourceField() throws InterruptedException {
+    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(svnSourceField));
+    svnSourceField.click();
+    loader.waitOnClosed();
+  }
 
-    /**
-     * wait the 'Branch' checkbox is selected
-     */
-    public void waitBranchIsSelected() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until
-                ((WebDriver webDriver) -> importBranchCheckBox.getAttribute("checked") != null);
-    }
+  /**
+   * Note: Import project from Subversion repository with typing a relative path
+   *
+   * <p>wait main form, select the 'SUBVERSION' field type uri and relative path type name of
+   * importing project click on button import
+   *
+   * @param uri is user uri into URL: field
+   * @param path is relative path into Relative Path: field
+   * @param nameOfProject is name of project into name: field
+   */
+  public void waitAndTypeImporterAsSvnInfo(String uri, String path, String nameOfProject)
+      throws InterruptedException {
+    waitMainForm();
+    selectSvnSourceField();
+    typeURi(uri);
+    typePathOfSvnRepoUrl(path);
+    typeProjectName(nameOfProject);
+    clickImportBtn();
+    waitMainFormIsClosed();
+    loader.waitOnClosed();
+  }
 
-    /**
-     * wait the 'Branch' checkbox is not selected
-     */
-    public void waitBranchIsNotSelected() {
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until
-                ((WebDriver webDriver) -> importBranchCheckBox.getAttribute("checked") == null);
-    }
-
-    /**
-     * type a relative path of Subversion repository URL into the 'Relative Path:' field
-     *
-     * @param path
-     *         is the relative path the Subversion repository URL
-     */
-    public void typePathOfSvnRepoUrl(String path) {
-        new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(svnRelativePath));
-        svnRelativePath.clear();
-        svnRelativePath.sendKeys(path);
-    }
-
-    /**
-     * wait main form, select the 'SUBVERSION' field
-     * type uri and name of importing project
-     * click on button import
-     *
-     * @param uri
-     *         is user uri into URL: field
-     * @param nameOfProject
-     *         is name of project into name: field
-     */
-    public void waitAndTypeImporterAsSvnInfo(String uri, String nameOfProject) throws InterruptedException {
-        waitMainForm();
-        selectSvnSourceField();
-        typeURi(uri);
-        typeProjectName(nameOfProject);
-        clickImportBtn();
-        waitMainFormIsClosed();
-        loader.waitOnClosed();
-    }
-
-    /**
-     * wait and click on the 'SUBVERSION' source control field
-     */
-    public void selectSvnSourceField() throws InterruptedException {
-        new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(svnSourceField));
-        svnSourceField.click();
-        loader.waitOnClosed();
-    }
-
-    /**
-     * Note: Import project from Subversion repository with typing a relative path
-     * <p>
-     * wait main form, select the 'SUBVERSION' field
-     * type uri and relative path
-     * type name of importing project
-     * click on button import
-     *
-     * @param uri
-     *         is user uri into URL: field
-     * @param path
-     *         is relative path into Relative Path: field
-     * @param nameOfProject
-     *         is name of project into name: field
-     */
-    public void waitAndTypeImporterAsSvnInfo(String uri, String path, String nameOfProject) throws InterruptedException {
-        waitMainForm();
-        selectSvnSourceField();
-        typeURi(uri);
-        typePathOfSvnRepoUrl(path);
-        typeProjectName(nameOfProject);
-        clickImportBtn();
-        waitMainFormIsClosed();
-        loader.waitOnClosed();
-    }
-
-    /**
-     * wait appereance main widget, click on close ('x') icon and wait closing of the widget
-     */
-    public void closeWithIcon() {
-        waitMainForm();
-        closeIcon.click();
-        waitMainFormIsClosed();
-    }
+  /** wait appereance main widget, click on close ('x') icon and wait closing of the widget */
+  public void closeWithIcon() {
+    waitMainForm();
+    closeIcon.click();
+    waitMainFormIsClosed();
+  }
 }

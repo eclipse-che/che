@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.factory;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
@@ -26,54 +25,53 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * @author Mihail Kuznyetsov
- */
+/** @author Mihail Kuznyetsov */
 public class CheckFactoryWithSparseCheckoutTest {
-    private static final String PROJECT_NAME = "java-multimodule2";
+  private static final String PROJECT_NAME = "java-multimodule2";
 
-    @Inject
-    private Ide                     ide;
-    @Inject
-    private ProjectExplorer         projectExplorer;
-    @Inject
-    private NotificationsPopupPanel notificationsPopupPanel;
-    @Inject
-    @Named("github.username")
-    private String                  gitHubUsername;
-    @Inject
-    private TestFactoryInitializer  testFactoryInitializer;
-    @Inject
-    private SeleniumWebDriver       seleniumWebDriver;
+  @Inject private Ide ide;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
 
-    private TestFactory testFactory;
+  @Inject
+  @Named("github.username")
+  private String gitHubUsername;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        TestFactoryInitializer.TestFactoryBuilder testFactoryBuilder = testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
-        ProjectConfigDto projectConfig = testFactoryBuilder.getWorkspace().getProjects().get(0);
-        projectConfig.getSource().setParameters(ImmutableMap.of("keepDir", "my-lib"));
-        projectConfig.getSource().setLocation("https://github.com/" + gitHubUsername + "/" + PROJECT_NAME);
-        projectConfig.setName(PROJECT_NAME);
-        projectConfig.setPath(PROJECT_NAME);
-        testFactory = testFactoryBuilder.build();
-    }
+  @Inject private TestFactoryInitializer testFactoryInitializer;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        testFactory.delete();
-    }
+  private TestFactory testFactory;
 
-    @Test
-    public void acceptFactoryWithSparseCheckout() throws Exception {
-        testFactory.authenticateAndOpen(ide.driver());
+  @BeforeClass
+  public void setUp() throws Exception {
+    TestFactoryInitializer.TestFactoryBuilder testFactoryBuilder =
+        testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
+    ProjectConfigDto projectConfig = testFactoryBuilder.getWorkspace().getProjects().get(0);
+    projectConfig.getSource().setParameters(ImmutableMap.of("keepDir", "my-lib"));
+    projectConfig
+        .getSource()
+        .setLocation("https://github.com/" + gitHubUsername + "/" + PROJECT_NAME);
+    projectConfig.setName(PROJECT_NAME);
+    projectConfig.setPath(PROJECT_NAME);
+    testFactory = testFactoryBuilder.build();
+  }
 
-        seleniumWebDriver.switchFromDashboardIframeToIde();
-        projectExplorer.waitProjectExplorer();
-        notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project " + PROJECT_NAME + " imported");
-        projectExplorer.waitItem(PROJECT_NAME);
-        projectExplorer.openItemByPath(PROJECT_NAME);
-        projectExplorer.waitItem(PROJECT_NAME + "/my-lib");
-        projectExplorer.waitItemIsNotPresentVisibleArea(PROJECT_NAME + "/my-webapp");
-    }
+  @AfterClass
+  public void tearDown() throws Exception {
+    testFactory.delete();
+  }
+
+  @Test
+  public void acceptFactoryWithSparseCheckout() throws Exception {
+    testFactory.authenticateAndOpen(ide.driver());
+
+    seleniumWebDriver.switchFromDashboardIframeToIde();
+    projectExplorer.waitProjectExplorer();
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
+        "Project " + PROJECT_NAME + " imported");
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.waitItem(PROJECT_NAME + "/my-lib");
+    projectExplorer.waitItemIsNotPresentVisibleArea(PROJECT_NAME + "/my-webapp");
+  }
 }

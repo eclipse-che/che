@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.factory;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.factory.FactoryTemplate.SVN;
 
+import com.google.inject.Inject;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -39,99 +43,81 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.factory.FactoryTemplate.SVN;
-
-/**
- * @author Musienko Maxim
- */
+/** @author Musienko Maxim */
 public class CheckFactoryWithSvnCVSTest {
-    private static final Logger LOG = LoggerFactory.getLogger(CheckFactoryWithSvnCVSTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CheckFactoryWithSvnCVSTest.class);
 
-    @Inject
-    private Ide             ide;
-    @Inject
-    private TestWorkspace   ws;
-    @Inject
-    private DefaultTestUser user;
+  @Inject private Ide ide;
+  @Inject private TestWorkspace ws;
+  @Inject private DefaultTestUser user;
 
-    @Inject
-    private TestSvnRepo1Provider    svnRepo1UrlProvider;
-    @Inject
-    private TestSvnUsernameProvider svnUsernameProvider;
-    @Inject
-    private TestSvnPasswordProvider svnPasswordProvider;
-    @Inject
-    private TestFactoryInitializer  testFactoryInitializer;
+  @Inject private TestSvnRepo1Provider svnRepo1UrlProvider;
+  @Inject private TestSvnUsernameProvider svnUsernameProvider;
+  @Inject private TestSvnPasswordProvider svnPasswordProvider;
+  @Inject private TestFactoryInitializer testFactoryInitializer;
 
-    private TestFactory testFactory;
+  private TestFactory testFactory;
 
-    @Inject
-    private Menu                      menu;
-    @Inject
-    private ProjectExplorer           projectExplorer;
-    @Inject
-    private Wizard                    wizard;
-    @Inject
-    private ImportProjectFromLocation importProjectFromLocation;
-    @Inject
-    private Loader                    loader;
-    @Inject
-    private Subversion                subversion;
-    @Inject
-    private Dashboard                 dashboard;
-    @Inject
-    private NotificationsPopupPanel   notifications;
-    @Inject
-    private Events                    events;
-    @Inject
-    private SeleniumWebDriver         seleniumWebDriver;
+  @Inject private Menu menu;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Wizard wizard;
+  @Inject private ImportProjectFromLocation importProjectFromLocation;
+  @Inject private Loader loader;
+  @Inject private Subversion subversion;
+  @Inject private Dashboard dashboard;
+  @Inject private NotificationsPopupPanel notifications;
+  @Inject private Events events;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        // setup test factory
-        TestFactoryInitializer.TestFactoryBuilder testFactoryBuilder = testFactoryInitializer.fromTemplate(SVN);
-        testFactoryBuilder.getWorkspace().getProjects().get(0).getSource().setLocation(svnRepo1UrlProvider.get() + "/trunk");
-        testFactory = testFactoryBuilder.build();
+  @BeforeClass
+  public void setUp() throws Exception {
+    // setup test factory
+    TestFactoryInitializer.TestFactoryBuilder testFactoryBuilder =
+        testFactoryInitializer.fromTemplate(SVN);
+    testFactoryBuilder
+        .getWorkspace()
+        .getProjects()
+        .get(0)
+        .getSource()
+        .setLocation(svnRepo1UrlProvider.get() + "/trunk");
+    testFactory = testFactoryBuilder.build();
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    testFactory.delete();
+  }
+
+  @Test
+  public void checkFactoryProcessing() throws Exception {
+    // given
+    String expectedProject = "SvnFactory";
+    List<String> expectedItemsInProjectTree =
+        Arrays.asList("commit-test", "copy", "move", "properties-test", "newfile", "test");
+
+    // when
+    testFactory.authenticateAndOpen(ide.driver());
+    seleniumWebDriver.switchFromDashboardIframeToIde();
+
+    // then
+    new WebDriverWait(ide.driver(), LOADER_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//div[text()='SVN Authentication']")));
+
+    subversion.svnLogin(svnUsernameProvider.get(), svnPasswordProvider.get());
+
+    try {
+      notifications.waitExpectedMessageOnProgressPanelAndClosed(
+          "Project " + expectedProject + " imported");
+    } catch (org.openqa.selenium.TimeoutException e) {
+      events.clickProjectEventsTab();
+      events.waitExpectedMessage("Project " + expectedProject + " imported");
     }
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        testFactory.delete();
+    projectExplorer.openItemByPath(expectedProject);
+    for (String item : expectedItemsInProjectTree) {
+      projectExplorer.waitItem(expectedProject + "/" + item);
     }
-
-    @Test
-    public void checkFactoryProcessing() throws Exception {
-        // given
-        String expectedProject = "SvnFactory";
-        List<String> expectedItemsInProjectTree =
-                Arrays.asList("commit-test", "copy", "move", "properties-test", "newfile", "test");
-
-        // when
-        testFactory.authenticateAndOpen(ide.driver());
-        seleniumWebDriver.switchFromDashboardIframeToIde();
-
-        // then
-        new WebDriverWait(ide.driver(), LOADER_TIMEOUT_SEC)
-                .until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[text()='SVN Authentication']")));
-
-        subversion.svnLogin(svnUsernameProvider.get(), svnPasswordProvider.get());
-
-        try {
-            notifications.waitExpectedMessageOnProgressPanelAndClosed("Project " + expectedProject + " imported");
-        } catch (org.openqa.selenium.TimeoutException e) {
-            events.clickProjectEventsTab();
-            events.waitExpectedMessage("Project " + expectedProject + " imported");
-        }
-
-        projectExplorer.openItemByPath(expectedProject);
-        for (String item : expectedItemsInProjectTree) {
-            projectExplorer.waitItem(expectedProject + "/" + item);
-        }
-
-    }
-
+  }
 }

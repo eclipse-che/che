@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.subversion;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 
+import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
@@ -30,78 +32,63 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
-
 /**
  * @author Anton Korneta
  * @author Andrey Chizhikov
  */
 public class VoidSvnForReImportProjectTest {
 
-    private static final String PROJECT_NAME = NameGenerator.generate("VoidSvnProject", 6);
-    private static final Logger LOG          = LoggerFactory.getLogger(VoidSvnForReImportProjectTest.class);
+  private static final String PROJECT_NAME = NameGenerator.generate("VoidSvnProject", 6);
+  private static final Logger LOG = LoggerFactory.getLogger(VoidSvnForReImportProjectTest.class);
 
-    @Inject
-    private Ide                     ide;
-    @Inject
-    private TestWorkspace           ws;
-    @Inject
-    private TestSvnRepo1Provider    svnRepo1UrlProvider;
-    @Inject
-    private TestSvnUsernameProvider svnUsernameProvider;
-    @Inject
-    private TestSvnPasswordProvider svnPasswordProvider;
+  @Inject private Ide ide;
+  @Inject private TestWorkspace ws;
+  @Inject private TestSvnRepo1Provider svnRepo1UrlProvider;
+  @Inject private TestSvnUsernameProvider svnUsernameProvider;
+  @Inject private TestSvnPasswordProvider svnPasswordProvider;
 
-    @Inject
-    private Menu                      menu;
-    @Inject
-    private ProjectExplorer           projectExplorer;
-    @Inject
-    private Wizard                    wizard;
-    @Inject
-    private ImportProjectFromLocation importProjectFromLocation;
-    @Inject
-    private Loader                    loader;
-    @Inject
-    private Subversion                subversion;
-    @Inject
-    private AskDialog                 askDialog;
+  @Inject private Menu menu;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Wizard wizard;
+  @Inject private ImportProjectFromLocation importProjectFromLocation;
+  @Inject private Loader loader;
+  @Inject private Subversion subversion;
+  @Inject private AskDialog askDialog;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        ide.open(ws);
-    }
+  @BeforeClass
+  public void setUp() throws Exception {
+    ide.open(ws);
+  }
 
-    @Test
-    public void voidSvnForReImportProjectTest() throws Exception {
-        menu.runCommand(WORKSPACE, IMPORT_PROJECT);
-        subversion.waitAndTypeImporterAsSvnInfo(svnRepo1UrlProvider.get(),
-                                                PROJECT_NAME,
-                                                svnUsernameProvider.get(),
-                                                svnPasswordProvider.get());
-        importProjectFromLocation.waitMainFormIsClosed();
+  @Test
+  public void voidSvnForReImportProjectTest() throws Exception {
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
+    subversion.waitAndTypeImporterAsSvnInfo(
+        svnRepo1UrlProvider.get(),
+        PROJECT_NAME,
+        svnUsernameProvider.get(),
+        svnPasswordProvider.get());
+    importProjectFromLocation.waitMainFormIsClosed();
 
-        wizard.waitOpenProjectConfigForm();
-        wizard.clickSaveButton();
-        wizard.waitCloseProjectConfigForm();
+    wizard.waitOpenProjectConfigForm();
+    wizard.clickSaveButton();
+    wizard.waitCloseProjectConfigForm();
 
-        loader.waitOnClosed();
-        projectExplorer.waitItem(PROJECT_NAME);
-        projectExplorer.selectItem(PROJECT_NAME);
+    loader.waitOnClosed();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.selectItem(PROJECT_NAME);
 
-        //  menu.runCommand(MenuCommands.File.FILE, MenuCommands.File.DELETE);
-        askDialog.waitFormToOpen();
-        askDialog.clickOkBtn();
-        loader.waitOnClosed();
+    //  menu.runCommand(MenuCommands.File.FILE, MenuCommands.File.DELETE);
+    askDialog.waitFormToOpen();
+    askDialog.clickOkBtn();
+    loader.waitOnClosed();
 
-        menu.runCommand(WORKSPACE, IMPORT_PROJECT);
-        importProjectFromLocation.waitMainForm();
-        importProjectFromLocation.selectSvnSourceField();
-        importProjectFromLocation.typeURi(svnRepo1UrlProvider.get());
-        importProjectFromLocation.typeProjectName(PROJECT_NAME);
-        importProjectFromLocation.clickImportBtn();
-        importProjectFromLocation.waitMainFormIsClosed(20);
-    }
-
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
+    importProjectFromLocation.waitMainForm();
+    importProjectFromLocation.selectSvnSourceField();
+    importProjectFromLocation.typeURi(svnRepo1UrlProvider.get());
+    importProjectFromLocation.typeProjectName(PROJECT_NAME);
+    importProjectFromLocation.clickImportBtn();
+    importProjectFromLocation.waitMainFormIsClosed(20);
+  }
 }

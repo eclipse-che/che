@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.pageobject;
+
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -21,8 +22,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
-
 /**
  * @author Musienko Maxim
  * @author Andrey Chizhikov
@@ -30,27 +29,26 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPEC
 @Singleton
 public class LoadingBehaviorPage {
 
-    private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriver seleniumWebDriver;
 
-    @Inject
-    public LoadingBehaviorPage(SeleniumWebDriver seleniumWebDriver) {
-        this.seleniumWebDriver = seleniumWebDriver;
-        PageFactory.initElements(seleniumWebDriver, this);
-    }
+  @Inject
+  public LoadingBehaviorPage(SeleniumWebDriver seleniumWebDriver) {
+    this.seleniumWebDriver = seleniumWebDriver;
+    PageFactory.initElements(seleniumWebDriver, this);
+  }
 
-    private interface Locators {
-        String STATE_IDE_FRAME_CSS = "ide-iframe.ng-hide";
-    }
+  private interface Locators {
+    String STATE_IDE_FRAME_CSS = "ide-iframe.ng-hide";
+  }
 
-    @FindBy(css = LoadingBehaviorPage.Locators.STATE_IDE_FRAME_CSS)
-    WebElement loadPage;
+  @FindBy(css = LoadingBehaviorPage.Locators.STATE_IDE_FRAME_CSS)
+  WebElement loadPage;
 
-    /**
-     * wait closing of the Staring workspace page
-     */
-    public void waitWhileLoadPageIsClosed() {
-        new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC).until(ExpectedConditions.invisibilityOfElementLocated(
+  /** wait closing of the Staring workspace page */
+  public void waitWhileLoadPageIsClosed() {
+    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+        .until(
+            ExpectedConditions.invisibilityOfElementLocated(
                 By.cssSelector(Locators.STATE_IDE_FRAME_CSS)));
-    }
-
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.dashboard;
 
 import com.google.inject.Inject;
-
+import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -28,74 +28,58 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.concurrent.ExecutionException;
-
-/**
- * @author Andrey Chizhikov
- */
+/** @author Andrey Chizhikov */
 public class ImportMavenProjectFromGitHubTest {
-    private final        String WORKSPACE    = NameGenerator.generate("ImtMvnPrjGitHub", 4);
-    private static final String PROJECT_NAME = "guess-project";
+  private final String WORKSPACE = NameGenerator.generate("ImtMvnPrjGitHub", 4);
+  private static final String PROJECT_NAME = "guess-project";
 
-    @Inject
-    private Dashboard                  dashboard;
-    @Inject
-    private DashboardWorkspace         dashboardWorkspace;
-    @Inject
-    private Loader                     loader;
-    @Inject
-    private ProjectExplorer            explorer;
-    @Inject
-    private NavigationBar              navigationBar;
-    @Inject
-    private CreateWorkspace            createWorkspace;
-    @Inject
-    private ProjectSourcePage          projectSourcePage;
-    @Inject
-    private SeleniumWebDriver          seleniumWebDriver;
-    @Inject
-    private TestWorkspaceServiceClient workspaceServiceClient;
-    @Inject
-    private DefaultTestUser            defaultTestUser;
+  @Inject private Dashboard dashboard;
+  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private Loader loader;
+  @Inject private ProjectExplorer explorer;
+  @Inject private NavigationBar navigationBar;
+  @Inject private CreateWorkspace createWorkspace;
+  @Inject private ProjectSourcePage projectSourcePage;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private DefaultTestUser defaultTestUser;
 
+  @BeforeClass
+  public void setUp() {
+    dashboard.open();
+  }
 
-    @BeforeClass
-    public void setUp() {
-        dashboard.open();
-    }
+  @AfterClass
+  public void tearDown() throws Exception {
+    workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
+  }
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
-    }
+  @Test
+  public void checkAbilityImportMavenProjectTest() throws ExecutionException, InterruptedException {
+    navigationBar.waitNavigationBar();
+    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
 
-    @Test
-    public void checkAbilityImportMavenProjectTest() throws ExecutionException, InterruptedException {
-        navigationBar.waitNavigationBar();
-        navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
+    dashboardWorkspace.clickOnNewWorkspaceBtn();
+    createWorkspace.waitToolbar();
+    createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
+    createWorkspace.typeWorkspaceName(WORKSPACE);
 
+    projectSourcePage.clickAddOrImportProjectButton();
 
-        dashboardWorkspace.clickOnNewWorkspaceBtn();
-        createWorkspace.waitToolbar();
-        createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
-        createWorkspace.typeWorkspaceName(WORKSPACE);
+    projectSourcePage.selectSourceTab(ProjectSourcePage.Sources.GIT);
+    projectSourcePage.typeGitRepositoryLocation("https://github.com/iedexmain1/guess-project.git");
+    projectSourcePage.clickAdd();
 
-        projectSourcePage.clickAddOrImportProjectButton();
+    createWorkspace.clickCreate();
 
-        projectSourcePage.selectSourceTab(ProjectSourcePage.Sources.GIT);
-        projectSourcePage.typeGitRepositoryLocation("https://github.com/iedexmain1/guess-project.git");
-        projectSourcePage.clickAdd();
+    seleniumWebDriver.switchFromDashboardIframeToIde();
 
-        createWorkspace.clickCreate();
-
-        seleniumWebDriver.switchFromDashboardIframeToIde();
-
-        loader.waitOnClosed();
-        explorer.waitProjectExplorer();
-        explorer.waitItem(PROJECT_NAME);
-        /* TODO when bug with project type is solved:
-        explorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
-        explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
-        explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);*/
-    }
+    loader.waitOnClosed();
+    explorer.waitProjectExplorer();
+    explorer.waitItem(PROJECT_NAME);
+    /* TODO when bug with project type is solved:
+    explorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
+    explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
+    explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);*/
+  }
 }

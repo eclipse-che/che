@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.core.configuration;
-
 
 /**
  * Exception happen in case of some problems with configuration.
@@ -17,8 +16,7 @@ package org.eclipse.che.selenium.core.configuration;
  * @author Sergii Kabashniuk
  */
 public class ConfigurationException extends RuntimeException {
-    public ConfigurationException(String message) {
-        super(message);
-    }
-
+  public ConfigurationException(String message) {
+    super(message);
+  }
 }

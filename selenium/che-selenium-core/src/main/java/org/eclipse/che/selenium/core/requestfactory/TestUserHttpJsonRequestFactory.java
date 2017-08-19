@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,25 +7,23 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.core.requestfactory;
 
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
+import javax.validation.constraints.NotNull;
 
-/**
- * @author Dmytro Nochevnov
- */
+/** @author Dmytro Nochevnov */
 public class TestUserHttpJsonRequestFactory extends TestHttpJsonRequestFactory {
 
-    private final String authToken;
+  private final String authToken;
 
-    public TestUserHttpJsonRequestFactory(@NotNull String authToken) {
-        Objects.requireNonNull(authToken);
-        this.authToken = authToken;
-    }
+  public TestUserHttpJsonRequestFactory(@NotNull String authToken) {
+    Objects.requireNonNull(authToken);
+    this.authToken = authToken;
+  }
 
-    protected String getAuthToken() {
-        return this.authToken;
-    }
+  protected String getAuthToken() {
+    return this.authToken;
+  }
 }
