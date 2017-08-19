@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,29 +7,26 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.project.shared;
 
 import com.google.gwt.resources.client.ClientBundle;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-/**
- * @author Vlad Zhukovskiy
- */
+/** @author Vlad Zhukovskiy */
 public interface NodesResources extends ClientBundle {
-    @Source("file.svg")
-    SVGResource file();
+  @Source("file.svg")
+  SVGResource file();
 
-    @Source("hiddenSimpleFolder.svg")
-    SVGResource hiddenSimpleFolder();
+  @Source("hiddenSimpleFolder.svg")
+  SVGResource hiddenSimpleFolder();
 
-    @Source("notValidProjectFolder.svg")
-    SVGResource notValidProjectFolder();
+  @Source("notValidProjectFolder.svg")
+  SVGResource notValidProjectFolder();
 
-    @Source("projectFolder.svg")
-    SVGResource projectFolder();
+  @Source("projectFolder.svg")
+  SVGResource projectFolder();
 
-    @Source("simpleFolder.svg")
-    SVGResource simpleFolder();
+  @Source("simpleFolder.svg")
+  SVGResource simpleFolder();
 }

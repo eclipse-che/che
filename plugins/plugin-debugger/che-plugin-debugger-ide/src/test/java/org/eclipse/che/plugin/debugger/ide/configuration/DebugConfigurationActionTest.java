@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.debugger.ide.configuration;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
@@ -23,58 +27,48 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Artem Zatsarynnyi
- */
+/** @author Artem Zatsarynnyi */
 @RunWith(GwtMockitoTestRunner.class)
 public class DebugConfigurationActionTest {
 
-    @Mock
-    private DebuggerLocalizationConstant localizationConstant;
-    @Mock
-    private DebugConfigurationsManager   debugConfigurationsManager;
-    @Mock
-    private DebugConfiguration           debugConfiguration;
+  @Mock private DebuggerLocalizationConstant localizationConstant;
+  @Mock private DebugConfigurationsManager debugConfigurationsManager;
+  @Mock private DebugConfiguration debugConfiguration;
 
-    @InjectMocks
-    private DebugConfigurationAction action;
+  @InjectMocks private DebugConfigurationAction action;
 
-    @Test
-    public void verifyActionConstruction() {
-        verify(debugConfiguration).getName();
-        verify(localizationConstant).debugConfigurationActionDescription();
-    }
+  @Test
+  public void verifyActionConstruction() {
+    verify(debugConfiguration).getName();
+    verify(localizationConstant).debugConfigurationActionDescription();
+  }
 
-    @Test
-    public void shouldBeVisibleOnUpdate() {
-        String confName = "test_conf";
-        when(debugConfiguration.getName()).thenReturn(confName);
+  @Test
+  public void shouldBeVisibleOnUpdate() {
+    String confName = "test_conf";
+    when(debugConfiguration.getName()).thenReturn(confName);
 
-        DebugConfiguration configuration = mock(DebugConfiguration.class);
-        Optional<DebugConfiguration> configurationOptional = mock(Optional.class);
-        when(configurationOptional.isPresent()).thenReturn(Boolean.TRUE);
-        when(configurationOptional.get()).thenReturn(configuration);
-        when(debugConfigurationsManager.getCurrentDebugConfiguration()).thenReturn(configurationOptional);
+    DebugConfiguration configuration = mock(DebugConfiguration.class);
+    Optional<DebugConfiguration> configurationOptional = mock(Optional.class);
+    when(configurationOptional.isPresent()).thenReturn(Boolean.TRUE);
+    when(configurationOptional.get()).thenReturn(configuration);
+    when(debugConfigurationsManager.getCurrentDebugConfiguration())
+        .thenReturn(configurationOptional);
 
-        ActionEvent event = mock(ActionEvent.class);
-        Presentation presentation = mock(Presentation.class);
-        when(event.getPresentation()).thenReturn(presentation);
+    ActionEvent event = mock(ActionEvent.class);
+    Presentation presentation = mock(Presentation.class);
+    when(event.getPresentation()).thenReturn(presentation);
 
-        action.updateInPerspective(event);
+    action.updateInPerspective(event);
 
-        verify(presentation).setEnabledAndVisible(true);
-    }
+    verify(presentation).setEnabledAndVisible(true);
+  }
 
-    @Test
-    public void shouldSetCurrentConfigurationAndApplyOnActionPerformed() {
-        action.actionPerformed(null);
+  @Test
+  public void shouldSetCurrentConfigurationAndApplyOnActionPerformed() {
+    action.actionPerformed(null);
 
-        verify(debugConfigurationsManager).setCurrentDebugConfiguration(eq(debugConfiguration));
-        verify(debugConfigurationsManager).apply(eq(debugConfiguration));
-    }
+    verify(debugConfigurationsManager).setCurrentDebugConfiguration(eq(debugConfiguration));
+    verify(debugConfigurationsManager).apply(eq(debugConfiguration));
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.list;
 
 import com.google.gwt.dom.client.Element;
@@ -15,160 +15,160 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-
-import org.vectomatic.dom.svg.ui.SVGResource;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * @author Evgen Vidolob
  * @author Vitaliy Guliy
  */
 public class CategoriesList extends Composite {
-    /** Defines the attribute used to indicate selection. */
-    private static final String SELECTED_ATTRIBUTE = "SELECTED";
-    private final Resources                 resources;
-    private final SelectionManager          selectionManager;
-    private       List<CategoryNodeElement> categoryNodeElements;
+  /** Defines the attribute used to indicate selection. */
+  private static final String SELECTED_ATTRIBUTE = "SELECTED";
 
-    private FlowPanel rootPanel;
-    private FlowPanel scrollPanel;
-    private FlowPanel lockPanel;
+  private final Resources resources;
+  private final SelectionManager selectionManager;
+  private List<CategoryNodeElement> categoryNodeElements;
 
-    private boolean enabled = true;
+  private FlowPanel rootPanel;
+  private FlowPanel scrollPanel;
+  private FlowPanel lockPanel;
 
-    public CategoriesList(Resources resources) {
-        this.resources = resources;
-        this.categoryNodeElements = new ArrayList<>();
+  private boolean enabled = true;
 
-        rootPanel = new FlowPanel();
-        rootPanel.setStyleName(resources.defaultCategoriesListCss().rootPanel());
-        initWidget(rootPanel);
+  public CategoriesList(Resources resources) {
+    this.resources = resources;
+    this.categoryNodeElements = new ArrayList<>();
 
-        scrollPanel = new FlowPanel();
-        scrollPanel.setStyleName(resources.defaultCategoriesListCss().scrollPanel());
-        rootPanel.add(scrollPanel);
+    rootPanel = new FlowPanel();
+    rootPanel.setStyleName(resources.defaultCategoriesListCss().rootPanel());
+    initWidget(rootPanel);
 
-        lockPanel = new FlowPanel();
-        lockPanel.setStyleName(resources.defaultCategoriesListCss().lockPanel());
-        lockPanel.setVisible(false);
-        rootPanel.add(lockPanel);
+    scrollPanel = new FlowPanel();
+    scrollPanel.setStyleName(resources.defaultCategoriesListCss().scrollPanel());
+    rootPanel.add(scrollPanel);
 
-        selectionManager = new SelectionManager();
+    lockPanel = new FlowPanel();
+    lockPanel.setStyleName(resources.defaultCategoriesListCss().lockPanel());
+    lockPanel.setVisible(false);
+    rootPanel.add(lockPanel);
+
+    selectionManager = new SelectionManager();
+  }
+
+  /**
+   * Refreshes list of items.
+   *
+   * <p>
+   *
+   * <p>This method tries to keep selection.
+   *
+   * @param categories the categories
+   * @param renderChildren if is true - child node will be expanded, otherwise only root node.
+   */
+  public void render(List<Category<?>> categories, boolean renderChildren) {
+    this.categoryNodeElements = new ArrayList<>();
+    for (Category category : categories) {
+      CategoryNodeElement categoryNodeElement =
+          new CategoryNodeElement(category, renderChildren, selectionManager, resources);
+      categoryNodeElements.add(categoryNodeElement);
+      scrollPanel.add(categoryNodeElement);
+    }
+  }
+
+  /**
+   * Select object in the list.
+   *
+   * @param element
+   * @return
+   */
+  public boolean selectElement(Object element) {
+    if (categoryNodeElements == null || categoryNodeElements.isEmpty()) {
+      return false;
     }
 
-    /**
-     * Refreshes list of items.
-     * <p/>
-     * <p>This method tries to keep selection.
-     *
-     * @param categories
-     *         the categories
-     * @param renderChildren
-     *         if is true - child node will be expanded, otherwise only root node.
-     */
-    public void render(List<Category<?>> categories, boolean renderChildren) {
-        this.categoryNodeElements = new ArrayList<>();
-        for (Category category : categories) {
-            CategoryNodeElement categoryNodeElement = new CategoryNodeElement(category, renderChildren, selectionManager, resources);
-            categoryNodeElements.add(categoryNodeElement);
-            scrollPanel.add(categoryNodeElement);
-        }
+    for (CategoryNodeElement category : categoryNodeElements) {
+      if (category.containsItem(element)) {
+        category.selectItem(element);
+        return true;
+      }
     }
 
-    /**
-     * Select object in the list.
-     *
-     * @param element
-     * @return
-     */
-    public boolean selectElement(Object element) {
-        if (categoryNodeElements == null || categoryNodeElements.isEmpty()) {
-            return false;
-        }
+    return false;
+  }
 
-        for (CategoryNodeElement category : categoryNodeElements) {
-            if (category.containsItem(element)) {
-                category.selectItem(element);
-                return true;
-            }
-        }
+  /** Clears list of items. */
+  public void clear() {
+    scrollPanel.clear();
+    categoryNodeElements = null;
+  }
 
-        return false;
+  /**
+   * Enables ot disables this widget.
+   *
+   * @param enabled enabled state
+   */
+  public void setEnabled(boolean enabled) {
+    if (enabled) {
+      lockPanel.setVisible(false);
+      scrollPanel.getElement().getStyle().clearProperty("opacity");
+    } else {
+      lockPanel.setVisible(true);
+      scrollPanel.getElement().getStyle().setProperty("opacity", "0.5");
     }
 
-    /**
-     * Clears list of items.
-     */
-    public void clear() {
-        scrollPanel.clear();
-        categoryNodeElements = null;
+    this.enabled = enabled;
+  }
+
+  class SelectionManager {
+
+    private Element selectedItem;
+
+    public void selectItem(Element item) {
+      if (selectedItem != null) {
+        selectedItem.removeAttribute(SELECTED_ATTRIBUTE);
+      }
+      selectedItem = item;
+      selectedItem.setAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
     }
+  }
 
-    /**
-     * Enables ot disables this widget.
-     *
-     * @param enabled
-     *         enabled state
-     */
-    public void setEnabled(boolean enabled) {
-        if (enabled) {
-            lockPanel.setVisible(false);
-            scrollPanel.getElement().getStyle().clearProperty("opacity");
-        } else {
-            lockPanel.setVisible(true);
-            scrollPanel.getElement().getStyle().setProperty("opacity", "0.5");
-        }
+  /** Item style selectors for a categories list item. */
+  public interface Css extends CssResource {
 
-        this.enabled = enabled;
-    }
+    String rootPanel();
 
-    class SelectionManager {
+    String scrollPanel();
 
-        private Element selectedItem;
+    String lockPanel();
 
-        public void selectItem(Element item) {
-            if (selectedItem != null) {
-                selectedItem.removeAttribute(SELECTED_ATTRIBUTE);
-            }
-            selectedItem = item;
-            selectedItem.setAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
-        }
-    }
+    String categoryItem();
 
-    /** Item style selectors for a categories list item. */
-    public interface Css extends CssResource {
+    String category();
 
-        String rootPanel();
+    String categoryLabel();
 
-        String scrollPanel();
+    String expandControl();
 
-        String lockPanel();
+    String categoryHeader();
 
+    String expandedImage();
 
-        String categoryItem();
+    String itemContainer();
 
-        String category();
+    String headerText();
+  }
 
-        String categoryLabel();
+  public interface Resources extends ClientBundle {
+    @Source({
+      "CategoriesList.css",
+      "org/eclipse/che/ide/ui/constants.css",
+      "org/eclipse/che/ide/api/ui/style.css"
+    })
+    Css defaultCategoriesListCss();
 
-        String expandControl();
-
-        String categoryHeader();
-
-        String expandedImage();
-
-        String itemContainer();
-
-        String headerText();
-    }
-
-    public interface Resources extends ClientBundle {
-        @Source({"CategoriesList.css", "org/eclipse/che/ide/ui/constants.css", "org/eclipse/che/ide/api/ui/style.css"})
-        Css defaultCategoriesListCss();
-
-        @Source("arrowExpansionIcon.svg")
-        SVGResource arrowExpansionImage();
-    }
+    @Source("arrowExpansionIcon.svg")
+    SVGResource arrowExpansionImage();
+  }
 }

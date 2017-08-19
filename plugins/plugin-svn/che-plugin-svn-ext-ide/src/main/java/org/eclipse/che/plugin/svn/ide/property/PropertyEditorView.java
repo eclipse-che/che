@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.ide.property;
 
 import java.util.List;
-
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.plugin.svn.shared.Depth;
 
 /**
@@ -24,43 +22,42 @@ import org.eclipse.che.plugin.svn.shared.Depth;
  */
 public interface PropertyEditorView extends View<PropertyEditorView.ActionDelegate> {
 
-    interface ActionDelegate {
+  interface ActionDelegate {
 
-        void onCancelClicked();
+    void onCancelClicked();
 
-        void onOkClicked();
+    void onOkClicked();
 
-        void onPropertyNameChanged(String propertyName);
+    void onPropertyNameChanged(String propertyName);
 
-        void obtainExistingPropertiesForPath();
+    void obtainExistingPropertiesForPath();
+  }
 
-    }
+  /** Perform actions when close window performed. */
+  void onClose();
 
-    /** Perform actions when close window performed. */
-    void onClose();
+  /** Perform actions when open window performed. */
+  void onShow();
 
-    /** Perform actions when open window performed. */
-    void onShow();
+  /** Return selected user's property. */
+  String getSelectedProperty();
 
-    /** Return selected user's property. */
-    String getSelectedProperty();
+  /** Get property depth. */
+  Depth getDepth();
 
-    /** Get property depth. */
-    Depth getDepth();
+  /** Get property value. */
+  String getPropertyValue();
 
-    /** Get property value. */
-    String getPropertyValue();
+  /** Return true if user selected property edit. */
+  boolean isEditPropertySelected();
 
-    /** Return true if user selected property edit. */
-    boolean isEditPropertySelected();
+  /** Return true if user selected property delete. */
+  boolean isDeletePropertySelected();
 
-    /** Return true if user selected property delete. */
-    boolean isDeletePropertySelected();
+  /** Return true if user selected forcing. */
+  boolean isForceSelected();
 
-    /** Return true if user selected forcing. */
-    boolean isForceSelected();
+  void setPropertyCurrentValue(List<String> values);
 
-    void setPropertyCurrentValue(List<String> values);
-
-    void setExistingPropertiesForPath(List<String> properties);
+  void setExistingPropertiesForPath(List<String> properties);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.type;
 
 import com.google.gwt.i18n.client.Messages;
@@ -19,9 +19,9 @@ import com.google.gwt.i18n.client.Messages;
  */
 public interface CommandTypeMessages extends Messages {
 
-    @Key("type.registry.message.already_registered")
-    String typeRegistryMessageAlreadyRegistered(String id);
+  @Key("type.registry.message.already_registered")
+  String typeRegistryMessageAlreadyRegistered(String id);
 
-    @Key("type.chooser.message.canceled")
-    String typeChooserMessageCanceled();
+  @Key("type.chooser.message.canceled")
+  String typeChooserMessageCanceled();
 }

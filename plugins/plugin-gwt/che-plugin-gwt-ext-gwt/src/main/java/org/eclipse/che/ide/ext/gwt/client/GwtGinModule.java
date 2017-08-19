@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.gwt.client;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
-
+import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.ext.gwt.client.command.GwtCommandType;
-import org.eclipse.che.ide.api.command.CommandType;
 
 /**
  * GIN module for Che GWT extension.
@@ -25,8 +24,8 @@ import org.eclipse.che.ide.api.command.CommandType;
 @ExtensionGinModule
 public class GwtGinModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        GinMultibinder.newSetBinder(binder(), CommandType.class).addBinding().to(GwtCommandType.class);
-    }
+  @Override
+  protected void configure() {
+    GinMultibinder.newSetBinder(binder(), CommandType.class).addBinding().to(GwtCommandType.class);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,36 +7,32 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.editor.codeassist;
 
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 
-/**
- * Interface for completion objects.
- */
+/** Interface for completion objects. */
 public interface Completion {
 
-    /**
-     * Inserts the proposed completion into the given document.
-     *
-     * @param document
-     *         the document into which to insert the proposed completion
-     */
-    void apply(Document document);
+  /**
+   * Inserts the proposed completion into the given document.
+   *
+   * @param document the document into which to insert the proposed completion
+   */
+  void apply(Document document);
 
-    /**
-     * Returns the new selection after the proposal has been applied to the given document in absolute document coordinates. If it
-     * returns <code>null</code>, no new selection is set.
-     * <p/>
-     * A document change can trigger other document changes, which have to be taken into account when calculating the new
-     * selection. Typically, this would be done by installing a document listener or by using a document position during
-     * {@link #apply(Document)}.
-     *
-     * @param document
-     *         the document into which the proposed completion has been inserted
-     * @return the new selection in absolute document coordinates
-     */
-    LinearRange getSelection(Document document);
+  /**
+   * Returns the new selection after the proposal has been applied to the given document in absolute
+   * document coordinates. If it returns <code>null</code>, no new selection is set.
+   *
+   * <p>A document change can trigger other document changes, which have to be taken into account
+   * when calculating the new selection. Typically, this would be done by installing a document
+   * listener or by using a document position during {@link #apply(Document)}.
+   *
+   * @param document the document into which the proposed completion has been inserted
+   * @return the new selection in absolute document coordinates
+   */
+  LinearRange getSelection(Document document);
 }

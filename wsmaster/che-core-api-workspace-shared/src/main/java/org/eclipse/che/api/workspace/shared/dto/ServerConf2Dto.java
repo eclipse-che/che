@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,44 +7,41 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto;
-
-import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.workspace.ServerConf2;
-import org.eclipse.che.dto.shared.DTO;
-
-import java.util.Map;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
-/**
- * @author Alexander Garagatyi
- */
+import java.util.Map;
+import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
+import org.eclipse.che.dto.shared.DTO;
+
+/** @author Alexander Garagatyi */
 @DTO
 public interface ServerConf2Dto extends ServerConf2 {
-    @Override
-    @FactoryParameter(obligation = MANDATORY)
-    String getPort();
+  @Override
+  @FactoryParameter(obligation = MANDATORY)
+  String getPort();
 
-    void setPort(String port);
+  void setPort(String port);
 
-    ServerConf2Dto withPort(String port);
+  ServerConf2Dto withPort(String port);
 
-    @Override
-    @FactoryParameter(obligation = MANDATORY)
-    String getProtocol();
+  @Override
+  @FactoryParameter(obligation = MANDATORY)
+  String getProtocol();
 
-    void setProtocol(String protocol);
+  void setProtocol(String protocol);
 
-    ServerConf2Dto withProtocol(String protocol);
+  ServerConf2Dto withProtocol(String protocol);
 
-    @Override
-    @FactoryParameter(obligation = OPTIONAL)
-    Map<String, String> getProperties();
+  @Override
+  @FactoryParameter(obligation = OPTIONAL)
+  Map<String, String> getProperties();
 
-    void setProperties(Map<String, String> properties);
+  void setProperties(Map<String, String> properties);
 
-    ServerConf2Dto withProperties(Map<String, String> properties);
+  ServerConf2Dto withProperties(Map<String, String> properties);
 }

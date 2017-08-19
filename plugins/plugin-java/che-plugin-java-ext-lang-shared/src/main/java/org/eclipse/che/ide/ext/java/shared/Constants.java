@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.shared;
 
 /**
@@ -15,20 +15,20 @@ package org.eclipse.che.ide.ext.java.shared;
  * @author Valeriy Svydenko
  */
 public final class Constants {
-    // project categories
-    public static final String JAVA_CATEGORY               = "Java";
-    public static final String JAVA_ID                     = "java";
-    // project attribute names
-    public static final String LANGUAGE                    = "language";
-    public static final String LANGUAGE_VERSION            = "languageVersion";
-    public static final String FRAMEWORK                   = "framework";
-    public static final String CONTAINS_JAVA_FILES         = "containsJavaFiles";
-    public static final String SOURCE_FOLDER               = "java.source.folder";
-    public static final String OUTPUT_FOLDER               = "java.output.folder";
+  // project categories
+  public static final String JAVA_CATEGORY = "Java";
+  public static final String JAVA_ID = "java";
+  // project attribute names
+  public static final String LANGUAGE = "language";
+  public static final String LANGUAGE_VERSION = "languageVersion";
+  public static final String FRAMEWORK = "framework";
+  public static final String CONTAINS_JAVA_FILES = "containsJavaFiles";
+  public static final String SOURCE_FOLDER = "java.source.folder";
+  public static final String OUTPUT_FOLDER = "java.output.folder";
 
-    public static final String JAVAC                       = "javac";
+  public static final String JAVAC = "javac";
 
-    private Constants() {
-        throw new UnsupportedOperationException("Unused constructor.");
-    }
+  private Constants() {
+    throw new UnsupportedOperationException("Unused constructor.");
+  }
 }

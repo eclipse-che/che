@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.security.oauth1;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Allow store and provide services with implementations of {@link OAuthAuthenticator} for OAuth 1.
@@ -24,21 +24,23 @@ import java.util.Set;
  */
 @Singleton
 public class OAuthAuthenticatorProvider {
-    private final Map<String, OAuthAuthenticator> oAuthAuthenticators = new HashMap<>();
+  private final Map<String, OAuthAuthenticator> oAuthAuthenticators = new HashMap<>();
 
-    @Inject
-    public OAuthAuthenticatorProvider(final Set<OAuthAuthenticator> oAuthAuthenticators) {
-        oAuthAuthenticators.forEach(authenticator -> this.oAuthAuthenticators.put(authenticator.getOAuthProvider(), authenticator));
-    }
+  @Inject
+  public OAuthAuthenticatorProvider(final Set<OAuthAuthenticator> oAuthAuthenticators) {
+    oAuthAuthenticators.forEach(
+        authenticator ->
+            this.oAuthAuthenticators.put(authenticator.getOAuthProvider(), authenticator));
+  }
 
-    /**
-     * Get the OAuth authentication service by name.
-     *
-     * @param oauthProviderName
-     *         name of the OAuth provider.
-     * @return {@link OAuthAuthenticator} instance or {@code null} if specified OAuth provider is not supported.
-     */
-    public OAuthAuthenticator getAuthenticator(String oauthProviderName) {
-        return oAuthAuthenticators.get(oauthProviderName);
-    }
+  /**
+   * Get the OAuth authentication service by name.
+   *
+   * @param oauthProviderName name of the OAuth provider.
+   * @return {@link OAuthAuthenticator} instance or {@code null} if specified OAuth provider is not
+   *     supported.
+   */
+  public OAuthAuthenticator getAuthenticator(String oauthProviderName) {
+    return oAuthAuthenticators.get(oauthProviderName);
+  }
 }

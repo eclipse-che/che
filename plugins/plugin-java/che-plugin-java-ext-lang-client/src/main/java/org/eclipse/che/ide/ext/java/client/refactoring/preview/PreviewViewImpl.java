@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.refactoring.preview;
+
+import static com.google.gwt.dom.client.Style.Float.LEFT;
+import static com.google.gwt.dom.client.Style.Unit.PX;
+import static org.eclipse.che.ide.api.theme.Style.getEditorSelectionColor;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -35,7 +39,10 @@ import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
@@ -51,15 +58,6 @@ import org.eclipse.che.ide.orion.compare.FileOptions;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.window.Window;
 
-import javax.validation.constraints.NotNull;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.google.gwt.dom.client.Style.Float.LEFT;
-import static com.google.gwt.dom.client.Style.Unit.PX;
-import static org.eclipse.che.ide.api.theme.Style.getEditorSelectionColor;
-
 /**
  * @author Dmitry Shnurenko
  * @author Valeriy Svydenko
@@ -67,323 +65,336 @@ import static org.eclipse.che.ide.api.theme.Style.getEditorSelectionColor;
 @Singleton
 final class PreviewViewImpl extends Window implements PreviewView {
 
-    interface PreviewViewImplUiBinder extends UiBinder<Widget, PreviewViewImpl> {
-    }
+  interface PreviewViewImplUiBinder extends UiBinder<Widget, PreviewViewImpl> {}
 
-    private static final PreviewViewImplUiBinder UI_BINDER = GWT.create(PreviewViewImplUiBinder.class);
+  private static final PreviewViewImplUiBinder UI_BINDER =
+      GWT.create(PreviewViewImplUiBinder.class);
 
-    @UiField(provided = true)
-    final JavaLocalizationConstant locale;
-    @UiField
-    SimplePanel   diff;
-    @UiField
-    FlowPanel     diffPanelToHide;
-    @UiField
-    SimplePanel   noPreviewToHide;
-    @UiField
-    VerticalPanel treePanel;
-    @UiField
-    Label         errorLabel;
+  @UiField(provided = true)
+  final JavaLocalizationConstant locale;
 
-    private ActionDelegate delegate;
-    private FileOptions    newFile;
-    private FileOptions    oldFile;
-    private CompareWidget  compare;
-    private ThemeAgent     themeAgent;
+  @UiField SimplePanel diff;
+  @UiField FlowPanel diffPanelToHide;
+  @UiField SimplePanel noPreviewToHide;
+  @UiField VerticalPanel treePanel;
+  @UiField Label errorLabel;
 
-    private final LoaderFactory  loaderFactory;
-    private final CompareFactory compareFactory;
+  private ActionDelegate delegate;
+  private FileOptions newFile;
+  private FileOptions oldFile;
+  private CompareWidget compare;
+  private ThemeAgent themeAgent;
 
-    private Map<TreeItem, RefactoringPreview> containerChanges = new HashMap<>();
-    private Element selectedElement;
+  private final LoaderFactory loaderFactory;
+  private final CompareFactory compareFactory;
 
-    @Inject
-    public PreviewViewImpl(JavaLocalizationConstant locale,
-                           LoaderFactory loaderFactory,
-                           CompareFactory compareFactory, ThemeAgent themeAgent) {
-        this.locale = locale;
-        this.loaderFactory = loaderFactory;
-        this.compareFactory = compareFactory;
-        this.themeAgent = themeAgent;
+  private Map<TreeItem, RefactoringPreview> containerChanges = new HashMap<>();
+  private Element selectedElement;
 
-        setTitle(locale.moveDialogTitle());
+  @Inject
+  public PreviewViewImpl(
+      JavaLocalizationConstant locale,
+      LoaderFactory loaderFactory,
+      CompareFactory compareFactory,
+      ThemeAgent themeAgent) {
+    this.locale = locale;
+    this.loaderFactory = loaderFactory;
+    this.compareFactory = compareFactory;
+    this.themeAgent = themeAgent;
 
-        setWidget(UI_BINDER.createAndBindUi(this));
+    setTitle(locale.moveDialogTitle());
 
-        Button backButton = createButton(locale.moveDialogButtonBack(), "preview-back-button", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    setWidget(UI_BINDER.createAndBindUi(this));
+
+    Button backButton =
+        createButton(
+            locale.moveDialogButtonBack(),
+            "preview-back-button",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onBackButtonClicked();
-            }
-        });
+              }
+            });
 
-        Button cancelButton = createButton(locale.moveDialogButtonCancel(), "preview-cancel-button", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    Button cancelButton =
+        createButton(
+            locale.moveDialogButtonCancel(),
+            "preview-cancel-button",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 hide();
                 delegate.onCancelButtonClicked();
-            }
-        });
+              }
+            });
 
-        Button acceptButton = createButton(locale.moveDialogButtonOk(), "preview-ok-button", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    Button acceptButton =
+        createButton(
+            locale.moveDialogButtonOk(),
+            "preview-ok-button",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onAcceptButtonClicked();
-            }
+              }
+            });
+
+    addButtonToFooter(acceptButton);
+    addButtonToFooter(cancelButton);
+    addButtonToFooter(backButton);
+
+    diff.getElement().setId(Document.get().createUniqueId());
+    showDiff(null);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void show() {
+    errorLabel.setText("");
+    diff.clear();
+    compare = null;
+    treePanel.clear();
+    containerChanges.clear();
+
+    super.show();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected void onClose() {
+    delegate.onCancelButtonClicked();
+
+    super.onClose();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setTreeOfChanges(final RefactoringPreview changes) {
+    showDiffPanel(false);
+
+    final SelectionModel<RefactoringPreview> selectionModel = new SingleSelectionModel<>();
+    selectionModel.addSelectionChangeHandler(
+        new SelectionChangeEvent.Handler() {
+          @Override
+          public void onSelectionChange(SelectionChangeEvent event) {
+            RefactoringPreview selectedNode =
+                (RefactoringPreview) ((SingleSelectionModel) selectionModel).getSelectedObject();
+            delegate.onSelectionChanged(selectedNode);
+          }
         });
 
-        addButtonToFooter(acceptButton);
-        addButtonToFooter(cancelButton);
-        addButtonToFooter(backButton);
+    Tree tree = new Tree();
 
-        diff.getElement().setId(Document.get().createUniqueId());
-        showDiff(null);
+    tree.getElement().setId("tree-of-changes");
+
+    for (RefactoringPreview parentChange : changes.getChildrens()) {
+      TreeItem treeItem = new TreeItem();
+      containerChanges.put(treeItem, parentChange);
+      createTreeElement(treeItem, parentChange.getText(), parentChange.getChildrens());
+      tree.addItem(treeItem);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void show() {
-        errorLabel.setText("");
-        diff.clear();
-        compare = null;
-        treePanel.clear();
-        containerChanges.clear();
-
-        super.show();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-        delegate.onCancelButtonClicked();
-
-        super.onClose();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setTreeOfChanges(final RefactoringPreview changes) {
-        showDiffPanel(false);
-
-        final SelectionModel<RefactoringPreview> selectionModel = new SingleSelectionModel<>();
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                RefactoringPreview selectedNode = (RefactoringPreview)((SingleSelectionModel)selectionModel).getSelectedObject();
-                delegate.onSelectionChanged(selectedNode);
+    tree.addSelectionHandler(
+        new SelectionHandler<TreeItem>() {
+          @Override
+          public void onSelection(SelectionEvent<TreeItem> event) {
+            if (selectedElement != null) {
+              selectedElement.getStyle().setProperty("background", "transparent");
             }
+
+            selectedElement = event.getSelectedItem().getWidget().getElement();
+            selectedElement.getStyle().setProperty("background", getEditorSelectionColor());
+          }
         });
 
-        Tree tree = new Tree();
+    treePanel.add(tree);
+  }
 
-        tree.getElement().setId("tree-of-changes");
+  private void createTreeElement(
+      final TreeItem root, String changeName, List<RefactoringPreview> children) {
+    FlowPanel element = new FlowPanel();
+    element.getElement().getStyle().setFloat(LEFT);
+    CheckBox itemCheckBox = new CheckBox();
+    itemCheckBox.setValue(true);
+    itemCheckBox.getElement().getStyle().setFloat(LEFT);
+    itemCheckBox.getElement().getStyle().setMarginTop(3, PX);
+    Label name = new Label(changeName);
+    name.addClickHandler(
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            delegate.onSelectionChanged(containerChanges.get(root));
+            root.setSelected(true);
+          }
+        });
+    name.getElement().getStyle().setFloat(LEFT);
+    element.add(itemCheckBox);
+    element.add(name);
 
-        for (RefactoringPreview parentChange : changes.getChildrens()) {
-            TreeItem treeItem = new TreeItem();
-            containerChanges.put(treeItem, parentChange);
-            createTreeElement(treeItem, parentChange.getText(), parentChange.getChildrens());
-            tree.addItem(treeItem);
-        }
+    root.setWidget(element);
 
-        tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
-            @Override
-            public void onSelection(SelectionEvent<TreeItem> event) {
-                if (selectedElement != null) {
-                    selectedElement.getStyle().setProperty("background", "transparent");
-                }
+    element.getElement().getParentElement().getStyle().setMargin(1, PX);
 
-                selectedElement = event.getSelectedItem().getWidget().getElement();
-                selectedElement.getStyle().setProperty("background", getEditorSelectionColor());
-            }
+    itemCheckBox.addValueChangeHandler(
+        new ValueChangeHandler<Boolean>() {
+          @Override
+          public void onValueChange(ValueChangeEvent<Boolean> event) {
+            checkChildrenState(root, event.getValue());
+            checkParentState(root, event.getValue());
+
+            RefactoringPreview change = containerChanges.get(root);
+            change.setEnabled(event.getValue());
+
+            delegate.onEnabledStateChanged(change);
+          }
         });
 
-        treePanel.add(tree);
+    if (children.isEmpty()) {
+      return;
     }
 
-    private void createTreeElement(final TreeItem root, String changeName, List<RefactoringPreview> children) {
-        FlowPanel element = new FlowPanel();
-        element.getElement().getStyle().setFloat(LEFT);
-        CheckBox itemCheckBox = new CheckBox();
-        itemCheckBox.setValue(true);
-        itemCheckBox.getElement().getStyle().setFloat(LEFT);
-        itemCheckBox.getElement().getStyle().setMarginTop(3, PX);
-        Label name = new Label(changeName);
-        name.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onSelectionChanged(containerChanges.get(root));
-                root.setSelected(true);
-            }
-        });
-        name.getElement().getStyle().setFloat(LEFT);
-        element.add(itemCheckBox);
-        element.add(name);
+    for (RefactoringPreview child : children) {
+      TreeItem treeItem = new TreeItem();
+      containerChanges.put(treeItem, child);
+      createTreeElement(treeItem, child.getText(), child.getChildrens());
+      root.addItem(treeItem);
+    }
+  }
 
-        root.setWidget(element);
+  private void checkParentState(TreeItem treeItem, Boolean value) {
+    TreeItem parentItem = treeItem.getParentItem();
 
-        element.getElement().getParentElement().getStyle().setMargin(1, PX);
-
-        itemCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                checkChildrenState(root, event.getValue());
-                checkParentState(root, event.getValue());
-
-                RefactoringPreview change = containerChanges.get(root);
-                change.setEnabled(event.getValue());
-
-                delegate.onEnabledStateChanged(change);
-            }
-        });
-
-        if (children.isEmpty()) {
-            return;
-        }
-
-        for (RefactoringPreview child : children) {
-            TreeItem treeItem = new TreeItem();
-            containerChanges.put(treeItem, child);
-            createTreeElement(treeItem, child.getText(), child.getChildrens());
-            root.addItem(treeItem);
-        }
+    if (parentItem == null) {
+      return;
     }
 
-    private void checkParentState(TreeItem treeItem, Boolean value) {
-        TreeItem parentItem = treeItem.getParentItem();
+    if (!(parentItem.getWidget() instanceof FlowPanel)) {
+      return;
+    }
+    FlowPanel parentChangeContainer = (FlowPanel) parentItem.getWidget();
 
-        if (parentItem == null) {
-            return;
-        }
+    if (!(parentChangeContainer.getWidget(0) instanceof CheckBox)) {
+      return;
+    }
+    CheckBox parentCheckBox = (CheckBox) parentChangeContainer.getWidget(0);
 
-        if (!(parentItem.getWidget() instanceof FlowPanel)) {
-            return;
-        }
-        FlowPanel parentChangeContainer = (FlowPanel)parentItem.getWidget();
+    if (value && !parentCheckBox.getValue()) {
+      parentCheckBox.setValue(true);
+      checkParentState(parentItem, true);
+    }
+  }
 
-        if (!(parentChangeContainer.getWidget(0) instanceof CheckBox)) {
-            return;
-        }
-        CheckBox parentCheckBox = (CheckBox)parentChangeContainer.getWidget(0);
-
-        if (value && !parentCheckBox.getValue()) {
-            parentCheckBox.setValue(true);
-            checkParentState(parentItem, true);
-        }
+  private void checkChildrenState(TreeItem treeItem, Boolean value) {
+    int childCount = treeItem.getChildCount();
+    if (childCount == 0) {
+      return;
     }
 
-    private void checkChildrenState(TreeItem treeItem, Boolean value) {
-        int childCount = treeItem.getChildCount();
-        if (childCount == 0) {
-            return;
-        }
+    for (int i = 0; i < childCount; i++) {
+      TreeItem childItem = treeItem.getChild(i);
+      if (!(childItem.getWidget() instanceof FlowPanel)) {
+        return;
+      }
+      FlowPanel childItemContainer = (FlowPanel) childItem.getWidget();
 
-        for (int i = 0; i < childCount; i++) {
-            TreeItem childItem = treeItem.getChild(i);
-            if (!(childItem.getWidget() instanceof FlowPanel)) {
-                return;
-            }
-            FlowPanel childItemContainer = (FlowPanel)childItem.getWidget();
+      if (!(childItemContainer.getWidget(0) instanceof CheckBox)) {
+        return;
+      }
+      CheckBox childCheckBox = (CheckBox) childItemContainer.getWidget(0);
 
-            if (!(childItemContainer.getWidget(0) instanceof CheckBox)) {
-                return;
-            }
-            CheckBox childCheckBox = (CheckBox)childItemContainer.getWidget(0);
-
-            childCheckBox.setValue(value);
-            checkChildrenState(childItem, value);
-        }
+      childCheckBox.setValue(value);
+      checkChildrenState(childItem, value);
     }
+  }
 
-    private void showDiffPanel(boolean isVisible) {
-        diffPanelToHide.setVisible(isVisible);
-        noPreviewToHide.setVisible(!isVisible);
+  private void showDiffPanel(boolean isVisible) {
+    diffPanelToHide.setVisible(isVisible);
+    noPreviewToHide.setVisible(!isVisible);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void showErrorMessage(RefactoringStatus status) {
+    errorLabel.getElement().getStyle().setColor(Style.getErrorColor());
+
+    showMessage(status);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void showDiff(@Nullable ChangePreview preview) {
+    if (preview == null) {
+      showDiffPanel(false);
+    } else {
+      showDiffPanel(true);
+      if (compare == null) {
+        prepareDiffEditor(preview);
+        return;
+      }
+      refreshComperingFiles(preview);
+
+      compare.reload();
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void showErrorMessage(RefactoringStatus status) {
-        errorLabel.getElement().getStyle().setColor(Style.getErrorColor());
+  private void refreshComperingFiles(@NotNull ChangePreview preview) {
+    newFile.setContent(preview.getNewContent());
+    newFile.setName(preview.getFileName());
+    oldFile.setContent(preview.getOldContent());
+    oldFile.setName(preview.getFileName());
+  }
 
-        showMessage(status);
+  private void prepareDiffEditor(@NotNull ChangePreview preview) {
+    newFile = compareFactory.createFieOptions();
+    newFile.setReadOnly(true);
+
+    oldFile = compareFactory.createFieOptions();
+    oldFile.setReadOnly(true);
+
+    refreshComperingFiles(preview);
+
+    CompareConfig compareConfig = compareFactory.createCompareConfig();
+    compareConfig.setNewFile(newFile);
+    compareConfig.setOldFile(oldFile);
+    compareConfig.setShowTitle(true);
+    compareConfig.setShowLineStatus(true);
+
+    compare = new CompareWidget(compareConfig, themeAgent.getCurrentThemeId(), loaderFactory);
+    diff.add(compare);
+  }
+
+  private void showMessage(RefactoringStatus status) {
+    RefactoringStatusEntry statusEntry =
+        getEntryMatchingSeverity(status.getSeverity(), status.getEntries());
+    if (statusEntry != null) {
+      errorLabel.setText(statusEntry.getMessage());
+    } else {
+      errorLabel.setText("");
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void showDiff(@Nullable ChangePreview preview) {
-        if (preview == null) {
-            showDiffPanel(false);
-        } else {
-            showDiffPanel(true);
-            if (compare == null) {
-                prepareDiffEditor(preview);
-                return;
-            }
-            refreshComperingFiles(preview);
-
-            compare.reload();
-        }
+  /**
+   * Returns the first entry which severity is equal or greater than the given severity. If more
+   * than one entry exists that matches the criteria the first one is returned. Returns <code>null
+   * </code> if no entry matches.
+   *
+   * @param severity the severity to search for. Must be one of <code>FATAL
+   *         </code>, <code>ERROR</code>, <code>WARNING</code> or <code>INFO</code>
+   * @param entries list of the refactoring status entries
+   * @return the entry that matches the search criteria
+   */
+  private RefactoringStatusEntry getEntryMatchingSeverity(
+      int severity, List<RefactoringStatusEntry> entries) {
+    for (RefactoringStatusEntry entry : entries) {
+      if (entry.getSeverity() >= severity) return entry;
     }
-
-    private void refreshComperingFiles(@NotNull ChangePreview preview) {
-        newFile.setContent(preview.getNewContent());
-        newFile.setName(preview.getFileName());
-        oldFile.setContent(preview.getOldContent());
-        oldFile.setName(preview.getFileName());
-    }
-
-    private void prepareDiffEditor(@NotNull ChangePreview preview) {
-        newFile = compareFactory.createFieOptions();
-        newFile.setReadOnly(true);
-
-        oldFile = compareFactory.createFieOptions();
-        oldFile.setReadOnly(true);
-
-        refreshComperingFiles(preview);
-
-        CompareConfig compareConfig = compareFactory.createCompareConfig();
-        compareConfig.setNewFile(newFile);
-        compareConfig.setOldFile(oldFile);
-        compareConfig.setShowTitle(true);
-        compareConfig.setShowLineStatus(true);
-
-        compare = new CompareWidget(compareConfig, themeAgent.getCurrentThemeId(), loaderFactory);
-        diff.add(compare);
-    }
-
-    private void showMessage(RefactoringStatus status) {
-        RefactoringStatusEntry statusEntry = getEntryMatchingSeverity(status.getSeverity(), status.getEntries());
-        if (statusEntry != null) {
-            errorLabel.setText(statusEntry.getMessage());
-        } else {
-            errorLabel.setText("");
-        }
-    }
-
-    /**
-     * Returns the first entry which severity is equal or greater than the
-     * given severity. If more than one entry exists that matches the
-     * criteria the first one is returned. Returns <code>null</code> if no
-     * entry matches.
-     *
-     * @param severity
-     *         the severity to search for. Must be one of <code>FATAL
-     *         </code>, <code>ERROR</code>, <code>WARNING</code> or <code>INFO</code>
-     * @param entries
-     *         list of the refactoring status entries
-     * @return the entry that matches the search criteria
-     */
-    private RefactoringStatusEntry getEntryMatchingSeverity(int severity, List<RefactoringStatusEntry> entries) {
-        for (RefactoringStatusEntry entry : entries) {
-            if (entry.getSeverity() >= severity)
-                return entry;
-        }
-        return null;
-    }
-
+    return null;
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.toolbar.processes;
 
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -15,13 +15,13 @@ import org.eclipse.che.api.core.model.machine.Machine;
 /** Model of the process. */
 public interface Process {
 
-    String getName();
+  String getName();
 
-    String getCommandLine();
+  String getCommandLine();
 
-    int getPid();
+  int getPid();
 
-    boolean isAlive();
+  boolean isAlive();
 
-    Machine getMachine();
+  Machine getMachine();
 }

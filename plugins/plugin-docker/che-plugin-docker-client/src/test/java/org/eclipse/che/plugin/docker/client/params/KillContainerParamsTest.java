@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,51 +7,47 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.client.params;
-
-import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-/**
- * @author Mykola Morhun
- */
+import org.testng.annotations.Test;
+
+/** @author Mykola Morhun */
 public class KillContainerParamsTest {
 
-    private static final String CONTAINER = "container";
-    private static final int    SIGNAL    = 9;
+  private static final String CONTAINER = "container";
+  private static final int SIGNAL = 9;
 
-    private KillContainerParams killContainerParams;
+  private KillContainerParams killContainerParams;
 
-    @Test
-    public void shouldCreateParamsObjectWithRequiredParameters() {
-        killContainerParams = KillContainerParams.create(CONTAINER);
+  @Test
+  public void shouldCreateParamsObjectWithRequiredParameters() {
+    killContainerParams = KillContainerParams.create(CONTAINER);
 
-        assertEquals(killContainerParams.getContainer(), CONTAINER);
+    assertEquals(killContainerParams.getContainer(), CONTAINER);
 
-        assertNull(killContainerParams.getSignal());
-    }
+    assertNull(killContainerParams.getSignal());
+  }
 
-    @Test
-    public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        killContainerParams = KillContainerParams.create(CONTAINER)
-                                                 .withSignal(SIGNAL);
+  @Test
+  public void shouldCreateParamsObjectWithAllPossibleParameters() {
+    killContainerParams = KillContainerParams.create(CONTAINER).withSignal(SIGNAL);
 
-        assertEquals(killContainerParams.getContainer(), CONTAINER);
-        assertTrue(killContainerParams.getSignal() == SIGNAL);
-    }
+    assertEquals(killContainerParams.getContainer(), CONTAINER);
+    assertTrue(killContainerParams.getSignal() == SIGNAL);
+  }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        killContainerParams = KillContainerParams.create(null);
-    }
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
+    killContainerParams = KillContainerParams.create(null);
+  }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNullPointerExceptionIfContainerRequiredParameterResetWithNull() {
-        killContainerParams.withContainer(null);
-    }
-
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionIfContainerRequiredParameterResetWithNull() {
+    killContainerParams.withContainer(null);
+  }
 }

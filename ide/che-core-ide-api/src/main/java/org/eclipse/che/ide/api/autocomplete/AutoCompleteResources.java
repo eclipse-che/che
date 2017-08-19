@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,33 +7,29 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.autocomplete;
 
 import com.google.gwt.resources.client.CssResource;
-
 import org.eclipse.che.ide.ui.Popup;
 import org.eclipse.che.ide.ui.list.SimpleList;
 
-/**
- * Resource that defines the appearance of autocomplete popups.
- */
+/** Resource that defines the appearance of autocomplete popups. */
 public interface AutoCompleteResources extends SimpleList.Resources, Popup.Resources {
 
-    @Source({"AutocompleteComponent.css", "org/eclipse/che/ide/api/ui/style.css"})
-    Css autocompleteComponentCss();
+  @Source({"AutocompleteComponent.css", "org/eclipse/che/ide/api/ui/style.css"})
+  Css autocompleteComponentCss();
 
-    interface Css extends CssResource {
+  interface Css extends CssResource {
 
-        String proposalIcon();
+    String proposalIcon();
 
-        String proposalLabel();
+    String proposalLabel();
 
-        String proposalGroup();
+    String proposalGroup();
 
-        String container();
+    String container();
 
-        String items();
-    }
-
+    String items();
+  }
 }

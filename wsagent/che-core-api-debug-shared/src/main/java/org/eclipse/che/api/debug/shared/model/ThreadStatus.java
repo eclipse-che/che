@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.debug.shared.model;
 
-/**
- * @author Anatolii Bazko
- */
+/** @author Anatolii Bazko */
 public enum ThreadStatus {
-    ZOMBIE,
-    RUNNING,
-    SLEEPING,
-    MONITOR,
-    WAIT,
-    NOT_STARTED,
-    UNKNOWN
+  ZOMBIE,
+  RUNNING,
+  SLEEPING,
+  MONITOR,
+  WAIT,
+  NOT_STARTED,
+  UNKNOWN
 }

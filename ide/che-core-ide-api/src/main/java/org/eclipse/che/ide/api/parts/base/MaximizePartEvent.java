@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.parts.base;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -21,40 +21,36 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
  */
 public class MaximizePartEvent extends GwtEvent<MaximizePartEvent.Handler> {
 
-    /**
-     * Implement this handler to handle maximizing the part.
-     */
-    public interface Handler extends EventHandler {
+  /** Implement this handler to handle maximizing the part. */
+  public interface Handler extends EventHandler {
 
-        void onMaximizePart(MaximizePartEvent event);
+    void onMaximizePart(MaximizePartEvent event);
+  }
 
-    }
+  public static final GwtEvent.Type<MaximizePartEvent.Handler> TYPE = new GwtEvent.Type<>();
 
-    public static final GwtEvent.Type<MaximizePartEvent.Handler> TYPE = new GwtEvent.Type<>();
+  private PartPresenter part;
 
-    private PartPresenter part;
+  public MaximizePartEvent(PartPresenter part) {
+    this.part = part;
+  }
 
-    public MaximizePartEvent(PartPresenter part) {
-        this.part = part;
-    }
+  /**
+   * Returns part to be maximized.
+   *
+   * @return part
+   */
+  public PartPresenter getPart() {
+    return part;
+  }
 
-    /**
-     * Returns part to be maximized.
-     *
-     * @return part
-     */
-    public PartPresenter getPart() {
-        return part;
-    }
+  @Override
+  public Type<Handler> getAssociatedType() {
+    return TYPE;
+  }
 
-    @Override
-    public Type<Handler> getAssociatedType() {
-        return TYPE;
-    }
-
-    @Override
-    protected void dispatch(Handler handler) {
-        handler.onMaximizePart(this);
-    }
-
+  @Override
+  protected void dispatch(Handler handler) {
+    handler.onMaximizePart(this);
+  }
 }

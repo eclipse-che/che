@@ -1,19 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.plugin.jdb.server.model;
 
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.Value;
-
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
@@ -25,43 +23,43 @@ import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
  * @author Anatolii Bazko
  */
 public class JdbVariable implements Variable {
-    private final LocalVariable jdiVariable;
-    private final SimpleValue   value;
+  private final LocalVariable jdiVariable;
+  private final SimpleValue value;
 
-    public JdbVariable(StackFrame jdiStackFrame, LocalVariable jdiVariable) {
-        Value jdiValue = jdiStackFrame.getValue(jdiVariable);
+  public JdbVariable(StackFrame jdiStackFrame, LocalVariable jdiVariable) {
+    Value jdiValue = jdiStackFrame.getValue(jdiVariable);
 
-        this.jdiVariable = jdiVariable;
-        this.value = jdiValue == null ? new JdbNullValue() : new JdbValue(jdiValue, getVariablePath());
-    }
+    this.jdiVariable = jdiVariable;
+    this.value = jdiValue == null ? new JdbNullValue() : new JdbValue(jdiValue, getVariablePath());
+  }
 
-    public JdbVariable(SimpleValue value, LocalVariable jdiVariable) {
-        this.jdiVariable = jdiVariable;
-        this.value = value;
-    }
+  public JdbVariable(SimpleValue value, LocalVariable jdiVariable) {
+    this.jdiVariable = jdiVariable;
+    this.value = value;
+  }
 
-    @Override
-    public String getName() {
-        return jdiVariable.name();
-    }
+  @Override
+  public String getName() {
+    return jdiVariable.name();
+  }
 
-    @Override
-    public boolean isPrimitive() {
-        return JdbType.isPrimitive(jdiVariable.signature());
-    }
+  @Override
+  public boolean isPrimitive() {
+    return JdbType.isPrimitive(jdiVariable.signature());
+  }
 
-    @Override
-    public SimpleValue getValue() {
-        return value;
-    }
+  @Override
+  public SimpleValue getValue() {
+    return value;
+  }
 
-    @Override
-    public String getType() {
-        return jdiVariable.typeName();
-    }
+  @Override
+  public String getType() {
+    return jdiVariable.typeName();
+  }
 
-    @Override
-    public VariablePath getVariablePath() {
-        return new VariablePathImpl(getName());
-    }
+  @Override
+  public VariablePath getVariablePath() {
+    return new VariablePathImpl(getName());
+  }
 }

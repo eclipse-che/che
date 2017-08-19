@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.commons.test.db;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.io.Resources;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.persist.jpa.JpaPersistModule;
-
-import org.eclipse.persistence.config.PersistenceUnitProperties;
-import org.eclipse.persistence.exceptions.ExceptionHandler;
-import org.stringtemplate.v4.ST;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -29,14 +26,16 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
+import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.eclipse.persistence.exceptions.ExceptionHandler;
+import org.stringtemplate.v4.ST;
 
 /**
- * Helps to build persistence.xml for test purposes.
- * If bound creates META-INF/persistence.xml with generated content.
+ * Helps to build persistence.xml for test purposes. If bound creates META-INF/persistence.xml with
+ * generated content.
  *
  * <p>The example of generated content is:
+ *
  * <pre>{@code
  *  // for binding
  *  new PersistTestModuleBuilder().setDriver("org.h2.Driver")
@@ -69,165 +68,142 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class PersistTestModuleBuilder {
 
-    private static final String PERSISTENCE_XML_TEMPLATE_RESOURCE_PATH = "org/eclipse/che/commons/test/db/persistence.xml.template";
+  private static final String PERSISTENCE_XML_TEMPLATE_RESOURCE_PATH =
+      "org/eclipse/che/commons/test/db/persistence.xml.template";
 
-    private final Map<String, String> properties   = new LinkedHashMap<>();
-    private final Set<String>         entityFqnSet = new LinkedHashSet<>();
+  private final Map<String, String> properties = new LinkedHashMap<>();
+  private final Set<String> entityFqnSet = new LinkedHashSet<>();
 
-    private String persistenceUnit = "test";
+  private String persistenceUnit = "test";
 
-    /**
-     * Sets url, user and password equal to the values provided by server.
-     */
-    public PersistTestModuleBuilder runningOn(DBTestServer server) {
-        setUrl(server.getUrl());
-        setUser(server.getUser());
-        setPassword(server.getPassword());
-        return this;
+  /** Sets url, user and password equal to the values provided by server. */
+  public PersistTestModuleBuilder runningOn(DBTestServer server) {
+    setUrl(server.getUrl());
+    setUser(server.getUser());
+    setPassword(server.getPassword());
+    return this;
+  }
+
+  /** Sets the value of {@value PersistenceUnitProperties#JDBC_DRIVER} property. */
+  public PersistTestModuleBuilder setDriver(String driver) {
+    return setProperty(PersistenceUnitProperties.JDBC_DRIVER, driver);
+  }
+
+  /**
+   * Sets the value of {@value PersistenceUnitProperties#JDBC_DRIVER} property, the value would be
+   * equal to class fqn.
+   */
+  public PersistTestModuleBuilder setDriver(Class<? extends java.sql.Driver> driverClass) {
+    return setDriver(driverClass.getName());
+  }
+
+  /** Sets the value of {@value PersistenceUnitProperties#JDBC_URL} property. */
+  public PersistTestModuleBuilder setUrl(String url) {
+    return setProperty(PersistenceUnitProperties.JDBC_URL, url);
+  }
+
+  /** Sets the value of {@value PersistenceUnitProperties#JDBC_USER} property. */
+  public PersistTestModuleBuilder setUser(String user) {
+    return setProperty(PersistenceUnitProperties.JDBC_USER, user);
+  }
+
+  /** Sets the value of {@value PersistenceUnitProperties#JDBC_PASSWORD} property. */
+  public PersistTestModuleBuilder setPassword(String password) {
+    return setProperty(PersistenceUnitProperties.JDBC_PASSWORD, password);
+  }
+
+  /** Sets the value of {@value PersistenceUnitProperties#EXCEPTION_HANDLER_CLASS} property. */
+  public PersistTestModuleBuilder setExceptionHandler(Class<? extends ExceptionHandler> exHandler) {
+    return setProperty(PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS, exHandler.getName());
+  }
+
+  /** Adds class to the listing of the entities defined by persistence unit. */
+  public PersistTestModuleBuilder addEntityClass(Class<?> entityClass) {
+    entityFqnSet.add(entityClass.getName());
+    return this;
+  }
+
+  /** Adds class to the listing of the entities defined by persistence unit. */
+  public PersistTestModuleBuilder addEntityClass(String fqn) {
+    entityFqnSet.add(fqn);
+    return this;
+  }
+
+  /** Batch add of entity classes to the persistence unit listing. */
+  public PersistTestModuleBuilder addEntityClasses(Class<?>... entityClasses) {
+    for (Class<?> entityClass : entityClasses) {
+      addEntityClass(entityClass);
     }
+    return this;
+  }
 
-    /**
-     * Sets the value of {@value PersistenceUnitProperties#JDBC_DRIVER} property.
-     */
-    public PersistTestModuleBuilder setDriver(String driver) {
-        return setProperty(PersistenceUnitProperties.JDBC_DRIVER, driver);
+  /** Sets persistence unit custom property. */
+  public PersistTestModuleBuilder setProperty(String name, String value) {
+    if (name != null && value != null) {
+      properties.put(name, value);
     }
+    return this;
+  }
 
-    /**
-     * Sets the value of {@value PersistenceUnitProperties#JDBC_DRIVER} property,
-     * the value would be equal to class fqn.
-     */
-    public PersistTestModuleBuilder setDriver(Class<? extends java.sql.Driver> driverClass) {
-        return setDriver(driverClass.getName());
-    }
+  /** Sets the the value of {@link PersistenceUnitProperties#LOGGING_LEVEL} property. */
+  public PersistTestModuleBuilder setLogLevel(String logLevel) {
+    return setProperty(PersistenceUnitProperties.LOGGING_LEVEL, logLevel);
+  }
 
-    /**
-     * Sets the value of {@value PersistenceUnitProperties#JDBC_URL} property.
-     */
-    public PersistTestModuleBuilder setUrl(String url) {
-        return setProperty(PersistenceUnitProperties.JDBC_URL, url);
-    }
+  /** Sets the name of persistence unit. */
+  public PersistTestModuleBuilder setPersistenceUnit(String persistenceUnit) {
+    this.persistenceUnit = persistenceUnit;
+    return this;
+  }
 
-    /**
-     * Sets the value of {@value PersistenceUnitProperties#JDBC_USER} property.
-     */
-    public PersistTestModuleBuilder setUser(String user) {
-        return setProperty(PersistenceUnitProperties.JDBC_USER, user);
+  /** Creates or overrides META-INF/persistence.xml. */
+  public Path savePersistenceXml() throws IOException, URISyntaxException {
+    Path persistenceXmlPath = getOrCreateMetaInf().resolve("persistence.xml");
+    URL url =
+        Thread.currentThread()
+            .getContextClassLoader()
+            .getResource(PERSISTENCE_XML_TEMPLATE_RESOURCE_PATH);
+    if (url == null) {
+      throw new IOException(
+          "Resource '" + PERSISTENCE_XML_TEMPLATE_RESOURCE_PATH + "' doesn't exist");
     }
+    ST st = new ST(Resources.toString(url, UTF_8), '$', '$');
+    if (persistenceUnit != null) {
+      st.add("unit", persistenceUnit);
+    }
+    if (!entityFqnSet.isEmpty()) {
+      st.add("entity_classes", entityFqnSet);
+    }
+    if (!properties.isEmpty()) {
+      st.add("properties", properties);
+    }
+    Files.write(persistenceXmlPath, st.render().getBytes(UTF_8));
+    return persistenceXmlPath;
+  }
 
-    /**
-     * Sets the value of {@value PersistenceUnitProperties#JDBC_PASSWORD} property.
-     */
-    public PersistTestModuleBuilder setPassword(String password) {
-        return setProperty(PersistenceUnitProperties.JDBC_PASSWORD, password);
-    }
+  /** Creates persistence.xml and builds module for testing. */
+  public Module build() {
+    return new PersistTestModule();
+  }
 
-    /**
-     * Sets the value of {@value PersistenceUnitProperties#EXCEPTION_HANDLER_CLASS} property.
-     */
-    public PersistTestModuleBuilder setExceptionHandler(Class<? extends ExceptionHandler> exHandler) {
-        return setProperty(PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS, exHandler.getName());
+  private class PersistTestModule extends AbstractModule {
+    @Override
+    protected void configure() {
+      try {
+        savePersistenceXml();
+      } catch (Exception x) {
+        throw new RuntimeException(x.getMessage());
+      }
+      install(new JpaPersistModule(persistenceUnit));
     }
+  }
 
-    /**
-     * Adds class to the listing of the entities defined by persistence unit.
-     */
-    public PersistTestModuleBuilder addEntityClass(Class<?> entityClass) {
-        entityFqnSet.add(entityClass.getName());
-        return this;
+  private Path getOrCreateMetaInf() throws URISyntaxException, IOException {
+    Path root = Paths.get(Thread.currentThread().getContextClassLoader().getResource(".").toURI());
+    Path metaInf = root.resolve("META-INF");
+    if (!Files.exists(metaInf)) {
+      Files.createDirectory(metaInf);
     }
-
-    /**
-     * Adds class to the listing of the entities defined by persistence unit.
-     */
-    public PersistTestModuleBuilder addEntityClass(String fqn) {
-        entityFqnSet.add(fqn);
-        return this;
-    }
-
-    /**
-     * Batch add of entity classes to the persistence unit listing.
-     */
-    public PersistTestModuleBuilder addEntityClasses(Class<?>... entityClasses) {
-        for (Class<?> entityClass : entityClasses) {
-            addEntityClass(entityClass);
-        }
-        return this;
-    }
-
-    /**
-     * Sets persistence unit custom property.
-     */
-    public PersistTestModuleBuilder setProperty(String name, String value) {
-        if (name != null && value != null) {
-            properties.put(name, value);
-        }
-        return this;
-    }
-
-    /**
-     * Sets the the value of {@link PersistenceUnitProperties#LOGGING_LEVEL} property.
-     */
-    public PersistTestModuleBuilder setLogLevel(String logLevel) {
-        return setProperty(PersistenceUnitProperties.LOGGING_LEVEL, logLevel);
-    }
-
-    /**
-     * Sets the name of persistence unit.
-     */
-    public PersistTestModuleBuilder setPersistenceUnit(String persistenceUnit) {
-        this.persistenceUnit = persistenceUnit;
-        return this;
-    }
-
-    /**
-     * Creates or overrides META-INF/persistence.xml.
-     */
-    public Path savePersistenceXml() throws IOException, URISyntaxException {
-        Path persistenceXmlPath = getOrCreateMetaInf().resolve("persistence.xml");
-        URL url = Thread.currentThread().getContextClassLoader().getResource(PERSISTENCE_XML_TEMPLATE_RESOURCE_PATH);
-        if (url == null) {
-            throw new IOException("Resource '" + PERSISTENCE_XML_TEMPLATE_RESOURCE_PATH + "' doesn't exist");
-        }
-        ST st = new ST(Resources.toString(url, UTF_8), '$', '$');
-        if (persistenceUnit != null) {
-            st.add("unit", persistenceUnit);
-        }
-        if (!entityFqnSet.isEmpty()) {
-            st.add("entity_classes", entityFqnSet);
-        }
-        if (!properties.isEmpty()) {
-            st.add("properties", properties);
-        }
-        Files.write(persistenceXmlPath, st.render().getBytes(UTF_8));
-        return persistenceXmlPath;
-    }
-
-    /**
-     * Creates persistence.xml and builds module for testing.
-     */
-    public Module build() {
-        return new PersistTestModule();
-    }
-
-    private class PersistTestModule extends AbstractModule {
-        @Override
-        protected void configure() {
-            try {
-                savePersistenceXml();
-            } catch (Exception x) {
-                throw new RuntimeException(x.getMessage());
-            }
-            install(new JpaPersistModule(persistenceUnit));
-        }
-    }
-
-    private Path getOrCreateMetaInf() throws URISyntaxException, IOException {
-        Path root = Paths.get(Thread.currentThread().getContextClassLoader().getResource(".").toURI());
-        Path metaInf = root.resolve("META-INF");
-        if (!Files.exists(metaInf)) {
-            Files.createDirectory(metaInf);
-        }
-        return metaInf;
-    }
+    return metaInf;
+  }
 }

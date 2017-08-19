@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,23 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.command.valueproviders;
 
-import com.google.common.base.Optional;
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
@@ -32,123 +44,96 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Valeriy Svydenko
- */
+/** @author Valeriy Svydenko */
 @RunWith(MockitoJUnitRunner.class)
 public class SourcepathMacroTest {
-    @Mock
-    private ClasspathContainer classpathContainer;
-    @Mock
-    private ClasspathResolver  classpathResolver;
-    @Mock
-    private AppContext         appContext;
-    @Mock
-    private PromiseProvider    promises;
+  @Mock private ClasspathContainer classpathContainer;
+  @Mock private ClasspathResolver classpathResolver;
+  @Mock private AppContext appContext;
+  @Mock private PromiseProvider promises;
 
-    @Mock
-    private Resource                         resource;
-    @Mock
-    private Optional<Project>                projectOptional;
-    @Mock
-    private Project                          project;
-    @Mock
-    private Promise<List<ClasspathEntryDto>> classpathEntriesPromise;
+  @Mock private Resource resource;
+  @Mock private Optional<Project> projectOptional;
+  @Mock private Project project;
+  @Mock private Promise<List<ClasspathEntryDto>> classpathEntriesPromise;
 
-    @Captor
-    private ArgumentCaptor<Function<List<ClasspathEntryDto>, String>> classpathEntriesCapture;
+  @Captor private ArgumentCaptor<Function<List<ClasspathEntryDto>, String>> classpathEntriesCapture;
 
-    @InjectMocks
-    private SourcepathMacro sourcepathMacro;
+  @InjectMocks private SourcepathMacro sourcepathMacro;
 
-    private Resource[] resources = new Resource[1];
+  private Resource[] resources = new Resource[1];
 
-    @Before
-    public void setUp() throws Exception {
-        resources[0] = resource;
+  @Before
+  public void setUp() throws Exception {
+    resources[0] = resource;
 
-        when(appContext.getResources()).thenReturn(resources);
-        when(resource.getRelatedProject()).thenReturn(projectOptional);
-        when(projectOptional.get()).thenReturn(project);
+    when(appContext.getResources()).thenReturn(resources);
+    when(resource.getRelatedProject()).thenReturn(projectOptional);
+    when(projectOptional.get()).thenReturn(project);
 
-        Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(Constants.LANGUAGE, singletonList("java"));
+    Map<String, List<String>> attributes = new HashMap<>();
+    attributes.put(Constants.LANGUAGE, singletonList("java"));
 
-        when(project.getAttributes()).thenReturn(attributes);
+    when(project.getAttributes()).thenReturn(attributes);
 
-        Path projectPath = Path.valueOf("/name");
-        when(project.getLocation()).thenReturn(projectPath);
-    }
+    Path projectPath = Path.valueOf("/name");
+    when(project.getLocation()).thenReturn(projectPath);
+  }
 
-    @Test
-    public void sourcepathShouldBeBuiltWith2Libraries() throws Exception {
-        String source1 = "/name/source1";
-        String source2 = "/name/source2";
+  @Test
+  public void sourcepathShouldBeBuiltWith2Libraries() throws Exception {
+    String source1 = "/name/source1";
+    String source2 = "/name/source2";
 
-        List<ClasspathEntryDto> entries = new ArrayList<>();
+    List<ClasspathEntryDto> entries = new ArrayList<>();
 
-        Set<String> sources = new HashSet<>();
-        sources.add(source1);
-        sources.add(source2);
+    Set<String> sources = new HashSet<>();
+    sources.add(source1);
+    sources.add(source2);
 
-        when(classpathContainer.getClasspathEntries(anyString())).thenReturn(classpathEntriesPromise);
-        when(classpathResolver.getSources()).thenReturn(sources);
+    when(classpathContainer.getClasspathEntries(anyString())).thenReturn(classpathEntriesPromise);
+    when(classpathResolver.getSources()).thenReturn(sources);
 
-        sourcepathMacro.expand();
+    sourcepathMacro.expand();
 
-        verify(classpathEntriesPromise).then(classpathEntriesCapture.capture());
-        String classpath = classpathEntriesCapture.getValue().apply(entries);
+    verify(classpathEntriesPromise).then(classpathEntriesCapture.capture());
+    String classpath = classpathEntriesCapture.getValue().apply(entries);
 
-        verify(classpathResolver).resolveClasspathEntries(entries);
-        assertEquals("source2:source1:", classpath);
-    }
+    verify(classpathResolver).resolveClasspathEntries(entries);
+    assertEquals("source2:source1:", classpath);
+  }
 
-    @Test
-    public void defaultValueOfSourcepathShouldBeBuilt() throws Exception {
-        List<ClasspathEntryDto> entries = new ArrayList<>();
-        Set<String> libs = new HashSet<>();
-        Path projectsRoot = Path.valueOf("/projects");
+  @Test
+  public void defaultValueOfSourcepathShouldBeBuilt() throws Exception {
+    List<ClasspathEntryDto> entries = new ArrayList<>();
+    Set<String> libs = new HashSet<>();
+    Path projectsRoot = Path.valueOf("/projects");
 
-        when(appContext.getProjectsRoot()).thenReturn(projectsRoot);
-        when(classpathContainer.getClasspathEntries(anyString())).thenReturn(classpathEntriesPromise);
-        when(classpathResolver.getLibs()).thenReturn(libs);
+    when(appContext.getProjectsRoot()).thenReturn(projectsRoot);
+    when(classpathContainer.getClasspathEntries(anyString())).thenReturn(classpathEntriesPromise);
+    when(classpathResolver.getLibs()).thenReturn(libs);
 
-        sourcepathMacro.expand();
+    sourcepathMacro.expand();
 
-        verify(classpathEntriesPromise).then(classpathEntriesCapture.capture());
-        String classpath = classpathEntriesCapture.getValue().apply(entries);
+    verify(classpathEntriesPromise).then(classpathEntriesCapture.capture());
+    String classpath = classpathEntriesCapture.getValue().apply(entries);
 
-        verify(classpathResolver).resolveClasspathEntries(entries);
-        assertEquals("/projects/name", classpath);
-    }
+    verify(classpathResolver).resolveClasspathEntries(entries);
+    assertEquals("/projects/name", classpath);
+  }
 
-    @Test
-    public void returnEmptySourcepathIfProjectDoesNotSupportJava() throws Exception {
-        Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(Constants.LANGUAGE, singletonList("c"));
+  @Test
+  public void returnEmptySourcepathIfProjectDoesNotSupportJava() throws Exception {
+    Map<String, List<String>> attributes = new HashMap<>();
+    attributes.put(Constants.LANGUAGE, singletonList("c"));
 
-        when(project.getAttributes()).thenReturn(attributes);
+    when(project.getAttributes()).thenReturn(attributes);
 
-        verify(classpathContainer, never()).getClasspathEntries(anyString());
-    }
+    verify(classpathContainer, never()).getClasspathEntries(anyString());
+  }
 
-    @Test
-    public void keyOfTheSourcepathShouldBeReturned() throws Exception {
-        assertEquals("${project.java.sourcepath}", sourcepathMacro.getName());
-    }
-
+  @Test
+  public void keyOfTheSourcepathShouldBeReturned() throws Exception {
+    assertEquals("${project.java.sourcepath}", sourcepathMacro.getName());
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.debug.shared.dto;
 
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -16,33 +16,33 @@ import org.eclipse.che.dto.shared.DTO;
 /** @author andrew00x */
 @DTO
 public interface VariableDto extends Variable {
-    String getName();
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    VariableDto withName(String name);
+  VariableDto withName(String name);
 
-    SimpleValueDto getValue();
+  SimpleValueDto getValue();
 
-    void setValue(SimpleValueDto value);
+  void setValue(SimpleValueDto value);
 
-    VariableDto withValue(SimpleValueDto value);
+  VariableDto withValue(SimpleValueDto value);
 
-    String getType();
+  String getType();
 
-    void setType(String type);
+  void setType(String type);
 
-    VariableDto withType(String type);
+  VariableDto withType(String type);
 
-    VariablePathDto getVariablePath();
+  VariablePathDto getVariablePath();
 
-    void setVariablePath(VariablePathDto variablePath);
+  void setVariablePath(VariablePathDto variablePath);
 
-    VariableDto withVariablePath(VariablePathDto variablePath);
+  VariableDto withVariablePath(VariablePathDto variablePath);
 
-    boolean isPrimitive();
+  boolean isPrimitive();
 
-    void setPrimitive(boolean primitive);
+  void setPrimitive(boolean primitive);
 
-    VariableDto withPrimitive(boolean primitive);
+  VariableDto withPrimitive(boolean primitive);
 }

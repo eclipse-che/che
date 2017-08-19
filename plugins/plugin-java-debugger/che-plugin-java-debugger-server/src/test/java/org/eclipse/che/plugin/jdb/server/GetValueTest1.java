@@ -1,17 +1,27 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.plugin.jdb.server;
 
-import com.google.common.collect.ImmutableList;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.findMainThreadId;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.startJavaDebugger;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -27,19 +37,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.findMainThreadId;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.startJavaDebugger;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
 /**
  * Test ThreadDump when all threads are suspended.
  *
@@ -47,91 +44,99 @@ import static org.testng.Assert.assertTrue;
  */
 public class GetValueTest1 {
 
-    private JavaDebugger                 debugger;
-    private BlockingQueue<DebuggerEvent> debuggerEvents;
-    private long                         mainThreadId;
+  private JavaDebugger debugger;
+  private BlockingQueue<DebuggerEvent> debuggerEvents;
+  private long mainThreadId;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        ProjectApiUtils.ensure();
+  @BeforeClass
+  public void setUp() throws Exception {
+    ProjectApiUtils.ensure();
 
-        Location location = new LocationImpl("org.eclipse.GetValueTest1", 26);
+    Location location = new LocationImpl("org.eclipse.GetValueTest1", 26);
 
-        debuggerEvents = new ArrayBlockingQueue<>(10);
-        debugger = startJavaDebugger(new BreakpointImpl(location), debuggerEvents);
+    debuggerEvents = new ArrayBlockingQueue<>(10);
+    debugger = startJavaDebugger(new BreakpointImpl(location), debuggerEvents);
 
-        ensureSuspendAtDesiredLocation(location, debuggerEvents);
+    ensureSuspendAtDesiredLocation(location, debuggerEvents);
 
-        mainThreadId = findMainThreadId(debugger);
+    mainThreadId = findMainThreadId(debugger);
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    if (debugger != null) {
+      terminateVirtualMachineQuietly(debugger);
     }
+  }
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        if (debugger != null) {
-            terminateVirtualMachineQuietly(debugger);
-        }
+  @Test(dataProvider = "getVariablePaths")
+  public void shouldGetValue(List<String> path, int frameIndex, String value) throws Exception {
+    SimpleValue debuggerValue =
+        debugger.getValue(new VariablePathImpl(path), mainThreadId, frameIndex);
+
+    if (debuggerValue == null) {
+      assertNull(value);
+    } else {
+      assertEquals(debuggerValue.getString(), value);
     }
+  }
 
-    @Test(dataProvider = "getVariablePaths")
-    public void shouldGetValue(List<String> path, int frameIndex, String value) throws Exception {
-        SimpleValue debuggerValue = debugger.getValue(new VariablePathImpl(path), mainThreadId, frameIndex);
+  @DataProvider(name = "getVariablePaths")
+  public static Object[][] getVariablePaths() {
+    return new Object[][] {
+      {ImmutableList.of("i"), 0, "2"},
+      {ImmutableList.of("i"), 1, null},
+      {ImmutableList.of("var1"), 0, "\"var1\""},
+      {ImmutableList.of("var1"), 1, null},
+      {ImmutableList.of("var2"), 0, "\"var2\""},
+      {ImmutableList.of("static", "var2"), 0, "\"field2\""},
+      {ImmutableList.of("static", "var2"), 1, "\"field2\""},
+      {ImmutableList.of("args"), 0, null}
+    };
+  }
 
-        if (debuggerValue == null) {
-            assertNull(value);
-        } else {
-            assertEquals(debuggerValue.getString(), value);
-        }
+  @Test
+  public void shouldGetNestedVariables() throws Exception {
+    SimpleValue debuggerValue =
+        debugger.getValue(new VariablePathImpl(ImmutableList.of("var1")), mainThreadId, 0);
+
+    assertEquals(debuggerValue.getString(), "\"var1\"");
+
+    Variable hashVar =
+        debuggerValue
+            .getVariables()
+            .stream()
+            .filter(v -> v.getName().equals("value"))
+            .findAny()
+            .get();
+    assertNotNull(hashVar);
+    assertEquals(hashVar.getType(), "char[]");
+    assertEquals(hashVar.getName(), "value");
+    assertTrue(hashVar.getValue().getString().contains("instance of char[4]"));
+    assertEquals(hashVar.getVariablePath().getPath(), ImmutableList.of("var1", "value"));
+
+    List<? extends Variable> valueVariables = hashVar.getValue().getVariables();
+    for (int i = 0; i < 4; i++) {
+      Variable variable = valueVariables.get(i);
+      assertEquals(
+          variable.getVariablePath().getPath(), ImmutableList.of("var1", "value", "[" + i + "]"));
+      assertEquals(variable.getValue().getString(), "var1".substring(i, i));
     }
+  }
 
-    @DataProvider(name = "getVariablePaths")
-    public static Object[][] getVariablePaths() {
-        return new Object[][] {{ImmutableList.of("i"), 0, "2"},
-                               {ImmutableList.of("i"), 1, null},
-                               {ImmutableList.of("var1"), 0, "\"var1\""},
-                               {ImmutableList.of("var1"), 1, null},
-                               {ImmutableList.of("var2"), 0, "\"var2\""},
-                               {ImmutableList.of("static", "var2"), 0, "\"field2\""},
-                               {ImmutableList.of("static", "var2"), 1, "\"field2\""},
-                               {ImmutableList.of("args"), 0, null}};
-    }
+  @Test(dataProvider = "setVariable")
+  public void shouldSetValue(List<String> path, String newValue, int frameIndex) throws Exception {
+    final VariablePathImpl variablePath = new VariablePathImpl(path);
 
-    @Test
-    public void shouldGetNestedVariables() throws Exception {
-        SimpleValue debuggerValue = debugger.getValue(new VariablePathImpl(ImmutableList.of("var1")), mainThreadId, 0);
+    debugger.setValue(
+        new VariableImpl(new SimpleValueImpl(newValue), variablePath), mainThreadId, frameIndex);
 
-        assertEquals(debuggerValue.getString(), "\"var1\"");
+    SimpleValue debuggerValue = debugger.getValue(variablePath, mainThreadId, frameIndex);
+    assertEquals(debuggerValue.getString(), newValue);
+  }
 
-        Variable hashVar = debuggerValue.getVariables()
-                                        .stream()
-                                        .filter(v -> v.getName().equals("value"))
-                                        .findAny()
-                                        .get();
-        assertNotNull(hashVar);
-        assertEquals(hashVar.getType(), "char[]");
-        assertEquals(hashVar.getName(), "value");
-        assertTrue(hashVar.getValue().getString().contains("instance of char[4]"));
-        assertEquals(hashVar.getVariablePath().getPath(), ImmutableList.of("var1", "value"));
-
-        List<? extends Variable> valueVariables = hashVar.getValue().getVariables();
-        for (int i = 0; i < 4; i++) {
-            Variable variable = valueVariables.get(i);
-            assertEquals(variable.getVariablePath().getPath(), ImmutableList.of("var1", "value", "[" + i + "]"));
-            assertEquals(variable.getValue().getString(), "var1".substring(i, i));
-        }
-    }
-
-    @Test(dataProvider = "setVariable")
-    public void shouldSetValue(List<String> path, String newValue, int frameIndex) throws Exception {
-        final VariablePathImpl variablePath = new VariablePathImpl(path);
-
-        debugger.setValue(new VariableImpl(new SimpleValueImpl(newValue), variablePath), mainThreadId, frameIndex);
-
-        SimpleValue debuggerValue = debugger.getValue(variablePath, mainThreadId, frameIndex);
-        assertEquals(debuggerValue.getString(), newValue);
-    }
-
-    @DataProvider(name = "setVariable")
-    public static Object[][] getSetVariable() {
-        return new Object[][] {{ImmutableList.of("i"), "3", 0}};
-    }
+  @DataProvider(name = "setVariable")
+  public static Object[][] getSetVariable() {
+    return new Object[][] {{ImmutableList.of("i"), "3", 0}};
+  }
 }

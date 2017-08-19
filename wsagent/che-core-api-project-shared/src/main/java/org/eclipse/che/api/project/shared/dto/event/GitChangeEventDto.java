@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.shared.dto.event;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -19,18 +19,18 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface GitChangeEventDto {
-    Type getType();
+  Type getType();
 
-    String getPath();
+  String getPath();
 
-    GitChangeEventDto withType(Type type);
+  GitChangeEventDto withType(Type type);
 
-    GitChangeEventDto withPath(String path);
+  GitChangeEventDto withPath(String path);
 
-    enum Type {
-        ADDED,
-        MODIFIED,
-        UNTRACKED,
-        NOT_MODIFIED
-    }
+  enum Type {
+    ADDED,
+    MODIFIED,
+    UNTRACKED,
+    NOT_MODIFIED
+  }
 }

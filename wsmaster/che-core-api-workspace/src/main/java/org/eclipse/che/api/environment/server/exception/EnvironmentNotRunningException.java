@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.environment.server.exception;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -19,11 +19,11 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
  * @author Alexander Garagatyi
  */
 public class EnvironmentNotRunningException extends NotFoundException {
-    public EnvironmentNotRunningException(String message) {
-        super(message);
-    }
+  public EnvironmentNotRunningException(String message) {
+    super(message);
+  }
 
-    public EnvironmentNotRunningException(ServiceError serviceError) {
-        super(serviceError);
-    }
+  public EnvironmentNotRunningException(ServiceError serviceError) {
+    super(serviceError);
+  }
 }

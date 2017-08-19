@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,36 +7,36 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.vfs;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 
 /**
- * Attaches any point on backend filesystem some VirtualFile (root folder).
- * Only children of root folder may be accessible through this API.
+ * Attaches any point on backend filesystem some VirtualFile (root folder). Only children of root
+ * folder may be accessible through this API.
  *
  * @author andrew00x
- *
- * @deprecated VFS components are now considered deprecated and will be replaced by standard JDK routines.
+ * @deprecated VFS components are now considered deprecated and will be replaced by standard JDK
+ *     routines.
  */
 @Deprecated
 public interface VirtualFileSystem {
-    /**
-     * Get root folder of virtual file system. Any files in higher level than root are not accessible through virtual file system API.
-     *
-     * @return root folder of virtual file system
-     */
-    VirtualFile getRoot();
+  /**
+   * Get root folder of virtual file system. Any files in higher level than root are not accessible
+   * through virtual file system API.
+   *
+   * @return root folder of virtual file system
+   */
+  VirtualFile getRoot();
 
-    /**
-     * Get searcher provider associated with this VirtualFileSystem. Method may return {@code null} if implementation doesn't support
-     * searching.
-     */
-    SearcherProvider getSearcherProvider();
+  /**
+   * Get searcher provider associated with this VirtualFileSystem. Method may return {@code null} if
+   * implementation doesn't support searching.
+   */
+  SearcherProvider getSearcherProvider();
 
-    /** Release used resources, e.g. clear caches, searcher index, etc */
-    void close() throws ServerException;
-
+  /** Release used resources, e.g. clear caches, searcher index, etc */
+  void close() throws ServerException;
 }

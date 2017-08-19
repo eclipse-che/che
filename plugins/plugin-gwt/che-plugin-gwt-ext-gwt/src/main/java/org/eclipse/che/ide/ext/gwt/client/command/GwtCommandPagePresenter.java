@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.gwt.client.command;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandPage;
 
 /**
  * Page allows to customize command of {@link GwtCommandType}.
@@ -25,91 +24,90 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 @Singleton
 public class GwtCommandPagePresenter implements GwtCommandPageView.ActionDelegate, CommandPage {
 
-    private final GwtCommandPageView view;
+  private final GwtCommandPageView view;
 
-    private CommandImpl     editedCommand;
-    private GwtCommandModel editedCommandModel;
+  private CommandImpl editedCommand;
+  private GwtCommandModel editedCommandModel;
 
-    // initial value of the 'working directory' parameter
-    private String workingDirectoryInitial;
-    // initial value of the 'GWT module' parameter
-    private String gwtModuleInitial;
-    // initial value of the 'Code Server address' parameter
-    private String codeServerAddressInitial;
+  // initial value of the 'working directory' parameter
+  private String workingDirectoryInitial;
+  // initial value of the 'GWT module' parameter
+  private String gwtModuleInitial;
+  // initial value of the 'Code Server address' parameter
+  private String codeServerAddressInitial;
 
-    private DirtyStateListener listener;
+  private DirtyStateListener listener;
 
-    @Inject
-    public GwtCommandPagePresenter(GwtCommandPageView view) {
-        this.view = view;
+  @Inject
+  public GwtCommandPagePresenter(GwtCommandPageView view) {
+    this.view = view;
 
-        view.setDelegate(this);
-    }
+    view.setDelegate(this);
+  }
 
-    @Override
-    public void resetFrom(CommandImpl command) {
-        editedCommand = command;
+  @Override
+  public void resetFrom(CommandImpl command) {
+    editedCommand = command;
 
-        editedCommandModel = GwtCommandModel.fromCommandLine(command.getCommandLine());
+    editedCommandModel = GwtCommandModel.fromCommandLine(command.getCommandLine());
 
-        workingDirectoryInitial = editedCommandModel.getWorkingDirectory();
-        gwtModuleInitial = editedCommandModel.getGwtModule();
-        codeServerAddressInitial = editedCommandModel.getCodeServerAddress();
-    }
+    workingDirectoryInitial = editedCommandModel.getWorkingDirectory();
+    gwtModuleInitial = editedCommandModel.getGwtModule();
+    codeServerAddressInitial = editedCommandModel.getCodeServerAddress();
+  }
 
-    @Override
-    public void go(AcceptsOneWidget container) {
-        container.setWidget(view);
+  @Override
+  public void go(AcceptsOneWidget container) {
+    container.setWidget(view);
 
-        view.setWorkingDirectory(editedCommandModel.getWorkingDirectory());
-        view.setGwtModule(editedCommandModel.getGwtModule());
-        view.setCodeServerAddress(editedCommandModel.getCodeServerAddress());
-    }
+    view.setWorkingDirectory(editedCommandModel.getWorkingDirectory());
+    view.setGwtModule(editedCommandModel.getGwtModule());
+    view.setCodeServerAddress(editedCommandModel.getCodeServerAddress());
+  }
 
-    @Override
-    public void onSave() {
-        workingDirectoryInitial = editedCommandModel.getWorkingDirectory();
-        gwtModuleInitial = editedCommandModel.getGwtModule();
-        codeServerAddressInitial = editedCommandModel.getCodeServerAddress();
-    }
+  @Override
+  public void onSave() {
+    workingDirectoryInitial = editedCommandModel.getWorkingDirectory();
+    gwtModuleInitial = editedCommandModel.getGwtModule();
+    codeServerAddressInitial = editedCommandModel.getCodeServerAddress();
+  }
 
-    @Override
-    public boolean isDirty() {
-        return !(workingDirectoryInitial.equals(editedCommandModel.getWorkingDirectory()) &&
-                 gwtModuleInitial.equals(editedCommandModel.getGwtModule()) &&
-                 codeServerAddressInitial.equals(editedCommandModel.getCodeServerAddress()));
-    }
+  @Override
+  public boolean isDirty() {
+    return !(workingDirectoryInitial.equals(editedCommandModel.getWorkingDirectory())
+        && gwtModuleInitial.equals(editedCommandModel.getGwtModule())
+        && codeServerAddressInitial.equals(editedCommandModel.getCodeServerAddress()));
+  }
 
-    @Override
-    public void setDirtyStateListener(DirtyStateListener listener) {
-        this.listener = listener;
-    }
+  @Override
+  public void setDirtyStateListener(DirtyStateListener listener) {
+    this.listener = listener;
+  }
 
-    @Override
-    public void setFieldStateActionDelegate(FieldStateActionDelegate delegate) {
-    }
+  @Override
+  public void setFieldStateActionDelegate(FieldStateActionDelegate delegate) {}
 
-    @Override
-    public void onWorkingDirectoryChanged() {
-        editedCommandModel.setWorkingDirectory(view.getWorkingDirectory());
+  @Override
+  public void onWorkingDirectoryChanged() {
+    editedCommandModel.setWorkingDirectory(view.getWorkingDirectory());
 
-        editedCommand.setCommandLine(editedCommandModel.toCommandLine());
-        listener.onDirtyStateChanged();
-    }
+    editedCommand.setCommandLine(editedCommandModel.toCommandLine());
+    listener.onDirtyStateChanged();
+  }
 
-    @Override
-    public void onGwtModuleChanged() {
-        editedCommandModel.setGwtModule(view.getGwtModule());
+  @Override
+  public void onGwtModuleChanged() {
+    editedCommandModel.setGwtModule(view.getGwtModule());
 
-        editedCommand.setCommandLine(editedCommandModel.toCommandLine());
-        listener.onDirtyStateChanged();
-    }
+    editedCommand.setCommandLine(editedCommandModel.toCommandLine());
+    listener.onDirtyStateChanged();
+  }
 
-    @Override
-    public void onCodeServerAddressChanged() {
-        editedCommandModel.setCodeServerAddress(view.getCodeServerAddress());
+  @Override
+  public void onCodeServerAddressChanged() {
+    editedCommandModel.setCodeServerAddress(view.getCodeServerAddress());
 
-        editedCommand.setCommandLine(editedCommandModel.toCommandLine());
-        listener.onDirtyStateChanged();
-    }
+    editedCommand.setCommandLine(editedCommandModel.toCommandLine());
+    listener.onDirtyStateChanged();
+  }
 }

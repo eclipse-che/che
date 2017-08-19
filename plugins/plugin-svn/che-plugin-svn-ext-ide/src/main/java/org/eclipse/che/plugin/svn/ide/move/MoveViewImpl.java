@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.ide.move;
 
 import com.google.common.collect.Sets;
@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.resources.Project;
@@ -54,210 +53,217 @@ import org.vectomatic.dom.svg.OMSVGSVGElement;
  */
 @Singleton
 public class MoveViewImpl extends Window implements MoveView {
-    interface MoveViewImplUiBinder extends UiBinder<Widget, MoveViewImpl> {
-    }
+  interface MoveViewImplUiBinder extends UiBinder<Widget, MoveViewImpl> {}
 
-    private static MoveViewImplUiBinder uiBinder = GWT.create(MoveViewImplUiBinder.class);
+  private static MoveViewImplUiBinder uiBinder = GWT.create(MoveViewImplUiBinder.class);
 
-    Button btnMove;
-    Button btnCancel;
+  Button btnMove;
+  Button btnCancel;
 
-    @UiField
-    DockLayoutPanel treeContainer;
+  @UiField DockLayoutPanel treeContainer;
 
-    @UiField
-    CheckBox urlCheckBox;
+  @UiField CheckBox urlCheckBox;
 
-    @UiField
-    DeckPanel deckPanel;
+  @UiField DeckPanel deckPanel;
 
-    @UiField
-    TextBox sourceUrlTextBox;
+  @UiField TextBox sourceUrlTextBox;
 
-    @UiField
-    TextBox targetUrlTextBox;
+  @UiField TextBox targetUrlTextBox;
 
-    @UiField
-    TextBox commentTextBox;
+  @UiField TextBox commentTextBox;
 
-    @UiField
-    DockLayoutPanel newNamePanel;
+  @UiField DockLayoutPanel newNamePanel;
 
-    @UiField
-    TextBox newNameTextBox;
+  @UiField TextBox newNameTextBox;
 
-    @UiField(provided = true)
-    SubversionExtensionResources             resources;
-    @UiField(provided = true)
-    SubversionExtensionLocalizationConstants constants;
-    private final ResourceNode.NodeFactory nodeFactory;
-    private final SettingsProvider         settingsProvider;
+  @UiField(provided = true)
+  SubversionExtensionResources resources;
 
-    private MoveView.ActionDelegate delegate;
-    private Tree                    tree;
-    private OMSVGSVGElement         alertMarker;
+  @UiField(provided = true)
+  SubversionExtensionLocalizationConstants constants;
 
-    private static final String PLACEHOLDER       = "placeholder";
-    private static final String PLACEHOLDER_DUMMY = "https://subversion.site.com/svn/sht_site/trunk";
+  private final ResourceNode.NodeFactory nodeFactory;
+  private final SettingsProvider settingsProvider;
 
-    @Inject
-    public MoveViewImpl(SubversionExtensionResources resources,
-                        SubversionExtensionLocalizationConstants constants,
-                        SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
-                        SkipLeafsInterceptor skipLeafsInterceptor,
-                        ResourceNode.NodeFactory nodeFactory,
-                        SettingsProvider settingsProvider) {
-        this.resources = resources;
-        this.constants = constants;
-        this.nodeFactory = nodeFactory;
-        this.settingsProvider = settingsProvider;
+  private MoveView.ActionDelegate delegate;
+  private Tree tree;
+  private OMSVGSVGElement alertMarker;
 
-        this.ensureDebugId("svn-move-window");
-        this.setTitle(constants.moveViewTitle());
+  private static final String PLACEHOLDER = "placeholder";
+  private static final String PLACEHOLDER_DUMMY = "https://subversion.site.com/svn/sht_site/trunk";
 
-        this.setWidget(uiBinder.createAndBindUi(this));
+  @Inject
+  public MoveViewImpl(
+      SubversionExtensionResources resources,
+      SubversionExtensionLocalizationConstants constants,
+      SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
+      SkipLeafsInterceptor skipLeafsInterceptor,
+      ResourceNode.NodeFactory nodeFactory,
+      SettingsProvider settingsProvider) {
+    this.resources = resources;
+    this.constants = constants;
+    this.nodeFactory = nodeFactory;
+    this.settingsProvider = settingsProvider;
 
-        btnCancel = createButton(constants.buttonCancel(), "svn-move-cancel", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    this.ensureDebugId("svn-move-window");
+    this.setTitle(constants.moveViewTitle());
+
+    this.setWidget(uiBinder.createAndBindUi(this));
+
+    btnCancel =
+        createButton(
+            constants.buttonCancel(),
+            "svn-move-cancel",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onCancelClicked();
-            }
-        });
-        addButtonToFooter(btnCancel);
+              }
+            });
+    addButtonToFooter(btnCancel);
 
-        btnMove = createButton(constants.moveButton(), "svn-move-move", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    btnMove =
+        createButton(
+            constants.moveButton(),
+            "svn-move-move",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onMoveClicked();
-            }
-        });
-        addButtonToFooter(btnMove);
+              }
+            });
+    addButtonToFooter(btnMove);
 
-        alertMarker = resources.alert().getSvg();
-        alertMarker.getStyle().setWidth(22, Style.Unit.PX);
-        alertMarker.getStyle().setHeight(22, Style.Unit.PX);
-        alertMarker.getStyle().setMargin(10, Style.Unit.PX);
-        getFooter().getElement().appendChild(alertMarker.getElement());
-        alertMarker.getStyle().setVisibility(Style.Visibility.HIDDEN);
+    alertMarker = resources.alert().getSvg();
+    alertMarker.getStyle().setWidth(22, Style.Unit.PX);
+    alertMarker.getStyle().setHeight(22, Style.Unit.PX);
+    alertMarker.getStyle().setMargin(10, Style.Unit.PX);
+    getFooter().getElement().appendChild(alertMarker.getElement());
+    alertMarker.getStyle().setVisibility(Style.Visibility.HIDDEN);
 
-        tree = new Tree(new NodeStorage(), new NodeLoader(Sets.newHashSet(skipHiddenNodesInterceptor, skipLeafsInterceptor)));
-        tree.getSelectionModel().setSelectionMode(SelectionModel.Mode.SINGLE);
+    tree =
+        new Tree(
+            new NodeStorage(),
+            new NodeLoader(Sets.newHashSet(skipHiddenNodesInterceptor, skipLeafsInterceptor)));
+    tree.getSelectionModel().setSelectionMode(SelectionModel.Mode.SINGLE);
 
-        treeContainer.add(tree);
+    treeContainer.add(tree);
 
-        sourceUrlTextBox.getElement().setAttribute(PLACEHOLDER, PLACEHOLDER_DUMMY);
-        targetUrlTextBox.getElement().setAttribute(PLACEHOLDER, PLACEHOLDER_DUMMY);
-        commentTextBox.getElement().setAttribute(PLACEHOLDER, "Comment...");
+    sourceUrlTextBox.getElement().setAttribute(PLACEHOLDER, PLACEHOLDER_DUMMY);
+    targetUrlTextBox.getElement().setAttribute(PLACEHOLDER, PLACEHOLDER_DUMMY);
+    commentTextBox.getElement().setAttribute(PLACEHOLDER, "Comment...");
 
-        urlCheckBox.setValue(false, true);
-        deckPanel.showWidget(0);
+    urlCheckBox.setValue(false, true);
+    deckPanel.showWidget(0);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onClose() {
+    hide();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setProject(Project project) {
+    final ContainerNode node =
+        nodeFactory.newContainerNode(project, settingsProvider.getSettings());
+
+    tree.getNodeStorage().clear();
+    tree.getNodeStorage().add(node);
+
+    tree.setExpanded(node, true);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void showErrorMarker(String message) {
+    alertMarker.getStyle().setVisibility(Style.Visibility.VISIBLE);
+
+    Tooltip.create(
+        (elemental.dom.Element) alertMarker.getElement(),
+        PositionController.VerticalAlign.TOP,
+        PositionController.HorizontalAlign.MIDDLE,
+        message);
+
+    btnMove.setEnabled(false);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void hideErrorMarker() {
+    alertMarker.getStyle().setVisibility(Style.Visibility.HIDDEN);
+
+    btnMove.setEnabled(true);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean isURLSelected() {
+    return urlCheckBox.getValue();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getSourceUrl() {
+    return sourceUrlTextBox.getText();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getTargetUrl() {
+    return targetUrlTextBox.getText();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Resource getDestinationNode() {
+    final Node node = tree.getSelectionModel().getSelectedNodes().get(0);
+
+    if (node instanceof ResourceNode) {
+      return ((ResourceNode) node).getData();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
+    return null;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void onShow(boolean singleSelectedItem) {
+    newNamePanel.setVisible(singleSelectedItem);
+    newNameTextBox.setText(null);
+    show();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getComment() {
+    return commentTextBox.getText();
+  }
+
+  @UiHandler({"sourceUrlTextBox", "targetUrlTextBox", "commentTextBox"})
+  @SuppressWarnings("unused")
+  public void onUrlFieldsChanged(KeyUpEvent event) {
+    delegate.onUrlsChanged();
+  }
+
+  @UiHandler("urlCheckBox")
+  @SuppressWarnings("unused")
+  public void onUrlCheckBoxClicked(ClickEvent event) {
+    if (isURLSelected()) {
+      sourceUrlTextBox.setText(null);
+      targetUrlTextBox.setText(null);
+      delegate.onUrlsChanged();
+      deckPanel.showWidget(1);
+    } else {
+      btnMove.setEnabled(true);
+      deckPanel.showWidget(0);
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onClose() {
-        hide();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setProject(Project project) {
-        final ContainerNode node = nodeFactory.newContainerNode(project, settingsProvider.getSettings());
-
-        tree.getNodeStorage().clear();
-        tree.getNodeStorage().add(node);
-
-        tree.setExpanded(node, true);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void showErrorMarker(String message) {
-        alertMarker.getStyle().setVisibility(Style.Visibility.VISIBLE);
-
-        Tooltip.create((elemental.dom.Element)alertMarker.getElement(),
-                       PositionController.VerticalAlign.TOP,
-                       PositionController.HorizontalAlign.MIDDLE,
-                       message);
-
-        btnMove.setEnabled(false);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void hideErrorMarker() {
-        alertMarker.getStyle().setVisibility(Style.Visibility.HIDDEN);
-
-        btnMove.setEnabled(true);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isURLSelected() {
-        return urlCheckBox.getValue();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getSourceUrl() {
-        return sourceUrlTextBox.getText();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getTargetUrl() {
-        return targetUrlTextBox.getText();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Resource getDestinationNode() {
-        final Node node = tree.getSelectionModel().getSelectedNodes().get(0);
-
-        if (node instanceof ResourceNode) {
-            return ((ResourceNode)node).getData();
-        }
-
-        return null;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onShow(boolean singleSelectedItem) {
-        newNamePanel.setVisible(singleSelectedItem);
-        newNameTextBox.setText(null);
-        show();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getComment() {
-        return commentTextBox.getText();
-    }
-
-    @UiHandler({"sourceUrlTextBox", "targetUrlTextBox", "commentTextBox"})
-    @SuppressWarnings("unused")
-    public void onUrlFieldsChanged(KeyUpEvent event) {
-        delegate.onUrlsChanged();
-    }
-
-    @UiHandler("urlCheckBox")
-    @SuppressWarnings("unused")
-    public void onUrlCheckBoxClicked(ClickEvent event) {
-        if (isURLSelected()) {
-            sourceUrlTextBox.setText(null);
-            targetUrlTextBox.setText(null);
-            delegate.onUrlsChanged();
-            deckPanel.showWidget(1);
-        } else {
-            btnMove.setEnabled(true);
-            deckPanel.showWidget(0);
-        }
-    }
+  }
 }

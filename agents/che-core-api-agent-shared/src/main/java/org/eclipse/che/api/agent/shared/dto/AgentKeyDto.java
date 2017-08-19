@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,27 +7,25 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.agent.shared.dto;
 
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Anatolii Bazko
- */
+/** @author Anatolii Bazko */
 @DTO
 public interface AgentKeyDto extends AgentKey {
 
-    String getName();
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    AgentKeyDto withName(String name);
+  AgentKeyDto withName(String name);
 
-    String getVersion();
+  String getVersion();
 
-    void setVersion(String version);
+  void setVersion(String version);
 
-    AgentKeyDto withVersion(String version);
+  AgentKeyDto withVersion(String version);
 }

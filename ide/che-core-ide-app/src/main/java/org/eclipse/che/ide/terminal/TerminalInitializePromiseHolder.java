@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,29 +7,26 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.terminal;
 
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.promises.client.Promise;
 
-/**
- * @author Alexander Andrienko
- */
+/** @author Alexander Andrienko */
 @Singleton
 public class TerminalInitializePromiseHolder {
 
-    private Promise<Void> initializerPromise;
+  private Promise<Void> initializerPromise;
 
-    public void setInitializerPromise(Promise<Void> initializerPromise) {
-        this.initializerPromise = initializerPromise;
-    }
+  public void setInitializerPromise(Promise<Void> initializerPromise) {
+    this.initializerPromise = initializerPromise;
+  }
 
-    public Promise<Void> getInitializerPromise() {
-        if (initializerPromise == null) {
-            throw new RuntimeException("Terminal initializer not set");
-        }
-        return initializerPromise;
+  public Promise<Void> getInitializerPromise() {
+    if (initializerPromise == null) {
+      throw new RuntimeException("Terminal initializer not set");
     }
+    return initializerPromise;
+  }
 }

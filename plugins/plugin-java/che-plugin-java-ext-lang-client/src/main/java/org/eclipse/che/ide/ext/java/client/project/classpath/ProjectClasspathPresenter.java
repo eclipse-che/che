@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,22 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.project.classpath;
+
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -30,175 +38,177 @@ import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
-
 /**
  * Presenter for managing classpath.
  *
  * @author Valeriy Svydenko
  */
 @Singleton
-public class ProjectClasspathPresenter implements ProjectClasspathView.ActionDelegate, ClasspathPagePresenter.DirtyStateListener {
-    private final ProjectClasspathView        view;
-    private final Set<ClasspathPagePresenter> classpathPages;
-    private final AppContext                  appContext;
-    private final ClasspathContainer          classpathContainer;
-    private final JavaLocalizationConstant    locale;
-    private final DialogFactory               dialogFactory;
-    private final NotificationManager         notificationManager;
-    private final ClasspathResolver           classpathResolver;
+public class ProjectClasspathPresenter
+    implements ProjectClasspathView.ActionDelegate, ClasspathPagePresenter.DirtyStateListener {
+  private final ProjectClasspathView view;
+  private final Set<ClasspathPagePresenter> classpathPages;
+  private final AppContext appContext;
+  private final ClasspathContainer classpathContainer;
+  private final JavaLocalizationConstant locale;
+  private final DialogFactory dialogFactory;
+  private final NotificationManager notificationManager;
+  private final ClasspathResolver classpathResolver;
 
-    private Map<String, Set<ClasspathPagePresenter>> propertiesMap;
+  private Map<String, Set<ClasspathPagePresenter>> propertiesMap;
 
-    @Inject
-    protected ProjectClasspathPresenter(ProjectClasspathView view,
-                                        Set<ClasspathPagePresenter> classpathPages,
-                                        AppContext appContext,
-                                        ClasspathContainer classpathContainer,
-                                        JavaLocalizationConstant locale,
-                                        DialogFactory dialogFactory,
-                                        NotificationManager notificationManager,
-                                        ClasspathResolver classpathResolver) {
-        this.view = view;
-        this.classpathPages = classpathPages;
-        this.appContext = appContext;
-        this.classpathContainer = classpathContainer;
-        this.locale = locale;
-        this.dialogFactory = dialogFactory;
-        this.notificationManager = notificationManager;
-        this.classpathResolver = classpathResolver;
-        this.view.setDelegate(this);
-        for (ClasspathPagePresenter property : classpathPages) {
-            property.setUpdateDelegate(this);
-        }
+  @Inject
+  protected ProjectClasspathPresenter(
+      ProjectClasspathView view,
+      Set<ClasspathPagePresenter> classpathPages,
+      AppContext appContext,
+      ClasspathContainer classpathContainer,
+      JavaLocalizationConstant locale,
+      DialogFactory dialogFactory,
+      NotificationManager notificationManager,
+      ClasspathResolver classpathResolver) {
+    this.view = view;
+    this.classpathPages = classpathPages;
+    this.appContext = appContext;
+    this.classpathContainer = classpathContainer;
+    this.locale = locale;
+    this.dialogFactory = dialogFactory;
+    this.notificationManager = notificationManager;
+    this.classpathResolver = classpathResolver;
+    this.view.setDelegate(this);
+    for (ClasspathPagePresenter property : classpathPages) {
+      property.setUpdateDelegate(this);
+    }
+  }
+
+  @Override
+  public void onDoneClicked() {
+    for (ClasspathPagePresenter property : classpathPages) {
+      if (property.isDirty()) {
+        property.storeChanges();
+      }
+      property.clearData();
     }
 
-    @Override
-    public void onDoneClicked() {
-        for (ClasspathPagePresenter property : classpathPages) {
-            if (property.isDirty()) {
-                property.storeChanges();
-            }
-            property.clearData();
-        }
-
-        classpathResolver.updateClasspath().then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
+    classpathResolver
+        .updateClasspath()
+        .then(
+            new Operation<Void>() {
+              @Override
+              public void apply(Void arg) throws OperationException {
                 view.hideWindow();
-            }
-        });
+              }
+            });
+  }
+
+  @Override
+  public void onCloseClicked() {
+    boolean haveUnsavedData = false;
+    for (ClasspathPagePresenter property : classpathPages) {
+      haveUnsavedData |= property.isDirty();
     }
-
-    @Override
-    public void onCloseClicked() {
-        boolean haveUnsavedData = false;
-        for (ClasspathPagePresenter property : classpathPages) {
-            haveUnsavedData |= property.isDirty();
-        }
-        if (haveUnsavedData) {
-            dialogFactory.createConfirmDialog(locale.unsavedChangesTitle(),
-                                              locale.messagesPromptSaveChanges(),
-                                              locale.buttonContinue(),
-                                              locale.buttonSave(),
-                                              getConfirmCallback(),
-                                              getCancelCallback()).show();
-        } else {
-            clearData();
-        }
+    if (haveUnsavedData) {
+      dialogFactory
+          .createConfirmDialog(
+              locale.unsavedChangesTitle(),
+              locale.messagesPromptSaveChanges(),
+              locale.buttonContinue(),
+              locale.buttonSave(),
+              getConfirmCallback(),
+              getCancelCallback())
+          .show();
+    } else {
+      clearData();
     }
+  }
 
-    @Override
-    public void onEnterClicked() {
-        if (view.isDoneButtonInFocus()) {
-            onDoneClicked();
-        }
+  @Override
+  public void onEnterClicked() {
+    if (view.isDoneButtonInFocus()) {
+      onDoneClicked();
     }
+  }
 
-    @Override
-    public void clearData() {
-        for (ClasspathPagePresenter property : classpathPages) {
-            property.clearData();
-        }
+  @Override
+  public void clearData() {
+    for (ClasspathPagePresenter property : classpathPages) {
+      property.clearData();
     }
+  }
 
-    @Override
-    public void onConfigurationSelected(ClasspathPagePresenter pagePresenter) {
-        pagePresenter.go(view.getConfigurationsContainer());
-    }
+  @Override
+  public void onConfigurationSelected(ClasspathPagePresenter pagePresenter) {
+    pagePresenter.go(view.getConfigurationsContainer());
+  }
 
-    /** Show dialog. */
-    public void show() {
+  /** Show dialog. */
+  public void show() {
 
-        final Resource[] resources = appContext.getResources();
+    final Resource[] resources = appContext.getResources();
 
-        Preconditions.checkState(resources != null && resources.length == 1);
+    Preconditions.checkState(resources != null && resources.length == 1);
 
-        final Optional<Project> project = resources[0].getRelatedProject();
+    final Optional<Project> project = resources[0].getRelatedProject();
 
-        Preconditions.checkState(isJavaProject(project.get()));
+    Preconditions.checkState(isJavaProject(project.get()));
 
-        classpathContainer.getClasspathEntries(project.get().getLocation().toString()).then(new Operation<List<ClasspathEntryDto>>() {
-            @Override
-            public void apply(List<ClasspathEntryDto> arg) throws OperationException {
+    classpathContainer
+        .getClasspathEntries(project.get().getLocation().toString())
+        .then(
+            new Operation<List<ClasspathEntryDto>>() {
+              @Override
+              public void apply(List<ClasspathEntryDto> arg) throws OperationException {
                 classpathResolver.resolveClasspathEntries(arg);
                 if (propertiesMap == null) {
-                    propertiesMap = new HashMap<>();
-                    for (ClasspathPagePresenter page : classpathPages) {
-                        Set<ClasspathPagePresenter> pages = propertiesMap.get(page.getCategory());
-                        if (pages == null) {
-                            pages = new HashSet<>();
-                            propertiesMap.put(page.getCategory(), pages);
-                        }
-                        pages.add(page);
+                  propertiesMap = new HashMap<>();
+                  for (ClasspathPagePresenter page : classpathPages) {
+                    Set<ClasspathPagePresenter> pages = propertiesMap.get(page.getCategory());
+                    if (pages == null) {
+                      pages = new HashSet<>();
+                      propertiesMap.put(page.getCategory(), pages);
                     }
+                    pages.add(page);
+                  }
 
-                    view.setPages(propertiesMap);
+                  view.setPages(propertiesMap);
                 }
                 view.show();
-                view.selectPage(propertiesMap.entrySet().iterator().next().getValue().iterator().next());
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify("Problems with getting classpath", arg.getMessage(), FAIL, EMERGE_MODE);
-            }
-        });
+                view.selectPage(
+                    propertiesMap.entrySet().iterator().next().getValue().iterator().next());
+              }
+            })
+        .catchError(
+            new Operation<PromiseError>() {
+              @Override
+              public void apply(PromiseError arg) throws OperationException {
+                notificationManager.notify(
+                    "Problems with getting classpath", arg.getMessage(), FAIL, EMERGE_MODE);
+              }
+            });
+  }
 
-    }
+  @Override
+  public void onDirtyChanged() {}
 
-    @Override
-    public void onDirtyChanged() {
-    }
+  private ConfirmCallback getConfirmCallback() {
+    return new ConfirmCallback() {
+      @Override
+      public void accepted() {
+        for (ClasspathPagePresenter property : classpathPages) {
+          if (property.isDirty()) {
+            property.revertChanges();
+          }
+        }
+      }
+    };
+  }
 
-    private ConfirmCallback getConfirmCallback() {
-        return new ConfirmCallback() {
-            @Override
-            public void accepted() {
-                for (ClasspathPagePresenter property : classpathPages) {
-                    if (property.isDirty()) {
-                        property.revertChanges();
-                    }
-                }
-            }
-        };
-    }
-
-    private CancelCallback getCancelCallback() {
-        return new CancelCallback() {
-            @Override
-            public void cancelled() {
-                onDoneClicked();
-            }
-        };
-    }
-
+  private CancelCallback getCancelCallback() {
+    return new CancelCallback() {
+      @Override
+      public void cancelled() {
+        onDoneClicked();
+      }
+    };
+  }
 }

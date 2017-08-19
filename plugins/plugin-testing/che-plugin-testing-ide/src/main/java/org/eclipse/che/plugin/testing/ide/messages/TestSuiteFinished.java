@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.ide.messages;
 
-/**
- * Data class represents test suite finished message.
- */
+/** Data class represents test suite finished message. */
 public class TestSuiteFinished extends BaseTestSuiteMessage {
 
-    TestSuiteFinished() {
-    }
+  TestSuiteFinished() {}
 
-    @Override
-    public void visit(TestingMessageVisitor visitor) {
-        visitor.visitTestSuiteFinished(this);
-    }
+  @Override
+  public void visit(TestingMessageVisitor visitor) {
+    visitor.visitTestSuiteFinished(this);
+  }
 }

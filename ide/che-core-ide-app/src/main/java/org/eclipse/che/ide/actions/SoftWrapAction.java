@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
@@ -25,42 +25,40 @@ import org.eclipse.che.ide.api.editor.texteditor.CanWrapLines;
  */
 public class SoftWrapAction extends ToggleAction {
 
-    private       EditorAgent          editorAgent;
+  private EditorAgent editorAgent;
 
-    @Inject
-    public SoftWrapAction(EditorAgent editorAgent,
-                          CoreLocalizationConstant localization) {
-        super(localization.softWrap());
-        this.editorAgent = editorAgent;
+  @Inject
+  public SoftWrapAction(EditorAgent editorAgent, CoreLocalizationConstant localization) {
+    super(localization.softWrap());
+    this.editorAgent = editorAgent;
+  }
+
+  @Override
+  public boolean isSelected(ActionEvent e) {
+    EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+    if (activeEditor != null && activeEditor instanceof CanWrapLines) {
+      return ((CanWrapLines) activeEditor).isWrapLines();
     }
 
-    @Override
-    public boolean isSelected(ActionEvent e) {
-        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if (activeEditor != null && activeEditor instanceof CanWrapLines) {
-            return ((CanWrapLines)activeEditor).isWrapLines();
-        }
+    return false;
+  }
 
-        return false;
+  @Override
+  public void setSelected(ActionEvent e, boolean state) {
+    EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+    if (activeEditor != null && activeEditor instanceof CanWrapLines) {
+      ((CanWrapLines) activeEditor).toggleWrapLines();
     }
+  }
 
-    @Override
-    public void setSelected(ActionEvent e, boolean state) {
-        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if (activeEditor != null && activeEditor instanceof CanWrapLines) {
-            ((CanWrapLines)activeEditor).toggleWrapLines();
-        }
+  @Override
+  public void update(ActionEvent e) {
+    EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+
+    if (activeEditor != null && activeEditor instanceof CanWrapLines) {
+      e.getPresentation().setEnabled(true);
+    } else {
+      e.getPresentation().setEnabled(false);
     }
-
-    @Override
-    public void update(ActionEvent e) {
-        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-
-        if (activeEditor != null && activeEditor instanceof CanWrapLines) {
-            e.getPresentation().setEnabled(true);
-        } else {
-            e.getPresentation().setEnabled(false);
-        }
-    }
-
+  }
 }

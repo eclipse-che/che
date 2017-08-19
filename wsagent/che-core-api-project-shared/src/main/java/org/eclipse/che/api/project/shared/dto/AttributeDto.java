@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.shared.dto;
 
 import org.eclipse.che.api.core.model.project.type.Attribute;
@@ -21,29 +21,28 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface AttributeDto extends Attribute {
 
-    @Override
-    String getName();
+  @Override
+  String getName();
 
-    AttributeDto withName(String name);
+  AttributeDto withName(String name);
 
-    @Override
-    String getDescription();
+  @Override
+  String getDescription();
 
-    AttributeDto withDescription(String description);
+  AttributeDto withDescription(String description);
 
-    @Override
-    boolean isRequired();
+  @Override
+  boolean isRequired();
 
-    AttributeDto withRequired(boolean required);
+  AttributeDto withRequired(boolean required);
 
-    @Override
-    boolean isVariable();
+  @Override
+  boolean isVariable();
 
-    AttributeDto withVariable(boolean variable);
+  AttributeDto withVariable(boolean variable);
 
-    @Override
-    ValueDto getValue();
+  @Override
+  ValueDto getValue();
 
-    AttributeDto withValue(ValueDto value);
-
+  AttributeDto withValue(ValueDto value);
 }

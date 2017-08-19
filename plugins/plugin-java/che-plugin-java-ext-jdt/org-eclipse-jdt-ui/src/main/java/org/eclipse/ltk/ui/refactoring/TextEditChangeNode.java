@@ -1,15 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2012-2015 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2015 Red Hat, Inc. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Red Hat, Inc. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.ltk.ui.refactoring;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -23,11 +26,6 @@ import org.eclipse.ltk.internal.ui.refactoring.InternalTextEditChangeNode;
 import org.eclipse.ltk.internal.ui.refactoring.PreviewNode;
 import org.eclipse.ltk.internal.ui.refactoring.RefactoringPluginImages;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditGroupNode;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * A special preview node to represent <code>TextEditBasedChange</code>s in the
@@ -44,132 +42,129 @@ import java.util.List;
  */
 public class TextEditChangeNode extends InternalTextEditChangeNode {
 
-	public static abstract class ChildNode extends PreviewNode {
-		protected ChildNode(PreviewNode parent) {
-			super(parent);
-		}
-		protected TextEditChangeNode getTextEditChangeNode() {
-			return internalGetTextEditChangeNode(this);
-		}
-	}
+  public abstract static class ChildNode extends PreviewNode {
+    protected ChildNode(PreviewNode parent) {
+      super(parent);
+    }
 
-	/**
-	 * Creates a new child node for the given parent and change group.
-	 *
-	 * @param parent the parent of the new child node
-	 * @param changeGroup the <code>TextEditBasedChangeGroup</code> this child node
-	 *  represents in the preview tree
-	 *
-	 * @return the new child node
-	 */
-	public static ChildNode createTextEditGroupNode(ChildNode parent, TextEditBasedChangeGroup changeGroup) {
-		return new TextEditGroupNode(parent, changeGroup);
-	}
+    protected TextEditChangeNode getTextEditChangeNode() {
+      return internalGetTextEditChangeNode(this);
+    }
+  }
 
-	/**
-	 * Creates a new child node for the given parent and change group.
-	 *
-	 * @param parent the parent of the new child node
-	 * @param changeGroup the <code>TextEditBasedChangeGroup</code> this child node
-	 *  represents in the preview tree
-	 *
-	 * @return the new child node
-	 */
-	public static ChildNode createTextEditGroupNode(TextEditChangeNode parent, TextEditBasedChangeGroup changeGroup) {
-		return new TextEditGroupNode(parent, changeGroup);
-	}
+  /**
+   * Creates a new child node for the given parent and change group.
+   *
+   * @param parent the parent of the new child node
+   * @param changeGroup the <code>TextEditBasedChangeGroup</code> this child node represents in the
+   *     preview tree
+   * @return the new child node
+   */
+  public static ChildNode createTextEditGroupNode(
+      ChildNode parent, TextEditBasedChangeGroup changeGroup) {
+    return new TextEditGroupNode(parent, changeGroup);
+  }
 
-	/**
-	 * Creates a new text edit change node for the given change.
-	 *
-	 * @param change the <code>TextEditBasedChange</code> this node
-	 *  represents in the preview tree
-	 */
-	public TextEditChangeNode(TextEditBasedChange change) {
-		// the parent will be set lazily via the initialize method
-		super(null, change);
-	}
+  /**
+   * Creates a new child node for the given parent and change group.
+   *
+   * @param parent the parent of the new child node
+   * @param changeGroup the <code>TextEditBasedChangeGroup</code> this child node represents in the
+   *     preview tree
+   * @return the new child node
+   */
+  public static ChildNode createTextEditGroupNode(
+      TextEditChangeNode parent, TextEditBasedChangeGroup changeGroup) {
+    return new TextEditGroupNode(parent, changeGroup);
+  }
 
-	/**
-	 * Returns the <code>TextEditBasedChange</code> this node is
-	 * associated with.
-	 *
-	 * @return the <code>TextEditBasedChange<code>
-	 */
-	public final TextEditBasedChange getTextEditBasedChange() {
-		return super.getTextEditBasedChange();
-	}
+  /**
+   * Creates a new text edit change node for the given change.
+   *
+   * @param change the <code>TextEditBasedChange</code> this node represents in the preview tree
+   */
+  public TextEditChangeNode(TextEditBasedChange change) {
+    // the parent will be set lazily via the initialize method
+    super(null, change);
+  }
 
-	/**
-	 * Returns the text used to render this node in the
-	 * UI.
-	 *
-	 * @return a human readable representation of this node
-	 */
-	public String getText() {
-		Change change= getTextEditBasedChange();
-		if (change instanceof TextFileChange) {
-			IFile file= ((TextFileChange)change).getFile();
-			return Messages.format(
-					"{0} - {1}",
-					new String[]{BasicElementLabels.getResourceName(file),
-								 BasicElementLabels.getPathLabel(file.getParent().getFullPath(), false)});
-		}
-		return super.getText();
-	}
+  /**
+   * Returns the <code>TextEditBasedChange</code> this node is
+   * associated with.
+   *
+   * @return the <code>TextEditBasedChange<code>
+   */
+  public final TextEditBasedChange getTextEditBasedChange() {
+    return super.getTextEditBasedChange();
+  }
 
-	/**
-	 * Returns the image descriptor used to render this node
-	 * in the UI.
-	 *
-	 * @return the image descriptor representing this node
-	 */
-	public ImageDescriptor getImageDescriptor() {
-		return RefactoringPluginImages.DESC_OBJS_FILE_CHANGE;
-	}
+  /**
+   * Returns the text used to render this node in the UI.
+   *
+   * @return a human readable representation of this node
+   */
+  public String getText() {
+    Change change = getTextEditBasedChange();
+    if (change instanceof TextFileChange) {
+      IFile file = ((TextFileChange) change).getFile();
+      return Messages.format(
+          "{0} - {1}",
+          new String[] {
+            BasicElementLabels.getResourceName(file),
+            BasicElementLabels.getPathLabel(file.getParent().getFullPath(), false)
+          });
+    }
+    return super.getText();
+  }
 
-	protected ChildNode[] createChildNodes() {
-		TextEditBasedChange change= getTextEditBasedChange();
-		if (change instanceof MultiStateTextFileChange) {
-			return new ChildNode[0]; // no edit preview & edit disabling possible in the MultiStateTextFileChange (edits must be applied in sequence)
-		}
-		TextEditBasedChangeGroup[] groups= getSortedChangeGroups(change);
-		ChildNode[] result= new ChildNode[groups.length];
-		for (int i= 0; i < groups.length; i++) {
-			result[i]= new TextEditGroupNode(this, groups[i]);
-		}
-		return result;
-	}
+  /**
+   * Returns the image descriptor used to render this node in the UI.
+   *
+   * @return the image descriptor representing this node
+   */
+  public ImageDescriptor getImageDescriptor() {
+    return RefactoringPluginImages.DESC_OBJS_FILE_CHANGE;
+  }
 
-	private static class OffsetComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			TextEditBasedChangeGroup c1= (TextEditBasedChangeGroup)o1;
-			TextEditBasedChangeGroup c2= (TextEditBasedChangeGroup)o2;
-			int p1= getOffset(c1);
-			int p2= getOffset(c2);
-			if (p1 < p2)
-				return -1;
-			if (p1 > p2)
-				return 1;
-			// same offset
-			return 0;
-		}
-		private int getOffset(TextEditBasedChangeGroup edit) {
-			return edit.getRegion().getOffset();
-		}
-	}
+  protected ChildNode[] createChildNodes() {
+    TextEditBasedChange change = getTextEditBasedChange();
+    if (change instanceof MultiStateTextFileChange) {
+      return new ChildNode
+          [0]; // no edit preview & edit disabling possible in the MultiStateTextFileChange (edits must be applied in sequence)
+    }
+    TextEditBasedChangeGroup[] groups = getSortedChangeGroups(change);
+    ChildNode[] result = new ChildNode[groups.length];
+    for (int i = 0; i < groups.length; i++) {
+      result[i] = new TextEditGroupNode(this, groups[i]);
+    }
+    return result;
+  }
 
-	private TextEditBasedChangeGroup[] getSortedChangeGroups(TextEditBasedChange change) {
-		TextEditBasedChangeGroup[] groups= change.getChangeGroups();
-		List result= new ArrayList(groups.length);
-		for (int i= 0; i < groups.length; i++) {
-			if (!groups[i].getTextEditGroup().isEmpty())
-				result.add(groups[i]);
-		}
-		Comparator comparator= new OffsetComparator();
-		Collections.sort(result, comparator);
-		return (TextEditBasedChangeGroup[])result.toArray(new TextEditBasedChangeGroup[result.size()]);
-	}
+  private static class OffsetComparator implements Comparator {
+    public int compare(Object o1, Object o2) {
+      TextEditBasedChangeGroup c1 = (TextEditBasedChangeGroup) o1;
+      TextEditBasedChangeGroup c2 = (TextEditBasedChangeGroup) o2;
+      int p1 = getOffset(c1);
+      int p2 = getOffset(c2);
+      if (p1 < p2) return -1;
+      if (p1 > p2) return 1;
+      // same offset
+      return 0;
+    }
 
+    private int getOffset(TextEditBasedChangeGroup edit) {
+      return edit.getRegion().getOffset();
+    }
+  }
 
+  private TextEditBasedChangeGroup[] getSortedChangeGroups(TextEditBasedChange change) {
+    TextEditBasedChangeGroup[] groups = change.getChangeGroups();
+    List result = new ArrayList(groups.length);
+    for (int i = 0; i < groups.length; i++) {
+      if (!groups[i].getTextEditGroup().isEmpty()) result.add(groups[i]);
+    }
+    Comparator comparator = new OffsetComparator();
+    Collections.sort(result, comparator);
+    return (TextEditBasedChangeGroup[]) result.toArray(new TextEditBasedChangeGroup[result.size()]);
+  }
 }

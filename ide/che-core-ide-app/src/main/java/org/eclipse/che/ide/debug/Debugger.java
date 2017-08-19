@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.debug;
 
+import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Client-side debugger.
@@ -28,129 +27,96 @@ import java.util.Map;
  */
 public interface Debugger extends DebuggerObservable {
 
-    /** Returns debugger type */
-    String getDebuggerType();
+  /** Returns debugger type */
+  String getDebuggerType();
 
-    /**
-     * Adds new breakpoint.
-     *
-     * @param file
-     *      the file
-     * @param lineNumber
-     *      the line number
-     */
-    void addBreakpoint(VirtualFile file, int lineNumber);
+  /**
+   * Adds new breakpoint.
+   *
+   * @param file the file
+   * @param lineNumber the line number
+   */
+  void addBreakpoint(VirtualFile file, int lineNumber);
 
-    /**
-     * Deletes the given breakpoint on server.
-     *
-     * @param file
-     *      the file
-     * @param lineNumber
-     *      the line number
-     */
-    void deleteBreakpoint(VirtualFile file, int lineNumber);
+  /**
+   * Deletes the given breakpoint on server.
+   *
+   * @param file the file
+   * @param lineNumber the line number
+   */
+  void deleteBreakpoint(VirtualFile file, int lineNumber);
 
-    /**
-     * Deletes all breakpoints.
-     */
-    void deleteAllBreakpoints();
+  /** Deletes all breakpoints. */
+  void deleteAllBreakpoints();
 
-    /**
-     * Connects to server.
-     *
-     * @param connectionProperties
-     *      the connection properties
-     */
-    Promise<Void> connect(Map<String, String> connectionProperties);
+  /**
+   * Connects to server.
+   *
+   * @param connectionProperties the connection properties
+   */
+  Promise<Void> connect(Map<String, String> connectionProperties);
 
-    /**
-     * Disconnects from process is being debugged.
-     * When debugger is disconnected it should invoke {@link DebuggerManager#setActiveDebugger(Debugger)} with {@code null}.
-     */
-    void disconnect();
+  /**
+   * Disconnects from process is being debugged. When debugger is disconnected it should invoke
+   * {@link DebuggerManager#setActiveDebugger(Debugger)} with {@code null}.
+   */
+  void disconnect();
 
-    /**
-     * Does step into.
-     */
-    void stepInto();
+  /** Does step into. */
+  void stepInto();
 
-    /**
-     * Does step over.
-     */
-    void stepOver();
+  /** Does step over. */
+  void stepOver();
 
-    /**
-     * Does step out.
-     */
-    void stepOut();
+  /** Does step out. */
+  void stepOut();
 
-    /**
-     * Resumes application.
-     */
-    void resume();
+  /** Resumes application. */
+  void resume();
 
-    /**
-     * Suspends application.
-     */
-    void suspend();
+  /** Suspends application. */
+  void suspend();
 
-    /**
-     * Evaluates the given expression inside specific frame.
-     *
-     * @param threadId
-     *      the unique thread id
-     * @param frameIndex
-     *      the frame index in the thread
-     */
-    Promise<String> evaluate(String expression, long threadId, int frameIndex);
+  /**
+   * Evaluates the given expression inside specific frame.
+   *
+   * @param threadId the unique thread id
+   * @param frameIndex the frame index in the thread
+   */
+  Promise<String> evaluate(String expression, long threadId, int frameIndex);
 
-    /**
-     * Gets the value of the given variable inside specific frame.
-     *
-     * @param variable
-     *      the variable to get value from
-     * @param threadId
-     *      the unique thread id
-     * @param frameIndex
-     *      the frame index in the thread
-     */
-    Promise<SimpleValue> getValue(Variable variable, long threadId, int frameIndex);
+  /**
+   * Gets the value of the given variableinside specific frame.
+   *
+   * @param variable the variable to get value from
+   * @param threadId the unique thread id
+   * @param frameIndex the frame index in the thread
+   */
+  Promise<SimpleValue> getValue(Variable variable, long threadId, int frameIndex);
 
-    /**
-     * Gets stack frame dump.
-     *
-     * @param threadId
-     *      the unique thread id
-     * @param frameIndex
-     *      the frame index in the thread
-     */
-    Promise<StackFrameDump> getStackFrameDump(long threadId, int frameIndex);
+  /**
+   * Gets stack framedump.
+   *
+   * @param threadId the unique thread id
+   * @param frameIndex the frameindex in the thread
+   */
+  Promise<StackFrameDump> getStackFrameDump(long threadId, int frameIndex);
 
-    /**
-     * Gets thread dump.
-     */
-    Promise<List<ThreadDumpDto>> getThreadDump();
+  /** Gets thread dump. */
+  Promise<List<ThreadDumpDto>> getThreadDump();
 
-    /**
-     * Updates the value of the given variable.
-     *
-     * @param variable
-     *      the variable to update
-     * @param threadId
-     *      the unique thread id
-     * @param frameIndex
-     *      the frame index in the thread
-     */
-    void setValue(Variable variable, long threadId, int frameIndex);
+  /**
+   * Updates the value of the given variable.
+   *
+   * @param variable the variable to update
+   * @param threadId the unique thread id
+   * @param frameIndex the frame index in the thread
+   */
+  void setValue(Variable variable, long threadId, int frameIndex);
 
-    /**
-     * Indicates if connection is established with the server.
-     */
-    boolean isConnected();
+  /** Indicates if connection is established with the server. */
+  boolean isConnected();
 
-    /**
-     * Indicates if debugger is in suspended state.
-     */
-    boolean isSuspended();
+  /** Indicates if debugger is in suspended state. */
+  boolean isSuspended();
 }

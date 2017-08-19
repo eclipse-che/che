@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.project.server.FolderEntry;
@@ -19,10 +19,11 @@ import org.eclipse.che.api.project.server.FolderEntry;
  */
 public interface ValueProviderFactory {
 
-    /**
-     * Create new instance of {@link ValueProvider}. Project is used for access to low-level information about project.
-     *
-     * @param projectFolder
-     */
-    ValueProvider newInstance(FolderEntry projectFolder);
+  /**
+   * Create new instance of {@link ValueProvider}. Project is used for access to low-level
+   * information about project.
+   *
+   * @param projectFolder
+   */
+  ValueProvider newInstance(FolderEntry projectFolder);
 }

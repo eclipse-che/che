@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.project.type;
 
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.commons.annotation.Nullable;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * @author Vitaly Parfonov
@@ -22,12 +21,12 @@ import java.util.List;
  */
 public interface ProjectTypeRegistry {
 
-    @Nullable
-    ProjectTypeDto getProjectType(@NotNull String id);
+  @Nullable
+  ProjectTypeDto getProjectType(@NotNull String id);
 
-    List<ProjectTypeDto> getProjectTypes();
+  List<ProjectTypeDto> getProjectTypes();
 
-    void register(ProjectTypeDto projectType);
+  void register(ProjectTypeDto projectType);
 
-    void registerAll(List<ProjectTypeDto> projectTypesList);
+  void registerAll(List<ProjectTypeDto> projectTypesList);
 }

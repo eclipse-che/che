@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.palette;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 
@@ -24,20 +23,17 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 @Singleton
 public class ShowCommandsPaletteAction extends Action {
 
-    private final CommandsPalettePresenter presenter;
+  private final CommandsPalettePresenter presenter;
 
-    @Inject
-    public ShowCommandsPaletteAction(PaletteMessages messages, CommandsPalettePresenter presenter) {
-        super(messages.actionShowPaletteTitle(),
-              messages.actionShowPaletteDescription(),
-              null,
-              null);
+  @Inject
+  public ShowCommandsPaletteAction(PaletteMessages messages, CommandsPalettePresenter presenter) {
+    super(messages.actionShowPaletteTitle(), messages.actionShowPaletteDescription(), null, null);
 
-        this.presenter = presenter;
-    }
+    this.presenter = presenter;
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        presenter.showDialog();
-    }
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    presenter.showDialog();
+  }
 }

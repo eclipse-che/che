@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,35 +7,34 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.machine;
 
+import javax.inject.Inject;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 
-import javax.inject.Inject;
-
-/**
- * @author Mihail Kuznyetsov.
- */
+/** @author Mihail Kuznyetsov. */
 public class RecipeScriptDownloadServiceClientImpl implements RecipeScriptDownloadServiceClient {
 
-    private final String restContext;
-    private final AsyncRequestFactory asyncRequestFactory;
+  private final String restContext;
+  private final AsyncRequestFactory asyncRequestFactory;
 
-    @Inject
-    public RecipeScriptDownloadServiceClientImpl(AppContext appContext, AsyncRequestFactory asyncRequestFactory) {
-        this.restContext = appContext.getMasterEndpoint();
-        this.asyncRequestFactory = asyncRequestFactory;
-    }
+  @Inject
+  public RecipeScriptDownloadServiceClientImpl(
+      AppContext appContext, AsyncRequestFactory asyncRequestFactory) {
+    this.restContext = appContext.getMasterEndpoint();
+    this.asyncRequestFactory = asyncRequestFactory;
+  }
 
-    @Override
-    public Promise<String> getRecipeScript(Machine machine) {
-        return asyncRequestFactory
-                .createGetRequest(restContext + "/recipe/script/" + machine.getWorkspaceId() + "/" + machine.getId())
-                .send(new StringUnmarshaller());
-    }
+  @Override
+  public Promise<String> getRecipeScript(Machine machine) {
+    return asyncRequestFactory
+        .createGetRequest(
+            restContext + "/recipe/script/" + machine.getWorkspaceId() + "/" + machine.getId())
+        .send(new StringUnmarshaller());
+  }
 }

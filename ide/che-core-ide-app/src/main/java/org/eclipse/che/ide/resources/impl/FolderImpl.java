@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.resources.impl;
 
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
@@ -32,43 +31,44 @@ import org.eclipse.che.ide.resource.Path;
 @Beta
 class FolderImpl extends ContainerImpl implements Folder {
 
-    @Inject
-    protected FolderImpl(@Assisted Path path,
-                         @Assisted ResourceManager resourceManager,
-                         PromiseProvider promiseProvider) {
-        super(path, resourceManager, promiseProvider);
-    }
+  @Inject
+  protected FolderImpl(
+      @Assisted Path path,
+      @Assisted ResourceManager resourceManager,
+      PromiseProvider promiseProvider) {
+    super(path, resourceManager, promiseProvider);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public final int getResourceType() {
-        return FOLDER;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public final int getResourceType() {
+    return FOLDER;
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public Project.ProjectRequest toProject() {
-        return new Project.ProjectRequest() {
-            private ProjectConfig config;
+  /** {@inheritDoc} */
+  @Override
+  public Project.ProjectRequest toProject() {
+    return new Project.ProjectRequest() {
+      private ProjectConfig config;
 
-            /** {@inheritDoc} */
-            @Override
-            public Request<Project, ProjectConfig> withBody(ProjectConfig object) {
-                this.config = object;
-                return this;
-            }
+      /** {@inheritDoc} */
+      @Override
+      public Request<Project, ProjectConfig> withBody(ProjectConfig object) {
+        this.config = object;
+        return this;
+      }
 
-            /** {@inheritDoc} */
-            @Override
-            public ProjectConfig getBody() {
-                return config;
-            }
+      /** {@inheritDoc} */
+      @Override
+      public ProjectConfig getBody() {
+        return config;
+      }
 
-            /** {@inheritDoc} */
-            @Override
-            public Promise<Project> send() {
-                return resourceManager.update(getLocation(), this);
-            }
-        };
-    }
+      /** {@inheritDoc} */
+      @Override
+      public Promise<Project> send() {
+        return resourceManager.update(getLocation(), this);
+      }
+    };
+  }
 }

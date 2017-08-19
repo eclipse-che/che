@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.navigation.openimplementation;
+
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-
+import java.util.Collections;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -44,163 +53,132 @@ import org.mockito.Mock;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import java.util.Collections;
-
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Valeriy Svydenko
- */
+/** @author Valeriy Svydenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class OpenImplementationPresenterTest {
-    //constructor mocks
-    @Mock
-    private JavaNavigationService    javaNavigationService;
-    @Mock
-    private AppContext               appContext;
-    @Mock
-    private EditorAgent              editorAgent;
-    @Mock()
-    private JavaResources            javaResources;
-    @Mock
-    private DtoFactory               dtoFactory;
-    @Mock(answer = RETURNS_DEEP_STUBS)
-    private PopupResources           popupResources;
-    @Mock
-    private JavaLocalizationConstant locale;
+  //constructor mocks
+  @Mock private JavaNavigationService javaNavigationService;
+  @Mock private AppContext appContext;
+  @Mock private EditorAgent editorAgent;
+  @Mock() private JavaResources javaResources;
+  @Mock private DtoFactory dtoFactory;
 
-    //other mocks
+  @Mock(answer = RETURNS_DEEP_STUBS)
+  private PopupResources popupResources;
 
-    @Mock
-    private TextEditor                   editor;
-    @Mock
-    private EditorInput                  editorInput;
-    @Mock
-    private File                         file;
-    @Mock
-    private Project                      relatedProject;
-    @Mock
-    private Container                    srcFolder;
-    @Mock
-    private ImplementationsDescriptorDTO implementationDescriptor;
-    @Mock
-    private Type                         type1;
-    @Mock
-    private Type                         type2;
-    @Mock
-    private JarEntry                     jarEntry;
-    @Mock
-    private Container                    workspaceRoot;
-    @Mock
-    private PositionConverter            positionConverter;
-    @Mock
-    private SVGResource                  svgResource;
-    @Mock
-    private OMSVGSVGElement              omsvgsvgElement;
+  @Mock private JavaLocalizationConstant locale;
 
-    @Mock
-    private Promise<ImplementationsDescriptorDTO> implementationsPromise;
-    @Mock
-    private Promise<JarEntry>                     jarEntryPromise;
-    @Mock
-    private Promise<String>                       contentPromise;
-    @Mock
-    private Promise<Optional<File>>               realFilePromise;
+  //other mocks
 
-    @Captor
-    ArgumentCaptor<Operation<ImplementationsDescriptorDTO>> implementationsOperation;
-    @Captor
-    ArgumentCaptor<Operation<JarEntry>>                     jarEntryOperation;
-    @Captor
-    ArgumentCaptor<Operation<String>>                       contentOperation;
-    @Captor
-    ArgumentCaptor<Operation<Optional<File>>>               realFileOperation;
+  @Mock private TextEditor editor;
+  @Mock private EditorInput editorInput;
+  @Mock private File file;
+  @Mock private Project relatedProject;
+  @Mock private Container srcFolder;
+  @Mock private ImplementationsDescriptorDTO implementationDescriptor;
+  @Mock private Type type1;
+  @Mock private Type type2;
+  @Mock private JarEntry jarEntry;
+  @Mock private Container workspaceRoot;
+  @Mock private PositionConverter positionConverter;
+  @Mock private SVGResource svgResource;
+  @Mock private OMSVGSVGElement omsvgsvgElement;
 
-    private OpenImplementationPresenter presenter;
+  @Mock private Promise<ImplementationsDescriptorDTO> implementationsPromise;
+  @Mock private Promise<JarEntry> jarEntryPromise;
+  @Mock private Promise<String> contentPromise;
+  @Mock private Promise<Optional<File>> realFilePromise;
 
-    @Before
-    public void setUp() throws Exception {
-        presenter = new OpenImplementationPresenter(javaNavigationService,
-                                                    appContext,
-                                                    dtoFactory,
-                                                    javaResources,
-                                                    popupResources,
-                                                    locale,
-                                                    editorAgent);
-    }
+  @Captor ArgumentCaptor<Operation<ImplementationsDescriptorDTO>> implementationsOperation;
+  @Captor ArgumentCaptor<Operation<JarEntry>> jarEntryOperation;
+  @Captor ArgumentCaptor<Operation<String>> contentOperation;
+  @Captor ArgumentCaptor<Operation<Optional<File>>> realFileOperation;
 
-    @Test
-    public void testShouldDisplayOneImplementationIsRealFile() throws Exception {
-        when(editor.getEditorInput()).thenReturn(editorInput);
-        when(editorInput.getFile()).thenReturn(file);
-        when(file.getRelatedProject()).thenReturn(Optional.of(relatedProject));
-        when(file.getParentWithMarker(eq(SourceFolderMarker.ID))).thenReturn(Optional.of(srcFolder));
-        when(file.getLocation()).thenReturn(Path.valueOf("/a/b/c/d/file.java"));
-        when(srcFolder.getLocation()).thenReturn(Path.valueOf("/a/b"));
-        when(file.getResourceType()).thenReturn(Resource.FILE);
-        when(file.getExtension()).thenReturn("java");
-        when(file.getName()).thenReturn("file.java");
-        when(relatedProject.getLocation()).thenReturn(Path.valueOf("/a"));
-        when(editor.getCursorOffset()).thenReturn(123);
-        when(implementationsPromise.then(any(Operation.class))).thenReturn(implementationsPromise);
-        when(javaNavigationService.getImplementations(eq(Path.valueOf("/a")), eq("c.d.file"), eq(123))).thenReturn(implementationsPromise);
+  private OpenImplementationPresenter presenter;
 
-        when(implementationDescriptor.getImplementations()).thenReturn(Collections.singletonList(type1));
-        when(implementationDescriptor.getMemberName()).thenReturn("memberName");
-        when(locale.openImplementationWindowTitle(eq("memberName"), eq(1))).thenReturn("foo");
+  @Before
+  public void setUp() throws Exception {
+    presenter =
+        new OpenImplementationPresenter(
+            javaNavigationService,
+            appContext,
+            dtoFactory,
+            javaResources,
+            popupResources,
+            locale,
+            editorAgent);
+  }
 
-        when(type1.isBinary()).thenReturn(false);
-        when(type1.getRootPath()).thenReturn("/memberPath");
-        when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
-        when(workspaceRoot.getFile(anyString())).thenReturn(realFilePromise);
-        when(realFilePromise.then(any(Operation.class))).thenReturn(realFilePromise);
+  @Test
+  public void testShouldDisplayOneImplementationIsRealFile() throws Exception {
+    when(editor.getEditorInput()).thenReturn(editorInput);
+    when(editorInput.getFile()).thenReturn(file);
+    when(file.getRelatedProject()).thenReturn(Optional.of(relatedProject));
+    when(file.getParentWithMarker(eq(SourceFolderMarker.ID))).thenReturn(Optional.of(srcFolder));
+    when(file.getLocation()).thenReturn(Path.valueOf("/a/b/c/d/file.java"));
+    when(srcFolder.getLocation()).thenReturn(Path.valueOf("/a/b"));
+    when(file.getResourceType()).thenReturn(Resource.FILE);
+    when(file.getExtension()).thenReturn("java");
+    when(file.getName()).thenReturn("file.java");
+    when(relatedProject.getLocation()).thenReturn(Path.valueOf("/a"));
+    when(editor.getCursorOffset()).thenReturn(123);
+    when(implementationsPromise.then(any(Operation.class))).thenReturn(implementationsPromise);
+    when(javaNavigationService.getImplementations(eq(Path.valueOf("/a")), eq("c.d.file"), eq(123)))
+        .thenReturn(implementationsPromise);
 
-        presenter.show(editor);
-        verify(implementationsPromise).then(implementationsOperation.capture());
-        implementationsOperation.getValue().apply(implementationDescriptor);
+    when(implementationDescriptor.getImplementations())
+        .thenReturn(Collections.singletonList(type1));
+    when(implementationDescriptor.getMemberName()).thenReturn("memberName");
+    when(locale.openImplementationWindowTitle(eq("memberName"), eq(1))).thenReturn("foo");
 
-        verify(realFilePromise).then(realFileOperation.capture());
-        realFileOperation.getValue().apply(Optional.of(file));
+    when(type1.isBinary()).thenReturn(false);
+    when(type1.getRootPath()).thenReturn("/memberPath");
+    when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+    when(workspaceRoot.getFile(anyString())).thenReturn(realFilePromise);
+    when(realFilePromise.then(any(Operation.class))).thenReturn(realFilePromise);
 
-        verify(editorAgent).openEditor(any(VirtualFile.class), any(EditorAgent.OpenEditorCallback.class));
-    }
+    presenter.show(editor);
+    verify(implementationsPromise).then(implementationsOperation.capture());
+    implementationsOperation.getValue().apply(implementationDescriptor);
 
-    @Test
-    public void testShouldDisplayNoImplementations() throws Exception {
-        when(editor.getEditorInput()).thenReturn(editorInput);
-        when(editorInput.getFile()).thenReturn(file);
-        when(file.getRelatedProject()).thenReturn(Optional.of(relatedProject));
-        when(file.getParentWithMarker(eq(SourceFolderMarker.ID))).thenReturn(Optional.of(srcFolder));
-        when(file.getLocation()).thenReturn(Path.valueOf("/a/b/c/d/file.java"));
-        when(srcFolder.getLocation()).thenReturn(Path.valueOf("/a/b"));
-        when(file.getResourceType()).thenReturn(Resource.FILE);
-        when(file.getExtension()).thenReturn("java");
-        when(file.getName()).thenReturn("file.java");
-        when(relatedProject.getLocation()).thenReturn(Path.valueOf("/a"));
-        when(editor.getCursorOffset()).thenReturn(123);
-        when(implementationsPromise.then(any(Operation.class))).thenReturn(implementationsPromise);
-        when(javaNavigationService.getImplementations(eq(Path.valueOf("/a")), eq("c.d.file"), eq(123))).thenReturn(implementationsPromise);
+    verify(realFilePromise).then(realFileOperation.capture());
+    realFileOperation.getValue().apply(Optional.of(file));
 
-        when(implementationDescriptor.getImplementations()).thenReturn(Collections.emptyList());
-        when(implementationDescriptor.getMemberName()).thenReturn("memberName");
-        when(locale.openImplementationWindowTitle(eq("memberName"), eq(1))).thenReturn("foo");
-        when(type1.getFlags()).thenReturn(-1);
+    verify(editorAgent)
+        .openEditor(any(VirtualFile.class), any(EditorAgent.OpenEditorCallback.class));
+  }
 
-        when(dtoFactory.createDto(eq(Type.class))).thenReturn(type1);
-        when(editor.getPositionConverter()).thenReturn(positionConverter);
-        when(positionConverter.offsetToPixel(anyInt())).thenReturn(new PositionConverter.PixelCoordinates(1, 1));
+  @Test
+  public void testShouldDisplayNoImplementations() throws Exception {
+    when(editor.getEditorInput()).thenReturn(editorInput);
+    when(editorInput.getFile()).thenReturn(file);
+    when(file.getRelatedProject()).thenReturn(Optional.of(relatedProject));
+    when(file.getParentWithMarker(eq(SourceFolderMarker.ID))).thenReturn(Optional.of(srcFolder));
+    when(file.getLocation()).thenReturn(Path.valueOf("/a/b/c/d/file.java"));
+    when(srcFolder.getLocation()).thenReturn(Path.valueOf("/a/b"));
+    when(file.getResourceType()).thenReturn(Resource.FILE);
+    when(file.getExtension()).thenReturn("java");
+    when(file.getName()).thenReturn("file.java");
+    when(relatedProject.getLocation()).thenReturn(Path.valueOf("/a"));
+    when(editor.getCursorOffset()).thenReturn(123);
+    when(implementationsPromise.then(any(Operation.class))).thenReturn(implementationsPromise);
+    when(javaNavigationService.getImplementations(eq(Path.valueOf("/a")), eq("c.d.file"), eq(123)))
+        .thenReturn(implementationsPromise);
 
-        presenter.show(editor);
-        verify(implementationsPromise).then(implementationsOperation.capture());
-        implementationsOperation.getValue().apply(implementationDescriptor);
+    when(implementationDescriptor.getImplementations()).thenReturn(Collections.emptyList());
+    when(implementationDescriptor.getMemberName()).thenReturn("memberName");
+    when(locale.openImplementationWindowTitle(eq("memberName"), eq(1))).thenReturn("foo");
+    when(type1.getFlags()).thenReturn(-1);
 
-        verify(locale, times(2)).noImplementations();
-    }
+    when(dtoFactory.createDto(eq(Type.class))).thenReturn(type1);
+    when(editor.getPositionConverter()).thenReturn(positionConverter);
+    when(positionConverter.offsetToPixel(anyInt()))
+        .thenReturn(new PositionConverter.PixelCoordinates(1, 1));
+
+    presenter.show(editor);
+    verify(implementationsPromise).then(implementationsOperation.capture());
+    implementationsOperation.getValue().apply(implementationDescriptor);
+
+    verify(locale, times(2)).noImplementations();
+  }
 }

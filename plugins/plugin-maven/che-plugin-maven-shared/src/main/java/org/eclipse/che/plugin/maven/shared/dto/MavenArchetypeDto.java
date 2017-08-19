@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.shared.dto;
 
+import java.util.Map;
 import org.eclipse.che.dto.shared.DTO;
 import org.eclipse.che.plugin.maven.shared.MavenArchetype;
-
-import java.util.Map;
 
 /**
  * DTO that describes Maven archetype to use for project generation.
@@ -23,23 +22,23 @@ import java.util.Map;
 @DTO
 public interface MavenArchetypeDto extends MavenArchetype {
 
-    void setGroupId(String groupId);
+  void setGroupId(String groupId);
 
-    MavenArchetypeDto withGroupId(String groupId);
+  MavenArchetypeDto withGroupId(String groupId);
 
-    void setArtifactId(String artifactId);
+  void setArtifactId(String artifactId);
 
-    MavenArchetypeDto withArtifactId(String artifactId);
+  MavenArchetypeDto withArtifactId(String artifactId);
 
-    void setVersion(String version);
+  void setVersion(String version);
 
-    MavenArchetypeDto withVersion(String version);
+  MavenArchetypeDto withVersion(String version);
 
-    void setRepository(String repository);
+  void setRepository(String repository);
 
-    MavenArchetypeDto withRepository(String repository);
+  MavenArchetypeDto withRepository(String repository);
 
-    void setProperties(Map<String, String> properties);
+  void setProperties(Map<String, String> properties);
 
-    MavenArchetypeDto withProperties(Map<String, String> properties);
+  MavenArchetypeDto withProperties(Map<String, String> properties);
 }

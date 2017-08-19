@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.shared.dto;
 
+import java.util.List;
 import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.dto.shared.DTO;
-
-import java.util.List;
 
 /**
  * Data transfer object (DTO) for Value
@@ -23,11 +22,11 @@ import java.util.List;
 @DTO
 public interface ValueDto extends Value {
 
-    @Override
-    String getString();
+  @Override
+  String getString();
 
-    @Override
-    List<String> getList();
+  @Override
+  List<String> getList();
 
-    ValueDto withList(List<String> list);
+  ValueDto withList(List<String> list);
 }

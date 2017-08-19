@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.editor.signature;
 
 import com.google.common.base.Optional;
-
-import javax.validation.constraints.NotNull;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 
 /**
  * Result of calculation of signatures, represent the signature of something callable.
@@ -22,23 +21,25 @@ import java.util.List;
  */
 public interface SignatureHelp {
 
-    /**
-     * One or more signature.
-     * @return
-     */
-    @NotNull
-    List<SignatureInfo> getSignatures();
+  /**
+   * One or more signature.
+   *
+   * @return
+   */
+  @NotNull
+  List<SignatureInfo> getSignatures();
 
-    /**
-     * The active signature
-     *
-     * @return
-     */
-    Optional<Integer> getActiveSignature();
+  /**
+   * The active signature
+   *
+   * @return
+   */
+  Optional<Integer> getActiveSignature();
 
-    /**
-     * The active parameter of the active signature.
-     * @return
-     */
-    Optional<Integer> getActiveParameter();
+  /**
+   * The active parameter of the active signature.
+   *
+   * @return
+   */
+  Optional<Integer> getActiveParameter();
 }

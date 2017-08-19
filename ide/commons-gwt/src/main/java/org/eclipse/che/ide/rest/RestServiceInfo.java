@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.rest;
 
 /**
@@ -17,49 +17,57 @@ package org.eclipse.che.ide.rest;
  */
 public class RestServiceInfo {
 
-    private String fqn;
+  private String fqn;
 
-    private String regex;
+  private String regex;
 
-    private String path;
+  private String path;
 
-    public RestServiceInfo(String fqn, String regex, String path) {
-        this.fqn = fqn;
-        this.regex = regex;
-        this.path = path;
-    }
+  public RestServiceInfo(String fqn, String regex, String path) {
+    this.fqn = fqn;
+    this.regex = regex;
+    this.path = path;
+  }
 
-    /**
-     * FQN of REST service class
-     * @return fqn
-     */
-    public String getFqn() {
-        return fqn;
-    }
+  /**
+   * FQN of REST service class
+   *
+   * @return fqn
+   */
+  public String getFqn() {
+    return fqn;
+  }
 
-    /**
-     * Regular expressions for URI pattern.
-     * @return
-     */
-    public String getRegex() {
-        return regex;
-    }
+  /**
+   * Regular expressions for URI pattern.
+   *
+   * @return
+   */
+  public String getRegex() {
+    return regex;
+  }
 
-    /**
-     * Describe the Path annotation, see {@link javax.ws.rs.Path}
-     * @return
-     */
-    public String getPath() {
-        return path;
-    }
+  /**
+   * Describe the Path annotation, see {@link javax.ws.rs.Path}
+   *
+   * @return
+   */
+  public String getPath() {
+    return path;
+  }
 
-    @Override
-    public String toString() {
-         return "RestServiceInfo{" +
-                "fqn='" + fqn + '\'' +
-                ", regex='" + regex + '\'' +
-                ", path='" + path + '\'' +
-                   '}';
-    }
-
+  @Override
+  public String toString() {
+    return "RestServiceInfo{"
+        + "fqn='"
+        + fqn
+        + '\''
+        + ", regex='"
+        + regex
+        + '\''
+        + ", path='"
+        + path
+        + '\''
+        + '}';
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,20 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.jdb.server;
 
-import com.google.common.collect.ImmutableMap;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -32,195 +41,179 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-/**
- * @author Anatolii Bazko
- */
+/** @author Anatolii Bazko */
 public class JavaDebuggerTest {
 
-    private JavaDebugger                 debugger;
-    private BlockingQueue<DebuggerEvent> events;
+  private JavaDebugger debugger;
+  private BlockingQueue<DebuggerEvent> events;
 
-    @BeforeClass
-    protected void setUp() throws Exception {
-        ProjectApiUtils.ensure();
+  @BeforeClass
+  protected void setUp() throws Exception {
+    ProjectApiUtils.ensure();
 
-        events = new ArrayBlockingQueue<>(10);
-        Map<String, String> connectionProperties = ImmutableMap.of("host", "localhost",
-                                                                   "port", System.getProperty("debug.port"));
-        JavaDebuggerFactory factory = new JavaDebuggerFactory();
-        debugger = (JavaDebugger)factory.create(connectionProperties, events::add);
-    }
+    events = new ArrayBlockingQueue<>(10);
+    Map<String, String> connectionProperties =
+        ImmutableMap.of("host", "localhost", "port", System.getProperty("debug.port"));
+    JavaDebuggerFactory factory = new JavaDebuggerFactory();
+    debugger = (JavaDebugger) factory.create(connectionProperties, events::add);
+  }
 
+  @AfterClass
+  public void tearDown() throws Exception {
+    terminateVirtualMachineQuietly(debugger);
+  }
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        terminateVirtualMachineQuietly(debugger);
-    }
+  @Test(priority = 10)
+  public void testGetInfo() throws Exception {
+    DebuggerInfo info = debugger.getInfo();
 
+    assertEquals(info.getHost(), "localhost");
+    assertEquals(info.getPort(), Integer.parseInt(System.getProperty("debug.port")));
 
-    @Test(priority = 10)
-    public void testGetInfo() throws Exception {
-        DebuggerInfo info = debugger.getInfo();
+    assertNotNull(info.getName());
+    assertNotNull(info.getVersion());
+  }
 
-        assertEquals(info.getHost(), "localhost");
-        assertEquals(info.getPort(), Integer.parseInt(System.getProperty("debug.port")));
+  @Test(priority = 20)
+  public void testStartDebugger() throws Exception {
+    BreakpointImpl breakpoint =
+        new BreakpointImpl(new LocationImpl("com.HelloWorld", 17), false, null);
+    debugger.start(new StartActionImpl(singletonList(breakpoint)));
 
-        assertNotNull(info.getName());
-        assertNotNull(info.getVersion());
-    }
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
 
-    @Test(priority = 20)
-    public void testStartDebugger() throws Exception {
-        BreakpointImpl breakpoint = new BreakpointImpl(new LocationImpl("com.HelloWorld", 17), false, null);
-        debugger.start(new StartActionImpl(singletonList(breakpoint)));
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
 
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
+    Location location = ((SuspendEvent) debuggerEvent).getLocation();
+    assertEquals(location.getLineNumber(), 17);
+    assertEquals(location.getTarget(), "com.HelloWorld");
+  }
 
-        debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
+  @Test(priority = 30)
+  public void testAddBreakpoint() throws Exception {
+    int breakpointsCount = debugger.getAllBreakpoints().size();
 
-        Location location = ((SuspendEvent)debuggerEvent).getLocation();
-        assertEquals(location.getLineNumber(), 17);
-        assertEquals(location.getTarget(), "com.HelloWorld");
-    }
+    debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 18), false, null));
 
-    @Test(priority = 30)
-    public void testAddBreakpoint() throws Exception {
-        int breakpointsCount = debugger.getAllBreakpoints().size();
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
 
-        debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 18), false, null));
+    Breakpoint breakpoint = ((BreakpointActivatedEvent) debuggerEvent).getBreakpoint();
+    assertEquals(breakpoint.getLocation().getLineNumber(), 18);
+    assertEquals(breakpoint.getLocation().getTarget(), "com.HelloWorld");
+    assertTrue(breakpoint.isEnabled());
 
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
+    assertEquals(debugger.getAllBreakpoints().size(), breakpointsCount + 1);
+  }
 
-        Breakpoint breakpoint = ((BreakpointActivatedEvent)debuggerEvent).getBreakpoint();
-        assertEquals(breakpoint.getLocation().getLineNumber(), 18);
-        assertEquals(breakpoint.getLocation().getTarget(), "com.HelloWorld");
-        assertTrue(breakpoint.isEnabled());
+  @Test(priority = 50, expectedExceptions = DebuggerException.class)
+  public void testAddBreakpointToUnExistedLocation() throws Exception {
+    debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 1), false, null));
+  }
 
-        assertEquals(debugger.getAllBreakpoints().size(), breakpointsCount + 1);
-    }
+  @Test(priority = 60)
+  public void testRemoveBreakpoint() throws Exception {
+    debugger.deleteBreakpoint(new LocationImpl("com.HelloWorld", 17));
+    assertEquals(debugger.getAllBreakpoints().size(), 1);
+  }
 
-    @Test(priority = 50, expectedExceptions = DebuggerException.class)
-    public void testAddBreakpointToUnExistedLocation() throws Exception {
-        debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 1), false, null));
-    }
+  @Test(priority = 70)
+  public void testRemoveUnExistedBreakpoint() throws Exception {
+    int breakpointsCount = debugger.getAllBreakpoints().size();
 
-    @Test(priority = 60)
-    public void testRemoveBreakpoint() throws Exception {
-        debugger.deleteBreakpoint(new LocationImpl("com.HelloWorld", 17));
-        assertEquals(debugger.getAllBreakpoints().size(), 1);
-    }
+    debugger.deleteBreakpoint(new LocationImpl("com.HelloWorld", 2));
 
-    @Test(priority = 70)
-    public void testRemoveUnExistedBreakpoint() throws Exception {
-        int breakpointsCount = debugger.getAllBreakpoints().size();
+    assertEquals(debugger.getAllBreakpoints().size(), breakpointsCount);
+  }
 
-        debugger.deleteBreakpoint(new LocationImpl("com.HelloWorld", 2));
+  @Test(priority = 80)
+  public void testGetAllBreakpoints() throws Exception {
+    assertFalse(debugger.getAllBreakpoints().isEmpty());
 
-        assertEquals(debugger.getAllBreakpoints().size(), breakpointsCount);
-    }
+    debugger.deleteAllBreakpoints();
 
-    @Test(priority = 80)
-    public void testGetAllBreakpoints() throws Exception {
-        assertFalse(debugger.getAllBreakpoints().isEmpty());
+    assertTrue(debugger.getAllBreakpoints().isEmpty());
 
-        debugger.deleteAllBreakpoints();
+    debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 18), false, null));
 
-        assertTrue(debugger.getAllBreakpoints().isEmpty());
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
 
-        debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 18), false, null));
+    assertEquals(debugger.getAllBreakpoints().size(), 1);
 
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
+    Breakpoint breakpoint = debugger.getAllBreakpoints().get(0);
+    assertEquals(breakpoint.getLocation().getLineNumber(), 18);
+    assertEquals(breakpoint.getLocation().getTarget(), "com.HelloWorld");
+    assertTrue(breakpoint.isEnabled());
+  }
 
-        assertEquals(debugger.getAllBreakpoints().size(), 1);
+  @Test(priority = 90)
+  public void testSteps() throws Exception {
+    debugger.deleteAllBreakpoints();
 
-        Breakpoint breakpoint = debugger.getAllBreakpoints().get(0);
-        assertEquals(breakpoint.getLocation().getLineNumber(), 18);
-        assertEquals(breakpoint.getLocation().getTarget(), "com.HelloWorld");
-        assertTrue(breakpoint.isEnabled());
-    }
+    debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 20), false, null));
 
-    @Test(priority = 90)
-    public void testSteps() throws Exception {
-        debugger.deleteAllBreakpoints();
+    assertTrue(events.take() instanceof BreakpointActivatedEvent);
 
-        debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 20), false, null));
+    debugger.resume(new ResumeActionImpl());
 
-        assertTrue(events.take() instanceof BreakpointActivatedEvent);
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+    Location location = ((SuspendEvent) debuggerEvent).getLocation();
+    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getLineNumber(), 20);
+    assertEquals(location.getExternalResourceId(), -1);
+    assertEquals(location.getResourceProjectPath(), "/test");
+    assertEquals(location.getResourcePath(), "/test/src/com/HelloWorld.java");
 
-        debugger.resume(new ResumeActionImpl());
+    debugger.stepInto(new StepIntoActionImpl());
 
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
-        Location location = ((SuspendEvent)debuggerEvent).getLocation();
-        assertEquals(location.getTarget(), "com.HelloWorld");
-        assertEquals(location.getLineNumber(), 20);
-        assertEquals(location.getExternalResourceId(), -1);
-        assertEquals(location.getResourceProjectPath(), "/test");
-        assertEquals(location.getResourcePath(), "/test/src/com/HelloWorld.java");
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+    location = ((SuspendEvent) debuggerEvent).getLocation();
+    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getLineNumber(), 28);
 
-        debugger.stepInto(new StepIntoActionImpl());
+    debugger.stepOut(new StepOutActionImpl());
 
-        debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
-        location = ((SuspendEvent)debuggerEvent).getLocation();
-        assertEquals(location.getTarget(), "com.HelloWorld");
-        assertEquals(location.getLineNumber(), 28);
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+    location = ((SuspendEvent) debuggerEvent).getLocation();
+    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getLineNumber(), 20);
 
-        debugger.stepOut(new StepOutActionImpl());
+    debugger.stepOver(new StepOverActionImpl());
 
-        debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
-        location = ((SuspendEvent)debuggerEvent).getLocation();
-        assertEquals(location.getTarget(), "com.HelloWorld");
-        assertEquals(location.getLineNumber(), 20);
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+    location = ((SuspendEvent) debuggerEvent).getLocation();
+    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getLineNumber(), 21);
 
-        debugger.stepOver(new StepOverActionImpl());
+    debugger.stepOver(new StepOverActionImpl());
 
-        debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
-        location = ((SuspendEvent)debuggerEvent).getLocation();
-        assertEquals(location.getTarget(), "com.HelloWorld");
-        assertEquals(location.getLineNumber(), 21);
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+    location = ((SuspendEvent) debuggerEvent).getLocation();
+    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getLineNumber(), 23);
 
-        debugger.stepOver(new StepOverActionImpl());
+    debugger.stepOver(new StepOverActionImpl());
 
-        debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
-        location = ((SuspendEvent)debuggerEvent).getLocation();
-        assertEquals(location.getTarget(), "com.HelloWorld");
-        assertEquals(location.getLineNumber(), 23);
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+    location = ((SuspendEvent) debuggerEvent).getLocation();
+    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getLineNumber(), 24);
+  }
 
-        debugger.stepOver(new StepOverActionImpl());
+  @Test(priority = 120)
+  public void testDisconnect() throws Exception {
+    debugger.disconnect();
 
-        debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof SuspendEvent);
-        location = ((SuspendEvent)debuggerEvent).getLocation();
-        assertEquals(location.getTarget(), "com.HelloWorld");
-        assertEquals(location.getLineNumber(), 24);
-    }
-
-    @Test(priority = 120)
-    public void testDisconnect() throws Exception {
-        debugger.disconnect();
-
-        DebuggerEvent debuggerEvent = events.take();
-        assertTrue(debuggerEvent instanceof DisconnectEvent);
-    }
-
-
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof DisconnectEvent);
+  }
 }

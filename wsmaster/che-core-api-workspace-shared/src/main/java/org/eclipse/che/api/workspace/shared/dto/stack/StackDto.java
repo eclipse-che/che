@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,66 +7,63 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.shared.dto.stack;
 
+import java.util.List;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
-/**
- * @author Alexander Andrienko
- */
+/** @author Alexander Andrienko */
 @DTO
 public interface StackDto extends Stack, Hyperlinks {
 
-    void setId(String id);
+  void setId(String id);
 
-    StackDto withId(String id);
+  StackDto withId(String id);
 
-    void setName(String name);
+  void setName(String name);
 
-    StackDto withName(String name);
+  StackDto withName(String name);
 
-    void setDescription(String description);
+  void setDescription(String description);
 
-    StackDto withDescription(String description);
+  StackDto withDescription(String description);
 
-    void setScope(String scope);
+  void setScope(String scope);
 
-    StackDto withScope(String scope);
+  StackDto withScope(String scope);
 
-    void setCreator(String creator);
+  void setCreator(String creator);
 
-    StackDto withCreator(String creator);
+  StackDto withCreator(String creator);
 
-    void setTags(List<String> tags);
+  void setTags(List<String> tags);
 
-    StackDto withTags(List<String> tags);
+  StackDto withTags(List<String> tags);
 
-    @Override
-    WorkspaceConfigDto getWorkspaceConfig();
+  @Override
+  WorkspaceConfigDto getWorkspaceConfig();
 
-    void setWorkspaceConfig(WorkspaceConfigDto workspaceConfigDto);
+  void setWorkspaceConfig(WorkspaceConfigDto workspaceConfigDto);
 
-    StackDto withWorkspaceConfig(WorkspaceConfigDto workspaceConfigDto);
+  StackDto withWorkspaceConfig(WorkspaceConfigDto workspaceConfigDto);
 
-    StackSourceDto getSource();
+  StackSourceDto getSource();
 
-    void setSource(StackSourceDto source);
+  void setSource(StackSourceDto source);
 
-    StackDto withSource(StackSourceDto source);
+  StackDto withSource(StackSourceDto source);
 
-    @Override
-    List<StackComponentDto> getComponents();
+  @Override
+  List<StackComponentDto> getComponents();
 
-    void setComponents(List<StackComponentDto> components);
+  void setComponents(List<StackComponentDto> components);
 
-    StackDto withComponents(List<StackComponentDto> components);
+  StackDto withComponents(List<StackComponentDto> components);
 
-    StackDto withLinks(List<Link> links);
+  StackDto withLinks(List<Link> links);
 }

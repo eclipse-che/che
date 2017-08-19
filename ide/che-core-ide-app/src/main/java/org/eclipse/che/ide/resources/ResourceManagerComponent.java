@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.resources;
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 
@@ -26,25 +25,26 @@ import org.eclipse.che.ide.resources.impl.ResourceManager;
 @Singleton
 public class ResourceManagerComponent implements WsAgentComponent {
 
-    private ResourceManagerInitializer initializer;
+  private ResourceManagerInitializer initializer;
 
-    @Inject
-    public ResourceManagerComponent(ResourceManagerInitializer initializer) {
-        this.initializer = initializer;
-    }
+  @Inject
+  public ResourceManagerComponent(ResourceManagerInitializer initializer) {
+    this.initializer = initializer;
+  }
 
-    @Override
-    public void start(final Callback<WsAgentComponent, Exception> callback) {
-        initializer.initResourceManager(new Callback<ResourceManager, Exception>() {
-            @Override
-            public void onFailure(Exception reason) {
-                callback.onFailure(reason);
-            }
+  @Override
+  public void start(final Callback<WsAgentComponent, Exception> callback) {
+    initializer.initResourceManager(
+        new Callback<ResourceManager, Exception>() {
+          @Override
+          public void onFailure(Exception reason) {
+            callback.onFailure(reason);
+          }
 
-            @Override
-            public void onSuccess(ResourceManager manager) {
-                callback.onSuccess(ResourceManagerComponent.this);
-            }
+          @Override
+          public void onSuccess(ResourceManager manager) {
+            callback.onSuccess(ResourceManagerComponent.this);
+          }
         });
-    }
+  }
 }
