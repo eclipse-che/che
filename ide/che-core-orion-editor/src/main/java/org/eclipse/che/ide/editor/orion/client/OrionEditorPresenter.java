@@ -116,6 +116,7 @@ import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationOperation;
 import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -185,6 +186,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private final EditorContextMenu contextMenu;
   private final AutoSaveMode autoSaveMode;
   private final ClientServerEventService clientServerEventService;
+  private final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation;
 
   private final AnnotationRendering rendering = new AnnotationRendering();
   private HasKeyBindings keyBindingsManager;
@@ -228,7 +230,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       final SignatureHelpView signatureHelpView,
       final EditorContextMenu contextMenu,
       final AutoSaveMode autoSaveMode,
-      final ClientServerEventService clientServerEventService) {
+      final ClientServerEventService clientServerEventService,
+      final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation) {
     this.codeAssistantFactory = codeAssistantFactory;
     this.deletedFilesController = deletedFilesController;
     this.breakpointManager = breakpointManager;
@@ -251,6 +254,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     this.contextMenu = contextMenu;
     this.autoSaveMode = autoSaveMode;
     this.clientServerEventService = clientServerEventService;
+    this.editorFileStatusNotificationOperation = editorFileStatusNotificationOperation;
 
     keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -614,16 +618,17 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
 
   @Override
   public void doSave() {
+    editorFileStatusNotificationOperation.suspend();
     doSave(
         new AsyncCallback<EditorInput>() {
           @Override
           public void onSuccess(final EditorInput result) {
-            // do nothing
+            editorFileStatusNotificationOperation.resume();
           }
 
           @Override
           public void onFailure(final Throwable caught) {
-            // do nothing
+            editorFileStatusNotificationOperation.resume();
           }
         });
   }
