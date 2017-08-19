@@ -91,6 +91,7 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
                 case ERROR:
                   handleMachineError(event);
                   break;
+                default:
               }
             });
   }

@@ -67,7 +67,7 @@ abstract class LifecycleModule extends AbstractModule {
   @SuppressWarnings("unchecked")
   LifecycleModule() {
     cache =
-        CacheBuilder.<Key, Method[]>newBuilder()
+        CacheBuilder.newBuilder()
             .maximumSize(1_000)
             .expireAfterWrite(1, TimeUnit.HOURS)
             .build(

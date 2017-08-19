@@ -18,7 +18,9 @@ import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
  * Event that describes the fact that dev machine state has been changed.
  *
  * @author Roman Nikitenko
+ * @deprecated in favor of {@link MachineStateEvent}
  */
+@Deprecated
 public class DevMachineStateEvent extends GwtEvent<DevMachineStateEvent.Handler> {
 
   public interface Handler extends EventHandler {
@@ -94,6 +96,7 @@ public class DevMachineStateEvent extends GwtEvent<DevMachineStateEvent.Handler>
       case DESTROYED:
         handler.onDevMachineDestroyed(this);
         break;
+      default:
     }
   }
 }
