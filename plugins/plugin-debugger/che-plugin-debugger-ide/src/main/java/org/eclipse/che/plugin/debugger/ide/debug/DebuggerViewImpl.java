@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.debugger.ide.debug;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -27,7 +26,6 @@ import com.google.inject.Singleton;
 import elemental.dom.Element;
 import elemental.events.KeyboardEvent;
 import elemental.events.MouseEvent;
-import elemental.html.TableCellElement;
 import elemental.html.TableElement;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +48,6 @@ import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.input.SignalEvent;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * The class business logic which allow us to change visual representation of debugger panel.
@@ -85,7 +82,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   private final Tree<MutableVariable> variables;
   private final SimpleList<Breakpoint> breakpoints;
   private final SimpleList<StackFrameDump> frames;
-  private final DebuggerResources res;
+  private final DebuggerResources debuggerResources;
 
   private TreeNodeElement<MutableVariable> selectedVariable;
 
@@ -100,7 +97,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
     super(partStackUIResources);
 
     this.locale = locale;
-    this.res = resources;
+    this.debuggerResources = resources;
     this.coreRes = coreRes;
 
     setContentWidget(uiBinder.createAndBindUi(this));
@@ -178,46 +175,10 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
           public void onListItemDoubleClicked(Element listItemBase, Breakpoint itemData) {}
         };
 
-    SimpleList.ListItemRenderer<Breakpoint> breakpointListItemRenderer =
-        new SimpleList.ListItemRenderer<Breakpoint>() {
-          @Override
-          public void render(Element itemElement, Breakpoint itemData) {
-            TableCellElement label = Elements.createTDElement();
-
-            SafeHtmlBuilder sb = new SafeHtmlBuilder();
-            // Add icon
-            sb.appendHtmlConstant("<table><tr><td>");
-            SVGResource icon = res.breakpoint();
-            if (icon != null) {
-              sb.appendHtmlConstant("<img src=\"" + icon.getSafeUri().asString() + "\">");
-            }
-            sb.appendHtmlConstant("</td>");
-
-            // Add title
-            sb.appendHtmlConstant("<td>");
-
-            String path = itemData.getPath();
-            sb.appendEscaped(
-                path.substring(path.lastIndexOf("/") + 1)
-                    + ":"
-                    + String.valueOf(itemData.getLineNumber() + 1));
-            sb.appendHtmlConstant("</td></tr></table>");
-
-            label.setInnerHTML(sb.toSafeHtml().asString());
-
-            itemElement.appendChild(label);
-          }
-
-          @Override
-          public Element createElement() {
-            return Elements.createTRElement();
-          }
-        };
-
     return SimpleList.create(
         (SimpleList.View) breakPointsElement,
         coreRes.defaultSimpleListCss(),
-        breakpointListItemRenderer,
+        new BreakpointItemRender(debuggerResources),
         breakpointListEventDelegate);
   }
 
@@ -232,59 +193,13 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
             delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex());
           }
 
-          public void onListItemDoubleClicked(Element listItemBase, StackFrameDump itemData) {
-            delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex());
-          }
-        };
-
-    SimpleList.ListItemRenderer<StackFrameDump> frameListItemRenderer =
-        new SimpleList.ListItemRenderer<StackFrameDump>() {
-          @Override
-          public void render(Element itemElement, StackFrameDump itemData) {
-            TableCellElement label = Elements.createTDElement();
-
-            SafeHtmlBuilder sb = new SafeHtmlBuilder();
-            sb.appendEscaped(itemData.getLocation().getMethod().getName());
-            sb.appendEscaped("(");
-
-            List<? extends Variable> arguments = itemData.getLocation().getMethod().getArguments();
-            for (int i = 0; i < arguments.size(); i++) {
-              String[] classTypeEntries = arguments.get(i).getType().split("\\.");
-              sb.appendEscaped(classTypeEntries[classTypeEntries.length - 1]);
-
-              if (i != arguments.size() - 1) {
-                sb.appendEscaped(", ");
-              }
-            }
-
-            sb.appendEscaped("):");
-            sb.append(itemData.getLocation().getLineNumber());
-            sb.appendEscaped(", ");
-
-            String classFqn = itemData.getLocation().getTarget();
-            int classNameIndex = classFqn.lastIndexOf(".");
-            String className = classFqn.substring(classNameIndex + 1);
-            String packageName = classFqn.substring(0, classNameIndex);
-
-            sb.appendEscaped(className);
-            sb.appendEscaped(" (");
-            sb.appendEscaped(packageName);
-            sb.appendEscaped(") ");
-
-            label.setInnerHTML(sb.toSafeHtml().asString());
-            itemElement.appendChild(label);
-          }
-
-          @Override
-          public Element createElement() {
-            return Elements.createTRElement();
-          }
+          public void onListItemDoubleClicked(Element listItemBase, StackFrameDump itemData) {}
         };
 
     return SimpleList.create(
         (SimpleList.View) frameElement,
         coreRes.defaultSimpleListCss(),
-        frameListItemRenderer,
+        new FrameItemRender(),
         frameListEventDelegate);
   }
 

@@ -46,18 +46,16 @@ public class VariableTreeNodeRenderer implements NodeRenderer<MutableVariable> {
     this.css.ensureInjected();
   }
 
-  /** {@inheritDoc} */
   @Override
   public Element getNodeKeyTextContainer(@NotNull SpanElement treeNodeLabel) {
     return (Element) treeNodeLabel.getChildNodes().item(1);
   }
 
-  /** {@inheritDoc} */
   @Override
   public SpanElement renderNodeContents(@NotNull MutableVariable data) {
     SpanElement root = Elements.createSpanElement(css.variableRoot());
     SpanElement label = Elements.createSpanElement(css.variableLabel());
-    String content = data.getName() + ": " + data.getValue().getString();
+    String content = data.getName() + "=" + data.getValue().getString();
     label.setTextContent(content);
 
     root.appendChild(label);
@@ -65,7 +63,6 @@ public class VariableTreeNodeRenderer implements NodeRenderer<MutableVariable> {
     return root;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void updateNodeContents(@NotNull TreeNodeElement<MutableVariable> treeNode) {
     // do nothing
