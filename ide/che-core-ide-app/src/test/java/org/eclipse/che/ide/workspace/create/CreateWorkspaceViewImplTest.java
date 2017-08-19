@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,24 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace.create;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
@@ -29,243 +38,222 @@ import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Dmitry Shnurenko
- */
+/** @author Dmitry Shnurenko */
 @RunWith(GwtMockitoTestRunner.class)
 public class CreateWorkspaceViewImplTest {
 
-    //constructor mocks
-    @Mock
-    private CoreLocalizationConstant      locale;
-    @Mock(answer = RETURNS_DEEP_STUBS)
-    private org.eclipse.che.ide.Resources resources;
-    @Mock
-    private FlowPanel                     tagsPanel;
-    @Mock
-    private WorkspaceWidgetFactory        tagFactory;
-    @Mock
-    private PopupPanel                    popupPanel;
+  //constructor mocks
+  @Mock private CoreLocalizationConstant locale;
 
-    //additional mocks
-    @Mock
-    private RecipeDescriptor descriptor;
-    @Mock
-    private RecipeWidget     tag;
-    @Mock
-    private ActionDelegate   delegate;
-    @Mock
-    private KeyUpEvent       keyUpEvent;
-    @Mock
-    private ClickEvent       clickEvent;
+  @Mock(answer = RETURNS_DEEP_STUBS)
+  private org.eclipse.che.ide.Resources resources;
 
-    @InjectMocks
-    private CreateWorkspaceViewImpl view;
+  @Mock private FlowPanel tagsPanel;
+  @Mock private WorkspaceWidgetFactory tagFactory;
+  @Mock private PopupPanel popupPanel;
 
-    @Before
-    public void setUp() {
-        view.setDelegate(delegate);
-    }
+  //additional mocks
+  @Mock private RecipeDescriptor descriptor;
+  @Mock private RecipeWidget tag;
+  @Mock private ActionDelegate delegate;
+  @Mock private KeyUpEvent keyUpEvent;
+  @Mock private ClickEvent clickEvent;
 
-    @Test
-    public void popupPanelShouldBeSettingUp() {
-        verify(resources.coreCss()).createWsTagsPopup();
-    }
+  @InjectMocks private CreateWorkspaceViewImpl view;
 
-    @Test
-    public void nameShouldBeSet() {
-        verify(view.wsName).setText(anyString());
-        verify(locale).createWsDefaultName();
-    }
+  @Before
+  public void setUp() {
+    view.setDelegate(delegate);
+  }
 
-    @Test
-    public void placeholdersShouldBeSet() {
-        verify(locale).placeholderChoosePredefined();
-        verify(locale).placeholderInputRecipeUrl();
-        verify(locale).placeholderFindByTags();
-    }
+  @Test
+  public void popupPanelShouldBeSettingUp() {
+    verify(resources.coreCss()).createWsTagsPopup();
+  }
 
-    @Test
-    public void workspaceNameShouldBeSet() {
-        view.setWorkspaceName("test");
+  @Test
+  public void nameShouldBeSet() {
+    verify(view.wsName).setText(anyString());
+    verify(locale).createWsDefaultName();
+  }
 
-        verify(view.wsName).setText("test");
-    }
+  @Test
+  public void placeholdersShouldBeSet() {
+    verify(locale).placeholderChoosePredefined();
+    verify(locale).placeholderInputRecipeUrl();
+    verify(locale).placeholderFindByTags();
+  }
 
-    @Test
-    public void recipeUrlShouldBeReturned() {
-        view.getRecipeUrl();
+  @Test
+  public void workspaceNameShouldBeSet() {
+    view.setWorkspaceName("test");
 
-        verify(view.recipeURL).getText();
-    }
+    verify(view.wsName).setText("test");
+  }
 
-    @Test
-    public void tagsShouldBeReturned() {
-        when(view.tags.getValue()).thenReturn("test test ");
+  @Test
+  public void recipeUrlShouldBeReturned() {
+    view.getRecipeUrl();
 
-        List<String> tags = view.getTags();
+    verify(view.recipeURL).getText();
+  }
 
-        assertThat("test", is(equalTo(tags.get(0))));
-    }
+  @Test
+  public void tagsShouldBeReturned() {
+    when(view.tags.getValue()).thenReturn("test test ");
 
-    @Test
-    public void workspaceNameShouldBeReturned() {
-        view.getWorkspaceName();
+    List<String> tags = view.getTags();
 
-        verify(view.wsName).getText();
-    }
+    assertThat("test", is(equalTo(tags.get(0))));
+  }
 
-    @Test
-    public void recipesShouldBeShown() {
-        when(tagFactory.create(descriptor)).thenReturn(tag);
+  @Test
+  public void workspaceNameShouldBeReturned() {
+    view.getWorkspaceName();
 
-        view.showFoundByTagRecipes(Arrays.asList(descriptor));
+    verify(view.wsName).getText();
+  }
 
-        verify(tagsPanel).clear();
+  @Test
+  public void recipesShouldBeShown() {
+    when(tagFactory.create(descriptor)).thenReturn(tag);
 
-        verify(tagFactory).create(descriptor);
+    view.showFoundByTagRecipes(Arrays.asList(descriptor));
 
-        verify(tag).setDelegate(view);
+    verify(tagsPanel).clear();
 
-        verify(view.tags).getAbsoluteLeft();
-        verify(view.tags).getAbsoluteTop();
-        verify(view.tags).getOffsetHeight();
-    }
+    verify(tagFactory).create(descriptor);
 
-    @Test
-    public void predefinedRecipesShouldBeShown() {
-        when(tagFactory.create(descriptor)).thenReturn(tag);
+    verify(tag).setDelegate(view);
 
-        view.showPredefinedRecipes(Arrays.asList(descriptor));
+    verify(view.tags).getAbsoluteLeft();
+    verify(view.tags).getAbsoluteTop();
+    verify(view.tags).getOffsetHeight();
+  }
 
-        verify(view.predefinedRecipes).getAbsoluteLeft();
-        verify(view.predefinedRecipes).getAbsoluteTop();
-        verify(view.predefinedRecipes).getOffsetHeight();
-    }
+  @Test
+  public void predefinedRecipesShouldBeShown() {
+    when(tagFactory.create(descriptor)).thenReturn(tag);
 
-    @Test
-    public void predefinedRecipeShouldBeSelected() {
-        when(tag.getRecipeUrl()).thenReturn("url");
-        when(tag.getTagName()).thenReturn("tag_name");
+    view.showPredefinedRecipes(Arrays.asList(descriptor));
 
-        view.onPredefineRecipesClicked(clickEvent);
+    verify(view.predefinedRecipes).getAbsoluteLeft();
+    verify(view.predefinedRecipes).getAbsoluteTop();
+    verify(view.predefinedRecipes).getOffsetHeight();
+  }
 
-        view.onTagClicked(tag);
+  @Test
+  public void predefinedRecipeShouldBeSelected() {
+    when(tag.getRecipeUrl()).thenReturn("url");
+    when(tag.getTagName()).thenReturn("tag_name");
 
-        verify(tag).getRecipeUrl();
+    view.onPredefineRecipesClicked(clickEvent);
 
-        verify(view.recipeURL).setText("url");
-        verify(view.predefinedRecipes).setText("tag_name");
+    view.onTagClicked(tag);
 
-        verify(view.tags).setText("");
+    verify(tag).getRecipeUrl();
 
-        verify(delegate).onRecipeUrlChanged();
-    }
+    verify(view.recipeURL).setText("url");
+    verify(view.predefinedRecipes).setText("tag_name");
 
-    @Test
-    public void recipeFoundViaTagShouldBeSelected() {
-        when(tag.getRecipeUrl()).thenReturn("url");
-        when(tag.getTagName()).thenReturn("tag_name");
+    verify(view.tags).setText("");
 
-        view.onTagsChanged(keyUpEvent);
+    verify(delegate).onRecipeUrlChanged();
+  }
 
-        view.onTagClicked(tag);
+  @Test
+  public void recipeFoundViaTagShouldBeSelected() {
+    when(tag.getRecipeUrl()).thenReturn("url");
+    when(tag.getTagName()).thenReturn("tag_name");
 
-        verify(tag).getRecipeUrl();
+    view.onTagsChanged(keyUpEvent);
 
-        verify(view.recipeURL).setText("url");
-        verify(view.predefinedRecipes).setText("");
+    view.onTagClicked(tag);
 
-        verify(view.tags).setText("");
+    verify(tag).getRecipeUrl();
 
-        verify(delegate).onRecipeUrlChanged();
-    }
+    verify(view.recipeURL).setText("url");
+    verify(view.predefinedRecipes).setText("");
 
-    @Test
-    public void urlErrorVisibilityShouldBeChanged() {
-        view.setVisibleUrlError(true);
+    verify(view.tags).setText("");
 
-        verify(view.recipeUrlError).setVisible(true);
-    }
+    verify(delegate).onRecipeUrlChanged();
+  }
 
-    @Test
-    public void tagsErrorVisibilityShouldBeChanged() {
-        view.setVisibleTagsError(true);
+  @Test
+  public void urlErrorVisibilityShouldBeChanged() {
+    view.setVisibleUrlError(true);
 
-        verify(view.tagsError).setVisible(true);
-    }
+    verify(view.recipeUrlError).setVisible(true);
+  }
 
-    @Test
-    public void nameErrorShouldBeShown() {
-        view.showValidationNameError("error");
+  @Test
+  public void tagsErrorVisibilityShouldBeChanged() {
+    view.setVisibleTagsError(true);
 
-        verify(view.nameError).setVisible(true);
-        verify(view.nameError).setText("error");
-    }
+    verify(view.tagsError).setVisible(true);
+  }
 
-    @Test
-    public void nameErrorShouldNotBeShown() {
-        view.showValidationNameError("");
+  @Test
+  public void nameErrorShouldBeShown() {
+    view.showValidationNameError("error");
 
-        verify(view.nameError).setVisible(false);
-        verify(view.nameError).setText("");
-    }
+    verify(view.nameError).setVisible(true);
+    verify(view.nameError).setText("error");
+  }
 
-    @Test
-    public void tagsShouldBeChanged() {
-        when(view.tags.getText()).thenReturn("test");
+  @Test
+  public void nameErrorShouldNotBeShown() {
+    view.showValidationNameError("");
 
-        view.onTagsChanged(keyUpEvent);
+    verify(view.nameError).setVisible(false);
+    verify(view.nameError).setText("");
+  }
 
-        verify(view.tags).getText();
+  @Test
+  public void tagsShouldBeChanged() {
+    when(view.tags.getText()).thenReturn("test");
 
-        verify(view.tagsError).setVisible(true);
+    view.onTagsChanged(keyUpEvent);
 
-        verify(delegate).onTagsChanged(Matchers.<HidePopupCallBack>anyObject());
-    }
+    verify(view.tags).getText();
 
-    @Test
-    public void onTagsTextBoxShouldBeClicked() {
-        when(view.tags.getText()).thenReturn("test");
+    verify(view.tagsError).setVisible(true);
 
-        view.onTagsClicked(clickEvent);
+    verify(delegate).onTagsChanged(Matchers.<HidePopupCallBack>anyObject());
+  }
 
-        verify(view.tags).getText();
+  @Test
+  public void onTagsTextBoxShouldBeClicked() {
+    when(view.tags.getText()).thenReturn("test");
 
-        verify(view.tagsError).setVisible(true);
+    view.onTagsClicked(clickEvent);
 
-        verify(delegate).onTagsChanged(Matchers.<HidePopupCallBack>anyObject());
-    }
+    verify(view.tags).getText();
 
-    @Test
-    public void recipeUrlShouldBeChanged() {
-        view.onRecipeUrlChanged(keyUpEvent);
+    verify(view.tagsError).setVisible(true);
 
-        verify(delegate).onRecipeUrlChanged();
-    }
+    verify(delegate).onTagsChanged(Matchers.<HidePopupCallBack>anyObject());
+  }
 
-    @Test
-    public void workspaceNameShouldBeChanged() {
-        view.onWorkspaceNameChanged(keyUpEvent);
+  @Test
+  public void recipeUrlShouldBeChanged() {
+    view.onRecipeUrlChanged(keyUpEvent);
 
-        verify(delegate).onNameChanged();
-    }
+    verify(delegate).onRecipeUrlChanged();
+  }
 
-    @Test
-    public void predefinedRecipeShouldBeClicked() {
-        view.onPredefineRecipesClicked(clickEvent);
+  @Test
+  public void workspaceNameShouldBeChanged() {
+    view.onWorkspaceNameChanged(keyUpEvent);
 
-        verify(delegate).onPredefinedRecipesClicked();
-    }
+    verify(delegate).onNameChanged();
+  }
+
+  @Test
+  public void predefinedRecipeShouldBeClicked() {
+    view.onPredefineRecipesClicked(clickEvent);
+
+    verify(delegate).onPredefinedRecipesClicked();
+  }
 }

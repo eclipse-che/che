@@ -17,6 +17,7 @@ import {DockerImageEnvironmentManager} from './environment/docker-image-environm
 import {CheEnvironmentRegistry} from './environment/che-environment-registry.factory';
 import {CheJsonRpcMasterApi} from './json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from './json-rpc/che-json-rpc-api.factory';
+import {CheBranding} from '../branding/che-branding.factory';
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   create: any;
@@ -63,7 +64,7 @@ export class CheWorkspace {
    */
   constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService, $q: ng.IQService, cheJsonRpcApi: CheJsonRpcApi,
               $websocket: ng.websocket.IWebSocketProvider, $location: ng.ILocationService, proxySettings : string, userDashboardConfig: any,
-              lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService) {
+              lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheBranding: CheBranding) {
     this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
 
     // keep resource
@@ -92,8 +93,6 @@ export class CheWorkspace {
     // list of subscribed to websocket workspace Ids
     this.subscribedWorkspacesIds = [];
     this.statusDefers = {};
-    this.jsonRpcApiLocation = this.formJsonRpcApiLocation($location, proxySettings, userDashboardConfig.developmentMode);
-    this.cheJsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(this.jsonRpcApiLocation);
 
     // remote call
     this.remoteWorkspaceAPI = <ICHELicenseResource<any>>this.$resource('/api/workspace', {}, {
@@ -117,6 +116,14 @@ export class CheWorkspace {
     cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager($log));
 
     this.fetchWorkspaceSettings();
+
+    const CONTEXT_FETCHER_ID = 'websocketContextFetcher';
+    const callback = () => {
+      this.jsonRpcApiLocation = this.formJsonRpcApiLocation($location, proxySettings, userDashboardConfig.developmentMode) + cheBranding.getWebsocketContext();
+      this.cheJsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(this.jsonRpcApiLocation);
+      cheBranding.unregisterCallback(CONTEXT_FETCHER_ID);
+    };
+    cheBranding.registerCallback(CONTEXT_FETCHER_ID, callback.bind(this));
   }
 
   /**

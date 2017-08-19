@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,22 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.resources;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.resource.Path;
 
 /**
- * Implementation for {@link VirtualFile} which describe resource which doesn't exist on file system and is auto generated.
- * For example it may be effective version of such resource.
- * <p/>
- * This file doesn't have link to the content url.
+ * Implementation for {@link VirtualFile} which describe resource which doesn't exist on file system
+ * and is auto generated. For example it may be effective version of such resource.
+ *
+ * <p>This file doesn't have link to the content url.
  *
  * @author Vlad Zhukovskiy
  * @see VirtualFile
@@ -30,75 +29,72 @@ import org.eclipse.che.ide.resource.Path;
 @Beta
 public class SyntheticFile implements VirtualFile {
 
-    private String name;
-    private String content;
-    private String displayName;
+  private String name;
+  private String content;
+  private String displayName;
 
-    public SyntheticFile(String name, String content) {
-        this(name, name, content);
-    }
+  public SyntheticFile(String name, String content) {
+    this(name, name, content);
+  }
 
-    public SyntheticFile(String name, String displayName, String content) {
-        this.name = name;
-        this.displayName = displayName;
-        this.content = content;
-    }
+  public SyntheticFile(String name, String displayName, String content) {
+    this.name = name;
+    this.displayName = displayName;
+    this.content = content;
+  }
 
-    @Override
-    public Path getLocation() {
-        return Path.valueOf(name);
-    }
+  @Override
+  public Path getLocation() {
+    return Path.valueOf(name);
+  }
 
-    @Override
-    public String getName() {
-        return name;
-    }
+  @Override
+  public String getName() {
+    return name;
+  }
 
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
+  @Override
+  public String getDisplayName() {
+    return displayName;
+  }
 
-    @Override
-    public boolean isReadOnly() {
-        return true;
-    }
+  @Override
+  public boolean isReadOnly() {
+    return true;
+  }
 
-    @Override
-    public String getContentUrl() {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public String getContentUrl() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public Promise<String> getContent() {
-        return Promises.resolve(content);
-    }
+  @Override
+  public Promise<String> getContent() {
+    return Promises.resolve(content);
+  }
 
-    @Override
-    public Promise<Void> updateContent(String content) {
-        this.content = content;
+  @Override
+  public Promise<Void> updateContent(String content) {
+    this.content = content;
 
-        return Promises.resolve(null);
-    }
+    return Promises.resolve(null);
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SyntheticFile)) return false;
-        SyntheticFile that = (SyntheticFile)o;
-        return Objects.equal(name, that.name) &&
-               Objects.equal(content, that.content);
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof SyntheticFile)) return false;
+    SyntheticFile that = (SyntheticFile) o;
+    return Objects.equal(name, that.name) && Objects.equal(content, that.content);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(name, content);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(name, content);
+  }
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("name", name)
-                          .toString();
-    }
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).add("name", name).toString();
+  }
 }

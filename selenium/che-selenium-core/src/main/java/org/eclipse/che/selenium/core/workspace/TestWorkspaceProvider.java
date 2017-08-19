@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.core.workspace;
 
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -19,21 +19,15 @@ import org.eclipse.che.selenium.core.user.TestUser;
  */
 public interface TestWorkspaceProvider {
 
-    /**
-     * Creates a new workspace.
-     *
-     * @param owner
-     *      the workspace owner
-     * @param memoryGB
-     *      the workspace memory size in GB
-     * @param template
-     *      the workspace template
-     *      {@link WorkspaceTemplate}
-     */
-    TestWorkspace createWorkspace(TestUser owner, int memoryGB, String template) throws Exception;
+  /**
+   * Creates a new workspace.
+   *
+   * @param owner the workspace owner
+   * @param memoryGB the workspace memory size in GB
+   * @param template the workspace template {@link WorkspaceTemplate}
+   */
+  TestWorkspace createWorkspace(TestUser owner, int memoryGB, String template) throws Exception;
 
-    /**
-     * Release all allocated resources.
-     */
-    void shutdown();
+  /** Release all allocated resources. */
+  void shutdown();
 }

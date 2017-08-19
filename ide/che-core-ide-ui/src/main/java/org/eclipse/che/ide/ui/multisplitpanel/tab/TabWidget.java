@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.multisplitpanel.tab;
+
+import static com.google.gwt.dom.client.NativeEvent.BUTTON_LEFT;
+import static com.google.gwt.dom.client.NativeEvent.BUTTON_MIDDLE;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -22,15 +25,10 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import javax.validation.constraints.NotNull;
-
-import static com.google.gwt.dom.client.NativeEvent.BUTTON_LEFT;
-import static com.google.gwt.dom.client.NativeEvent.BUTTON_MIDDLE;
 
 /**
  * Widget that represents a tab.
@@ -39,89 +37,87 @@ import static com.google.gwt.dom.client.NativeEvent.BUTTON_MIDDLE;
  */
 public class TabWidget extends Composite implements Tab {
 
-    private static final TabItemWidgetUiBinder UI_BINDER = GWT.create(TabItemWidgetUiBinder.class);
+  private static final TabItemWidgetUiBinder UI_BINDER = GWT.create(TabItemWidgetUiBinder.class);
 
-    private final String      title;
-    private final SVGResource icon;
+  private final String title;
+  private final SVGResource icon;
 
-    @UiField
-    SimplePanel iconPanel;
+  @UiField SimplePanel iconPanel;
 
-    @UiField
-    Label titleLabel;
+  @UiField Label titleLabel;
 
-    @UiField
-    FlowPanel closeButton;
+  @UiField FlowPanel closeButton;
 
-    @UiField(provided = true)
-    PartStackUIResources resources;
+  @UiField(provided = true)
+  PartStackUIResources resources;
 
-    private ActionDelegate delegate;
+  private ActionDelegate delegate;
 
-    @Inject
-    public TabWidget(PartStackUIResources resources,
-                     @Assisted String title,
-                     @Assisted SVGResource icon,
-                     @Assisted boolean closable) {
-        this.resources = resources;
-        this.title = title;
-        this.icon = icon;
+  @Inject
+  public TabWidget(
+      PartStackUIResources resources,
+      @Assisted String title,
+      @Assisted SVGResource icon,
+      @Assisted boolean closable) {
+    this.resources = resources;
+    this.title = title;
+    this.icon = icon;
 
-        initWidget(UI_BINDER.createAndBindUi(this));
+    initWidget(UI_BINDER.createAndBindUi(this));
 
-        titleLabel.setText(title);
+    titleLabel.setText(title);
 
-        iconPanel.add(new SVGImage(getIcon()));
+    iconPanel.add(new SVGImage(getIcon()));
 
-        addDomHandler(this, ClickEvent.getType());
-        addDomHandler(this, DoubleClickEvent.getType());
+    addDomHandler(this, ClickEvent.getType());
+    addDomHandler(this, DoubleClickEvent.getType());
 
-        if (closable) {
-            closeButton.addDomHandler(event -> delegate.onTabClosing(TabWidget.this), ClickEvent.getType());
-        } else {
-            closeButton.setVisible(false);
-        }
+    if (closable) {
+      closeButton.addDomHandler(
+          event -> delegate.onTabClosing(TabWidget.this), ClickEvent.getType());
+    } else {
+      closeButton.setVisible(false);
     }
+  }
 
-    @Override
-    public SVGResource getIcon() {
-        return icon;
-    }
+  @Override
+  public SVGResource getIcon() {
+    return icon;
+  }
 
-    @Override
-    public String getTitleText() {
-        return title;
-    }
+  @Override
+  public String getTitleText() {
+    return title;
+  }
 
-    @Override
-    public void select() {
-        getElement().setAttribute("focused", "");
-    }
+  @Override
+  public void select() {
+    getElement().setAttribute("focused", "");
+  }
 
-    @Override
-    public void unSelect() {
-        getElement().removeAttribute("focused");
-    }
+  @Override
+  public void unSelect() {
+    getElement().removeAttribute("focused");
+  }
 
-    @Override
-    public void onClick(@NotNull ClickEvent event) {
-        if (BUTTON_LEFT == event.getNativeButton()) {
-            delegate.onTabClicked(this);
-        } else if (BUTTON_MIDDLE == event.getNativeButton()) {
-            delegate.onTabClosing(this);
-        }
+  @Override
+  public void onClick(@NotNull ClickEvent event) {
+    if (BUTTON_LEFT == event.getNativeButton()) {
+      delegate.onTabClicked(this);
+    } else if (BUTTON_MIDDLE == event.getNativeButton()) {
+      delegate.onTabClosing(this);
     }
+  }
 
-    @Override
-    public void onDoubleClick(DoubleClickEvent event) {
-        delegate.onTabDoubleClicked(this);
-    }
+  @Override
+  public void onDoubleClick(DoubleClickEvent event) {
+    delegate.onTabDoubleClicked(this);
+  }
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    interface TabItemWidgetUiBinder extends UiBinder<Widget, TabWidget> {
-    }
+  interface TabItemWidgetUiBinder extends UiBinder<Widget, TabWidget> {}
 }

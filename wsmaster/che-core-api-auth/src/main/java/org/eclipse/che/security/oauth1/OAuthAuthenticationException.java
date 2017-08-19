@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.security.oauth1;
 
 import org.eclipse.che.api.core.ServerException;
@@ -20,23 +20,21 @@ import org.eclipse.che.api.core.ServerException;
  */
 public final class OAuthAuthenticationException extends ServerException {
 
-    /**
-     * Constructs an instance of {@link OAuthAuthenticationException}.
-     *
-     * @param message
-     *         the exception message.
-     */
-    public OAuthAuthenticationException(final String message) {
-        super(message);
-    }
+  /**
+   * Constructs an instance of {@link OAuthAuthenticationException}.
+   *
+   * @param message the exception message.
+   */
+  public OAuthAuthenticationException(final String message) {
+    super(message);
+  }
 
-    /**
-     * Constructs an instance of {@link OAuthAuthenticationException}.
-     *
-     * @param cause
-     *         the cause of the exception.
-     */
-    public OAuthAuthenticationException(final Throwable cause) {
-        super(cause);
-    }
+  /**
+   * Constructs an instance of {@link OAuthAuthenticationException}.
+   *
+   * @param cause the cause of the exception.
+   */
+  public OAuthAuthenticationException(final Throwable cause) {
+    super(cause);
+  }
 }

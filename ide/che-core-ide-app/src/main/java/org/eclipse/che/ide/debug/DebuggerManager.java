@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.debug;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.commons.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * The debugger provider.
@@ -28,70 +26,63 @@ import java.util.Map;
  */
 @Singleton
 public class DebuggerManager implements DebuggerManagerObservable {
-    private Debugger                      activeDebugger;
-    private Map<String, Debugger>         debuggers;
-    private List<DebuggerManagerObserver> observers;
+  private Debugger activeDebugger;
+  private Map<String, Debugger> debuggers;
+  private List<DebuggerManagerObserver> observers;
 
-    @Inject
-    protected DebuggerManager() {
-        this.debuggers = new HashMap<>();
-        this.observers = new ArrayList<>();
+  @Inject
+  protected DebuggerManager() {
+    this.debuggers = new HashMap<>();
+    this.observers = new ArrayList<>();
+  }
+
+  /** Register new debugger for the given id. */
+  public void registeredDebugger(String id, Debugger debugger) {
+    debuggers.put(id, debugger);
+  }
+
+  /** Gets {@link Debugger} for the given id. */
+  @Nullable
+  public Debugger getDebugger(String id) {
+    return debuggers.get(id);
+  }
+
+  /**
+   * Sets new active debugger. Resubscribe all {@link DebuggerObserver} to listen to events from new
+   * {@link Debugger}
+   *
+   * @param debugger debugger is being used
+   */
+  public void setActiveDebugger(@Nullable Debugger debugger) {
+    if (activeDebugger != null) {
+      for (DebuggerManagerObserver observer : observers) {
+        activeDebugger.removeObserver(observer);
+      }
     }
 
-    /**
-     * Register new debugger for the given id.
-     */
-    public void registeredDebugger(String id, Debugger debugger) {
-        debuggers.put(id, debugger);
+    activeDebugger = debugger;
+
+    for (DebuggerManagerObserver observer : observers) {
+      if (activeDebugger != null) {
+        activeDebugger.addObserver(observer);
+      }
+      observer.onActiveDebuggerChanged(activeDebugger);
     }
+  }
 
-    /**
-     * Gets {@link Debugger} for the given id.
-     */
-    @Nullable
-    public Debugger getDebugger(String id) {
-        return debuggers.get(id);
-    }
+  /** @return {@link Debugger} is currently being used */
+  @Nullable
+  public Debugger getActiveDebugger() {
+    return activeDebugger;
+  }
 
-    /**
-     * Sets new active debugger.
-     * Resubscribe all {@link DebuggerObserver} to listen to events from new {@link Debugger}
-     *
-     * @param debugger
-     *         debugger is being used
-     */
-    public void setActiveDebugger(@Nullable Debugger debugger) {
-        if (activeDebugger != null) {
-            for (DebuggerManagerObserver observer : observers) {
-                activeDebugger.removeObserver(observer);
-            }
-        }
+  @Override
+  public void addObserver(DebuggerManagerObserver observer) {
+    observers.add(observer);
+  }
 
-        activeDebugger = debugger;
-
-        for (DebuggerManagerObserver observer : observers) {
-            if (activeDebugger != null) {
-                activeDebugger.addObserver(observer);
-            }
-            observer.onActiveDebuggerChanged(activeDebugger);
-        }
-    }
-
-    /**
-     * @return {@link Debugger} is currently being used
-     */
-    @Nullable
-    public Debugger getActiveDebugger() {
-        return activeDebugger;
-    }
-
-    @Override
-    public void addObserver(DebuggerManagerObserver observer) {
-        observers.add(observer);
-    }
-
-    @Override
-    public void removeObserver(DebuggerManagerObserver observer) {
-        observers.remove(observer);
-    }
+  @Override
+  public void removeObserver(DebuggerManagerObserver observer) {
+    observers.remove(observer);
+  }
 }

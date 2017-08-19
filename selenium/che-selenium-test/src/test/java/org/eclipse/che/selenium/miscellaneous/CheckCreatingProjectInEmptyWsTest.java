@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.miscellaneous;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 
+import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -26,88 +27,103 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-
-/**
- * @author Musienko Maxim
- */
+/** @author Musienko Maxim */
 public class CheckCreatingProjectInEmptyWsTest {
 
-    @Inject
-    private Loader                    loader;
-    @Inject
-    private TestWorkspace             workspace;
-    @Inject
-    private Ide                       ide;
-    @Inject
-    private ProjectExplorer           projectExplorer;
-    @Inject
-    private Wizard                    wizard;
-    @Inject
-    private ImportProjectFromLocation importProjectFromLocation;
-    @Inject
-    private ActionsFactory            actionsFactory;
+  @Inject private Loader loader;
+  @Inject private TestWorkspace workspace;
+  @Inject private Ide ide;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Wizard wizard;
+  @Inject private ImportProjectFromLocation importProjectFromLocation;
+  @Inject private ActionsFactory actionsFactory;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        ide.open(workspace);
+  @BeforeClass
+  public void setUp() throws Exception {
+    ide.open(workspace);
+  }
+
+  @Test
+  public void checkImportAndCreatingFromProjectExplorer() throws InterruptedException {
+    loader.waitOnClosed();
+    projectExplorer.clickOnCreateProjectLink(10);
+    wizard.closeWithIcon();
+    projectExplorer.clickOnEmptyAreaOfProjectTree(1);
+    projectExplorer.clickOnImportProjectLink(1);
+    importProjectFromLocation.closeWithIcon();
+
+    projectExplorer.clickOnEmptyAreaOfProjectTree(1);
+    try {
+      actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
+      wizard.closeWithIcon();
+    } catch (org.openqa.selenium.TimeoutException e) {
+      actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
+      wizard.closeWithIcon();
     }
-
-    @Test
-    public void checkImportAndCreatingFromProjectExplorer() throws InterruptedException {
-        loader.waitOnClosed();
-        projectExplorer.clickOnCreateProjectLink(10);
-        wizard.closeWithIcon();
-        projectExplorer.clickOnEmptyAreaOfProjectTree(1);
-        projectExplorer.clickOnImportProjectLink(1);
-        importProjectFromLocation.closeWithIcon();
-
-        projectExplorer.clickOnEmptyAreaOfProjectTree(1);
-        try {
-            actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
-            wizard.closeWithIcon();
-        } catch (org.openqa.selenium.TimeoutException e) {
-            actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
-            wizard.closeWithIcon();
-        }
-        projectExplorer.clickOnEmptyAreaOfProjectTree(1);
-        try {
-            actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A").perform();
-            importProjectFromLocation.closeWithIcon();
-        } catch (org.openqa.selenium.TimeoutException e) {
-            actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A").perform();
-            importProjectFromLocation.closeWithIcon();
-        }
+    projectExplorer.clickOnEmptyAreaOfProjectTree(1);
+    try {
+      actionsFactory
+          .createAction(ide.driver())
+          .sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A")
+          .perform();
+      importProjectFromLocation.closeWithIcon();
+    } catch (org.openqa.selenium.TimeoutException e) {
+      actionsFactory
+          .createAction(ide.driver())
+          .sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A")
+          .perform();
+      importProjectFromLocation.closeWithIcon();
     }
+  }
 
-    @Test(priority = 1)
-    public void checkImportAndCreatingFromEditorPanel() {
-        WebDriverWait waitForWebElements = new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC);
-        String locatorToEditorContaiPaineId = "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']";
-        String locatorToImportProjectLnk = locatorToEditorContaiPaineId + "//div[text()='Import Project...']";
-        String locatorToCreateProjectLnk = locatorToEditorContaiPaineId + "//div[text()='Create Project...']";
+  @Test(priority = 1)
+  public void checkImportAndCreatingFromEditorPanel() {
+    WebDriverWait waitForWebElements = new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC);
+    String locatorToEditorContaiPaineId =
+        "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']";
+    String locatorToImportProjectLnk =
+        locatorToEditorContaiPaineId + "//div[text()='Import Project...']";
+    String locatorToCreateProjectLnk =
+        locatorToEditorContaiPaineId + "//div[text()='Create Project...']";
 
-        loader.waitOnClosed();
-        waitForWebElements.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorToImportProjectLnk))).click();
-        importProjectFromLocation.closeWithIcon();
-        waitForWebElements.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorToCreateProjectLnk))).click();
-        wizard.closeWithIcon();
+    loader.waitOnClosed();
+    waitForWebElements
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorToImportProjectLnk)))
+        .click();
+    importProjectFromLocation.closeWithIcon();
+    waitForWebElements
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locatorToCreateProjectLnk)))
+        .click();
+    wizard.closeWithIcon();
 
-        waitForWebElements.until(ExpectedConditions.visibilityOfElementLocated((By.xpath(locatorToEditorContaiPaineId)))).click();
-        try {
-            actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
-            wizard.closeWithIcon();
-        } catch (org.openqa.selenium.TimeoutException e) {
-            actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
-            wizard.closeWithIcon();
-        }
-        waitForWebElements.until(ExpectedConditions.visibilityOf(ide.driver().findElement(By.xpath(locatorToEditorContaiPaineId)))).click();
-        try {
-            actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A").perform();
-            importProjectFromLocation.closeWithIcon();
-        } catch (org.openqa.selenium.TimeoutException e) {
-            actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A").perform();
-            importProjectFromLocation.closeWithIcon();
-        }
+    waitForWebElements
+        .until(
+            ExpectedConditions.visibilityOfElementLocated((By.xpath(locatorToEditorContaiPaineId))))
+        .click();
+    try {
+      actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
+      wizard.closeWithIcon();
+    } catch (org.openqa.selenium.TimeoutException e) {
+      actionsFactory.createAction(ide.driver()).sendKeys(Keys.ALT.toString() + "x").perform();
+      wizard.closeWithIcon();
     }
+    waitForWebElements
+        .until(
+            ExpectedConditions.visibilityOf(
+                ide.driver().findElement(By.xpath(locatorToEditorContaiPaineId))))
+        .click();
+    try {
+      actionsFactory
+          .createAction(ide.driver())
+          .sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A")
+          .perform();
+      importProjectFromLocation.closeWithIcon();
+    } catch (org.openqa.selenium.TimeoutException e) {
+      actionsFactory
+          .createAction(ide.driver())
+          .sendKeys(Keys.ALT.toString() + Keys.SHIFT.toString() + "A")
+          .perform();
+      importProjectFromLocation.closeWithIcon();
+    }
+  }
 }

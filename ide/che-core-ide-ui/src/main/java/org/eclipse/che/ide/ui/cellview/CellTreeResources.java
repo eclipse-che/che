@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.cellview;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.user.cellview.client.CellTree;
 
-/**
- * @author Valeriy Svydenko
- */
-public interface CellTreeResources extends CellTree.Resources{
-    interface CellTreeStyle extends CellTree.Style {
-    }
+/** @author Valeriy Svydenko */
+public interface CellTreeResources extends CellTree.Resources {
+  interface CellTreeStyle extends CellTree.Style {}
 
-    @Override
-    @ClientBundle.Source({"cellTree.css", "org/eclipse/che/ide/api/ui/style.css"})
-    CellTreeStyle cellTreeStyle();
+  @Override
+  @ClientBundle.Source({"cellTree.css", "org/eclipse/che/ide/api/ui/style.css"})
+  CellTreeStyle cellTreeStyle();
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.editor.link;
 
 import java.util.List;
 
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public interface LinkedModelData {
-    void setType(String type);
+  void setType(String type);
 
-    void setValues(List<String> values);
+  void setValues(List<String> values);
 }

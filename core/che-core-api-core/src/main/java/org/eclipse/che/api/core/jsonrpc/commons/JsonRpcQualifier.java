@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.jsonrpc.commons;
 
 public interface JsonRpcQualifier {
-    boolean isValidJson(String message);
+  boolean isValidJson(String message);
 
-    boolean isJsonRpcRequest(String message);
+  boolean isJsonRpcRequest(String message);
 
-    boolean isJsonRpcResponse(String message);
+  boolean isJsonRpcResponse(String message);
 }

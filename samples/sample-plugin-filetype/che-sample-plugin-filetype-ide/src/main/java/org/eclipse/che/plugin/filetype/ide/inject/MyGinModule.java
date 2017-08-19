@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.filetype.ide.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
@@ -26,16 +26,15 @@ import org.eclipse.che.plugin.filetype.ide.MyResources;
 @ExtensionGinModule
 public class MyGinModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        //Nothing to do here, yet
-    }
+  @Override
+  protected void configure() {
+    //Nothing to do here, yet
+  }
 
-    @Provides
-    @Singleton
-    @Named("MyFileType")
-    protected FileType provideMyFile() {
-        return new FileType(MyResources.INSTANCE.icon(), "my");
-    }
-
+  @Provides
+  @Singleton
+  @Named("MyFileType")
+  protected FileType provideMyFile() {
+    return new FileType(MyResources.INSTANCE.icon(), "my");
+  }
 }

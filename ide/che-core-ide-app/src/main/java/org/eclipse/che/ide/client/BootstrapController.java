@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.client;
 
 import com.google.gwt.core.client.Callback;
@@ -23,7 +23,10 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -45,11 +48,6 @@ import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 /**
  * Performs initial application startup.
  *
@@ -60,183 +58,199 @@ import java.util.TreeMap;
 @Singleton
 public class BootstrapController {
 
-    private final Provider<WorkspacePresenter>     workspaceProvider;
-    private final ExtensionInitializer             extensionInitializer;
-    private final EventBus                         eventBus;
-    private final Provider<AppStateManager>        appStateManagerProvider;
-    private final AppContext                       appContext;
-    private final WorkspaceServiceClient           workspaceService;
-    private final Provider<WsAgentStateController> wsAgentStateControllerProvider;
-    private final WsAgentURLModifier               wsAgentURLModifier;
+  private final Provider<WorkspacePresenter> workspaceProvider;
+  private final ExtensionInitializer extensionInitializer;
+  private final EventBus eventBus;
+  private final Provider<AppStateManager> appStateManagerProvider;
+  private final AppContext appContext;
+  private final WorkspaceServiceClient workspaceService;
+  private final Provider<WsAgentStateController> wsAgentStateControllerProvider;
+  private final WsAgentURLModifier wsAgentURLModifier;
 
-    @Inject
-    public BootstrapController(Provider<WorkspacePresenter> workspaceProvider,
-                               ExtensionInitializer extensionInitializer,
-                               EventBus eventBus,
-                               Provider<AppStateManager> appStateManagerProvider,
-                               AppContext appContext,
-                               DtoRegistrar dtoRegistrar,
-                               WorkspaceServiceClient workspaceService,
-                               Provider<WsAgentStateController> wsAgentStateControllerProvider,
-                               WsAgentURLModifier wsAgentURLModifier) {
-        this.workspaceProvider = workspaceProvider;
-        this.extensionInitializer = extensionInitializer;
-        this.eventBus = eventBus;
-        this.appStateManagerProvider = appStateManagerProvider;
-        this.appContext = appContext;
-        this.workspaceService = workspaceService;
-        this.wsAgentStateControllerProvider = wsAgentStateControllerProvider;
-        this.wsAgentURLModifier = wsAgentURLModifier;
+  @Inject
+  public BootstrapController(
+      Provider<WorkspacePresenter> workspaceProvider,
+      ExtensionInitializer extensionInitializer,
+      EventBus eventBus,
+      Provider<AppStateManager> appStateManagerProvider,
+      AppContext appContext,
+      DtoRegistrar dtoRegistrar,
+      WorkspaceServiceClient workspaceService,
+      Provider<WsAgentStateController> wsAgentStateControllerProvider,
+      WsAgentURLModifier wsAgentURLModifier) {
+    this.workspaceProvider = workspaceProvider;
+    this.extensionInitializer = extensionInitializer;
+    this.eventBus = eventBus;
+    this.appStateManagerProvider = appStateManagerProvider;
+    this.appContext = appContext;
+    this.workspaceService = workspaceService;
+    this.wsAgentStateControllerProvider = wsAgentStateControllerProvider;
+    this.wsAgentURLModifier = wsAgentURLModifier;
 
-        appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
-        dtoRegistrar.registerDtoProviders();
+    appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
+    dtoRegistrar.registerDtoProviders();
 
-        setCustomInterval();
-    }
+    setCustomInterval();
+  }
 
-    @Inject
-    private void startComponents(Map<String, Provider<Component>> components) {
-        startComponents(components.values().iterator());
-    }
+  @Inject
+  private void startComponents(Map<String, Provider<Component>> components) {
+    startComponents(components.values().iterator());
+  }
 
-    @Inject
-    private void startWsAgentComponents(EventBus eventBus, final Map<String, Provider<WsAgentComponent>> components) {
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedEvent.Handler() {
-            @Override
-            public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-                workspaceService.getWorkspace(event.getWorkspace().getId()).then(new Operation<WorkspaceDto>() {
-                    @Override
-                    public void apply(WorkspaceDto ws) throws OperationException {
+  @Inject
+  private void startWsAgentComponents(
+      EventBus eventBus, final Map<String, Provider<WsAgentComponent>> components) {
+    eventBus.addHandler(
+        WorkspaceStartedEvent.TYPE,
+        new WorkspaceStartedEvent.Handler() {
+          @Override
+          public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+            workspaceService
+                .getWorkspace(event.getWorkspace().getId())
+                .then(
+                    new Operation<WorkspaceDto>() {
+                      @Override
+                      public void apply(WorkspaceDto ws) throws OperationException {
                         MachineDto devMachineDto = ws.getRuntime().getDevMachine();
                         DevMachine devMachine = new DevMachine(devMachineDto);
 
                         if (appContext instanceof AppContextImpl) {
-                            ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(devMachineDto.getRuntime().projectsRoot()));
+                          ((AppContextImpl) appContext)
+                              .setProjectsRoot(
+                                  Path.valueOf(devMachineDto.getRuntime().projectsRoot()));
                         }
 
                         wsAgentStateControllerProvider.get().initialize(devMachine);
                         wsAgentURLModifier.initialize(devMachine);
-                        SortedMap<String, Provider<WsAgentComponent>> sortedComponents = new TreeMap<>();
+                        SortedMap<String, Provider<WsAgentComponent>> sortedComponents =
+                            new TreeMap<>();
                         sortedComponents.putAll(components);
                         startWsAgentComponents(sortedComponents.values().iterator());
-                    }
-                }).catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError err) throws OperationException {
+                      }
+                    })
+                .catchError(
+                    new Operation<PromiseError>() {
+                      @Override
+                      public void apply(PromiseError err) throws OperationException {
                         Log.error(getClass(), err.getCause());
                         initializationFailed(err.getMessage());
-                    }
-                });
-            }
+                      }
+                    });
+          }
         });
-    }
+  }
 
-    private void startComponents(final Iterator<Provider<Component>> componentProviderIterator) {
-        if (componentProviderIterator.hasNext()) {
-            Provider<Component> componentProvider = componentProviderIterator.next();
+  private void startComponents(final Iterator<Provider<Component>> componentProviderIterator) {
+    if (componentProviderIterator.hasNext()) {
+      Provider<Component> componentProvider = componentProviderIterator.next();
 
-            final Component component = componentProvider.get();
-            component.start(new Callback<Component, Exception>() {
-                @Override
-                public void onSuccess(Component result) {
-                    startComponents(componentProviderIterator);
-                }
-
-                @Override
-                public void onFailure(Exception reason) {
-                    Log.error(component.getClass(), reason);
-                    initializationFailed(reason.getMessage());
-                }
-            });
-        } else {
-            startExtensionsAndDisplayUI();
-        }
-    }
-
-    private void startWsAgentComponents(final Iterator<Provider<WsAgentComponent>> componentProviderIterator) {
-        if (componentProviderIterator.hasNext()) {
-            Provider<WsAgentComponent> componentProvider = componentProviderIterator.next();
-
-            final WsAgentComponent component = componentProvider.get();
-            component.start(new Callback<WsAgentComponent, Exception>() {
-                @Override
-                public void onSuccess(WsAgentComponent result) {
-                    startWsAgentComponents(componentProviderIterator);
-                }
-
-                @Override
-                public void onFailure(Exception reason) {
-                    Log.error(component.getClass(), reason);
-                    initializationFailed(reason.getMessage());
-                }
-            });
-        }
-    }
-
-    private void startExtensionsAndDisplayUI() {
-        // Change background color according to the current theme
-        if (Style.theme != null) {
-            Document.get().getBody().getStyle().setBackgroundColor(Style.theme.backgroundColor());
-        }
-
-        appStateManagerProvider.get();
-
-        displayIDE();
-
-        extensionInitializer.startExtensions();
-
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+      final Component component = componentProvider.get();
+      component.start(
+          new Callback<Component, Exception>() {
             @Override
-            public void execute() {
+            public void onSuccess(Component result) {
+              startComponents(componentProviderIterator);
+            }
+
+            @Override
+            public void onFailure(Exception reason) {
+              Log.error(component.getClass(), reason);
+              initializationFailed(reason.getMessage());
+            }
+          });
+    } else {
+      startExtensionsAndDisplayUI();
+    }
+  }
+
+  private void startWsAgentComponents(
+      final Iterator<Provider<WsAgentComponent>> componentProviderIterator) {
+    if (componentProviderIterator.hasNext()) {
+      Provider<WsAgentComponent> componentProvider = componentProviderIterator.next();
+
+      final WsAgentComponent component = componentProvider.get();
+      component.start(
+          new Callback<WsAgentComponent, Exception>() {
+            @Override
+            public void onSuccess(WsAgentComponent result) {
+              startWsAgentComponents(componentProviderIterator);
+            }
+
+            @Override
+            public void onFailure(Exception reason) {
+              Log.error(component.getClass(), reason);
+              initializationFailed(reason.getMessage());
+            }
+          });
+    }
+  }
+
+  private void startExtensionsAndDisplayUI() {
+    // Change background color according to the current theme
+    if (Style.theme != null) {
+      Document.get().getBody().getStyle().setBackgroundColor(Style.theme.backgroundColor());
+    }
+
+    appStateManagerProvider.get();
+
+    displayIDE();
+
+    extensionInitializer.startExtensions();
+
+    Scheduler.get()
+        .scheduleDeferred(
+            new ScheduledCommand() {
+              @Override
+              public void execute() {
                 notifyShowIDE();
-            }
+              }
+            });
+  }
+
+  private void displayIDE() {
+    // Start UI
+    SimpleLayoutPanel mainPanel = new SimpleLayoutPanel();
+    RootLayoutPanel.get().add(mainPanel);
+
+    // Make sure the root panel creates its own stacking context
+    RootLayoutPanel.get().getElement().getStyle().setZIndex(0);
+
+    WorkspacePresenter workspacePresenter = workspaceProvider.get();
+
+    // Display IDE
+    workspacePresenter.go(mainPanel);
+
+    // Bind browser's window events
+    Window.addWindowClosingHandler(
+        new Window.ClosingHandler() {
+          @Override
+          public void onWindowClosing(Window.ClosingEvent event) {
+            eventBus.fireEvent(WindowActionEvent.createWindowClosingEvent(event));
+          }
         });
-    }
 
-    private void displayIDE() {
-        // Start UI
-        SimpleLayoutPanel mainPanel = new SimpleLayoutPanel();
-        RootLayoutPanel.get().add(mainPanel);
-
-        // Make sure the root panel creates its own stacking context
-        RootLayoutPanel.get().getElement().getStyle().setZIndex(0);
-
-        WorkspacePresenter workspacePresenter = workspaceProvider.get();
-
-        // Display IDE
-        workspacePresenter.go(mainPanel);
-
-        // Bind browser's window events
-        Window.addWindowClosingHandler(new Window.ClosingHandler() {
-            @Override
-            public void onWindowClosing(Window.ClosingEvent event) {
-                eventBus.fireEvent(WindowActionEvent.createWindowClosingEvent(event));
-            }
+    Window.addCloseHandler(
+        new CloseHandler<Window>() {
+          @Override
+          public void onClose(CloseEvent<Window> event) {
+            eventBus.fireEvent(WindowActionEvent.createWindowClosedEvent());
+          }
         });
+  }
 
-        Window.addCloseHandler(new CloseHandler<Window>() {
-            @Override
-            public void onClose(CloseEvent<Window> event) {
-                eventBus.fireEvent(WindowActionEvent.createWindowClosedEvent());
-            }
-        });
-    }
-
-    /**
-     * Sends a message to the parent frame to inform that IDE application can be shown.
-     */
-    private native void notifyShowIDE() /*-{
+  /** Sends a message to the parent frame to inform that IDE application can be shown. */
+  private native void notifyShowIDE() /*-{
         $wnd.parent.postMessage("show-ide", "*");
     }-*/;
 
-    /**
-     * Handles any of initialization errors.
-     * Tries to call predefined IDE.eventHandlers.ideInitializationFailed function.
-     *
-     * @param reason
-     *         failure encountered
-     */
-    private native void initializationFailed(String reason) /*-{
+  /**
+   * Handles any of initialization errors. Tries to call predefined
+   * IDE.eventHandlers.ideInitializationFailed function.
+   *
+   * @param reason failure encountered
+   */
+  private native void initializationFailed(String reason) /*-{
         try {
             $wnd.IDE.eventHandlers.initializationFailed(reason);
             this.@org.eclipse.che.ide.client.BootstrapController::notifyShowIDE()();
@@ -245,12 +259,14 @@ public class BootstrapController {
         }
     }-*/;
 
-    /**
-     * When we change browser tab and IDE executes into inactive tab, browser set code execution interval to improve performance. For
-     * example Chrome and Firefox set 1000ms = 1sec interval. The method override global setInterval function and set custom value (100ms)
-     * of interval. This solution fix issue when we need execute some code into inactive tab permanently, for example launch factory.
-     */
-    private native void setCustomInterval() /*-{
+  /**
+   * When we change browser tab and IDE executes into inactive tab, browser set code execution
+   * interval to improve performance. For example Chrome and Firefox set 1000ms = 1sec interval. The
+   * method override global setInterval function and set custom value (100ms) of interval. This
+   * solution fix issue when we need execute some code into inactive tab permanently, for example
+   * launch factory.
+   */
+  private native void setCustomInterval() /*-{
         var customInterval = 10;
         var setInterval = function () {
             clearInterval(interval);
@@ -259,5 +275,4 @@ public class BootstrapController {
 
         var interval = setInterval(setInterval, customInterval);
     }-*/;
-
 }

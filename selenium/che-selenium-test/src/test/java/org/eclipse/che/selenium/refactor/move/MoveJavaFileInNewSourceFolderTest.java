@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.refactor.move;
 
 import com.google.inject.Inject;
-
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.Random;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
@@ -28,110 +30,96 @@ import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.Random;
-
-/**
- * @author Aleksandr Shmaraev
- */
+/** @author Aleksandr Shmaraev */
 public class MoveJavaFileInNewSourceFolderTest {
 
-    private static final String PROJECT_NAME           = "MoveJavaFileInNewSourceFolder" + new Random().nextInt(999);
-    private static final String PATH_TO_FILE           = PROJECT_NAME + "/src/com/company/nba/ATest.java";
-    private static final String NEW_FOLDER_NAME        = "test";
-    private static final String NEW_SOURCE_FOLDER      = "java";
-    private static final String PATH_NEW_SOURCE_FOLDER = PROJECT_NAME + "/test/java";
-    private static final String NEW_PACKAGE_NAME       = "com.org.ltd";
+  private static final String PROJECT_NAME =
+      "MoveJavaFileInNewSourceFolder" + new Random().nextInt(999);
+  private static final String PATH_TO_FILE = PROJECT_NAME + "/src/com/company/nba/ATest.java";
+  private static final String NEW_FOLDER_NAME = "test";
+  private static final String NEW_SOURCE_FOLDER = "java";
+  private static final String PATH_NEW_SOURCE_FOLDER = PROJECT_NAME + "/test/java";
+  private static final String NEW_PACKAGE_NAME = "com.org.ltd";
 
-    @Inject
-    private TestWorkspace           workspace;
-    @Inject
-    private Ide                     ide;
-    @Inject
-    private ProjectExplorer          projectExplorer;
-    @Inject
-    private Loader                   loader;
-    @Inject
-    private Refactor                 refactor;
-    @Inject
-    private Menu                     menu;
-    @Inject
-    private AskForValueDialog        askForValueDialog;
-    @Inject
-    private ToastLoader              toastLoader;
-    @Inject
-    private NotificationsPopupPanel  notificationsPopupPanel;
-    @Inject
-    private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestWorkspace workspace;
+  @Inject private Ide ide;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Loader loader;
+  @Inject private Refactor refactor;
+  @Inject private Menu menu;
+  @Inject private AskForValueDialog askForValueDialog;
+  @Inject private ToastLoader toastLoader;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
 
-    @BeforeClass
-    public void prepare() throws Exception {
-        URL resource = getClass().getResource("/projects/plain-java-project");
-        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
-                                               PROJECT_NAME,
-                                               ProjectTemplates.PLAIN_JAVA
-        );
-        ide.open(workspace);
-    }
+  @BeforeClass
+  public void prepare() throws Exception {
+    URL resource = getClass().getResource("/projects/plain-java-project");
+    testProjectServiceClient.importProject(
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.PLAIN_JAVA);
+    ide.open(workspace);
+  }
 
-    @Test
-    public void checkMoveJavaClassInNewSourceFolder() {
-        projectExplorer.waitProjectExplorer();
-        projectExplorer.waitItem(PROJECT_NAME);
-        projectExplorer.quickExpandWithJavaScript();
-        projectExplorer.openItemByPath(PATH_TO_FILE);
+  @Test
+  public void checkMoveJavaClassInNewSourceFolder() {
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.openItemByPath(PATH_TO_FILE);
 
-        // create new folder and configure as source
-        projectExplorer.selectItem(PROJECT_NAME);
-        createNewFolder(NEW_FOLDER_NAME);
-        projectExplorer.waitItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
-        projectExplorer.selectItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
-        createNewFolder(NEW_SOURCE_FOLDER);
-        projectExplorer.selectItem(PATH_NEW_SOURCE_FOLDER);
-        projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test/" + NEW_SOURCE_FOLDER);
-        projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.BUILD_PATH);
-        projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER);
-        projectExplorer.waitFolderDefinedTypeOfFolderByPath
-                (PATH_NEW_SOURCE_FOLDER, ProjectExplorer.FolderTypes.JAVA_SOURCE_FOLDER);
-        projectExplorer.selectItem(PATH_NEW_SOURCE_FOLDER);
-        projectExplorer.openContextMenuByPathSelectedItem(PATH_NEW_SOURCE_FOLDER);
-        createPackage();
+    // create new folder and configure as source
+    projectExplorer.selectItem(PROJECT_NAME);
+    createNewFolder(NEW_FOLDER_NAME);
+    projectExplorer.waitItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
+    projectExplorer.selectItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
+    createNewFolder(NEW_SOURCE_FOLDER);
+    projectExplorer.selectItem(PATH_NEW_SOURCE_FOLDER);
+    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test/" + NEW_SOURCE_FOLDER);
+    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.BUILD_PATH);
+    projectExplorer.clickOnItemInContextMenu(
+        TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER);
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
+        PATH_NEW_SOURCE_FOLDER, ProjectExplorer.FolderTypes.JAVA_SOURCE_FOLDER);
+    projectExplorer.selectItem(PATH_NEW_SOURCE_FOLDER);
+    projectExplorer.openContextMenuByPathSelectedItem(PATH_NEW_SOURCE_FOLDER);
+    createPackage();
 
-        // move java file into new source folder
-        projectExplorer.waitItem(PROJECT_NAME);
-        projectExplorer.selectItem(PATH_TO_FILE);
-        projectExplorer.launchRefactorMoveByKeyboard();
-        refactor.waitMoveItemFormIsOpen();
-        refactor.clickOnExpandIconTree(PROJECT_NAME);
-        refactor.clickOnExpandIconTree("/test/java");
-        loader.waitOnClosed();
-        refactor.chooseDestinationForItem(NEW_PACKAGE_NAME);
-        refactor.clickOkButtonRefactorForm();
-        refactor.waitMoveItemFormIsClosed();
-        loader.waitOnClosed();
-        projectExplorer.waitItem(PROJECT_NAME + "/test/java/com/org/ltd/ATest.java");
-    }
+    // move java file into new source folder
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.selectItem(PATH_TO_FILE);
+    projectExplorer.launchRefactorMoveByKeyboard();
+    refactor.waitMoveItemFormIsOpen();
+    refactor.clickOnExpandIconTree(PROJECT_NAME);
+    refactor.clickOnExpandIconTree("/test/java");
+    loader.waitOnClosed();
+    refactor.chooseDestinationForItem(NEW_PACKAGE_NAME);
+    refactor.clickOkButtonRefactorForm();
+    refactor.waitMoveItemFormIsClosed();
+    loader.waitOnClosed();
+    projectExplorer.waitItem(PROJECT_NAME + "/test/java/com/org/ltd/ATest.java");
+  }
 
-    private void createNewFolder(String folderName) {
-        menu.runCommand(TestMenuCommandsConstants.Project.PROJECT,
-                        TestMenuCommandsConstants.Project.New.NEW,
-                        TestMenuCommandsConstants.Project.New.FOLDER);
+  private void createNewFolder(String folderName) {
+    menu.runCommand(
+        TestMenuCommandsConstants.Project.PROJECT,
+        TestMenuCommandsConstants.Project.New.NEW,
+        TestMenuCommandsConstants.Project.New.FOLDER);
 
-        askForValueDialog.waitFormToOpen();
-        askForValueDialog.typeAndWaitText(folderName);
-        askForValueDialog.clickOkBtn();
-        askForValueDialog.waitFormToClose();
-    }
+    askForValueDialog.waitFormToOpen();
+    askForValueDialog.typeAndWaitText(folderName);
+    askForValueDialog.clickOkBtn();
+    askForValueDialog.waitFormToClose();
+  }
 
-    private void createPackage() {
-        loader.waitOnClosed();
-        projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
-        projectExplorer.clickOnNewContextMenuItem(TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_PACKAGE);
-        askForValueDialog.waitFormToOpen();
-        askForValueDialog.typeAndWaitText(NEW_PACKAGE_NAME);
-        askForValueDialog.clickOkBtn();
-        askForValueDialog.waitFormToClose();
-        projectExplorer.waitItemInVisibleArea(NEW_PACKAGE_NAME);
-    }
+  private void createPackage() {
+    loader.waitOnClosed();
+    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
+    projectExplorer.clickOnNewContextMenuItem(
+        TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_PACKAGE);
+    askForValueDialog.waitFormToOpen();
+    askForValueDialog.typeAndWaitText(NEW_PACKAGE_NAME);
+    askForValueDialog.clickOkBtn();
+    askForValueDialog.waitFormToClose();
+    projectExplorer.waitItemInVisibleArea(NEW_PACKAGE_NAME);
+  }
 }

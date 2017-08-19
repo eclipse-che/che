@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.languageserver;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 
+import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -27,57 +28,51 @@ import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
-
-/**
- * @author Musienko Maxim
- */
+/** @author Musienko Maxim */
 public class CheckMainFeatureForLanguageTest {
 
-    private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
-    @InjectTestWorkspace(template = WorkspaceTemplate.CODENVY_DEBIAN_JRE)
-    private TestWorkspace   workspace;
-    @Inject
-    private Ide             ide;
-    @Inject
-    private ProjectExplorer projectExplorer;
-    @Inject
-    private Loader          loader;
-    @Inject
-    private CodenvyEditor   editor;
-    @Inject
-    private Menu            menu;
-    @Inject
-    private Wizard          wizard;
+  private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        ide.open(workspace);
-    }
+  @InjectTestWorkspace(template = WorkspaceTemplate.CODENVY_DEBIAN_JRE)
+  private TestWorkspace workspace;
 
-    @Test
-    public void checkLaunchingCodeserver() throws Exception {
-        projectExplorer.waitProjectExplorer();
-        menu.runCommand(TestMenuCommandsConstants.Workspace.WORKSPACE, TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
-        wizard.selectSample(Wizard.SamplesName.ASP_DOT_NET_WEB_SIMPLE);
-        wizard.typeProjectNameOnWizard(PROJECT_NAME);
-        wizard.clickCreateButton();
-        wizard.waitCloseProjectConfigForm();
-        projectExplorer.openItemByPath(PROJECT_NAME);
-        projectExplorer.waitItem(PROJECT_NAME + "/Program.cs", 240);
-        projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
-        loader.waitOnClosed();
-        editor.setCursorToDefinedLineAndChar(16, 34);
-        for (int i = 0; i < 8; i++) {
-            editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-        }
-        editor.launchAutocomplete();
-        editor.waitTextIntoAutocompleteContainer("Build()");
-        editor.closeAutocomplete();
-        editor.waitMarkerInPosition(ERROR_MARKER, 10);
-        editor.waitMarkerInPosition(ERROR_MARKER, 18);
-        editor.setCursorToDefinedLineAndChar(16, 26);
-        editor.typeTextIntoEditor("Build();");
-        editor.waitAllMarkersDisappear(ERROR_MARKER);
+  @Inject private Ide ide;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Loader loader;
+  @Inject private CodenvyEditor editor;
+  @Inject private Menu menu;
+  @Inject private Wizard wizard;
+
+  @BeforeClass
+  public void setUp() throws Exception {
+    ide.open(workspace);
+  }
+
+  @Test
+  public void checkLaunchingCodeserver() throws Exception {
+    projectExplorer.waitProjectExplorer();
+    menu.runCommand(
+        TestMenuCommandsConstants.Workspace.WORKSPACE,
+        TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
+    wizard.selectSample(Wizard.SamplesName.ASP_DOT_NET_WEB_SIMPLE);
+    wizard.typeProjectNameOnWizard(PROJECT_NAME);
+    wizard.clickCreateButton();
+    wizard.waitCloseProjectConfigForm();
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.waitItem(PROJECT_NAME + "/Program.cs", 240);
+    projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
+    loader.waitOnClosed();
+    editor.setCursorToDefinedLineAndChar(16, 34);
+    for (int i = 0; i < 8; i++) {
+      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     }
+    editor.launchAutocomplete();
+    editor.waitTextIntoAutocompleteContainer("Build()");
+    editor.closeAutocomplete();
+    editor.waitMarkerInPosition(ERROR_MARKER, 10);
+    editor.waitMarkerInPosition(ERROR_MARKER, 18);
+    editor.setCursorToDefinedLineAndChar(16, 26);
+    editor.typeTextIntoEditor("Build();");
+    editor.waitAllMarkersDisappear(ERROR_MARKER);
+  }
 }

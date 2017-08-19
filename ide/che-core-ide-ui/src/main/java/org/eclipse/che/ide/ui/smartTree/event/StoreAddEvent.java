@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.smartTree.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
-
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.ui.smartTree.event.StoreAddEvent.StoreAddHandler;
-
 import java.util.Collections;
 import java.util.List;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.event.StoreAddEvent.StoreAddHandler;
 
 /**
  * Indicates that an element has been added to the Store.
@@ -28,52 +26,52 @@ import java.util.List;
  */
 public class StoreAddEvent extends GwtEvent<StoreAddHandler> {
 
-    public interface HasStoreAddHandlers extends HasHandlers {
-        HandlerRegistration addStoreAddHandler(StoreAddHandler handler);
+  public interface HasStoreAddHandlers extends HasHandlers {
+    HandlerRegistration addStoreAddHandler(StoreAddHandler handler);
+  }
+
+  public interface StoreAddHandler extends EventHandler {
+    void onAdd(StoreAddEvent event);
+  }
+
+  private static Type<StoreAddHandler> TYPE;
+
+  public static Type<StoreAddHandler> getType() {
+    if (TYPE == null) {
+      TYPE = new Type<>();
     }
+    return TYPE;
+  }
 
-    public interface StoreAddHandler extends EventHandler {
-        void onAdd(StoreAddEvent event);
-    }
+  private final List<Node> nodes;
+  private final int index;
 
-    private static Type<StoreAddHandler> TYPE;
+  public StoreAddEvent(int index, List<Node> nodes) {
+    this.index = index;
+    this.nodes = Collections.unmodifiableList(nodes);
+  }
 
-    public static Type<StoreAddHandler> getType() {
-        if (TYPE == null) {
-            TYPE = new Type<>();
-        }
-        return TYPE;
-    }
+  public StoreAddEvent(int index, Node node) {
+    this.index = index;
+    nodes = Collections.singletonList(node);
+  }
 
-    private final List<Node> nodes;
-    private final int        index;
+  @Override
+  public Type<StoreAddHandler> getAssociatedType() {
+    return getType();
+  }
 
-    public StoreAddEvent(int index, List<Node> nodes) {
-        this.index = index;
-        this.nodes = Collections.unmodifiableList(nodes);
-    }
+  public int getIndex() {
+    return index;
+  }
 
-    public StoreAddEvent(int index, Node node) {
-        this.index = index;
-        nodes = Collections.singletonList(node);
-    }
+  public List<Node> getNodes() {
+    return nodes;
+  }
 
-    @Override
-    public Type<StoreAddHandler> getAssociatedType() {
-        return getType();
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public List<Node> getNodes() {
-        return nodes;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void dispatch(StoreAddHandler handler) {
-        handler.onAdd(this);
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected void dispatch(StoreAddHandler handler) {
+    handler.onAdd(this);
+  }
 }

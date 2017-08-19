@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.ide.credentialsdialog;
 
 import com.google.gwt.core.client.GWT;
@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-
 import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 
@@ -31,91 +30,95 @@ import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
  *
  * @author Igor Vinokur
  */
-public class SubversionCredentialsDialogViewImpl extends Window implements SubversionCredentialsDialogView {
+public class SubversionCredentialsDialogViewImpl extends Window
+    implements SubversionCredentialsDialogView {
 
-    @UiField(provided = true)
-    final SubversionExtensionLocalizationConstants locale;
+  @UiField(provided = true)
+  final SubversionExtensionLocalizationConstants locale;
 
-    interface SubversionAuthenticatorImplUiBinder extends UiBinder<Widget, SubversionCredentialsDialogViewImpl> {
-    }
+  interface SubversionAuthenticatorImplUiBinder
+      extends UiBinder<Widget, SubversionCredentialsDialogViewImpl> {}
 
-    private static SubversionAuthenticatorImplUiBinder uiBinder = GWT.create(SubversionAuthenticatorImplUiBinder.class);
+  private static SubversionAuthenticatorImplUiBinder uiBinder =
+      GWT.create(SubversionAuthenticatorImplUiBinder.class);
 
-    private ActionDelegate delegate;
+  private ActionDelegate delegate;
 
-    @UiField
-    TextBox         usernameTextBox;
-    @UiField
-    PasswordTextBox passwordTextBox;
+  @UiField TextBox usernameTextBox;
+  @UiField PasswordTextBox passwordTextBox;
 
-    private final Button authenticateButton;
+  private final Button authenticateButton;
 
-    @Inject
-    public SubversionCredentialsDialogViewImpl(SubversionExtensionLocalizationConstants locale) {
-        this.locale = locale;
-        this.setWidget(uiBinder.createAndBindUi(this));
-        this.setTitle(locale.credentialsDialogTitle());
+  @Inject
+  public SubversionCredentialsDialogViewImpl(SubversionExtensionLocalizationConstants locale) {
+    this.locale = locale;
+    this.setWidget(uiBinder.createAndBindUi(this));
+    this.setTitle(locale.credentialsDialogTitle());
 
-        authenticateButton = createPrimaryButton(locale.credentialsDialogAuthenticateButton(),
-                                                 "svn-authentication-username",
-                                                 new ClickHandler() {
-                                                     @Override
-                                                     public void onClick(ClickEvent event) {
-                                                         delegate.onAuthenticateClicked();
-                                                     }
-                                                 });
-        Button cancelButton = createButton(locale.credentialsDialogCancelButton(),
-                                           "svn-authentication-password",
-                                           new ClickHandler() {
-                                               @Override
-                                               public void onClick(ClickEvent event) {
-                                                   delegate.onCancelClicked();
-                                               }
-                                           });
+    authenticateButton =
+        createPrimaryButton(
+            locale.credentialsDialogAuthenticateButton(),
+            "svn-authentication-username",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onAuthenticateClicked();
+              }
+            });
+    Button cancelButton =
+        createButton(
+            locale.credentialsDialogCancelButton(),
+            "svn-authentication-password",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onCancelClicked();
+              }
+            });
 
-        addButtonToFooter(authenticateButton);
-        addButtonToFooter(cancelButton);
-    }
+    addButtonToFooter(authenticateButton);
+    addButtonToFooter(cancelButton);
+  }
 
-    @Override
-    public void showDialog() {
-        super.show();
-    }
+  @Override
+  public void showDialog() {
+    super.show();
+  }
 
-    @Override
-    public void closeDialog() {
-        super.hide();
-    }
+  @Override
+  public void closeDialog() {
+    super.hide();
+  }
 
-    @Override
-    public String getUsername() {
-        return usernameTextBox.getText();
-    }
+  @Override
+  public String getUsername() {
+    return usernameTextBox.getText();
+  }
 
-    @Override
-    public String getPassword() {
-        return passwordTextBox.getText();
-    }
+  @Override
+  public String getPassword() {
+    return passwordTextBox.getText();
+  }
 
-    @Override
-    public void cleanCredentials() {
-        usernameTextBox.setText("");
-        passwordTextBox.setText("");
-        setEnabledAuthenticateButton(false);
-    }
+  @Override
+  public void cleanCredentials() {
+    usernameTextBox.setText("");
+    passwordTextBox.setText("");
+    setEnabledAuthenticateButton(false);
+  }
 
-    @UiHandler({"usernameTextBox", "passwordTextBox"})
-    void credentialChangeHandler(KeyUpEvent event) {
-        delegate.onCredentialsChanged();
-    }
+  @UiHandler({"usernameTextBox", "passwordTextBox"})
+  void credentialChangeHandler(KeyUpEvent event) {
+    delegate.onCredentialsChanged();
+  }
 
-    @Override
-    public void setEnabledAuthenticateButton(boolean enabled) {
-        authenticateButton.setEnabled(enabled);
-    }
+  @Override
+  public void setEnabledAuthenticateButton(boolean enabled) {
+    authenticateButton.setEnabled(enabled);
+  }
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 }

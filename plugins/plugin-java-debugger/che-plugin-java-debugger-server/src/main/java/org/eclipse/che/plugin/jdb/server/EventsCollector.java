@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,52 +7,51 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.jdb.server;
 
 import com.sun.jdi.VMDisconnectedException;
 import com.sun.jdi.event.EventQueue;
-
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** @author andrew00x */
 final class EventsCollector implements Runnable {
-    private static final Logger LOG = LoggerFactory.getLogger(EventsCollector.class);
-    private final    EventsHandler handler;
-    private final    EventQueue    queue;
-    private final    Thread        thread;
-    private volatile boolean       running;
+  private static final Logger LOG = LoggerFactory.getLogger(EventsCollector.class);
+  private final EventsHandler handler;
+  private final EventQueue queue;
+  private final Thread thread;
+  private volatile boolean running;
 
-    EventsCollector(EventQueue queue, EventsHandler handler) {
-        this.queue = queue;
-        this.handler = handler;
+  EventsCollector(EventQueue queue, EventsHandler handler) {
+    this.queue = queue;
+    this.handler = handler;
 
-        thread = new Thread(this);
-        running = true;
-        thread.start();
+    thread = new Thread(this);
+    running = true;
+    thread.start();
+  }
+
+  @Override
+  public void run() {
+    while (running) {
+      try {
+        handler.handleEvents(queue.remove());
+      } catch (DebuggerException e) {
+        LOG.error(e.getMessage(), e);
+      } catch (VMDisconnectedException e) {
+        break;
+      } catch (InterruptedException e) {
+        // Thread interrupted with method stop().
+        LOG.debug("EventsCollector terminated");
+      }
     }
+    LOG.debug("EventsCollector stopped");
+  }
 
-    @Override
-    public void run() {
-        while (running) {
-            try {
-                handler.handleEvents(queue.remove());
-            } catch (DebuggerException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (VMDisconnectedException e) {
-                break;
-            } catch (InterruptedException e) {
-                // Thread interrupted with method stop().
-                LOG.debug("EventsCollector terminated");
-            }
-        }
-        LOG.debug("EventsCollector stopped");
-    }
-
-    void stop() {
-        running = false;
-        thread.interrupt();
-    }
+  void stop() {
+    running = false;
+    thread.interrupt();
+  }
 }

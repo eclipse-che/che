@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.core;
-
-import elemental.json.Json;
-import elemental.json.JsonFactory;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
@@ -20,7 +17,8 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
-
+import elemental.json.Json;
+import elemental.json.JsonFactory;
 import org.eclipse.che.ide.actions.ActionApiModule;
 import org.eclipse.che.ide.api.ConnectionClosedInformer;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
@@ -93,90 +91,94 @@ import org.eclipse.che.providers.DynaProviderImpl;
 @ExtensionGinModule
 public class CoreGinModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        install(new JsonRpcModule());
-        install(new WebSocketModule());
-        install(new ClientServerEventModule());
+  @Override
+  protected void configure() {
+    install(new JsonRpcModule());
+    install(new WebSocketModule());
+    install(new ClientServerEventModule());
 
-        install(new UiModule());
-        install(new ClipboardModule());
+    install(new UiModule());
+    install(new ClipboardModule());
 
-        install(new EditorApiModule());
-        install(new EditorPreferencesModule());
-        install(new NotificationApiModule());
-        install(new FileTypeApiModule());
-        install(new ResourceApiModule());
-        install(new ActionApiModule());
-        install(new PartApiModule());
-        install(new DebugApiModule());
-        install(new ThemeApiModule());
-        install(new PreferencesApiModule());
-        install(new PersistenceApiModule());
-        install(new MacroApiModule());
-        install(new UserApiModule());
-        install(new WorkspaceApiModule());
-        install(new MachineApiModule());
-        install(new CommandApiModule());
-        install(new ConsoleGinModule());
-        install(new ProcessesGinModule());
-        install(new ProjectApiModule());
-        install(new ProjectImportModule());
-        install(new OAuthApiModule());
-        install(new WorkspaceEventsModule());
-        install(new FactoryGinModule());
-        install(new WorkspaceEventsModule());
+    install(new EditorApiModule());
+    install(new EditorPreferencesModule());
+    install(new NotificationApiModule());
+    install(new FileTypeApiModule());
+    install(new ResourceApiModule());
+    install(new ActionApiModule());
+    install(new PartApiModule());
+    install(new DebugApiModule());
+    install(new ThemeApiModule());
+    install(new PreferencesApiModule());
+    install(new PersistenceApiModule());
+    install(new MacroApiModule());
+    install(new UserApiModule());
+    install(new WorkspaceApiModule());
+    install(new MachineApiModule());
+    install(new CommandApiModule());
+    install(new ConsoleGinModule());
+    install(new ProcessesGinModule());
+    install(new ProjectApiModule());
+    install(new ProjectImportModule());
+    install(new OAuthApiModule());
+    install(new WorkspaceEventsModule());
+    install(new FactoryGinModule());
+    install(new WorkspaceEventsModule());
 
-        // configure miscellaneous core components
-        bind(StandardComponentInitializer.class).in(Singleton.class);
+    // configure miscellaneous core components
+    bind(StandardComponentInitializer.class).in(Singleton.class);
 
-        bind(TerminalInitializer.class).in(Singleton.class);
+    bind(TerminalInitializer.class).in(Singleton.class);
 
-        GinMapBinder<String, Component> componentsBinder = GinMapBinder.newMapBinder(binder(), String.class, Component.class);
-        componentsBinder.addBinding("Standard components").to(StandardComponent.class);
+    GinMapBinder<String, Component> componentsBinder =
+        GinMapBinder.newMapBinder(binder(), String.class, Component.class);
+    componentsBinder.addBinding("Standard components").to(StandardComponent.class);
 
-        bind(DynaProvider.class).to(DynaProviderImpl.class);
+    bind(DynaProvider.class).to(DynaProviderImpl.class);
 
-        GinMapBinder.newMapBinder(binder(), String.class, FqnProvider.class);
+    GinMapBinder.newMapBinder(binder(), String.class, FqnProvider.class);
 
-        bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
+    bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
 
-        //TODO: don't remove binding until not fix Codenvy and other packaging  
-        bind(String.class).annotatedWith(RestContext.class).toProvider(RestContextProvider.class).in(Singleton.class);
+    //TODO: don't remove binding until not fix Codenvy and other packaging
+    bind(String.class)
+        .annotatedWith(RestContext.class)
+        .toProvider(RestContextProvider.class)
+        .in(Singleton.class);
 
-        install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
-        install(new GinFactoryModuleBuilder().build(PopupLoaderFactory.class));
+    install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
+    install(new GinFactoryModuleBuilder().build(PopupLoaderFactory.class));
 
-        bind(ExtensionRegistry.class).in(Singleton.class);
+    bind(ExtensionRegistry.class).in(Singleton.class);
 
-        bind(AppContext.class).to(AppContextImpl.class);
+    bind(AppContext.class).to(AppContextImpl.class);
 
-        install(new GinFactoryModuleBuilder().build(FindResultNodeFactory.class));
-        install(new GinFactoryModuleBuilder().build(TerminalFactory.class));
+    install(new GinFactoryModuleBuilder().build(FindResultNodeFactory.class));
+    install(new GinFactoryModuleBuilder().build(TerminalFactory.class));
 
-        // clients for the REST services
-        bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
-        bind(SshServiceClient.class).to(SshServiceClientImpl.class).in(Singleton.class);
-        bind(RecipeServiceClient.class).to(RecipeServiceClientImpl.class).in(Singleton.class);
+    // clients for the REST services
+    bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
+    bind(SshServiceClient.class).to(SshServiceClientImpl.class).in(Singleton.class);
+    bind(RecipeServiceClient.class).to(RecipeServiceClientImpl.class).in(Singleton.class);
 
-        // IDE agents
-        bind(SelectionAgent.class).to(SelectionAgentImpl.class).asEagerSingleton();
-        bind(KeyBindingAgent.class).to(KeyBindingManager.class).in(Singleton.class);
-        bind(WorkspaceAgent.class).to(WorkspacePresenter.class).in(Singleton.class);
+    // IDE agents
+    bind(SelectionAgent.class).to(SelectionAgentImpl.class).asEagerSingleton();
+    bind(KeyBindingAgent.class).to(KeyBindingManager.class).in(Singleton.class);
+    bind(WorkspaceAgent.class).to(WorkspacePresenter.class).in(Singleton.class);
 
-        // Exec agent
-        bind(ExecAgentCommandManager.class).to(JsonRpcExecAgentCommandManager.class);
-        bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
-        bind(ConnectedEventHandler.class).asEagerSingleton();
-        bind(AskCredentialsDialog.class).to(AskCredentialsDialogImpl.class);
-        bind(ProductInfoDataProvider.class).to(ProductInfoDataProviderImpl.class);
-        bind(WsAgentURLModifier.class).to(CheWsAgentLinksModifier.class);
-        bind(ConnectionClosedInformer.class).to(ConnectionClosedInformerImpl.class);
-    }
+    // Exec agent
+    bind(ExecAgentCommandManager.class).to(JsonRpcExecAgentCommandManager.class);
+    bind(ExecAgentEventManager.class).to(JsonRpcExecAgentEventManager.class);
+    bind(ConnectedEventHandler.class).asEagerSingleton();
+    bind(AskCredentialsDialog.class).to(AskCredentialsDialogImpl.class);
+    bind(ProductInfoDataProvider.class).to(ProductInfoDataProviderImpl.class);
+    bind(WsAgentURLModifier.class).to(CheWsAgentLinksModifier.class);
+    bind(ConnectionClosedInformer.class).to(ConnectionClosedInformerImpl.class);
+  }
 
-    @Provides
-    @Singleton
-    protected JsonFactory provideJsonFactory() {
-        return Json.instance();
-    }
+  @Provides
+  @Singleton
+  protected JsonFactory provideJsonFactory() {
+    return Json.instance();
+  }
 }

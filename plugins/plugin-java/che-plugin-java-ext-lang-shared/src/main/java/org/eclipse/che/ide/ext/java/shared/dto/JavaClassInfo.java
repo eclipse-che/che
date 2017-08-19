@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -20,13 +20,13 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface JavaClassInfo {
 
-    /** @return the FQN of java class */
-    String getFQN();
+  /** @return the FQN of java class */
+  String getFQN();
 
-    JavaClassInfo withFQN(String fqn);
+  JavaClassInfo withFQN(String fqn);
 
-    /** @return the project path */
-    String getProjectPath();
+  /** @return the project path */
+  String getProjectPath();
 
-    JavaClassInfo withProjectPath(String projectPath);
+  JavaClassInfo withProjectPath(String projectPath);
 }

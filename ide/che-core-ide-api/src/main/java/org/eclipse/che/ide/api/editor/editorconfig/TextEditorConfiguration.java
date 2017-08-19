@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.editor.editorconfig;
 
+import java.util.Map;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.changeintercept.ChangeInterceptorProvider;
@@ -21,88 +23,85 @@ import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 
-import javax.validation.constraints.NotNull;
-import java.util.Map;
-
-/**
- * Configure extended functions of the editor.
- */
+/** Configure extended functions of the editor. */
 public interface TextEditorConfiguration {
 
-    /**
-     * Returns the visual width of the tab character. This implementation always returns 3.
-     *
-     * @return the tab width
-     */
-    int getTabWidth();
+  /**
+   * Returns the visual width of the tab character. This implementation always returns 3.
+   *
+   * @return the tab width
+   */
+  int getTabWidth();
 
-    /**
-     * Returns the content formatter.
-     *
-     * @return the content formatter
-     */
-    @Nullable
-    ContentFormatter getContentFormatter();
+  /**
+   * Returns the content formatter.
+   *
+   * @return the content formatter
+   */
+  @Nullable
+  ContentFormatter getContentFormatter();
 
-    /**
-     * Returns the content assistant (completion) processors.
-     *
-     * @return the code assist processors
-     */
-    @Nullable
-    Map<String, CodeAssistProcessor> getContentAssistantProcessors();
+  /**
+   * Returns the content assistant (completion) processors.
+   *
+   * @return the code assist processors
+   */
+  @Nullable
+  Map<String, CodeAssistProcessor> getContentAssistantProcessors();
 
-    /**
-     * Returns the reconciler.
-     *
-     * @return the reconciler
-     */
-    @Nullable
-    Reconciler getReconciler();
+  /**
+   * Returns the reconciler.
+   *
+   * @return the reconciler
+   */
+  @Nullable
+  Reconciler getReconciler();
 
-    /**
-     * Returns the document partitioner.
-     *
-     * @return the document partitioner
-     */
-    @NotNull
-    DocumentPartitioner getPartitioner();
+  /**
+   * Returns the document partitioner.
+   *
+   * @return the document partitioner
+   */
+  @NotNull
+  DocumentPartitioner getPartitioner();
 
-    /**
-     * Return the document position model.
-     *
-     * @return the position model
-     */
-    @Nullable
-    DocumentPositionMap getDocumentPositionMap();
+  /**
+   * Return the document position model.
+   *
+   * @return the position model
+   */
+  @Nullable
+  DocumentPositionMap getDocumentPositionMap();
 
-    /**
-     * Return the annotation model.
-     *
-     * @return the annotation model
-     */
-    @Nullable
-    AnnotationModel getAnnotationModel();
+  /**
+   * Return the annotation model.
+   *
+   * @return the annotation model
+   */
+  @Nullable
+  AnnotationModel getAnnotationModel();
 
-    /**
-     * Return the Quickassist assistant processor.
-     *
-     * @return the quickassist assistant processor
-     */
-    @Nullable
-    QuickAssistProcessor getQuickAssistProcessor();
+  /**
+   * Return the Quickassist assistant processor.
+   *
+   * @return the quickassist assistant processor
+   */
+  @Nullable
+  QuickAssistProcessor getQuickAssistProcessor();
 
-    /**
-     * Return the {@link ChangeInterceptorProvider}.<br>
-     * @return the change interceptors
-     */
-    @Nullable
-    ChangeInterceptorProvider getChangeInterceptorProvider();
+  /**
+   * Return the {@link ChangeInterceptorProvider}.<br>
+   *
+   * @return the change interceptors
+   */
+  @Nullable
+  ChangeInterceptorProvider getChangeInterceptorProvider();
 
-    /**
-     * Return the {@link SignatureHelpProvider}
-     * @return the signature help provider
-     */
-    @Nullable
-    SignatureHelpProvider getSignatureHelpProvider();
+  /**
+   * Return the {@link SignatureHelpProvider}
+   *
+   * @return the signature help provider
+   */
+  @Nullable
+  SignatureHelpProvider getSignatureHelpProvider();
 }

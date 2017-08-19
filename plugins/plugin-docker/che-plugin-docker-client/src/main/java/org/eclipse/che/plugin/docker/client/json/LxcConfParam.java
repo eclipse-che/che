@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,47 +7,44 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.client.json;
 
 /** @author andrew00x */
 public class LxcConfParam {
-    private String key;
-    private String value;
+  private String key;
+  private String value;
 
-    public String getKey() {
-        return key;
-    }
+  public String getKey() {
+    return key;
+  }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
+  public void setKey(String key) {
+    this.key = key;
+  }
 
-    public String getValue() {
-        return value;
-    }
+  public String getValue() {
+    return value;
+  }
 
-    public void setValue(String value) {
-        this.value = value;
-    }
+  public void setValue(String value) {
+    this.value = value;
+  }
 
-    @Override
-    public String toString() {
-        return "LxcConfParam{" +
-               "key='" + key + '\'' +
-               ", value='" + value + '\'' +
-               '}';
-    }
+  @Override
+  public String toString() {
+    return "LxcConfParam{" + "key='" + key + '\'' + ", value='" + value + '\'' + '}';
+  }
 
-    // -------------------------
+  // -------------------------
 
-    public LxcConfParam withKey(String key) {
-        this.key = key;
-        return this;
-    }
+  public LxcConfParam withKey(String key) {
+    this.key = key;
+    return this;
+  }
 
-    public LxcConfParam withValue(String value) {
-        this.value = value;
-        return this;
-    }
+  public LxcConfParam withValue(String value) {
+    this.value = value;
+    return this;
+  }
 }

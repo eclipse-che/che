@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.core.workspace;
 
-import org.eclipse.che.selenium.core.user.TestUser;
-
 import java.util.concurrent.ExecutionException;
+import org.eclipse.che.selenium.core.user.TestUser;
 
 /**
  * Represents workspace in a test environment.
@@ -21,28 +20,18 @@ import java.util.concurrent.ExecutionException;
  */
 public interface TestWorkspace {
 
-    /**
-     * Return the name of the workspace.
-     */
-    String getName() throws ExecutionException, InterruptedException;
+  /** Return the name of the workspace. */
+  String getName() throws ExecutionException, InterruptedException;
 
-    /**
-     * Returns the id of the workspace.
-     */
-    String getId() throws ExecutionException, InterruptedException;
+  /** Returns the id of the workspace. */
+  String getId() throws ExecutionException, InterruptedException;
 
-    /**
-     * Returns owner of the workspace.
-     */
-    TestUser getOwner();
+  /** Returns owner of the workspace. */
+  TestUser getOwner();
 
-    /**
-     * Waits until workspace is started.
-     */
-    void await() throws InterruptedException, ExecutionException;
+  /** Waits until workspace is started. */
+  void await() throws InterruptedException, ExecutionException;
 
-    /**
-     * Deletes workspace.
-     */
-    void delete();
+  /** Deletes workspace. */
+  void delete();
 }

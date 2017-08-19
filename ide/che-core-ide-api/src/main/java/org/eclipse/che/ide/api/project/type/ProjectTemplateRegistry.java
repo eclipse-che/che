@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.project.type;
 
-import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
-
-import javax.validation.constraints.NotNull;
 import java.util.List;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 
 /**
  * Registry for {@link ProjectTemplateDescriptor}s.
@@ -21,15 +20,17 @@ import java.util.List;
  * @author Artem Zatsarynnyi
  */
 public interface ProjectTemplateRegistry {
-    /**
-     * Register the specified {@code descriptor}.
-     *
-     * @param descriptor
-     *         template descriptor to register
-     */
-    void register(@NotNull ProjectTemplateDescriptor descriptor);
+  /**
+   * Register the specified {@code descriptor}.
+   *
+   * @param descriptor template descriptor to register
+   */
+  void register(@NotNull ProjectTemplateDescriptor descriptor);
 
-    /** Get all {@link org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor}s for the specified {@code projectTypeId}. */
-    @NotNull
-    List<ProjectTemplateDescriptor> getTemplateDescriptors(@NotNull String projectTypeId);
+  /**
+   * Get all {@link org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor}s for
+   * the specified {@code projectTypeId}.
+   */
+  @NotNull
+  List<ProjectTemplateDescriptor> getTemplateDescriptors(@NotNull String projectTypeId);
 }

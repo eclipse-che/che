@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.debugger;
 
 import com.google.inject.Inject;
-
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -34,185 +37,189 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.file.Paths;
-
-/**
- * @author Dmytro Nochevnov
- */
+/** @author Dmytro Nochevnov */
 public class PhpProjectDebuggingTest {
 
-    private static final Logger LOG               = LoggerFactory.getLogger(PhpProjectDebuggingTest.class);
-    private static final String PROJECT           = "php-tests";
-    private static final String PATH_TO_INDEX_PHP = PROJECT + "/index.php";
-    private static final String PATH_TO_LIB_PHP   = PROJECT + "/lib.php";
+  private static final Logger LOG = LoggerFactory.getLogger(PhpProjectDebuggingTest.class);
+  private static final String PROJECT = "php-tests";
+  private static final String PATH_TO_INDEX_PHP = PROJECT + "/index.php";
+  private static final String PATH_TO_LIB_PHP = PROJECT + "/lib.php";
 
-    private static final String DEBUG_PHP_SCRIPT_COMMAND_NAME = "debug php script";
-    private static final String START_APACHE_COMMAND_NAME     = "start apache";
-    private static final String STOP_APACHE_COMMAND_NAME      = "stop apache";
-    private static final int    NON_DEFAULT_DEBUG_PORT        = 10140;
-    private static final String START_DEBUG_PARAMETERS        = "?start_debug=1&debug_host=localhost&debug_port=" + NON_DEFAULT_DEBUG_PORT;
+  private static final String DEBUG_PHP_SCRIPT_COMMAND_NAME = "debug php script";
+  private static final String START_APACHE_COMMAND_NAME = "start apache";
+  private static final String STOP_APACHE_COMMAND_NAME = "stop apache";
+  private static final int NON_DEFAULT_DEBUG_PORT = 10140;
+  private static final String START_DEBUG_PARAMETERS =
+      "?start_debug=1&debug_host=localhost&debug_port=" + NON_DEFAULT_DEBUG_PORT;
 
-    @InjectTestWorkspace(template = WorkspaceTemplate.ECLIPSE_PHP)
-    private TestWorkspace   ws;
-    @Inject
-    private Ide             ide;
+  @InjectTestWorkspace(template = WorkspaceTemplate.ECLIPSE_PHP)
+  private TestWorkspace ws;
 
-    @Inject
-    private ProjectExplorer          projectExplorer;
-    @Inject
-    private Loader                   loader;
-    @Inject
-    private DebugPanel               debugPanel;
-    @Inject
-    private PhpDebugConfig           debugConfig;
-    @Inject
-    private NotificationsPopupPanel  notificationPopup;
-    @Inject
-    private Menu                     menu;
-    @Inject
-    private CodenvyEditor            editor;
-    @Inject
-    private Consoles                 consoles;
-    @Inject
-    private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Ide ide;
 
-    @BeforeClass
-    public void setup() throws Exception {
-        URL resource = getClass().getResource("/projects/plugins/DebuggerPlugin/php-tests");
-        testProjectServiceClient.importProject(ws.getId(), Paths.get(resource.toURI()), PROJECT, ProjectTemplates.PHP
-        );
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Loader loader;
+  @Inject private DebugPanel debugPanel;
+  @Inject private PhpDebugConfig debugConfig;
+  @Inject private NotificationsPopupPanel notificationPopup;
+  @Inject private Menu menu;
+  @Inject private CodenvyEditor editor;
+  @Inject private Consoles consoles;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
 
-        // open IDE
-        ide.open(ws);
-        loader.waitOnClosed();
-        projectExplorer.waitItem(PROJECT);
-        notificationPopup.waitProgressPopupPanelClose();
+  @BeforeClass
+  public void setup() throws Exception {
+    URL resource = getClass().getResource("/projects/plugins/DebuggerPlugin/php-tests");
+    testProjectServiceClient.importProject(
+        ws.getId(), Paths.get(resource.toURI()), PROJECT, ProjectTemplates.PHP);
 
-        // open project tree
-        projectExplorer.quickExpandWithJavaScript();
-    }
+    // open IDE
+    ide.open(ws);
+    loader.waitOnClosed();
+    projectExplorer.waitItem(PROJECT);
+    notificationPopup.waitProgressPopupPanelClose();
 
-    @BeforeMethod
-    public void startDebug() {
-        // goto root item in the Project Explorer to have proper value of ${current.project.path} when executing maven command.
-        projectExplorer.selectItem(PROJECT);
-    }
+    // open project tree
+    projectExplorer.quickExpandWithJavaScript();
+  }
 
-    @AfterMethod
-    public void stopDebug() {
-        debugPanel.removeAllBreakpoints();
-        menu.runCommand(TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.END_DEBUG_SESSION);
-        projectExplorer.invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT, STOP_APACHE_COMMAND_NAME);
+  @BeforeMethod
+  public void startDebug() {
+    // goto root item in the Project Explorer to have proper value of ${current.project.path} when executing maven command.
+    projectExplorer.selectItem(PROJECT);
+  }
 
-        // remove debug configuration
-        menu.runCommand(TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
-        debugConfig.removeConfig(PROJECT);
-    }
+  @AfterMethod
+  public void stopDebug() {
+    debugPanel.removeAllBreakpoints();
+    menu.runCommand(
+        TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.END_DEBUG_SESSION);
+    projectExplorer.invokeCommandWithContextMenu(
+        ProjectExplorer.CommandsGoal.COMMON, PROJECT, STOP_APACHE_COMMAND_NAME);
 
-    @Test(priority = 0)
-    public void shouldDebugCliPhpScriptFromFirstLine() {
-        // when
-        menu.runCommand(TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
-        debugConfig.createConfig(PROJECT);
+    // remove debug configuration
+    menu.runCommand(
+        TestMenuCommandsConstants.Run.RUN_MENU,
+        TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
+    debugConfig.removeConfig(PROJECT);
+  }
 
-        menu.runCommandByXpath(TestMenuCommandsConstants.Run.RUN_MENU,
-                               TestMenuCommandsConstants.Run.DEBUG,
-                               getXpathForDebugConfigurationMenuItem());
+  @Test(priority = 0)
+  public void shouldDebugCliPhpScriptFromFirstLine() {
+    // when
+    menu.runCommand(
+        TestMenuCommandsConstants.Run.RUN_MENU,
+        TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
+    debugConfig.createConfig(PROJECT);
 
-        notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
+    menu.runCommandByXpath(
+        TestMenuCommandsConstants.Run.RUN_MENU,
+        TestMenuCommandsConstants.Run.DEBUG,
+        getXpathForDebugConfigurationMenuItem());
 
-        projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
-        editor.setBreakPointAndWaitActiveState(14);
-        editor.closeAllTabs();
+    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
 
-        projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
-        projectExplorer.invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT, DEBUG_PHP_SCRIPT_COMMAND_NAME);
-        debugPanel.openDebugPanel();
+    projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
+    editor.setBreakPointAndWaitActiveState(14);
+    editor.closeAllTabs();
 
-        // then
-        debugPanel.waitDebugHighlightedText("<?php include 'lib.php';?>");
-        debugPanel.waitTextInVariablesPanel("$_GET: array [0]");
+    projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
+    projectExplorer.invokeCommandWithContextMenu(
+        ProjectExplorer.CommandsGoal.COMMON, PROJECT, DEBUG_PHP_SCRIPT_COMMAND_NAME);
+    debugPanel.openDebugPanel();
 
-        // when
-        debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
+    // then
+    debugPanel.waitDebugHighlightedText("<?php include 'lib.php';?>");
+    debugPanel.waitTextInVariablesPanel("$_GET: array [0]");
 
-        // then
-        editor.waitTabFileWithSavedStatus("lib.php");
-        debugPanel.waitDebugHighlightedText("return \"Hello, \" + $name;");
-        debugPanel.waitTextInVariablesPanel("$name: \"man\"");
+    // when
+    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
 
-        // when
-        debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
+    // then
+    editor.waitTabFileWithSavedStatus("lib.php");
+    debugPanel.waitDebugHighlightedText("return \"Hello, \" + $name;");
+    debugPanel.waitTextInVariablesPanel("$name: \"man\"");
 
-        //then
-        editor.waitTabFileWithSavedStatus("index.php");
-        debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
-        debugPanel.waitTextInVariablesPanel("$_GET: array [0]");
-    }
+    // when
+    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
 
-    @Test(priority = 1)
-    public void shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine() throws IOException {
-        // when
-        menu.runCommand(TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
-        debugConfig.createConfig(PROJECT, false, NON_DEFAULT_DEBUG_PORT);
+    //then
+    editor.waitTabFileWithSavedStatus("index.php");
+    debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
+    debugPanel.waitTextInVariablesPanel("$_GET: array [0]");
+  }
 
-        menu.runCommandByXpath(TestMenuCommandsConstants.Run.RUN_MENU,
-                               TestMenuCommandsConstants.Run.DEBUG,
-                               getXpathForDebugConfigurationMenuItem());
+  @Test(priority = 1)
+  public void shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine() throws IOException {
+    // when
+    menu.runCommand(
+        TestMenuCommandsConstants.Run.RUN_MENU,
+        TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
+    debugConfig.createConfig(PROJECT, false, NON_DEFAULT_DEBUG_PORT);
 
-        notificationPopup.waitExpectedMessageOnProgressPanelAndClosed(
-                String.format("Remote debugger connected\nConnected to: Zend Debugger, port: %s.",
-                              NON_DEFAULT_DEBUG_PORT));
+    menu.runCommandByXpath(
+        TestMenuCommandsConstants.Run.RUN_MENU,
+        TestMenuCommandsConstants.Run.DEBUG,
+        getXpathForDebugConfigurationMenuItem());
 
-        projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
-        editor.setBreakPointAndWaitActiveState(14);
-        editor.closeAllTabs();
+    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed(
+        String.format(
+            "Remote debugger connected\nConnected to: Zend Debugger, port: %s.",
+            NON_DEFAULT_DEBUG_PORT));
 
-        projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
-        projectExplorer.invokeCommandWithContextMenu(ProjectExplorer.CommandsGoal.COMMON, PROJECT, START_APACHE_COMMAND_NAME);
+    projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
+    editor.setBreakPointAndWaitActiveState(14);
+    editor.closeAllTabs();
 
-        startWebPhpScriptInDebugMode();
+    projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
+    projectExplorer.invokeCommandWithContextMenu(
+        ProjectExplorer.CommandsGoal.COMMON, PROJECT, START_APACHE_COMMAND_NAME);
 
-        debugPanel.openDebugPanel();
+    startWebPhpScriptInDebugMode();
 
-        // then
-        editor.waitTabFileWithSavedStatus("lib.php");
-        debugPanel.waitDebugHighlightedText("return \"Hello, \" + $name;");
-        debugPanel.waitTextInVariablesPanel("$name: \"man\"");
+    debugPanel.openDebugPanel();
 
-        // when
-        debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
+    // then
+    editor.waitTabFileWithSavedStatus("lib.php");
+    debugPanel.waitDebugHighlightedText("return \"Hello, \" + $name;");
+    debugPanel.waitTextInVariablesPanel("$name: \"man\"");
 
-        //then
-        editor.waitTabFileWithSavedStatus("index.php");
-        debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
-        debugPanel.waitTextInVariablesPanel("$_GET: array [3]");
-    }
+    // when
+    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
 
-    /**
-     * Start Web PHP Application in debug mode by making HTTP GET request to this application asynchronously on preview url displayed in
-     * console + start debug parameters
-     */
-    private void startWebPhpScriptInDebugMode() {
-        final String previewUrl = consoles.getPreviewUrl() + START_DEBUG_PARAMETERS;
-        new Thread(() -> {
-            try {
+    //then
+    editor.waitTabFileWithSavedStatus("index.php");
+    debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
+    debugPanel.waitTextInVariablesPanel("$_GET: array [3]");
+  }
+
+  /**
+   * Start Web PHP Application in debug mode by making HTTP GET request to this application
+   * asynchronously on preview url displayed in console + start debug parameters
+   */
+  private void startWebPhpScriptInDebugMode() {
+    final String previewUrl = consoles.getPreviewUrl() + START_DEBUG_PARAMETERS;
+    new Thread(
+            () -> {
+              try {
                 URL connectionUrl = new URL(previewUrl);
-                HttpURLConnection connection = (HttpURLConnection)connectionUrl.openConnection();
+                HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
                 connection.setRequestMethod("GET");
                 connection.getResponseCode();
-            } catch (IOException e) {
-                LOG.error(String.format("There was a problem with connecting to PHP-application for debug on URL '%s'", previewUrl), e);
-            }
-        }).start();
-    }
+              } catch (IOException e) {
+                LOG.error(
+                    String.format(
+                        "There was a problem with connecting to PHP-application for debug on URL '%s'",
+                        previewUrl),
+                    e);
+              }
+            })
+        .start();
+  }
 
-    private String getXpathForDebugConfigurationMenuItem() {
-        return String.format("//*[@id=\"%1$s/%2$s\" or @id=\"topmenu/Run/Debug/Debug '%2$s'\"]",
-                             TestMenuCommandsConstants.Run.DEBUG,
-                             PROJECT);
-    }
+  private String getXpathForDebugConfigurationMenuItem() {
+    return String.format(
+        "//*[@id=\"%1$s/%2$s\" or @id=\"topmenu/Run/Debug/Debug '%2$s'\"]",
+        TestMenuCommandsConstants.Run.DEBUG, PROJECT);
+  }
 }

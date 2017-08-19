@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.fetch;
-
-import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.ide.ext.git.client.GitResources;
-import org.eclipse.che.ide.ui.window.Window;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -30,9 +25,12 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import javax.validation.constraints.NotNull;
 import java.util.List;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitResources;
+import org.eclipse.che.ide.ui.window.Window;
 
 /**
  * The implementation of {@link FetchView}.
@@ -41,239 +39,245 @@ import java.util.List;
  */
 @Singleton
 public class FetchViewImpl extends Window implements FetchView {
-    interface FetchViewImplUiBinder extends UiBinder<Widget, FetchViewImpl> {
-    }
+  interface FetchViewImplUiBinder extends UiBinder<Widget, FetchViewImpl> {}
 
-    private static FetchViewImplUiBinder ourUiBinder = GWT.create(FetchViewImplUiBinder.class);
+  private static FetchViewImplUiBinder ourUiBinder = GWT.create(FetchViewImplUiBinder.class);
 
-    @UiField
-    CheckBox removeDeletedRefs;
-    @UiField
-    CheckBox fetchAllBranches;
-    @UiField
-    ListBox  repository;
-    @UiField
-    ListBox  localBranch;
-    @UiField
-    ListBox  remoteBranch;
-    Button btnFetch;
-    Button btnCancel;
-    @UiField(provided = true)
-    final   GitResources            res;
-    @UiField(provided = true)
-    final   GitLocalizationConstant locale;
-    private ActionDelegate          delegate;
+  @UiField CheckBox removeDeletedRefs;
+  @UiField CheckBox fetchAllBranches;
+  @UiField ListBox repository;
+  @UiField ListBox localBranch;
+  @UiField ListBox remoteBranch;
+  Button btnFetch;
+  Button btnCancel;
 
-    /**
-     * Create view.
-     *
-     * @param resources
-     * @param locale
-     */
-    @Inject
-    protected FetchViewImpl(GitResources resources, GitLocalizationConstant locale) {
-        this.res = resources;
-        this.locale = locale;
-        this.ensureDebugId("git-remotes-fetch-window");
+  @UiField(provided = true)
+  final GitResources res;
 
-        Widget widget = ourUiBinder.createAndBindUi(this);
+  @UiField(provided = true)
+  final GitLocalizationConstant locale;
 
-        this.setTitle(locale.fetchTitle());
-        this.setWidget(widget);
+  private ActionDelegate delegate;
 
-        btnCancel = createButton(locale.buttonCancel(), "git-remotes-fetch-cancel", new ClickHandler() {
+  /**
+   * Create view.
+   *
+   * @param resources
+   * @param locale
+   */
+  @Inject
+  protected FetchViewImpl(GitResources resources, GitLocalizationConstant locale) {
+    this.res = resources;
+    this.locale = locale;
+    this.ensureDebugId("git-remotes-fetch-window");
 
-            @Override
-            public void onClick(ClickEvent event) {
+    Widget widget = ourUiBinder.createAndBindUi(this);
+
+    this.setTitle(locale.fetchTitle());
+    this.setWidget(widget);
+
+    btnCancel =
+        createButton(
+            locale.buttonCancel(),
+            "git-remotes-fetch-cancel",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onCancelClicked();
-            }
-        });
-        addButtonToFooter(btnCancel);
+              }
+            });
+    addButtonToFooter(btnCancel);
 
-        btnFetch = createButton(locale.buttonFetch(), "git-remotes-fetch-fetch", new ClickHandler() {
+    btnFetch =
+        createButton(
+            locale.buttonFetch(),
+            "git-remotes-fetch-fetch",
+            new ClickHandler() {
 
-            @Override
-            public void onClick(ClickEvent event) {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onFetchClicked();
-            }
-        });
-        addButtonToFooter(btnFetch);
+              }
+            });
+    addButtonToFooter(btnFetch);
+  }
+
+  @Override
+  protected void onEnterClicked() {
+    if (isWidgetFocused(btnFetch)) {
+      delegate.onFetchClicked();
+      return;
     }
 
-    @Override
-    protected void onEnterClicked() {
-        if (isWidgetFocused(btnFetch)) {
-            delegate.onFetchClicked();
-            return;
-        }
-
-        if (isWidgetFocused(btnCancel)) {
-            delegate.onCancelClicked();
-        }
+    if (isWidgetFocused(btnCancel)) {
+      delegate.onCancelClicked();
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean isRemoveDeletedRefs() {
-        return removeDeletedRefs.getValue();
+  /** {@inheritDoc} */
+  @Override
+  public boolean isRemoveDeletedRefs() {
+    return removeDeletedRefs.getValue();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setRemoveDeleteRefs(boolean isRemoveDeleteRefs) {
+    removeDeletedRefs.setValue(isRemoveDeleteRefs);
+  }
+
+  /** {@inheritDoc} */
+  @NotNull
+  @Override
+  public String getRepositoryName() {
+    int index = repository.getSelectedIndex();
+    return index != -1 ? repository.getItemText(index) : "";
+  }
+
+  /** {@inheritDoc} */
+  @NotNull
+  @Override
+  public String getRepositoryUrl() {
+    int index = repository.getSelectedIndex();
+    return repository.getValue(index);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setRepositories(@NotNull List<Remote> repositories) {
+    this.repository.clear();
+    for (int i = 0; i < repositories.size(); i++) {
+      Remote repository = repositories.get(i);
+      this.repository.addItem(repository.getName(), repository.getUrl());
     }
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setRemoveDeleteRefs(boolean isRemoveDeleteRefs) {
-        removeDeletedRefs.setValue(isRemoveDeleteRefs);
+  /** {@inheritDoc} */
+  @NotNull
+  @Override
+  public String getLocalBranch() {
+    int index = localBranch.getSelectedIndex();
+    return index != -1 ? localBranch.getItemText(index) : "";
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setLocalBranches(@NotNull List<String> branches) {
+    this.localBranch.clear();
+    for (String branch : branches) {
+      this.localBranch.addItem(branch);
     }
+  }
 
-    /** {@inheritDoc} */
-    @NotNull
-    @Override
-    public String getRepositoryName() {
-        int index = repository.getSelectedIndex();
-        return index != -1 ? repository.getItemText(index) : "";
+  /** {@inheritDoc} */
+  @NotNull
+  @Override
+  public String getRemoteBranch() {
+    int index = remoteBranch.getSelectedIndex();
+    return index != -1 ? remoteBranch.getItemText(index) : "";
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setRemoteBranches(@NotNull List<String> branches) {
+    this.remoteBranch.clear();
+    for (String branch : branches) {
+      this.remoteBranch.addItem(branch);
     }
+  }
 
-    /** {@inheritDoc} */
-    @NotNull
-    @Override
-    public String getRepositoryUrl() {
-        int index = repository.getSelectedIndex();
-        return repository.getValue(index);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setRepositories(@NotNull List<Remote> repositories) {
-        this.repository.clear();
-        for (int i = 0; i < repositories.size(); i++) {
-            Remote repository = repositories.get(i);
-            this.repository.addItem(repository.getName(), repository.getUrl());
-        }
-    }
-
-    /** {@inheritDoc} */
-    @NotNull
-    @Override
-    public String getLocalBranch() {
-        int index = localBranch.getSelectedIndex();
-        return index != -1 ? localBranch.getItemText(index) : "";
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setLocalBranches(@NotNull List<String> branches) {
-        this.localBranch.clear();
-        for (String branch : branches) {
-            this.localBranch.addItem(branch);
-        }
-    }
-
-    /** {@inheritDoc} */
-    @NotNull
-    @Override
-    public String getRemoteBranch() {
-        int index = remoteBranch.getSelectedIndex();
-        return index != -1 ? remoteBranch.getItemText(index) : "";
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setRemoteBranches(@NotNull List<String> branches) {
-        this.remoteBranch.clear();
-        for (String branch : branches) {
-            this.remoteBranch.addItem(branch);
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableFetchButton(final boolean enabled) {
-        btnFetch.setEnabled(enabled);
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
+  /** {@inheritDoc} */
+  @Override
+  public void setEnableFetchButton(final boolean enabled) {
+    btnFetch.setEnabled(enabled);
+    Scheduler.get()
+        .scheduleDeferred(
+            new Scheduler.ScheduledCommand() {
+              @Override
+              public void execute() {
                 btnFetch.setFocus(enabled);
-            }
-        });
-    }
+              }
+            });
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void close() {
-        this.hide();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void close() {
+    this.hide();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void showDialog() {
-        this.show();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void showDialog() {
+    this.show();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
-    @UiHandler("fetchAllBranches")
-    public void onFetchAllBranchesValueChanged(ValueChangeEvent<Boolean> event) {
-        delegate.onValueChanged();
-    }
+  @UiHandler("fetchAllBranches")
+  public void onFetchAllBranchesValueChanged(ValueChangeEvent<Boolean> event) {
+    delegate.onValueChanged();
+  }
 
-    @UiHandler("remoteBranch")
-    public void onRemoteBranchValueChanged(ChangeEvent event) {
+  @UiHandler("remoteBranch")
+  public void onRemoteBranchValueChanged(ChangeEvent event) {
+    delegate.onRemoteBranchChanged();
+  }
+
+  @UiHandler("repository")
+  public void onRemoteRepositoryValueChanged(ChangeEvent event) {
+    delegate.onRemoteRepositoryChanged();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean isFetchAllBranches() {
+    return fetchAllBranches.getValue();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setFetchAllBranches(boolean isFetchAllBranches) {
+    fetchAllBranches.setValue(isFetchAllBranches, true);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setEnableRemoteBranchField(boolean enabled) {
+    remoteBranch.setEnabled(enabled);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void setEnableLocalBranchField(boolean enabled) {
+    localBranch.setEnabled(enabled);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void selectLocalBranch(String branch) {
+    for (int i = 0; i < localBranch.getItemCount(); i++) {
+      if (localBranch.getValue(i).equals(branch)) {
+        localBranch.setItemSelected(i, true);
+        break;
+      }
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void selectRemoteBranch(String branch) {
+    for (int i = 0; i < remoteBranch.getItemCount(); i++) {
+      if (remoteBranch.getValue(i).equals(branch)) {
+        remoteBranch.setItemSelected(i, true);
         delegate.onRemoteBranchChanged();
+        break;
+      }
     }
-
-    @UiHandler("repository")
-    public void onRemoteRepositoryValueChanged(ChangeEvent event) {
-        delegate.onRemoteRepositoryChanged();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean isFetchAllBranches() {
-        return fetchAllBranches.getValue();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setFetchAllBranches(boolean isFetchAllBranches) {
-        fetchAllBranches.setValue(isFetchAllBranches, true);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableRemoteBranchField(boolean enabled) {
-        remoteBranch.setEnabled(enabled);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableLocalBranchField(boolean enabled) {
-        localBranch.setEnabled(enabled);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void selectLocalBranch(String branch) {
-        for (int i = 0; i < localBranch.getItemCount(); i++) {
-            if (localBranch.getValue(i).equals(branch)) {
-                localBranch.setItemSelected(i, true);
-                break;
-            }
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void selectRemoteBranch(String branch) {
-        for (int i = 0; i < remoteBranch.getItemCount(); i++) {
-            if (remoteBranch.getValue(i).equals(branch)) {
-                remoteBranch.setItemSelected(i, true);
-                delegate.onRemoteBranchChanged();
-                break;
-            }
-        }
-    }
-
+  }
 }

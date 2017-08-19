@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.project.shared.dto;
 
-import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.dto.shared.DTO;
+import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.List;
 import java.util.Map;
-
-import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
+import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Data transfer object (DTO) for update project.
@@ -28,72 +27,70 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
 @DTO
 @ApiModel(description = "Update project")
 public interface ProjectUpdate {
-    /** Get unique ID of type of project. */
-    @ApiModelProperty(value = "Unique ID of project's type", required = true)
-    @FactoryParameter(obligation = OPTIONAL)
-    String getType();
+  /** Get unique ID of type of project. */
+  @ApiModelProperty(value = "Unique ID of project's type", required = true)
+  @FactoryParameter(obligation = OPTIONAL)
+  String getType();
 
-    /** Set unique ID of type of project. */
-    void setType(String type);
+  /** Set unique ID of type of project. */
+  void setType(String type);
 
-    ProjectUpdate withType(String type);
+  ProjectUpdate withType(String type);
 
-    //
+  //
 
-    /** Get optional description of project. */
-    @ApiModelProperty(value = "Optional description for new project")
-    @FactoryParameter(obligation = OPTIONAL)
-    String getDescription();
+  /** Get optional description of project. */
+  @ApiModelProperty(value = "Optional description for new project")
+  @FactoryParameter(obligation = OPTIONAL)
+  String getDescription();
 
-    /** Set optional description of project. */
-    void setDescription(String description);
+  /** Set optional description of project. */
+  void setDescription(String description);
 
-    ProjectUpdate withDescription(String description);
+  ProjectUpdate withDescription(String description);
 
-    //
+  //
 
-    @ApiModelProperty(value = "Attributes for project")
-    @FactoryParameter(obligation = OPTIONAL)
-    /** Get attributes of project. */
-    Map<String, List<String>> getAttributes();
+  @ApiModelProperty(value = "Attributes for project")
+  @FactoryParameter(obligation = OPTIONAL)
+  /** Get attributes of project. */
+  Map<String, List<String>> getAttributes();
 
-    /** Set attributes of project. */
-    void setAttributes(Map<String, List<String>> attributes);
+  /** Set attributes of project. */
+  void setAttributes(Map<String, List<String>> attributes);
 
-    ProjectUpdate withAttributes(Map<String, List<String>> attributes);
+  ProjectUpdate withAttributes(Map<String, List<String>> attributes);
 
-    //
+  //
 
-    @ApiModelProperty(value = "Visibility for project", allowableValues = "public,private")
-    @FactoryParameter(obligation = OPTIONAL)
-    /** Gets project visibility, e.g. private or public. */
-    String getVisibility();
+  @ApiModelProperty(value = "Visibility for project", allowableValues = "public,private")
+  @FactoryParameter(obligation = OPTIONAL)
+  /** Gets project visibility, e.g. private or public. */
+  String getVisibility();
 
-    /** Sets project visibility, e.g. private or public. */
-    void setVisibility(String visibility);
+  /** Sets project visibility, e.g. private or public. */
+  void setVisibility(String visibility);
 
-    ProjectUpdate withVisibility(String visibility);
+  ProjectUpdate withVisibility(String visibility);
 
+  /** Gets project mixin types */
+  @ApiModelProperty("Mixing types")
+  List<String> getMixins();
 
-    /** Gets project mixin types */
-    @ApiModelProperty("Mixing types")
-    List<String> getMixins();
+  /** Sets permissions of current user on this project. */
+  void setMixins(List<String> mixins);
 
-    /** Sets permissions of current user on this project. */
-    void setMixins(List<String> mixins);
+  ProjectUpdate withMixins(List<String> mixins);
 
-    ProjectUpdate withMixins(List<String> mixins);
+  String getRecipe();
 
+  void setRecipe(String recipe);
 
-    String getRecipe();
+  ProjectUpdate withRecipe(String recipe);
 
-    void setRecipe(String recipe);
+  String getContentRoot();
 
-    ProjectUpdate withRecipe(String recipe);
+  void setContentRoot(String contentRoot);
 
-    String getContentRoot();
-
-    void setContentRoot(String contentRoot);
-
-    ProjectUpdate withContentRoot(String contentRoot);
+  ProjectUpdate withContentRoot(String contentRoot);
 }

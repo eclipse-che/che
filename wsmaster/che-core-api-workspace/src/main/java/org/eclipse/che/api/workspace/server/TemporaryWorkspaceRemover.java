@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,23 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.workspace.server;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import com.google.common.annotations.VisibleForTesting;
-
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
-import org.slf4j.Logger;
-
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.List;
-
-import static org.slf4j.LoggerFactory.getLogger;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.slf4j.Logger;
 
 /**
  * Removes temporary workspaces on server startup and shutdown.
@@ -33,50 +31,51 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Singleton
 public class TemporaryWorkspaceRemover {
 
-    private static final Logger LOG = getLogger(TemporaryWorkspaceRemover.class);
+  private static final Logger LOG = getLogger(TemporaryWorkspaceRemover.class);
 
-    private final WorkspaceDao workspaceDao;
+  private final WorkspaceDao workspaceDao;
 
-    @Inject
-    public TemporaryWorkspaceRemover(WorkspaceDao workspaceDao) {
-        this.workspaceDao = workspaceDao;
+  @Inject
+  public TemporaryWorkspaceRemover(WorkspaceDao workspaceDao) {
+    this.workspaceDao = workspaceDao;
+  }
+
+  @PostConstruct
+  void initialize() {
+    try {
+      removeTemporaryWs();
+    } catch (ServerException e) {
+      LOG.warn("Unable to cleanup temporary workspaces on startup: " + e.getLocalizedMessage(), e);
     }
+  }
 
+  @PreDestroy
+  void shutdown() {
+    try {
+      removeTemporaryWs();
+    } catch (ServerException e) {
+      LOG.warn("Unable to cleanup temporary workspaces on shutdown: " + e.getLocalizedMessage(), e);
+    }
+  }
 
-    @PostConstruct
-    void initialize() {
+  @VisibleForTesting
+  void removeTemporaryWs() throws ServerException {
+    final int count = 100;
+    int skip = 0;
+    List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(true, skip, count);
+    while (!workspaces.isEmpty()) {
+      for (WorkspaceImpl workspace : workspaces) {
         try {
-            removeTemporaryWs();
+          workspaceDao.remove(workspace.getId());
         } catch (ServerException e) {
-            LOG.warn("Unable to cleanup temporary workspaces on startup: " + e.getLocalizedMessage(), e);
+          LOG.error(
+              "Unable to cleanup temporary workspace {}. Reason is {}",
+              workspace.getId(),
+              e.getLocalizedMessage());
         }
+      }
+      skip = skip + count;
+      workspaces = workspaceDao.getWorkspaces(true, skip, count);
     }
-
-    @PreDestroy
-    void shutdown() {
-        try {
-            removeTemporaryWs();
-        } catch (ServerException e) {
-            LOG.warn("Unable to cleanup temporary workspaces on shutdown: " + e.getLocalizedMessage(), e);
-        }
-    }
-
-    @VisibleForTesting
-    void removeTemporaryWs() throws ServerException {
-        final int count = 100;
-        int skip = 0;
-        List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(true, skip, count);
-        while (!workspaces.isEmpty()) {
-            for (WorkspaceImpl workspace : workspaces) {
-                try {
-                    workspaceDao.remove(workspace.getId());
-                } catch (ServerException e) {
-                    LOG.error("Unable to cleanup temporary workspace {}. Reason is {}", workspace.getId(), e.getLocalizedMessage());
-                }
-            }
-            skip = skip + count;
-            workspaces = workspaceDao.getWorkspaces(true, skip, count);
-        }
-    }
-
+  }
 }

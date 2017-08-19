@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.machine;
 
+import java.util.Objects;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.machine.ServerProperties;
-
-import java.util.Objects;
 
 /**
  * Describe development machine server instance.
@@ -23,77 +22,86 @@ import java.util.Objects;
  */
 public class MachineServer implements Server {
 
+  private final String address;
+  private final String protocol;
+  private final String ref;
+  private final String url;
+  private final ServerProperties properties;
 
-    private final String address;
-    private final String protocol;
-    private final String ref;
-    private final String url;
-    private final ServerProperties properties;
+  public MachineServer(Server dto) {
+    address = dto.getAddress();
+    protocol = dto.getProtocol();
+    ref = dto.getRef();
+    url = dto.getUrl();
+    properties = dto.getProperties();
+  }
 
-        public MachineServer(Server dto) {
-            address = dto.getAddress();
-            protocol = dto.getProtocol();
-            ref = dto.getRef();
-            url = dto.getUrl();
-            properties = dto.getProperties();
-        }
+  @Override
+  public String getRef() {
+    return ref;
+  }
 
+  @Override
+  public String getAddress() {
+    return address;
+  }
 
-        @Override
-        public String getRef() {
-            return ref;
-        }
+  @Override
+  public String getProtocol() {
+    return protocol;
+  }
 
-        @Override
-        public String getAddress() {
-            return address;
-        }
+  @Override
+  public String getUrl() {
+    return url;
+  }
 
-        @Override
-        public String getProtocol() {
-            return protocol;
-        }
+  @Override
+  public ServerProperties getProperties() {
+    return properties;
+  };
 
-        @Override
-        public String getUrl() {
-            return url;
-        }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof MachineServer)) return false;
+    final MachineServer other = (MachineServer) o;
+    return Objects.equals(ref, other.ref)
+        && Objects.equals(protocol, other.protocol)
+        && Objects.equals(address, other.address)
+        && Objects.equals(url, other.url)
+        && Objects.equals(properties, other.properties);
+  }
 
-        @Override
-        public ServerProperties getProperties() { return properties; };
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = hash * 31 + Objects.hashCode(ref);
+    hash = hash * 31 + Objects.hashCode(protocol);
+    hash = hash * 31 + Objects.hashCode(address);
+    hash = hash * 31 + Objects.hashCode(url);
+    hash = hash * 31 + Objects.hashCode(properties);
+    return hash;
+  }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof MachineServer)) return false;
-            final MachineServer other = (MachineServer) o;
-            return Objects.equals(ref, other.ref) &&
-                           Objects.equals(protocol, other.protocol) &&
-                           Objects.equals(address, other.address) &&
-                           Objects.equals(url, other.url) &&
-                           Objects.equals(properties, other.properties);
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = hash * 31 + Objects.hashCode(ref);
-            hash = hash * 31 + Objects.hashCode(protocol);
-            hash = hash * 31 + Objects.hashCode(address);
-            hash = hash * 31 + Objects.hashCode(url);
-            hash = hash * 31 + Objects.hashCode(properties);
-            return hash;
-        }
-
-        @Override
-        public String toString() {
-            return "MachineServer{" +
-                           "ref='" + ref + '\'' +
-                           ", protocol='" + protocol + '\'' +
-                           ", address='" + address + '\'' +
-                           ", url='" + url + '\'' +
-                           ", properties='" + properties + '\'' +
-                           '}';
-        }
-
-    }
+  @Override
+  public String toString() {
+    return "MachineServer{"
+        + "ref='"
+        + ref
+        + '\''
+        + ", protocol='"
+        + protocol
+        + '\''
+        + ", address='"
+        + address
+        + '\''
+        + ", url='"
+        + url
+        + '\''
+        + ", properties='"
+        + properties
+        + '\''
+        + '}';
+  }
+}

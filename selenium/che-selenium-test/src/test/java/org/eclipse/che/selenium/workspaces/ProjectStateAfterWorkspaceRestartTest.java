@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.workspaces;
 
 import com.google.inject.Inject;
-
+import java.net.URL;
+import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -29,93 +30,87 @@ import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.net.URL;
-import java.nio.file.Paths;
-
-/**
- * @author Aleksandr Shmaraev
- *         on 10.03.16
- */
+/** @author Aleksandr Shmaraev on 10.03.16 */
 public class ProjectStateAfterWorkspaceRestartTest {
-    private static final String  PROJECT_NAME         = NameGenerator.generate("Spring_Simple", 4);
-    private static final String  EXP_TEXT_NOT_PRESENT = "@Override\n" + "   public ModelAndView handleRequest";
-    private              boolean passedState          = false;
+  private static final String PROJECT_NAME = NameGenerator.generate("Spring_Simple", 4);
+  private static final String EXP_TEXT_NOT_PRESENT =
+      "@Override\n" + "   public ModelAndView handleRequest";
+  private boolean passedState = false;
 
-    @Inject
-    private TestWorkspace            workspace;
-    @Inject
-    private Ide                      ide;
-    @Inject
-    private ProjectExplorer          projectExplorer;
-    @Inject
-    private Loader                   loader;
-    @Inject
-    private Consoles                 consoles;
-    @Inject
-    private ToastLoader              toastLoader;
-    @Inject
-    private Menu                     menu;
-    @Inject
-    private NotificationsPopupPanel  notificationsPanel;
-    @Inject
-    private CodenvyEditor            editor;
-    @Inject
-    private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestWorkspace workspace;
+  @Inject private Ide ide;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Loader loader;
+  @Inject private Consoles consoles;
+  @Inject private ToastLoader toastLoader;
+  @Inject private Menu menu;
+  @Inject private NotificationsPopupPanel notificationsPanel;
+  @Inject private CodenvyEditor editor;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        URL resource = ProjectStateAfterWorkspaceRestartTest.this.getClass().getResource("/projects/guess-project");
-        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
-                                               PROJECT_NAME,
-                                               ProjectTemplates.MAVEN_SPRING
-        );
-        ide.open(workspace);
-    }
+  @BeforeClass
+  public void setUp() throws Exception {
+    URL resource =
+        ProjectStateAfterWorkspaceRestartTest.this
+            .getClass()
+            .getResource("/projects/guess-project");
+    testProjectServiceClient.importProject(
+        workspace.getId(),
+        Paths.get(resource.toURI()),
+        PROJECT_NAME,
+        ProjectTemplates.MAVEN_SPRING);
+    ide.open(workspace);
+  }
 
-    @Test
-    public void checkProjectAfterStopStartWs() {
-        // create workspace from dashboard
-        projectExplorer.waitProjectExplorer();
-        projectExplorer.waitItem(PROJECT_NAME);
-        loader.waitOnClosed();
-        projectExplorer.quickExpandWithJavaScript();
-        projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-        editor.waitActiveEditor();
-        projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-        editor.waitActiveEditor();
-        notificationsPanel.waitProgressPopupPanelClose();
-        loader.waitOnClosed();
+  @Test
+  public void checkProjectAfterStopStartWs() {
+    // create workspace from dashboard
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
+    loader.waitOnClosed();
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
+    editor.waitActiveEditor();
+    projectExplorer.openItemByPath(
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
+    editor.waitActiveEditor();
+    notificationsPanel.waitProgressPopupPanelClose();
+    loader.waitOnClosed();
 
-        // stop and start workspace
-        menu.runCommand(TestMenuCommandsConstants.Workspace.WORKSPACE, TestMenuCommandsConstants.Workspace.STOP_WORKSPACE);
-        loader.waitOnClosed();
-        toastLoader.waitToastLoaderIsOpen();
-        toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
-        loader.waitOnClosed();
-        notificationsPanel.waitPopUpPanelsIsClosed();
-        consoles.closeProcessesArea();
-        editor.waitTabIsNotPresent("AppController");
-        editor.waitTabIsNotPresent("index.jsp");
-        //projectExplorer.clickOnProjectExplorerTab();
-        projectExplorer.waitProjectExplorer();
-        projectExplorer.waitDisappearItemByPath(PROJECT_NAME);
-        toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
-        toastLoader.clickOnStartButton();
+    // stop and start workspace
+    menu.runCommand(
+        TestMenuCommandsConstants.Workspace.WORKSPACE,
+        TestMenuCommandsConstants.Workspace.STOP_WORKSPACE);
+    loader.waitOnClosed();
+    toastLoader.waitToastLoaderIsOpen();
+    toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
+    loader.waitOnClosed();
+    notificationsPanel.waitPopUpPanelsIsClosed();
+    consoles.closeProcessesArea();
+    editor.waitTabIsNotPresent("AppController");
+    editor.waitTabIsNotPresent("index.jsp");
+    //projectExplorer.clickOnProjectExplorerTab();
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitDisappearItemByPath(PROJECT_NAME);
+    toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
+    toastLoader.clickOnStartButton();
 
-        // check state of the project
-        notificationsPanel.waitExpectedMessageOnProgressPanelAndClosed(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
-        projectExplorer.waitProjectExplorer();
-        toastLoader.waitToastLoaderIsClosed();
-        loader.waitOnClosed();
-        projectExplorer.waitItem(PROJECT_NAME);
-        projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
-        editor.waitTabIsPresent("AppController");
-        editor.waitTabIsPresent("index.jsp");
-        projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-        projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
-        projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
-        editor.waitActiveEditor();
-        editor.waitTextNotPresentIntoEditor(EXP_TEXT_NOT_PRESENT);
-        editor.waitTextIntoEditor("Developer Workspace");
-    }
+    // check state of the project
+    notificationsPanel.waitExpectedMessageOnProgressPanelAndClosed(
+        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
+    projectExplorer.waitProjectExplorer();
+    toastLoader.waitToastLoaderIsClosed();
+    loader.waitOnClosed();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
+    editor.waitTabIsPresent("AppController");
+    editor.waitTabIsPresent("index.jsp");
+    projectExplorer.waitItem(
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
+    projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
+    editor.waitActiveEditor();
+    editor.waitTextNotPresentIntoEditor(EXP_TEXT_NOT_PRESENT);
+    editor.waitTextIntoEditor("Developer Workspace");
+  }
 }

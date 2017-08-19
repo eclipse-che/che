@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.ssh.key.script;
 
 import com.google.inject.Inject;
-
+import java.io.IOException;
+import java.util.Optional;
+import java.util.Set;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -24,77 +26,75 @@ import org.eclipse.che.plugin.ssh.key.utils.UrlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Optional;
-import java.util.Set;
-
 /**
  * Implementation {@link SshKeyProvider} that provides private key and upload public
  *
  * @author Anton Korneta
  */
 public class SshKeyProviderImpl implements SshKeyProvider {
-    private static final Logger LOG = LoggerFactory.getLogger(SshKeyProviderImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SshKeyProviderImpl.class);
 
-    private final SshServiceClient    sshService;
-    private final Set<SshKeyUploader> sshKeyUploaders;
+  private final SshServiceClient sshService;
+  private final Set<SshKeyUploader> sshKeyUploaders;
 
-    @Inject
-    public SshKeyProviderImpl(SshServiceClient sshService, Set<SshKeyUploader> sshKeyUploaders) {
-        this.sshService = sshService;
-        this.sshKeyUploaders = sshKeyUploaders;
+  @Inject
+  public SshKeyProviderImpl(SshServiceClient sshService, Set<SshKeyUploader> sshKeyUploaders) {
+    this.sshService = sshService;
+    this.sshKeyUploaders = sshKeyUploaders;
+  }
+
+  /**
+   * Get private ssh key and upload public ssh key to repository hosting service.
+   *
+   * @param url url to the repository
+   * @return private ssh key
+   * @throws ServerException if an error occurs while generating or uploading keys
+   */
+  @Override
+  public byte[] getPrivateKey(String url) throws ServerException {
+    String host = UrlUtils.getHost(url);
+
+    SshPair pair;
+    try {
+      pair = sshService.getPair("vcs", host);
+    } catch (ServerException | NotFoundException e) {
+      throw new ServerException(
+          DtoFactory.newDto(ExtendedError.class)
+              .withMessage("Unable get private ssh key")
+              .withErrorCode(ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY));
     }
 
-    /**
-     * Get private ssh key and upload public ssh key to repository hosting service.
-     *
-     * @param url
-     *         url to the repository
-     * @return private ssh key
-     * @throws ServerException
-     *         if an error occurs while generating or uploading keys
-     */
-    @Override
-    public byte[] getPrivateKey(String url) throws ServerException {
-        String host = UrlUtils.getHost(url);
+    // check keys existence
+    String privateKey = pair.getPrivateKey();
+    if (privateKey == null) {
+      throw new ServerException(
+          DtoFactory.newDto(ExtendedError.class)
+              .withMessage("Unable get private ssh key")
+              .withErrorCode(ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY));
+    }
 
-        SshPair pair;
+    final String publicKey = pair.getPublicKey();
+    if (publicKey != null) {
+      final Optional<SshKeyUploader> optionalKeyUploader =
+          sshKeyUploaders.stream().filter(keyUploader -> keyUploader.match(url)).findFirst();
+      if (optionalKeyUploader.isPresent()) {
+        final SshKeyUploader uploader = optionalKeyUploader.get();
         try {
-            pair = sshService.getPair("vcs", host);
-        } catch (ServerException | NotFoundException e) {
-            throw new ServerException(DtoFactory.newDto(ExtendedError.class)
-                                                .withMessage("Unable get private ssh key")
-                                                .withErrorCode(ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY));
+          uploader.uploadKey(publicKey);
+        } catch (IOException e) {
+          throw new ServerException(e.getMessage(), e);
+        } catch (UnauthorizedException e) {
+          // action might fail without uploaded public SSH key.
+          LOG.warn(
+              String.format(
+                  "Unable upload public SSH key with %s", uploader.getClass().getSimpleName()),
+              e);
         }
-
-        // check keys existence
-        String privateKey = pair.getPrivateKey();
-        if (privateKey == null) {
-            throw new ServerException(DtoFactory.newDto(ExtendedError.class)
-                                                .withMessage("Unable get private ssh key")
-                                                .withErrorCode(ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY));
-        }
-
-        final String publicKey = pair.getPublicKey();
-        if (publicKey != null) {
-            final Optional<SshKeyUploader> optionalKeyUploader = sshKeyUploaders.stream()
-                                                                                .filter(keyUploader -> keyUploader.match(url))
-                                                                                .findFirst();
-            if (optionalKeyUploader.isPresent()) {
-                final SshKeyUploader uploader = optionalKeyUploader.get();
-                try {
-                    uploader.uploadKey(publicKey);
-                } catch (IOException e) {
-                    throw new ServerException(e.getMessage(), e);
-                } catch (UnauthorizedException e) {
-                    // action might fail without uploaded public SSH key.
-                    LOG.warn(String.format("Unable upload public SSH key with %s", uploader.getClass().getSimpleName()), e);
-                }
-            } else {
-                // action might fail without uploaded public SSH key.
-                LOG.warn(String.format("Not found ssh key uploader for %s", host));
-            }
-        }
-        return privateKey.getBytes();
+      } else {
+        // action might fail without uploaded public SSH key.
+        LOG.warn(String.format("Not found ssh key uploader for %s", host));
+      }
     }
+    return privateKey.getBytes();
+  }
 }

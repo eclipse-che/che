@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.navigation.paraminfo;
 
 import com.google.gwt.core.client.GWT;
@@ -22,70 +22,65 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
+import java.util.List;
 import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
 
-import java.util.List;
-
-/**
- * @author Dmitry Shnurenko
- */
+/** @author Dmitry Shnurenko */
 @Singleton
 public class ParametersHintsViewImpl extends PopupPanel implements ParametersHintsView {
-    interface ParametersInfoViewImplUiBinder extends UiBinder<Widget, ParametersHintsViewImpl> {
+  interface ParametersInfoViewImplUiBinder extends UiBinder<Widget, ParametersHintsViewImpl> {}
+
+  private static ParametersInfoViewImplUiBinder UI_BINDER =
+      GWT.create(ParametersInfoViewImplUiBinder.class);
+
+  private final Provider<FlowPanel> panelsProvider;
+
+  @UiField FlowPanel parametersPanel;
+
+  @Inject
+  public ParametersHintsViewImpl(Provider<FlowPanel> panelsProvider) {
+    setWidget(UI_BINDER.createAndBindUi(this));
+
+    this.panelsProvider = panelsProvider;
+
+    setAutoHideEnabled(true);
+  }
+
+  @Override
+  public void show(List<MethodParameters> parametersList, int x, int y) {
+    parametersPanel.clear();
+
+    for (MethodParameters parameters : parametersList) {
+      FlowPanel widget = panelsProvider.get();
+
+      String parametersLine = parameters.getParameters();
+      if (parametersLine.isEmpty()) {
+        parametersLine = "<no parameters>";
+      }
+
+      String result = parametersLine.replace("<", "&lt").replace(">", "&gt");
+
+      Element element = widget.getElement();
+      element.setInnerHTML(result);
+      element.getStyle().setColor("yellow");
+
+      parametersPanel.add(widget);
     }
 
-    private static ParametersInfoViewImplUiBinder UI_BINDER = GWT.create(ParametersInfoViewImplUiBinder.class);
+    setPopupPosition(x, y);
+    show();
+  }
 
-    private final Provider<FlowPanel> panelsProvider;
-
-    @UiField
-    FlowPanel parametersPanel;
-
-    @Inject
-    public ParametersHintsViewImpl(Provider<FlowPanel> panelsProvider) {
-        setWidget(UI_BINDER.createAndBindUi(this));
-
-        this.panelsProvider = panelsProvider;
-
-        setAutoHideEnabled(true);
-    }
-
-    @Override
-    public void show(List<MethodParameters> parametersList, int x, int y) {
-        parametersPanel.clear();
-
-        for (MethodParameters parameters : parametersList) {
-            FlowPanel widget = panelsProvider.get();
-
-            String parametersLine = parameters.getParameters();
-            if (parametersLine.isEmpty()) {
-                parametersLine = "<no parameters>";
-            }
-
-            String result = parametersLine.replace("<", "&lt").replace(">", "&gt");
-
-            Element element = widget.getElement();
-            element.setInnerHTML(result);
-            element.getStyle().setColor("yellow");
-
-            parametersPanel.add(widget);
+  /** The method used to hide popup with parameters when user press 'Escape' button. */
+  @Override
+  protected void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+    super.onPreviewNativeEvent(event);
+    switch (event.getTypeInt()) {
+      case Event.ONKEYDOWN:
+        if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
+          hide();
         }
-
-        setPopupPosition(x, y);
-        show();
+        break;
     }
-
-    /** The method used to hide popup with parameters when user press 'Escape' button. */
-    @Override
-    protected void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-        super.onPreviewNativeEvent(event);
-        switch (event.getTypeInt()) {
-            case Event.ONKEYDOWN:
-                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
-                    hide();
-                }
-                break;
-        }
-    }
+  }
 }

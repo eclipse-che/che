@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.requirejs;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
-
 import org.eclipse.che.requirejs.conf.RequirejsConfig;
 
 /**
@@ -22,14 +21,13 @@ import org.eclipse.che.requirejs.conf.RequirejsConfig;
  */
 public class Requirejs extends JavaScriptObject {
 
-    protected Requirejs() {
-    }
+  protected Requirejs() {}
 
-    public static final native Requirejs get() /*-{
+  public static final native Requirejs get() /*-{
         return $wnd.require;
     }-*/;
 
-    public static final native Requirejs config(RequirejsConfig config) /*-{
+  public static final native Requirejs config(RequirejsConfig config) /*-{
         var localRequire = $wnd.require.config(config);
         localRequire.require = function(deps, callback, errback) {
             return localRequire(deps, callback, errback);
@@ -37,11 +35,12 @@ public class Requirejs extends JavaScriptObject {
         return localRequire;
     }-*/;
 
-    public final void require(JsArrayString deps, RequirejsCallback callback) {
-        require(deps, callback, null);
-    }
+  public final void require(JsArrayString deps, RequirejsCallback callback) {
+    require(deps, callback, null);
+  }
 
-    public final native void require(JsArrayString deps, RequirejsCallback callback, RequirejsErrorHandler errorHandler) /*-{
+  public final native void require(
+      JsArrayString deps, RequirejsCallback callback, RequirejsErrorHandler errorHandler) /*-{
         var realCallback = function() {
             var param = [];
             var args = Array.prototype.slice.call(arguments);
@@ -60,32 +59,31 @@ public class Requirejs extends JavaScriptObject {
         this.require(deps, realCallback, realErrHandler);
     }-*/;
 
-
-    public final native String toUrl(String moduleNamePlusExt) /*-{
+  public final native String toUrl(String moduleNamePlusExt) /*-{
         return this.tourl(moduleNamePlusExt);
     }-*/;
 
-    public final native String undef(String module) /*-{
+  public final native String undef(String module) /*-{
         return this.undef(module);
     }-*/;
 
-    public final native boolean defined(String module) /*-{
+  public final native boolean defined(String module) /*-{
         return this.defined(module);
     }-*/;
 
-    public final native boolean specified(String module) /*-{
+  public final native boolean specified(String module) /*-{
         return this.specified(module);
     }-*/;
 
-    public final native String version() /*-{
+  public final native String version() /*-{
         return this.version;
     }-*/;
 
-    public final native void setOnError(JavaScriptObject onError) /*-{
+  public final native void setOnError(JavaScriptObject onError) /*-{
         this.onError = onError;
     }-*/;
 
-    public final native void setOnError(RequirejsErrorHandler handler) /*-{
+  public final native void setOnError(RequirejsErrorHandler handler) /*-{
         this.onError = function(err) {
             handler.@org.eclipse.che.requirejs.RequirejsErrorHandler::onError(Lorg/eclipse/che/requirejs/RequirejsErrorHandler$RequireError;)(err);
         };

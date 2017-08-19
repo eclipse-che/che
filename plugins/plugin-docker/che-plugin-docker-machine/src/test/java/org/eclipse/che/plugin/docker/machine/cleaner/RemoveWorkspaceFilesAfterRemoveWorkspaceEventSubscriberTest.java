@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.machine.cleaner;
+
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
@@ -20,10 +24,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Test for {@link RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber}.
  *
@@ -31,39 +31,37 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriberTest {
-    //mocks for constructor
-    @Mock
-    private EventService          eventService;
-    @Mock
-    private WorkspaceFilesCleaner workspaceFilesCleaner;
+  //mocks for constructor
+  @Mock private EventService eventService;
+  @Mock private WorkspaceFilesCleaner workspaceFilesCleaner;
 
-    @Mock
-    private WorkspaceRemovedEvent event;
-    @Mock
-    private Workspace             workspace;
+  @Mock private WorkspaceRemovedEvent event;
+  @Mock private Workspace workspace;
 
-    private RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber;
+  private RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber
+      removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber;
 
-    @BeforeMethod
-    public void setUp() {
-        removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber =
-                new RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber(eventService, workspaceFilesCleaner);
-    }
+  @BeforeMethod
+  public void setUp() {
+    removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber =
+        new RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber(
+            eventService, workspaceFilesCleaner);
+  }
 
-    @Test
-    public void shouldSubscribeListenerToEventService() {
-        removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.subscribe();
+  @Test
+  public void shouldSubscribeListenerToEventService() {
+    removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.subscribe();
 
-        verify(eventService).subscribe(removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber);
-    }
+    verify(eventService).subscribe(removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber);
+  }
 
-    @Test
-    public void workspaceShouldBeCleaned() throws Exception {
-        when(event.getWorkspace()).thenReturn(workspace);
+  @Test
+  public void workspaceShouldBeCleaned() throws Exception {
+    when(event.getWorkspace()).thenReturn(workspace);
 
-        removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.onEvent(event);
+    removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.onEvent(event);
 
-        verify(event, timeout(2000)).getWorkspace();
-        verify(workspaceFilesCleaner, timeout(2000)).clear(workspace);
-    }
+    verify(event, timeout(2000)).getWorkspace();
+    verify(workspaceFilesCleaner, timeout(2000)).clear(workspace);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,10 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.processes.monitoring;
-
-import elemental.dom.Element;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -20,7 +18,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-
+import elemental.dom.Element;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.menu.PositionController;
 
@@ -32,91 +30,81 @@ import org.eclipse.che.ide.ui.menu.PositionController;
  */
 public class MonitorWidget extends Composite {
 
-    interface MonitorWidgetUiBinder extends UiBinder<Widget, MonitorWidget> {
-    }
+  interface MonitorWidgetUiBinder extends UiBinder<Widget, MonitorWidget> {}
 
-    private final static MonitorWidgetUiBinder UI_BINDER = GWT.create(MonitorWidgetUiBinder.class);
+  private static final MonitorWidgetUiBinder UI_BINDER = GWT.create(MonitorWidgetUiBinder.class);
 
-    @UiField
-    FlowPanel cpuBar, memBar, diskBar;
+  @UiField FlowPanel cpuBar, memBar, diskBar;
 
-    @UiField
-    HTMLPanel tooltip;
+  @UiField HTMLPanel tooltip;
 
-    @UiField
-    DivElement tooltipCpuBar, tooltipCpuValue;
+  @UiField DivElement tooltipCpuBar, tooltipCpuValue;
+  @UiField DivElement tooltipMemBar, tooltipMemValue, tooltipMemDescription;
+  @UiField DivElement tooltipDiskBar, tooltipDiskValue, tooltipDiskDescription;
 
-    @UiField
-    DivElement tooltipMemBar, tooltipMemValue, tooltipMemDescription;
+  public MonitorWidget() {
+    initWidget(UI_BINDER.createAndBindUi(this));
 
-    @UiField
-    DivElement tooltipDiskBar, tooltipDiskValue, tooltipDiskDescription;
+    tooltip.removeFromParent();
 
-    public MonitorWidget() {
-        initWidget(UI_BINDER.createAndBindUi(this));
+    Tooltip.create(
+        (Element) getElement(),
+        PositionController.VerticalAlign.BOTTOM,
+        PositionController.HorizontalAlign.RIGHT,
+        (Element) tooltip.getElement());
+  }
 
-        tooltip.removeFromParent();
+  /**
+   * Sets CPU usage value.
+   *
+   * @param cpuUsage cpuUsage usage
+   */
+  public void setCpuUsage(int cpuUsage) {
+    setVisible(true);
 
-        Tooltip.create((Element)getElement(), PositionController.VerticalAlign.BOTTOM, PositionController.HorizontalAlign.RIGHT, (Element)tooltip.getElement());
-    }
+    cpuBar.getElement().getFirstChildElement().getStyle().setProperty("height", cpuUsage + "%");
 
-    /**
-     * Sets CPU usage value.
-     *
-     * @param cpuUsage
-     *          cpuUsage usage
-     */
-    public void setCpuUsage(int cpuUsage) {
-        setVisible(true);
+    tooltipCpuBar.getStyle().setProperty("height", cpuUsage + "%");
+    tooltipCpuValue.setInnerText(cpuUsage + "%");
+  }
 
-        cpuBar.getElement().getFirstChildElement().getStyle().setProperty("height", cpuUsage + "%");
+  /**
+   * Sets memory usage value.
+   *
+   * @param mem memory usage
+   * @param max max memory available
+   */
+  public void setMemoryUsage(int mem, int max) {
+    setVisible(true);
 
-        tooltipCpuBar.getStyle().setProperty("height", cpuUsage + "%");
-        tooltipCpuValue.setInnerText(cpuUsage + "%");
-    }
+    int percentage = (int) ((double) mem / ((double) max / 100));
 
-    /**
-     * Sets memory usage value.
-     *
-     * @param mem
-     *          memory usage
-     * @param max
-     *          max memory available
-     */
-    public void setMemoryUsage(int mem, int max) {
-        setVisible(true);
+    memBar.getElement().getFirstChildElement().getStyle().setProperty("height", percentage + "%");
 
-        int percentage = (int)((double)mem / ((double)max / 100) );
+    tooltipMemBar.getStyle().setProperty("height", percentage + "%");
+    tooltipMemValue.setInnerText(percentage + "%");
+    tooltipMemDescription.setInnerText("- " + mem + " MB / " + max + " MB");
+  }
 
-        memBar.getElement().getFirstChildElement().getStyle().setProperty("height", percentage + "%");
+  /**
+   * Sets disk usage value.
+   *
+   * @param disk disk usage
+   * @param max max disk available
+   */
+  public void setDiskUsage(int disk, int max) {
+    setVisible(true);
 
-        tooltipMemBar.getStyle().setProperty("height", percentage + "%");
-        tooltipMemValue.setInnerText(percentage + "%");
-        tooltipMemDescription.setInnerText("- " + mem + " MB / " + max + " MB");
-    }
+    int percentage = (int) ((double) disk / ((double) max / 100));
 
-    /**
-     * Sets disk usage value.
-     *
-     * @param disk
-     *          disk usage
-     * @param max
-     *          max disk available
-     */
-    public void setDiskUsage(int disk, int max) {
-        setVisible(true);
+    diskBar.getElement().getFirstChildElement().getStyle().setProperty("height", percentage + "%");
 
-        int percentage = (int)((double)disk / ((double)max / 100) );
+    tooltipDiskBar.getStyle().setProperty("height", percentage + "%");
+    tooltipDiskValue.setInnerText(percentage + "%");
 
-        diskBar.getElement().getFirstChildElement().getStyle().setProperty("height", percentage + "%");
+    disk = disk / 1024;
+    max = max / 1024;
 
-        tooltipDiskBar.getStyle().setProperty("height", percentage + "%");
-        tooltipDiskValue.setInnerText(percentage + "%");
-
-        disk = disk / 1024;
-        max = max / 1024;
-
-        tooltipDiskDescription.setInnerText("- " + disk + " MB / " + max + " MB");
-    }
-
+    tooltipDiskDescription.setInnerText("- " + disk + " MB / " + max + " MB");
+  }
 }

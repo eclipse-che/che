@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,10 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.dialogs.confirm;
-
-import org.eclipse.che.ide.ui.window.Window;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -19,8 +17,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.ui.window.Window;
 
 /**
  * Implementation of the confirmation dialog view.
@@ -30,70 +28,69 @@ import javax.validation.constraints.NotNull;
  */
 public class ConfirmDialogViewImpl extends Window implements ConfirmDialogView {
 
-    /** The UI binder instance. */
-    private static ConfirmWindowUiBinder uiBinder = GWT.create(ConfirmWindowUiBinder.class);
-    /** The window footer. */
-    private final ConfirmDialogFooter footer;
-    /** The container for the window content. */
-    @UiField
-    SimplePanel content;
-    private ActionDelegate delegate;
+  /** The UI binder instance. */
+  private static ConfirmWindowUiBinder uiBinder = GWT.create(ConfirmWindowUiBinder.class);
+  /** The window footer. */
+  private final ConfirmDialogFooter footer;
+  /** The container for the window content. */
+  @UiField SimplePanel content;
 
-    @Inject
-    public ConfirmDialogViewImpl(final @NotNull ConfirmDialogFooter footer) {
-        Widget widget = uiBinder.createAndBindUi(this);
-        setWidget(widget);
+  private ActionDelegate delegate;
 
-        this.footer = footer;
-        getFooter().add(this.footer);
-    }
+  @Inject
+  public ConfirmDialogViewImpl(final @NotNull ConfirmDialogFooter footer) {
+    Widget widget = uiBinder.createAndBindUi(this);
+    setWidget(widget);
 
-    @Override
-    public void setDelegate(final ActionDelegate delegate) {
-        this.delegate = delegate;
-        this.footer.setDelegate(delegate);
-    }
+    this.footer = footer;
+    getFooter().add(this.footer);
+  }
 
-    @Override
-    protected void onEnterClicked() {
-        delegate.onEnterClicked();
-    }
+  @Override
+  public void setDelegate(final ActionDelegate delegate) {
+    this.delegate = delegate;
+    this.footer.setDelegate(delegate);
+  }
 
-    @Override
-    public void showDialog() {
-        this.show(footer.okButton);
-    }
+  @Override
+  protected void onEnterClicked() {
+    delegate.onEnterClicked();
+  }
 
-    @Override
-    public void closeDialog() {
-        this.hide();
-    }
+  @Override
+  public void showDialog() {
+    this.show(footer.okButton);
+  }
 
-    @Override
-    public void setContent(final IsWidget content) {
-        this.content.clear();
-        this.content.setWidget(content);
-    }
+  @Override
+  public void closeDialog() {
+    this.hide();
+  }
 
-    public void setOkButtonLabel(String label) {
-        footer.setOkButtonLabel(label);
-    }
+  @Override
+  public void setContent(final IsWidget content) {
+    this.content.clear();
+    this.content.setWidget(content);
+  }
 
-    public void setCancelButtonLabel(String label) {
-        footer.setCancelButtonLabel(label);
-    }
+  public void setOkButtonLabel(String label) {
+    footer.setOkButtonLabel(label);
+  }
 
-    @Override
-    public boolean isOkButtonInFocus() {
-        return isWidgetFocused(footer.okButton);
-    }
+  public void setCancelButtonLabel(String label) {
+    footer.setCancelButtonLabel(label);
+  }
 
-    @Override
-    public boolean isCancelButtonInFocus() {
-        return isWidgetFocused(footer.cancelButton);
-    }
+  @Override
+  public boolean isOkButtonInFocus() {
+    return isWidgetFocused(footer.okButton);
+  }
 
-    /** The UI binder interface for this components. */
-    interface ConfirmWindowUiBinder extends UiBinder<Widget, ConfirmDialogViewImpl> {
-    }
+  @Override
+  public boolean isCancelButtonInFocus() {
+    return isWidgetFocused(footer.cancelButton);
+  }
+
+  /** The UI binder interface for this components. */
+  interface ConfirmWindowUiBinder extends UiBinder<Widget, ConfirmDialogViewImpl> {}
 }

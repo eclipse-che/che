@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.workspaces;
 
 import com.google.inject.Inject;
-
+import java.net.URL;
+import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
@@ -31,80 +32,69 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.net.URL;
-import java.nio.file.Paths;
-
-/**
- * @author Andrey Chizhikov
- */
+/** @author Andrey Chizhikov */
 public class SnapshotTest {
-    private static final String PROJECT_NAME     = SnapshotTest.class.getSimpleName();
-    private static final String PROJECT_PATH     = "src/test/resources/projects/guess-project";
-    private static final String USER_DIRECTORY   = "cd ~/";
-    private static final String CREATE_TEXT_FILE = ">" + PROJECT_NAME + ".txt";
-    private static final String FILE_NAME        = PROJECT_NAME + ".txt";
-    private static final String LS_COMMAND       = "ls";
+  private static final String PROJECT_NAME = SnapshotTest.class.getSimpleName();
+  private static final String PROJECT_PATH = "src/test/resources/projects/guess-project";
+  private static final String USER_DIRECTORY = "cd ~/";
+  private static final String CREATE_TEXT_FILE = ">" + PROJECT_NAME + ".txt";
+  private static final String FILE_NAME = PROJECT_NAME + ".txt";
+  private static final String LS_COMMAND = "ls";
 
-    @Inject
-    private TestWorkspace           workspace;
-    @Inject
-    private Ide                      ide;
-    @Inject
-    private ProjectExplorer          projectExplorer;
-    @Inject
-    private Loader                   loader;
-    @Inject
-    private MachineTerminal          terminal;
-    @Inject
-    private Consoles                 consoles;
-    @Inject
-    private ToastLoader              toastLoader;
-    @Inject
-    private Menu                     menu;
-    @Inject
-    private NotificationsPopupPanel  notificationsPanel;
-    @Inject
-    private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestWorkspace workspace;
+  @Inject private Ide ide;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Loader loader;
+  @Inject private MachineTerminal terminal;
+  @Inject private Consoles consoles;
+  @Inject private ToastLoader toastLoader;
+  @Inject private Menu menu;
+  @Inject private NotificationsPopupPanel notificationsPanel;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        URL resource = SnapshotTest.this.getClass().getResource("/projects/guess-project");
-        testProjectServiceClient.importProject(workspace.getId(), Paths.get(resource.toURI()),
-                                               PROJECT_NAME,
-                                               ProjectTemplates.MAVEN_SPRING
-        );
-        ide.open(workspace);
-    }
+  @BeforeClass
+  public void setUp() throws Exception {
+    URL resource = SnapshotTest.this.getClass().getResource("/projects/guess-project");
+    testProjectServiceClient.importProject(
+        workspace.getId(),
+        Paths.get(resource.toURI()),
+        PROJECT_NAME,
+        ProjectTemplates.MAVEN_SPRING);
+    ide.open(workspace);
+  }
 
-    @Test
-    public void snapshotTest() throws Exception {
-        projectExplorer.waitProjectExplorer();
-        loader.waitOnClosed();
-        menu.runCommand(TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.TERMINAL);
-        terminal.waitTerminalConsole();
-        consoles.selectProcessByTabName("Terminal");
-        terminal.typeIntoTerminal(USER_DIRECTORY);
-        terminal.waitExpectedTextIntoTerminal(USER_DIRECTORY);
-        terminal.typeIntoTerminal(Keys.ENTER.toString());
-        terminal.typeIntoTerminal(CREATE_TEXT_FILE);
-        terminal.waitExpectedTextIntoTerminal(CREATE_TEXT_FILE);
-        terminal.typeIntoTerminal(Keys.ENTER.toString());
-        consoles.closeTerminalIntoConsoles();
-        menu.runCommand(TestMenuCommandsConstants.Workspace.WORKSPACE, TestMenuCommandsConstants.Workspace.STOP_WORKSPACE);
-        toastLoader.waitExpectedTextInToastLoader("Snapshotting the workspace");
-        toastLoader.waitExpectedTextInToastLoader("Workspace is not running", 60);
+  @Test
+  public void snapshotTest() throws Exception {
+    projectExplorer.waitProjectExplorer();
+    loader.waitOnClosed();
+    menu.runCommand(TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.TERMINAL);
+    terminal.waitTerminalConsole();
+    consoles.selectProcessByTabName("Terminal");
+    terminal.typeIntoTerminal(USER_DIRECTORY);
+    terminal.waitExpectedTextIntoTerminal(USER_DIRECTORY);
+    terminal.typeIntoTerminal(Keys.ENTER.toString());
+    terminal.typeIntoTerminal(CREATE_TEXT_FILE);
+    terminal.waitExpectedTextIntoTerminal(CREATE_TEXT_FILE);
+    terminal.typeIntoTerminal(Keys.ENTER.toString());
+    consoles.closeTerminalIntoConsoles();
+    menu.runCommand(
+        TestMenuCommandsConstants.Workspace.WORKSPACE,
+        TestMenuCommandsConstants.Workspace.STOP_WORKSPACE);
+    toastLoader.waitExpectedTextInToastLoader("Snapshotting the workspace");
+    toastLoader.waitExpectedTextInToastLoader("Workspace is not running", 60);
 
-        toastLoader.clickOnStartButton();
-        notificationsPanel.waitExpectedMessageOnProgressPanelAndClosed(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS, 240);
-        terminal.waitTerminalConsole();
-        consoles.selectProcessByTabName("Terminal");
-        terminal.typeIntoTerminal(USER_DIRECTORY);
-        terminal.waitExpectedTextIntoTerminal(USER_DIRECTORY);
-        terminal.typeIntoTerminal(Keys.ENTER.toString());
-        terminal.typeIntoTerminal(LS_COMMAND);
-        terminal.waitExpectedTextIntoTerminal(LS_COMMAND);
-        terminal.typeIntoTerminal(Keys.ENTER.toString());
-        WaitUtils.sleepQuietly(3);
-        Assert.assertTrue(terminal.getVisibleTextFromTerminal().contains(FILE_NAME));
-    }
+    toastLoader.clickOnStartButton();
+    notificationsPanel.waitExpectedMessageOnProgressPanelAndClosed(
+        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS, 240);
+    terminal.waitTerminalConsole();
+    consoles.selectProcessByTabName("Terminal");
+    terminal.typeIntoTerminal(USER_DIRECTORY);
+    terminal.waitExpectedTextIntoTerminal(USER_DIRECTORY);
+    terminal.typeIntoTerminal(Keys.ENTER.toString());
+    terminal.typeIntoTerminal(LS_COMMAND);
+    terminal.waitExpectedTextIntoTerminal(LS_COMMAND);
+    terminal.typeIntoTerminal(Keys.ENTER.toString());
+    WaitUtils.sleepQuietly(3);
+    Assert.assertTrue(terminal.getVisibleTextFromTerminal().contains(FILE_NAME));
+  }
 }

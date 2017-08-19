@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.git;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestSshServiceClient;
@@ -29,74 +28,63 @@ import org.eclipse.che.selenium.pageobject.git.Git;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * @author Aleksandr Shmaraev
- */
+/** @author Aleksandr Shmaraev */
 public class CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest {
-    private static final String PROJECT_NAME  = "testRepo";
-    private static final String MASTER_BRANCH = "master";
-    private static final String ORIGIN_MASTER = "origin/master";
-    private static final String GIT_MSG       = "Ref master already exists";
+  private static final String PROJECT_NAME = "testRepo";
+  private static final String MASTER_BRANCH = "master";
+  private static final String ORIGIN_MASTER = "origin/master";
+  private static final String GIT_MSG = "Ref master already exists";
 
-    @Inject
-    private TestWorkspace             ws;
-    @Inject
-    private Ide                       ide;
-    @Inject
-    private DefaultTestUser           productUser;
-    @Inject
-    @Named("github.username")
-    private String                    gitHubUsername;
-    @Inject
-    @Named("github.password")
-    private String                    gitHubPassword;
-    @Inject
-    private ProjectExplorer           projectExplorer;
-    @Inject
-    private Menu                      menu;
-    @Inject
-    private Git                       git;
-    @Inject
-    private Loader                    loader;
-    @Inject
-    private ImportProjectFromLocation importFromLocation;
-    @Inject
-    private Wizard                    projectWizard;
-    @Inject
-    private TestSshServiceClient      testSshServiceClient;
-    @Inject
-    private TestGitHubServiceClient   gitHubClientService;
+  @Inject private TestWorkspace ws;
+  @Inject private Ide ide;
+  @Inject private DefaultTestUser productUser;
 
-    @BeforeClass
-    public void prepare() throws Exception {
-        try {
-            String publicKey = testSshServiceClient.generateGithubKey();
-            gitHubClientService.uploadPublicKey(gitHubUsername, gitHubPassword, publicKey);
-        } catch (ConflictException ignored) {
-            // already generated
-        }
+  @Inject
+  @Named("github.username")
+  private String gitHubUsername;
 
-        ide.open(ws);
+  @Inject
+  @Named("github.password")
+  private String gitHubPassword;
+
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Menu menu;
+  @Inject private Git git;
+  @Inject private Loader loader;
+  @Inject private ImportProjectFromLocation importFromLocation;
+  @Inject private Wizard projectWizard;
+  @Inject private TestSshServiceClient testSshServiceClient;
+  @Inject private TestGitHubServiceClient gitHubClientService;
+
+  @BeforeClass
+  public void prepare() throws Exception {
+    try {
+      String publicKey = testSshServiceClient.generateGithubKey();
+      gitHubClientService.uploadPublicKey(gitHubUsername, gitHubPassword, publicKey);
+    } catch (ConflictException ignored) {
+      // already generated
     }
 
-    @Test
-    public void checkoutRemoteBranchToExistingLocalBranchTest() throws Exception {
-        // Clone test repository with specific remote name.
-        projectExplorer.waitProjectExplorer();
-        String repoUrl = "https://github.com/" + gitHubUsername + "/gitPullTest.git";
-        git.importJavaApp(repoUrl, PROJECT_NAME, Wizard.TypeProject.MAVEN);
-        projectExplorer.selectItem(PROJECT_NAME);
+    ide.open(ws);
+  }
 
-        // Open branches form
-        menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
-        git.waitBranchInTheList(MASTER_BRANCH);
-        git.waitBranchInTheList(ORIGIN_MASTER);
-        git.waitBranchInTheListWithCoState(MASTER_BRANCH);
+  @Test
+  public void checkoutRemoteBranchToExistingLocalBranchTest() throws Exception {
+    // Clone test repository with specific remote name.
+    projectExplorer.waitProjectExplorer();
+    String repoUrl = "https://github.com/" + gitHubUsername + "/gitPullTest.git";
+    git.importJavaApp(repoUrl, PROJECT_NAME, Wizard.TypeProject.MAVEN);
+    projectExplorer.selectItem(PROJECT_NAME);
 
-        // Checkout to the master remote branch.
-        git.selectBranchAndClickCheckoutBtn(ORIGIN_MASTER);
-        git.closeBranchesForm();
-        git.waitGitStatusBarWithMess(GIT_MSG);
-    }
+    // Open branches form
+    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
+    git.waitBranchInTheList(MASTER_BRANCH);
+    git.waitBranchInTheList(ORIGIN_MASTER);
+    git.waitBranchInTheListWithCoState(MASTER_BRANCH);
 
+    // Checkout to the master remote branch.
+    git.selectBranchAndClickCheckoutBtn(ORIGIN_MASTER);
+    git.closeBranchesForm();
+    git.waitGitStatusBarWithMess(GIT_MSG);
+  }
 }

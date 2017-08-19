@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.ide.model;
 
-/**
- * Interface add ability to print information to the output.
- */
+/** Interface add ability to print information to the output. */
 public interface Printable {
 
-    /**
-     * Prints information to the output.
-     *
-     * @param printer
-     *         object which should print information
-     */
-    void print(Printer printer);
+  /**
+   * Prints information to the output.
+   *
+   * @param printer object which should print information
+   */
+  void print(Printer printer);
 }

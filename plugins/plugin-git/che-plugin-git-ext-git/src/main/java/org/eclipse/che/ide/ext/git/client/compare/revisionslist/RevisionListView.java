@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.client.compare.revisionslist;
 
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.api.mvp.View;
-
-import javax.validation.constraints.NotNull;
-
-import java.util.List;
 
 /**
  * The view of {@link RevisionListPresenter}.
@@ -23,63 +21,60 @@ import java.util.List;
  * @author Igor Vinokur
  */
 public interface RevisionListView extends View<RevisionListView.ActionDelegate> {
-    /** Needs for delegate some function into list of revisions view. */
-    interface ActionDelegate {
-        /** Performs any actions appropriate in response to the user having pressed the Close button. */
-        void onCloseClicked();
-
-        /** Performs any actions appropriate in response to the user having pressed the Compare button. */
-        void onCompareClicked();
-
-        /**
-         * Performs any action in response to the user having select revision.
-         *
-         * @param revision
-         *         selected revision
-         */
-        void onRevisionSelected(@NotNull Revision revision);
-
-        /** Performs any action in response to the user do not have double-clicked any revision. */
-        void onRevisionDoubleClicked();
-
-        /** Performs any action in response to the user do not have any selected revision. */
-        void onRevisionUnselected();
-    }
+  /** Needs for delegate some function into list of revisions view. */
+  interface ActionDelegate {
+    /** Performs any actions appropriate in response to the user having pressed the Close button. */
+    void onCloseClicked();
 
     /**
-     * Set available revisions.
-     *
-     * @param revisions
-     *         git commits
+     * Performs any actions appropriate in response to the user having pressed the Compare button.
      */
-    void setRevisions(@NotNull List<Revision> revisions);
+    void onCompareClicked();
 
     /**
-     * Change the enable state of the compare button.
+     * Performs any action in response to the user having select revision.
      *
-     * @param enabled
-     *         <code>true</code> to enable the button, <code>false</code> to disable it
+     * @param revision selected revision
      */
-    void setEnableCompareButton(boolean enabled);
+    void onRevisionSelected(@NotNull Revision revision);
 
-    /**
-     * Set message to description field.
-     *
-     * @param description
-     *         message
-     */
-    void setDescription(String description);
+    /** Performs any action in response to the user do not have double-clicked any revision. */
+    void onRevisionDoubleClicked();
 
-    /** Close dialog. */
-    void close();
+    /** Performs any action in response to the user do not have any selected revision. */
+    void onRevisionUnselected();
+  }
 
-    /**
-     * Returns whether the view is shown.
-     *
-     * @return <code>true</code> if the view is shown, and
-     *         <code>false</code> otherwise
-     */
+  /**
+   * Set available revisions.
+   *
+   * @param revisions git commits
+   */
+  void setRevisions(@NotNull List<Revision> revisions);
 
-    /** Show dialog. */
-    void showDialog();
+  /**
+   * Change the enable state of the compare button.
+   *
+   * @param enabled <code>true</code> to enable the button, <code>false</code> to disable it
+   */
+  void setEnableCompareButton(boolean enabled);
+
+  /**
+   * Set message to description field.
+   *
+   * @param description message
+   */
+  void setDescription(String description);
+
+  /** Close dialog. */
+  void close();
+
+  /**
+   * Returns whether the view is shown.
+   *
+   * @return <code>true</code> if the view is shown, and <code>false</code> otherwise
+   */
+
+  /** Show dialog. */
+  void showDialog();
 }

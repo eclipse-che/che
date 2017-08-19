@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.execute;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.command.CommandExecutor;
@@ -24,34 +23,35 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 /** Action for executing a {@link CommandImpl}. */
 class ExecuteCommandAction extends Action {
 
-    private final CommandImpl     command;
-    private final CommandExecutor commandExecutor;
-    private final CommandManager  commandManager;
+  private final CommandImpl command;
+  private final CommandExecutor commandExecutor;
+  private final CommandManager commandManager;
 
-    @Inject
-    ExecuteCommandAction(@Assisted CommandImpl command,
-                         CommandUtils commandUtils,
-                         CommandExecutor commandExecutor,
-                         CommandManager commandManager) {
-        super(command.getName());
+  @Inject
+  ExecuteCommandAction(
+      @Assisted CommandImpl command,
+      CommandUtils commandUtils,
+      CommandExecutor commandExecutor,
+      CommandManager commandManager) {
+    super(command.getName());
 
-        this.command = command;
-        this.commandExecutor = commandExecutor;
-        this.commandManager = commandManager;
+    this.command = command;
+    this.commandExecutor = commandExecutor;
+    this.commandManager = commandManager;
 
-        final SVGResource commandIcon = commandUtils.getCommandTypeIcon(command.getType());
-        if (commandIcon != null) {
-            getTemplatePresentation().setSVGResource(commandIcon);
-        }
+    final SVGResource commandIcon = commandUtils.getCommandTypeIcon(command.getType());
+    if (commandIcon != null) {
+      getTemplatePresentation().setSVGResource(commandIcon);
     }
+  }
 
-    @Override
-    public void update(ActionEvent e) {
-        e.getPresentation().setEnabledAndVisible(commandManager.isCommandApplicable(command));
-    }
+  @Override
+  public void update(ActionEvent e) {
+    e.getPresentation().setEnabledAndVisible(commandManager.isCommandApplicable(command));
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        commandExecutor.executeCommand(command);
-    }
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    commandExecutor.executeCommand(command);
+  }
 }

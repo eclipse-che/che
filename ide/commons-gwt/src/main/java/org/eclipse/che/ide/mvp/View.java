@@ -19,17 +19,16 @@ import elemental.dom.Element;
 /**
  * Implementors are Objects that represent some DOM structure.
  *
- * @param <D>
- *         Generic type representing any class that wishes to become this
- *         view's delegate and handle events sourced by the view.
+ * @param <D> Generic type representing any class that wishes to become this view's delegate and
+ *     handle events sourced by the view.
  */
 public interface View<D> {
-    /** @return the delegate which receives events from this view. */
-    D getDelegate();
+  /** @return the delegate which receives events from this view. */
+  D getDelegate();
 
-    /** Sets the delegate to receive events from this view. */
-    void setDelegate(D delegate);
+  /** Sets the delegate to receive events from this view. */
+  void setDelegate(D delegate);
 
-    /** @return the base element for this view. */
-    Element getElement();
+  /** @return the base element for this view. */
+  Element getElement();
 }

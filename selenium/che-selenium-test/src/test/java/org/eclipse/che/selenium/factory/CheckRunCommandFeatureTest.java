@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.factory;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory.AddAction.RUN_COMMAND;
 
+import com.google.inject.Inject;
+import java.util.concurrent.ExecutionException;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -30,102 +36,77 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.concurrent.ExecutionException;
-
-import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
-import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
-import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory.AddAction.RUN_COMMAND;
-
-/**
- * @author Andrey Chizhikov
- */
+/** @author Andrey Chizhikov */
 public class CheckRunCommandFeatureTest {
-    private static final String PROJECT_NAME       = CheckRunCommandFeatureTest.class.getSimpleName();
-    private static final String NAME_BUILD_COMMAND = PROJECT_NAME + ": build and run";
+  private static final String PROJECT_NAME = CheckRunCommandFeatureTest.class.getSimpleName();
+  private static final String NAME_BUILD_COMMAND = PROJECT_NAME + ": build and run";
 
-    private String factoryWsName;
+  private String factoryWsName;
 
-    @Inject
-    private ProjectExplorer     projectExplorer;
-    @Inject
-    private Dashboard           dashboard;
-    @Inject
-    private DashboardFactory    dashboardFactory;
-    @Inject
-    private Ide                 ide;
-    @Inject
-    private LoadingBehaviorPage        loadingBehaviorPage;
-    @Inject
-    private CodenvyEditor              editor;
-    @Inject
-    private Loader                     loader;
-    @Inject
-    private Wizard                     wizard;
-    @Inject
-    private Menu                       menu;
-    @Inject
-    private TestWorkspace              ws;
-    @Inject
-    private DefaultTestUser            user;
-    @Inject
-    private Consoles                   consoles;
-    @Inject
-    private SeleniumWebDriver          seleniumWebDriver;
-    @Inject
-    private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private Dashboard dashboard;
+  @Inject private DashboardFactory dashboardFactory;
+  @Inject private Ide ide;
+  @Inject private LoadingBehaviorPage loadingBehaviorPage;
+  @Inject private CodenvyEditor editor;
+  @Inject private Loader loader;
+  @Inject private Wizard wizard;
+  @Inject private Menu menu;
+  @Inject private TestWorkspace ws;
+  @Inject private DefaultTestUser user;
+  @Inject private Consoles consoles;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        ide.open(ws);
+  @BeforeClass
+  public void setUp() throws Exception {
+    ide.open(ws);
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    if (factoryWsName != null) {
+      workspaceServiceClient.delete(factoryWsName, user.getName());
     }
+  }
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        if (factoryWsName != null) {
-            workspaceServiceClient.delete(factoryWsName, user.getName());
-        }
-    }
+  @Test
+  public void checkRunCommandFeatureTest() throws ExecutionException, InterruptedException {
+    createProject(PROJECT_NAME);
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
+    dashboard.open();
+    dashboard.selectFactoriesOnDashbord();
+    dashboardFactory.clickOnAddFactoryBtn();
+    dashboardFactory.clickWorkspacesTabOnSelectSource();
+    dashboardFactory.selectWorkspaceForCreation(ws.getName());
+    dashboardFactory.clickOnCreateFactoryBtn();
+    dashboardFactory.selectAction(RUN_COMMAND);
+    dashboardFactory.enterParamValue(NAME_BUILD_COMMAND);
+    dashboardFactory.clickAddOnAddAction();
+    dashboardFactory.clickOnOpenFactory();
+    String currentWin = ide.driver().getWindowHandle();
+    seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
+    loadingBehaviorPage.waitWhileLoadPageIsClosed();
+    seleniumWebDriver.switchFromDashboardIframeToIde();
+    factoryWsName = seleniumWebDriver.getWorkspaceNameFromBrowserUrl();
+    projectExplorer.waitItem(PROJECT_NAME);
+    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
+  }
 
-    @Test
-    public void checkRunCommandFeatureTest() throws ExecutionException, InterruptedException {
-        createProject(PROJECT_NAME);
-        projectExplorer.waitProjectExplorer();
-        projectExplorer.waitItem(PROJECT_NAME);
-        dashboard.open();
-        dashboard.selectFactoriesOnDashbord();
-        dashboardFactory.clickOnAddFactoryBtn();
-        dashboardFactory.clickWorkspacesTabOnSelectSource();
-        dashboardFactory.selectWorkspaceForCreation(ws.getName());
-        dashboardFactory.clickOnCreateFactoryBtn();
-        dashboardFactory.selectAction(RUN_COMMAND);
-        dashboardFactory.enterParamValue(NAME_BUILD_COMMAND);
-        dashboardFactory.clickAddOnAddAction();
-        dashboardFactory.clickOnOpenFactory();
-        String currentWin = ide.driver().getWindowHandle();
-        seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
-        loadingBehaviorPage.waitWhileLoadPageIsClosed();
-        seleniumWebDriver.switchFromDashboardIframeToIde();
-        factoryWsName = seleniumWebDriver.getWorkspaceNameFromBrowserUrl();
-        projectExplorer.waitItem(PROJECT_NAME);
-        consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
-    }
-
-    private void createProject(String projectName) {
-        projectExplorer.waitProjectExplorer();
-        loader.waitOnClosed();
-        menu.runCommand(WORKSPACE, CREATE_PROJECT);
-        wizard.waitCreateProjectWizardForm();
-        wizard.typeProjectNameOnWizard(projectName);
-        wizard.selectSample(WEB_JAVA_SPRING);
-        wizard.clickCreateButton();
-        loader.waitOnClosed();
-        wizard.waitCloseProjectConfigForm();
-        loader.waitOnClosed();
-        projectExplorer.waitProjectExplorer();
-        projectExplorer.waitItem(projectName);
-        loader.waitOnClosed();
-    }
-
+  private void createProject(String projectName) {
+    projectExplorer.waitProjectExplorer();
+    loader.waitOnClosed();
+    menu.runCommand(WORKSPACE, CREATE_PROJECT);
+    wizard.waitCreateProjectWizardForm();
+    wizard.typeProjectNameOnWizard(projectName);
+    wizard.selectSample(WEB_JAVA_SPRING);
+    wizard.clickCreateButton();
+    loader.waitOnClosed();
+    wizard.waitCloseProjectConfigForm();
+    loader.waitOnClosed();
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(projectName);
+    loader.waitOnClosed();
+  }
 }

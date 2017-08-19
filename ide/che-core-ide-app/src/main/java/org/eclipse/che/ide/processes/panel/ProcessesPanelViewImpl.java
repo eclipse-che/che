@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.processes.panel;
 
-import elemental.events.KeyboardEvent;
-import elemental.events.MouseEvent;
+import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.MACHINE_NODE;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
@@ -28,7 +27,12 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-
+import elemental.events.KeyboardEvent;
+import elemental.events.MouseEvent;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
@@ -48,473 +52,472 @@ import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.input.SignalEvent;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.MACHINE_NODE;
-
 /**
  * Implementation of {@link ProcessesPanelView}.
  *
  * @author Artem Zatsarynnyi
  */
-public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDelegate> implements ProcessesPanelView,
-                                                                                                   SubPanel.FocusListener,
-                                                                                                   SubPanel.DoubleClickListener,
-                                                                                                   RequiresResize {
+public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDelegate>
+    implements ProcessesPanelView,
+        SubPanel.FocusListener,
+        SubPanel.DoubleClickListener,
+        RequiresResize {
 
-    @UiField(provided = true)
-    MachineResources machineResources;
+  @UiField(provided = true)
+  MachineResources machineResources;
 
-    @UiField(provided = true)
-    SplitLayoutPanel splitLayoutPanel;
+  @UiField(provided = true)
+  SplitLayoutPanel splitLayoutPanel;
 
-    @UiField
-    FlowPanel navigationPanel;
+  @UiField FlowPanel navigationPanel;
 
-    @UiField(provided = true)
-    Tree<ProcessTreeNode> processTree;
+  @UiField(provided = true)
+  Tree<ProcessTreeNode> processTree;
 
-    private LinkedHashMap<String, ProcessTreeNode> processTreeNodes;
+  private LinkedHashMap<String, ProcessTreeNode> processTreeNodes;
 
-    private Map<WidgetToShow, SubPanel>    widget2Panels;
-    private Map<String, WidgetToShow>      processWidgets;
-    private Map<IsWidget, ProcessTreeNode> widget2TreeNodes;
+  private Map<WidgetToShow, SubPanel> widget2Panels;
+  private Map<String, WidgetToShow> processWidgets;
+  private Map<IsWidget, ProcessTreeNode> widget2TreeNodes;
 
-    private SubPanel focusedSubPanel;
+  private SubPanel focusedSubPanel;
 
-    private String activeProcessId = "";
+  private String activeProcessId = "";
 
-    private Focusable lastFosuced;
+  private Focusable lastFosuced;
 
-    private boolean navigationPanelVisible;
+  private boolean navigationPanelVisible;
 
-    @Inject
-    public ProcessesPanelViewImpl(PartStackUIResources partStackUIResources,
-                                  org.eclipse.che.ide.Resources resources,
-                                  MachineResources machineResources,
-                                  ProcessTreeRenderer renderer,
-                                  ProcessDataAdapter adapter,
-                                  ProcessesPartViewImplUiBinder uiBinder,
-                                  SubPanelFactory subPanelFactory,
-                                  CoreLocalizationConstant localizationConstants) {
-        super(partStackUIResources);
-        setTitle(localizationConstants.viewProcessesTitle());
-        this.machineResources = machineResources;
+  @Inject
+  public ProcessesPanelViewImpl(
+      PartStackUIResources partStackUIResources,
+      org.eclipse.che.ide.Resources resources,
+      MachineResources machineResources,
+      ProcessTreeRenderer renderer,
+      ProcessDataAdapter adapter,
+      ProcessesPartViewImplUiBinder uiBinder,
+      SubPanelFactory subPanelFactory,
+      CoreLocalizationConstant localizationConstants) {
+    super(partStackUIResources);
+    setTitle(localizationConstants.viewProcessesTitle());
+    this.machineResources = machineResources;
 
-        processTreeNodes = new LinkedHashMap<>();
-        widget2Panels = new HashMap<>();
-        processWidgets = new HashMap<>();
-        widget2TreeNodes = new HashMap<>();
+    processTreeNodes = new LinkedHashMap<>();
+    widget2Panels = new HashMap<>();
+    processWidgets = new HashMap<>();
+    widget2TreeNodes = new HashMap<>();
 
-        renderer.addAddTerminalClickHandler(machineId -> delegate.onAddTerminal(machineId, this));
-        renderer.addPreviewSshClickHandler(machineId -> delegate.onPreviewSsh(machineId));
-        renderer.addStopProcessHandler(new StopProcessHandler() {
-            @Override
-            public void onStopProcessClick(ProcessTreeNode node) {
-                delegate.onStopCommandProcess(node);
+    renderer.addAddTerminalClickHandler(machineId -> delegate.onAddTerminal(machineId, this));
+    renderer.addPreviewSshClickHandler(machineId -> delegate.onPreviewSsh(machineId));
+    renderer.addStopProcessHandler(
+        new StopProcessHandler() {
+          @Override
+          public void onStopProcessClick(ProcessTreeNode node) {
+            delegate.onStopCommandProcess(node);
+          }
+
+          @Override
+          public void onCloseProcessOutputClick(ProcessTreeNode node) {
+            switch (node.getType()) {
+              case COMMAND_NODE:
+                delegate.onCloseCommandOutputClick(node);
+                break;
+              case TERMINAL_NODE:
+                delegate.onCloseTerminal(node);
+                break;
             }
-
-            @Override
-            public void onCloseProcessOutputClick(ProcessTreeNode node) {
-                switch (node.getType()) {
-                    case COMMAND_NODE:
-                        delegate.onCloseCommandOutputClick(node);
-                        break;
-                    case TERMINAL_NODE:
-                        delegate.onCloseTerminal(node);
-                        break;
-                }
-            }
+          }
         });
 
-        processTree = Tree.create(resources, adapter, renderer);
-        processTree.asWidget().addStyleName(machineResources.getCss().processTree());
-        processTree.setTreeEventHandler(new Tree.Listener<ProcessTreeNode>() {
-            @Override
-            public void onNodeAction(TreeNodeElement<ProcessTreeNode> node) {
-            }
+    processTree = Tree.create(resources, adapter, renderer);
+    processTree.asWidget().addStyleName(machineResources.getCss().processTree());
+    processTree.setTreeEventHandler(
+        new Tree.Listener<ProcessTreeNode>() {
+          @Override
+          public void onNodeAction(TreeNodeElement<ProcessTreeNode> node) {}
 
-            @Override
-            public void onNodeClosed(TreeNodeElement<ProcessTreeNode> node) {
-            }
+          @Override
+          public void onNodeClosed(TreeNodeElement<ProcessTreeNode> node) {}
 
-            @Override
-            public void onNodeContextMenu(int mouseX, int mouseY, TreeNodeElement<ProcessTreeNode> node) {
-                delegate.onContextMenu(mouseX, mouseY, node.getData());
-            }
+          @Override
+          public void onNodeContextMenu(
+              int mouseX, int mouseY, TreeNodeElement<ProcessTreeNode> node) {
+            delegate.onContextMenu(mouseX, mouseY, node.getData());
+          }
 
-            @Override
-            public void onNodeDragStart(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {
-            }
+          @Override
+          public void onNodeDragStart(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {}
 
-            @Override
-            public void onNodeDragDrop(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {
-            }
+          @Override
+          public void onNodeDragDrop(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {}
 
-            @Override
-            public void onNodeExpanded(TreeNodeElement<ProcessTreeNode> node) {
-            }
+          @Override
+          public void onNodeExpanded(TreeNodeElement<ProcessTreeNode> node) {}
 
-            @Override
-            public void onNodeSelected(TreeNodeElement<ProcessTreeNode> node, SignalEvent event) {
-                delegate.onTreeNodeSelected(node.getData());
-            }
+          @Override
+          public void onNodeSelected(TreeNodeElement<ProcessTreeNode> node, SignalEvent event) {
+            delegate.onTreeNodeSelected(node.getData());
+          }
 
-            @Override
-            public void onRootContextMenu(int mouseX, int mouseY) {
-            }
+          @Override
+          public void onRootContextMenu(int mouseX, int mouseY) {}
 
-            @Override
-            public void onRootDragDrop(MouseEvent event) {
-            }
+          @Override
+          public void onRootDragDrop(MouseEvent event) {}
 
-            @Override
-            public void onKeyboard(KeyboardEvent event) {
-            }
+          @Override
+          public void onKeyboard(KeyboardEvent event) {}
         });
-        processTree.asWidget().ensureDebugId("process-tree");
+    processTree.asWidget().ensureDebugId("process-tree");
 
-        splitLayoutPanel = new SplitLayoutPanel(1);
+    splitLayoutPanel = new SplitLayoutPanel(1);
 
-        setContentWidget(uiBinder.createAndBindUi(this));
-        navigationPanel.getElement().setTabIndex(0);
+    setContentWidget(uiBinder.createAndBindUi(this));
+    navigationPanel.getElement().setTabIndex(0);
 
-        final SubPanel subPanel = subPanelFactory.newPanel();
-        subPanel.setFocusListener(this);
-        subPanel.setDoubleClickListener(this);
-        splitLayoutPanel.add(subPanel.getView());
-        focusedSubPanel = subPanel;
+    final SubPanel subPanel = subPanelFactory.newPanel();
+    subPanel.setFocusListener(this);
+    subPanel.setDoubleClickListener(this);
+    splitLayoutPanel.add(subPanel.getView());
+    focusedSubPanel = subPanel;
 
-        tuneSplitter();
-        splitLayoutPanel.setWidgetHidden(navigationPanel, true);
-        navigationPanelVisible = false;
-    }
+    tuneSplitter();
+    splitLayoutPanel.setWidgetHidden(navigationPanel, true);
+    navigationPanelVisible = false;
+  }
 
-    /**
-     * Improves splitter visibility.
-     */
-    private void tuneSplitter() {
-        NodeList<Node> nodes = splitLayoutPanel.getElement().getChildNodes();
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Node node = nodes.getItem(i);
-            if (node.hasChildNodes()) {
-                com.google.gwt.dom.client.Element el = node.getFirstChild().cast();
-                if ("gwt-SplitLayoutPanel-HDragger".equals(el.getClassName())) {
-                    tuneSplitter(el);
-                    return;
-                }
-            }
+  /** Improves splitter visibility. */
+  private void tuneSplitter() {
+    NodeList<Node> nodes = splitLayoutPanel.getElement().getChildNodes();
+    for (int i = 0; i < nodes.getLength(); i++) {
+      Node node = nodes.getItem(i);
+      if (node.hasChildNodes()) {
+        com.google.gwt.dom.client.Element el = node.getFirstChild().cast();
+        if ("gwt-SplitLayoutPanel-HDragger".equals(el.getClassName())) {
+          tuneSplitter(el);
+          return;
         }
+      }
     }
+  }
 
-    /**
-     * Tunes splitter. Makes it wider and adds double border to seem rich.
-     *
-     * @param el
-     *         element to tune
-     */
-    private void tuneSplitter(Element el) {
-        /** Add Z-Index to move the splitter on the top and make content visible */
-        el.getParentElement().getStyle().setProperty("zIndex", "1000");
-        el.getParentElement().getStyle().setProperty("overflow", "visible");
+  /**
+   * Tunes splitter. Makes it wider and adds double border to seem rich.
+   *
+   * @param el element to tune
+   */
+  private void tuneSplitter(Element el) {
+    /** Add Z-Index to move the splitter on the top and make content visible */
+    el.getParentElement().getStyle().setProperty("zIndex", "1000");
+    el.getParentElement().getStyle().setProperty("overflow", "visible");
 
-        /** Tune splitter catch panel */
-        el.getStyle().setProperty("boxSizing", "border-box");
-        el.getStyle().setProperty("width", "5px");
-        el.getStyle().setProperty("overflow", "hidden");
-        el.getStyle().setProperty("marginLeft", "-3px");
-        el.getStyle().setProperty("backgroundColor", "transparent");
+    /** Tune splitter catch panel */
+    el.getStyle().setProperty("boxSizing", "border-box");
+    el.getStyle().setProperty("width", "5px");
+    el.getStyle().setProperty("overflow", "hidden");
+    el.getStyle().setProperty("marginLeft", "-3px");
+    el.getStyle().setProperty("backgroundColor", "transparent");
 
-        /** Add small border */
-        DivElement smallBorder = Document.get().createDivElement();
-        smallBorder.getStyle().setProperty("position", "absolute");
-        smallBorder.getStyle().setProperty("width", "1px");
-        smallBorder.getStyle().setProperty("height", "100%");
-        smallBorder.getStyle().setProperty("left", "3px");
-        smallBorder.getStyle().setProperty("top", "0px");
-        smallBorder.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
-        el.appendChild(smallBorder);
+    /** Add small border */
+    DivElement smallBorder = Document.get().createDivElement();
+    smallBorder.getStyle().setProperty("position", "absolute");
+    smallBorder.getStyle().setProperty("width", "1px");
+    smallBorder.getStyle().setProperty("height", "100%");
+    smallBorder.getStyle().setProperty("left", "3px");
+    smallBorder.getStyle().setProperty("top", "0px");
+    smallBorder.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
+    el.appendChild(smallBorder);
 
-        /** Add large border */
-        DivElement largeBorder = Document.get().createDivElement();
-        largeBorder.getStyle().setProperty("position", "absolute");
-        largeBorder.getStyle().setProperty("width", "2px");
-        largeBorder.getStyle().setProperty("height", "100%");
-        largeBorder.getStyle().setProperty("left", "1px");
-        largeBorder.getStyle().setProperty("top", "0px");
-        largeBorder.getStyle().setProperty("opacity", "0.4");
-        largeBorder.getStyle().setProperty("backgroundColor", Style.getSplitterLargeBorderColor());
-        el.appendChild(largeBorder);
-    }
+    /** Add large border */
+    DivElement largeBorder = Document.get().createDivElement();
+    largeBorder.getStyle().setProperty("position", "absolute");
+    largeBorder.getStyle().setProperty("width", "2px");
+    largeBorder.getStyle().setProperty("height", "100%");
+    largeBorder.getStyle().setProperty("left", "1px");
+    largeBorder.getStyle().setProperty("top", "0px");
+    largeBorder.getStyle().setProperty("opacity", "0.4");
+    largeBorder.getStyle().setProperty("backgroundColor", Style.getSplitterLargeBorderColor());
+    el.appendChild(largeBorder);
+  }
 
-    @Override
-    public void addWidget(final String processId,
-                          final String title,
-                          final SVGResource icon,
-                          final IsWidget widget,
-                          final boolean machineConsole) {
-        final WidgetToShow widgetToShow = new WidgetToShow() {
-            @Override
-            public IsWidget getWidget() {
-                return widget;
-            }
+  @Override
+  public void addWidget(
+      final String processId,
+      final String title,
+      final SVGResource icon,
+      final IsWidget widget,
+      final boolean machineConsole) {
+    final WidgetToShow widgetToShow =
+        new WidgetToShow() {
+          @Override
+          public IsWidget getWidget() {
+            return widget;
+          }
 
-            @Override
-            public String getTitle() {
-                return title;
-            }
+          @Override
+          public String getTitle() {
+            return title;
+          }
 
-            @Override
-            public SVGResource getIcon() {
-                return icon;
-            }
+          @Override
+          public SVGResource getIcon() {
+            return icon;
+          }
         };
 
-        widget2Panels.put(widgetToShow, focusedSubPanel);
+    widget2Panels.put(widgetToShow, focusedSubPanel);
 
-        focusedSubPanel.addWidget(widgetToShow, !machineConsole, new SubPanel.WidgetRemovingListener() {
-            @Override
-            public void onWidgetRemoving(SubPanel.RemoveCallback removeCallback) {
-                final ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
+    focusedSubPanel.addWidget(
+        widgetToShow,
+        !machineConsole,
+        new SubPanel.WidgetRemovingListener() {
+          @Override
+          public void onWidgetRemoving(SubPanel.RemoveCallback removeCallback) {
+            final ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
 
-                if (treeNode == null) {
-                    return;
-                }
-
-                switch (treeNode.getType()) {
-                    case COMMAND_NODE:
-                        delegate.onCommandTabClosing(treeNode, removeCallback);
-                        break;
-                    case TERMINAL_NODE:
-                        delegate.onTerminalTabClosing(treeNode);
-                        removeCallback.remove();
-                        break;
-                    case MACHINE_NODE:
-                        removeCallback.remove();
-                        break;
-
-                }
+            if (treeNode == null) {
+              return;
             }
+
+            switch (treeNode.getType()) {
+              case COMMAND_NODE:
+                delegate.onCommandTabClosing(treeNode, removeCallback);
+                break;
+              case TERMINAL_NODE:
+                delegate.onTerminalTabClosing(treeNode);
+                removeCallback.remove();
+                break;
+              case MACHINE_NODE:
+                removeCallback.remove();
+                break;
+            }
+          }
         });
 
-        processWidgets.put(processId, widgetToShow);
+    processWidgets.put(processId, widgetToShow);
 
-        widget2TreeNodes.put(widgetToShow.getWidget(), processTreeNodes.get(processId));
+    widget2TreeNodes.put(widgetToShow.getWidget(), processTreeNodes.get(processId));
 
-        showProcessOutput(processId);
+    showProcessOutput(processId);
+  }
+
+  @Override
+  public void selectNode(final ProcessTreeNode node) {
+    final SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
+
+    if (node == null) {
+      selectionModel.clearSelections();
+    } else {
+      selectionModel.setTreeActive(true);
+      selectionModel.clearSelections();
+      selectionModel.selectSingleNode(node);
+
+      node.getTreeNodeElement().scrollIntoView();
     }
 
-    @Override
-    public void selectNode(final ProcessTreeNode node) {
-        final SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
-
-        if (node == null) {
-            selectionModel.clearSelections();
-        } else {
-            selectionModel.setTreeActive(true);
-            selectionModel.clearSelections();
-            selectionModel.selectSingleNode(node);
-
-            node.getTreeNodeElement().scrollIntoView();
-        }
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
+    Scheduler.get()
+        .scheduleDeferred(
+            new Scheduler.ScheduledCommand() {
+              @Override
+              public void execute() {
                 delegate.onTreeNodeSelected(node);
-            }
-        });
+              }
+            });
+  }
+
+  @Override
+  public int getNodeIndex(String processId) {
+    int index = 0;
+    for (ProcessTreeNode processTreeNode : processTreeNodes.values()) {
+      if (processTreeNode.getId().equals(processId)) {
+        return index;
+      }
+
+      index++;
     }
 
-    @Override
-    public int getNodeIndex(String processId) {
-        int index = 0;
-        for (ProcessTreeNode processTreeNode : processTreeNodes.values()) {
-            if (processTreeNode.getId().equals(processId)) {
-                return index;
-            }
+    return -1;
+  }
 
-            index++;
-        }
+  @Nullable
+  @Override
+  public ProcessTreeNode getSelectedTreeNode() {
+    List<ProcessTreeNode> selectedNodes = processTree.getSelectionModel().getSelectedNodes();
+    if (!selectedNodes.isEmpty()) {
+      return selectedNodes.get(0);
+    }
+    return null;
+  }
 
-        return -1;
+  @Override
+  @Nullable
+  public ProcessTreeNode getNodeByIndex(int index) {
+    return (ProcessTreeNode) processTreeNodes.values().toArray()[index];
+  }
+
+  @Override
+  @Nullable
+  public ProcessTreeNode getNodeById(String nodeId) {
+    return processTreeNodes.get(nodeId);
+  }
+
+  @Override
+  public void addProcessNode(ProcessTreeNode node) {
+    processTreeNodes.put(node.getId(), node);
+  }
+
+  @Override
+  public void removeProcessNode(ProcessTreeNode node) {
+    processTreeNodes.remove(node.getId());
+  }
+
+  @Override
+  public void setProcessesData(ProcessTreeNode root) {
+    splitLayoutPanel.setWidgetHidden(navigationPanel, false);
+    navigationPanelVisible = true;
+
+    processTree.asWidget().setVisible(true);
+    processTree.getModel().setRoot(root);
+    processTree.renderTree();
+
+    for (ProcessTreeNode processTreeNode : processTreeNodes.values()) {
+      if (!processTreeNode.getId().equals(activeProcessId) && processTreeNode.hasUnreadContent()) {
+        processTreeNode
+            .getTreeNodeElement()
+            .getClassList()
+            .add(machineResources.getCss().badgeVisible());
+      }
+    }
+  }
+
+  @Override
+  public void setStopButtonVisibility(String nodeId, boolean visible) {
+    ProcessTreeNode processTreeNode = processTreeNodes.get(nodeId);
+    if (processTreeNode == null) {
+      return;
     }
 
-    @Nullable
-    @Override
-    public ProcessTreeNode getSelectedTreeNode() {
-        List<ProcessTreeNode> selectedNodes = processTree.getSelectionModel().getSelectedNodes();
-        if (!selectedNodes.isEmpty()) {
-            return selectedNodes.get(0);
-        }
-        return null;
+    if (visible) {
+      processTreeNode
+          .getTreeNodeElement()
+          .getClassList()
+          .remove(machineResources.getCss().hideStopButton());
+    } else {
+      processTreeNode
+          .getTreeNodeElement()
+          .getClassList()
+          .add(machineResources.getCss().hideStopButton());
+    }
+  }
+
+  @Override
+  public void showProcessOutput(String processId) {
+    if (!processWidgets.containsKey(processId)) {
+      processId = "";
     }
 
-    @Override
-    @Nullable
-    public ProcessTreeNode getNodeByIndex(int index) {
-        return (ProcessTreeNode)processTreeNodes.values().toArray()[index];
+    onResize();
+
+    final WidgetToShow widgetToShow = processWidgets.get(processId);
+    final SubPanel subPanel = widget2Panels.get(widgetToShow);
+    if (subPanel != null) {
+      subPanel.activateWidget(widgetToShow);
     }
 
-    @Override
-    @Nullable
-    public ProcessTreeNode getNodeById(String nodeId) {
-        return processTreeNodes.get(nodeId);
+    activeProcessId = processId;
+
+    final ProcessTreeNode treeNode = processTreeNodes.get(processId);
+    if (treeNode != null && !MACHINE_NODE.equals(treeNode.getType())) {
+      treeNode.setHasUnreadContent(false);
+      treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
+    }
+  }
+
+  @Override
+  public void hideProcessOutput(String processId) {
+    final WidgetToShow widgetToShow = processWidgets.get(processId);
+    final SubPanel subPanel = widget2Panels.get(widgetToShow);
+    if (subPanel != null) {
+      subPanel.removeWidget(widgetToShow);
+    }
+    processWidgets.remove(processId);
+  }
+
+  @Override
+  public void removeWidget(String processId) {
+    WidgetToShow widget = processWidgets.get(processId);
+    hideProcessOutput(processId);
+    widget2Panels.remove(widget);
+  }
+
+  @Override
+  public void markProcessHasOutput(String processId) {
+    if (processId.equals(activeProcessId)) {
+      return;
     }
 
-    @Override
-    public void addProcessNode(ProcessTreeNode node) {
-        processTreeNodes.put(node.getId(), node);
+    final ProcessTreeNode treeNode = processTreeNodes.get(processId);
+    if (treeNode != null) {
+      treeNode.setHasUnreadContent(true);
+      treeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().badgeVisible());
+    }
+  }
+
+  @Override
+  public void clear() {
+    for (WidgetToShow widgetToShow : processWidgets.values()) {
+      SubPanel subPanel = widget2Panels.get(widgetToShow);
+      subPanel.removeWidget(widgetToShow);
     }
 
-    @Override
-    public void removeProcessNode(ProcessTreeNode node) {
-        processTreeNodes.remove(node.getId());
+    processWidgets.clear();
+  }
+
+  @Override
+  public void focusGained(SubPanel subPanel, IsWidget widget) {
+    focusedSubPanel = subPanel;
+
+    final ProcessTreeNode processTreeNode = widget2TreeNodes.get(widget);
+    if (processTreeNode != null) {
+      selectNode(processTreeNode);
     }
 
-    @Override
-    public void setProcessesData(ProcessTreeNode root) {
-        splitLayoutPanel.setWidgetHidden(navigationPanel, false);
-        navigationPanelVisible = true;
-
-        processTree.asWidget().setVisible(true);
-        processTree.getModel().setRoot(root);
-        processTree.renderTree();
-
-        for (ProcessTreeNode processTreeNode : processTreeNodes.values()) {
-            if (!processTreeNode.getId().equals(activeProcessId) && processTreeNode.hasUnreadContent()) {
-                processTreeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().badgeVisible());
-            }
-        }
+    if (lastFosuced != null && !lastFosuced.equals(widget)) {
+      lastFosuced.setFocus(false);
     }
 
-    @Override
-    public void setStopButtonVisibility(String nodeId, boolean visible) {
-        ProcessTreeNode processTreeNode = processTreeNodes.get(nodeId);
-        if (processTreeNode == null) {
-            return;
-        }
+    if (widget instanceof Focusable) {
+      ((Focusable) widget).setFocus(true);
 
-        if (visible) {
-            processTreeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().hideStopButton());
-        } else {
-            processTreeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().hideStopButton());
-        }
+      lastFosuced = (Focusable) widget;
     }
+  }
 
-    @Override
-    public void showProcessOutput(String processId) {
-        if (!processWidgets.containsKey(processId)) {
-            processId = "";
-        }
+  @Override
+  public void onDoubleClicked(final SubPanel panel, final IsWidget widget) {
+    delegate.onToggleMaximizeConsole();
+  }
 
-        onResize();
-
-        final WidgetToShow widgetToShow = processWidgets.get(processId);
-        final SubPanel subPanel = widget2Panels.get(widgetToShow);
-        if (subPanel != null) {
-            subPanel.activateWidget(widgetToShow);
-        }
-
-        activeProcessId = processId;
-
-        final ProcessTreeNode treeNode = processTreeNodes.get(processId);
-        if (treeNode != null && !MACHINE_NODE.equals(treeNode.getType())) {
-            treeNode.setHasUnreadContent(false);
-            treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
-        }
+  @Override
+  public void onResize() {
+    for (WidgetToShow widgetToShow : widget2Panels.keySet()) {
+      final IsWidget widget = widgetToShow.getWidget();
+      if (widget instanceof RequiresResize) {
+        ((RequiresResize) widget).onResize();
+      }
     }
+  }
 
-    @Override
-    public void hideProcessOutput(String processId) {
-        final WidgetToShow widgetToShow = processWidgets.get(processId);
-        final SubPanel subPanel = widget2Panels.get(widgetToShow);
-        if (subPanel != null) {
-            subPanel.removeWidget(widgetToShow);
-        }
-        processWidgets.remove(processId);
-    }
+  @Override
+  public void setProcessesTreeVisible(boolean visible) {
+    splitLayoutPanel.setWidgetHidden(navigationPanel, !visible);
+    navigationPanelVisible = visible;
+  }
 
-    @Override
-    public void removeWidget(String processId) {
-        WidgetToShow widget = processWidgets.get(processId);
-        hideProcessOutput(processId);
-        widget2Panels.remove(widget);
-    }
+  @Override
+  public boolean isProcessesTreeVisible() {
+    return navigationPanelVisible;
+  }
 
-    @Override
-    public void markProcessHasOutput(String processId) {
-        if (processId.equals(activeProcessId)) {
-            return;
-        }
-
-        final ProcessTreeNode treeNode = processTreeNodes.get(processId);
-        if (treeNode != null) {
-            treeNode.setHasUnreadContent(true);
-            treeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().badgeVisible());
-        }
-    }
-
-    @Override
-    public void clear() {
-        for (WidgetToShow widgetToShow : processWidgets.values()) {
-            SubPanel subPanel = widget2Panels.get(widgetToShow);
-            subPanel.removeWidget(widgetToShow);
-        }
-
-        processWidgets.clear();
-    }
-
-    @Override
-    public void focusGained(SubPanel subPanel, IsWidget widget) {
-        focusedSubPanel = subPanel;
-
-        final ProcessTreeNode processTreeNode = widget2TreeNodes.get(widget);
-        if (processTreeNode != null) {
-            selectNode(processTreeNode);
-        }
-
-        if (lastFosuced != null && !lastFosuced.equals(widget)) {
-            lastFosuced.setFocus(false);
-        }
-
-        if (widget instanceof Focusable) {
-            ((Focusable)widget).setFocus(true);
-
-            lastFosuced = (Focusable)widget;
-        }
-    }
-
-    @Override
-    public void onDoubleClicked(final SubPanel panel, final IsWidget widget) {
-        delegate.onToggleMaximizeConsole();
-    }
-
-    @Override
-    public void onResize() {
-        for (WidgetToShow widgetToShow : widget2Panels.keySet()) {
-            final IsWidget widget = widgetToShow.getWidget();
-            if (widget instanceof RequiresResize) {
-                ((RequiresResize)widget).onResize();
-            }
-        }
-    }
-
-    @Override
-    public void setProcessesTreeVisible(boolean visible) {
-        splitLayoutPanel.setWidgetHidden(navigationPanel, !visible);
-        navigationPanelVisible = visible;
-    }
-
-    @Override
-    public boolean isProcessesTreeVisible() {
-        return navigationPanelVisible;
-    }
-
-    interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {
-    }
-
+  interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {}
 }

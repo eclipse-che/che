@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.git;
 
 import org.eclipse.che.api.git.shared.GitUser;
@@ -19,12 +19,10 @@ import org.eclipse.che.api.git.shared.GitUser;
  */
 public interface GitUserResolver {
 
-    /**
-     * Retrieves user for git operations.
-     *
-     * @return credentials of current user to execute git operation
-     *
-     */
-    GitUser getUser();
-
+  /**
+   * Retrieves user for git operations.
+   *
+   * @return credentials of current user to execute git operation
+   */
+  GitUser getUser();
 }

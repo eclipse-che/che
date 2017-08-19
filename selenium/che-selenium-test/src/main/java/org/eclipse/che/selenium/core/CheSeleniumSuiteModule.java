@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.selenium.core;
+
+import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
-
+import javax.inject.Named;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
@@ -54,10 +56,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspaceProviderImpl;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 
-import javax.inject.Named;
-
-import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
-
 /**
  * Guice module per suite.
  *
@@ -65,47 +63,51 @@ import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
  */
 public class CheSeleniumSuiteModule extends AbstractModule {
 
-    @Override
-    public void configure() {
-        TestConfiguration config = new SeleniumTestConfiguration();
-        config.getMap().forEach((key, value) -> bindConstant().annotatedWith(Names.named(key)).to(value));
+  @Override
+  public void configure() {
+    TestConfiguration config = new SeleniumTestConfiguration();
+    config
+        .getMap()
+        .forEach((key, value) -> bindConstant().annotatedWith(Names.named(key)).to(value));
 
-        bind(TestSvnPasswordProvider.class).to(CheTestSvnPasswordProvider.class);
-        bind(TestSvnUsernameProvider.class).to(CheTestSvnUsernameProvider.class);
-        bind(TestSvnRepo1Provider.class).to(CheTestSvnRepo1Provider.class);
-        bind(TestSvnRepo2Provider.class).to(CheTestSvnRepo2Provider.class);
-        bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
-        bind(TestUserNamespaceResolver.class).to(CheTestUserNamespaceResolver.class);
-        bind(TestApiEndpointUrlProvider.class).to(CheTestApiEndpointUrlProvider.class);
-        bind(TestIdeUrlProvider.class).to(CheTestIdeUrlProvider.class);
-        bind(TestDashboardUrlProvider.class).to(CheTestDashboardUrlProvider.class);
+    bind(TestSvnPasswordProvider.class).to(CheTestSvnPasswordProvider.class);
+    bind(TestSvnUsernameProvider.class).to(CheTestSvnUsernameProvider.class);
+    bind(TestSvnRepo1Provider.class).to(CheTestSvnRepo1Provider.class);
+    bind(TestSvnRepo2Provider.class).to(CheTestSvnRepo2Provider.class);
+    bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
+    bind(TestUserNamespaceResolver.class).to(CheTestUserNamespaceResolver.class);
+    bind(TestApiEndpointUrlProvider.class).to(CheTestApiEndpointUrlProvider.class);
+    bind(TestIdeUrlProvider.class).to(CheTestIdeUrlProvider.class);
+    bind(TestDashboardUrlProvider.class).to(CheTestDashboardUrlProvider.class);
 
-        bind(HttpJsonRequestFactory.class).to(TestDefaultUserHttpJsonRequestFactory.class);
+    bind(HttpJsonRequestFactory.class).to(TestDefaultUserHttpJsonRequestFactory.class);
 
-        bind(AdminTestUser.class).to(CheAdminTestUser.class);
+    bind(AdminTestUser.class).to(CheAdminTestUser.class);
 
-        bind(TestAuthServiceClient.class).to(CheTestAuthServiceClient.class);
-        bind(TestMachineServiceClient.class).to(CheTestMachineServiceClient.class);
+    bind(TestAuthServiceClient.class).to(CheTestAuthServiceClient.class);
+    bind(TestMachineServiceClient.class).to(CheTestMachineServiceClient.class);
 
-        bind(TestUser.class).to(TestUserImpl.class);
-        bind(TestWorkspaceProvider.class).to(TestWorkspaceProviderImpl.class).asEagerSingleton();
-    }
+    bind(TestUser.class).to(TestUserImpl.class);
+    bind(TestWorkspaceProvider.class).to(TestWorkspaceProviderImpl.class).asEagerSingleton();
+  }
 
-    @Provides
-    public TestWorkspace getWorkspace(TestWorkspaceProvider testWorkspaceProvider,
-                                      Provider<DefaultTestUser> defaultUserProvider,
-                                      @Named("workspace.default_memory_gb") int defaultMemoryGb) throws Exception {
+  @Provides
+  public TestWorkspace getWorkspace(
+      TestWorkspaceProvider testWorkspaceProvider,
+      Provider<DefaultTestUser> defaultUserProvider,
+      @Named("workspace.default_memory_gb") int defaultMemoryGb)
+      throws Exception {
 
-        TestWorkspace workspace = testWorkspaceProvider.createWorkspace(defaultUserProvider.get(),
-                                                                        defaultMemoryGb,
-                                                                        WorkspaceTemplate.DEFAULT);
-        workspace.await();
+    TestWorkspace workspace =
+        testWorkspaceProvider.createWorkspace(
+            defaultUserProvider.get(), defaultMemoryGb, WorkspaceTemplate.DEFAULT);
+    workspace.await();
 
-        return workspace;
-    }
+    return workspace;
+  }
 
-    @Provides
-    public ActionsFactory getActionFactory() {
-        return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
-    }
+  @Provides
+  public ActionsFactory getActionFactory() {
+    return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
+  }
 }

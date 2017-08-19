@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.java.server;
+
+import static java.util.Collections.emptyList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.ImplementationsDescriptorDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.Region;
@@ -31,156 +34,152 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Collections.emptyList;
-
 /**
- * A type hierarchy provides navigations between a type and its resolved supertypes
- * and subtypes for a specific type or for all types within a region.
+ * A type hierarchy provides navigations between a type and its resolved supertypes and subtypes for
+ * a specific type or for all types within a region.
  *
  * @author Valeriy Svydenko
  */
 @Singleton
 public class JavaTypeHierarchy {
 
-    @Inject
-    public JavaTypeHierarchy() {
+  @Inject
+  public JavaTypeHierarchy() {}
 
+  /**
+   * Get all implementations of selected Java Element.
+   *
+   * @param project opened project
+   * @param fqn fully qualified name of the class file
+   * @param offset cursor position
+   * @return descriptor of the implementations
+   * @throws JavaModelException when JavaModel has a failure
+   */
+  public ImplementationsDescriptorDTO getImplementations(
+      IJavaProject project, String fqn, int offset) throws JavaModelException {
+    ImplementationsDescriptorDTO implementationDescriptor =
+        DtoFactory.newDto(ImplementationsDescriptorDTO.class);
+
+    IJavaElement element = getJavaElement(project, fqn, offset);
+    if (element == null) {
+      return implementationDescriptor.withImplementations(emptyList());
     }
 
-    /**
-     * Get all implementations of selected Java Element.
-     *
-     * @param project
-     *         opened project
-     * @param fqn
-     *         fully qualified name of the class file
-     * @param offset
-     *         cursor position
-     * @return descriptor of the implementations
-     * @throws JavaModelException
-     *         when JavaModel has a failure
-     */
-    public ImplementationsDescriptorDTO getImplementations(IJavaProject project, String fqn, int offset) throws JavaModelException {
-        ImplementationsDescriptorDTO implementationDescriptor = DtoFactory.newDto(ImplementationsDescriptorDTO.class);
+    List<Type> implementations = new ArrayList<>();
 
-        IJavaElement element = getJavaElement(project, fqn, offset);
-        if (element == null){
-            return implementationDescriptor.withImplementations(emptyList());
-        }
+    implementationDescriptor.setImplementations(implementations);
 
-        List<Type> implementations = new ArrayList<>();
-
-        implementationDescriptor.setImplementations(implementations);
-
-        switch (element.getElementType()) {
-            case 7: //type
-                findSubTypes(element, implementations);
-                implementationDescriptor.setMemberName(element.getElementName());
-                break;
-            case 9: //method
-                findTypesWithSubMethods(element, implementations);
-                implementationDescriptor.setMemberName(element.getElementName());
-                break;
-            default:
-                break;
-        }
-
-        return implementationDescriptor;
+    switch (element.getElementType()) {
+      case 7: //type
+        findSubTypes(element, implementations);
+        implementationDescriptor.setMemberName(element.getElementName());
+        break;
+      case 9: //method
+        findTypesWithSubMethods(element, implementations);
+        implementationDescriptor.setMemberName(element.getElementName());
+        break;
+      default:
+        break;
     }
 
-    private IJavaElement getJavaElement(IJavaProject project, String fqn, int offset) throws JavaModelException {
-        IJavaElement originalElement = null;
-        IType type = project.findType(fqn);
-        ICodeAssist codeAssist;
-        if (type.isBinary()) {
-            codeAssist = type.getClassFile();
-        } else {
-            codeAssist = type.getCompilationUnit();
-        }
+    return implementationDescriptor;
+  }
 
-        IJavaElement[] elements = null;
-        if (codeAssist != null) {
-            elements = codeAssist.codeSelect(offset, 0);
-        }
-
-        if (elements != null && elements.length > 0) {
-            originalElement = elements[0];
-        }
-        return originalElement;
+  private IJavaElement getJavaElement(IJavaProject project, String fqn, int offset)
+      throws JavaModelException {
+    IJavaElement originalElement = null;
+    IType type = project.findType(fqn);
+    ICodeAssist codeAssist;
+    if (type.isBinary()) {
+      codeAssist = type.getClassFile();
+    } else {
+      codeAssist = type.getCompilationUnit();
     }
 
-    private void findSubTypes(IJavaElement element, List<Type> implementations) throws JavaModelException {
-        IType type = (IType)element;
-        ITypeHierarchy typeHierarchy = type.newTypeHierarchy(new NullProgressMonitor());
-        IType[] implTypes = typeHierarchy.getAllSubtypes(type);
-
-        for (IType implType : implTypes) {
-            Type dto = convertToTypeDTO(implType);
-            implementations.add(dto);
-        }
+    IJavaElement[] elements = null;
+    if (codeAssist != null) {
+      elements = codeAssist.codeSelect(offset, 0);
     }
 
-    private void findTypesWithSubMethods(IJavaElement element, List<Type> implementations) throws JavaModelException {
-        IMethod selectedMethod = (IMethod)element;
-        IType parentType = selectedMethod.getDeclaringType();
-        if (parentType == null) {
-            return;
-        }
-        ITypeHierarchy typeHierarchy = parentType.newTypeHierarchy(new NullProgressMonitor());
-        IType[] subTypes = typeHierarchy.getAllSubtypes(parentType);
+    if (elements != null && elements.length > 0) {
+      originalElement = elements[0];
+    }
+    return originalElement;
+  }
 
-        MethodOverrideTester methodOverrideTester = new MethodOverrideTester(parentType, typeHierarchy);
+  private void findSubTypes(IJavaElement element, List<Type> implementations)
+      throws JavaModelException {
+    IType type = (IType) element;
+    ITypeHierarchy typeHierarchy = type.newTypeHierarchy(new NullProgressMonitor());
+    IType[] implTypes = typeHierarchy.getAllSubtypes(type);
 
-        for (IType type : subTypes) {
-            IMethod method = methodOverrideTester.findOverridingMethodInType(type, selectedMethod);
-            if (method == null) {
-                continue;
-            }
-            Type openDeclaration = convertToTypeDTO(type);
-            setRange(openDeclaration, method);
-            implementations.add(openDeclaration);
-        }
+    for (IType implType : implTypes) {
+      Type dto = convertToTypeDTO(implType);
+      implementations.add(dto);
+    }
+  }
+
+  private void findTypesWithSubMethods(IJavaElement element, List<Type> implementations)
+      throws JavaModelException {
+    IMethod selectedMethod = (IMethod) element;
+    IType parentType = selectedMethod.getDeclaringType();
+    if (parentType == null) {
+      return;
+    }
+    ITypeHierarchy typeHierarchy = parentType.newTypeHierarchy(new NullProgressMonitor());
+    IType[] subTypes = typeHierarchy.getAllSubtypes(parentType);
+
+    MethodOverrideTester methodOverrideTester = new MethodOverrideTester(parentType, typeHierarchy);
+
+    for (IType type : subTypes) {
+      IMethod method = methodOverrideTester.findOverridingMethodInType(type, selectedMethod);
+      if (method == null) {
+        continue;
+      }
+      Type openDeclaration = convertToTypeDTO(type);
+      setRange(openDeclaration, method);
+      implementations.add(openDeclaration);
+    }
+  }
+
+  private void setRange(Member member, IMember iMember) throws JavaModelException {
+    ISourceRange nameRange = iMember.getNameRange();
+    if (iMember.isBinary()) {
+      nameRange = iMember.getSourceRange();
     }
 
-    private void setRange(Member member, IMember iMember) throws JavaModelException {
-        ISourceRange nameRange = iMember.getNameRange();
-        if (iMember.isBinary()) {
-            nameRange = iMember.getSourceRange();
-        }
-
-        if (nameRange == null) {
-            return;
-        }
-
-        member.setFileRegion(convertToRegionDTO(iMember.getSourceRange()));
+    if (nameRange == null) {
+      return;
     }
 
-    private Type convertToTypeDTO(IType type) throws JavaModelException {
-        Type dto = DtoFactory.newDto(Type.class);
-        String typeName = type.getElementName();
-        if (typeName.isEmpty()) {
-            dto.setElementName("Anonymous in " + type.getParent().getElementName());
-        } else {
-            dto.setElementName(type.getElementName());
-        }
-        if (type.isBinary()) {
-            dto.setRootPath(type.getFullyQualifiedName());
-            dto.setLibId(type.getAncestor(IPackageFragmentRoot.PACKAGE_FRAGMENT_ROOT).hashCode());
-            dto.setBinary(true);
-        } else {
-            dto.setRootPath(type.getPath().toOSString());
-            dto.setBinary(false);
-        }
-        setRange(dto, type);
+    member.setFileRegion(convertToRegionDTO(iMember.getSourceRange()));
+  }
 
-        return dto;
+  private Type convertToTypeDTO(IType type) throws JavaModelException {
+    Type dto = DtoFactory.newDto(Type.class);
+    String typeName = type.getElementName();
+    if (typeName.isEmpty()) {
+      dto.setElementName("Anonymous in " + type.getParent().getElementName());
+    } else {
+      dto.setElementName(type.getElementName());
     }
+    if (type.isBinary()) {
+      dto.setRootPath(type.getFullyQualifiedName());
+      dto.setLibId(type.getAncestor(IPackageFragmentRoot.PACKAGE_FRAGMENT_ROOT).hashCode());
+      dto.setBinary(true);
+    } else {
+      dto.setRootPath(type.getPath().toOSString());
+      dto.setBinary(false);
+    }
+    setRange(dto, type);
 
-    private Region convertToRegionDTO(ISourceRange iSourceRange) {
-        Region region = DtoFactory.newDto(Region.class);
-        return iSourceRange == null ? region : region.withLength(iSourceRange.getLength()).withOffset(iSourceRange.getOffset());
-    }
+    return dto;
+  }
+
+  private Region convertToRegionDTO(ISourceRange iSourceRange) {
+    Region region = DtoFactory.newDto(Region.class);
+    return iSourceRange == null
+        ? region
+        : region.withLength(iSourceRange.getLength()).withOffset(iSourceRange.getOffset());
+  }
 }

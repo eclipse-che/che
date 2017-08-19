@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.actions;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -27,11 +30,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-
 /**
  * Tests for {@link FullTextSearchAction}.
  *
@@ -39,53 +37,50 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class FullTextSearchActionTest {
-    @Mock
-    private ActionEvent             actionEvent;
-    @Mock
-    private FullTextSearchPresenter fullTextSearchPresenter;
+  @Mock private ActionEvent actionEvent;
+  @Mock private FullTextSearchPresenter fullTextSearchPresenter;
 
-    @Mock(answer = Answers.RETURNS_MOCKS)
-    private CoreLocalizationConstant locale;
-    @Mock(answer = Answers.RETURNS_MOCKS)
-    private Resources                resources;
-    @Mock(answer = Answers.RETURNS_MOCKS)
-    private AppContext               appContext;
+  @Mock(answer = Answers.RETURNS_MOCKS)
+  private CoreLocalizationConstant locale;
 
-    @Mock
-    private Project project;
+  @Mock(answer = Answers.RETURNS_MOCKS)
+  private Resources resources;
 
-    @InjectMocks
-    FullTextSearchAction fullTextSearchAction;
+  @Mock(answer = Answers.RETURNS_MOCKS)
+  private AppContext appContext;
 
-    @Test
-    public void actionShouldBePerformed() {
-        fullTextSearchAction.actionPerformed(actionEvent);
+  @Mock private Project project;
 
-        verify(fullTextSearchPresenter).showDialog(any(Path.class));
-    }
+  @InjectMocks FullTextSearchAction fullTextSearchAction;
 
-    @Test
-    public void actionShouldBeEnabled() {
-        Presentation presentation = Mockito.mock(Presentation.class);
-        when(actionEvent.getPresentation()).thenReturn(presentation);
-        when(appContext.getRootProject()).thenReturn(project);
+  @Test
+  public void actionShouldBePerformed() {
+    fullTextSearchAction.actionPerformed(actionEvent);
 
-        fullTextSearchAction.updateInPerspective(actionEvent);
+    verify(fullTextSearchPresenter).showDialog(any(Path.class));
+  }
 
-        verify(presentation).setVisible(true);
-        verify(presentation).setEnabled(true);
-    }
+  @Test
+  public void actionShouldBeEnabled() {
+    Presentation presentation = Mockito.mock(Presentation.class);
+    when(actionEvent.getPresentation()).thenReturn(presentation);
+    when(appContext.getRootProject()).thenReturn(project);
 
-    @Test
-    public void actionShouldBeDisabled() {
-        Presentation presentation = Mockito.mock(Presentation.class);
-        when(actionEvent.getPresentation()).thenReturn(presentation);
-        when(appContext.getRootProject()).thenReturn(null);
+    fullTextSearchAction.updateInPerspective(actionEvent);
 
-        fullTextSearchAction.updateInPerspective(actionEvent);
+    verify(presentation).setVisible(true);
+    verify(presentation).setEnabled(true);
+  }
 
-        verify(presentation).setVisible(true);
-        verify(presentation).setEnabled(false);
-    }
+  @Test
+  public void actionShouldBeDisabled() {
+    Presentation presentation = Mockito.mock(Presentation.class);
+    when(actionEvent.getPresentation()).thenReturn(presentation);
+    when(appContext.getRootProject()).thenReturn(null);
 
+    fullTextSearchAction.updateInPerspective(actionEvent);
+
+    verify(presentation).setVisible(true);
+    verify(presentation).setEnabled(false);
+  }
 }

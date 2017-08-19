@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.part.explorer.project.macro;
-
-import com.google.common.base.Joiner;
-import com.google.gwtmockito.GwtMockitoTestRunner;
-
-import org.eclipse.che.ide.resource.Path;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
+
+import com.google.common.base.Joiner;
+import com.google.gwtmockito.GwtMockitoTestRunner;
+import org.eclipse.che.ide.resource.Path;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Unit tests for the {@link ExplorerCurrentFilePathMacro}
@@ -30,45 +29,51 @@ import static org.mockito.Mockito.verify;
 @RunWith(GwtMockitoTestRunner.class)
 public class ExplorerCurrentFilePathMacroTest extends AbstractExplorerMacroTest {
 
-    private ExplorerCurrentFilePathMacro provider;
+  private ExplorerCurrentFilePathMacro provider;
 
-    @Before
-    public void init() throws Exception {
-        super.init();
-        provider = new ExplorerCurrentFilePathMacro(projectExplorer, promiseProvider, appContext, localizationConstants);
-    }
+  @Before
+  public void init() throws Exception {
+    super.init();
+    provider =
+        new ExplorerCurrentFilePathMacro(
+            projectExplorer, promiseProvider, appContext, localizationConstants);
+  }
 
-    @Test
-    public void testGetKey() throws Exception {
-        assertSame(provider.getName(), ExplorerCurrentFilePathMacro.KEY);
-    }
+  @Test
+  public void testGetKey() throws Exception {
+    assertSame(provider.getName(), ExplorerCurrentFilePathMacro.KEY);
+  }
 
-    @Test
-    public void getValue() throws Exception {
-        initWithOneFile();
+  @Test
+  public void getValue() throws Exception {
+    initWithOneFile();
 
-        provider.expand();
+    provider.expand();
 
-        verify(promiseProvider).resolve(eq(Path.valueOf(PROJECTS_ROOT).append(FILE_1_PATH).toString()));
-    }
+    verify(promiseProvider).resolve(eq(Path.valueOf(PROJECTS_ROOT).append(FILE_1_PATH).toString()));
+  }
 
-    @Test
-    public void getMultipleValues() throws Exception {
-        initWithTwoFiles();
+  @Test
+  public void getMultipleValues() throws Exception {
+    initWithTwoFiles();
 
-        provider.expand();
+    provider.expand();
 
-        verify(promiseProvider).resolve(eq(Joiner.on(", ").join(Path.valueOf(PROJECTS_ROOT).append(FILE_1_PATH).toString(),
-                                                                Path.valueOf(PROJECTS_ROOT).append(FILE_2_PATH).toString())));
-    }
+    verify(promiseProvider)
+        .resolve(
+            eq(
+                Joiner.on(", ")
+                    .join(
+                        Path.valueOf(PROJECTS_ROOT).append(FILE_1_PATH).toString(),
+                        Path.valueOf(PROJECTS_ROOT).append(FILE_2_PATH).toString())));
+  }
 
-    @Test
-    public void getEmptyValues() throws Exception {
-        initWithNoFiles();
+  @Test
+  public void getEmptyValues() throws Exception {
+    initWithNoFiles();
 
-        provider.expand();
+    provider.expand();
 
-        verify(promiseProvider).resolve(eq(""));
-    }
-
+    verify(promiseProvider).resolve(eq(""));
+  }
 }

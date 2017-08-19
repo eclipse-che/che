@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.api.constraints;
 
 /**
@@ -17,15 +17,9 @@ package org.eclipse.che.ide.api.constraints;
  */
 public enum Direction {
 
-    /**
-     * Direction type that specifies the item to be the horizontally at the
-     * moment of addition.
-     */
-    HORIZONTALLY,
+  /** Direction type that specifies the item to be the horizontally at the moment of addition. */
+  HORIZONTALLY,
 
-    /**
-     * Direction type that specifies the item to be the vertically at the
-     * moment of addition.
-     */
-    VERTICALLY
+  /** Direction type that specifies the item to be the vertically at the moment of addition. */
+  VERTICALLY
 }

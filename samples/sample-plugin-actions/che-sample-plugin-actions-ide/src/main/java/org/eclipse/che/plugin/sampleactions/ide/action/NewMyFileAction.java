@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.sampleactions.ide.action;
 
 import com.google.inject.Inject;
-
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -22,34 +21,33 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
 import org.eclipse.che.plugin.sampleactions.ide.SampleActionsResources;
 
-/**
- * Simple action that creates an empty file with an "my" extension.
- */
+/** Simple action that creates an empty file with an "my" extension. */
 public class NewMyFileAction extends AbstractNewResourceAction {
 
-    /**
-     * Creates new action.
-     */
-    @Inject
-    public NewMyFileAction(SampleActionsResources resources,
-                           DialogFactory dialogFactory,
-                           CoreLocalizationConstant coreLocalizationConstant,
-                           EventBus eventBus,
-                           AppContext appContext,
-                           NotificationManager notificationManager,
-                           Provider<EditorAgent> editorAgentProvider) {
-        super("Create my file", "Create a new file",
-                resources.icon(),
-                dialogFactory,
-                coreLocalizationConstant,
-                eventBus,
-                appContext,
-                notificationManager,
-                editorAgentProvider);
-    }
+  /** Creates new action. */
+  @Inject
+  public NewMyFileAction(
+      SampleActionsResources resources,
+      DialogFactory dialogFactory,
+      CoreLocalizationConstant coreLocalizationConstant,
+      EventBus eventBus,
+      AppContext appContext,
+      NotificationManager notificationManager,
+      Provider<EditorAgent> editorAgentProvider) {
+    super(
+        "Create my file",
+        "Create a new file",
+        resources.icon(),
+        dialogFactory,
+        coreLocalizationConstant,
+        eventBus,
+        appContext,
+        notificationManager,
+        editorAgentProvider);
+  }
 
-    @Override
-    protected String getExtension() {
-        return "my";
-    }
+  @Override
+  protected String getExtension() {
+    return "my";
+  }
 }
