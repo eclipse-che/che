@@ -13,11 +13,12 @@ package org.eclipse.che.workspace.infrastructure.docker.local;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.dod.DockerApiHostEnvVariableProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersConfigProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentServerConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.projects.ProjectsVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisionersApplier;
@@ -40,6 +41,7 @@ public class LocalCheInfrastructureProvisioner implements InfrastructureProvisio
   private final LabelsProvisioner labelsProvisioner;
   private final DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner;
   private final ToolingServersEnvVarsProvisioner toolingServersEnvVarsProvisioner;
+  private final WsAgentServerConfigProvisioner wsAgentServerConfigProvisioner;
 
   @Inject
   public LocalCheInfrastructureProvisioner(
@@ -49,7 +51,8 @@ public class LocalCheInfrastructureProvisioner implements InfrastructureProvisio
       LocalInstallersConfigProvisioner installerConfigProvisioner,
       LabelsProvisioner labelsProvisioner,
       DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner,
-      ToolingServersEnvVarsProvisioner toolingServersEnvVarsProvisioner) {
+      ToolingServersEnvVarsProvisioner toolingServersEnvVarsProvisioner,
+      WsAgentServerConfigProvisioner wsAgentServerConfigProvisioner) {
 
     this.settingsProvisioners = settingsProvisioners;
     this.snapshotProvisioner = snapshotProvisioner;
@@ -58,11 +61,12 @@ public class LocalCheInfrastructureProvisioner implements InfrastructureProvisio
     this.labelsProvisioner = labelsProvisioner;
     this.dockerApiEnvProvisioner = dockerApiEnvProvisioner;
     this.toolingServersEnvVarsProvisioner = toolingServersEnvVarsProvisioner;
+    this.wsAgentServerConfigProvisioner = wsAgentServerConfigProvisioner;
   }
 
   @Override
   public void provision(
-      EnvironmentImpl envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+      InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
     snapshotProvisioner.provision(envConfig, internalEnv, identity);
@@ -72,5 +76,6 @@ public class LocalCheInfrastructureProvisioner implements InfrastructureProvisio
     labelsProvisioner.provision(envConfig, internalEnv, identity);
     dockerApiEnvProvisioner.provision(envConfig, internalEnv, identity);
     toolingServersEnvVarsProvisioner.provision(envConfig, internalEnv, identity);
+    wsAgentServerConfigProvisioner.provision(envConfig, internalEnv, identity);
   }
 }

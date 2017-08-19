@@ -12,8 +12,7 @@ package org.eclipse.che.workspace.infrastructure.openshift.provision.installer;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.workspace.server.Utils.WSAGENT_INSTALLER;
-import static org.mockito.Matchers.any;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -31,12 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.installer.server.exception.InstallerException;
-import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -54,8 +53,7 @@ public class InstallerConfigProvisionerTest {
 
   private static final String CHE_SERVER_ENDPOINT = "localhost:8080";
 
-  @Mock private InstallerRegistry registry;
-  @Mock private EnvironmentImpl environment;
+  @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
 
@@ -63,7 +61,7 @@ public class InstallerConfigProvisionerTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    installerConfigProvisioner = new InstallerConfigProvisioner(registry, CHE_SERVER_ENDPOINT);
+    installerConfigProvisioner = new InstallerConfigProvisioner(CHE_SERVER_ENDPOINT);
   }
 
   @Test
@@ -72,13 +70,14 @@ public class InstallerConfigProvisionerTest {
     final Container container = mockContainer("machine");
     final Pod pod = mockPod(podName, singletonList(container));
     when(osEnv.getPods()).thenReturn(ImmutableMap.of(podName, pod));
-    final MachineConfigImpl devMachine = mock(MachineConfigImpl.class);
-    final Map<String, MachineConfigImpl> machines = ImmutableMap.of("test/machine", devMachine);
+    final InternalMachineConfig devMachine = mock(InternalMachineConfig.class);
+    final Map<String, InternalMachineConfig> machines = ImmutableMap.of("test/machine", devMachine);
     when(environment.getMachines()).thenReturn(machines);
-    final List<String> installerIds = singletonList(WSAGENT_INSTALLER);
-    when(devMachine.getInstallers()).thenReturn(installerIds);
-    final Installer installer = mock(Installer.class);
-    when(registry.getOrderedInstallers(installerIds)).thenReturn(singletonList(installer));
+    when(devMachine.getServers())
+        .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, new ServerConfigImpl()));
+    final InstallerImpl installer = mock(InstallerImpl.class);
+    final List<InstallerImpl> installers = singletonList(installer);
+    when(devMachine.getInstallers()).thenReturn(installers);
     final Map<String, String> envVars = ImmutableMap.of("environment", "CHE_HOST=localhost");
     when(installer.getProperties()).thenReturn(envVars);
     final List<EnvVar> envVariables = new ArrayList<>();
@@ -87,9 +86,9 @@ public class InstallerConfigProvisionerTest {
 
     installerConfigProvisioner.provision(environment, osEnv, runtimeIdentity);
 
-    verify(osEnv, times(1)).getPods();
+    verify(osEnv, times(2)).getPods();
     verify(runtimeIdentity, atLeast(1)).getWorkspaceId();
-    verify(environment, times(1)).getMachines();
+    verify(environment, times(2)).getMachines();
     assertTrue(envVariables.size() == 3);
   }
 
@@ -99,8 +98,7 @@ public class InstallerConfigProvisionerTest {
     final Pod pod = mockPod(podName, "machine");
     when(osEnv.getPods()).thenReturn(ImmutableMap.of(podName, pod));
     when(environment.getMachines())
-        .thenReturn(ImmutableMap.of("test/machine", mock(MachineConfigImpl.class)));
-    when(registry.getOrderedInstallers(any())).thenThrow(new InstallerException("not found"));
+        .thenReturn(ImmutableMap.of("test/machine", mock(InternalMachineConfig.class)));
 
     installerConfigProvisioner.provision(environment, osEnv, runtimeIdentity);
   }

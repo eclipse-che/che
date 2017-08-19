@@ -17,13 +17,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.inject.Inject;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.Labels;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -48,13 +46,6 @@ import org.slf4j.Logger;
 public class InstallerConfigApplier {
   private static final Logger LOG = getLogger(InstallerConfigApplier.class);
 
-  private final InstallerRegistry installerRegistry;
-
-  @Inject
-  public InstallerConfigApplier(InstallerRegistry installerRegistry) {
-    this.installerRegistry = installerRegistry;
-  }
-
   /**
    * Applies docker specific properties to an environment of machines.
    *
@@ -63,12 +54,12 @@ public class InstallerConfigApplier {
    * @param dockerEnvironment affected environment of machines
    * @throws InstallerException if any error occurs
    */
-  public void apply(Environment envConfig, DockerEnvironment dockerEnvironment)
+  public void apply(InternalEnvironment envConfig, DockerEnvironment dockerEnvironment)
       throws InstallerException {
-    for (Map.Entry<String, ? extends MachineConfig> machineEntry :
+    for (Map.Entry<String, InternalMachineConfig> machineEntry :
         envConfig.getMachines().entrySet()) {
       String machineName = machineEntry.getKey();
-      MachineConfig machineConf = machineEntry.getValue();
+      InternalMachineConfig machineConf = machineEntry.getValue();
       DockerContainerConfig dockerContainer = dockerEnvironment.getContainers().get(machineName);
 
       apply(machineConf, dockerContainer);
@@ -83,11 +74,10 @@ public class InstallerConfigApplier {
    * @param machine affected machine
    * @throws InstallerException if any error occurs
    */
-  public void apply(@Nullable MachineConfig machineConf, DockerContainerConfig machine)
+  public void apply(@Nullable InternalMachineConfig machineConf, DockerContainerConfig machine)
       throws InstallerException {
     if (machineConf != null) {
-      for (Installer installer :
-          installerRegistry.getOrderedInstallers(machineConf.getInstallers())) {
+      for (Installer installer : machineConf.getInstallers()) {
         addEnv(machine, installer.getProperties());
         addExposedPorts(machine, installer.getServers());
         addLabels(machine, installer.getServers());

@@ -15,8 +15,8 @@ import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator
 
 import com.google.common.base.Joiner;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -29,12 +29,13 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  * @author Alexander Andrienko
  */
 public class DockerfileEnvironmentParser implements DockerConfigSourceSpecificEnvironmentParser {
+  public static final String TYPE = "dockerfile";
 
   @Override
-  public DockerEnvironment parse(Environment environment) throws ValidationException {
-    Recipe recipe = environment.getRecipe();
+  public DockerEnvironment parse(InternalEnvironment environment) throws ValidationException {
+    InternalRecipe recipe = environment.getRecipe();
 
-    if (!"dockerfile".equals(recipe.getType())) {
+    if (!TYPE.equals(recipe.getType())) {
       throw new ValidationException(
           format(
               "Dockerfile environment parser doesn't support recipe type '%s'", recipe.getType()));
@@ -51,17 +52,12 @@ public class DockerfileEnvironmentParser implements DockerConfigSourceSpecificEn
     DockerEnvironment cheContainerEnv = new DockerEnvironment();
     DockerContainerConfig container = new DockerContainerConfig();
     cheContainerEnv.getContainers().put(getMachineName(environment), container);
-
-    if (recipe.getLocation() != null) {
-      container.setBuild(new DockerBuildContext().setContext(recipe.getLocation()));
-    } else {
-      container.setBuild(new DockerBuildContext().setDockerfileContent(recipe.getContent()));
-    }
+    container.setBuild(new DockerBuildContext().setDockerfileContent(recipe.getContent()));
 
     return cheContainerEnv;
   }
 
-  private String getMachineName(Environment environment) throws ValidationException {
+  private String getMachineName(InternalEnvironment environment) throws ValidationException {
     checkArgument(
         environment.getMachines().size() == 1,
         "Environment of type '%s' doesn't support multiple machines, but contains machines: %s",

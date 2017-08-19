@@ -138,6 +138,11 @@ public class InstallerImpl implements Installer {
     this.id = id;
   }
 
+  public InstallerImpl withId(String id) {
+    this.id = id;
+    return this;
+  }
+
   @Override
   public String getName() {
     return name;
@@ -145,6 +150,11 @@ public class InstallerImpl implements Installer {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public InstallerImpl withName(String name) {
+    this.name = name;
+    return this;
   }
 
   @Override
@@ -156,6 +166,11 @@ public class InstallerImpl implements Installer {
     this.version = version;
   }
 
+  public InstallerImpl withVersion(String version) {
+    this.version = version;
+    return this;
+  }
+
   @Override
   public String getDescription() {
     return description;
@@ -163,6 +178,11 @@ public class InstallerImpl implements Installer {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public InstallerImpl withDescription(String description) {
+    this.description = description;
+    return this;
   }
 
   @Override
@@ -177,6 +197,11 @@ public class InstallerImpl implements Installer {
     this.dependencies = dependencies;
   }
 
+  public InstallerImpl withDependencies(List<String> dependencies) {
+    this.dependencies = dependencies;
+    return this;
+  }
+
   @Override
   public Map<String, String> getProperties() {
     if (properties == null) {
@@ -189,6 +214,11 @@ public class InstallerImpl implements Installer {
     this.properties = properties;
   }
 
+  public InstallerImpl withProperties(Map<String, String> properties) {
+    this.properties = properties;
+    return this;
+  }
+
   @Override
   public String getScript() {
     return script;
@@ -196,6 +226,11 @@ public class InstallerImpl implements Installer {
 
   public void setScript(String script) {
     this.script = script;
+  }
+
+  public InstallerImpl withScript(String script) {
+    this.script = script;
+    return this;
   }
 
   @Override
@@ -210,12 +245,22 @@ public class InstallerImpl implements Installer {
     this.servers = servers;
   }
 
+  public InstallerImpl withServers(Map<String, InstallerServerConfigImpl> servers) {
+    this.servers = servers;
+    return this;
+  }
+
   public Long getInternalId() {
     return internalId;
   }
 
   public void setInternalId(Long internalId) {
     this.internalId = internalId;
+  }
+
+  public InstallerImpl withInternalId(Long internalId) {
+    this.internalId = internalId;
+    return this;
   }
 
   @Override

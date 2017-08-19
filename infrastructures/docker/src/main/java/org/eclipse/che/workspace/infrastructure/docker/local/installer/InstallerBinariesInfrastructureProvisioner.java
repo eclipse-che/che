@@ -17,14 +17,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -92,17 +92,16 @@ public abstract class InstallerBinariesInfrastructureProvisioner
 
   @Override
   public void provision(
-      EnvironmentImpl envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+      InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    for (Map.Entry<String, MachineConfigImpl> machineConfigEntry :
+    for (Map.Entry<String, InternalMachineConfig> machineConfigEntry :
         envConfig.getMachines().entrySet()) {
-      String machineName = machineConfigEntry.getKey();
-      MachineConfigImpl machineConfig = machineConfigEntry.getValue();
-      DockerContainerConfig containerConfig = internalEnv.getContainers().get(machineName);
+      InternalMachineConfig machineConfig = machineConfigEntry.getValue();
 
-      List<String> installers = machineConfig.getInstallers();
-      if (installers.contains(installerFqn)) {
+      if (InstallerFqn.idInInstallerList(installerFqn, machineConfig.getInstallers())) {
+        DockerContainerConfig containerConfig =
+            internalEnv.getContainers().get(machineConfigEntry.getKey());
         containerConfig.getVolumes().add(binariesVolume);
       }
     }

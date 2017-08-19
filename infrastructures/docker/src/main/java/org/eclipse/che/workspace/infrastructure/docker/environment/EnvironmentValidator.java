@@ -22,11 +22,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.installer.server.impl.InstallerFqn;
+import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -68,15 +68,15 @@ public class EnvironmentValidator {
   private static final Pattern VOLUME_FROM_PATTERN =
       Pattern.compile("^(?<containerName>" + MACHINE_NAME_REGEXP + ")(:(ro|rw))?$");
 
-  public void validate(Environment env, DockerEnvironment dockerEnvironment)
+  public void validate(InternalEnvironment env, DockerEnvironment dockerEnvironment)
       throws ValidationException, InfrastructureException {
     checkArgument(
         dockerEnvironment.getContainers() != null && !dockerEnvironment.getContainers().isEmpty(),
-        "Environment should contain at least 1 machine");
+        "Environment should contain at least 1 container");
 
     checkArgument(
         env.getMachines() != null && !env.getMachines().isEmpty(),
-        "Environment doesn't contain machine with 'org.eclipse.che.ws-agent' agent");
+        "Environment should contain at least 1 machine");
 
     List<String> missingContainers =
         env.getMachines()
@@ -86,26 +86,25 @@ public class EnvironmentValidator {
             .collect(toList());
     checkArgument(
         missingContainers.isEmpty(),
-        "Environment 'contains machines that are missing in environment recipe: %s",
+        "Environment contains machines that are missing in environment recipe: %s",
         Joiner.on(", ").join(missingContainers));
 
-    List<String> devMachines =
+    List<String> machinesWithWsagentServer =
         env.getMachines()
             .entrySet()
             .stream()
             .filter(
                 entry ->
-                    InstallerFqn.idInKeyList(
-                        "org.eclipse.che.ws-agent", entry.getValue().getInstallers()))
+                    WsAgentMachineFinderUtil.containsWsAgentServerOrInstaller(entry.getValue()))
             .map(Map.Entry::getKey)
             .collect(toList());
 
     checkArgument(
-        devMachines.size() == 1,
-        "Environment should contain exactly 1 machine with agent 'org.eclipse.che.ws-agent', but contains '%s'. "
+        machinesWithWsagentServer.size() == 1,
+        "Environment should contain exactly 1 machine with wsagent, but contains '%s'. "
             + "All machines with this agent: %s",
-        devMachines.size(),
-        Joiner.on(", ").join(devMachines));
+        machinesWithWsagentServer.size(),
+        Joiner.on(", ").join(machinesWithWsagentServer));
 
     // needed to validate different kinds of dependencies in containers to other containers
     Set<String> containersNames = dockerEnvironment.getContainers().keySet();
@@ -119,10 +118,11 @@ public class EnvironmentValidator {
 
   private void validateMachine(
       String machineName,
-      @Nullable MachineConfig machineConfig,
+      @Nullable InternalMachineConfig machineConfig,
       DockerContainerConfig container,
       Set<String> containersNames)
       throws ValidationException {
+
     checkArgument(
         MACHINE_NAME_PATTERN.matcher(machineName).matches(),
         "Name of machine '%s' in environment is invalid",
@@ -219,7 +219,7 @@ public class EnvironmentValidator {
         machineName);
   }
 
-  private void validateExtendedMachine(MachineConfig machineConfig, String machineName)
+  private void validateExtendedMachine(InternalMachineConfig machineConfig, String machineName)
       throws ValidationException {
     if (machineConfig.getAttributes() != null
         && machineConfig.getAttributes().get("memoryLimitBytes") != null) {
@@ -257,16 +257,6 @@ public class EnvironmentValidator {
             machineName,
             serverName,
             server.getProtocol());
-      }
-    }
-
-    if (machineConfig.getInstallers() != null) {
-      for (String agent : machineConfig.getInstallers()) {
-        checkArgument(
-            !isNullOrEmpty(agent),
-            "Machine '%s' in environment contains invalid agent '%s'",
-            machineName,
-            agent);
       }
     }
   }

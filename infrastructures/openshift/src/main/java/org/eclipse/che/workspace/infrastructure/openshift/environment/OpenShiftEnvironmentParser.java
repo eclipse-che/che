@@ -26,18 +26,16 @@ import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.api.core.model.workspace.config.Recipe;
-import org.eclipse.che.api.workspace.server.RecipeDownloader;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.ServerExposer;
 
 /**
- * Parses {@link Environment} into {@link OpenShiftEnvironment}.
+ * Parses {@link InternalEnvironment} into {@link OpenShiftEnvironment}.
  *
  * <p>It is done in following way:
  *
@@ -50,26 +48,21 @@ import org.eclipse.che.workspace.infrastructure.openshift.ServerExposer;
  */
 public class OpenShiftEnvironmentParser {
   private final OpenShiftClientFactory clientFactory;
-  private final RecipeDownloader recipeDownloader;
 
   @Inject
-  public OpenShiftEnvironmentParser(
-      OpenShiftClientFactory clientFactory, RecipeDownloader recipeDownloader) {
+  public OpenShiftEnvironmentParser(OpenShiftClientFactory clientFactory) {
     this.clientFactory = clientFactory;
-    this.recipeDownloader = recipeDownloader;
   }
 
-  public OpenShiftEnvironment parse(Environment environment)
+  public OpenShiftEnvironment parse(InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
     checkNotNull(environment, "Environment should not be null");
-    Recipe recipe = environment.getRecipe();
+    InternalRecipe recipe = environment.getRecipe();
     checkNotNull(environment.getRecipe(), "Environment recipe should not be null");
-
-    String content = getContentOfRecipe(recipe);
-    String contentType = recipe.getContentType();
-
-    checkNotNull(contentType, "Recipe content type should not be null");
+    String content = recipe.getContent();
     checkNotNull(content, "Recipe content should not be null");
+    String contentType = recipe.getContentType();
+    checkNotNull(contentType, "Recipe content type should not be null");
 
     switch (contentType) {
       case "application/x-yaml":
@@ -127,7 +120,7 @@ public class OpenShiftEnvironmentParser {
   }
 
   private void normalizeEnvironment(
-      OpenShiftEnvironment openShiftEnvironment, Environment environment)
+      OpenShiftEnvironment openShiftEnvironment, InternalEnvironment environment)
       throws ValidationException {
     for (Pod podConfig : openShiftEnvironment.getPods().values()) {
       String podName = podConfig.getMetadata().getName();
@@ -135,7 +128,7 @@ public class OpenShiftEnvironmentParser {
 
       for (Container containerConfig : podConfig.getSpec().getContainers()) {
         String machineName = podName + "/" + containerConfig.getName();
-        MachineConfig machineConfig = environment.getMachines().get(machineName);
+        InternalMachineConfig machineConfig = environment.getMachines().get(machineName);
         if (machineConfig != null && !machineConfig.getServers().isEmpty()) {
           ServerExposer serverExposer =
               new ServerExposer(machineName, containerConfig, openShiftEnvironment);
@@ -158,18 +151,6 @@ public class OpenShiftEnvironmentParser {
       metadata.setLabels(labels);
     }
     return labels;
-  }
-
-  private String getContentOfRecipe(Recipe environmentRecipe) throws InfrastructureException {
-    if (environmentRecipe.getContent() != null) {
-      return environmentRecipe.getContent();
-    } else {
-      try {
-        return recipeDownloader.getRecipe(environmentRecipe.getLocation());
-      } catch (ServerException e) {
-        throw new InfrastructureException(e.getLocalizedMessage(), e);
-      }
-    }
   }
 
   private void checkNotNull(Object object, String errorMessage) throws ValidationException {

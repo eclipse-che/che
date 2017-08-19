@@ -19,10 +19,10 @@ import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
@@ -39,7 +39,7 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
 
   @Inject
   public OpenShiftRuntimeContext(
-      @Assisted Environment environment,
+      @Assisted InternalEnvironment environment,
       @Assisted OpenShiftEnvironment openShiftEnvironment,
       @Assisted RuntimeIdentity identity,
       @Assisted RuntimeInfrastructure infrastructure,
@@ -48,7 +48,8 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
       OpenShiftRuntimeFactory runtimeFactory,
       @Named("che.websocket.endpoint.base") String websocketEndpointBase)
       throws ValidationException, InfrastructureException {
-    super(environment, identity, infrastructure, installerRegistry);
+
+    super(environment, identity, infrastructure);
     this.clientFactory = clientFactory;
     this.runtimeFactory = runtimeFactory;
     this.openShiftEnvironment = openShiftEnvironment;
@@ -72,7 +73,7 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
 
   @Override
   public InternalRuntime getRuntime() throws InfrastructureException {
-    String namespace = identity.getWorkspaceId();
-    return runtimeFactory.create(this, new OpenShiftProject(namespace, clientFactory));
+    return runtimeFactory.create(
+        this, new OpenShiftProject(getIdentity().getWorkspaceId(), clientFactory));
   }
 }

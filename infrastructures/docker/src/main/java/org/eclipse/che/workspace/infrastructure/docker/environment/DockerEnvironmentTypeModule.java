@@ -25,7 +25,11 @@ public class DockerEnvironmentTypeModule extends AbstractModule {
         MapBinder.newMapBinder(
             binder(), String.class, DockerConfigSourceSpecificEnvironmentParser.class);
     envParserMapBinder.addBinding("compose").to(ComposeEnvironmentParser.class);
-    envParserMapBinder.addBinding("dockerfile").to(DockerfileEnvironmentParser.class);
-    envParserMapBinder.addBinding("dockerimage").to(DockerImageEnvironmentParser.class);
+    envParserMapBinder
+        .addBinding(DockerfileEnvironmentParser.TYPE)
+        .to(DockerfileEnvironmentParser.class);
+    envParserMapBinder
+        .addBinding(DockerImageEnvironmentParser.TYPE)
+        .to(DockerImageEnvironmentParser.class);
   }
 }
