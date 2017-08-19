@@ -12,7 +12,6 @@ package org.eclipse.che.dto.definitions;
 
 import org.eclipse.che.dto.shared.DTO;
 
-
 /**
  * Keeps DTO interfaces for hierarchy test
  *
