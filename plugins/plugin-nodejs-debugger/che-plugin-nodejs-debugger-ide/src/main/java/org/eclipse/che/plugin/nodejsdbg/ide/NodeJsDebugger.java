@@ -26,7 +26,7 @@ import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
-import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
+import org.eclipse.che.plugin.debugger.ide.debug.DefaultDebuggerResourceHandler;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -47,7 +47,7 @@ public class NodeJsDebugger extends AbstractDebugger {
                           DtoFactory dtoFactory,
                           LocalStorageProvider localStorageProvider,
                           EventBus eventBus,
-                          BasicActiveFileHandler activeFileHandler,
+                          DefaultDebuggerResourceHandler activeFileHandler,
                           DebuggerManager debuggerManager,
                           NotificationManager notificationManager,
                           BreakpointManager breakpointManager,

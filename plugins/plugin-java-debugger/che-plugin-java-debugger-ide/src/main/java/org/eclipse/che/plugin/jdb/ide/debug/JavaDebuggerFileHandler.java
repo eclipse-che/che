@@ -22,7 +22,7 @@ import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServ
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
+import org.eclipse.che.plugin.debugger.ide.debug.DefaultDebuggerResourceHandler;
 
 /**
  * Responsible to open files in editor when debugger stopped at breakpoint.
@@ -30,7 +30,7 @@ import org.eclipse.che.plugin.debugger.ide.debug.BasicActiveFileHandler;
  * @author Anatoliy Bazko
  */
 @Singleton
-public class JavaDebuggerFileHandler extends BasicActiveFileHandler {
+public class JavaDebuggerFileHandler extends DefaultDebuggerResourceHandler {
 
     private final JavaNavigationService javaNavigationService;
     private final JavaNodeFactory       nodeFactory;

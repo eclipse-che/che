@@ -25,6 +25,8 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -102,7 +104,7 @@ public class EvaluateExpressionTest extends BaseTest {
 
     @Test
     public void testEvaluateExpressionRequestIsSuccessful() throws Exception {
-        when(debugger.evaluate(anyString())).thenReturn(promise);
+        when(debugger.evaluate(anyString(), anyLong(), anyInt())).thenReturn(promise);
         when(view.getExpression()).thenReturn(EXPRESSION);
         when(promise.then(any(Operation.class))).thenReturn(promise);
 
@@ -112,13 +114,13 @@ public class EvaluateExpressionTest extends BaseTest {
         presenter.onEvaluateClicked();
 
         verify(view, atLeastOnce()).setEnableEvaluateButton(eq(DISABLE_BUTTON));
-        verify(debugger).evaluate(eq(EXPRESSION));
+        verify(debugger).evaluate(eq(EXPRESSION), anyLong(), anyInt());
     }
 
     @Test
     public void testEvaluateExpressionRequestIsFailed() throws Exception {
         when(view.getExpression()).thenReturn(EXPRESSION);
-        when(debugger.evaluate(view.getExpression())).thenReturn(promise);
+        when(debugger.evaluate(view.getExpression(), anyLong(), anyInt())).thenReturn(promise);
         when(promise.then((Operation)anyObject())).thenReturn(promise);
         when(promise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(promise);
         when(debuggerManager.getActiveDebugger()).thenReturn(debugger);
@@ -128,7 +130,7 @@ public class EvaluateExpressionTest extends BaseTest {
         presenter.onEvaluateClicked();
 
         verify(view, atLeastOnce()).setEnableEvaluateButton(eq(DISABLE_BUTTON));
-        verify(debugger).evaluate(eq(EXPRESSION));
+        verify(debugger).evaluate(eq(EXPRESSION), anyLong(), anyInt());
         verify(promise).catchError(errorCaptor.capture());
 
         errorCaptor.getValue().apply(promiseError);

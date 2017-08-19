@@ -27,6 +27,7 @@ import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
+import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerManager;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
 
@@ -57,7 +58,7 @@ public class JavaDebugger extends AbstractDebugger {
                         LocalStorageProvider localStorageProvider,
                         EventBus eventBus,
                         FqnResolverFactory fqnResolverFactory,
-                        JavaDebuggerFileHandler javaDebuggerFileHandler,
+                        DebuggerResourceHandlerManager debuggerResourceHandlerManager,
                         DebuggerManager debuggerManager,
                         NotificationManager notificationManager,
                         FileTypeRegistry fileTypeRegistry,
@@ -69,12 +70,12 @@ public class JavaDebugger extends AbstractDebugger {
               dtoFactory,
               localStorageProvider,
               eventBus,
-              javaDebuggerFileHandler,
               debuggerManager,
               notificationManager,
               breakpointManager,
               ID,
-              requestHandlerManager);
+              requestHandlerManager,
+              debuggerResourceHandlerManager);
         this.fqnResolverFactory = fqnResolverFactory;
         this.fileTypeRegistry = fileTypeRegistry;
     }

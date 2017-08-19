@@ -36,13 +36,13 @@ import java.util.List;
  * @author Anatoliy Bazko
  */
 @Singleton
-public class BasicActiveFileHandler implements DebuggerResourceHandler {
+public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
 
     private final EditorAgent editorAgent;
     private final AppContext  appContext;
 
     @Inject
-    public BasicActiveFileHandler(EditorAgent editorAgent, AppContext appContext) {
+    public DefaultDebuggerResourceHandler(EditorAgent editorAgent, AppContext appContext) {
         this.editorAgent = editorAgent;
         this.appContext = appContext;
     }
@@ -51,10 +51,10 @@ public class BasicActiveFileHandler implements DebuggerResourceHandler {
      * Tries to find file and open it.
      * To perform the operation the following sequence of methods invocation are processed:
      *
-     * {@link BasicActiveFileHandler#findInOpenedEditors(Location, AsyncCallback)}
-     * {@link BasicActiveFileHandler#findInProject(Location, AsyncCallback)}
-     * {@link BasicActiveFileHandler#findInWorkspace(Location, AsyncCallback)}
-     * {@link BasicActiveFileHandler#searchSource(Location, AsyncCallback)}
+     * {@link DefaultDebuggerResourceHandler#findInOpenedEditors(Location, AsyncCallback)}
+     * {@link DefaultDebuggerResourceHandler#findInProject(Location, AsyncCallback)}
+     * {@link DefaultDebuggerResourceHandler#findInWorkspace(Location, AsyncCallback)}
+     * {@link DefaultDebuggerResourceHandler#searchSource(Location, AsyncCallback)}
      *
      * @see DebuggerResourceHandler#open(Location, AsyncCallback)
      */

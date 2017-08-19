@@ -121,19 +121,19 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                             DtoFactory dtoFactory,
                             LocalStorageProvider localStorageProvider,
                             EventBus eventBus,
-                            DebuggerResourceHandler debuggerResourceHandler,
                             DebuggerManager debuggerManager,
                             NotificationManager notificationManager,
                             BreakpointManager breakpointManager,
                             String type,
-                            RequestHandlerManager requestHandlerManager) {
+                            RequestHandlerManager requestHandlerManager,
+    DebuggerResourceHandlerManager debuggerResourceHandlerManager) {
         this.service = service;
         this.transmitter = transmitter;
         this.configurator = configurator;
         this.dtoFactory = dtoFactory;
         this.localStorageProvider = localStorageProvider;
         this.eventBus = eventBus;
-        this.debuggerResourceHandler = debuggerResourceHandler;
+        this.debuggerResourceHandler = debuggerResourceHandlerManager.get(getDebuggerType());
         this.debuggerManager = debuggerManager;
         this.notificationManager = notificationManager;
         this.breakpointManager = breakpointManager;
