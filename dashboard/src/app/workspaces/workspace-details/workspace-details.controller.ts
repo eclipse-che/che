@@ -22,11 +22,8 @@ export  interface IInitData {
 
 const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Agents', 'Servers', 'Env_Variables', 'Config'];
 
-const STARTING = WorkspaceStatus[WorkspaceStatus.STARTING];
-const RUNNING = WorkspaceStatus[WorkspaceStatus.RUNNING];
 const STOPPING = WorkspaceStatus[WorkspaceStatus.STOPPING];
 const STOPPED = WorkspaceStatus[WorkspaceStatus.STOPPED];
-const SNAPSHOTTING = WorkspaceStatus[WorkspaceStatus.SNAPSHOTTING];
 
 /**
  * @ngdoc controller
@@ -229,6 +226,24 @@ export class WorkspaceDetailsController {
       return;
     }
     this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
+    const failTabs = [];
+    const tabs = Object.keys(this.tab).filter((tabKey: string) => {
+      return !isNaN(parseInt(tabKey, 10));
+    });
+    tabs.forEach((tabKey: string) => {
+      if (this.checkFormsNotValid(tabKey)) {
+        failTabs.push(this.tab[tabKey]);
+      }
+    });
+    if (failTabs.length) {
+      const url = this.$location.absUrl().split('?')[0];
+      this.editModeMessage = '<i class="error fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Impossible to save and apply the configuration. Errors in ';
+      this.editModeMessage += failTabs.map((tab: string) => {
+        return `<a href='${url}?tab=${tab}'>${tab}</a>`;
+      }).join(', ');
+      this.showApplyMessage = true;
+      return;
+    }
     this.editModeMessage = 'Changes will be applied and workspace restarted';
     const needRunningStatus = this.workspaceDetailsService.needRunningToUpdate();
     if (needRunningStatus) {

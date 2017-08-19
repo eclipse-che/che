@@ -92,7 +92,7 @@
                 </div>
                 <!-- Actions -->
                 <div flex="10" layout="column" layout-align="center end" class="machine-servers-actions">
-                  <did flex layout="row">
+                  <div flex layout="row">
                     <div ng-if="server.userScope"
                          ng-click="machineServersController.showEditDialog(server.reference)">
                       <span class="fa fa-pencil"></span>
@@ -101,7 +101,7 @@
                          ng-click="machineServersController.deleteServer(server.reference)">
                       <span class="fa fa-trash-o"></span>
                     </div>
-                  </did>
+                  </div>
                 </div>
               </div>
             </div>

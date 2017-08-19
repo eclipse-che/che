@@ -10,12 +10,12 @@
  */
 'use strict';
 
-import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
 import {StackSelectorSvc} from './stack-selector/stack-selector.service';
 import {ProjectSourceSelectorService} from './project-source-selector/project-source-selector.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
+import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 
 /**
  * This class is handling the service for workspace creation.

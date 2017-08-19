@@ -17,8 +17,8 @@ import {DockerImageEnvironmentManager} from '../environment/docker-image-environ
 import {CheEnvironmentRegistry} from '../environment/che-environment-registry.factory';
 import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
-import {CheBranding} from './../branding/che-branding.factory';
 import {IObservableCallbackFn, Observable} from './../../utils/observable';
+import {CheBranding} from '../../branding/che-branding.factory';
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   create: any;

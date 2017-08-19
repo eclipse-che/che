@@ -1,5 +1,5 @@
 <che-row-toolbar
-  title="{{workspaceDetailsController.isCreationFlow ? 'New Workspace' : workspaceDetailsController.workspaceName}}"
+  title="{{workspaceDetailsController.workspaceName}}"
   link-href="#/workspaces" link-title="Workspaces" class="workspace-details-toolbar">
   <div layout="row" layout-align="start center" class="toolbar-info">
     <workspace-status che-status="workspaceDetailsController.getWorkspaceStatus()"></workspace-status>
@@ -131,7 +131,6 @@
 
     <!-- Other tabs -->
     <md-tab ng-repeat="section in workspaceDetailsController.getPages()"
-            ng-if="workspaceDetailsController.isCreationFlow === false"
             ng-init="workspaceDetailsController.addTab(section.title);"
             md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab[section.title]);">
       <md-tab-label>

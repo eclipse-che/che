@@ -34,7 +34,7 @@
  *
  * @author Oleksii Kurinnyi
  */
-export class WorkspaceEditModeOverlay {
+export class WorkspaceEditModeOverlay implements ng.IDirective {
   replace: boolean = true;
   transclude: boolean = true;
   restrict: string = 'E';

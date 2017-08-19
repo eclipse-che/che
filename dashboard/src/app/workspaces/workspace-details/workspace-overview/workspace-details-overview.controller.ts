@@ -31,6 +31,7 @@ export class WorkspaceDetailsOverviewController {
   private $q: ng.IQService;
   private $route: ng.route.IRouteService;
   private $location: ng.ILocationService;
+  private $timeout: ng.ITimeoutService;
   private cheWorkspace: CheWorkspace;
   private cheNotification: CheNotification;
   private confirmDialogService: ConfirmDialogService;
@@ -40,7 +41,6 @@ export class WorkspaceDetailsOverviewController {
   private workspaceDetailsService: WorkspaceDetailsService;
   private namespaceId: string;
   private workspaceName: string;
-  private newWorkspaceName: string = '';
   private usedNamesList: Array<string>;
   private inputmodel: ng.INgModelController;
   private isLoading: boolean;
@@ -49,9 +49,10 @@ export class WorkspaceDetailsOverviewController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $route: ng.route.IRouteService, $location: ng.ILocationService, cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
+  constructor($q: ng.IQService, $route: ng.route.IRouteService, $timeout: ng.ITimeoutService, $location: ng.ILocationService, cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
     this.$q = $q;
     this.$route = $route;
+    this.$timeout = $timeout;
     this.$location = $location;
     this.cheWorkspace = cheWorkspace;
     this.cheNotification = cheNotification;
@@ -62,7 +63,6 @@ export class WorkspaceDetailsOverviewController {
     const routeParams = $route.current.params;
     this.namespaceId = routeParams.namespace;
     this.workspaceName = routeParams.workspaceName;
-    this.newWorkspaceName = angular.copy(this.workspaceDetails.config.name);
 
     this.fillInListOfUsedNames();
   }
@@ -242,14 +242,12 @@ export class WorkspaceDetailsOverviewController {
   }
 
   /**
-   * Callback when Team button is clicked in Edit mode.
-   * Redirects to billing details or team details.
-   *
-   * @param {string} namespaceId
+   * Callback on name change.
    */
-  onNameChange(name: string) {
-    this.workspaceDetails.config.name = name;
-    this.onChange();
+  onNameChange() {
+    this.$timeout(() => {
+      this.onChange();
+    });
   }
 
   /**
@@ -290,11 +288,11 @@ export class WorkspaceDetailsOverviewController {
    * @return {string}
    */
   getNamespaceLink(): string {
-    if (this.namespaceId) {
+    if (!this.namespaceId) {
       return null;
     }
     const namespace = this.getNamespace(this.namespaceId);
-    if (!this.namespaceId) {
+    if (!namespace) {
       return null;
     }
     return namespace.location;
