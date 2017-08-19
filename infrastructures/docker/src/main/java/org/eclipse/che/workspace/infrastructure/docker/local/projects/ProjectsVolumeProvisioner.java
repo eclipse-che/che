@@ -11,7 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
+import static org.eclipse.che.api.workspace.server.Utils.getDevMachineName;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.base.Strings;

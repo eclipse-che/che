@@ -11,8 +11,13 @@
 package org.eclipse.che.api.installer.server.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -40,5 +45,25 @@ public class InstallerFqnTest {
   @Test(expectedExceptions = IllegalInstallerKeyException.class)
   public void testParseInstallerFqnFails() throws Exception {
     InstallerFqn.parse("id:1:2");
+  }
+
+  @Test(dataProvider = "inListData")
+  public void shouldBeInList(String id, List<String> installerIds) throws Exception {
+    assertTrue(InstallerFqn.idInKeyList(id, installerIds));
+  }
+
+  @Test(dataProvider = "notInListData")
+  public void shouldNotBeInList(String id, List<String> installerIds) throws Exception {
+    assertFalse(InstallerFqn.idInKeyList(id, installerIds));
+  }
+
+  @DataProvider(name = "inListData")
+  public static Object[][] getInListData() {
+    return new Object[][] {{"a", ImmutableList.of("a")}, {"a", ImmutableList.of("a:1.0.0")}};
+  }
+
+  @DataProvider(name = "notInListData")
+  public static Object[][] getNotInListData() {
+    return new Object[][] {{"a", ImmutableList.of("b")}, {"a:1.0.0", ImmutableList.of("a:1.0.1")}};
   }
 }

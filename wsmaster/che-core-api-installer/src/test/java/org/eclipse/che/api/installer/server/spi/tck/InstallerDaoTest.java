@@ -54,7 +54,7 @@ public class InstallerDaoTest {
     installers = new InstallerImpl[INSTALLER_COUNT];
 
     for (int i = 0; i < installers.length; i++) {
-      installers[i] = TestInstallerFactory.createInstaller("id_" + i, "version_" + i);
+      installers[i] = TestInstallerFactory.createInstaller("id_" + i, "1.0." + i);
     }
 
     tckRepository.createAll(asList(installers));
@@ -67,7 +67,7 @@ public class InstallerDaoTest {
 
   @Test
   public void shouldGetInstallerByFqn() throws Exception {
-    final InstallerFqn fqn = new InstallerFqn("id_0", "version_0");
+    final InstallerFqn fqn = new InstallerFqn("id_0", "1.0.0");
 
     assertEquals(new InstallerImpl(installers[0]), installerDao.getByFqn(fqn));
   }
@@ -88,7 +88,7 @@ public class InstallerDaoTest {
 
   @Test(expectedExceptions = InstallerNotFoundException.class)
   public void shouldThrowNotFoundExceptionWhenGettingInstallerByWrongId() throws Exception {
-    final InstallerFqn fqn = new InstallerFqn("non-existed", "version_0");
+    final InstallerFqn fqn = new InstallerFqn("non-existed", "1.0.0");
 
     installerDao.getByFqn(fqn);
   }
@@ -107,7 +107,7 @@ public class InstallerDaoTest {
   public void shouldReturnAllInstallersBySpecificId() throws Exception {
     List<String> result = installerDao.getVersions("id_0");
     assertEquals(result.size(), 1);
-    assertEquals(result.get(0), "version_0");
+    assertEquals(result.get(0), "1.0.0");
   }
 
   @Test
@@ -156,12 +156,12 @@ public class InstallerDaoTest {
 
   @Test
   public void shouldCreateInstaller() throws Exception {
-    InstallerImpl newInstaller = TestInstallerFactory.createInstaller("id_new", "version_new");
+    InstallerImpl newInstaller = TestInstallerFactory.createInstaller("id_new", "1.0.0");
 
     installerDao.create(newInstaller);
 
     assertEquals(
-        installerDao.getByFqn(new InstallerFqn("id_new", "version_new")),
+        installerDao.getByFqn(new InstallerFqn("id_new", "1.0.0")),
         new InstallerImpl(newInstaller));
   }
 
@@ -185,13 +185,12 @@ public class InstallerDaoTest {
 
     installerDao.update(updatedInstaller);
 
-    assertEquals(installerDao.getByFqn(new InstallerFqn("id_0", "version_0")), updatedInstaller);
+    assertEquals(installerDao.getByFqn(new InstallerFqn("id_0", "1.0.0")), updatedInstaller);
   }
 
   @Test(expectedExceptions = InstallerNotFoundException.class)
   public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingInstaller() throws Exception {
-    InstallerImpl updatedInstaller =
-        TestInstallerFactory.createInstaller("non-existed", "non-existed");
+    InstallerImpl updatedInstaller = TestInstallerFactory.createInstaller("non-existed", "1.0.0");
 
     installerDao.update(updatedInstaller);
   }
@@ -203,7 +202,7 @@ public class InstallerDaoTest {
 
   @Test(expectedExceptions = InstallerNotFoundException.class)
   public void shouldRemoveInstaller() throws Exception {
-    InstallerFqn fqn = new InstallerFqn("id_0", "version_0");
+    InstallerFqn fqn = new InstallerFqn("id_0", "1.0.0");
 
     installerDao.remove(fqn);
     installerDao.getByFqn(fqn);

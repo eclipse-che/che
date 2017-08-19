@@ -11,6 +11,7 @@
 package org.eclipse.che.api.installer.server.impl;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Objects;
 import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyException;
 import org.eclipse.che.api.installer.shared.model.Installer;
@@ -18,16 +19,20 @@ import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author Anatolii Bazko */
 public class InstallerFqn implements Serializable {
-  public static final String DEFAULT_VERSION = "latest";
+  public static final String LATEST_VERSION_TAG = "latest";
 
   private String id;
   private String version;
 
   public InstallerFqn() {}
 
+  public InstallerFqn(String id) {
+    this(id, null);
+  }
+
   public InstallerFqn(String id, @Nullable String version) {
     this.id = id;
-    this.version = version == null ? DEFAULT_VERSION : version;
+    this.version = version == null ? LATEST_VERSION_TAG : version;
   }
 
   public String getId() {
@@ -63,6 +68,44 @@ public class InstallerFqn implements Serializable {
 
   public String toKey() {
     return id + ":" + version;
+  }
+
+  public boolean hasLatestTag() {
+    return LATEST_VERSION_TAG.equals(version);
+  }
+
+  /** Indicates if installer id is contained in the giving list of keys. */
+  public static boolean idInKeyList(
+      String installerId, @Nullable Collection<String> installerKeys) {
+    Objects.requireNonNull(installerId, "Installer ID is null");
+    if (installerKeys == null) {
+      return false;
+    }
+
+    for (String installerKey : installerKeys) {
+      if (installerKey.equals(installerId) || installerKey.startsWith(installerId + ":")) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /** Indicates if installer id is contained in the giving list of FQNs. */
+  public static boolean idInFqnList(
+      String installerId, @Nullable Collection<InstallerFqn> installerFqns) {
+    Objects.requireNonNull(installerId, "Installer ID is null");
+    if (installerFqns == null) {
+      return false;
+    }
+
+    for (InstallerFqn fqn : installerFqns) {
+      if (fqn.getId().equals(installerId)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   @Override

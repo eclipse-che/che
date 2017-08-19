@@ -11,7 +11,9 @@
 package org.eclipse.che.api.agent.server.filters;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -31,8 +33,7 @@ public class AddExecInstallerInEnvironmentUtil {
           if (environment != null && environment.getMachines() != null) {
             for (MachineConfigDto machine : environment.getMachines().values()) {
               if (machine.getInstallers() != null) {
-                if (machine.getInstallers().contains("org.eclipse.che.terminal")
-                    && !machine.getInstallers().contains("org.eclipse.che.exec")) {
+                if (containsTerminalInstallerWithoutExec(machine.getInstallers())) {
                   ArrayList<String> updatedInstallers = new ArrayList<>(machine.getInstallers());
                   updatedInstallers.add("org.eclipse.che.exec");
                   machine.setInstallers(updatedInstallers);
@@ -43,5 +44,10 @@ public class AddExecInstallerInEnvironmentUtil {
         }
       }
     }
+  }
+
+  private static boolean containsTerminalInstallerWithoutExec(List<String> installers) {
+    return InstallerFqn.idInKeyList("org.eclipse.che.terminal", installers)
+        && !(InstallerFqn.idInKeyList("org.eclipse.che.exec", installers));
   }
 }

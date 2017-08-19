@@ -14,9 +14,11 @@ import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
@@ -25,18 +27,8 @@ import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
-import org.eclipse.che.api.installer.ExecInstaller;
-import org.eclipse.che.api.installer.GitCredentialsInstaller;
-import org.eclipse.che.api.installer.LSCSharpInstaller;
-import org.eclipse.che.api.installer.LSJsonInstaller;
-import org.eclipse.che.api.installer.LSPhpInstaller;
-import org.eclipse.che.api.installer.LSPythonInstaller;
-import org.eclipse.che.api.installer.LSTypeScriptInstaller;
-import org.eclipse.che.api.installer.SshInstaller;
-import org.eclipse.che.api.installer.TerminalInstaller;
-import org.eclipse.che.api.installer.UnisonInstaller;
-import org.eclipse.che.api.installer.WsInstaller;
 import org.eclipse.che.api.installer.server.InstallerModule;
+import org.eclipse.che.api.installer.server.impl.InstallersProvider;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.recipe.JpaRecipeDao;
 import org.eclipse.che.api.recipe.RecipeDao;
@@ -162,18 +154,7 @@ public class WsMasterModule extends AbstractModule {
     // installers
     install(new InstallerModule());
 
-    Multibinder<Installer> installers = Multibinder.newSetBinder(binder(), Installer.class);
-    installers.addBinding().to(SshInstaller.class);
-    installers.addBinding().to(UnisonInstaller.class);
-    installers.addBinding().to(ExecInstaller.class);
-    installers.addBinding().to(TerminalInstaller.class);
-    installers.addBinding().to(WsInstaller.class);
-    installers.addBinding().to(LSPhpInstaller.class);
-    installers.addBinding().to(LSPythonInstaller.class);
-    installers.addBinding().to(LSJsonInstaller.class);
-    installers.addBinding().to(LSCSharpInstaller.class);
-    installers.addBinding().to(LSTypeScriptInstaller.class);
-    installers.addBinding().to(GitCredentialsInstaller.class);
+    binder().bind(new TypeLiteral<Set<Installer>>() {}).toProvider(InstallersProvider.class);
 
     bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 

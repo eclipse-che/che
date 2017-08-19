@@ -11,7 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.provision.volume;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.workspace.shared.Utils.WSAGENT_INSTALLER;
+import static org.eclipse.che.api.workspace.server.Utils.WSAGENT_INSTALLER;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;

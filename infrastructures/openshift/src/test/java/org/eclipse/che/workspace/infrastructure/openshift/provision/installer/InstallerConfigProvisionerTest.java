@@ -12,7 +12,7 @@ package org.eclipse.che.workspace.infrastructure.openshift.provision.installer;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.workspace.shared.Utils.WSAGENT_INSTALLER;
+import static org.eclipse.che.api.workspace.server.Utils.WSAGENT_INSTALLER;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;

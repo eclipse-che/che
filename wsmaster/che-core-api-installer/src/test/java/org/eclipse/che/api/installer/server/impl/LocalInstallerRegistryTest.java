@@ -12,7 +12,6 @@ package org.eclipse.che.api.installer.server.impl;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.installer.server.impl.InstallerFqn.DEFAULT_VERSION;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -46,9 +45,10 @@ public class LocalInstallerRegistryTest {
   private LocalInstallerRegistry registry;
 
   @Mock private Installer installer1v1;
-  @Mock private Installer installer1latest;
-  @Mock private Installer installer2latest;
-  @Mock private Installer installer3latest;
+  @Mock private Installer installer1v2;
+  @Mock private Installer installer2v1;
+  @Mock private Installer installer3v1;
+  @Mock private InstallerValidator installerValidator;
 
   private MapBasedInstallerDao installerDao;
 
@@ -57,21 +57,22 @@ public class LocalInstallerRegistryTest {
     installerDao = new MapBasedInstallerDao();
 
     when(installer1v1.getId()).thenReturn("installer1");
-    when(installer1v1.getVersion()).thenReturn("v1");
+    when(installer1v1.getVersion()).thenReturn("1.0.0");
 
-    when(installer1latest.getId()).thenReturn("installer1");
-    when(installer1latest.getVersion()).thenReturn("latest");
+    when(installer1v2.getId()).thenReturn("installer1");
+    when(installer1v2.getVersion()).thenReturn("2.0.0");
 
-    when(installer2latest.getId()).thenReturn("installer2");
-    when(installer2latest.getVersion()).thenReturn(null); // Default version
+    when(installer2v1.getId()).thenReturn("installer2");
+    when(installer2v1.getVersion()).thenReturn("1.0.0"); // Default version
 
-    when(installer3latest.getId()).thenReturn("installer3");
-    when(installer3latest.getVersion()).thenReturn("latest");
+    when(installer3v1.getId()).thenReturn("installer3");
+    when(installer3v1.getVersion()).thenReturn("1.0.0");
 
     registry =
         new LocalInstallerRegistry(
-            ImmutableSet.of(installer1v1, installer1latest, installer2latest, installer3latest),
-            installerDao);
+            ImmutableSet.of(installer1v1, installer1v2, installer2v1, installer3v1),
+            installerDao,
+            installerValidator);
   }
 
   @Test(dataProvider = "versions")
@@ -87,9 +88,9 @@ public class LocalInstallerRegistryTest {
   @DataProvider(name = "versions")
   public static Object[][] versions() {
     return new Object[][] {
-      {"installer1", ImmutableSet.of("v1", "latest")},
-      {"installer2", ImmutableSet.of("latest")},
-      {"installer3", ImmutableSet.of("latest")}
+      {"installer1", ImmutableSet.of("1.0.0", "2.0.0")},
+      {"installer2", ImmutableSet.of("1.0.0")},
+      {"installer3", ImmutableSet.of("1.0.0")}
     };
   }
 
@@ -141,7 +142,7 @@ public class LocalInstallerRegistryTest {
 
     List<? extends Installer> items = installers.getItems();
     assertEquals(items.size(), 1);
-    assertTrue(items.contains(new InstallerImpl(installer3latest)));
+    assertTrue(items.contains(new InstallerImpl(installer1v2)));
   }
 
   @Test
@@ -155,16 +156,16 @@ public class LocalInstallerRegistryTest {
 
     List<? extends Installer> items = installers.getItems();
     assertEquals(items.size(), 2);
-    assertTrue(items.contains(new InstallerImpl(installer1latest)));
-    assertTrue(items.contains(new InstallerImpl(installer2latest)));
+    assertTrue(items.contains(new InstallerImpl(installer2v1)));
+    assertTrue(items.contains(new InstallerImpl(installer3v1)));
   }
 
   @Test
   public void shouldReturnEmptyPageIfNoInstallersFound() throws Exception {
-    registry.remove("installer1:v1");
-    registry.remove("installer1:latest");
-    registry.remove("installer2:latest");
-    registry.remove("installer3:latest");
+    registry.remove("installer1:1.0.0");
+    registry.remove("installer1:2.0.0");
+    registry.remove("installer2:1.0.0");
+    registry.remove("installer3:1.0.0");
 
     Page<? extends Installer> installers = registry.getInstallers(Integer.MAX_VALUE, 0);
 
@@ -175,19 +176,24 @@ public class LocalInstallerRegistryTest {
     assertFalse(installers.hasPreviousPage());
   }
 
-  @Test(dataProvider = "installerKeys")
-  public void shouldReturnInstallerByIdAndVersion(String id, String version) throws Exception {
-    Installer installer = registry.getInstaller(id + (version != null ? ":" + version : ""));
+  @Test
+  public void shouldReturnInstallerByIdAndVersion() throws Exception {
+    Installer installer = registry.getInstaller("installer1:1.0.0");
 
     assertNotNull(installer);
     assertNotNull(installer.getVersion());
-    assertEquals(installer.getId(), id);
-    assertEquals(installer.getVersion(), version == null ? DEFAULT_VERSION : version);
+    assertEquals(installer.getId(), "installer1");
+    assertEquals(installer.getVersion(), "1.0.0");
   }
 
-  @DataProvider(name = "installerKeys")
-  public static Object[][] installerKeys() {
-    return new String[][] {{"installer1", "v1"}, {"installer1", "latest"}, {"installer1", null}};
+  @Test
+  public void shouldReturnLatestInstaller() throws Exception {
+    Installer installer = registry.getInstaller("installer1");
+
+    assertNotNull(installer);
+    assertNotNull(installer.getVersion());
+    assertEquals(installer.getId(), "installer1");
+    assertEquals(installer.getVersion(), "2.0.0");
   }
 
   @Test(expectedExceptions = InstallerNotFoundException.class)
@@ -198,50 +204,67 @@ public class LocalInstallerRegistryTest {
   @Test
   public void sortInstallersRespectingDependencies() throws Exception {
     when(installer1v1.getDependencies()).thenReturn(asList("installer2", "installer3"));
-    when(installer2latest.getDependencies()).thenReturn(singletonList("installer3"));
+    when(installer2v1.getDependencies()).thenReturn(singletonList("installer3"));
 
     installerDao.update(new InstallerImpl(installer1v1));
-    installerDao.update(new InstallerImpl(installer2latest));
+    installerDao.update(new InstallerImpl(installer2v1));
 
     List<Installer> sorted =
-        registry.getOrderedInstallers(asList("installer1:v1", "installer2", "installer3"));
+        registry.getOrderedInstallers(asList("installer1:1.0.0", "installer2", "installer3"));
 
     assertEquals(sorted.size(), 3);
-    assertEquals(InstallerFqn.of(sorted.get(0)).toString(), "installer3:latest");
-    assertEquals(InstallerFqn.of(sorted.get(1)).toString(), "installer2:latest");
-    assertEquals(InstallerFqn.of(sorted.get(2)).toString(), "installer1:v1");
+    assertEquals(InstallerFqn.of(sorted.get(0)).toString(), "installer3:1.0.0");
+    assertEquals(InstallerFqn.of(sorted.get(1)).toString(), "installer2:1.0.0");
+    assertEquals(InstallerFqn.of(sorted.get(2)).toString(), "installer1:1.0.0");
   }
 
   @Test
   public void shouldReturnInstallerAlongWithItsTransitiveDependenciesOnSorting() throws Exception {
-    when(installer1v1.getDependencies()).thenReturn(singletonList("installer2:latest"));
-    when(installer2latest.getDependencies()).thenReturn(singletonList("installer3"));
+    when(installer1v1.getDependencies()).thenReturn(singletonList("installer2:1.0.0"));
+    when(installer2v1.getDependencies()).thenReturn(singletonList("installer3"));
 
     installerDao.update(new InstallerImpl(installer1v1));
-    installerDao.update(new InstallerImpl(installer2latest));
+    installerDao.update(new InstallerImpl(installer2v1));
 
-    List<Installer> sorted = registry.getOrderedInstallers(singletonList("installer1:v1"));
+    List<Installer> sorted = registry.getOrderedInstallers(singletonList("installer1:1.0.0"));
 
     assertEquals(sorted.size(), 3);
-    assertEquals(InstallerFqn.of(sorted.get(0)).toString(), "installer3:latest");
-    assertEquals(InstallerFqn.of(sorted.get(1)).toString(), "installer2:latest");
-    assertEquals(InstallerFqn.of(sorted.get(2)).toString(), "installer1:v1");
+    assertEquals(InstallerFqn.of(sorted.get(0)).toString(), "installer3:1.0.0");
+    assertEquals(InstallerFqn.of(sorted.get(1)).toString(), "installer2:1.0.0");
+    assertEquals(InstallerFqn.of(sorted.get(2)).toString(), "installer1:1.0.0");
   }
 
   @Test(
     expectedExceptions = InstallerException.class,
     expectedExceptionsMessageRegExp =
-        "Installers circular dependency found between 'installer1:v1'" + " and 'installer3:latest'"
+        "Installers circular dependency found between 'installer1:1.0.0'"
+            + " and 'installer3:1.0.0'"
   )
   public void sortingShouldFailIfCircularDependenciesFound() throws Exception {
-    when(installer1v1.getDependencies()).thenReturn(singletonList("installer2:latest"));
-    when(installer2latest.getDependencies()).thenReturn(singletonList("installer3:latest"));
-    when(installer3latest.getDependencies()).thenReturn(singletonList("installer1:v1"));
+    when(installer1v1.getDependencies()).thenReturn(singletonList("installer2:1.0.0"));
+    when(installer2v1.getDependencies()).thenReturn(singletonList("installer3:1.0.0"));
+    when(installer3v1.getDependencies()).thenReturn(singletonList("installer1:1.0.0"));
 
     installerDao.update(new InstallerImpl(installer1v1));
-    installerDao.update(new InstallerImpl(installer2latest));
-    installerDao.update(new InstallerImpl(installer3latest));
+    installerDao.update(new InstallerImpl(installer2v1));
+    installerDao.update(new InstallerImpl(installer3v1));
 
-    registry.getOrderedInstallers(asList("installer1:v1", "installer2", "installer3:latest"));
+    registry.getOrderedInstallers(
+        asList("installer1:1.0.0", "installer2:1.0.0", "installer3:1.0.0"));
+  }
+
+  @Test(
+    expectedExceptions = InstallerException.class,
+    expectedExceptionsMessageRegExp =
+        "Installers dependencies conflict. Several version '2.0.0' and '1.0.0' of the some id 'installer1"
+  )
+  public void shouldNotReturnOrderedSeveralInstallersDifferentVersions() throws Exception {
+    when(installer2v1.getDependencies()).thenReturn(singletonList("installer1:1.0.0"));
+    when(installer3v1.getDependencies()).thenReturn(singletonList("installer1:2.0.0"));
+
+    installerDao.update(new InstallerImpl(installer2v1));
+    installerDao.update(new InstallerImpl(installer3v1));
+
+    registry.getOrderedInstallers(asList("installer2:1.0.0", "installer3:1.0.0"));
   }
 }

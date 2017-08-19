@@ -300,7 +300,7 @@ public class DockerInternalRuntimeTest {
     return new InstallerImpl(
         "installer_" + i,
         "installer_name" + i,
-        String.valueOf(i),
+        String.valueOf(i) + ".0.0",
         "test installer",
         Collections.emptyList(),
         emptyMap(),

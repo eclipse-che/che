@@ -16,10 +16,10 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.Utils;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
-import org.eclipse.che.api.workspace.shared.Utils;
 import org.eclipse.che.inject.CheBootstrap;
 import org.eclipse.che.workspace.infrastructure.docker.local.server.DockerExtConfBindingProvider;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;

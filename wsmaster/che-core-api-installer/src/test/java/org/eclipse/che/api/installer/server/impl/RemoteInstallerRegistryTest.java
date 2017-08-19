@@ -52,11 +52,13 @@ public class RemoteInstallerRegistryTest {
 
   @BeforeMethod
   public void setUp(ITestContext context) throws Exception {
-    installer = TestInstallerFactory.createInstaller("id_0", "version_0");
+    installer = TestInstallerFactory.createInstaller("id_0", "1.0.0");
     installerKey = InstallerFqn.of(installer).toKey();
 
     LocalInstallerRegistry localInstallerRegistry =
-        new LocalInstallerRegistry(Collections.singleton(installer), new MapBasedInstallerDao());
+        new LocalInstallerRegistry(
+            Collections.singleton(installer), new MapBasedInstallerDao(), new InstallerValidator());
+
     registryService = new InstallerRegistryService(localInstallerRegistry);
 
     Integer port = (Integer) context.getAttribute(EverrestJetty.JETTY_PORT);
@@ -67,7 +69,7 @@ public class RemoteInstallerRegistryTest {
 
   @Test
   public void shouldAddNewInstaller() throws Exception {
-    InstallerImpl newInstaller = TestInstallerFactory.createInstaller("id_1", "version_1");
+    InstallerImpl newInstaller = TestInstallerFactory.createInstaller("id_1", "1.0.1");
     String newInstallerKey = InstallerFqn.of(newInstaller).toKey();
 
     registry.add(newInstaller);
@@ -82,7 +84,7 @@ public class RemoteInstallerRegistryTest {
 
   @Test
   public void shouldUpdateInstaller() throws Exception {
-    InstallerImpl newInstaller = TestInstallerFactory.createInstaller("id_0", "version_0");
+    InstallerImpl newInstaller = TestInstallerFactory.createInstaller("id_0", "1.0.0");
     String newInstallerKey = InstallerFqn.of(newInstaller).toKey();
 
     registry.update(newInstaller);
@@ -93,7 +95,7 @@ public class RemoteInstallerRegistryTest {
   @Test(expectedExceptions = InstallerNotFoundException.class)
   public void shouldThrowInstallerNotFoundExceptionOnUpdatingIfInstallerDoesNotExist()
       throws Exception {
-    InstallerImpl newInstaller = TestInstallerFactory.createInstaller("id_1", "version_1");
+    InstallerImpl newInstaller = TestInstallerFactory.createInstaller("id_1", "1.0.1");
 
     registry.update(newInstaller);
   }
@@ -153,8 +155,8 @@ public class RemoteInstallerRegistryTest {
 
   @Test
   public void shouldReturnFirstPage() throws Exception {
-    InstallerImpl installer1 = TestInstallerFactory.createInstaller("id_1", "version_1");
-    InstallerImpl installer2 = TestInstallerFactory.createInstaller("id_2", "version_2");
+    InstallerImpl installer1 = TestInstallerFactory.createInstaller("id_1", "1.0.1");
+    InstallerImpl installer2 = TestInstallerFactory.createInstaller("id_2", "1.0.2");
     registry.add(installer1);
     registry.add(installer2);
 
@@ -176,8 +178,8 @@ public class RemoteInstallerRegistryTest {
 
   @Test
   public void shouldReturnMiddlePage() throws Exception {
-    InstallerImpl installer1 = TestInstallerFactory.createInstaller("id_1", "version_1");
-    InstallerImpl installer2 = TestInstallerFactory.createInstaller("id_2", "version_2");
+    InstallerImpl installer1 = TestInstallerFactory.createInstaller("id_1", "1.0.1");
+    InstallerImpl installer2 = TestInstallerFactory.createInstaller("id_2", "1.0.2");
     registry.add(installer1);
     registry.add(installer2);
 
@@ -203,8 +205,8 @@ public class RemoteInstallerRegistryTest {
 
   @Test
   public void shouldReturnLastPage() throws Exception {
-    InstallerImpl installer1 = TestInstallerFactory.createInstaller("id_1", "version_1");
-    InstallerImpl installer2 = TestInstallerFactory.createInstaller("id_2", "version_2");
+    InstallerImpl installer1 = TestInstallerFactory.createInstaller("id_1", "1.0.1");
+    InstallerImpl installer2 = TestInstallerFactory.createInstaller("id_2", "1.0.2");
     registry.add(installer1);
     registry.add(installer2);
 
@@ -238,19 +240,19 @@ public class RemoteInstallerRegistryTest {
 
   @Test
   public void shouldReturnOrderedInstallers() throws Exception {
-    InstallerImpl installer1 = TestInstallerFactory.createInstaller("id_1", "version_1");
-    InstallerImpl installer2 = TestInstallerFactory.createInstaller("id_2", "version_2");
+    InstallerImpl installer1 = TestInstallerFactory.createInstaller("id_1", "1.0.1");
+    InstallerImpl installer2 = TestInstallerFactory.createInstaller("id_2", "1.0.2");
 
     installer.setDependencies(Collections.emptyList());
-    installer1.setDependencies(Collections.singletonList("id_0:version_0"));
-    installer2.setDependencies(Collections.singletonList("id_1:version_1"));
+    installer1.setDependencies(Collections.singletonList("id_0:1.0.0"));
+    installer2.setDependencies(Collections.singletonList("id_1:1.0.1"));
 
     registry.update(installer);
     registry.add(installer1);
     registry.add(installer2);
 
     List<Installer> orderedInstallers =
-        registry.getOrderedInstallers(ImmutableList.of("id_2:version_2"));
+        registry.getOrderedInstallers(ImmutableList.of("id_2:1.0.2"));
 
     assertEquals(orderedInstallers.size(), 3);
     assertInstaller(orderedInstallers.get(0), installer);

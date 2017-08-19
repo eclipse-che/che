@@ -31,7 +31,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
 /** @author Anatoliy Bazko */
@@ -102,7 +101,7 @@ public class InstallerImpl implements Installer {
       Map<String, ? extends ServerConfig> servers) {
     this.id = id;
     this.name = name;
-    this.version = version == null ? InstallerFqn.DEFAULT_VERSION : version;
+    this.version = version;
     this.description = description;
     this.dependencies = dependencies;
     this.properties = properties;

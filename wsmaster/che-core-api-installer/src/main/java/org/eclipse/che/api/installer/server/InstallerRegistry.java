@@ -90,13 +90,14 @@ public interface InstallerRegistry {
 
   /**
    * Traverses dependencies of all listed installers and returns properly ordered list of
-   * non-duplicated installer descriptions
+   * non-duplicated installer descriptions. If any of {@code installerKeys} contains only id then
+   * the latest version of this installer will be used to fetch dependencies.
    *
-   * @param installers installers to fetch dependencies and order
+   * @param installerKeys installers keys to fetch dependencies and order
    * @return list of installers
    * @throws IllegalInstallerKeyException if specified installer key has wrong format
    * @throws InstallerNotFoundException if some of specified installer is not found in the registry
    * @throws InstallerException if unexpected error occurred
    */
-  List<Installer> getOrderedInstallers(List<String> installers) throws InstallerException;
+  List<Installer> getOrderedInstallers(List<String> installerKeys) throws InstallerException;
 }
