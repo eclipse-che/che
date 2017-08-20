@@ -7,7 +7,7 @@ public enum DatabaseType {
 
     POSTGRES("postgres", 5432, "postgres", ""),
 
-    MYSQL("mysql", 3306, "root", ""),
+    MYSQL("com.mysql.jdbc.Driver", 3306, "root", ""),
 
     ORACLE("oracle", 1521, "SYSTEM", ""),
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,7 @@ public class NewDatasourceWizardMainPagePresenter extends AbstractWizardPage<Dat
                 enabledConnectorsId.add(connector.getId());
             }
         }
+
         view.reset();
     }
 
@@ -79,12 +80,9 @@ public class NewDatasourceWizardMainPagePresenter extends AbstractWizardPage<Dat
         container.setWidget(view.asWidget());
         dbConnectors = connectorAgent.getConnectors();
         view.setConnectors(dbConnectors);
-        Log.error(NewDatasourceWizardMainPagePresenter.class,"here goes size");
-        Log.error(NewDatasourceWizardMainPagePresenter.class,dbConnectors.size());
 
         List<String> drivers = jdbcDriversService.getDrivers();
-        Log.error(NewDatasourceWizardMainPagePresenter.class,"Driver : "+drivers.get(0));
-        Log.debug(NewDatasourceWizardMainPagePresenter.class,"Driver : "+drivers.get(0));
+        Log.info(NewDatasourceWizardMainPagePresenter.class,"Driver : "+drivers.get(0));
         updateAvailableDatabase(drivers);
         eventBus.addHandler(JdbcDriversFetchedEvent.getType(), new JdbcDriversFetchedEventHandler() {
             @Override
@@ -99,10 +97,12 @@ public class NewDatasourceWizardMainPagePresenter extends AbstractWizardPage<Dat
                             /** Update view from data-object. */
     private void updateView() {
         for (NewDatasourceConnector connector : dbConnectors) {
-            if (dataObject.getConfigurationConnectorId().equals(connector.getId())) {
-                view.selectConnector(connector);
-                break;
-            }
+//            if (dataObject.getConfigurationConnectorId().equals(connector.getId())) {
+//                Log.info(NewDatasourceWizardMainPagePresenter.class,"inside if");
+//
+//                view.selectConnector(connector);
+//                break;
+//            }
         }
     }
 

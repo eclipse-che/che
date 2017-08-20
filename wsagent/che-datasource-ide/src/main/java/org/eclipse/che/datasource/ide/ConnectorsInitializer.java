@@ -69,7 +69,7 @@ public class ConnectorsInitializer {
                                                                            connectorCounter,
                                                                            dsMessages.mysql(),
                                                                            resources.getMySqlLogo(),
-                                                                           "com.mysql.jdbc.Driver",
+                                                                           "com.mysql.cj.jdbc.Driver",
                                                                            mysqlWizardPages, DatabaseCategoryType.NOTCLOUD);
         this.connectors.add(connectorMysql);
 

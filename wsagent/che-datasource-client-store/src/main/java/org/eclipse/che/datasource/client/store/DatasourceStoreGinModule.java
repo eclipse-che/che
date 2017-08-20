@@ -11,7 +11,6 @@
 package org.eclipse.che.datasource.client.store;
 
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
@@ -23,7 +22,7 @@ public class DatasourceStoreGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
         // bind the datasource manager and the datasource metadat store
-        bind(DatasourceManager.class).to(DatasourceManagerPrefImpl.class).in(Singleton.class);
+        bind(DatasourceManager1.class).to(DatasourceManagerPrefImpl.class).in(Singleton.class);
 //        bind(DatabaseInfoStore.class).to(DatabaseInfoStoreImpl.class);
 //        bind(DatabaseInfoOracle.class).to(DatabaseInfoOracleImpl.class);
 //

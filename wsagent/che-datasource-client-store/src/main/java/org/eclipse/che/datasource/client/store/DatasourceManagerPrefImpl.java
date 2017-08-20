@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,17 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.datasource.client.store;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 
-import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.datasource.shared.DatabaseConfigurationDTO;
 import org.eclipse.che.datasource.shared.DatasourceConfigPreferences;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.util.loging.Log;
+//import org.eclipse.che.ide.api.preferences.PreferencesManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,20 +28,21 @@ import java.util.Map;
 import java.util.Set;
 
 @Singleton
-public class DatasourceManagerPrefImpl implements DatasourceManager {
+public class DatasourceManagerPrefImpl implements DatasourceManager1 {
 
     private static final String                     PREFERENCE_KEY = "datasources";
 
-    private PreferencesManager                      preferencesManager;
+//    private PreferencesManager                      preferencesManager;
 
     private DtoFactory                              dtoFactory;
 
     protected Map<String, DatabaseConfigurationDTO> inMemoryDatabaseConfigurations;
 
     @Inject
-    public DatasourceManagerPrefImpl(final PreferencesManager prefManager,
+    public DatasourceManagerPrefImpl(
+//    		final PreferencesManager prefManager,
                                      final DtoFactory dtoFactory) {
-        preferencesManager = prefManager;
+//        preferencesManager = prefManager;
         this.dtoFactory = dtoFactory;
         inMemoryDatabaseConfigurations = new HashMap<String, DatabaseConfigurationDTO>();
     }
@@ -90,7 +88,7 @@ public class DatasourceManagerPrefImpl implements DatasourceManager {
 
     @Override
     public void persist() {
-        preferencesManager.flushPreferences();
+//        preferencesManager.flushPreferences();
     }
 
     @Override
@@ -102,28 +100,30 @@ public class DatasourceManagerPrefImpl implements DatasourceManager {
     }
 
     private DatasourceConfigPreferences getDatasourceConfigPreferences() {
-        String datasourcesJson = preferencesManager.getValue(PREFERENCE_KEY);
-        DatasourceConfigPreferences datasourcesPreferences;
-        if (datasourcesJson == null) {
-            datasourcesPreferences = dtoFactory.createDto(DatasourceConfigPreferences.class);
-        } else {
-            try {
-                datasourcesPreferences = dtoFactory.createDtoFromJson(datasourcesJson, DatasourceConfigPreferences.class);
-            } catch (Exception e) {
-                Log.error(DatasourceManagerPrefImpl.class, e);
-                datasourcesPreferences = dtoFactory.createDto(DatasourceConfigPreferences.class);
-            }
-        }
-        return datasourcesPreferences;
+//        String datasourcesJson = preferencesManager.getValue(PREFERENCE_KEY);
+//        DatasourceConfigPreferences datasourcesPreferences;
+//        if (datasourcesJson == null) {
+//            datasourcesPreferences = dtoFactory.createDto(DatasourceConfigPreferences.class);
+//        } else {
+//            try {
+//                datasourcesPreferences = dtoFactory.createDtoFromJson(datasourcesJson, DatasourceConfigPreferences.class);
+//            } catch (Exception e) {
+//                Log.error(DatasourceManagerPrefImpl.class, e);
+//                datasourcesPreferences = dtoFactory.createDto(DatasourceConfigPreferences.class);
+//            }
+//        }
+//        return datasourcesPreferences;
+    	return null;
     }
 
     private void saveDatasourceConfigPreferences(final DatasourceConfigPreferences datasourcesPreferences) {
-        preferencesManager.setValue(PREFERENCE_KEY, dtoFactory.toJson(datasourcesPreferences));
+//        preferencesManager.setValue(PREFERENCE_KEY, dtoFactory.toJson(datasourcesPreferences));
     }
 
     @Override
     public String toString() {
-        return "DatasourceManagerPrefImpl[" + preferencesManager.getValue(PREFERENCE_KEY) + "]";
+//        return "DatasourceManagerPrefImpl[" + preferencesManager.getValue(PREFERENCE_KEY) + "]";
+    	return "";
     }
 
     @Override
