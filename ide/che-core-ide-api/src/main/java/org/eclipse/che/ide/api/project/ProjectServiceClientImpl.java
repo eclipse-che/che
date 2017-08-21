@@ -139,8 +139,8 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
   /** {@inheritDoc} */
   @Override
   public Promise<List<SearchResult>> search(QueryExpression expression) {
-    Path prjPath = isNullOrEmpty(expression.getPath()) ? Path.ROOT : new Path(expression.getPath()).addLeadingSeparator();
-    final String url = getBaseUrl() + SEARCH + prjPath.getEncodedPath();
+    Path prjPath = isNullOrEmpty(expression.getPath()) ? Path.ROOT : new Path(expression.getPath());
+    final String url = getBaseUrl() + SEARCH + prjPath.addLeadingSeparator().getEncodedPath();
 
     StringBuilder queryParameters = new StringBuilder();
     if (expression.getName() != null && !expression.getName().isEmpty()) {
@@ -335,8 +335,8 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
   /** {@inheritDoc} */
   @Override
   public Promise<ProjectConfigDto> updateProject(ProjectConfigDto configuration) {
-    Path prjPath = new Path(configuration.getPath()).addLeadingSeparator();
-    final String url = getBaseUrl() + prjPath.getEncodedPath();
+    Path prjPath = new Path(configuration.getPath());
+    final String url = getBaseUrl() + prjPath.addLeadingSeparator().getEncodedPath();
 
     return reqFactory
         .createRequest(PUT, url, configuration, false)
