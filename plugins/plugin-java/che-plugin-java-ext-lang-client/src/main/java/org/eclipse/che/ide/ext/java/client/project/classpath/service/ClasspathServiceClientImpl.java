@@ -21,6 +21,8 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
+import static org.eclipse.che.ide.resource.Path.valueOf;
+
 /**
  * The implementation of {@link ClasspathServiceClient}.
  *
@@ -55,7 +57,7 @@ public class ClasspathServiceClientImpl implements ClasspathServiceClient {
         appContext.getDevMachine().getWsAgentBaseUrl()
             + pathToService
             + "?projectpath="
-            + projectPath;
+            + valueOf(projectPath).getEncodedPath();
 
     return asyncRequestFactory
         .createGetRequest(url)

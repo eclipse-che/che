@@ -13,6 +13,7 @@ package org.eclipse.che.ide.resource;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.nullToEmpty;
+import static com.google.gwt.http.client.URL.encodePathSegment;
 
 import com.google.common.base.Objects;
 import java.util.ArrayList;
@@ -184,6 +185,24 @@ public final class Path {
       return new Path(device, segments, HAS_LEADING);
     }
     return new Path(device, segments, separators | HAS_TRAILING);
+  }
+
+  /**
+   * Returns a path with the same segments as this path but with a leading separator added.
+   *
+   * <p>If this path already has a leading separator, this path is returned.
+   *
+   * @return the new path
+   * @see #hasTrailingSeparator()
+   */
+  public Path addLeadingSeparator() {
+    if (hasLeadingSeparator() || isRoot()) {
+      return this;
+    }
+    if (isEmpty()) {
+      return new Path(device, segments, HAS_LEADING);
+    }
+    return new Path(device, segments, separators | HAS_LEADING);
   }
 
   /**
@@ -534,6 +553,20 @@ public final class Path {
    */
   public boolean hasTrailingSeparator() {
     return (separators & HAS_TRAILING) != 0;
+  }
+
+  /**
+   * Returns whether this path has a leading separator.
+   *
+   * <p>Note: In the root path ("/"), the separator is considered to be leading rather than
+   * trailing.
+   *
+   * @return <code>true</code> if this path has a leading separator, and <code>false</code>
+   *     otherwise
+   * @see #addLeadingSeparator()
+   */
+  public boolean hasLeadingSeparator() {
+    return (separators & HAS_LEADING) != 0;
   }
 
   /*
@@ -1142,5 +1175,31 @@ public final class Path {
     }
 
     return commonPath;
+  }
+
+  /**
+   * Returns path encoded by segments.
+   */
+  public String getEncodedPath() {
+    StringBuilder encodedPath = new StringBuilder();
+
+    if (device != null) {
+      encodedPath.append(device);
+    }
+
+    if (hasLeadingSeparator()) {
+      encodedPath.append(SEPARATOR);
+    }
+
+    for (String segment : segments) {
+      encodedPath.append(encodePathSegment(segment));
+      encodedPath.append(SEPARATOR);
+    }
+
+    if (!hasTrailingSeparator()) {
+      encodedPath.deleteCharAt(encodedPath.length() - 1);
+    }
+
+    return encodedPath.toString();
   }
 }

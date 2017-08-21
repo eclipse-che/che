@@ -23,6 +23,8 @@ import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
+import static org.eclipse.che.ide.resource.Path.valueOf;
+
 /**
  * Implementation for {@link MavenServerServiceClient}.
  *
@@ -50,7 +52,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
         appContext.getDevMachine().getWsAgentBaseUrl()
             + servicePath
             + "effective/pom?projectpath="
-            + projectPath;
+            + valueOf(projectPath).getEncodedPath();
 
     return asyncRequestFactory
         .createGetRequest(url)
@@ -64,7 +66,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
         appContext.getDevMachine().getWsAgentBaseUrl()
             + servicePath
             + "download/sources?projectpath="
-            + projectPath
+            + valueOf(projectPath).getEncodedPath()
             + "&fqn="
             + fqn;
     return asyncRequestFactory
@@ -90,7 +92,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
   public Promise<Void> reImportProjects(@NotNull List<String> projectsPaths) {
     StringBuilder queryParameters = new StringBuilder();
     for (String path : projectsPaths) {
-      queryParameters.append("&projectPath=").append(path);
+      queryParameters.append("&projectPath=").append(valueOf(path).getEncodedPath());
     }
     final String url =
         appContext.getDevMachine().getWsAgentBaseUrl()
@@ -107,7 +109,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
         appContext.getDevMachine().getWsAgentBaseUrl()
             + servicePath
             + "pom/reconcile?pompath="
-            + pomPath;
+            + valueOf(pomPath).getEncodedPath();
     return asyncRequestFactory.createGetRequest(url).send();
   }
 }

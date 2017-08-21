@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.java.client.refactoring.service;
 
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.MimeType.TEXT_PLAIN;
+import static org.eclipse.che.ide.resource.Path.valueOf;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
@@ -240,7 +241,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         appContext.getDevMachine().getWsAgentBaseUrl()
             + pathToService
             + "reindex?projectpath="
-            + projectPath;
+            + valueOf(projectPath).getEncodedPath();
 
     return asyncRequestFactory.createGetRequest(url).loader(loader).send();
   }

@@ -24,6 +24,7 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
+import org.eclipse.lsp4j.services.WorkspaceService;
 
 /** @author Evgen Vidolob */
 @Singleton
@@ -44,7 +45,7 @@ public class WorkspaceServiceClient {
 
   /**
    * GWT client implementation of {@link
-   * io.typefox.lsapi.WorkspaceService#symbol(io.typefox.lsapi.WorkspaceSymbolParams)}
+   * WorkspaceService#symbol(WorkspaceSymbolParams)}
    *
    * @param params
    * @return

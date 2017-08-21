@@ -20,6 +20,8 @@ import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
+import static org.eclipse.che.ide.resource.Path.valueOf;
+
 /**
  * The implementation of {@link ClasspathUpdaterServiceClient}.
  *
@@ -49,7 +51,7 @@ public class ClasspathUpdaterServiceClientImpl implements ClasspathUpdaterServic
         appContext.getDevMachine().getWsAgentBaseUrl()
             + pathToService
             + "update?projectpath="
-            + projectPath;
+            + valueOf(projectPath).getEncodedPath();
     return asyncRequestFactory.createPostRequest(url, entries).loader(loader).send();
   }
 }
