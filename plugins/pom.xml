@@ -61,5 +61,6 @@
         <module>plugin-testing-php</module>
         <module>plugin-pullrequest-parent</module>
         <module>plugin-traefik</module>
+        <module>plugin-yaml</module>
     </modules>
 </project>
