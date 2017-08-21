@@ -137,22 +137,24 @@ public class CodeAssistService {
     return codeAssist.applyChosenImports(project, fqn, chosen.getTypeMatches());
   }
 
-    @POST
-    @Path("/format")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Creates edits that describe how to format the given string")
-    public List<Change> getFormatChanges(@ApiParam(value = "Path to the root project")
-                                         @QueryParam("projectpath") String projectPath,
-                                         @ApiParam(value = "The given offset to start recording the edits (inclusive)")
-                                         @QueryParam("offset") int offset,
-                                         @ApiParam(value = "The given length to stop recording the edits (exclusive)")
-                                         @QueryParam("length") int length,
-                                         @ApiParam(value = "The content to format. Java code formatting is supported only") final String content)
-            throws BadLocationException, IllegalArgumentException {
-        IJavaProject javaProject = model.getJavaProject(projectPath);
-        IFile file = javaProject.getProject().getFile(".che/che-formatter.xml");
-        return formatter.getFormatChanges(file, content, offset, length);
-    }
-
+  @POST
+  @Path("/format")
+  @Consumes(MediaType.TEXT_PLAIN)
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(value = "Creates edits that describe how to format the given string")
+  public List<Change> getFormatChanges(
+      @ApiParam(value = "Path to the root project") @QueryParam("projectpath") String projectPath,
+      @ApiParam(value = "The given offset to start recording the edits (inclusive)")
+          @QueryParam("offset")
+          int offset,
+      @ApiParam(value = "The given length to stop recording the edits (exclusive)")
+          @QueryParam("length")
+          int length,
+      @ApiParam(value = "The content to format. Java code formatting is supported only")
+          final String content)
+      throws BadLocationException, IllegalArgumentException {
+    IJavaProject javaProject = model.getJavaProject(projectPath);
+    IFile file = javaProject.getProject().getFile(".che/che-formatter.xml");
+    return formatter.getFormatChanges(file, content, offset, length);
+  }
 }

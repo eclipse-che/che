@@ -35,18 +35,17 @@ import org.eclipse.che.ide.util.loging.Log;
  */
 public class JavaFormatter implements ContentFormatter {
 
-    private JavaCodeAssistClient service;
-    private AppContext           appContext;
-    private EditorAgent          editorAgent;
+  private JavaCodeAssistClient service;
+  private AppContext appContext;
+  private EditorAgent editorAgent;
 
-    @Inject
-    public JavaFormatter(JavaCodeAssistClient service,
-                         AppContext appContext,
-                         EditorAgent editorAgent) {
-        this.service = service;
-        this.appContext = appContext;
-        this.editorAgent = editorAgent;
-    }
+  @Inject
+  public JavaFormatter(
+      JavaCodeAssistClient service, AppContext appContext, EditorAgent editorAgent) {
+    this.service = service;
+    this.appContext = appContext;
+    this.editorAgent = editorAgent;
+  }
 
   @Override
   public void format(final Document document) {
@@ -58,15 +57,18 @@ public class JavaFormatter implements ContentFormatter {
       length = document.getContentsCharCount();
     }
 
-        Project rootProject = appContext.getRootProject();
-        if (rootProject == null) {
-            return;
-        }
+    Project rootProject = appContext.getRootProject();
+    if (rootProject == null) {
+      return;
+    }
 
-        Promise<List<Change>> changesPromise = service.format(rootProject.getPath(), offset, length, document.getContents());
-        changesPromise.then(new Operation<List<Change>>() {
-            @Override
-            public void apply(List<Change> changes) throws OperationException {
+    Promise<List<Change>> changesPromise =
+        service.format(rootProject.getPath(), offset, length, document.getContents());
+    changesPromise
+        .then(
+            new Operation<List<Change>>() {
+              @Override
+              public void apply(List<Change> changes) throws OperationException {
                 applyChanges(changes, document);
               }
             })

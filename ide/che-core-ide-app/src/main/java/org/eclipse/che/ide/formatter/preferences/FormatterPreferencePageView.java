@@ -1,50 +1,45 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.formatter.preferences;
 
 import org.eclipse.che.ide.api.mvp.View;
 
-/**
- * The view of the code formatter importer page.
- */
-public interface FormatterPreferencePageView extends View<FormatterPreferencePageView.ActionDelegate> {
+/** The view of the code formatter importer page. */
+public interface FormatterPreferencePageView
+    extends View<FormatterPreferencePageView.ActionDelegate> {
 
-    interface ActionDelegate {
-        /**
-         * Calls when dirty state of the page is changed.
-         */
-        void onDirtyChanged();
+  interface ActionDelegate {
+    /** Calls when dirty state of the page is changed. */
+    void onDirtyChanged();
 
-        /**
-         * Calls when the import button is clicked.
-         */
-        void onImportButtonClicked();
-
-        /**
-         * Shows error message.
-         *
-         * @param error
-         *         test of an error
-         */
-        void showErrorMessage(String error);
-    }
+    /** Calls when the import button is clicked. */
+    void onImportButtonClicked();
 
     /**
-     * Shows view of the code importer page.
+     * Shows error message.
+     *
+     * @param error test of an error
      */
-    void showDialog();
+    void showErrorMessage(String error);
+  }
 
-    /** returns the content of the selected file. */
-    String getFileContent();
+  /** Shows view of the code importer page. */
+  void showDialog();
 
-    /** returns {@code true} if for the formatter should be applied for the whole workspace otherwise returns {@code false}.* */
-    boolean isWorkspaceTarget();
+  /** returns the content of the selected file. */
+  String getFileContent();
+
+  /**
+   * returns {@code true} if for the formatter should be applied for the whole workspace otherwise
+   * returns {@code false}.*
+   */
+  boolean isWorkspaceTarget();
 }
