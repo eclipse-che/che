@@ -28,7 +28,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerFactory;
-import org.eclipse.che.plugin.debugger.ide.debug.DefaultDebuggerResourceHandler;
 
 /**
  * The NodeJs Debugger Client.
@@ -63,9 +62,9 @@ public class NodeJsDebugger extends AbstractDebugger {
         debuggerManager,
         notificationManager,
         breakpointManager,
-        ID,
         requestHandlerManager,
-        debuggerResourceHandlerFactory);
+        debuggerResourceHandlerFactory,
+        ID);
   }
 
   @Override

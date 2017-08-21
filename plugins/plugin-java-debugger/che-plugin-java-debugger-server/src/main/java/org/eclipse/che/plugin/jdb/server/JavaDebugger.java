@@ -413,19 +413,19 @@ public class JavaDebugger implements EventsHandler, Debugger {
   /**
    * Get value of variable with specified path. Each item in path is name of variable.
    *
-   * <p>Path must be specified according to the following rules: *
+   * <p>Path must be specified according to the following rules:
    *
    * <ol>
-   *   <li>If need to get field of this object of current frame then first element in array always*
+   *   <li>If need to get field of this object of current frame then first element in array always
    *       should be 'this'.
    *   <li>If need to get static field in current frame then first element in array always should
    *       be* 'static'.
-   *   <li>If need to get local variable in current frame then first element should be the name of*
+   *   <li>If need to get local variable in current frame then first element should be the name of
    *       local variable.
    * </ol>
    *
    * Here is example. <br>
-   * Assume we have next hierarchy of classes and breakpoint set in line: <i>// breakpoint</i>: *
+   * Assume we have next hierarchy of classes and breakpoint set in line: <i>// breakpoint</i>:
    *
    * <pre>
    *    class A {
@@ -446,7 +446,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
    *    }
    * </pre>
    *
-   * * There are two ways to access variable <i>str</i> in class <i>A</i>: *
+   * * There are two ways to access variable <i>str</i> in class <i>A</i>:
    *
    * <ol>
    *   <li>Through field <i>a</i> in class <i>B</i>: ['this', 'a', 'str']
@@ -457,10 +457,14 @@ public class JavaDebugger implements EventsHandler, Debugger {
    * @return variable or <code>null</code> if variable not found
    * @throws DebuggerException when any other errors occur when try to access the variable
    */
-
   @Override
   public SimpleValue getValue(VariablePath variablePath) throws DebuggerException {
-    return getValue(variablePath, getCurrentThread().uniqueID(), 0);
+    lock.lock();
+    try {
+      return getValue(variablePath, getCurrentThread().uniqueID(), 0);
+    } finally {
+      lock.unlock();
+    }
   }
 
   @Override
@@ -683,7 +687,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public String evaluate(String expression) throws DebuggerException {
-    return evaluate(expression, getCurrentThread().uniqueID(), 0);
+    lock.lock();
+    try {
+      return evaluate(expression, getCurrentThread().uniqueID(), 0);
+    } finally {
+      lock.unlock();
+    }
   }
 
   @Override

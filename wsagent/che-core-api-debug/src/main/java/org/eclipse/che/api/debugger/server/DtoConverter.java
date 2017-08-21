@@ -10,6 +10,11 @@
  */
 package org.eclipse.che.api.debugger.server;
 
+import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
+
+import java.util.List;
+import java.util.Objects;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.DebuggerInfoDto;
@@ -39,12 +44,6 @@ import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
-
-import java.util.List;
-import java.util.Objects;
-
-import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Helps to convert to/from DTOs related to debugger.

@@ -139,7 +139,6 @@ public interface Debugger {
    * @param variable the variable to update
    * @throws DebuggerException if any error occur
    */
-
   @Deprecated
   void setValue(Variable variable) throws DebuggerException;
 

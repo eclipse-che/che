@@ -10,19 +10,21 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
-
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-
+import java.util.List;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
 
-import java.util.List;
-
-/** @author Anatolii Bazko */
+/**
+ * Renders stack frame item the panel.
+ *
+ * @see StackFrameDump
+ * @author Anatolii Bazko
+ */
 public class FrameItemRender extends SimpleList.ListItemRenderer<StackFrameDump> {
 
   @Override

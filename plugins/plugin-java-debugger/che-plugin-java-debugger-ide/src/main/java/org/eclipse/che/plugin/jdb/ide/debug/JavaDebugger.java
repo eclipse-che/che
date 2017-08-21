@@ -72,9 +72,9 @@ public class JavaDebugger extends AbstractDebugger {
         debuggerManager,
         notificationManager,
         breakpointManager,
-        ID,
         requestHandlerManager,
-        debuggerResourceHandlerFactory);
+        debuggerResourceHandlerFactory,
+        ID);
     this.fqnResolverFactory = fqnResolverFactory;
     this.fileTypeRegistry = fileTypeRegistry;
   }

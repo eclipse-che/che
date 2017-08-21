@@ -13,7 +13,6 @@ package org.eclipse.che.api.debug.shared.model.impl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
 import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;

@@ -166,6 +166,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   private SimpleList<Breakpoint> createBreakpointList() {
     TableElement breakPointsElement = Elements.createTableElement();
     breakPointsElement.setAttribute("style", "width: 100%");
+
     SimpleList.ListEventDelegate<Breakpoint> breakpointListEventDelegate =
         new SimpleList.ListEventDelegate<Breakpoint>() {
           public void onListItemClicked(Element itemElement, Breakpoint itemData) {
@@ -235,7 +236,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   }
 
   @Override
-  public void setThreads(List<? extends ThreadDump> threadDumps, long activeThreadId) {
+  public void setThreads(List<? extends ThreadDump> threadDumps, long threadIdToSelect) {
     threads.clear();
 
     for (int i = 0; i < threadDumps.size(); i++) {
@@ -250,7 +251,8 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
               + "\": "
               + td.getStatus();
       threads.addItem(item, String.valueOf(td.getId()));
-      if (td.getId() == activeThreadId) {
+
+      if (td.getId() == threadIdToSelect) {
         threads.setSelectedIndex(i);
       }
     }

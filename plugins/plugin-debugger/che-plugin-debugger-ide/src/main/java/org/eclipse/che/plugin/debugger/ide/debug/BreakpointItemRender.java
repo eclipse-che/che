@@ -10,20 +10,21 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
-
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-/** @author Anatolii Bazko */
+/**
+ * Renders breakpoint item the panel.
+ *
+ * @see Breakpoint
+ * @author Anatolii Bazko
+ */
 public class BreakpointItemRender extends SimpleList.ListItemRenderer<Breakpoint> {
 
   private final DebuggerResources debuggerResources;

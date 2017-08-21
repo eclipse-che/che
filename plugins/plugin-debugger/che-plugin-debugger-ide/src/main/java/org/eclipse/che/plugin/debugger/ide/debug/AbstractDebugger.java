@@ -122,9 +122,9 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       DebuggerManager debuggerManager,
       NotificationManager notificationManager,
       BreakpointManager breakpointManager,
-      String type,
       RequestHandlerManager requestHandlerManager,
-      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory) {
+      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
+      String type) {
     this.service = service;
     this.transmitter = transmitter;
     this.configurator = configurator;
@@ -175,7 +175,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                       }
 
                       if (currentLocation != null) {
-                        openCurrentFile(currentLocation);
+                        open(currentLocation);
                       }
 
                       startCheckingEvents();
@@ -196,7 +196,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     switch (event.getType()) {
       case SUSPEND:
         currentLocation = ((SuspendEventDto) event).getLocation();
-        openCurrentFile(currentLocation);
+        open(currentLocation);
         break;
       case BREAKPOINT_ACTIVATED:
         BreakpointDto breakpointDto = ((BreakpointActivatedEventDto) event).getBreakpoint();
@@ -214,8 +214,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     preserveDebuggerState();
   }
 
-  private void openCurrentFile(Location location) {
-    //todo we need add possibility to handle few files
+  private void open(Location location) {
     try {
       debuggerResourceHandler.open(
           location,

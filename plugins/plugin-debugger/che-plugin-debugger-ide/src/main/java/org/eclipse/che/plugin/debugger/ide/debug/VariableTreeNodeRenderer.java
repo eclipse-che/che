@@ -21,9 +21,10 @@ import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.dom.Elements;
 
 /**
- * The rendered for debug variable node.
+ * Renders variable item the panel.
  *
- * @author Andrey Plotnikov @@author Dmitry Shnurenko
+ * @see MutableVariable
+ * @author Anatolii Bazko
  */
 public class VariableTreeNodeRenderer implements NodeRenderer<MutableVariable> {
   public interface Css extends CssResource {

@@ -38,7 +38,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerFactory;
-import org.eclipse.che.plugin.debugger.ide.debug.DefaultDebuggerResourceHandler;
 
 /**
  * The GDB debugger client.
@@ -78,9 +77,9 @@ public class GdbDebugger extends AbstractDebugger {
         debuggerManager,
         notificationManager,
         breakpointManager,
-        ID,
         requestHandlerManager,
-        debuggerResourceHandlerFactory);
+        debuggerResourceHandlerFactory,
+        ID);
     this.locale = locale;
     this.appContext = appContext;
   }

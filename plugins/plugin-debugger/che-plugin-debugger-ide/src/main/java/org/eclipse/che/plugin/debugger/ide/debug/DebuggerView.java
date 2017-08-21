@@ -47,13 +47,14 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
      * @param variable variable that is selected
      */
     void onSelectedVariableElement(@NotNull MutableVariable variable);
+
     /** Is invoked when a new thread is selected. */
     void onSelectedThread(long threadId);
 
     /**
      * Is invoked when a new frame is selected.
-     *  @param frameIndex the frame index inside thread
      *
+     * @param frameIndex the frame index inside a thread
      */
     void onSelectedFrame(int frameIndex);
   }
@@ -83,7 +84,7 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
    * Sets the list of the threads and select the one with {@link ThreadDump#getId()} equal to {@code
    * activeThreadId}.
    */
-  void setThreads(@NotNull List<? extends ThreadDump> threadDumps, long activeThreadId);
+  void setThreads(@NotNull List<? extends ThreadDump> threadDumps, long threadIdToSelect);
 
   /** Sets the list of frames for selected thread. */
   void setFrames(@NotNull List<? extends StackFrameDump> stackFrameDumps);

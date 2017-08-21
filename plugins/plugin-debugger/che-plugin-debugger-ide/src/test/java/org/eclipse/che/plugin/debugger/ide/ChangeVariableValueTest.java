@@ -19,7 +19,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
@@ -43,16 +42,16 @@ public class ChangeVariableValueTest extends BaseTest {
   private static final String VAR_VALUE = "var_value";
   private static final String VAR_NAME = "var_name";
   private static final String EMPTY_VALUE = "";
-  @Mock private        ChangeValueView      view;
+  @Mock private ChangeValueView view;
   @InjectMocks private ChangeValuePresenter presenter;
-  @Mock private        VariableDto          var;
-  @Mock private        VariablePathDto      varPath;
-  @Mock private        DebuggerManager      debuggerManager;
-  @Mock private        Debugger             debugger;
-  @Mock private        DebuggerPresenter    debuggerPresenter;
-  @Mock private        MutableVariable      variable;
-  @Mock private        VariablePathDto      variablePathDto;
-  @Mock private        SimpleValueDto       simpleValueDto;
+  @Mock private VariableDto var;
+  @Mock private VariablePathDto varPath;
+  @Mock private DebuggerManager debuggerManager;
+  @Mock private Debugger debugger;
+  @Mock private DebuggerPresenter debuggerPresenter;
+  @Mock private MutableVariable variable;
+  @Mock private VariablePathDto variablePathDto;
+  @Mock private SimpleValueDto simpleValueDto;
 
   @Before
   public void setUp() {

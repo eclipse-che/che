@@ -635,9 +635,9 @@ public class DebuggerTest extends BaseTest {
           debuggerManager,
           notificationManager,
           breakpointManager,
-          id,
           requestHandlerManager,
-          debuggerResourceHandlerFactory);
+          debuggerResourceHandlerFactory,
+          id);
     }
 
     @Override

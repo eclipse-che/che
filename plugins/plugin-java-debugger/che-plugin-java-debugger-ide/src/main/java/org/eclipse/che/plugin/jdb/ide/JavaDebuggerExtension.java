@@ -46,7 +46,7 @@ public class JavaDebuggerExtension {
     debuggerManager.registeredDebugger(JavaDebugger.ID, javaDebugger);
     resolverFactory.addResolver("java", javaFqnResolver);
     resolverFactory.addResolver("class", javaClassFqnResolver);
-    
+
     debuggerResourceHandlerFactory.register(JavaDebugger.ID, javaDebuggerResourceHandler);
   }
 }
