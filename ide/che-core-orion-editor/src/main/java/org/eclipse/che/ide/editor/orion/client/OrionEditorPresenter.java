@@ -128,6 +128,7 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.editor.EditorFileStatusNotificationOperation;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
@@ -186,6 +187,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private final EditorContextMenu contextMenu;
   private final AutoSaveMode autoSaveMode;
   private final ClientServerEventService clientServerEventService;
+  private final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation;
 
   private final AnnotationRendering rendering = new AnnotationRendering();
   private HasKeyBindings keyBindingsManager;
@@ -229,7 +231,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       final SignatureHelpView signatureHelpView,
       final EditorContextMenu contextMenu,
       final AutoSaveMode autoSaveMode,
-      final ClientServerEventService clientServerEventService) {
+      final ClientServerEventService clientServerEventService,
+      final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation) {
     this.codeAssistantFactory = codeAssistantFactory;
     this.deletedFilesController = deletedFilesController;
     this.breakpointManager = breakpointManager;
@@ -252,6 +255,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     this.contextMenu = contextMenu;
     this.autoSaveMode = autoSaveMode;
     this.clientServerEventService = clientServerEventService;
+    this.editorFileStatusNotificationOperation = editorFileStatusNotificationOperation;
 
     keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -615,16 +619,17 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
 
   @Override
   public void doSave() {
+    editorFileStatusNotificationOperation.suspend();
     doSave(
         new AsyncCallback<EditorInput>() {
           @Override
           public void onSuccess(final EditorInput result) {
-            // do nothing
+            editorFileStatusNotificationOperation.resume();
           }
 
           @Override
           public void onFailure(final Throwable caught) {
-            // do nothing
+            editorFileStatusNotificationOperation.resume();
           }
         });
   }
