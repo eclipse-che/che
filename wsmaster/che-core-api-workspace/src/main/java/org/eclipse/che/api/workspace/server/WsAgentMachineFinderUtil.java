@@ -82,38 +82,4 @@ public class WsAgentMachineFinderUtil {
     return machineConfig.getServers().keySet().contains(SERVER_WS_AGENT_HTTP_REFERENCE)
         || InstallerFqn.idInInstallerList(WS_AGENT_INSTALLER, machineConfig.getInstallers());
   }
-
-  /**
-   * Finds machine in provided environment which contains wsagent installer.
-   *
-   * @param environment environment to find a machine with the wsagent installer
-   * @return {@link Optional} with name of the machine which contains wsagent installer or empty if
-   *     such machine is not present in provided environment
-   * @throws IllegalArgumentException if more than 1 machine with the wsagent installer are found
-   */
-  public static Optional<String> getWsAgentInstallerMachine(InternalEnvironment environment) {
-
-    List<String> machinesWithWsAgentInstaller =
-        environment
-            .getMachines()
-            .entrySet()
-            .stream()
-            .filter(
-                entry ->
-                    InstallerFqn.idInInstallerList(
-                        WS_AGENT_INSTALLER, entry.getValue().getInstallers()))
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toList());
-
-    if (machinesWithWsAgentInstaller.isEmpty()) {
-      return Optional.empty();
-    }
-    if (machinesWithWsAgentInstaller.size() == 1) {
-      return Optional.of(machinesWithWsAgentInstaller.get(0));
-    }
-    throw new IllegalArgumentException(
-        format(
-            "Environment contains '%s' machines with wsagent installer. Machines names: '%s'",
-            machinesWithWsAgentInstaller.size(), machinesWithWsAgentInstaller));
-  }
 }

@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import org.eclipse.che.api.core.NotFoundException;
@@ -443,19 +442,14 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
    *
    * @param machines the active machines map
    */
-  private void snapshotMachines(Map<String, DockerMachine> machines) {
+  private void snapshotMachines(Map<String, DockerMachine> machines)
+      throws InternalInfrastructureException {
     List<SnapshotImpl> newSnapshots = new ArrayList<>();
     final RuntimeIdentity identity = getContext().getIdentity();
     // TODO do we need dev machine flag at all?
-    String devMachineName;
-    Optional<String> devMachineNameOpt =
-        WsAgentMachineFinderUtil.getWsAgentInstallerMachine(getContext().getEnvironment());
-    // should not happen
-    if (!devMachineNameOpt.isPresent()) {
-      LOG.error("Dev machine is not found");
-      return;
-    }
-    devMachineName = devMachineNameOpt.get();
+    String devMachineName =
+        WsAgentMachineFinderUtil.getWsAgentServerMachine(getContext().getEnvironment())
+            .orElseThrow(() -> new InternalInfrastructureException("Machine with wsagent is not found"));
 
     for (Map.Entry<String, DockerMachine> dockerMachineEntry : machines.entrySet()) {
       SnapshotImpl snapshot =
