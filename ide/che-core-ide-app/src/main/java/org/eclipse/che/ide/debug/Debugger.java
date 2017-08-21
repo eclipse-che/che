@@ -93,7 +93,7 @@ public interface Debugger extends DebuggerObservable {
    * @param threadId the unique thread id {@link ThreadDump#getId()}
    * @param frameIndex the frame index inside the thread
    */
-  Promise<SimpleValue> getValue(Variable variable, long threadId, int frameIndex);
+  Promise<? extends SimpleValue> getValue(Variable variable, long threadId, int frameIndex);
 
   /**
    * Gets a stack frame dump.
@@ -101,7 +101,7 @@ public interface Debugger extends DebuggerObservable {
    * @param threadId the unique thread id {@link ThreadDump#getId()}
    * @param frameIndex the frame index inside the thread
    */
-  Promise<StackFrameDump> getStackFrameDump(long threadId, int frameIndex);
+  Promise<? extends StackFrameDump> getStackFrameDump(long threadId, int frameIndex);
 
   /** Gets thread dump. */
   Promise<List<ThreadDumpDto>> getThreadDump();

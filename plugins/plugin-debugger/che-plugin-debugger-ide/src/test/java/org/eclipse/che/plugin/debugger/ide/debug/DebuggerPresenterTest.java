@@ -57,6 +57,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 /**
  * Testing {@link DebuggerPresenter} functionality.
@@ -118,6 +119,9 @@ public class DebuggerPresenterTest extends BaseTest {
     FileType fileType = mock(FileType.class);
     doReturn("java").when(fileType).getExtension();
     doReturn(fileType).when(fileTypeRegistry).getFileTypeByFile(eq(file));
+
+    Mockito.reset(view);
+    Mockito.reset(breakpointManager);
   }
 
   @Test
@@ -131,7 +135,6 @@ public class DebuggerPresenterTest extends BaseTest {
     presenter.go(container);
 
     verify(view).setBreakpoints(breakpoints);
-    verify(view).setVariables(any());
     verify(container).setWidget(view);
     verify(debuggerToolbar).go(container);
   }
@@ -144,7 +147,7 @@ public class DebuggerPresenterTest extends BaseTest {
     doReturn(true).when(rootVariables).isEmpty();
     doReturn(rootVariables).when(selectedVariable).getVariables();
 
-    doReturn(promiseValue).when(debugger).getValue(selectedVariable, anyLong(), anyInt());
+    doReturn(promiseValue).when(debugger).getValue(eq(selectedVariable), anyLong(), anyInt());
     doReturn(promiseValue).when(promiseValue).then((Operation<SimpleValueDto>) any());
 
     presenter.onExpandVariablesTree();

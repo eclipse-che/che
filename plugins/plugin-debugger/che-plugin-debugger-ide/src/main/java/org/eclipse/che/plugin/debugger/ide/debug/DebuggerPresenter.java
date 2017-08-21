@@ -152,7 +152,7 @@ public class DebuggerPresenter extends BasePresenter
     if (rootVariables.isEmpty()) {
       Debugger debugger = debuggerManager.getActiveDebugger();
       if (debugger != null) {
-        Promise<SimpleValue> promise =
+        Promise<? extends SimpleValue> promise =
             debugger.getValue(selectedVariable, selectedThreadId, selectedFrameIndex);
 
         promise
@@ -313,7 +313,7 @@ public class DebuggerPresenter extends BasePresenter
   protected void updateStackFrameDump() {
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null && debugger.isSuspended()) {
-      Promise<StackFrameDump> promise =
+      Promise<? extends StackFrameDump> promise =
           debugger.getStackFrameDump(selectedThreadId, selectedFrameIndex);
       promise
           .then(

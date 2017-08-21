@@ -16,8 +16,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -102,6 +100,8 @@ import org.mockito.internal.creation.MockSettingsImpl;
 public class DebuggerTest extends BaseTest {
   private static final String DEBUG_INFO = "debug_info";
   private static final String SESSION_ID = "debugger_id";
+  private static final long THREAD_ID = 1;
+  private static final int FRAME_INDEX = 0;
 
   public static final int LINE_NUMBER = 20;
   public static final String FQN = "org.test.Test";
@@ -513,11 +513,11 @@ public class DebuggerTest extends BaseTest {
     doReturn(mock(VariablePathDto.class)).when(dtoFactory).createDto(VariablePathDto.class);
     doReturn(mock(VariablePathDto.class)).when(variable).getVariablePath();
 
-    doReturn(promiseValue).when(service).getValue(SESSION_ID, variableDto, anyLong(), anyInt());
+    doReturn(promiseValue).when(service).getValue(SESSION_ID, variableDto, THREAD_ID, FRAME_INDEX);
     doReturn(promiseValue).when(promiseValue).then((Function<SimpleValueDto, Object>) any());
     doReturn(promiseValue).when(promiseValue).catchError((Operation<PromiseError>) any());
 
-    Promise<SimpleValue> result = debugger.getValue(variable, anyLong(), anyInt());
+    Promise<? extends SimpleValue> result = debugger.getValue(variable, THREAD_ID, FRAME_INDEX);
     assertEquals(promiseValue, result);
   }
 
@@ -525,9 +525,9 @@ public class DebuggerTest extends BaseTest {
   public void testGetValueWithoutConnection() throws Exception {
     debugger.setDebugSession(null);
 
-    debugger.getValue(null, anyLong(), anyInt());
+    debugger.getValue(null, THREAD_ID, FRAME_INDEX);
 
-    verify(service, never()).getValue(any(), any(), anyLong(), anyInt());
+    verify(service, never()).getValue(any(), any(), eq(THREAD_ID), eq(FRAME_INDEX));
   }
 
   @Test
@@ -539,7 +539,7 @@ public class DebuggerTest extends BaseTest {
 
     doReturn(promiseStackFrameDump)
         .when(service)
-        .getStackFrameDump(SESSION_ID, anyLong(), anyInt());
+        .getStackFrameDump(SESSION_ID, THREAD_ID, FRAME_INDEX);
     doReturn(promiseStackFrameDump)
         .when(promiseStackFrameDump)
         .then((Function<StackFrameDumpDto, Object>) any());
@@ -547,7 +547,7 @@ public class DebuggerTest extends BaseTest {
         .when(promiseStackFrameDump)
         .catchError((Operation<PromiseError>) any());
 
-    Promise<StackFrameDump> result = debugger.getStackFrameDump(anyLong(), anyInt());
+    Promise<? extends StackFrameDump> result = debugger.getStackFrameDump(THREAD_ID, FRAME_INDEX);
     assertEquals(promiseStackFrameDump, result);
   }
 
@@ -555,26 +555,26 @@ public class DebuggerTest extends BaseTest {
   public void testGetStackFrameDumpWithoutConnection() throws Exception {
     debugger.setDebugSession(null);
 
-    debugger.getStackFrameDump(anyLong(), anyInt());
+    debugger.getStackFrameDump(THREAD_ID, FRAME_INDEX);
 
-    verify(service, never()).getStackFrameDump(any(), anyLong(), anyInt());
+    verify(service, never()).getStackFrameDump(any(), eq(THREAD_ID), eq(FRAME_INDEX));
   }
 
   @Test
   public void testEvaluateExpression() throws Exception {
     final String expression = "a = 1";
     Promise<String> promiseString = mock(Promise.class);
-    doReturn(promiseString).when(service).evaluate(SESSION_ID, expression, anyLong(), anyInt());
+    doReturn(promiseString).when(service).evaluate(SESSION_ID, expression, THREAD_ID, FRAME_INDEX);
 
-    Promise<String> result = debugger.evaluate(expression, anyLong(), anyInt());
+    Promise<String> result = debugger.evaluate(expression, THREAD_ID, FRAME_INDEX);
     assertEquals(promiseString, result);
   }
 
   @Test
   public void testEvaluateExpressionWithoutConnection() throws Exception {
     debugger.setDebugSession(null);
-    debugger.evaluate("any", anyLong(), anyInt());
-    verify(service, never()).evaluate(any(), any(), anyLong(), anyInt());
+    debugger.evaluate("any", THREAD_ID, FRAME_INDEX);
+    verify(service, never()).evaluate(any(), any(), eq(THREAD_ID), eq(FRAME_INDEX));
   }
 
   @Test
@@ -598,10 +598,10 @@ public class DebuggerTest extends BaseTest {
     doReturn(newValue).when(simpleValue).getString();
     doReturn(simpleValue).when(variable).getValue();
 
-    doReturn(promiseVoid).when(service).setValue(SESSION_ID, variableDto, anyLong(), anyInt());
+    doReturn(promiseVoid).when(service).setValue(SESSION_ID, variableDto, THREAD_ID, FRAME_INDEX);
     doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>) any());
 
-    debugger.setValue(variable, anyLong(), anyInt());
+    debugger.setValue(variable, THREAD_ID, FRAME_INDEX);
 
     verify(promiseVoid).then(operationVoidCaptor.capture());
     operationVoidCaptor.getValue().apply(null);

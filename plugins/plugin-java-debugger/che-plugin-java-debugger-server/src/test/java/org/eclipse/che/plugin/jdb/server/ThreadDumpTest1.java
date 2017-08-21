@@ -101,7 +101,6 @@ public class ThreadDumpTest1 {
 
     Method method = location.getMethod();
     assertEquals(method.getName(), "main");
-    assertTrue(method.getArguments().isEmpty());
   }
 
   private void validateFinalizerThreadDump(List<ThreadDumpDto> threads) {

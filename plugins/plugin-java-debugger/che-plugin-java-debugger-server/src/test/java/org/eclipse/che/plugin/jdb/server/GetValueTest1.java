@@ -121,7 +121,7 @@ public class GetValueTest1 {
       Variable variable = valueVariables.get(i);
       assertEquals(
           variable.getVariablePath().getPath(), ImmutableList.of("var1", "value", "[" + i + "]"));
-      assertEquals(variable.getValue().getString(), "var1".substring(i, i));
+      assertEquals(variable.getValue().getString(), "var1".substring(i, i + 1));
     }
   }
 

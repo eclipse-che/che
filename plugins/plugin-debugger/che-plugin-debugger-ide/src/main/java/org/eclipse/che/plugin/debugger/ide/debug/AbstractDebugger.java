@@ -28,7 +28,6 @@ import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
-import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
 import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
@@ -49,8 +48,6 @@ import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.Action;
-import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
-import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -315,26 +312,21 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public Promise<SimpleValue> getValue(Variable variable, long threadId, int frameIndex) {
+  public Promise<? extends SimpleValue> getValue(Variable variable, long threadId, int frameIndex) {
     if (!isConnected()) {
       return Promises.reject(JsPromiseError.create("Debugger is not connected"));
     }
 
-    Promise<SimpleValueDto> promise =
-        service.getValue(debugSessionDto.getId(), toDto(variable), threadId, frameIndex);
-    return promise.then((Function<SimpleValueDto, SimpleValue>) SimpleValueImpl::new);
+    return service.getValue(debugSessionDto.getId(), toDto(variable), threadId, frameIndex);
   }
 
   @Override
-  public Promise<StackFrameDump> getStackFrameDump(long threadId, int frameIndex) {
+  public Promise<? extends StackFrameDump> getStackFrameDump(long threadId, int frameIndex) {
     if (!isConnected()) {
       return Promises.reject(JsPromiseError.create("Debugger is not connected"));
     }
 
-    Promise<StackFrameDumpDto> stackFrameDump =
-        service.getStackFrameDump(debugSessionDto.getId(), threadId, frameIndex);
-    return stackFrameDump.then(
-        (Function<StackFrameDumpDto, StackFrameDump>) StackFrameDumpImpl::new);
+    return service.getStackFrameDump(debugSessionDto.getId(), threadId, frameIndex);
   }
 
   @Override
