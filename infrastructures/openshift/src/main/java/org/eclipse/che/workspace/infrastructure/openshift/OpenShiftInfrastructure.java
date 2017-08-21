@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -35,9 +36,15 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       OpenShiftRuntimeContextFactory runtimeContextFactory,
       OpenShiftEnvironmentParser envParser,
       OpenShiftInfrastructureProvisioner infrastructureProvisioner,
+      EventService eventService,
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever) {
-    super("openshift", ImmutableSet.of("openshift"), installerRegistry, recipeRetriever);
+    super(
+        "openshift",
+        ImmutableSet.of("openshift"),
+        eventService,
+        installerRegistry,
+        recipeRetriever);
     this.runtimeContextFactory = runtimeContextFactory;
     this.envParser = envParser;
     this.infrastructureProvisioner = infrastructureProvisioner;

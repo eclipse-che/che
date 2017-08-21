@@ -19,6 +19,7 @@ import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.RecipeRetriever;
 
@@ -33,15 +34,18 @@ public abstract class RuntimeInfrastructure {
   private final String name;
   private final InstallerRegistry installerRegistry;
   private final RecipeRetriever recipeRetriever;
+  private final EventService eventService;
 
   public RuntimeInfrastructure(
       String name,
       Collection<String> types,
+      EventService eventService,
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever) {
     Preconditions.checkArgument(!types.isEmpty());
     this.name = Objects.requireNonNull(name);
     this.recipeTypes = ImmutableSet.copyOf(types);
+    this.eventService = eventService;
     this.installerRegistry = installerRegistry;
     this.recipeRetriever = recipeRetriever;
   }
@@ -57,6 +61,11 @@ public abstract class RuntimeInfrastructure {
    */
   public final Set<String> getRecipeTypes() {
     return recipeTypes;
+  }
+
+  /** @return EventService */
+  public final EventService getEventService() {
+    return eventService;
   }
 
   /**

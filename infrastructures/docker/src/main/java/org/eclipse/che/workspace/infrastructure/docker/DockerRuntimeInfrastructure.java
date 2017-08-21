@@ -17,6 +17,7 @@ import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -57,9 +58,10 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
       Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
       DockerRuntimeContextFactory contextFactory,
       DockerContainers containers,
+      EventService eventService,
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever) {
-    super("docker", environmentParsers.keySet(), installerRegistry, recipeRetriever);
+    super("docker", environmentParsers.keySet(), eventService, installerRegistry, recipeRetriever);
     this.dockerEnvironmentValidator = dockerEnvironmentValidator;
     this.dockerEnvironmentParser = dockerEnvironmentParser;
     this.startStrategy = startStrategy;

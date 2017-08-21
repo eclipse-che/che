@@ -219,7 +219,7 @@ public class WorkspaceRuntimesTest {
 
     public TestInfrastructure(
         InstallerRegistry installerRegistry, RecipeRetriever recipeRetriever, String... types) {
-      super("test", Arrays.asList(types), installerRegistry, recipeRetriever);
+      super("test", Arrays.asList(types), null, installerRegistry, recipeRetriever);
     }
 
     @Override
