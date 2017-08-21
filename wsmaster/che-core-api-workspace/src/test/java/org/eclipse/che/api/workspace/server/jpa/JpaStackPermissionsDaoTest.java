@@ -172,8 +172,7 @@ public class JpaStackPermissionsDaoTest {
     protected void configure() {
       install(new JpaPersistModule("main"));
       bind(SchemaInitializer.class)
-          .toInstance(
-              new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
+          .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
       bind(DBInitializer.class).asEagerSingleton();
     }
   }

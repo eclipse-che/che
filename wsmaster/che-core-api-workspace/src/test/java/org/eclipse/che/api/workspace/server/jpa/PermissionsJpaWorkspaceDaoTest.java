@@ -37,7 +37,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Max Shaposhnik */
-public class OnPremisesJpaWorkspaceDaoTest {
+public class PermissionsJpaWorkspaceDaoTest {
   private EntityManager manager;
   private JpaWorkspaceDao dao;
 
@@ -141,7 +141,6 @@ public class OnPremisesJpaWorkspaceDaoTest {
   private class TestModule extends AbstractModule {
     @Override
     protected void configure() {
-      bind(JpaStackDao.class).to(JpaStackDao.class);
       install(new JpaPersistModule("main"));
       bind(SchemaInitializer.class)
           .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));

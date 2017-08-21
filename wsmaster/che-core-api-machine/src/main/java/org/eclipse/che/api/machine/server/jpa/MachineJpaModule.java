@@ -13,6 +13,7 @@ package org.eclipse.che.api.machine.server.jpa;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
+import org.eclipse.che.api.machine.server.jpa.listener.RemoveRecipeOnLastUserRemovedEventSubscriber;
 import org.eclipse.che.api.machine.server.recipe.RecipeDomain;
 import org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
@@ -40,6 +41,6 @@ public class MachineJpaModule extends AbstractModule {
         .to(RecipeDomain.class);
     bind(JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber.class)
         .asEagerSingleton();
-    //bind(RemoveRecipeOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
+    bind(RemoveRecipeOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
   }
 }

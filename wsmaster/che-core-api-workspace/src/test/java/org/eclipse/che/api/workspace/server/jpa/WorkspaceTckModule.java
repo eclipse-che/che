@@ -88,35 +88,25 @@ public class WorkspaceTckModule extends TckModule {
         .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
     bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
 
-    bind(new TypeLiteral<TckRepository<AccountImpl>>() {
-    })
+    bind(new TypeLiteral<TckRepository<AccountImpl>>() {})
         .toInstance(new JpaTckRepository<>(AccountImpl.class));
-    bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {
-    }).toInstance(new WorkspaceRepository());
-    bind(new TypeLiteral<TckRepository<StackImpl>>() {
-    }).toInstance(new StackRepository());
-    bind(new TypeLiteral<TckRepository<UserImpl>>() {
-    })
+    bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
+    bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
+    bind(new TypeLiteral<TckRepository<UserImpl>>() {})
         .toInstance(new JpaTckRepository<>(UserImpl.class));
-    bind(new TypeLiteral<TckRepository<WorkerImpl>>() {
-    })
+    bind(new TypeLiteral<TckRepository<WorkerImpl>>() {})
         .toInstance(new JpaTckRepository<>(WorkerImpl.class));
-    bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {
-    })
+    bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
-    bind(new TypeLiteral<TckRepository<StackPermissionsImpl>>() {
-    })
+    bind(new TypeLiteral<TckRepository<StackPermissionsImpl>>() {})
         .toInstance(new JpaTckRepository<>(StackPermissionsImpl.class));
 
-    bind(new TypeLiteral<PermissionsDao<StackPermissionsImpl>>() {
-    })
+    bind(new TypeLiteral<PermissionsDao<StackPermissionsImpl>>() {})
         .to(JpaStackPermissionsDao.class);
 
-    bind(new TypeLiteral<AbstractPermissionsDomain<WorkerImpl>>() {
-    })
+    bind(new TypeLiteral<AbstractPermissionsDomain<WorkerImpl>>() {})
         .to(WorkerDaoTest.TestDomain.class);
-    bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {
-    })
+    bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {})
         .to(StackPermissionsDaoTest.TestDomain.class);
 
     bind(WorkerDao.class).to(JpaWorkerDao.class);

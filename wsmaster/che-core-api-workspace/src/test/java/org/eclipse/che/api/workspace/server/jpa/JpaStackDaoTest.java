@@ -37,7 +37,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Max Shaposhnik (mshaposhnik@codenvy.com) */
-public class OnPremisesJpaStackDaoTest {
+public class JpaStackDaoTest {
 
   private EntityManager manager;
   private JpaStackDao dao;
@@ -172,8 +172,7 @@ public class OnPremisesJpaStackDaoTest {
     protected void configure() {
       install(new JpaPersistModule("main"));
       bind(SchemaInitializer.class)
-          .toInstance(
-              new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
+          .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
       bind(DBInitializer.class).asEagerSingleton();
     }
   }

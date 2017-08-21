@@ -33,6 +33,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
+import org.eclipse.che.api.workspace.server.spi.jpa.JpaStackPermissionsDao;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
@@ -63,6 +64,8 @@ public class StackLoaderTest {
 
   @Mock private DBInitializer dbInitializer;
 
+  @Mock private JpaStackPermissionsDao permissionsDao;
+
   private StackLoader stackLoader;
 
   @BeforeMethod
@@ -70,7 +73,11 @@ public class StackLoaderTest {
     when(dbInitializer.isBareInit()).thenReturn(true);
     stackLoader =
         new StackLoader(
-            false, ImmutableMap.of("stacks.json", "stack_img"), stackDao, dbInitializer);
+            false,
+            ImmutableMap.of("stacks.json", "stack_img"),
+            stackDao,
+            permissionsDao,
+            dbInitializer);
   }
 
   @Test

@@ -21,6 +21,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.machine.server.jpa.JpaRecipePermissionsDao;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.core.db.DBInitializer;
 import org.mockito.Mock;
@@ -41,12 +42,15 @@ public class RecipeLoaderTest {
 
   @Mock private RecipeDao recipeDao;
 
+  @Mock private JpaRecipePermissionsDao permissionsDao;
+
   @Mock private DBInitializer dbInitializer;
 
   @BeforeMethod
   public void startup() throws Exception {
     when(dbInitializer.isBareInit()).thenReturn(true);
-    recipeLoader = new RecipeLoader(ImmutableSet.of("recipes.json"), recipeDao, dbInitializer);
+    recipeLoader =
+        new RecipeLoader(ImmutableSet.of("recipes.json"), recipeDao, permissionsDao, dbInitializer);
   }
 
   @Test
@@ -59,7 +63,8 @@ public class RecipeLoaderTest {
   @Test
   public void shouldNotThrowExceptionWhenLoadPredefinedRecipesFromInvalidJson() throws Exception {
     recipeLoader =
-        new RecipeLoader(ImmutableSet.of("invalid-recipes.json"), recipeDao, dbInitializer);
+        new RecipeLoader(
+            ImmutableSet.of("invalid-recipes.json"), recipeDao, permissionsDao, dbInitializer);
 
     recipeLoader.start();
   }
@@ -77,7 +82,9 @@ public class RecipeLoaderTest {
 
   @Test
   public void doNotThrowExceptionWhenFileWithRecipesBySpecifiedPathIsNotExist() throws Exception {
-    recipeLoader = new RecipeLoader(ImmutableSet.of("non-existing-file"), recipeDao, dbInitializer);
+    recipeLoader =
+        new RecipeLoader(
+            ImmutableSet.of("non-existing-file"), recipeDao, permissionsDao, dbInitializer);
 
     recipeLoader.start();
 
