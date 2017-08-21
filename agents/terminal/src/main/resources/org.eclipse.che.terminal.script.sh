@@ -1,16 +1,28 @@
 #
-# Copyright (c) 2012-2017 Codenvy, S.A.
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-#   Codenvy, S.A. - initial API and implementation
+#   Red Hat, Inc. - initial API and implementation
 #
 
+is_current_user_root() {
+    test "$(id -u)" = 0
+}
+
+is_current_user_sudoer() {
+    sudo -n true > /dev/null 2>&1
+}
+
+set_sudo_command() {
+    if is_current_user_sudoer && ! is_current_user_root; then SUDO="sudo -E"; else unset SUDO; fi
+}
+
+set_sudo_command
 unset PACKAGES
-unset SUDO
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 CURL_INSTALLED=false
 WGET_INSTALLED=false
@@ -22,8 +34,6 @@ if [ ${CURL_INSTALLED} = false ] && [ ${WGET_INSTALLED} = false ]; then
   PACKAGES=${PACKAGES}" curl";
   CURL_INSTALLED=true
 fi
-
-test "$(id -u)" = 0 || SUDO="sudo -E"
 
 CHE_DIR=$HOME/che
 LOCAL_AGENT_BINARIES_URI='/mnt/che/terminal/websocket-terminal-${PREFIX}.tar.gz'

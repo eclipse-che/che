@@ -1,63 +1,60 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.editor.orion.client.signature;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public interface SignatureHelpResources extends ClientBundle {
 
-    @Source("SignatureHelp.css")
-    SignatureHelpCss css();
+  @Source("SignatureHelp.css")
+  SignatureHelpCss css();
 
-    @Source("arrow.svg")
-    SVGResource arrow();
+  @Source("arrow.svg")
+  SVGResource arrow();
 
-    interface SignatureHelpCss extends CssResource {
+  interface SignatureHelpCss extends CssResource {
 
-        String next();
+    String next();
 
-        String visible();
+    String visible();
 
-        String buttons();
+    String buttons();
 
-        String overloads();
+    String overloads();
 
-        String previous();
+    String previous();
 
-        String documentation();
+    String documentation();
 
-        String multiple();
+    String multiple();
 
-        String active();
+    String active();
 
-        String main();
+    String main();
 
-        String wrapper();
+    String wrapper();
 
-        @ClassName("documentation-parameter")
-        String documentationParameter();
+    @ClassName("documentation-parameter")
+    String documentationParameter();
 
-        String signatures();
+    String signatures();
 
-        String button();
+    String button();
 
-        @ClassName("parameter-hints-widget")
-        String parameterHintsWidget();
+    @ClassName("parameter-hints-widget")
+    String parameterHintsWidget();
 
-        String parameter();
-    }
+    String parameter();
+  }
 }

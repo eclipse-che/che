@@ -1,23 +1,24 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
 import {CheProjectTemplate} from '../../../../../components/api/che-project-template.factory';
+import {editingProgress, IEditingProgress} from '../project-source-selector-editing-progress';
 
 /**
  * Service for template selector.
  *
  * @author Oleksii Kurinnyi
  */
-export class TemplateSelectorSvc {
+export class TemplateSelectorSvc implements IEditingProgress {
   /**
    * Filter service.
    */
@@ -45,6 +46,23 @@ export class TemplateSelectorSvc {
     this.cheProjectTemplate = cheProjectTemplate;
 
     this.templates = [];
+  }
+
+  /**
+   * Returns projects' adding progress.
+   *
+   * @return {editingProgress}
+   */
+  checkEditingProgress(): editingProgress {
+    if (this.templates.length === 0) {
+      return null;
+    }
+
+    const number = this.templates.length;
+    return {
+      message: `There ${number === 1 ? 'is' : 'are'} ${number} ${number === 1 ? 'sample' : 'samples'} selected but not added.`,
+      number: number
+    };
   }
 
   /**

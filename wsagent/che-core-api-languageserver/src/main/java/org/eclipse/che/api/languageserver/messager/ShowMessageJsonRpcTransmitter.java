@@ -1,15 +1,19 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.languageserver.messager;
 
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
@@ -29,6 +33,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 @Singleton
 public class ShowMessageJsonRpcTransmitter {
+  private final Set<String> endpointIds = new CopyOnWriteArraySet<>();
     private final Set<String> endpointIds                   = new CopyOnWriteArraySet<>();
     private final Set<String> showMessageRequestEndpointIds = new CopyOnWriteArraySet<>();
 
@@ -50,14 +55,15 @@ public class ShowMessageJsonRpcTransmitter {
                                MessageParams.class);
     }
 
-    @Inject
-    private void configureSubscribeHandler(RequestHandlerConfigurator requestHandler) {
-        requestHandler.newConfiguration()
-                      .methodName("window/showMessage/subscribe")
-                      .noParams()
-                      .noResult()
-                      .withConsumer(endpointIds::add);
-    }
+  @Inject
+  private void configureSubscribeHandler(RequestHandlerConfigurator requestHandler) {
+    requestHandler
+        .newConfiguration()
+        .methodName("window/showMessage/subscribe")
+        .noParams()
+        .noResult()
+        .withConsumer(endpointIds::add);
+  }
 
     @Inject
     private void configureUnSubscribeHandler(RequestHandlerConfigurator requestHandler) {
@@ -91,9 +97,6 @@ public class ShowMessageJsonRpcTransmitter {
         if (showMessageRequestEndpointIds.isEmpty()) {
             result.complete(null);
         }
-//        if (showMessageRequestEndpointIds.size() > 1) {
-//            result.completeExceptionally(new Exception("Can't send show message request, too meany clients"));
-//        } else {
         for (String endpointId : endpointIds) {
             requestTransmitter.newRequest()
                               .endpointId(endpointId)
@@ -107,8 +110,6 @@ public class ShowMessageJsonRpcTransmitter {
                               })
                               .onFailure(jsonRpcError -> result.completeExceptionally(new Exception(jsonRpcError.getMessage())));
         }
-
-//        }
 
         return result;
     }

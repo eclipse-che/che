@@ -1,21 +1,21 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
-import IdeSvc from '../../ide/ide.service';
 import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
 import {StackSelectorSvc} from './stack-selector/stack-selector.service';
 import {ProjectSourceSelectorService} from './project-source-selector/project-source-selector.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * This class is handling the service for workspace creation.
@@ -40,10 +40,6 @@ export class CreateWorkspaceSvc {
    */
   private cheWorkspace: CheWorkspace;
   /**
-   * IDE service.
-   */
-  private ideSvc: IdeSvc;
-  /**
    * Namespace selector service.
    */
   private namespaceSelectorSvc: NamespaceSelectorSvc;
@@ -65,21 +61,25 @@ export class CreateWorkspaceSvc {
    * Notification factory.
    */
   private cheNotification: CheNotification;
+  /**
+   * Confirmation dialog service.
+   */
+  private confirmDialogService: ConfirmDialogService;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService, cheNotification: CheNotification) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService) {
     this.$location = $location;
     this.$log = $log;
     this.$q = $q;
     this.cheWorkspace = cheWorkspace;
-    this.ideSvc = ideSvc;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.stackSelectorSvc = stackSelectorSvc;
     this.projectSourceSelectorService = projectSourceSelectorService;
     this.cheNotification = cheNotification;
+    this.confirmDialogService = confirmDialogService;
 
     this.workspacesByNamespace = {};
   }
@@ -157,37 +157,52 @@ export class CreateWorkspaceSvc {
   createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes?: any): ng.IPromise<any> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
+    workspaceConfig.projects = projectTemplates;
+    return this.checkEditingProgress().then(() => {
+      workspaceConfig.projects = projectTemplates;
+      return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
 
-    return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
+        return this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv).then(() => {
+          this.redirectToIde(namespaceId, workspace);
+          this.projectSourceSelectorService.clearAllSources();
 
-      return this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv).then(() => {
-        this.redirectToIde(namespaceId, workspace);
-        this.projectSourceSelectorService.clearAllSources();
+          this.cheWorkspace.getWorkspacesById().set(workspace.id, workspace);
+          this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
+          return this.cheWorkspace.fetchStatusChange(workspace.id, 'RUNNING');
+        }).then(() => {
+          return this.cheWorkspace.fetchWorkspaceDetails(workspace.id);
+        }).then(() => {
+          return this.addProjectCommands(workspace.id, projectTemplates);
+        }).then(() => {
+          let IDE = this.getIDE();
+          IDE.CommandManager.refresh();
+        });
+      }, (error: any) => {
+        let errorMessage = 'Creation workspace failed.';
+        if (error && error.data && error.data.message) {
+          errorMessage = error.data.message;
+        }
+        this.cheNotification.showError(errorMessage);
 
-        this.cheWorkspace.getWorkspacesById().set(workspace.id, workspace);
-        this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
-        return this.cheWorkspace.fetchStatusChange(workspace.id, 'RUNNING');
-      }).then(() => {
-        return this.cheWorkspace.fetchWorkspaceDetails(workspace.id);
-      }).then(() => {
-        return this.createProjects(workspace.id, projectTemplates);
-      }).then(() => {
-        this.getIDE().ProjectExplorer.refresh();
-        return this.importProjects(workspace.id, projectTemplates);
-      }).then(() => {
-        let IDE = this.getIDE();
-        IDE.ProjectExplorer.refresh();
-        IDE.CommandManager.refresh();
+        return this.$q.reject(error);
       });
-    }, (error: any) => {
-      let errorMessage = 'Creation workspace failed.';
-      if (error && error.data && error.data.message) {
-        errorMessage = error.data.message;
-      }
-      this.cheNotification.showError(errorMessage);
-
-      return this.$q.reject(error);
     });
+  }
+
+  /**
+   * Show confirmation dialog when project editing is not completed.
+   *
+   * @return {angular.IPromise<any>}
+   */
+  checkEditingProgress(): ng.IPromise<any> {
+    const editingProgress = this.projectSourceSelectorService.getEditingProgress();
+    if (editingProgress === null) {
+      return this.$q.when();
+    }
+
+    const title = 'Warning',
+          content = `You have project editing, that is not completed. Would you like to proceed to workspace creation without these changes?`;
+    return this.confirmDialogService.showConfirmDialog(title, content, 'Continue');
   }
 
   /**
@@ -199,6 +214,7 @@ export class CreateWorkspaceSvc {
   redirectToIde(namespaceId: string, workspace: che.IWorkspace): void {
     const path = `/ide/${namespaceId}/${workspace.config.name}`;
     this.$location.path(path);
+    this.$location.search({'init': 'true'});
   }
 
   /**
@@ -218,19 +234,17 @@ export class CreateWorkspaceSvc {
   }
 
   /**
-   * Imports bunch of projects in row.
-   * Returns resolved promise if all project are imported properly, otherwise returns rejected promise with list of names of failed projects.
+   * Adds commands from the bunch of projects in row.
+   * Returns resolved promise if all commands are aded properly, otherwise returns rejected promise with list of names of failed projects.
    *
    * @param {string} workspaceId the workspace ID
-   * @param {Array<che.IProjectTemplate>} projectTemplates the list of project templates to import
+   * @param {Array<che.IProjectTemplate>} projectTemplates the list of project templates
    * @return {IPromise<any>}
    */
-  importProjects(workspaceId: string, projectTemplates: Array<che.IProjectTemplate>): ng.IPromise<any> {
+  addProjectCommands(workspaceId: string, projectTemplates: Array<che.IProjectTemplate>): ng.IPromise<any> {
     const defer = this.$q.defer();
     defer.resolve();
     let accumulatorPromise = defer.promise;
-
-    const projectTypeResolverService = this.cheWorkspace.getWorkspaceAgent(workspaceId).getProjectTypeResolver();
 
     const failedProjects = [];
 
@@ -239,8 +253,6 @@ export class CreateWorkspaceSvc {
         return this.addCommands(workspaceId, project.name, project.commands).catch(() => {
           // adding commands errors, ignore them here
           return this.$q.when();
-        }).then(() => {
-          return projectTypeResolverService.resolveProjectType(project as any);
         }).catch((error: any) => {
           failedProjects.push(project.name);
           if (error && error.message) {

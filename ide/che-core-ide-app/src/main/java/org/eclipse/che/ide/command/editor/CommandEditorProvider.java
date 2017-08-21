@@ -1,18 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.command.editor;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorProvider;
 
@@ -23,27 +22,28 @@ import org.eclipse.che.ide.api.editor.EditorProvider;
  */
 public class CommandEditorProvider implements EditorProvider {
 
-    private final Provider<CommandEditor> editorProvider;
-    private final EditorMessages          editorMessages;
+  private final Provider<CommandEditor> editorProvider;
+  private final EditorMessages editorMessages;
 
-    @Inject
-    public CommandEditorProvider(Provider<CommandEditor> editorProvider, EditorMessages editorMessages) {
-        this.editorProvider = editorProvider;
-        this.editorMessages = editorMessages;
-    }
+  @Inject
+  public CommandEditorProvider(
+      Provider<CommandEditor> editorProvider, EditorMessages editorMessages) {
+    this.editorProvider = editorProvider;
+    this.editorMessages = editorMessages;
+  }
 
-    @Override
-    public String getId() {
-        return "che_command_editor";
-    }
+  @Override
+  public String getId() {
+    return "che_command_editor";
+  }
 
-    @Override
-    public String getDescription() {
-        return editorMessages.editorDescription();
-    }
+  @Override
+  public String getDescription() {
+    return editorMessages.editorDescription();
+  }
 
-    @Override
-    public EditorPartPresenter getEditor() {
-        return editorProvider.get();
-    }
+  @Override
+  public EditorPartPresenter getEditor() {
+    return editorProvider.get();
+  }
 }

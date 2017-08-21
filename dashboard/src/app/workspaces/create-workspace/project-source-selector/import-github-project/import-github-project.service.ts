@@ -1,16 +1,17 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {CheAPI} from '../../../../../components/api/che-api.factory';
 import {IGithubRepository} from './github-repository-interface';
+import {editingProgress, IEditingProgress} from '../project-source-selector-editing-progress';
 
 export enum LoadingState {
   NO_REPO, IDLE, LOADING, LOADED, LOAD_ERROR
@@ -22,7 +23,7 @@ export enum LoadingState {
  * @author Florent Benoit
  * @author Oleksii Kurinnyi
  */
-export class ImportGithubProjectService {
+export class ImportGithubProjectService implements IEditingProgress {
   /**
    * API entry point.
    */
@@ -99,6 +100,23 @@ export class ImportGithubProjectService {
 
     this.state = LoadingState.IDLE;
     this.isGitHubOAuthProviderAvailable = false;
+  }
+
+  /**
+   * Returns projects' adding progress.
+   *
+   * @return {editingProgress}
+   */
+  checkEditingProgress(): editingProgress {
+    if (this.selectedRepositories.length === 0) {
+      return null;
+    }
+
+    const number = this.selectedRepositories.length;
+    return {
+      message: `There ${number === 1 ? 'is' : 'are'} GitHub ${number} ${number === 1 ? 'project' : 'projects'} selected but not added.`,
+      number: number
+    };
   }
 
   /**
