@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
@@ -55,6 +56,7 @@ public class RecipeRetriever {
    * @throws IllegalArgumentException when both recipe content and location are null or empty
    */
   public String getRecipe(Recipe recipe) throws InfrastructureException {
+    Objects.requireNonNull(recipe, "Recipe should not be null");
     if (recipe.getContent() != null && !recipe.getContent().isEmpty()) {
       // no downloading is needed
       return recipe.getContent();
