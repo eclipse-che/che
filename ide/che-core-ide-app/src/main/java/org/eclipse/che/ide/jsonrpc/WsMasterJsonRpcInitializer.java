@@ -31,6 +31,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.jsonrpc.SubscriptionManagerClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 
@@ -57,6 +58,12 @@ public class WsMasterJsonRpcInitializer {
 
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> initialize());
     eventBus.addHandler(WorkspaceStartingEvent.TYPE, e -> initialize());
+    eventBus.addHandler(
+        WorkspaceStoppedEvent.TYPE,
+        e -> {
+          unsubscribeFromEvents();
+          terminate();
+        });
   }
 
   private void initialize() {
@@ -94,6 +101,10 @@ public class WsMasterJsonRpcInitializer {
         .onSuccess(appContext::setApplicationWebsocketId);
   }
 
+  private void terminate() {
+    initializer.terminate(WS_MASTER_JSON_RPC_ENDPOINT_ID);
+  }
+
   private void subscribeToEvents() {
     Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
 
@@ -108,7 +119,18 @@ public class WsMasterJsonRpcInitializer {
         WS_MASTER_JSON_RPC_ENDPOINT_ID, INSTALLER_LOG_METHOD, scope);
   }
 
-  public void terminate() {
-    initializer.terminate(WS_MASTER_JSON_RPC_ENDPOINT_ID);
+  private void unsubscribeFromEvents() {
+    Map<String, String> scope = singletonMap("workspaceId", appContext.getWorkspaceId());
+
+    subscriptionManagerClient.unSubscribe(
+        WS_MASTER_JSON_RPC_ENDPOINT_ID, WORKSPACE_STATUS_CHANGED_METHOD, scope);
+    subscriptionManagerClient.unSubscribe(
+        WS_MASTER_JSON_RPC_ENDPOINT_ID, MACHINE_STATUS_CHANGED_METHOD, scope);
+    subscriptionManagerClient.unSubscribe(
+        WS_MASTER_JSON_RPC_ENDPOINT_ID, SERVER_STATUS_CHANGED_METHOD, scope);
+    subscriptionManagerClient.unSubscribe(
+        WS_MASTER_JSON_RPC_ENDPOINT_ID, MACHINE_LOG_METHOD, scope);
+    subscriptionManagerClient.unSubscribe(
+        WS_MASTER_JSON_RPC_ENDPOINT_ID, INSTALLER_LOG_METHOD, scope);
   }
 }
