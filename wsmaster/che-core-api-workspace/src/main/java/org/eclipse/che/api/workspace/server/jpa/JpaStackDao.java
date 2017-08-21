@@ -15,6 +15,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.inject.persist.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -128,7 +129,10 @@ public class JpaStackDao implements StackDao {
       return query.setParameter("userId", userId)
           .setMaxResults(maxItems)
           .setFirstResult(skipCount)
-          .getResultList();
+          .getResultList()
+          .stream()
+          .map(StackImpl::new)
+          .collect(Collectors.toList());
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);
     }

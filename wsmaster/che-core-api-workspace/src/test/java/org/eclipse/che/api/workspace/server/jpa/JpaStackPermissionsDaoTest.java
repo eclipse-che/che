@@ -17,9 +17,12 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
+import java.util.List;
 import javax.persistence.EntityManager;
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.permission.server.AbstractPermissionsDomain;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -70,7 +73,7 @@ public class JpaStackPermissionsDaoTest {
           new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null)
         };
 
-    Injector injector = Guice.createInjector(new TestModule(), new WorkspaceJpaModule());
+    Injector injector = Guice.createInjector(new TestModule());
     manager = injector.getInstance(EntityManager.class);
     dao = injector.getInstance(JpaStackPermissionsDao.class);
     removePermissionsSubscriber =
@@ -174,6 +177,20 @@ public class JpaStackPermissionsDaoTest {
       bind(SchemaInitializer.class)
           .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
       bind(DBInitializer.class).asEagerSingleton();
+      bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {})
+          .to(TestDomain.class);
+    }
+  }
+
+  public static class TestDomain extends AbstractPermissionsDomain<StackPermissionsImpl> {
+    public TestDomain() {
+      super("stack", asList("read", "write", "use", "delete"));
+    }
+
+    @Override
+    protected StackPermissionsImpl doCreateInstance(
+        String userId, String instanceId, List<String> allowedActions) {
+      return new StackPermissionsImpl(userId, instanceId, allowedActions);
     }
   }
 }

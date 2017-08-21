@@ -16,6 +16,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,6 +27,7 @@ import org.eclipse.che.api.permission.server.AbstractPermissionsDomain;
 import org.eclipse.che.api.permission.server.spi.PermissionsDao;
 import org.eclipse.che.api.permission.shared.model.Permissions;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.stack.StackPermissionsImpl;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -67,10 +69,15 @@ public class StackPermissionsDaoTest {
         };
     userRepository.createAll(asList(users));
 
+    // Workspace configuration
+    final WorkspaceConfigImpl wCfg = new WorkspaceConfigImpl();
+    wCfg.setDefaultEnv("env1");
+    wCfg.setName("ws1");
+    wCfg.setDescription("description");
     stackRepository.createAll(
         asList(
-            new StackImpl("stack1", "st1", null, null, null, null, null, null, null, null),
-            new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null)));
+            new StackImpl("stack1", "st1", null, null, null, null, wCfg, null, null, null),
+            new StackImpl("stack2", "st2", null, null, null, null, wCfg, null, null, null)));
 
     permissionsRepository.createAll(
         Stream.of(permissions).map(StackPermissionsImpl::new).collect(Collectors.toList()));

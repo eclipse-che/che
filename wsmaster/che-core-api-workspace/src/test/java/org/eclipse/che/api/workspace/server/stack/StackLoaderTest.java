@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -91,16 +90,6 @@ public class StackLoaderTest {
   @Test
   public void predefinedStackWithValidJsonShouldBeCreated() throws Exception {
     doThrow(new NotFoundException("Stack is already exist")).when(stackDao).update(any());
-
-    stackLoader.start();
-
-    verify(stackDao, times(5)).update(any());
-    verify(stackDao, times(5)).create(any());
-  }
-
-  @Test
-  public void predefinedStackWithValidJsonShouldBeCreated2() throws Exception {
-    doThrow(new ServerException("Internal server error")).when(stackDao).update(any());
 
     stackLoader.start();
 

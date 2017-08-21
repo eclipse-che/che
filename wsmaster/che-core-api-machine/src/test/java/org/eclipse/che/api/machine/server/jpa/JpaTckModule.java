@@ -22,6 +22,7 @@ import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.spi.tck.RecipePermissionsDaoTest;
 import org.eclipse.che.api.permission.server.AbstractPermissionsDomain;
+import org.eclipse.che.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.api.permission.server.spi.PermissionsDao;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
@@ -53,6 +54,7 @@ public class JpaTckModule extends TckModule {
                 RecipeImpl.class,
                 SnapshotImpl.class,
                 AccountImpl.class,
+                AbstractPermissions.class,
                 RecipePermissionsImpl.class,
                 TestWorkspaceEntity.class)
             .setExceptionHandler(H2ExceptionHandler.class)

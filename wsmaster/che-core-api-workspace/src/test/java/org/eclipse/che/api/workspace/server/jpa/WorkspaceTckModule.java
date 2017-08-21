@@ -71,6 +71,7 @@ public class WorkspaceTckModule extends TckModule {
                 EnvironmentImpl.class,
                 EnvironmentRecipeImpl.class,
                 RecipePermissionsImpl.class,
+                StackPermissionsImpl.class,
                 WorkerImpl.class,
                 ExtendedMachineImpl.class,
                 SourceStorageImpl.class,
