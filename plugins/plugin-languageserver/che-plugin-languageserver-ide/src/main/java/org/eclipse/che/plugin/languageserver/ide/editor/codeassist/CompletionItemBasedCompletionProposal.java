@@ -20,10 +20,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.List;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.codeassist.Completion;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -79,20 +76,14 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     if (completionItem.getItem().getDocumentation() == null && canResolve()) {
       resolve()
           .then(
-              new Operation<ExtendedCompletionItem>() {
-                @Override
-                public void apply(ExtendedCompletionItem item) throws OperationException {
-                  completionItem = item;
-                  resolved = true;
-                  callback.onSuccess(createAdditionalInfoWidget());
-                }
+              item -> {
+                completionItem = item;
+                resolved = true;
+                callback.onSuccess(createAdditionalInfoWidget());
               })
           .catchError(
-              new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError e) throws OperationException {
-                  callback.onFailure(e.getCause());
-                }
+              e -> {
+                callback.onFailure(e.getCause());
               });
     } else {
       callback.onSuccess(createAdditionalInfoWidget());
@@ -196,6 +187,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     private CompletionItem completionItem;
     private String currentWord;
+    private String insertedText;
     private int offset;
 
     public CompletionImpl(CompletionItem completionItem, String currentWord, int offset) {
@@ -223,18 +215,10 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
         if (completionItem.getInsertText() == null) {
           document.replace(
               cursorOffset - currentWordLength, currentWordLength, completionItem.getLabel());
+          insertedText = completionItem.getLabel();
         } else {
           document.replace(cursorOffset - offset, offset, completionItem.getInsertText());
-        }
-        if (currentWordLength == 0) {
-          TextPosition cursorPosition = document.getCursorPosition();
-          if (cursorPosition == null) {
-            return;
-          }
-          int line = cursorPosition.getLine();
-          int character = cursorPosition.getCharacter();
-          document.setCursorPosition(
-              new TextPosition(line, character + completionItem.getLabel().length()));
+          insertedText = completionItem.getInsertText();
         }
       }
     }
@@ -243,7 +227,8 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     public LinearRange getSelection(Document document) {
       final TextEdit textEdit = completionItem.getTextEdit();
       if (textEdit == null) {
-        return LinearRange.createWithStart(document.getCursorOffset()).andLength(0);
+        return LinearRange.createWithStart(document.getCursorOffset() + insertedText.length())
+            .andLength(0);
       }
       Range range = textEdit.getRange();
       TextPosition textPosition =
