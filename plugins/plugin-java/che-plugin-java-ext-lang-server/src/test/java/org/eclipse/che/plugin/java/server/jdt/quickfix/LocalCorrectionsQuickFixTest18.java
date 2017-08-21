@@ -1,15 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c) 2014
+ * IBM Corporation and others. All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v1.0 which accompanies this
+ * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: IBM Corporation - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.plugin.java.server.jdt.quickfix;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
 import org.eclipse.che.plugin.java.server.jdt.testplugin.Java18ProjectTestSetup;
 import org.eclipse.che.plugin.java.server.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.che.plugin.java.server.jdt.testplugin.TestOptions;
@@ -29,126 +30,121 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-
 public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 
-	private static final Class THIS= LocalCorrectionsQuickFixTest18.class;
+  private static final Class THIS = LocalCorrectionsQuickFixTest18.class;
 
-	private IJavaProject fJProject1;
+  private IJavaProject fJProject1;
 
-	private IPackageFragmentRoot fSourceFolder;
+  private IPackageFragmentRoot fSourceFolder;
 
+  public LocalCorrectionsQuickFixTest18() {
+    super(new Java18ProjectTestSetup());
+  }
 
-	public LocalCorrectionsQuickFixTest18() {
-		super(new Java18ProjectTestSetup());
-	}
+  //	public static Test suite() {
+  //		return setUpTest(new TestSuite(THIS));
+  //	}
+  //
+  //	public static Test setUpTest(Test test) {
+  //		return new Java18ProjectTestSetup(test);
+  //	}
 
-//	public static Test suite() {
-//		return setUpTest(new TestSuite(THIS));
-//	}
-//
-//	public static Test setUpTest(Test test) {
-//		return new Java18ProjectTestSetup(test);
-//	}
+  @Override
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+    Hashtable options = TestOptions.getDefaultOptions();
+    options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+    options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
+    options.put(
+        DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE,
+        String.valueOf(99));
+    options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.ERROR);
+    options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.IGNORE);
+    options.put(JavaCore.COMPILER_PB_MISSING_HASHCODE_METHOD, JavaCore.WARNING);
+    options.put(JavaCore.COMPILER_PB_REDUNDANT_TYPE_ARGUMENTS, JavaCore.WARNING);
 
+    JavaCore.setOptions(options);
 
-	@Override
-    @Before
-	public void setUp() throws Exception {
-		super.setUp();
-		Hashtable options = TestOptions.getDefaultOptions();
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
-		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
-		options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.ERROR);
-		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.IGNORE);
-		options.put(JavaCore.COMPILER_PB_MISSING_HASHCODE_METHOD, JavaCore.WARNING);
-		options.put(JavaCore.COMPILER_PB_REDUNDANT_TYPE_ARGUMENTS, JavaCore.WARNING);
+    IPreferenceStore store = JavaPlugin.getDefault().getPreferenceStore();
+    store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
-		JavaCore.setOptions(options);
+    StubUtility.setCodeTemplate(CodeTemplateContextType.CATCHBLOCK_ID, "", null);
+    StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
+    StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 
-		IPreferenceStore store = JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
+    fJProject1 = Java18ProjectTestSetup.getProject();
 
-		StubUtility.setCodeTemplate(CodeTemplateContextType.CATCHBLOCK_ID, "", null);
-		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
-		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
+    fSourceFolder = JavaProjectHelper.addSourceContainer(fJProject1, "src");
+  }
 
-		fJProject1 = Java18ProjectTestSetup.getProject();
+  @Override
+  @After
+  public void tearDown() throws Exception {
+    super.tearDown();
+    JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
+  }
 
-		fSourceFolder = JavaProjectHelper.addSourceContainer(fJProject1, "src");
-	}
+  @Test
+  public void testUncaughtExceptionTypeUseAnnotation1() throws Exception {
+    IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
+    StringBuffer buf = new StringBuffer();
+    buf.append("package test1;\n");
+    buf.append("import java.io.FileNotFoundException;\n");
+    buf.append("import java.lang.annotation.ElementType;\n");
+    buf.append("import java.lang.annotation.Target;\n");
+    buf.append("\n");
+    buf.append("public class E {\n");
+    buf.append("    void test(int a) {\n");
+    buf.append("        throw new @Marker FileNotFoundException();\n");
+    buf.append("    }\n");
+    buf.append("}\n");
+    buf.append("\n");
+    buf.append("@Target(ElementType.TYPE_USE)\n");
+    buf.append("@interface Marker { }\n");
+    ICompilationUnit cu = pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
+    CompilationUnit astRoot = getASTRoot(cu);
+    ArrayList proposals = collectCorrections(cu, astRoot);
+    assertNumberOfProposals(proposals, 2);
+    assertCorrectLabels(proposals);
 
+    buf = new StringBuffer();
+    buf.append("package test1;\n");
+    buf.append("import java.io.FileNotFoundException;\n");
+    buf.append("import java.lang.annotation.ElementType;\n");
+    buf.append("import java.lang.annotation.Target;\n");
+    buf.append("\n");
+    buf.append("public class E {\n");
+    buf.append("    void test(int a) throws @Marker FileNotFoundException {\n");
+    buf.append("        throw new @Marker FileNotFoundException();\n");
+    buf.append("    }\n");
+    buf.append("}\n");
+    buf.append("\n");
+    buf.append("@Target(ElementType.TYPE_USE)\n");
+    buf.append("@interface Marker { }\n");
+    String expected1 = buf.toString();
 
-	@Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
-	}
+    buf = new StringBuffer();
+    buf.append("package test1;\n");
+    buf.append("import java.io.FileNotFoundException;\n");
+    buf.append("import java.lang.annotation.ElementType;\n");
+    buf.append("import java.lang.annotation.Target;\n");
+    buf.append("\n");
+    buf.append("public class E {\n");
+    buf.append("    void test(int a) {\n");
+    buf.append("        try {\n");
+    buf.append("            throw new @Marker FileNotFoundException();\n");
+    buf.append("        } catch (@Marker FileNotFoundException e) {\n");
+    buf.append("        }\n");
+    buf.append("    }\n");
+    buf.append("}\n");
+    buf.append("\n");
+    buf.append("@Target(ElementType.TYPE_USE)\n");
+    buf.append("@interface Marker { }\n");
+    String expected2 = buf.toString();
 
-    @Test
-	public void testUncaughtExceptionTypeUseAnnotation1() throws Exception {
-		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.lang.annotation.ElementType;\n");
-		buf.append("import java.lang.annotation.Target;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void test(int a) {\n");
-		buf.append("        throw new @Marker FileNotFoundException();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("@interface Marker { }\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
-		assertCorrectLabels(proposals);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.lang.annotation.ElementType;\n");
-		buf.append("import java.lang.annotation.Target;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void test(int a) throws @Marker FileNotFoundException {\n");
-		buf.append("        throw new @Marker FileNotFoundException();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("@interface Marker { }\n");
-		String expected1= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.lang.annotation.ElementType;\n");
-		buf.append("import java.lang.annotation.Target;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void test(int a) {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new @Marker FileNotFoundException();\n");
-		buf.append("        } catch (@Marker FileNotFoundException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("@interface Marker { }\n");
-		String expected2= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
-	}
+    assertExpectedExistInProposals(proposals, new String[] {expected1, expected2});
+  }
 }

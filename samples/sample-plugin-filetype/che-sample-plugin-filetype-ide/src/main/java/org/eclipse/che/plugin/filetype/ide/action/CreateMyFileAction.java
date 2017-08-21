@@ -1,19 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.filetype.ide.action;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -29,26 +28,29 @@ import org.eclipse.che.plugin.filetype.ide.MyResources;
  */
 public class CreateMyFileAction extends AbstractNewResourceAction {
 
-    @Inject
-    public CreateMyFileAction(MyResources myResources,
-                              DialogFactory dialogFactory,
-                              CoreLocalizationConstant localizationConstant,
-                              EventBus eventBus,
-                              AppContext appContext,
-                              NotificationManager notificationManager,
-                              Provider<EditorAgent> editorAgentProvider) {
-        super("Create my File",
-              "Create a new file ",
-              myResources.icon(),
-              dialogFactory,
-              localizationConstant,
-              eventBus, appContext,
-              notificationManager,
-              editorAgentProvider);
-    }
+  @Inject
+  public CreateMyFileAction(
+      MyResources myResources,
+      DialogFactory dialogFactory,
+      CoreLocalizationConstant localizationConstant,
+      EventBus eventBus,
+      AppContext appContext,
+      NotificationManager notificationManager,
+      Provider<EditorAgent> editorAgentProvider) {
+    super(
+        "Create my File",
+        "Create a new file ",
+        myResources.icon(),
+        dialogFactory,
+        localizationConstant,
+        eventBus,
+        appContext,
+        notificationManager,
+        editorAgentProvider);
+  }
 
-    @Override
-    protected String getExtension() {
-        return "my";
-    }
+  @Override
+  protected String getExtension() {
+    return "my";
+  }
 }

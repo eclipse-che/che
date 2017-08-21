@@ -1,44 +1,40 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.docker.client.params;
-
-import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
-/**
- * @author Mykola Morhun
- */
+import org.testng.annotations.Test;
+
+/** @author Mykola Morhun */
 public class InspectImageParamsTest {
 
-    private static final String IMAGE = "image";
+  private static final String IMAGE = "image";
 
-    private InspectImageParams inspectImageParams;
+  private InspectImageParams inspectImageParams;
 
-    @Test
-    public void shouldCreateParamsObjectWithRequiredParameters() {
-        inspectImageParams = InspectImageParams.create(IMAGE);
+  @Test
+  public void shouldCreateParamsObjectWithRequiredParameters() {
+    inspectImageParams = InspectImageParams.create(IMAGE);
 
-        assertEquals(inspectImageParams.getImage(), IMAGE);
-    }
+    assertEquals(inspectImageParams.getImage(), IMAGE);
+  }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNullPointerExceptionIfImageRequiredParameterIsNull() {
-        inspectImageParams = InspectImageParams.create(null);
-    }
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionIfImageRequiredParameterIsNull() {
+    inspectImageParams = InspectImageParams.create(null);
+  }
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNullPointerExceptionIfImageRequiredParameterResetWithNull() {
-        inspectImageParams = InspectImageParams.create(IMAGE)
-                                               .withImage(null);
-    }
-
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionIfImageRequiredParameterResetWithNull() {
+    inspectImageParams = InspectImageParams.create(IMAGE).withImage(null);
+  }
 }

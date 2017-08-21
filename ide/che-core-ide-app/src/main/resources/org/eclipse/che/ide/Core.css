@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/**
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 @external .gwt-SplitLayoutPanel-HDragger, .gwt-SplitLayoutPanel-VDragger, .hsplitter, .hsplitter, .gwt-DialogBox, .gwt-Button, .gwt-PushButton, gwt-PushButton-up, gwt-PushButton-up-hovering, gwt-PushButton-up-disabled, gwt-PushButton-down,.gwt-PushButton-down-hovering,.gwt-PushButton-down-disabled, gwt-ToggleButton, gwt-ToggleButton-up, gwt-ToggleButton-up-hovering, gwt-ToggleButton-up-disabled, gwt-ToggleButton-down, .gwt-ToggleButton-down-hovering, .gwt-ToggleButton-down-disabled, .gwt-TextBox, .inputError, .gwt-TextArea, .gwt-ListBox, .gwt-PopupPanel, .gwt-Label;
 
 @eval inputSelectionBackground org.eclipse.che.ide.api.theme.Style.theme.inputSelectionBackground();
@@ -798,7 +798,25 @@ a {
     background-color: scrollbarHoverBackgroundColor;
 }
 
-.codeassistant-highlight {
+.found-highlight {
     color: completionPopupItemHighlightTextColor;
 }
+
+.found-item {
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
+    margin-top: -10px;
+    font-size: 1em;
+    padding-left: 2px;
+    padding-left: 4px;
+}
+
+.search-match {
+    background: linear-gradient(to bottom, #c1be9e 6%, #B89C07 64%);
+    border-radius: 2px;
+    padding-right: 2px;
+    padding-left: 2px;
+}
+
 

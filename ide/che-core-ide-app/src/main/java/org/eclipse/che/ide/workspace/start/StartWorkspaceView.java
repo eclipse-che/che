@@ -1,17 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.workspace.start;
 
 import com.google.inject.ImplementedBy;
-
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
 
@@ -23,42 +22,39 @@ import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
 @ImplementedBy(StartWorkspaceViewImpl.class)
 interface StartWorkspaceView extends View<StartWorkspaceView.ActionDelegate> {
 
-    /**
-     * Changes enabling button.
-     *
-     * @param enable
-     *         <code>true</code> button is enable, <code>false</code> button is disable
-     */
-    void setEnableStartButton(boolean enable);
+  /**
+   * Changes enabling button.
+   *
+   * @param enable <code>true</code> button is enable, <code>false</code> button is disable
+   */
+  void setEnableStartButton(boolean enable);
 
-    /**
-     * Adds workspace widget to panel to display it.
-     *
-     * @param workspace
-     *         widget which will be added
-     */
-    void addWorkspace(WorkspaceWidget workspace);
+  /**
+   * Adds workspace widget to panel to display it.
+   *
+   * @param workspace widget which will be added
+   */
+  void addWorkspace(WorkspaceWidget workspace);
 
-    /**
-     * Sets workspace name to text box.
-     *
-     * @param wsName
-     *         name which will be set
-     */
-    void setWsName(String wsName);
+  /**
+   * Sets workspace name to text box.
+   *
+   * @param wsName name which will be set
+   */
+  void setWsName(String wsName);
 
-    /** Shows dialog window. */
-    void show();
+  /** Shows dialog window. */
+  void show();
 
-    /** Hides dialog window. */
-    void hide();
+  /** Hides dialog window. */
+  void hide();
 
-    /** Clears panel which contains workspace widgets. */
-    void clearWorkspacesPanel();
+  /** Clears panel which contains workspace widgets. */
+  void clearWorkspacesPanel();
 
-    interface ActionDelegate {
-        void onStartWorkspaceClicked();
+  interface ActionDelegate {
+    void onStartWorkspaceClicked();
 
-        void onCreateWorkspaceClicked();
-    }
+    void onCreateWorkspaceClicked();
+  }
 }

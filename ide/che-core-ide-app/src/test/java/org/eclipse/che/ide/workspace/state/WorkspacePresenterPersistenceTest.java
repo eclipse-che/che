@@ -1,20 +1,29 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.workspace.state;
+
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.inject.Provider;
 import elemental.json.Json;
 import elemental.json.JsonObject;
-
-import org.eclipse.che.ide.api.parts.PartPresenter;
+import elemental.util.ArrayOf;
+import java.util.HashMap;
+import java.util.Map;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.menu.MainMenuPresenter;
@@ -28,83 +37,73 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
+ * Unit tests for the {@link WorkspacePresenter}.
+ *
  * @author Evgen Vidolob
+ * @author Vlad Zhukovskyi
  */
 @RunWith(MockitoJUnitRunner.class)
 public class WorkspacePresenterPersistenceTest {
 
+  @Mock private WorkspaceView workspaceView;
+  @Mock private Perspective perspective1;
+  @Mock private Perspective perspective2;
+  @Mock private MainMenuPresenter mainMenuPresenter;
+  @Mock private StatusPanelGroupPresenter statusPanelGroupPresenter;
+  @Mock private ToolbarPresenter toolbarPresenter;
+  @Mock private PromiseProvider promiseProvider;
 
-    @Mock
-    private WorkspaceView             workspaceView;
-    @Mock
-    private Perspective               perspective1;
-    @Mock
-    private Perspective               perspective2;
-    @Mock
-    private MainMenuPresenter         mainMenuPresenter;
-    @Mock
-    private StatusPanelGroupPresenter statusPanelGroupPresenter;
-    @Mock
-    private ToolbarPresenter          toolbarPresenter;
-    @Mock
-    private PartPresenter             part1;
+  private WorkspacePresenter presenter;
 
-    private WorkspacePresenter presenter;
+  @Mock private Provider<PerspectiveManager> perspectiveManagerProvider;
 
-    @Mock
-    private Provider<PerspectiveManager>    perspectiveManagerProvider;
+  private PerspectiveManager perspectiveManager;
 
-    private PerspectiveManager perspectiveManager;
+  @Before
+  public void setUp() throws Exception {
+    Map<String, Perspective> map = new HashMap<>();
+    map.put("perspective1", perspective1);
+    map.put("perspective2", perspective2);
+    perspectiveManager = new PerspectiveManager(map, "perspective1");
 
-    @Before
-    public void setUp() throws Exception {
-        Map<String, Perspective> map = new HashMap<>();
-        map.put("perspective1", perspective1);
-        map.put("perspective2", perspective2);
-        perspectiveManager = new PerspectiveManager(map, "perspective1");
+    when(perspectiveManagerProvider.get()).thenReturn(perspectiveManager);
 
-        when(perspectiveManagerProvider.get()).thenReturn(perspectiveManager);
+    presenter =
+        new WorkspacePresenter(
+            workspaceView,
+            perspectiveManagerProvider,
+            mainMenuPresenter,
+            statusPanelGroupPresenter,
+            toolbarPresenter,
+            "perspective1",
+            promiseProvider);
+  }
 
-        presenter = new WorkspacePresenter(workspaceView,
-                                           perspectiveManagerProvider,
-                                           mainMenuPresenter,
-                                           statusPanelGroupPresenter,
-                                           toolbarPresenter,
-                                           "perspective1");
+  @Test
+  public void shouldStorePerspectives() throws Exception {
+    when(perspective1.getState()).thenReturn(Json.createObject());
+    when(perspective2.getState()).thenReturn(Json.createObject());
 
-    }
+    JsonObject state = presenter.getState();
+    JsonObject perspectives = state.getObject("perspectives");
+    assertThat(perspectives).isNotNull();
+    assertThat(perspectives.getObject("perspective1")).isNotNull();
+  }
 
-    @Test
-    public void shouldStorePerspectives() throws Exception {
-        when(perspective1.getState()).thenReturn(Json.createObject());
-        when(perspective2.getState()).thenReturn(Json.createObject());
+  @Test
+  public void shouldRestoreStorePerspectives() throws Exception {
+    JsonObject state = Json.createObject();
+    state.put("currentPerspectiveId", "perspective2");
+    JsonObject perspectives = Json.createObject();
+    state.put("perspectives", perspectives);
+    JsonObject perspective1State = Json.createObject();
+    perspectives.put("perspective1", perspective1State);
 
-        JsonObject state = presenter.getState();
-        JsonObject perspectives = state.getObject("perspectives");
-        assertThat(perspectives).isNotNull();
-        assertThat(perspectives.getObject("perspective1")).isNotNull();
-    }
+    when(promiseProvider.all2(any(ArrayOf.class))).thenReturn(mock(Promise.class));
 
-    @Test
-    public void shouldRestoreStorePerspectives() throws Exception {
-        JsonObject state = Json.createObject();
-        state.put("currentPerspectiveId", "perspective2");
-        JsonObject perspectives = Json.createObject();
-        state.put("perspectives", perspectives);
-        JsonObject perspective1State = Json.createObject();
-        perspectives.put("perspective1", perspective1State);
+    presenter.loadState(state);
 
-        presenter.loadState(state);
-
-        verify(perspective1).loadState(perspective1State);
-    }
-
+    verify(perspective1).loadState(perspective1State);
+  }
 }
