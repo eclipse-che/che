@@ -106,8 +106,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
   /** {@inheritDoc} */
   @Override
   public Promise<SourceEstimation> estimate(Path path, String pType) {
-    final String url =
-            getBaseUrl() + ESTIMATE + path.getEncodedPath() + "?type=" + pType;
+    final String url = getBaseUrl() + ESTIMATE + path.getEncodedPath() + "?type=" + pType;
 
     return reqFactory
         .createGetRequest(url)
@@ -260,7 +259,8 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
   /** {@inheritDoc} */
   @Override
   public Promise<Void> copy(Path source, Path target, String newName, boolean overwrite) {
-    final String url = getBaseUrl() + COPY + source.getEncodedPath() + "?to=" + target.getEncodedPath();
+    final String url =
+        getBaseUrl() + COPY + source.getEncodedPath() + "?to=" + target.getEncodedPath();
 
     final CopyOptions copyOptions = dtoFactory.createDto(CopyOptions.class);
     copyOptions.setName(newName);
@@ -275,7 +275,8 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
   /** {@inheritDoc} */
   @Override
   public Promise<Void> move(Path source, Path target, String newName, boolean overwrite) {
-    final String url = getBaseUrl() + MOVE + source.getEncodedPath() + "?to=" + target.getEncodedPath();
+    final String url =
+        getBaseUrl() + MOVE + source.getEncodedPath() + "?to=" + target.getEncodedPath();
 
     final MoveOptions moveOptions = dtoFactory.createDto(MoveOptions.class);
     moveOptions.setName(newName);

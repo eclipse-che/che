@@ -112,7 +112,8 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Void> init(Path project, boolean bare) {
-    String url = getWsAgentBaseUrl() + INIT + "?projectPath=" + project.getEncodedPath() + "&bare=" + bare;
+    String url =
+        getWsAgentBaseUrl() + INIT + "?projectPath=" + project.getEncodedPath() + "&bare=" + bare;
     return asyncRequestFactory.createPostRequest(url, null).loader(loader).send();
   }
 
@@ -277,7 +278,8 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Void> branchRename(Path project, String oldName, String newName) {
-    String params = "?projectPath=" + project.getEncodedPath() + "&oldName=" + oldName + "&newName=" + newName;
+    String params =
+        "?projectPath=" + project.getEncodedPath() + "&oldName=" + oldName + "&newName=" + newName;
     String url = getWsAgentBaseUrl() + BRANCH + params;
     return asyncRequestFactory
         .createPostRequest(url, null)
@@ -372,7 +374,8 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Void> remoteDelete(Path project, String name) {
-    String url = getWsAgentBaseUrl() + REMOTE + '/' + name + "?projectPath=" + project.getEncodedPath();
+    String url =
+        getWsAgentBaseUrl() + REMOTE + '/' + name + "?projectPath=" + project.getEncodedPath();
     return asyncRequestFactory.createDeleteRequest(url).loader(loader).send();
   }
 
@@ -469,7 +472,13 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<ShowFileContentResponse> showFileContent(Path project, Path file, String version) {
-    String params = "?projectPath=" + project.getEncodedPath() + "&file=" + file.getEncodedPath() + "&version=" + version;
+    String params =
+        "?projectPath="
+            + project.getEncodedPath()
+            + "&file="
+            + file.getEncodedPath()
+            + "&version="
+            + version;
     String url = getWsAgentBaseUrl() + SHOW + params;
     return asyncRequestFactory
         .createGetRequest(url)

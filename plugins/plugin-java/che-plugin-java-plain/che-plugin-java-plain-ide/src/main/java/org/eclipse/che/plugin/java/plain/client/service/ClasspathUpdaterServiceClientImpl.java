@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.java.plain.client.service;
 
+import static org.eclipse.che.ide.resource.Path.valueOf;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -19,8 +21,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
-
-import static org.eclipse.che.ide.resource.Path.valueOf;
 
 /**
  * The implementation of {@link ClasspathUpdaterServiceClient}.

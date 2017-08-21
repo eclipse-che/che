@@ -49,7 +49,8 @@ public class JavaClasspathServiceClientImpl implements JavaClasspathServiceClien
   @Override
   public void updateDependencies(
       String projectPath, RequestCallback<ClassPathBuilderResult> callback) {
-    final String requestUrl = baseHttpUrl + "/classpath/update?projectpath=" + valueOf(projectPath).getEncodedPath();
+    final String requestUrl =
+        baseHttpUrl + "/classpath/update?projectpath=" + valueOf(projectPath).getEncodedPath();
 
     MessageBuilder builder = new MessageBuilder(GET, requestUrl);
     builder.header(ACCEPT, APPLICATION_JSON);

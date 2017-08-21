@@ -350,7 +350,6 @@ public class PathTest {
 
     assertTrue(path.toString().equals("Test/src/main/java"));
     assertTrue(pathWithSeparator.toString().equals("/Test/src/main/java"));
-
   }
 
   @Test

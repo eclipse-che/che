@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.maven.client.service;
 
+import static org.eclipse.che.ide.resource.Path.valueOf;
+
 import com.google.gwt.http.client.Response;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -22,8 +24,6 @@ import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-
-import static org.eclipse.che.ide.resource.Path.valueOf;
 
 /**
  * Implementation for {@link MavenServerServiceClient}.

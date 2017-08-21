@@ -44,8 +44,7 @@ public class WorkspaceServiceClient {
   }
 
   /**
-   * GWT client implementation of {@link
-   * WorkspaceService#symbol(WorkspaceSymbolParams)}
+   * GWT client implementation of {@link WorkspaceService#symbol(WorkspaceSymbolParams)}
    *
    * @param params
    * @return
