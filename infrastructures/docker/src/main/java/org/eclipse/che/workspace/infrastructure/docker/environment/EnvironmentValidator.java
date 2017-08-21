@@ -34,7 +34,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 /** @author Alexander Garagatyi */
 public class EnvironmentValidator {
   /* machine name must contain only {a-zA-Z0-9_-} characters and it's needed for validation machine names */
-  private static final String MACHINE_NAME_REGEXP = "[a-zA-Z0-9_-]+";
+  private static final String MACHINE_NAME_REGEXP = "[a-zA-Z0-9]+[a-zA-Z0-9_-]*";
   private static final Pattern MACHINE_NAME_PATTERN =
       Pattern.compile("^" + MACHINE_NAME_REGEXP + "$");
   private static final Pattern SERVER_PORT = Pattern.compile("^[1-9]+[0-9]*(/(tcp|udp))?$");
@@ -166,6 +166,10 @@ public class EnvironmentValidator {
 
       String containerFromLink = matcher.group("containerName");
       checkArgument(
+          !machineName.equals(containerFromLink),
+          "Container '%s' has illegal link to itself",
+          machineName);
+      checkArgument(
           containersNames.contains(containerFromLink),
           "Machine '%s' in environment contains link to non existing machine '%s'",
           machineName,
@@ -179,6 +183,10 @@ public class EnvironmentValidator {
           depends,
           machineName);
 
+      checkArgument(
+          !machineName.equals(depends),
+          "Container '%s' has illegal dependency to itself",
+          machineName);
       checkArgument(
           containersNames.contains(depends),
           "Machine '%s' in environment contains dependency to non existing machine '%s'",
@@ -197,8 +205,12 @@ public class EnvironmentValidator {
 
       String containerFromVolumesFrom = matcher.group("containerName");
       checkArgument(
+          !machineName.equals(containerFromVolumesFrom),
+          "Container '%s' can not mount volume from itself",
+          machineName);
+      checkArgument(
           containersNames.contains(containerFromVolumesFrom),
-          "OldMachine '%s' in environment contains non existing machine '%s' in 'volumes_from' field",
+          "Machine '%s' in environment contains non existing machine '%s' in 'volumes_from' field",
           machineName,
           containerFromVolumesFrom);
     }

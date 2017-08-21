@@ -10,8 +10,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,10 +30,12 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -45,11 +49,46 @@ public class EnvironmentValidatorTest {
   @Mock DockerEnvironment dockerEnvironment;
   @Mock InternalMachineConfig machineConfig;
   @Mock DockerContainerConfig container;
+  @Mock DockerBuildContext buildContext;
+  @Mock InstallerImpl installer;
+  @Mock ServerConfigImpl server;
 
   private EnvironmentValidator environmentValidator = new EnvironmentValidator();
 
+  @BeforeMethod
+  public void setUp() throws Exception {
+    when(environment.getMachines()).thenReturn(singletonMap(MACHINE_NAME, machineConfig));
+    when(dockerEnvironment.getContainers()).thenReturn(singletonMap(MACHINE_NAME, container));
+    when(container.getImage()).thenReturn("test/image:latest");
+    when(machineConfig.getInstallers()).thenReturn(singletonList(installer));
+    when(installer.getId()).thenReturn(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER);
+    when(server.getPort()).thenReturn("8080/tcp");
+    when(server.getPath()).thenReturn("/some/path");
+    when(server.getProtocol()).thenReturn("https");
+  }
+
   @Test
   public void shouldSucceedOnValidationOfValidEnvironment() throws Exception {
+    // given
+    String machine2Name = "anotherMachine";
+    DockerContainerConfig container2 = mock(DockerContainerConfig.class);
+    when(container2.getImage()).thenReturn("test/image:latest");
+    when(environment.getMachines()).thenReturn(singletonMap(MACHINE_NAME, machineConfig));
+    when(dockerEnvironment.getContainers())
+        .thenReturn(ImmutableMap.of(MACHINE_NAME, container, machine2Name, container2));
+    ServerConfigImpl server =
+        new ServerConfigImpl().withPort("8080").withPath("/some/path").withProtocol("https");
+    when(machineConfig.getServers())
+        .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, server));
+    Map<String, String> attributes =
+        ImmutableMap.of("testKey", "value", "memoryLimitBytes", "1000000000");
+    when(machineConfig.getAttributes()).thenReturn(attributes);
+    when(container.getExpose()).thenReturn(asList("8090", "9090/tcp", "7070/udp"));
+    when(container.getLinks()).thenReturn(singletonList(machine2Name + ":alias1"));
+    when(container.getDependsOn()).thenReturn(singletonList(machine2Name));
+    when(container.getVolumesFrom()).thenReturn(singletonList(machine2Name + ":ro"));
+
+    // when
     environmentValidator.validate(environment, dockerEnvironment);
   }
 
@@ -130,8 +169,6 @@ public class EnvironmentValidatorTest {
 
     // when
     environmentValidator.validate(environment, dockerEnvironment);
-    // wsagent installers
-    // wsagent server + installer in different machines
   }
 
   @DataProvider(name = "severalWsAgentsProvider")
@@ -164,6 +201,18 @@ public class EnvironmentValidatorTest {
     };
   }
 
+  @Test
+  public void shouldPassIfWsAgentServerAndInstallerAreInTheSameMachine() throws Exception {
+    // given
+    when(machineConfig.getServers())
+        .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, server));
+    when(machineConfig.getInstallers()).thenReturn(singletonList(installer));
+    when(installer.getId()).thenReturn(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER);
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
   @Test(
     dataProvider = "badMachineNameProvider",
     expectedExceptions = ValidationException.class,
@@ -171,8 +220,8 @@ public class EnvironmentValidatorTest {
   )
   public void shouldFailIfContainerNameIsInvalid(String name) throws Exception {
     // given
-    when(environment.getMachines()).thenReturn(singletonMap(name, machineConfig));
     when(dockerEnvironment.getContainers()).thenReturn(singletonMap(name, container));
+    when(environment.getMachines()).thenReturn(singletonMap(name, machineConfig));
 
     // when
     environmentValidator.validate(environment, dockerEnvironment);
@@ -185,67 +234,267 @@ public class EnvironmentValidatorTest {
     };
   }
 
-  @Test
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Field 'image' or 'build.context' is required in machine '.*' in environment"
+  )
   public void shouldFailIfNeitherImageNorBuildAreProvided() throws Exception {
     // given
-    when(environment.getMachines()).thenReturn(singletonMap(MACHINE_NAME, machineConfig));
-    when(dockerEnvironment.getContainers()).thenReturn(singletonMap(MACHINE_NAME, container));
+    when(container.getBuild()).thenReturn(null);
+    when(container.getImage()).thenReturn(null);
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Machine '.*' in environment contains mutually exclusive dockerfile content and build context."
+  )
+  public void shouldFailIfBothDockerfileAndBuildContextAreProvided() throws Exception {
+    // given
+    when(container.getImage()).thenReturn(null);
+    when(container.getBuild()).thenReturn(buildContext);
+    when(buildContext.getContext()).thenReturn("some value");
+    when(buildContext.getDockerfileContent()).thenReturn("FROM ubuntu");
 
     // when
     environmentValidator.validate(environment, dockerEnvironment);
   }
 
   @Test
-  public void shouldFailIfBothDockerfileAndBuildContextAreProvided() throws Exception {}
+  public void shouldPassIfMachineFromRecipeIsNotInTheListOfMachines() throws Exception {
+    // given
+    DockerContainerConfig container2 = mock(DockerContainerConfig.class);
+    when(container2.getImage()).thenReturn("test/image:latest");
+    when(environment.getMachines()).thenReturn(singletonMap(MACHINE_NAME, machineConfig));
+    when(dockerEnvironment.getContainers())
+        .thenReturn(ImmutableMap.of(MACHINE_NAME, container, "anotherContainer", container2));
 
-  @Test
-  public void shouldPassIfWsAgentServerAndInstallerAreInTheSameMachine() throws Exception {}
-
-  @Test
-  public void shouldPassIfMachineFromRecipeIsNotInTheListOfMachines() throws Exception {}
-
-  @Test
-  public void shouldFailIfMemoryAttributeIsIllegal() throws Exception {
-    // -1
-    //0
-    // non num
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
   }
 
-  @Test
-  public void shouldFailIfServerPortInMachineIsInvalid() throws Exception {}
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Value of attribute 'memoryLimitBytes' of machine '.*' in environment is illegal",
+    dataProvider = "memoryAttributeValue"
+  )
+  public void shouldFailIfMemoryAttributeIsIllegal(String memoryAttributeValue) throws Exception {
+    // given
+    Map<String, String> attributes =
+        ImmutableMap.of("testKey", "value", "memoryLimitBytes", memoryAttributeValue);
+    when(machineConfig.getAttributes()).thenReturn(attributes);
 
-  @Test
-  public void shouldFailIfServerProtocolInMachineIsInvalid() throws Exception {}
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
 
-  @Test
-  public void shouldFailIfContainerExposeIsInvalid() throws Exception {}
+  @DataProvider(name = "memoryAttributeValue")
+  public static Object[][] memoryAttributeValue() {
+    return new Object[][] {{"aa"}, {""}, {"!"}, {"156a"}, {"0"}, {"-1"}};
+  }
 
-  @Test
-  public void shouldFailIfContainerLinkIsInvalid() throws Exception {}
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Machine '.*' in environment contains server conf '.*' with invalid port '.*'"
+  )
+  public void shouldFailIfServerPortInMachineIsInvalid() throws Exception {
+    // given
+    when(server.getPort()).thenReturn("aaaaa");
+    when(machineConfig.getServers())
+        .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, server));
 
-  @Test
-  public void shouldFailIfContainerLinkContainsMissingContainer() throws Exception {}
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
 
-  @Test
-  public void shouldFailIfContainerDependencyIsInvalid() throws Exception {}
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Machine '.*' in environment contains server conf '.*' with invalid protocol '.*'"
+  )
+  public void shouldFailIfServerProtocolInMachineIsInvalid() throws Exception {
+    // given
+    when(machineConfig.getServers()).thenReturn(singletonMap("server1", server));
+    when(server.getProtocol()).thenReturn("0");
 
-  @Test
-  public void shouldFailIfContainerDependencyContainsMissingContainer() throws Exception {}
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
 
-  @Test
-  public void shouldFailIfContainerVolumeFromIsInvalid() throws Exception {}
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp = "Exposed port '.*' in machine '.*' in environment is invalid",
+    dataProvider = "invalidExposeProvider"
+  )
+  public void shouldFailIfContainerExposeIsInvalid(String expose) throws Exception {
+    // given
+    when(container.getExpose()).thenReturn(singletonList(expose));
 
-  @Test
-  public void shouldFailIfContainerVolumeFromContainsMissingContainer() throws Exception {}
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
 
-  @Test
-  public void shouldFailIfThereIsPortBindingInContainer() throws Exception {}
+  @DataProvider(name = "invalidExposeProvider")
+  public static Object[][] invalidExposeProvider() {
+    return new Object[][] {{"0"}, {"8080/ttp"}, {"8080/"}, {"0111"}, {"tcp"}, {"/tcp"}};
+  }
 
-  @Test
-  public void shouldFailIfThereIsVolumeBindingInContainer() throws Exception {}
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp = "Link '.*' in machine '.*' in environment is invalid"
+  )
+  public void shouldFailIfContainerLinkIsInvalid() throws Exception {
+    // given
+    when(container.getLinks()).thenReturn(singletonList(MACHINE_NAME + "->alias1"));
 
-  @Test
-  public void shouldFailIfThereIsNetworkInContainer() throws Exception {}
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp = "Container '.*' has illegal link to itself"
+  )
+  public void shouldFailIfContainerHasLinkToItself() throws Exception {
+    // given
+    when(container.getLinks()).thenReturn(singletonList(MACHINE_NAME + ":alias1"));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Machine '.*' in environment contains link to non existing machine '.*'"
+  )
+  public void shouldFailIfContainerLinkContainsMissingContainer() throws Exception {
+    // given
+    when(container.getLinks()).thenReturn(singletonList("nonExistingContainer:alias1"));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp = "Dependency '.*' in machine '.*' in environment is invalid"
+  )
+  public void shouldFailIfContainerDependencyIsInvalid() throws Exception {
+    // given
+    when(container.getDependsOn()).thenReturn(singletonList("--container"));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp = "Container '.*' has illegal dependency to itself"
+  )
+  public void shouldFailIfContainerHasDependencyToItself() throws Exception {
+    // given
+    when(container.getDependsOn()).thenReturn(singletonList(MACHINE_NAME));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Machine '.*' in environment contains dependency to non existing machine '.*'"
+  )
+  public void shouldFailIfContainerDependencyContainsMissingContainer() throws Exception {
+    // given
+    when(container.getDependsOn()).thenReturn(singletonList("nonExistingContainer"));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Machine name '.*' in field 'volumes_from' of machine '.*' in environment is invalid"
+  )
+  public void shouldFailIfContainerVolumeFromIsInvalid() throws Exception {
+    // given
+    when(container.getVolumesFrom()).thenReturn(singletonList(MACHINE_NAME + ":777"));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Machine '.*' in environment contains non existing machine '.*' in 'volumes_from' field"
+  )
+  public void shouldFailIfContainerVolumeFromContainsMissingContainer() throws Exception {
+    // given
+    when(container.getVolumesFrom()).thenReturn(singletonList("nonExistingContainer"));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp = "Container '.*' can not mount volume from itself"
+  )
+  public void shouldFailIfContainerHasVolumeFromItself() throws Exception {
+    // given
+    when(container.getVolumesFrom()).thenReturn(singletonList(MACHINE_NAME));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Ports binding is forbidden but found in machine '.*' of environment"
+  )
+  public void shouldFailIfThereIsPortBindingInContainer() throws Exception {
+    // given
+    when(container.getPorts()).thenReturn(singletonList("8080:8080"));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Volumes binding is forbidden but found in machine '.*' of environment"
+  )
+  public void shouldFailIfThereIsVolumeBindingInContainer() throws Exception {
+    // given
+    when(container.getVolumes()).thenReturn(singletonList("/etc:/etc"));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
+
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Networks configuration is forbidden but found in machine '.*' of environment"
+  )
+  public void shouldFailIfThereIsNetworkInContainer() throws Exception {
+    // given
+    when(container.getNetworks()).thenReturn(singletonList("newNetwork"));
+
+    // when
+    environmentValidator.validate(environment, dockerEnvironment);
+  }
 
   private static InternalMachineConfig machineMock() {
     InternalMachineConfig mock = mock(InternalMachineConfig.class);

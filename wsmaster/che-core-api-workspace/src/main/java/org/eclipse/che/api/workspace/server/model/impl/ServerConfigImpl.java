@@ -60,6 +60,11 @@ public class ServerConfigImpl implements ServerConfig {
     this.port = port;
   }
 
+  public ServerConfigImpl withPort(String port) {
+    this.port = port;
+    return this;
+  }
+
   @Override
   public String getProtocol() {
     return protocol;
@@ -69,6 +74,11 @@ public class ServerConfigImpl implements ServerConfig {
     this.protocol = protocol;
   }
 
+  public ServerConfigImpl withProtocol(String protocol) {
+    this.protocol = protocol;
+    return this;
+  }
+
   @Override
   public String getPath() {
     return path;
@@ -76,6 +86,11 @@ public class ServerConfigImpl implements ServerConfig {
 
   public void setPath(String path) {
     this.path = path;
+  }
+
+  public ServerConfigImpl withPath(String path) {
+    this.path = path;
+    return this;
   }
 
   @Override
