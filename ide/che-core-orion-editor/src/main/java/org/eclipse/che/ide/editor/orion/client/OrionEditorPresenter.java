@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.editor.orion.client;
 
 import static java.lang.Boolean.parseBoolean;
+import static java.util.Arrays.stream;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -44,6 +45,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -131,9 +133,14 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.vcs.HasVcsChangeMarkerRender;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionExtRulerOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
 import org.eclipse.che.ide.editor.orion.client.menu.EditorContextMenu;
 import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpView;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
@@ -148,6 +155,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     implements TextEditor,
         UndoableEditor,
         HasBreakpointRenderer,
+        HasVcsChangeMarkerRender,
         HasReadOnlyProperty,
         HandlesTextOperations,
         EditorWithAutoSave,
@@ -169,6 +177,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private final BreakpointManager breakpointManager;
   private final PreferencesManager preferencesManager;
   private final BreakpointRendererFactory breakpointRendererFactory;
+  private final VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory;
   private final DialogFactory dialogFactory;
   private final DocumentStorage documentStorage;
   private final EditorMultiPartStackPresenter editorMultiPartStackPresenter;
@@ -207,6 +216,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private HandlerRegistration resourceChangeHandler;
   private OrionEditorInit editorInit;
 
+  private VcsChangeMarkerRender vcsChangeMarkerRender;
+
   @Inject
   public OrionEditorPresenter(
       final CodeAssistantFactory codeAssistantFactory,
@@ -214,6 +225,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       final BreakpointManager breakpointManager,
       final PreferencesManager preferencesManager,
       final BreakpointRendererFactory breakpointRendererFactory,
+      final VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory,
       final DialogFactory dialogFactory,
       final DocumentStorage documentStorage,
       final EditorMultiPartStackPresenter editorMultiPartStackPresenter,
@@ -237,6 +249,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     this.breakpointManager = breakpointManager;
     this.preferencesManager = preferencesManager;
     this.breakpointRendererFactory = breakpointRendererFactory;
+    this.vcsChangeMarkerRenderFactory = vcsChangeMarkerRenderFactory;
     this.dialogFactory = dialogFactory;
     this.documentStorage = documentStorage;
     this.editorMultiPartStackPresenter = editorMultiPartStackPresenter;
@@ -702,6 +715,39 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
               ((HasGutter) this).getGutter(), this.editorWidget.getLineStyler(), this.document);
     }
     return this.breakpointRenderer;
+  }
+
+  @Override
+  public Promise<VcsChangeMarkerRender> getOrCreateVcsMarkRender() {
+    return Promises.create(
+        (resolve, reject) -> {
+          String vcsChangeMarker = "vcsChangeMarker";
+          java.util.Optional<OrionExtRulerOverlay> optional =
+              stream(editorWidget.getTextView().getRulers())
+                  .filter(ruler -> vcsChangeMarker.equals(ruler.getStyle().getStyleClass()))
+                  .findAny();
+          if (optional.isPresent()) {
+            resolve.apply(vcsChangeMarkerRender);
+          } else {
+            OrionStyleOverlay style = OrionStyleOverlay.create();
+            style.setStyleClass(vcsChangeMarker);
+            OrionExtRulerOverlay.create(
+                editorWidget.getEditor().getAnnotationModel(),
+                style,
+                OrionExtRulerOverlay.RulerLocation.LEFT.getLocation(),
+                OrionExtRulerOverlay.RulerOverview.PAGE.getOverview(),
+                orionExtRulerOverlay -> {
+                  editorWidget.getTextView().addRuler(orionExtRulerOverlay, 6);
+                  OrionVcsChangeMarkersRuler orionVcsChangeMarkersRuler =
+                      new OrionVcsChangeMarkersRuler(
+                          orionExtRulerOverlay, editorWidget.getEditor());
+
+                  vcsChangeMarkerRender =
+                      vcsChangeMarkerRenderFactory.create(orionVcsChangeMarkersRuler);
+                  resolve.apply(vcsChangeMarkerRender);
+                });
+          }
+        });
   }
 
   @Override

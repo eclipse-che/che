@@ -1633,6 +1633,21 @@ public class DarkTheme implements Theme {
   }
 
   @Override
+  public String vcsChangeMarkerInsertionColor() {
+    return "#72ad42";
+  }
+
+  @Override
+  public String vcsChangeMarkerModificationColor() {
+    return "#e0b91d";
+  }
+
+  @Override
+  public String vcsChangeMarkerDeletionColor() {
+    return "#bfc6ce";
+  }
+
+  @Override
   public String editorPreferenceCategoryBackgroundColor() {
     return "rgba(215, 215, 215, 0.10)";
   }

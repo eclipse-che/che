@@ -65,7 +65,8 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   @Override
   public void addBreakpointMark(final int lineNumber) {
     if (hasGutter != null) {
-      this.hasGutter.addGutterItem(lineNumber, BREAKPOINTS_GUTTER, inactiveBreakpointMark);
+      this.hasGutter.addGutterItem(
+          lineNumber, lineNumber, BREAKPOINTS_GUTTER, inactiveBreakpointMark);
     }
   }
 
@@ -73,6 +74,7 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   public void addBreakpointMark(final int lineNumber, final LineChangeAction action) {
     if (hasGutter != null) {
       this.hasGutter.addGutterItem(
+          lineNumber,
           lineNumber,
           BREAKPOINTS_GUTTER,
           inactiveBreakpointMark,
@@ -89,7 +91,7 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   @Override
   public void removeBreakpointMark(final int lineNumber) {
     if (hasGutter != null) {
-      this.hasGutter.removeGutterItem(lineNumber, BREAKPOINTS_GUTTER);
+      this.hasGutter.removeGutterItem(lineNumber, lineNumber, BREAKPOINTS_GUTTER);
     }
   }
 
@@ -103,10 +105,10 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
   @Override
   public void setBreakpointActive(final int lineNumber, final boolean active) {
     if (hasGutter != null) {
-      final Element mark = this.hasGutter.getGutterItem(lineNumber, BREAKPOINTS_GUTTER);
+      final Element mark = this.hasGutter.getGutterItem(lineNumber, lineNumber, BREAKPOINTS_GUTTER);
       if (mark != null) {
         Element element = active ? activeBreakpointMark : inactiveBreakpointMark;
-        this.hasGutter.setGutterItem(lineNumber, BREAKPOINTS_GUTTER, element);
+        this.hasGutter.setGutterItem(lineNumber, lineNumber, BREAKPOINTS_GUTTER, element);
       }
     }
   }

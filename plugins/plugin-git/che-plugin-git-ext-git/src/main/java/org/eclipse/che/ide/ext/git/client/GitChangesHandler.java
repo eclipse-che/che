@@ -15,18 +15,27 @@ import static org.eclipse.che.ide.api.vcs.VcsStatus.MODIFIED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.NOT_MODIFIED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.UNTRACKED;
 
+import com.google.web.bindery.event.shared.EventBus;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.git.shared.EditedRegion;
+import org.eclipse.che.api.git.shared.FileChangedEventDto;
+import org.eclipse.che.api.git.shared.IndexChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.vcs.EditType;
+import org.eclipse.che.ide.api.vcs.HasVcsChangeMarkerRender;
+import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
@@ -50,6 +59,8 @@ public class GitChangesHandler {
   @Inject
   public GitChangesHandler(
       RequestHandlerConfigurator configurator,
+      EventBus eventBus,
+      GitServiceClient gitServiceClient,
       AppContext appContext,
       Provider<EditorAgent> editorAgentProvider,
       Provider<ProjectExplorerPresenter> projectExplorerPresenterProvider,
@@ -59,6 +70,26 @@ public class GitChangesHandler {
     this.projectExplorerPresenterProvider = projectExplorerPresenterProvider;
     this.multiPartStackProvider = multiPartStackProvider;
 
+    eventBus.addHandler(
+        EditorOpenedEvent.TYPE,
+        event -> {
+          if (((File) event.getFile()).getVcsStatus() != MODIFIED) {
+            return;
+          }
+          ((HasVcsChangeMarkerRender) event.getEditor())
+              .getOrCreateVcsMarkRender()
+              .then(
+                  render -> {
+                    Path location = event.getFile().getLocation();
+                    gitServiceClient
+                        .getEditions(
+                            location.uptoSegment(1), location.removeFirstSegments(1).toString())
+                        .then(
+                            edition -> {
+                              handleEdition(edition, render);
+                            });
+                  });
+        });
     configureHandler(configurator);
   }
 
@@ -66,19 +97,19 @@ public class GitChangesHandler {
     configurator
         .newConfiguration()
         .methodName("event/git-change")
-        .paramsAsDto(GitChangeEventDto.class)
+        .paramsAsDto(FileChangedEventDto.class)
         .noResult()
         .withBiConsumer(this::apply);
 
     configurator
         .newConfiguration()
         .methodName("event/git-index")
-        .paramsAsDto(Status.class)
+        .paramsAsDto(IndexChangedEventDto.class)
         .noResult()
         .withBiConsumer(this::apply);
   }
 
-  public void apply(String endpointId, GitChangeEventDto dto) {
+  public void apply(String endpointId, FileChangedEventDto dto) {
     Tree tree = projectExplorerPresenterProvider.get().getTree();
     tree.getNodeStorage()
         .getAll()
@@ -95,7 +126,7 @@ public class GitChangesHandler {
               ((ResourceNode) node)
                   .getData()
                   .asFile()
-                  .setVcsStatus(VcsStatus.from(dto.getType().toString()));
+                  .setVcsStatus(VcsStatus.from(dto.getStatus().toString()));
               tree.refresh(node);
             });
 
@@ -108,18 +139,39 @@ public class GitChangesHandler {
                 editor.getEditorInput().getFile().getLocation().equals(Path.valueOf(dto.getPath())))
         .forEach(
             editor -> {
-              VcsStatus vcsStatus = VcsStatus.from(dto.getType().toString());
+              VcsStatus vcsStatus = VcsStatus.from(dto.getStatus().toString());
               EditorTab tab = multiPartStackProvider.get().getTabByPart(editor);
               if (vcsStatus != null) {
                 tab.setTitleColor(vcsStatus.getColor());
               }
+              if (((File) editor.getEditorInput().getFile()).getVcsStatus() != MODIFIED) {
+                return;
+              }
+              ((HasVcsChangeMarkerRender) editor)
+                  .getOrCreateVcsMarkRender()
+                  .then(
+                      arg -> {
+                        handleEdition(dto.getEditedRegions(), arg);
+                      });
             });
 
     appContext.getWorkspaceRoot().synchronize();
   }
 
-  public void apply(String endpointId, Status status) {
+  private void handleEdition(List<EditedRegion> editedRegions, VcsChangeMarkerRender render) {
+    render.clearAllChangeMarkers();
+    editedRegions.forEach(
+        edition -> {
+          render.addChangeMarker(
+              edition.getBeginLine(),
+              edition.getEndLine(),
+              EditType.valueOf(edition.getType().toString()));
+        });
+  }
+
+  public void apply(String endpointId, IndexChangedEventDto dto) {
     Tree tree = projectExplorerPresenterProvider.get().getTree();
+    Status status = dto.getStatus();
     tree.getNodeStorage()
         .getAll()
         .stream()
@@ -163,6 +215,19 @@ public class GitChangesHandler {
               } else if (((File) tab.getFile()).getVcsStatus() != NOT_MODIFIED) {
                 tab.setTitleColor(NOT_MODIFIED.getColor());
               }
+
+              String file =
+                  editor.getEditorInput().getFile().getLocation().removeFirstSegments(1).toString();
+              ((HasVcsChangeMarkerRender) editor)
+                  .getOrCreateVcsMarkRender()
+                  .then(
+                      render -> {
+                        if (dto.getModifiedFiles().keySet().contains(file)) {
+                          handleEdition(dto.getModifiedFiles().get(file), render);
+                        } else {
+                          render.clearAllChangeMarkers();
+                        }
+                      });
             });
 
     appContext.getWorkspaceRoot().synchronize();

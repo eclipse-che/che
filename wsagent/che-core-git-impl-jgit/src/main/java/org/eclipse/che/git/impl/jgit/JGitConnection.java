@@ -18,15 +18,18 @@ import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.EditedRegion.Type.*;
 import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.jgit.api.RebaseResult.Status.STOPPED;
 import static org.eclipse.jgit.api.RebaseResult.Status.UNCOMMITTED_CHANGES;
 import static org.eclipse.jgit.api.RebaseResult.Status.UP_TO_DATE;
+import static org.eclipse.jgit.diff.Edit.Type.DELETE;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -93,24 +96,8 @@ import org.eclipse.che.api.git.params.RemoteUpdateParams;
 import org.eclipse.che.api.git.params.ResetParams;
 import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.params.TagCreateParams;
-import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.BranchListMode;
-import org.eclipse.che.api.git.shared.DiffCommitFile;
-import org.eclipse.che.api.git.shared.GitUser;
-import org.eclipse.che.api.git.shared.MergeResult;
-import org.eclipse.che.api.git.shared.ProviderInfo;
-import org.eclipse.che.api.git.shared.PullResponse;
-import org.eclipse.che.api.git.shared.PushResponse;
-import org.eclipse.che.api.git.shared.RebaseResponse;
+import org.eclipse.che.api.git.shared.*;
 import org.eclipse.che.api.git.shared.RebaseResponse.RebaseStatus;
-import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.git.shared.RemoteReference;
-import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.git.shared.ShowFileContentResponse;
-import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
-import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
@@ -143,20 +130,11 @@ import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.EditList;
 import org.eclipse.jgit.dircache.DirCache;
-import org.eclipse.jgit.lib.BatchingProgressMonitor;
-import org.eclipse.jgit.lib.ConfigConstants;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.RefUpdate.Result;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.lib.RepositoryState;
-import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.merge.ResolveMerger;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
@@ -177,6 +155,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.EmptyTreeIterator;
+import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
@@ -184,6 +163,7 @@ import org.eclipse.jgit.treewalk.filter.PathFilterGroup;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.eclipse.jgit.util.io.NullOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -652,13 +632,13 @@ class JGitConnection implements GitConnection {
           specified
               .stream()
               .filter(path -> staged.stream().anyMatch(s -> s.startsWith(path)))
-              .collect(Collectors.toList());
+              .collect(toList());
 
       List<String> specifiedChanged =
           specified
               .stream()
               .filter(path -> changed.stream().anyMatch(c -> c.startsWith(path)))
-              .collect(Collectors.toList());
+              .collect(toList());
 
       // Check that there are changes present for commit, if 'isAmend' is disabled
       if (!params.isAmend()) {
@@ -730,6 +710,69 @@ class JGitConnection implements GitConnection {
   @Override
   public DiffPage diff(DiffParams params) throws GitException {
     return new JGitDiffPage(params, repository);
+  }
+
+  @Override
+  public List<EditedRegion> getEditedRegions(String file) throws GitException {
+    DirCache dirCache = null;
+    try (ObjectReader reader = repository.newObjectReader()) {
+      dirCache = getRepository().lockDirCache();
+      DiffFormatter formatter = new DiffFormatter(DisabledOutputStream.INSTANCE);
+      formatter.setRepository(repository);
+
+      RevTree tree;
+      try (RevWalk revWalk = new RevWalk(repository)) {
+        tree = revWalk.parseTree(repository.resolve("HEAD"));
+      }
+      CanonicalTreeParser treeParser = new CanonicalTreeParser();
+      treeParser.reset(reader, tree);
+
+      Optional<DiffEntry> optional =
+          formatter
+              .scan(treeParser, new FileTreeIterator(repository))
+              .stream()
+              .filter(entry -> file.equals(entry.getNewPath()))
+              .findAny();
+      if (optional.isPresent()) {
+        EditList edits = formatter.toFileHeader(optional.get()).getHunks().get(0).toEditList();
+        return edits
+            .stream()
+            .map(
+                edit -> {
+                  EditedRegion.Type type = null;
+                  switch (edit.getType()) {
+                    case INSERT:
+                      {
+                        type = INSERTION;
+                        break;
+                      }
+                    case REPLACE:
+                      {
+                        type = MODIFICATION;
+                        break;
+                      }
+                    case DELETE:
+                      {
+                        type = DELETION;
+                        break;
+                      }
+                  }
+                  return newDto(EditedRegion.class)
+                      .withBeginLine(
+                          edit.getType() == DELETE ? edit.getBeginB() : edit.getBeginB() + 1)
+                      .withEndLine(edit.getEndB())
+                      .withType(type);
+                })
+            .collect(toList());
+      }
+    } catch (IOException e) {
+      throw new GitException(e.getMessage());
+    } finally {
+      if (dirCache != null) {
+        dirCache.unlock();
+      }
+    }
+    return Collections.emptyList();
   }
 
   @Override
@@ -929,7 +972,7 @@ class JGitConnection implements GitConnection {
     return branches
         .stream()
         .map(branch -> newDto(Branch.class).withName(branch.getName()))
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   private List<DiffCommitFile> getCommitDiffFiles(RevCommit revCommit, String pattern)
@@ -983,7 +1026,7 @@ class JGitConnection implements GitConnection {
                           .withOldPath(diff.getOldPath())
                           .withNewPath(diff.getNewPath())
                           .withChangeType(diff.getChangeType().name()))
-              .collect(Collectors.toList()));
+              .collect(toList()));
     }
     return commitFilesList;
   }
@@ -1339,7 +1382,7 @@ class JGitConnection implements GitConnection {
     }
     List<String> refSpec = params.getRefSpec();
     if (!refSpec.isEmpty()) {
-      pushCommand.setRefSpecs(refSpec.stream().map(RefSpec::new).collect(Collectors.toList()));
+      pushCommand.setRefSpecs(refSpec.stream().map(RefSpec::new).collect(toList()));
     }
     pushCommand.setForce(params.isForce());
     int timeout = params.getTimeout();
@@ -1811,7 +1854,7 @@ class JGitConnection implements GitConnection {
                 newDto(RemoteReference.class)
                     .withCommitId(ref.getObjectId().name())
                     .withReferenceName(ref.getName()))
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   @Override

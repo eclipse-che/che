@@ -23,13 +23,13 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay;
 import org.eclipse.che.ide.util.dom.Elements;
 
 /**
- * Orion implementation of the ruler for adding breakpoints marks.
+ * Orion implementation of the ruler for adding VCS change markers.
  *
- * @author Anatoliy Bazko
+ * @author Igor Vinokur
  */
-public class OrionBreakpointRuler implements Gutter {
+public class OrionVcsChangeMarkersRuler implements Gutter {
 
-  private static final String CHE_BREAKPOINT = "che.breakpoint";
+  private static final String VCS_CHANGE_MARKERS = "vcs.change.markers";
 
   private final OrionExtRulerOverlay orionExtRulerOverlay;
   private final OrionEditorOverlay editorOverlay;
@@ -37,26 +37,23 @@ public class OrionBreakpointRuler implements Gutter {
 
   private OrionTextModelOverlay.EventHandler<ModelChangedEventOverlay> modelChangingEventHandler;
 
-  public OrionBreakpointRuler(OrionExtRulerOverlay rulerOverlay, OrionEditorOverlay editorOverlay) {
+  OrionVcsChangeMarkersRuler(OrionExtRulerOverlay rulerOverlay, OrionEditorOverlay editorOverlay) {
     this.orionExtRulerOverlay = rulerOverlay;
     this.editorOverlay = editorOverlay;
-    this.orionExtRulerOverlay.addAnnotationType(CHE_BREAKPOINT, 1);
+    this.orionExtRulerOverlay.addAnnotationType(VCS_CHANGE_MARKERS, 1);
     this.annotationModel = orionExtRulerOverlay.getAnnotationModel();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void addGutterItem(int lineStart, int lineEnd, String gutterId, Element element) {
-    if (!Gutters.BREAKPOINTS_GUTTER.equals(gutterId)
-        && !Gutters.VCS_CHANGE_MARKERS_GUTTER.equals(gutterId)) {
+    if (!Gutters.VCS_CHANGE_MARKERS_GUTTER.equals(gutterId)) {
       return;
     }
 
-    OrionAnnotationOverlay annotation = toAnnotation(element, lineStart, lineEnd);
+    OrionAnnotationOverlay annotation = toAnnotation(element, lineStart - 1, lineEnd - 1);
     annotationModel.addAnnotation(annotation);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void addGutterItem(
       int lineStart,
@@ -64,7 +61,7 @@ public class OrionBreakpointRuler implements Gutter {
       String gutterId,
       Element element,
       final LineNumberingChangeCallback lineCallback) {
-    if (!Gutters.BREAKPOINTS_GUTTER.equals(gutterId)) {
+    if (!Gutters.VCS_CHANGE_MARKERS_GUTTER.equals(gutterId)) {
       return;
     }
 
@@ -90,10 +87,9 @@ public class OrionBreakpointRuler implements Gutter {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void removeGutterItem(int lineStart, int lineEnd, String gutterId) {
-    if (!Gutters.BREAKPOINTS_GUTTER.equals(gutterId)) {
+    if (!Gutters.VCS_CHANGE_MARKERS_GUTTER.equals(gutterId)) {
       return;
     }
 
@@ -101,16 +97,15 @@ public class OrionBreakpointRuler implements Gutter {
     removeAnnotations(annotations);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Element getGutterItem(int lineStart, int lineEnd, String gutterId) {
-    if (!Gutters.BREAKPOINTS_GUTTER.equals(gutterId)) {
+    if (!Gutters.VCS_CHANGE_MARKERS_GUTTER.equals(gutterId)) {
       return null;
     }
 
     OrionAnnotationOverlay[] annotations = getAnnotations(lineStart, lineEnd);
     for (OrionAnnotationOverlay annotation : annotations) {
-      if (isBreakpointAnnotation(annotation)) {
+      if (isVcsMarkAnnotation(annotation)) {
         return Elements.createDivElement(annotation.getStyle().getStyleClass());
       }
     }
@@ -118,10 +113,9 @@ public class OrionBreakpointRuler implements Gutter {
     return null;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void clearGutter(String gutterId) {
-    if (!Gutters.BREAKPOINTS_GUTTER.equals(gutterId)) {
+    if (!Gutters.VCS_CHANGE_MARKERS_GUTTER.equals(gutterId)) {
       return;
     }
 
@@ -129,10 +123,9 @@ public class OrionBreakpointRuler implements Gutter {
     removeAnnotations(annotations);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setGutterItem(int lineStart, int lineEnd, String gutterId, Element element) {
-    if (!Gutters.BREAKPOINTS_GUTTER.equals(gutterId)) {
+    if (!Gutters.VCS_CHANGE_MARKERS_GUTTER.equals(gutterId)) {
       return;
     }
 
@@ -144,23 +137,22 @@ public class OrionBreakpointRuler implements Gutter {
 
   private void removeAnnotations(OrionAnnotationOverlay[] annotations) {
     for (OrionAnnotationOverlay annotation : annotations) {
-      if (isBreakpointAnnotation(annotation)) {
+      if (isVcsMarkAnnotation(annotation)) {
         annotationModel.removeAnnotation(annotation);
       }
     }
   }
 
   private OrionAnnotationOverlay toAnnotation(Element element, int lineStart, int lineEnd) {
-
     OrionAnnotationOverlay annotation = OrionAnnotationOverlay.create();
 
     OrionStyleOverlay styleOverlay = OrionStyleOverlay.create();
     styleOverlay.setStyleClass(element.getClassName());
 
     annotation.setStyle(styleOverlay);
-    annotation.setType(CHE_BREAKPOINT);
+    annotation.setType(VCS_CHANGE_MARKERS);
     annotation.setStart(editorOverlay.getModel().getLineStart(lineStart));
-    annotation.setEnd(editorOverlay.getModel().getLineStart(lineEnd));
+    annotation.setEnd(editorOverlay.getModel().getLineEnd(lineEnd) + 1);
 
     return annotation;
   }
@@ -168,7 +160,7 @@ public class OrionBreakpointRuler implements Gutter {
   private OrionAnnotationOverlay[] getAnnotations(int lineStart, int lineEnd) {
     return doGetAnnotations(
         editorOverlay.getModel().getLineStart(lineStart),
-        editorOverlay.getModel().getLineStart(lineEnd));
+        editorOverlay.getModel().getLineEnd(lineEnd));
   }
 
   private OrionAnnotationOverlay[] getAnnotationsFrom(int fromLine) {
@@ -184,7 +176,7 @@ public class OrionBreakpointRuler implements Gutter {
     return orionExtRulerOverlay.getAnnotationsByType(annotationModel, lineStart, lineEnd);
   }
 
-  private boolean isBreakpointAnnotation(OrionAnnotationOverlay annotation) {
-    return CHE_BREAKPOINT.equals(annotation.getType());
+  private boolean isVcsMarkAnnotation(OrionAnnotationOverlay annotation) {
+    return VCS_CHANGE_MARKERS.equals(annotation.getType());
   }
 }

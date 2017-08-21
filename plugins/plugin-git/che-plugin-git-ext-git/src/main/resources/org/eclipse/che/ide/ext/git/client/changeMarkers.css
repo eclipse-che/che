@@ -1,0 +1,63 @@
+/**
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+@eval insertion org.eclipse.che.ide.api.theme.Style.theme.vcsChangeMarkerInsertionColor();
+@eval modification org.eclipse.che.ide.api.theme.Style.theme.vcsChangeMarkerModificationColor();
+@eval deletion org.eclipse.che.ide.api.theme.Style.theme.vcsChangeMarkerDeletionColor();
+
+.markerInsertion:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -14px;
+    right: 9px;
+    height: 15px;
+    background-color: insertion;
+}
+
+.markerInsertion {
+    position: relative;
+    font-size: 11px;
+    line-height: 15px;
+}
+
+.markerModification:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -14px;
+    right: 9px;
+    height: 15px;
+    background-color: modification;
+}
+
+.markerModification {
+    position: relative;
+    font-size: 11px;
+    line-height: 15px;
+}
+
+.markerDeletion:before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    z-index: 1;
+    left: -13px;
+    border-bottom: 6px solid transparent;
+    border-top: 6px solid transparent;
+    border-left: 6px solid deletion;
+}
+
+.markerDeletion {
+    position: relative;
+    font-size: 11px;
+    line-height: 15px;
+}
+

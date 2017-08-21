@@ -33,11 +33,22 @@ public interface GitResources extends ClientBundle {
     String spacing();
   }
 
+  interface ChangeMarkersCSS extends CssResource {
+    String markerInsertion();
+
+    String markerModification();
+
+    String markerDeletion();
+  }
+
   @Source({"importer/page/GitImporterPage.css", "org/eclipse/che/ide/api/ui/style.css"})
   GitImporterPageViewImpl.Style gitImporterPageStyle();
 
   @Source({"git.css", "org/eclipse/che/ide/api/ui/style.css"})
   GitCSS gitCSS();
+
+  @Source({"changeMarkers.css", "org/eclipse/che/ide/api/ui/style.css"})
+  ChangeMarkersCSS changeMarkersCSS();
 
   @Source("push/arrow.svg")
   SVGResource arrow();
