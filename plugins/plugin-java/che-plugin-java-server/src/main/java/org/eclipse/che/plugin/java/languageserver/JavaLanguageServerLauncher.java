@@ -16,6 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
+import javax.security.auth.callback.LanguageCallback;
+
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
 import org.eclipse.che.api.languageserver.registry.DocumentFilter;
@@ -61,6 +63,7 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
 
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
         ProcessBuilder processBuilder = new ProcessBuilder(launchScript.toString());
+        processBuilder.directory(launchScript.getParent().toFile());
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
         processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
         try {
