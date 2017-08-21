@@ -61,7 +61,7 @@ public class LocalCheInfrastructureProvisionerTest {
           labelsProvisioner,
           dockerApiEnvProvisioner,
           toolingServersEnvVarsProvisioner,
-            wsAgentServerConfigProvisioner
+          wsAgentServerConfigProvisioner
         };
   }
 

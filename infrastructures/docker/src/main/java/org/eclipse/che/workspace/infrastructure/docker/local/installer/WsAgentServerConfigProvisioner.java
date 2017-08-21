@@ -26,7 +26,7 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.Configuration
 /**
  * Provides volumes configuration of machine for wsagent server.
  *
- * <p/>On Windows MUST be locate in "user.home" directory in case limitation windows+docker.
+ * <p>On Windows MUST be locate in "user.home" directory in case limitation windows+docker.
  *
  * @author Alexander Garagatyi
  */

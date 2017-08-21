@@ -98,8 +98,7 @@ public class WsAgentServerConfigProvisionerTest {
     envConfig = createEnvironment(MACHINE_1_NAME, MACHINE_2_NAME, MACHINE_1_NAME);
     InternalMachineConfig machine = envConfig.getMachines().get(MACHINE_1_NAME);
     when(machine.getServers())
-        .thenReturn(
-            singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, new ServerConfigImpl()));
+        .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, new ServerConfigImpl()));
 
     // when
     provisioner.provision(envConfig, dockerEnv, RUNTIME_IDENTITY);
@@ -109,8 +108,7 @@ public class WsAgentServerConfigProvisionerTest {
   }
 
   @Test
-  public void shouldAddExtConfVolumeAndEnvVarIfMachineConfHasWsagentServerOnly()
-      throws Exception {
+  public void shouldAddExtConfVolumeAndEnvVarIfMachineConfHasWsagentServerOnly() throws Exception {
     // given
     String volumeValue = "/host/path:/container/path";
     when(extConfBindingProvider.get()).thenReturn(volumeValue);
