@@ -26,16 +26,15 @@ public interface Gutter {
   /**
    * Adds a gutter item.
    *
-   * <p>If is not overridden, then equals to {@link #addGutterItem(int, String, Element)} with
-   * <code>lineStart</code> as an argument, <code>lineEnd</code> will be ignored.
-   *
    * @param lineStart the first line of the item
    * @param lineEnd the last line of the item
    * @param gutterId the gutter identifier
    * @param element the (DOM) element to add
    */
   default void addGutterItem(int lineStart, int lineEnd, String gutterId, Element element) {
-    addGutterItem(lineStart, gutterId, element);
+    for (int i = lineStart; i <= lineEnd; i++) {
+      addGutterItem(i, gutterId, element);
+    }
   }
 
   /**
