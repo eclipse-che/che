@@ -2444,9 +2444,22 @@
       },
       "commands": [
         {
-          "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+          "commandLine": "scl enable rh-maven33 'mvn install -f ${current.project.path}'",
           "name": "build",
-          "type": "mvn"
+          "type": "mvn",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
+        },
+        {
+          "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+          "name": "clean build",
+          "type": "mvn",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
         },
         {
           "commandLine": "scl enable rh-maven33 'mvn compile spring-boot:run -f ${current.project.path}'",
