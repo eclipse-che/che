@@ -13,7 +13,6 @@ package org.eclipse.che.api.workspace.server.filters;
 import static org.eclipse.che.api.permission.server.SystemDomain.DOMAIN_ID;
 import static org.eclipse.che.api.permission.server.SystemDomain.MANAGE_SYSTEM_ACTION;
 
-
 import java.util.HashSet;
 import java.util.Set;
 import javax.inject.Inject;

@@ -12,8 +12,12 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
 import javax.sql.DataSource;
+import org.eclipse.che.api.factory.server.permissions.FactoryPermissionsFilter;
 import org.eclipse.che.api.permission.server.jpa.SystemPermissionsJpaModule;
+import org.eclipse.che.api.user.server.permissions.UserProfileServicePermissionsFilter;
+import org.eclipse.che.api.user.server.permissions.UserServicePermissionsFilter;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.activity.ActivityPermissionsFilter;
 
 @DynaModule
 public class MultiUserCheWsMasterModule extends AbstractModule {
@@ -23,8 +27,11 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
     bind(org.eclipse.che.api.system.server.SystemServicePermissionsFilter.class);
     install(new SystemPermissionsJpaModule());
-    install(new com.codenvy.api.permission.server.PermissionsModule());
+    install(new org.eclipse.che.api.permission.server.PermissionsModule());
     install(new org.eclipse.che.api.workspace.server.WorkspaceApiPermissionsModule());
-
+    bind(UserProfileServicePermissionsFilter.class);
+    bind(UserServicePermissionsFilter.class);
+    bind(FactoryPermissionsFilter.class);
+    bind(ActivityPermissionsFilter.class);
   }
 }
