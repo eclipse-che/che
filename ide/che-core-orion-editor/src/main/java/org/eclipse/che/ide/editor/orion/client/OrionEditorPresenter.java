@@ -141,6 +141,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
 import org.eclipse.che.ide.editor.orion.client.menu.EditorContextMenu;
 import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpView;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
@@ -722,8 +723,9 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     return Promises.create(
         (resolve, reject) -> {
           String vcsChangeMarker = "vcsChangeMarker";
+          OrionTextViewOverlay textView = editorWidget.getTextView();
           java.util.Optional<OrionExtRulerOverlay> optional =
-              stream(editorWidget.getTextView().getRulers())
+              stream(textView.getRulers())
                   .filter(ruler -> vcsChangeMarker.equals(ruler.getStyle().getStyleClass()))
                   .findAny();
           if (optional.isPresent()) {
@@ -737,7 +739,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                 OrionExtRulerOverlay.RulerLocation.LEFT.getLocation(),
                 OrionExtRulerOverlay.RulerOverview.PAGE.getOverview(),
                 orionExtRulerOverlay -> {
-                  editorWidget.getTextView().addRuler(orionExtRulerOverlay, 6);
+                  textView.addRuler(orionExtRulerOverlay, textView.getRulers().length + 1);
                   OrionVcsChangeMarkersRuler orionVcsChangeMarkersRuler =
                       new OrionVcsChangeMarkersRuler(
                           orionExtRulerOverlay, editorWidget.getEditor());

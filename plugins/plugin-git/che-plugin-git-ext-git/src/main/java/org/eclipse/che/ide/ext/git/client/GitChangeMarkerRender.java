@@ -16,7 +16,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import elemental.html.DivElement;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
-import org.eclipse.che.ide.api.vcs.EditType;
+import org.eclipse.che.ide.api.vcs.EditedRegionType;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
 import org.eclipse.che.ide.util.dom.Elements;
 
@@ -33,7 +33,7 @@ public class GitChangeMarkerRender implements VcsChangeMarkerRender {
   }
 
   @Override
-  public void addChangeMarker(int lineStart, int lineEnd, EditType type) {
+  public void addChangeMarker(int lineStart, int lineEnd, EditedRegionType type) {
     DivElement element = null;
     switch (type) {
       case INSERTION:

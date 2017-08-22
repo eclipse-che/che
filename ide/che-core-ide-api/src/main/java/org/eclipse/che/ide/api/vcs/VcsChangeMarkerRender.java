@@ -20,7 +20,7 @@ public interface VcsChangeMarkerRender {
    * @param lineEnd lastLine of the marker
    * @param type tpe of the marker e.g. insertion, modification, deletion
    */
-  void addChangeMarker(int lineStart, int lineEnd, EditType type);
+  void addChangeMarker(int lineStart, int lineEnd, EditedRegionType type);
 
   /** Clear all VCS change markers in the gutter. */
   void clearAllChangeMarkers();

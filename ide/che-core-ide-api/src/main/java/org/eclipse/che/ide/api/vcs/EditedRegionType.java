@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.api.vcs;
 
 /** Type of the change in the file. */
-public enum EditType {
+public enum EditedRegionType {
   INSERTION,
   MODIFICATION,
   DELETION
