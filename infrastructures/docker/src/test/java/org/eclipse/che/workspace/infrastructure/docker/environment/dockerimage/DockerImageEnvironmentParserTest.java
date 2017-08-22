@@ -46,7 +46,7 @@ public class DockerImageEnvironmentParserTest {
   public void setUp() throws Exception {
     when(environment.getRecipe()).thenReturn(recipe);
     when(environment.getMachines()).thenReturn(singletonMap(DEFAULT_MACHINE_NAME, machineConfig));
-    when(recipe.getType()).thenReturn("dockerimage");
+    when(recipe.getType()).thenReturn(DockerImageEnvironmentParser.TYPE);
     when(recipe.getContent()).thenReturn(DEFAULT_DOCKER_IMAGE);
   }
 
@@ -59,7 +59,7 @@ public class DockerImageEnvironmentParserTest {
     // given
     when(environment.getMachines())
         .thenReturn(
-            ImmutableMap.of(DEFAULT_DOCKER_IMAGE, machineConfig, "anotherMachine", machineConfig));
+            ImmutableMap.of(DEFAULT_MACHINE_NAME, machineConfig, "anotherMachine", machineConfig));
 
     // when
     parser.parse(environment);
@@ -84,7 +84,7 @@ public class DockerImageEnvironmentParserTest {
     expectedExceptionsMessageRegExp =
         "Docker image environment parser doesn't support recipe type 'dockerfile'"
   )
-  public void shouldReturnThrowExceptionInCaseEnvironmentContainsNotSupportedRecipeType()
+  public void shouldThrowExceptionInCaseEnvironmentContainsNotSupportedRecipeType()
       throws Exception {
     // given
     when(recipe.getType()).thenReturn("dockerfile");

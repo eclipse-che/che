@@ -30,6 +30,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  */
 public class DockerfileEnvironmentParser implements DockerConfigSourceSpecificEnvironmentParser {
   public static final String TYPE = "dockerfile";
+  public static final String CONTENT_TYPE = "text/x-dockerfile";
 
   @Override
   public DockerEnvironment parse(InternalEnvironment environment) throws ValidationException {
@@ -41,7 +42,7 @@ public class DockerfileEnvironmentParser implements DockerConfigSourceSpecificEn
               "Dockerfile environment parser doesn't support recipe type '%s'", recipe.getType()));
     }
 
-    if (!"text/x-dockerfile".equals(recipe.getContentType())) {
+    if (!CONTENT_TYPE.equals(recipe.getContentType())) {
       throw new ValidationException(
           format(
               "Content type '%s' of recipe of environment is unsupported."
