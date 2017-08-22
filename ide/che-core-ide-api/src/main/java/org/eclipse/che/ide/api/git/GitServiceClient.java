@@ -293,7 +293,7 @@ public interface GitServiceClient {
    * @param project project (root of GIT repository)
    * @param file path of the file
    */
-  Promise<List<EditedRegion>> getEditions(Path project, String file);
+  Promise<List<EditedRegion>> getEditedRegions(Path project, String file);
 
   /**
    * Get the file content from specified revision or branch.

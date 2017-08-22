@@ -77,16 +77,16 @@ public class GitChangesHandler {
             return;
           }
           ((HasVcsChangeMarkerRender) event.getEditor())
-              .getOrCreateVcsMarkRender()
+              .getOrCreateVcsChangeMarkerRender()
               .then(
                   render -> {
                     Path location = event.getFile().getLocation();
                     gitServiceClient
-                        .getEditions(
+                        .getEditedRegions(
                             location.uptoSegment(1), location.removeFirstSegments(1).toString())
                         .then(
                             edition -> {
-                              handleEdition(edition, render);
+                              handleEditedRegions(edition, render);
                             });
                   });
         });
@@ -144,21 +144,22 @@ public class GitChangesHandler {
               if (vcsStatus != null) {
                 tab.setTitleColor(vcsStatus.getColor());
               }
-              if (((File) editor.getEditorInput().getFile()).getVcsStatus() != MODIFIED) {
-                return;
-              }
               ((HasVcsChangeMarkerRender) editor)
-                  .getOrCreateVcsMarkRender()
+                  .getOrCreateVcsChangeMarkerRender()
                   .then(
-                      arg -> {
-                        handleEdition(dto.getEditedRegions(), arg);
+                      render -> {
+                        if (((File) editor.getEditorInput().getFile()).getVcsStatus() != MODIFIED) {
+                          render.clearAllChangeMarkers();
+                        } else {
+                          handleEditedRegions(dto.getEditedRegions(), render);
+                        }
                       });
             });
 
     appContext.getWorkspaceRoot().synchronize();
   }
 
-  private void handleEdition(List<EditedRegion> editedRegions, VcsChangeMarkerRender render) {
+  private void handleEditedRegions(List<EditedRegion> editedRegions, VcsChangeMarkerRender render) {
     render.clearAllChangeMarkers();
     editedRegions.forEach(
         edition -> {
@@ -219,11 +220,11 @@ public class GitChangesHandler {
               String file =
                   editor.getEditorInput().getFile().getLocation().removeFirstSegments(1).toString();
               ((HasVcsChangeMarkerRender) editor)
-                  .getOrCreateVcsMarkRender()
+                  .getOrCreateVcsChangeMarkerRender()
                   .then(
                       render -> {
                         if (dto.getModifiedFiles().keySet().contains(file)) {
-                          handleEdition(dto.getModifiedFiles().get(file), render);
+                          handleEditedRegions(dto.getModifiedFiles().get(file), render);
                         } else {
                           render.clearAllChangeMarkers();
                         }

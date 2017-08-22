@@ -431,7 +431,7 @@ public class GitServiceClientImpl implements GitServiceClient {
   }
 
   @Override
-  public Promise<List<EditedRegion>> getEditions(Path project, String file) {
+  public Promise<List<EditedRegion>> getEditedRegions(Path project, String file) {
     String url = getWsAgentBaseUrl() + EDITS + "?projectPath=" + project + "&file=" + file;
     return asyncRequestFactory
         .createGetRequest(url)

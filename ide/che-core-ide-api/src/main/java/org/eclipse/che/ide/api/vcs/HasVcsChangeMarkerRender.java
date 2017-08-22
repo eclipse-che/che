@@ -16,5 +16,5 @@ import org.eclipse.che.api.promises.client.Promise;
 public interface HasVcsChangeMarkerRender {
 
   /** Returns new, or created instance (if was created earlier) of {@link VcsChangeMarkerRender}. */
-  Promise<VcsChangeMarkerRender> getOrCreateVcsMarkRender();
+  Promise<VcsChangeMarkerRender> getOrCreateVcsChangeMarkerRender();
 }

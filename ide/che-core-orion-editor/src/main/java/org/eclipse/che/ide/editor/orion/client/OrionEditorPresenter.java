@@ -718,7 +718,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   }
 
   @Override
-  public Promise<VcsChangeMarkerRender> getOrCreateVcsMarkRender() {
+  public Promise<VcsChangeMarkerRender> getOrCreateVcsChangeMarkerRender() {
     return Promises.create(
         (resolve, reject) -> {
           String vcsChangeMarker = "vcsChangeMarker";

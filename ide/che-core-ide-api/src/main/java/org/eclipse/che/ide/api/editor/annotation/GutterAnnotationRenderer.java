@@ -75,8 +75,7 @@ public class GutterAnnotationRenderer
     final Position position = event.getPositionOfRemovedAnnotation(annotation);
     final TextPosition textPosition = this.document.getPositionFromIndex(position.getOffset());
     final Element annotationItem =
-        this.hasGutter.getGutterItem(
-            textPosition.getLine(), textPosition.getLine(), ANNOTATION_GUTTER);
+        this.hasGutter.getGutterItem(textPosition.getLine(), ANNOTATION_GUTTER);
     if (AnnotationGroupImpl.isAnnotation(annotationItem)) {
       final AnnotationGroup group = AnnotationGroupImpl.create(annotationItem);
       group.removeAnnotation(annotation, position.getOffset());
@@ -85,8 +84,7 @@ public class GutterAnnotationRenderer
       }
     }
     // else
-    this.hasGutter.removeGutterItem(
-        textPosition.getLine(), textPosition.getLine(), ANNOTATION_GUTTER);
+    this.hasGutter.removeGutterItem(textPosition.getLine(), ANNOTATION_GUTTER);
   }
 
   private void addAnnotationItem(final AnnotationModel model, final Annotation annotation) {
@@ -98,8 +96,7 @@ public class GutterAnnotationRenderer
     final TextPosition textPosition = this.document.getPositionFromIndex(position.getOffset());
 
     final Element annotationItem =
-        this.hasGutter.getGutterItem(
-            textPosition.getLine(), textPosition.getLine(), ANNOTATION_GUTTER);
+        this.hasGutter.getGutterItem(textPosition.getLine(), ANNOTATION_GUTTER);
 
     AnnotationGroup annotationGroup;
     if (!AnnotationGroupImpl.isAnnotation(annotationItem)) {
@@ -118,7 +115,7 @@ public class GutterAnnotationRenderer
               false);
 
       this.hasGutter.addGutterItem(
-          textPosition.getLine(), textPosition.getLine(), ANNOTATION_GUTTER, newGroup.getElement());
+          textPosition.getLine(), ANNOTATION_GUTTER, newGroup.getElement());
       annotationGroup = newGroup;
     } else {
       LOG.fine("Reuse annotation group for line " + textPosition.getLine());
