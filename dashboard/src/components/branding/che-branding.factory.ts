@@ -140,6 +140,9 @@ export class CheBranding {
    */
   registerCallback(callbackId: string, callback: Function): void {
     this.callbacks.set(callbackId, callback);
+    if (this.$rootScope.branding) {
+      callback(this.$rootScope.branding);
+    }
   }
 
   /**
@@ -206,7 +209,6 @@ export class CheBranding {
    * @returns {string}
    */
   getWebsocketContext(): string {
-    debugger;
     return this.brandingData.websocketContext ? this.brandingData.websocketContext : DEFAULT_WEBSOCKET_CONTEXT;
   }
 

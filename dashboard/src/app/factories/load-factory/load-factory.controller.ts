@@ -387,13 +387,10 @@ export class LoadFactoryController {
       }
     };
 
-    let machines = this.getMachineNames(data.config);
-    machines.forEach((machine: string) => {
-      this.jsonRpcMasterApi.subscribeEnvironmentOutput(workspaceId, machine, environmentOutputHandler);
-    });
+    this.jsonRpcMasterApi.subscribeEnvironmentOutput(workspaceId, environmentOutputHandler);
 
     let workspaceStatusHandler = (message: any) => {
-      if (message.eventType === 'ERROR' && message.workspaceId === workspaceId) {
+      if (message.status === 'ERROR' && message.workspaceId === workspaceId) {
         // need to show the error
         this.$mdDialog.show(
           this.$mdDialog.alert()
@@ -405,7 +402,7 @@ export class LoadFactoryController {
         this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
       }
 
-      if (message.eventType === 'RUNNING' && message.workspaceId === workspaceId) {
+      if (message.status === 'RUNNING' && message.workspaceId === workspaceId) {
         this.finish();
       }
     };
@@ -418,9 +415,9 @@ export class LoadFactoryController {
       }
 
       if (this.getLoadingSteps()[WS_AGENT_STEP].logs.length > 0) {
-        this.getLoadingSteps()[WS_AGENT_STEP].logs = this.getLoadingSteps()[WS_AGENT_STEP].logs + '\n' + message;
+        this.getLoadingSteps()[WS_AGENT_STEP].logs = this.getLoadingSteps()[WS_AGENT_STEP].logs + '\n' + message.text;
       } else {
-        this.getLoadingSteps()[WS_AGENT_STEP].logs = message;
+        this.getLoadingSteps()[WS_AGENT_STEP].logs = message.text;
       }
     };
 
@@ -436,22 +433,10 @@ export class LoadFactoryController {
   getDisplayMachineLog(log: any): string {
     log = angular.fromJson(log);
     if (angular.isObject(log)) {
-      return '[' + log.machineName + '] ' + log.content;
+      return '[' + log.machineName + '] ' + log.text;
     } else {
       return log;
     }
-  }
-
-  getMachineNames(workspaceConfig: any): Array<string> {
-    let machines = [];
-    let environments = workspaceConfig.environments;
-    let envName = workspaceConfig.defaultEnv;
-    let defaultEnvironment = environments[envName];
-    if (!defaultEnvironment) {
-      return machines;
-    }
-
-    return Object.keys(defaultEnvironment.machines);
   }
 
   /**
