@@ -198,6 +198,7 @@ public class PushingChangesTest {
     loader.waitOnClosed();
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
     events.clickProjectEventsTab();
+    events.clearAllMessages();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
     events.waitExpectedMessage(PUSH_MSG);
 

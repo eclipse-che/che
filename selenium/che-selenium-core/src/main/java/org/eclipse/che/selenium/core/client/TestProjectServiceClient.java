@@ -23,8 +23,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -169,7 +170,7 @@ public class TestProjectServiceClient {
     }
   }
 
-  public ProjectConfig getFirstProject(String workspaceId) throws Exception {
+  public ProjectConfigDto getFirstProject(String workspaceId) throws Exception {
     String apiUrl = getWsAgentUrl(workspaceId);
     return requestFactory
         .fromUrl(apiUrl)
@@ -212,14 +213,13 @@ public class TestProjectServiceClient {
     Workspace workspace = workspaceServiceClient.getById(workspaceId);
     workspaceServiceClient.ensureRunningStatus(workspace);
 
-    return workspace
-            .getRuntime()
-            .getMachines()
-            .get(0)
-            .getRuntime()
-            .getServers()
-            .get(String.valueOf(WS_AGENT_PORT) + "/tcp")
-            .getUrl()
-        + "/project";
+    Map<String, ? extends Machine> machines =
+        workspaceServiceClient.getById(workspaceId).getRuntime().getMachines();
+    for (Machine machine : machines.values()) {
+      if (machine.getServers().get("wsagent/http") != null) {
+        return machine.getServers().get("wsagent/http").getUrl() + "/project";
+      }
+    }
+    throw new RuntimeException("Cannot find dev machine on workspace");
   }
 }

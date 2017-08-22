@@ -20,12 +20,14 @@ import com.google.inject.Singleton;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -203,6 +205,9 @@ public class TestWorkspaceServiceClient {
         .getRuntime()
         .getMachines()
         .get(0)
+        .getServers()
+        .get(valueOf(port) + "/tcp")
+        .getUrl();
         .getRuntime()
         .getServers()
         .get(valueOf(port) + "/tcp")
@@ -222,6 +227,13 @@ public class TestWorkspaceServiceClient {
 
     ensureRunningStatus(workspace);
 
+    Map<String, ? extends Machine> machines = workspace.getRuntime().getMachines();
+    for (Machine machine : machines.values()) {
+      if (machine.getServers().get("wsagent/http") != null) {
+        return machine.getServers().get(exposedPort);
+      }
+    }
+    return null;
     return workspace.getRuntime().getDevMachine().getRuntime().getServers().get(exposedPort);
   }
 
