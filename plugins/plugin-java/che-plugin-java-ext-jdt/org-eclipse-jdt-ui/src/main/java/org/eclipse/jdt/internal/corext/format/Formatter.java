@@ -9,10 +9,10 @@
  */
 package org.eclipse.jdt.internal.corext.format;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jface.text.BadLocationException;
@@ -35,13 +35,13 @@ public class Formatter {
    * @throws IllegalArgumentException If the offset and length are not inside the string, a
    *     IllegalArgumentException is thrown.
    */
-  public List<Change> getFormatChanges(IFile formatter, String content, int offset, int length)
+  public List<Change> getFormatChanges(File formatter, String content, int offset, int length)
       throws BadLocationException, IllegalArgumentException {
     IDocument document = new Document(content);
     DocumentChangeListener documentChangeListener = new DocumentChangeListener(document);
     Map<String, String> options = null;
-    if (formatter.exists()) {
-      options = CheCodeFormatterOptions.getFormatSettingsFromFile(formatter.getLocation().toFile());
+    if (formatter != null && formatter.exists()) {
+      options = CheCodeFormatterOptions.getFormatSettingsFromFile(formatter);
     }
     TextEdit textEdit =
         CodeFormatterUtil.format2(

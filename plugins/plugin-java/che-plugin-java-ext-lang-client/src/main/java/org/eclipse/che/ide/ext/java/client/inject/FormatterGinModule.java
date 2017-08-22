@@ -8,15 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.formatter;
+package org.eclipse.che.ide.ext.java.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import javax.inject.Singleton;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
-import org.eclipse.che.ide.formatter.preferences.FormatterPreferencePagePresenter;
-import org.eclipse.che.ide.formatter.preferences.FormatterPreferencePageView;
-import org.eclipse.che.ide.formatter.preferences.FormatterPreferencePageViewImpl;
+import org.eclipse.che.ide.ext.java.client.formatter.preferences.FormatterPreferencePagePresenter;
+import org.eclipse.che.ide.ext.java.client.formatter.preferences.FormatterPreferencePageView;
+import org.eclipse.che.ide.ext.java.client.formatter.preferences.FormatterPreferencePageViewImpl;
 
 public class FormatterGinModule extends AbstractGinModule {
   @Override

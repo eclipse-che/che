@@ -55,7 +55,6 @@ import org.eclipse.che.ide.editor.EditorApiModule;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesModule;
 import org.eclipse.che.ide.factory.inject.FactoryGinModule;
 import org.eclipse.che.ide.filetypes.FileTypeApiModule;
-import org.eclipse.che.ide.formatter.FormatterGinModule;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.machine.MachineApiModule;
 import org.eclipse.che.ide.macro.MacroApiModule;
@@ -125,7 +124,6 @@ public class CoreGinModule extends AbstractGinModule {
     install(new WorkspaceEventsModule());
     install(new FactoryGinModule());
     install(new WorkspaceEventsModule());
-    install(new FormatterGinModule());
 
     // configure miscellaneous core components
     bind(StandardComponentInitializer.class).in(Singleton.class);

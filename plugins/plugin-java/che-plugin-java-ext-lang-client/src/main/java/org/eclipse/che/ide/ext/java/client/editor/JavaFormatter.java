@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.ext.java.client.formatter.JavaFormatterServiceClient;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -35,13 +36,13 @@ import org.eclipse.che.ide.util.loging.Log;
  */
 public class JavaFormatter implements ContentFormatter {
 
-  private JavaCodeAssistClient service;
+  private JavaFormatterServiceClient service;
   private AppContext appContext;
   private EditorAgent editorAgent;
 
   @Inject
   public JavaFormatter(
-      JavaCodeAssistClient service, AppContext appContext, EditorAgent editorAgent) {
+      JavaFormatterServiceClient service, AppContext appContext, EditorAgent editorAgent) {
     this.service = service;
     this.appContext = appContext;
     this.editorAgent = editorAgent;

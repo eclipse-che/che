@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.formatter.preferences;
+package org.eclipse.che.ide.ext.java.client.formatter.preferences;
 
 import org.eclipse.che.ide.api.mvp.View;
 

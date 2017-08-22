@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.formatter.preferences;
+package org.eclipse.che.ide.ext.java.client.formatter.preferences;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,13 +20,18 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
+import org.eclipse.che.ide.ui.radiobuttongroup.RadioButtonGroup;
 
 /** Implementation of the code formatter importer page. */
 @Singleton
-public class FormatterPreferencePageViewImpl implements FormatterPreferencePageView {
+public class FormatterPreferencePageViewImpl
+    implements org.eclipse.che.ide.ext.java.client.formatter.preferences
+        .FormatterPreferencePageView {
 
   interface FormatterPreferencePageViewImplUiBinder
       extends UiBinder<DockLayoutPanel, FormatterPreferencePageViewImpl> {}
@@ -35,17 +40,38 @@ public class FormatterPreferencePageViewImpl implements FormatterPreferencePageV
   private Widget widget;
   private FileUpload fileUpload;
   private String fileContent;
+  private boolean isWorkspace;
+  private RadioButtonGroup radioButtonGroup;
 
   @UiField FormPanel uploadForm;
   @UiField Label errorMessage;
   @UiField Button importButton;
+  @UiField SimplePanel targetPanel;
 
   @Inject
-  public FormatterPreferencePageViewImpl(FormatterPreferencePageViewImplUiBinder uiBinder) {
+  public FormatterPreferencePageViewImpl(
+      FormatterPreferencePageViewImplUiBinder uiBinder,
+      JavaLocalizationConstant localizationConstant) {
     widget = uiBinder.createAndBindUi(this);
     fileUpload = new FileUpload();
-    uploadForm.add(fileUpload);
+    radioButtonGroup = new RadioButtonGroup();
+    targetPanel.add(radioButtonGroup);
 
+    radioButtonGroup.addButton(
+        localizationConstant.formatterPreferencesProjectLabel(),
+        localizationConstant.formatterPreferencesProjectDescription(),
+        null,
+        event -> isWorkspace = false);
+
+    radioButtonGroup.addButton(
+        localizationConstant.formatterPreferencesWorkspaceLabel(),
+        localizationConstant.formatterPreferencesWorkspaceDescription(),
+        null,
+        event -> isWorkspace = true);
+
+    radioButtonGroup.selectButton(0);
+
+    uploadForm.add(fileUpload);
     importButton.setEnabled(false);
   }
 
@@ -60,6 +86,7 @@ public class FormatterPreferencePageViewImpl implements FormatterPreferencePageV
   }
 
   public void showDialog() {
+    radioButtonGroup.selectButton(0);
     uploadForm.remove(fileUpload);
     errorMessage.setText("");
     importButton.setEnabled(false);
@@ -87,7 +114,7 @@ public class FormatterPreferencePageViewImpl implements FormatterPreferencePageV
 
   @Override
   public boolean isWorkspaceTarget() {
-    return false;
+    return isWorkspace;
   }
 
   @UiHandler("importButton")
@@ -101,7 +128,7 @@ public class FormatterPreferencePageViewImpl implements FormatterPreferencePageV
         function readFileContent(evt) {
             // Check for the various File API support.
             if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
-                instance.@org.eclipse.che.ide.formatter.preferences.FormatterPreferencePageViewImpl::onError(Ljava/lang/String;)
+                instance.@org.eclipse.che.ide.ext.java.client.formatter.preferences.FormatterPreferencePageViewImpl::onError(Ljava/lang/String;)
                 ('The File APIs are not fully supported in this browser.');
                 return;
             }
@@ -111,11 +138,11 @@ public class FormatterPreferencePageViewImpl implements FormatterPreferencePageV
             var reader = new FileReader();
             reader.onload = function () {
                 //getting file's content
-                instance.@org.eclipse.che.ide.formatter.preferences.FormatterPreferencePageViewImpl::fileContent = reader.result;
+                instance.@org.eclipse.che.ide.ext.java.client.formatter.preferences.FormatterPreferencePageViewImpl::fileContent = reader.result;
             };
 
             reader.onerror = function (event) {
-                instance.@org.eclipse.che.ide.formatter.preferences.FormatterPreferencePageViewImpl::onError(Ljava/lang/String;)
+                instance.@org.eclipse.che.ide.ext.java.client.formatter.preferences.FormatterPreferencePageViewImpl::onError(Ljava/lang/String;)
                 ('Error reading file ' + event.target.error.code);
             };
 
