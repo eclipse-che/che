@@ -100,6 +100,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
+            <artifactId>test-ls-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
             <artifactId>unison-agent</artifactId>
         </dependency>
         <dependency>
@@ -344,15 +348,4 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>test-ls</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.eclipse.che</groupId>
-                    <artifactId>test-ls-agent</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 </project>

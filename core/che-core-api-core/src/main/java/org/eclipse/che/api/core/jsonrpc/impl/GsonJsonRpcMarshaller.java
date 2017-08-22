@@ -31,13 +31,13 @@ import org.eclipse.che.dto.server.DtoFactory;
 
 public class GsonJsonRpcMarshaller implements JsonRpcMarshaller {
   private final JsonParser jsonParser;
-    private final Gson gson;
+  private final Gson gson;
 
-    @Inject
-    public GsonJsonRpcMarshaller(JsonParser jsonParser, Gson gson) {
-        this.jsonParser = jsonParser;
-        this.gson = gson;
-    }
+  @Inject
+  public GsonJsonRpcMarshaller(JsonParser jsonParser, Gson gson) {
+    this.jsonParser = jsonParser;
+    this.gson = gson;
+  }
 
   @Override
   public String marshall(JsonRpcResponse response) {
@@ -143,30 +143,31 @@ public class GsonJsonRpcMarshaller implements JsonRpcMarshaller {
       return jsonElement;
     }
 
-        JsonArray array = new JsonArray();
-        array.add(jsonElement);
-        return array;
+    JsonArray array = new JsonArray();
+    array.add(jsonElement);
+    return array;
+  }
+
+  private JsonElement getJsonElement(Object param) {
+    if (param == null) {
+      return JsonNull.INSTANCE;
     }
-    private JsonElement getJsonElement(Object param) {
-        if (param == null) {
-            return JsonNull.INSTANCE;
-        }
-        if (param instanceof JsonElement) {
-            return cast(param);
-        }
-        if (param instanceof String) {
-            return new JsonPrimitive((String)param);
-        }
-        if (param instanceof Boolean) {
-            return new JsonPrimitive((Boolean)param);
-        }
-        if (param instanceof Double) {
-            return new JsonPrimitive((Double)param);
-        }
-        try {
-            return jsonParser.parse(DtoFactory.getInstance().toJson(param));
-        } catch (IllegalArgumentException e){
-            return gson.toJsonTree(param);
-        }
+    if (param instanceof JsonElement) {
+      return cast(param);
     }
+    if (param instanceof String) {
+      return new JsonPrimitive((String) param);
+    }
+    if (param instanceof Boolean) {
+      return new JsonPrimitive((Boolean) param);
+    }
+    if (param instanceof Double) {
+      return new JsonPrimitive((Double) param);
+    }
+    try {
+      return jsonParser.parse(DtoFactory.getInstance().toJson(param));
+    } catch (IllegalArgumentException e) {
+      return gson.toJsonTree(param);
+    }
+  }
 }

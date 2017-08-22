@@ -121,7 +121,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
           servers.add(launcher);
           String id = String.valueOf(serverId.incrementAndGet());
           initializer
-              .initialize(launcher, new CheLanguageClient(eventService, id), projectPath)
+              .initialize(launcher, clientFactory.create(id), projectPath)
               .thenAccept(
                   pair -> {
                     synchronized (initializedServers) {

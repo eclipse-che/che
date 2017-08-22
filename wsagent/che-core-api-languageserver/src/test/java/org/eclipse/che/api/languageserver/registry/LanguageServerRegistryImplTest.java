@@ -58,10 +58,8 @@ public class LanguageServerRegistryImplTest {
   @Mock private Provider<ProjectManager> pmp;
   @Mock private ProjectManager pm;
   @Mock private FolderEntry projectsRoot;
-  @Mock
-  private CheLanguageClientFactory clientFactory;
-  @Mock
-  private CheLanguageClient languageClient;
+  @Mock private CheLanguageClientFactory clientFactory;
+  @Mock private CheLanguageClient languageClient;
 
   private LanguageServerRegistryImpl registry;
   private LanguageServerDescription serverDescription;

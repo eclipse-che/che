@@ -166,6 +166,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>test-ls-agent</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>unison-agent</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -965,6 +970,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-test-ls-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-testing-classpath</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -1221,23 +1231,6 @@
                 <mdep.analyze.skip>true</mdep.analyze.skip>
                 <skipTests>true</skipTests>
             </properties>
-        </profile>
-        <profile>
-            <id>test-ls</id>
-            <dependencyManagement>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.che</groupId>
-                        <artifactId>test-ls-agent</artifactId>
-                        <version>${che.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.eclipse.che.plugin</groupId>
-                        <artifactId>che-plugin-test-ls-server</artifactId>
-                        <version>${che.version}</version>
-                    </dependency>
-                </dependencies>
-            </dependencyManagement>
         </profile>
     </profiles>
 </project>

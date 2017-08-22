@@ -34,30 +34,34 @@ public class ShowMessageJsonRpcReceiver {
         .withConsumer(params -> provider.get().processNotification(params));
   }
 
-    @Inject
-    private void subscribe(RequestTransmitter transmitter) {
-        transmitter.newRequest()
-                   .endpointId("ws-agent")
-                   .methodName("window/showMessage/subscribe")
-                   .noParams()
-                   .sendAndSkipResult();
-    }
+  @Inject
+  private void subscribe(RequestTransmitter transmitter) {
+    transmitter
+        .newRequest()
+        .endpointId("ws-agent")
+        .methodName("window/showMessage/subscribe")
+        .noParams()
+        .sendAndSkipResult();
+  }
 
-    @Inject
-    private void configureShowMessageRequestReceiver(Provider<ShowMessageRequestProcessor> provider, RequestHandlerConfigurator configurator) {
-        configurator.newConfiguration()
-                    .methodName("window/showMessageRequest")
-                    .paramsAsDto(ShowMessageRequestParams.class)
-                    .resultAsPromiseDto(MessageActionItem.class)
-                    .withPromise(params -> provider.get().processNotificationRequest(params));
-    }
+  @Inject
+  private void configureShowMessageRequestReceiver(
+      Provider<ShowMessageRequestProcessor> provider, RequestHandlerConfigurator configurator) {
+    configurator
+        .newConfiguration()
+        .methodName("window/showMessageRequest")
+        .paramsAsDto(ShowMessageRequestParams.class)
+        .resultAsPromiseDto(MessageActionItem.class)
+        .withPromise(params -> provider.get().processNotificationRequest(params));
+  }
 
-    @Inject
-    private void subscribeShowMessageRequest(RequestTransmitter transmitter) {
-        transmitter.newRequest()
-                   .endpointId("ws-agent")
-                   .methodName("window/showMessageRequest/subscribe")
-                   .noParams()
-                   .sendAndSkipResult();
-    }
+  @Inject
+  private void subscribeShowMessageRequest(RequestTransmitter transmitter) {
+    transmitter
+        .newRequest()
+        .endpointId("ws-agent")
+        .methodName("window/showMessageRequest/subscribe")
+        .noParams()
+        .sendAndSkipResult();
+  }
 }

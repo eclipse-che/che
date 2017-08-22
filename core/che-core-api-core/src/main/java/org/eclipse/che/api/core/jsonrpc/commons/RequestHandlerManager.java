@@ -47,7 +47,8 @@ public class RequestHandlerManager {
 
   private final Map<String, Category> methodToCategory = new ConcurrentHashMap<>();
   private final Map<String, OneToOneHandler> oneToOneHandlers = new ConcurrentHashMap<>();
-  private final Map<String, OneToPromiseOneHandler> oneToPromiseOneHandlers = new ConcurrentHashMap<>();
+  private final Map<String, OneToPromiseOneHandler> oneToPromiseOneHandlers =
+      new ConcurrentHashMap<>();
   private final Map<String, OneToManyHandler> oneToManyHandlers = new ConcurrentHashMap<>();
   private final Map<String, OneToNoneHandler> oneToNoneHandlers = new ConcurrentHashMap<>();
   private final Map<String, ManyToOneHandler> manyToOneHandlers = new ConcurrentHashMap<>();
@@ -79,16 +80,19 @@ public class RequestHandlerManager {
     oneToOneHandlers.put(method, new OneToOneHandler<>(pClass, rClass, biFunction));
   }
 
-    public synchronized <P, R> void registerOneToPromiseOne(String method, Class<P> pClass, Class<R> rClass,
-                                               BiFunction<String, P, JsonRpcPromise<R>> function) {
-        mustNotBeRegistered(method);
-        methodToCategory.put(method, Category.ONE_TO_PROMISE_ONE);
-        oneToPromiseOneHandlers.put(method, new OneToPromiseOneHandler<>(pClass, rClass, function));
-    }
+  public synchronized <P, R> void registerOneToPromiseOne(
+      String method,
+      Class<P> pClass,
+      Class<R> rClass,
+      BiFunction<String, P, JsonRpcPromise<R>> function) {
+    mustNotBeRegistered(method);
+    methodToCategory.put(method, Category.ONE_TO_PROMISE_ONE);
+    oneToPromiseOneHandlers.put(method, new OneToPromiseOneHandler<>(pClass, rClass, function));
+  }
 
-    public synchronized <P, R> void registerOneToMany(String method, Class<P> pClass, Class<R> rClass,
-                                                      BiFunction<String, P, List<R>> biFunction) {
-        mustNotBeRegistered(method);
+  public synchronized <P, R> void registerOneToMany(
+      String method, Class<P> pClass, Class<R> rClass, BiFunction<String, P, List<R>> biFunction) {
+    mustNotBeRegistered(method);
 
     methodToCategory.put(method, Category.ONE_TO_MANY);
     oneToManyHandlers.put(method, new OneToManyHandler<>(pClass, rClass, biFunction));
@@ -281,15 +285,17 @@ public class RequestHandlerManager {
     String message = marshaller.marshall(jsonRpcResponse);
     transmitter.transmit(endpointId, message);
   }
-    private void transmitPromiseOne(String endpointId, String requestId, JsonRpcPromise<Object> promise) {
-        promise.onSuccess(result -> transmitOne(endpointId, requestId, result));
-        promise.onFailure(jsonRpcError -> {
-            JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(requestId, null, jsonRpcError);
-            String message = marshaller.marshall(jsonRpcResponse);
-            transmitter.transmit(endpointId, message);
-        });
-    }
 
+  private void transmitPromiseOne(
+      String endpointId, String requestId, JsonRpcPromise<Object> promise) {
+    promise.onSuccess(result -> transmitOne(endpointId, requestId, result));
+    promise.onFailure(
+        jsonRpcError -> {
+          JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(requestId, null, jsonRpcError);
+          String message = marshaller.marshall(jsonRpcResponse);
+          transmitter.transmit(endpointId, message);
+        });
+  }
 
   public enum Category {
     ONE_TO_ONE,
@@ -321,27 +327,28 @@ public class RequestHandlerManager {
     }
   }
 
-    private class OneToPromiseOneHandler<P, R> {
-        final private Class<P>                                 pClass;
-        final private Class<R>                                 rClass;
-        private BiFunction<String, P, JsonRpcPromise<R>> function;
+  private class OneToPromiseOneHandler<P, R> {
+    private final Class<P> pClass;
+    private final Class<R> rClass;
+    private BiFunction<String, P, JsonRpcPromise<R>> function;
 
-        private OneToPromiseOneHandler(Class<P> pClass, Class<R> rClass, BiFunction<String, P, JsonRpcPromise<R>> function) {
-            this.pClass = pClass;
-            this.rClass = rClass;
-            this.function = function;
-        }
-
-        private JsonRpcPromise<R> handle(String endpointId, JsonRpcParams params) {
-            P dto = dtoComposer.composeOne(params, pClass);
-            return function.apply(endpointId, dto);
-        }
+    private OneToPromiseOneHandler(
+        Class<P> pClass, Class<R> rClass, BiFunction<String, P, JsonRpcPromise<R>> function) {
+      this.pClass = pClass;
+      this.rClass = rClass;
+      this.function = function;
     }
 
-    private class OneToManyHandler<P, R> {
-        final private Class<P>                       pClass;
-        final private Class<R>                       rClass;
-        final private BiFunction<String, P, List<R>> biFunction;
+    private JsonRpcPromise<R> handle(String endpointId, JsonRpcParams params) {
+      P dto = dtoComposer.composeOne(params, pClass);
+      return function.apply(endpointId, dto);
+    }
+  }
+
+  private class OneToManyHandler<P, R> {
+    private final Class<P> pClass;
+    private final Class<R> rClass;
+    private final BiFunction<String, P, List<R>> biFunction;
 
     private OneToManyHandler(
         Class<P> pClass, Class<R> rClass, BiFunction<String, P, List<R>> biFunction) {

@@ -37,13 +37,6 @@
         <module>ls-python</module>
         <module>ls-typescript</module>
         <module>ls-csharp</module>
+        <module>test-ls</module>
     </modules>
-    <profiles>
-        <profile>
-            <id>test-ls</id>
-            <modules>
-                <module>test-ls</module>
-            </modules>
-        </profile>
-    </profiles>
 </project>
