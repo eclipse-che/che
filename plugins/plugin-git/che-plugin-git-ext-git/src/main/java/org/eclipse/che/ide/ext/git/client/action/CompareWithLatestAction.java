@@ -10,12 +10,21 @@
  */
 package org.eclipse.che.ide.ext.git.client.action;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.ide.api.git.GitServiceClient;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -85,36 +94,27 @@ public class CompareWithLatestAction extends GitAction {
             .removeTrailingSeparator()
             .toString();
 
-    service
-        .diff(
-            project.getLocation(),
-            selectedItemPath.isEmpty() ? null : singletonList(selectedItemPath),
-            NAME_STATUS,
-            false,
-            0,
-            REVISION,
-            false)
-        .then(
-            diff -> {
-              if (diff.isEmpty()) {
-                dialogFactory
-                    .createMessageDialog(
-                        locale.compareMessageIdenticalContentTitle(),
-                        locale.compareMessageIdenticalContentText(),
-                        null)
-                    .show();
-              } else {
-                AlteredFiles alteredFiles = new AlteredFiles(project, diff);
-                if (alteredFiles.getFilesQuantity() == 1) {
-                  comparePresenter.showCompareWithLatest(alteredFiles, null, REVISION);
-                } else {
-                  changesListPresenter.show(alteredFiles, REVISION, null);
-                }
-              }
-            })
-        .catchError(
-            arg -> {
-              notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
-            });
-  }
+        service.diff(project.getLocation(),
+                     selectedItemPath.isEmpty() ? null : singletonList(selectedItemPath), NAME_STATUS, false, 0, REVISION, false)
+               .then(diff -> {
+                   if (diff.isEmpty()) {
+                       dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
+                                                         locale.compareMessageIdenticalContentText(), null).show();
+                   } else {
+                       AlteredFiles alteredFiles = new AlteredFiles(project, diff);
+                       if (alteredFiles.getFilesQuantity() == 1) {
+
+                                   comparePresenter.showCompareWithLatest(alteredFiles, null,
+                                                                          REVISION);
+                               }
+                            else {
+
+                           changesListPresenter.show(alteredFiles, REVISION, null);
+                       }
+                   }
+               })
+               .catchError(arg -> {
+                   notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
+               });
+    }
 }

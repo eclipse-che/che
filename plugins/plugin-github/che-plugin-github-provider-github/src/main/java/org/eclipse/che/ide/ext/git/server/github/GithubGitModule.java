@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.git.server.github;
 
-import org.eclipse.che.api.git.CredentialsProvider;
-import org.eclipse.che.inject.DynaModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+import org.eclipse.che.api.git.CredentialsProvider;
+import org.eclipse.che.inject.DynaModule;
 
 /**
  * The module that contains configuration of the server side part of the Git extension.
@@ -23,10 +23,11 @@ import com.google.inject.multibindings.Multibinder;
 @DynaModule
 public class GithubGitModule extends AbstractModule {
 
-    /** {@inheritDoc} */
-    @Override
-    protected void configure() {
-        Multibinder.newSetBinder(binder(), CredentialsProvider.class).addBinding().to(GitHubOAuthCredentialProvider.class);
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected void configure() {
+    Multibinder.newSetBinder(binder(), CredentialsProvider.class)
+        .addBinding()
+        .to(GitHubOAuthCredentialProvider.class);
+  }
 }
-

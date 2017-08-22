@@ -10,6 +10,25 @@
  */
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.MODIFIED;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.DiffType;
@@ -146,20 +165,16 @@ public class CommitPresenterTest extends BaseTest {
     verify(dialog).show();
   }
 
-  @Test
-  public void shouldShowDialog() throws Exception {
-    final String diff = "M\tfile";
-    final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
-
-    ConfirmDialog dialog = mock(ConfirmDialog.class);
-    when(dialogFactory.createConfirmDialog(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyString(),
-            any(ConfirmCallback.class),
-            eq(null)))
-        .thenReturn(dialog);
+    @Test
+    public void shouldShowDialog() throws Exception {
+        final String diff = "M\tfile";
+    final AlteredFiles alteredFiles = new AlteredFiles(project, diff);ConfirmDialog dialog = mock(ConfirmDialog.class);
+        when(dialogFactory.createConfirmDialog(anyString(),
+                                               anyString(),
+                                               anyString(),
+                                               anyString(),
+                                               any(ConfirmCallback.class),
+                                               eq(null))).thenReturn(dialog);
 
     presenter.showDialog(project);
     verify(stringPromise).then(stringCaptor.capture());
@@ -177,17 +192,15 @@ public class CommitPresenterTest extends BaseTest {
     verify(view).setMarkedCheckBoxes(anySet());
   }
 
-  @Test
-  public void shouldShowUntrackedFilesOnInitialCommit() throws Exception {
-    final String diff = "A\tfile";
-    final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
-
-    PromiseError error = mock(PromiseError.class);
-    ServerException exception = mock(ServerException.class);
-    when(exception.getErrorCode()).thenReturn(ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED);
-    when(error.getCause()).thenReturn(exception);
-    Status status = mock(Status.class);
-    when(status.getUntracked()).thenReturn(singletonList("file"));
+    @Test
+    public void shouldShowUntrackedFilesOnInitialCommit() throws Exception {
+        final String diff = "A\tfile";
+    final AlteredFiles alteredFiles = new AlteredFiles(project, diff);PromiseError error = mock(PromiseError.class);
+        ServerException exception = mock(ServerException.class);
+        when(exception.getErrorCode()).thenReturn(ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED);
+        when(error.getCause()).thenReturn(exception);
+        Status status = mock(Status.class);
+        when(status.getUntracked()).thenReturn(singletonList("file"));
 
     presenter.showDialog(project);
     verify(stringPromise).then(stringCaptor.capture());

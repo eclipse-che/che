@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,27 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.maven.server.core;
 
-import com.google.inject.Singleton;
+import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_PERCENT_METHOD;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_PERCENT_UNDEFINED_METHOD;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_START_STOP_METHOD;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_SUBSCRIBE;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_TEXT_METHOD;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_UNSUBSCRIBE;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_UPDATE_METHOD;
+import static org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent.TYPE.PERCENT;
+import static org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent.TYPE.PERCENT_UNDEFINED;
+import static org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent.TYPE.START_STOP;
 
+import com.google.inject.Singleton;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
@@ -29,144 +45,144 @@ import org.eclipse.che.plugin.maven.shared.event.MavenStartStopEvent;
 import org.eclipse.che.plugin.maven.shared.event.MavenTextMessageEvent;
 import org.eclipse.che.plugin.maven.shared.event.MavenUpdateEvent;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Set;
-
-import static com.google.common.collect.Sets.newConcurrentHashSet;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_SUBSCRIBE;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_UNSUBSCRIBE;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_PERCENT_METHOD;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_PERCENT_UNDEFINED_METHOD;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_START_STOP_METHOD;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_TEXT_METHOD;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_UPDATE_METHOD;
-import static org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent.TYPE.PERCENT;
-import static org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent.TYPE.PERCENT_UNDEFINED;
-import static org.eclipse.che.plugin.maven.shared.event.MavenOutputEvent.TYPE.START_STOP;
-
-/**
- * Send maven events using JSON RPC to the clients.
- */
+/** Send maven events using JSON RPC to the clients. */
 @Singleton
 public class MavenJsonRpcCommunication implements EventSubscriber<MavenOutputEvent> {
-    private final Set<String> endpointIds = newConcurrentHashSet();
-    private EventService       eventService;
-    private RequestTransmitter transmitter;
+  private final Set<String> endpointIds = newConcurrentHashSet();
+  private EventService eventService;
+  private RequestTransmitter transmitter;
 
-    @Inject
-    public MavenJsonRpcCommunication(EventService eventService, RequestTransmitter transmitter) {
-        this.eventService = eventService;
-        this.transmitter = transmitter;
+  @Inject
+  public MavenJsonRpcCommunication(EventService eventService, RequestTransmitter transmitter) {
+    this.eventService = eventService;
+    this.transmitter = transmitter;
+  }
+
+  @PostConstruct
+  private void subscribe() {
+    eventService.subscribe(this);
+  }
+
+  @PreDestroy
+  private void unsubscribe() {
+    eventService.unsubscribe(this);
+  }
+
+  @Inject
+  private void configureHandlers(RequestHandlerConfigurator configurator) {
+    configurator
+        .newConfiguration()
+        .methodName(MAVEN_OUTPUT_SUBSCRIBE)
+        .noParams()
+        .noResult()
+        .withConsumer(endpointIds::add);
+
+    configurator
+        .newConfiguration()
+        .methodName(MAVEN_OUTPUT_UNSUBSCRIBE)
+        .noParams()
+        .noResult()
+        .withConsumer(endpointIds::remove);
+  }
+
+  @Override
+  public void onEvent(MavenOutputEvent event) {
+    switch (event.getType()) {
+      case TEXT:
+        sendTextNotification((MavenTextMessageEvent) event);
+        break;
+      case UPDATE:
+        sendUpdateNotification((MavenUpdateEvent) event);
+        break;
+      case START_STOP:
+        sendStartStopNotification((MavenStartStopEvent) event);
+        break;
+      case PERCENT:
+        senPercentNotification((MavenPercentMessageEvent) event);
+        break;
+      case PERCENT_UNDEFINED:
+        sendPercentUndefinedNotification((MavenPercentUndefinedEvent) event);
+        break;
     }
+  }
 
-    @PostConstruct
-    private void subscribe() {
-        eventService.subscribe(this);
-    }
+  private void senPercentNotification(MavenPercentMessageEvent event) {
+    PercentMessageDto percentMessageDto =
+        DtoFactory.newDto(PercentMessageDto.class).withPercent(event.getPercent());
+    percentMessageDto.setType(PERCENT);
 
-    @PreDestroy
-    private void unsubscribe() {
-        eventService.unsubscribe(this);
-    }
+    endpointIds.forEach(
+        it ->
+            transmitter
+                .newRequest()
+                .endpointId(it)
+                .methodName(MAVEN_OUTPUT_PERCENT_METHOD)
+                .paramsAsDto(percentMessageDto)
+                .sendAndSkipResult());
+  }
 
-    @Inject
-    private void configureHandlers(RequestHandlerConfigurator configurator) {
-        configurator.newConfiguration()
-                    .methodName(MAVEN_OUTPUT_SUBSCRIBE)
-                    .noParams()
-                    .noResult()
-                    .withConsumer(endpointIds::add);
+  private void sendPercentUndefinedNotification(MavenPercentUndefinedEvent event) {
+    PercentUndefinedMessageDto percentUndefinedMessageDto =
+        DtoFactory.newDto(PercentUndefinedMessageDto.class);
+    percentUndefinedMessageDto.setPercentUndefined(event.isPercentUndefined());
+    percentUndefinedMessageDto.setType(PERCENT_UNDEFINED);
 
-        configurator.newConfiguration()
-                    .methodName(MAVEN_OUTPUT_UNSUBSCRIBE)
-                    .noParams()
-                    .noResult()
-                    .withConsumer(endpointIds::remove);
-    }
+    endpointIds.forEach(
+        it ->
+            transmitter
+                .newRequest()
+                .endpointId(it)
+                .methodName(MAVEN_OUTPUT_PERCENT_UNDEFINED_METHOD)
+                .paramsAsDto(percentUndefinedMessageDto)
+                .sendAndSkipResult());
+  }
 
-    @Override
-    public void onEvent(MavenOutputEvent event) {
-        switch (event.getType()) {
-            case TEXT:
-                sendTextNotification((MavenTextMessageEvent)event);
-                break;
-            case UPDATE:
-                sendUpdateNotification((MavenUpdateEvent)event);
-                break;
-            case START_STOP:
-                sendStartStopNotification((MavenStartStopEvent)event);
-                break;
-            case PERCENT:
-                senPercentNotification((MavenPercentMessageEvent)event);
-                break;
-            case PERCENT_UNDEFINED:
-                sendPercentUndefinedNotification((MavenPercentUndefinedEvent)event);
-                break;
-        }
-    }
+  private void sendStartStopNotification(MavenStartStopEvent event) {
+    StartStopNotification startEventDto = DtoFactory.newDto(StartStopNotification.class);
+    startEventDto.setStart(event.isStart());
+    startEventDto.setType(START_STOP);
 
-    private void senPercentNotification(MavenPercentMessageEvent event) {
-        PercentMessageDto percentMessageDto = DtoFactory.newDto(PercentMessageDto.class).withPercent(event.getPercent());
-        percentMessageDto.setType(PERCENT);
+    endpointIds.forEach(
+        it ->
+            transmitter
+                .newRequest()
+                .endpointId(it)
+                .methodName(MAVEN_OUTPUT_START_STOP_METHOD)
+                .paramsAsDto(startEventDto)
+                .sendAndSkipResult());
+  }
 
-        endpointIds.forEach(it -> transmitter.newRequest()
-                                             .endpointId(it)
-                                             .methodName(MAVEN_OUTPUT_PERCENT_METHOD)
-                                             .paramsAsDto(percentMessageDto)
-                                             .sendAndSkipResult());
-    }
+  private void sendUpdateNotification(MavenUpdateEvent event) {
+    ProjectsUpdateMessage updateEventDto = DtoFactory.newDto(ProjectsUpdateMessage.class);
+    List<String> updatedPaths = event.getUpdatedProjects();
+    List<String> removedPaths = event.getRemovedProjects();
+    updateEventDto.setUpdatedProjects(updatedPaths);
+    updateEventDto.setDeletedProjects(removedPaths);
 
-    private void sendPercentUndefinedNotification(MavenPercentUndefinedEvent event) {
-        PercentUndefinedMessageDto percentUndefinedMessageDto = DtoFactory.newDto(PercentUndefinedMessageDto.class);
-        percentUndefinedMessageDto.setPercentUndefined(event.isPercentUndefined());
-        percentUndefinedMessageDto.setType(PERCENT_UNDEFINED);
+    updateEventDto.setType(MavenOutputEvent.TYPE.UPDATE);
 
-        endpointIds.forEach(it -> transmitter.newRequest()
-                                             .endpointId(it)
-                                             .methodName(MAVEN_OUTPUT_PERCENT_UNDEFINED_METHOD)
-                                             .paramsAsDto(percentUndefinedMessageDto)
-                                             .sendAndSkipResult());
-    }
+    endpointIds.forEach(
+        it ->
+            transmitter
+                .newRequest()
+                .endpointId(it)
+                .methodName(MAVEN_OUTPUT_UPDATE_METHOD)
+                .paramsAsDto(updateEventDto)
+                .sendAndSkipResult());
+  }
 
-    private void sendStartStopNotification(MavenStartStopEvent event) {
-        StartStopNotification startEventDto = DtoFactory.newDto(StartStopNotification.class);
-        startEventDto.setStart(event.isStart());
-        startEventDto.setType(START_STOP);
+  private void sendTextNotification(MavenTextMessageEvent event) {
+    TextMessageDto notification =
+        DtoFactory.newDto(TextMessageDto.class).withText(event.getMessage());
+    notification.setType(MavenOutputEvent.TYPE.TEXT);
 
-        endpointIds.forEach(it -> transmitter.newRequest()
-                                             .endpointId(it)
-                                             .methodName(MAVEN_OUTPUT_START_STOP_METHOD)
-                                             .paramsAsDto(startEventDto)
-                                             .sendAndSkipResult());
-    }
-
-    private void sendUpdateNotification(MavenUpdateEvent event) {
-        ProjectsUpdateMessage updateEventDto = DtoFactory.newDto(ProjectsUpdateMessage.class);
-        List<String> updatedPaths = event.getUpdatedProjects();
-        List<String> removedPaths = event.getRemovedProjects();
-        updateEventDto.setUpdatedProjects(updatedPaths);
-        updateEventDto.setDeletedProjects(removedPaths);
-
-        updateEventDto.setType(MavenOutputEvent.TYPE.UPDATE);
-
-        endpointIds.forEach(it -> transmitter.newRequest()
-                                             .endpointId(it)
-                                             .methodName(MAVEN_OUTPUT_UPDATE_METHOD)
-                                             .paramsAsDto(updateEventDto)
-                                             .sendAndSkipResult());
-    }
-
-    private void sendTextNotification(MavenTextMessageEvent event) {
-        TextMessageDto notification = DtoFactory.newDto(TextMessageDto.class).withText(event.getMessage());
-        notification.setType(MavenOutputEvent.TYPE.TEXT);
-
-        endpointIds.forEach(it -> transmitter.newRequest()
-                                             .endpointId(it)
-                                             .methodName(MAVEN_OUTPUT_TEXT_METHOD)
-                                             .paramsAsDto(notification)
-                                             .sendAndSkipResult());
-    }
+    endpointIds.forEach(
+        it ->
+            transmitter
+                .newRequest()
+                .endpointId(it)
+                .methodName(MAVEN_OUTPUT_TEXT_METHOD)
+                .paramsAsDto(notification)
+                .sendAndSkipResult());
+  }
 }

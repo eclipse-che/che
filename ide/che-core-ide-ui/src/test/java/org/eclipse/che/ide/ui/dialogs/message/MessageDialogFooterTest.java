@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,21 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ui.dialogs.message;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import com.google.gwt.event.dom.client.ClickEvent;
 import org.eclipse.che.ide.ui.UILocalizationConstant;
 import org.eclipse.che.ide.ui.dialogs.BaseTest;
-import com.google.gwt.event.dom.client.ClickEvent;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.eclipse.che.ide.ui.dialogs.message.MessageDialogView.ActionDelegate;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 /**
  * Testing {@link MessageDialogFooter} functionality.
@@ -29,24 +27,21 @@ import static org.mockito.Mockito.verify;
  * @author Artem Zatsarynnyi
  */
 public class MessageDialogFooterTest extends BaseTest {
-    @Mock
-    private UILocalizationConstant           uiLocalizationConstant;
-    @Mock
-    private MessageDialogView.ActionDelegate actionDelegate;
-    @InjectMocks
-    private MessageDialogFooter              footer;
+  @Mock private UILocalizationConstant uiLocalizationConstant;
+  @Mock private MessageDialogView.ActionDelegate actionDelegate;
+  @InjectMocks private MessageDialogFooter footer;
 
-    @Before
-    @Override
-    public void setUp() {
-        super.setUp();
-        footer.setDelegate(actionDelegate);
-    }
+  @Before
+  @Override
+  public void setUp() {
+    super.setUp();
+    footer.setDelegate(actionDelegate);
+  }
 
-    @Test
-    public void shouldCallAcceptedOnOkClicked() throws Exception {
-        footer.handleOkClick(mock(ClickEvent.class));
+  @Test
+  public void shouldCallAcceptedOnOkClicked() throws Exception {
+    footer.handleOkClick(mock(ClickEvent.class));
 
-        verify(actionDelegate).accepted();
-    }
+    verify(actionDelegate).accepted();
+  }
 }

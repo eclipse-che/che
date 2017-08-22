@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.languageserver.ide.navigation.references;
 
-import com.google.inject.Inject;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
+import com.google.inject.Inject;
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -31,74 +35,73 @@ import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
-
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 public class FindReferencesAction extends AbstractPerspectiveAction {
 
-    private final EditorAgent               editorAgent;
-    private final TextDocumentServiceClient client;
-    private final DtoFactory                dtoFactory;
-    private final OpenLocationPresenter     presenter;
+  private final EditorAgent editorAgent;
+  private final TextDocumentServiceClient client;
+  private final DtoFactory dtoFactory;
+  private final OpenLocationPresenter presenter;
 
-    @Inject
-    public FindReferencesAction(EditorAgent editorAgent, OpenLocationPresenterFactory presenterFactory,
-                                TextDocumentServiceClient client, DtoFactory dtoFactory) {
-        super(singletonList(PROJECT_PERSPECTIVE_ID), "Find References", "Find References", null, null);
-        this.editorAgent = editorAgent;
-        this.client = client;
-        this.dtoFactory = dtoFactory;
-        presenter = presenterFactory.create("Find References");
+  @Inject
+  public FindReferencesAction(
+      EditorAgent editorAgent,
+      OpenLocationPresenterFactory presenterFactory,
+      TextDocumentServiceClient client,
+      DtoFactory dtoFactory) {
+    super(singletonList(PROJECT_PERSPECTIVE_ID), "Find References", "Find References", null, null);
+    this.editorAgent = editorAgent;
+    this.client = client;
+    this.dtoFactory = dtoFactory;
+    presenter = presenterFactory.create("Find References");
+  }
+
+  @Override
+  public void updateInPerspective(@NotNull ActionEvent event) {
+    EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+    if (activeEditor instanceof TextEditor) {
+      TextEditorConfiguration configuration = ((TextEditor) activeEditor).getConfiguration();
+      if (configuration instanceof LanguageServerEditorConfiguration) {
+        ServerCapabilities capabilities =
+            ((LanguageServerEditorConfiguration) configuration).getServerCapabilities();
+        event
+            .getPresentation()
+            .setEnabledAndVisible(
+                capabilities.getReferencesProvider() != null
+                    && capabilities.getReferencesProvider());
+        return;
+      }
     }
+    event.getPresentation().setEnabledAndVisible(false);
+  }
 
-    @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
-        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if (activeEditor instanceof TextEditor) {
-            TextEditorConfiguration configuration = ((TextEditor)activeEditor).getConfiguration();
-            if (configuration instanceof LanguageServerEditorConfiguration) {
-                ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
-                event.getPresentation()
-                     .setEnabledAndVisible(capabilities.getReferencesProvider() != null && capabilities.getReferencesProvider());
-                return;
-            }
-        }
-        event.getPresentation().setEnabledAndVisible(false);
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+
+    //TODO replace this
+    if (!(activeEditor instanceof TextEditor)) {
+      return;
     }
+    TextEditor textEditor = ((TextEditor) activeEditor);
+    String path = activeEditor.getEditorInput().getFile().getLocation().toString();
+    ReferenceParams paramsDTO = dtoFactory.createDto(ReferenceParams.class);
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+    Position Position = dtoFactory.createDto(Position.class);
+    Position.setLine(textEditor.getCursorPosition().getLine());
+    Position.setCharacter(textEditor.getCursorPosition().getCharacter());
 
-        //TODO replace this
-        if (!(activeEditor instanceof TextEditor)) {
-            return;
-        }
-        TextEditor textEditor = ((TextEditor)activeEditor);
-        String path = activeEditor.getEditorInput().getFile().getLocation().toString();
-        ReferenceParams paramsDTO = dtoFactory.createDto(ReferenceParams.class);
+    TextDocumentIdentifier identifierDTO = dtoFactory.createDto(TextDocumentIdentifier.class);
+    identifierDTO.setUri(path);
 
-        Position Position = dtoFactory.createDto(Position.class);
-        Position.setLine(textEditor.getCursorPosition().getLine());
-        Position.setCharacter(textEditor.getCursorPosition().getCharacter());
+    ReferenceContext contextDTO = dtoFactory.createDto(ReferenceContext.class);
+    contextDTO.setIncludeDeclaration(true);
 
-        TextDocumentIdentifier identifierDTO = dtoFactory.createDto(TextDocumentIdentifier.class);
-        identifierDTO.setUri(path);
-
-        ReferenceContext contextDTO = dtoFactory.createDto(ReferenceContext.class);
-        contextDTO.setIncludeDeclaration(true);
-
-        paramsDTO.setUri(path);
-        paramsDTO.setPosition(Position);
-        paramsDTO.setTextDocument(identifierDTO);
-        paramsDTO.setContext(contextDTO);
-        Promise<List<Location>> promise = client.references(paramsDTO);
-        presenter.openLocation(promise);
-    }
+    paramsDTO.setUri(path);
+    paramsDTO.setPosition(Position);
+    paramsDTO.setTextDocument(identifierDTO);
+    paramsDTO.setContext(contextDTO);
+    Promise<List<Location>> promise = client.references(paramsDTO);
+    presenter.openLocation(promise);
+  }
 }

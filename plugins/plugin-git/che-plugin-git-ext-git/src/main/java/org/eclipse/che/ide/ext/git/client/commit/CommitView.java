@@ -10,14 +10,13 @@
  */
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import java.util.List;
+import java.util.Set;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.resource.Path;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.Set;
 
 /**
  * The view of {@link CommitPresenter}.
@@ -49,9 +48,9 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
     /** Set the commit message for an amend commit. */
     void setAmendCommitMessage();
 
-    /** Get list of changed files paths. */
-    List<String> getChangedFiles();
-  }
+        /** Get list of changed files paths. */
+        List<String> getChangedFiles();
+    }
 
   /** @return entered message */
   @NotNull

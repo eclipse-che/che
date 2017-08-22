@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.java.client.search.node;
-
-import elemental.html.SpanElement;
 
 import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
+import elemental.html.SpanElement;
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -47,9 +47,6 @@ import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.eclipse.che.ide.util.dom.Elements;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
-
 /**
  * Node represent Match for find usages search.
  *
@@ -57,144 +54,167 @@ import java.util.List;
  */
 public class MatchNode extends AbstractPresentationNode implements HasAction {
 
-    private       TreeStyles            styles;
-    private       JavaResources         resources;
-    private       EditorAgent           editorAgent;
-    private       AppContext            appContext;
-    private       Match                 match;
-    private       CompilationUnit       compilationUnit;
-    private       ClassFile             classFile;
-    private final JavaNavigationService service;
+  private TreeStyles styles;
+  private JavaResources resources;
+  private EditorAgent editorAgent;
+  private AppContext appContext;
+  private Match match;
+  private CompilationUnit compilationUnit;
+  private ClassFile classFile;
+  private final JavaNavigationService service;
 
-    @Inject
-    public MatchNode(TreeStyles styles,
-                     JavaResources resources,
-                     EditorAgent editorAgent,
-                     AppContext appContext,
-                     @Assisted Match match,
-                     @Nullable @Assisted CompilationUnit compilationUnit,
-                     @Nullable @Assisted ClassFile classFile,
-                     JavaNavigationService service) {
-        this.styles = styles;
-        this.resources = resources;
-        this.editorAgent = editorAgent;
-        this.appContext = appContext;
-        this.match = match;
-        this.compilationUnit = compilationUnit;
-        this.classFile = classFile;
-        this.service = service;
+  @Inject
+  public MatchNode(
+      TreeStyles styles,
+      JavaResources resources,
+      EditorAgent editorAgent,
+      AppContext appContext,
+      @Assisted Match match,
+      @Nullable @Assisted CompilationUnit compilationUnit,
+      @Nullable @Assisted ClassFile classFile,
+      JavaNavigationService service) {
+    this.styles = styles;
+    this.resources = resources;
+    this.editorAgent = editorAgent;
+    this.appContext = appContext;
+    this.match = match;
+    this.compilationUnit = compilationUnit;
+    this.classFile = classFile;
+    this.service = service;
+  }
+
+  @Override
+  protected Promise<List<Node>> getChildrenImpl() {
+    return null;
+  }
+
+  @Override
+  public void updatePresentation(@NotNull NodePresentation presentation) {
+    SpanElement spanElement =
+        Elements.createSpanElement(styles.styles().presentableTextContainer());
+
+    SpanElement lineNumberElement = Elements.createSpanElement();
+    lineNumberElement.setInnerHTML(
+        String.valueOf(match.getMatchLineNumber() + 1) + ":&nbsp;&nbsp;&nbsp;");
+    spanElement.appendChild(lineNumberElement);
+
+    SpanElement textElement = Elements.createSpanElement();
+    Region matchInLine = match.getMatchInLine();
+    String matchedLine = match.getMatchedLine();
+    if (matchedLine != null && matchInLine != null) {
+      String startLine = matchedLine.substring(0, matchInLine.getOffset());
+      textElement.appendChild(Elements.createTextNode(startLine));
+      SpanElement highlightElement = Elements.createSpanElement(resources.css().searchMatch());
+      highlightElement.setInnerText(
+          matchedLine.substring(
+              matchInLine.getOffset(), matchInLine.getOffset() + matchInLine.getLength()));
+      textElement.appendChild(highlightElement);
+
+      textElement.appendChild(
+          Elements.createTextNode(
+              matchedLine.substring(matchInLine.getOffset() + matchInLine.getLength())));
+    } else {
+      textElement.appendChild(Elements.createTextNode("Can't find sources"));
     }
+    spanElement.appendChild(textElement);
 
-    @Override
-    protected Promise<List<Node>> getChildrenImpl() {
-        return null;
-    }
+    presentation.setPresentableIcon(resources.searchMatch());
+    presentation.setUserElement((Element) spanElement);
+  }
 
-    @Override
-    public void updatePresentation(@NotNull NodePresentation presentation) {
-        SpanElement spanElement = Elements.createSpanElement(styles.styles().presentableTextContainer());
+  @Override
+  public String getName() {
+    return match.getMatchedLine();
+  }
 
-        SpanElement lineNumberElement = Elements.createSpanElement();
-        lineNumberElement.setInnerHTML(String.valueOf(match.getMatchLineNumber() + 1) + ":&nbsp;&nbsp;&nbsp;");
-        spanElement.appendChild(lineNumberElement);
+  @Override
+  public boolean isLeaf() {
+    return true;
+  }
 
-        SpanElement textElement = Elements.createSpanElement();
-        Region matchInLine = match.getMatchInLine();
-        String matchedLine = match.getMatchedLine();
-        if (matchedLine != null && matchInLine != null) {
-            String startLine = matchedLine.substring(0, matchInLine.getOffset());
-            textElement.appendChild(Elements.createTextNode(startLine));
-            SpanElement highlightElement = Elements.createSpanElement(resources.css().searchMatch());
-            highlightElement
-                    .setInnerText(matchedLine.substring(matchInLine.getOffset(), matchInLine.getOffset() + matchInLine.getLength()));
-            textElement.appendChild(highlightElement);
+  public Match getMatch() {
+    return match;
+  }
 
-            textElement.appendChild(Elements.createTextNode(matchedLine.substring(matchInLine.getOffset() + matchInLine.getLength())));
-        } else {
-            textElement.appendChild(Elements.createTextNode("Can't find sources"));
-        }
-        spanElement.appendChild(textElement);
-
-        presentation.setPresentableIcon(resources.searchMatch());
-        presentation.setUserElement((Element)spanElement);
-    }
-
-    @Override
-    public String getName() {
-        return match.getMatchedLine();
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return true;
-    }
-
-    public Match getMatch() {
-        return match;
-    }
-
-    @Override
-    public void actionPerformed() {
-        if (compilationUnit != null) {
-            final EditorPartPresenter editorPartPresenter = editorAgent.getOpenedEditor(Path.valueOf(compilationUnit.getPath()));
-            if (editorPartPresenter != null) {
-                selectRange(editorPartPresenter);
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        editorAgent.activateEditor(editorPartPresenter);
-                    }
+  @Override
+  public void actionPerformed() {
+    if (compilationUnit != null) {
+      final EditorPartPresenter editorPartPresenter =
+          editorAgent.getOpenedEditor(Path.valueOf(compilationUnit.getPath()));
+      if (editorPartPresenter != null) {
+        selectRange(editorPartPresenter);
+        Scheduler.get()
+            .scheduleDeferred(
+                new Scheduler.ScheduledCommand() {
+                  @Override
+                  public void execute() {
+                    editorAgent.activateEditor(editorPartPresenter);
+                  }
                 });
-                return;
-            }
+        return;
+      }
 
-            appContext.getWorkspaceRoot().getFile(compilationUnit.getPath()).then(new Operation<Optional<File>>() {
+      appContext
+          .getWorkspaceRoot()
+          .getFile(compilationUnit.getPath())
+          .then(
+              new Operation<Optional<File>>() {
                 @Override
                 public void apply(Optional<File> file) throws OperationException {
-                    if (file.isPresent()) {
-                        editorAgent.openEditor(file.get(), new OpenEditorCallbackImpl() {
-                            @Override
-                            public void onEditorOpened(EditorPartPresenter editor) {
-                                selectRange(editor);
-                            }
+                  if (file.isPresent()) {
+                    editorAgent.openEditor(
+                        file.get(),
+                        new OpenEditorCallbackImpl() {
+                          @Override
+                          public void onEditorOpened(EditorPartPresenter editor) {
+                            selectRange(editor);
+                          }
                         });
-                    }
+                  }
                 }
-            });
-        } else if (classFile != null) {
-            final String className = classFile.getElementName();
+              });
+    } else if (classFile != null) {
+      final String className = classFile.getElementName();
 
-            final Resource resource = appContext.getResource();
+      final Resource resource = appContext.getResource();
 
-            if (resource == null) {
-                return;
-            }
+      if (resource == null) {
+        return;
+      }
 
-            final Project project = resource.getRelatedProject().get();
+      final Project project = resource.getRelatedProject().get();
 
-            service.getContent(project.getLocation(), className)
-                   .then(new Operation<ClassContent>() {
-                       @Override
-                       public void apply(ClassContent content) throws OperationException {
-                           final VirtualFile file = new SyntheticFile(Path.valueOf(className.replace('.', '/')).lastSegment(),
-                                                                      content.getContent());
-                           editorAgent.openEditor(file, new OpenEditorCallbackImpl() {
-                               @Override
-                               public void onEditorOpened(EditorPartPresenter editor) {
-                                   selectRange(editor);
-                               }
-                           });
-                       }
-                   });
-        }
+      service
+          .getContent(project.getLocation(), className)
+          .then(
+              new Operation<ClassContent>() {
+                @Override
+                public void apply(ClassContent content) throws OperationException {
+                  final VirtualFile file =
+                      new SyntheticFile(
+                          Path.valueOf(className.replace('.', '/')).lastSegment(),
+                          content.getContent());
+                  editorAgent.openEditor(
+                      file,
+                      new OpenEditorCallbackImpl() {
+                        @Override
+                        public void onEditorOpened(EditorPartPresenter editor) {
+                          selectRange(editor);
+                        }
+                      });
+                }
+              });
     }
+  }
 
-    private void selectRange(EditorPartPresenter editor) {
-        if (editor instanceof TextEditor) {
-            ((TextEditor)editor).getDocument().setSelectedRange(
-                    LinearRange.createWithStart(match.getFileMatchRegion().getOffset()).andLength(match.getFileMatchRegion().getLength()),
-                    true);
-        }
+  private void selectRange(EditorPartPresenter editor) {
+    if (editor instanceof TextEditor) {
+      ((TextEditor) editor)
+          .getDocument()
+          .setSelectedRange(
+              LinearRange.createWithStart(match.getFileMatchRegion().getOffset())
+                  .andLength(match.getFileMatchRegion().getLength()),
+              true);
     }
-
+  }
 }

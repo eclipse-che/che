@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.user.server.event;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
@@ -21,14 +21,14 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 @EventOrigin("user")
 public class UserRemovedEvent {
 
-    private final String userId;
+  private final String userId;
 
-    public UserRemovedEvent(String userId) {
-        this.userId = userId;
-    }
+  public UserRemovedEvent(String userId) {
+    this.userId = userId;
+  }
 
-    /** Returns id of removed user */
-    public String getUserId() {
-        return userId;
-    }
+  /** Returns id of removed user */
+  public String getUserId() {
+    return userId;
+  }
 }

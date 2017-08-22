@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,10 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.git.impl;
 
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.git.impl.GitTestUtil.addFile;
+import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
+import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitConnection;
@@ -21,80 +32,75 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.git.impl.GitTestUtil.addFile;
-import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
-import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-/**
- * @author Dmytro Nochevnov
- */
+/** @author Dmytro Nochevnov */
 public class IsInsideWorkTreeTest {
 
-    private File repository;
-    private File regularDir;
+  private File repository;
+  private File regularDir;
 
-    @BeforeMethod
-    public void setUp() {
-        repository = Files.createTempDir();
-        regularDir = Files.createTempDir();
-    }
+  @BeforeMethod
+  public void setUp() {
+    repository = Files.createTempDir();
+    regularDir = Files.createTempDir();
+  }
 
-    @AfterMethod
-    public void cleanUp() {
-        cleanupTestRepo(repository);
-    }
+  @AfterMethod
+  public void cleanUp() {
+    cleanupTestRepo(repository);
+  }
 
-    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
-    public void shouldReturnTrueInsideWorkingTree(GitConnectionFactory connectionFactory)
-        throws ServerException, IOException, UnauthorizedException, URISyntaxException {
-        // given
-        GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
+  @Test(
+    dataProvider = "GitConnectionFactory",
+    dataProviderClass = GitConnectionFactoryProvider.class
+  )
+  public void shouldReturnTrueInsideWorkingTree(GitConnectionFactory connectionFactory)
+      throws ServerException, IOException, UnauthorizedException, URISyntaxException {
+    // given
+    GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
 
-        // add new dir into working tree
-        addFile(connection.getWorkingDir().toPath().resolve("new_directory"), "a", "content of a");
-        connection.add(AddParams.create(singletonList(".")));
-        connection.commit(CommitParams.create("test"));
+    // add new dir into working tree
+    addFile(connection.getWorkingDir().toPath().resolve("new_directory"), "a", "content of a");
+    connection.add(AddParams.create(singletonList(".")));
+    connection.commit(CommitParams.create("test"));
 
-        // when
-        boolean isInsideWorkingTree = connection.isInsideWorkTree();
+    // when
+    boolean isInsideWorkingTree = connection.isInsideWorkTree();
 
-        // then
-        assertTrue(isInsideWorkingTree);
-    }
+    // then
+    assertTrue(isInsideWorkingTree);
+  }
 
-    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
-    public void shouldReturnFalseInsideDotGitDirectory(GitConnectionFactory connectionFactory)
-        throws ServerException, IOException, UnauthorizedException, URISyntaxException {
-        // given
-        GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-        Path internalDir = connection.getWorkingDir().toPath().resolve(".git");
+  @Test(
+    dataProvider = "GitConnectionFactory",
+    dataProviderClass = GitConnectionFactoryProvider.class
+  )
+  public void shouldReturnFalseInsideDotGitDirectory(GitConnectionFactory connectionFactory)
+      throws ServerException, IOException, UnauthorizedException, URISyntaxException {
+    // given
+    GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
+    Path internalDir = connection.getWorkingDir().toPath().resolve(".git");
 
-        // when
-        GitConnection internalDirConnection = connectionFactory.getConnection(internalDir.toFile());
-        boolean isInsideWorkingTree = internalDirConnection.isInsideWorkTree();
+    // when
+    GitConnection internalDirConnection = connectionFactory.getConnection(internalDir.toFile());
+    boolean isInsideWorkingTree = internalDirConnection.isInsideWorkTree();
 
-        // then
-        assertFalse(isInsideWorkingTree);
-    }
+    // then
+    assertFalse(isInsideWorkingTree);
+  }
 
-    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
-    public void shouldReturnFalseOutsideRepositoryDirectory(GitConnectionFactory connectionFactory)
-        throws ServerException, IOException, UnauthorizedException, URISyntaxException {
-        // given
-        GitConnection externalDir = connectionFactory.getConnection(regularDir);
-                
-        // when
-        boolean isInsideWorkingTree = externalDir.isInsideWorkTree();
+  @Test(
+    dataProvider = "GitConnectionFactory",
+    dataProviderClass = GitConnectionFactoryProvider.class
+  )
+  public void shouldReturnFalseOutsideRepositoryDirectory(GitConnectionFactory connectionFactory)
+      throws ServerException, IOException, UnauthorizedException, URISyntaxException {
+    // given
+    GitConnection externalDir = connectionFactory.getConnection(regularDir);
 
-        // then
-        assertFalse(isInsideWorkingTree);
-    }
+    // when
+    boolean isInsideWorkingTree = externalDir.isInsideWorkTree();
+
+    // then
+    assertFalse(isInsideWorkingTree);
+  }
 }

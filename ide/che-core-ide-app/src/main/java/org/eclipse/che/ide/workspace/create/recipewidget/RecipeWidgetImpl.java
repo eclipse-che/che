@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace.create.recipewidget;
 
 import com.google.gwt.core.client.GWT;
@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
@@ -32,60 +31,56 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  * @author Dmitry Shnurenko
  */
 public class RecipeWidgetImpl extends Composite implements RecipeWidget, ClickHandler {
-    interface TagEntryUiBinder extends UiBinder<Widget, RecipeWidgetImpl> {
-    }
+  interface TagEntryUiBinder extends UiBinder<Widget, RecipeWidgetImpl> {}
 
-    private static final TagEntryUiBinder UI_BINDER = GWT.create(TagEntryUiBinder.class);
+  private static final TagEntryUiBinder UI_BINDER = GWT.create(TagEntryUiBinder.class);
 
-    private final RecipeDescriptor descriptor;
+  private final RecipeDescriptor descriptor;
 
-    private ActionDelegate delegate;
+  private ActionDelegate delegate;
 
-    @UiField
-    Label       tagName;
-    @UiField
-    SimplePanel icon;
-    @UiField
-    Label       type;
-    @UiField
-    FlowPanel   main;
+  @UiField Label tagName;
+  @UiField SimplePanel icon;
+  @UiField Label type;
+  @UiField FlowPanel main;
 
-    @Inject
-    public RecipeWidgetImpl(org.eclipse.che.ide.Resources resources, @Assisted RecipeDescriptor descriptor) {
-        this.descriptor = descriptor;
+  @Inject
+  public RecipeWidgetImpl(
+      org.eclipse.che.ide.Resources resources, @Assisted RecipeDescriptor descriptor) {
+    this.descriptor = descriptor;
 
-        initWidget(UI_BINDER.createAndBindUi(this));
+    initWidget(UI_BINDER.createAndBindUi(this));
 
-        tagName.setText(descriptor.getName());
-        type.setText(descriptor.getType());
+    tagName.setText(descriptor.getName());
+    type.setText(descriptor.getType());
 
-        SVGImage image = new SVGImage(resources.recipe());
-        icon.getElement().setInnerHTML(image.toString());
+    SVGImage image = new SVGImage(resources.recipe());
+    icon.getElement().setInnerHTML(image.toString());
 
-        addDomHandler(this, ClickEvent.getType());
-    }
+    addDomHandler(this, ClickEvent.getType());
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getRecipeUrl() {
-        return descriptor.getLink("get recipe script").getHref();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getRecipeUrl() {
+    return descriptor.getLink("get recipe script").getHref();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getTagName() {
-        return tagName.getText();
-    }
+  /** {@inheritDoc} */
+  @Override
+  public String getTagName() {
+    return tagName.getText();
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void onClick(ClickEvent event) {
-        delegate.onTagClicked(this);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void onClick(ClickEvent event) {
+    delegate.onTagClicked(this);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 }

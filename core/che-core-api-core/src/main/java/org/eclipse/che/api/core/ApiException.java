@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
@@ -20,34 +20,34 @@ import org.eclipse.che.dto.server.DtoFactory;
  */
 @SuppressWarnings("serial")
 public class ApiException extends Exception {
-    private final ServiceError serviceError;
+  private final ServiceError serviceError;
 
-    public ApiException(ServiceError serviceError) {
-        super(serviceError.getMessage());
-        this.serviceError = serviceError;
-    }
+  public ApiException(ServiceError serviceError) {
+    super(serviceError.getMessage());
+    this.serviceError = serviceError;
+  }
 
-    public ApiException(String message) {
-        super(message);
+  public ApiException(String message) {
+    super(message);
 
-        this.serviceError = createError(message);
-    }
+    this.serviceError = createError(message);
+  }
 
-    public ApiException(String message, Throwable cause) {
-        super(message, cause);
-        this.serviceError = createError(message);
-    }
+  public ApiException(String message, Throwable cause) {
+    super(message, cause);
+    this.serviceError = createError(message);
+  }
 
-    public ApiException(Throwable cause) {
-        super(cause);
-        this.serviceError = createError(cause.getMessage());
-    }
+  public ApiException(Throwable cause) {
+    super(cause);
+    this.serviceError = createError(cause.getMessage());
+  }
 
-    public ServiceError getServiceError() {
-        return serviceError;
-    }
+  public ServiceError getServiceError() {
+    return serviceError;
+  }
 
-    private ServiceError createError(String message) {
-        return DtoFactory.getInstance().createDto(ServiceError.class).withMessage(message);
-    }
+  private ServiceError createError(String message) {
+    return DtoFactory.getInstance().createDto(ServiceError.class).withMessage(message);
+  }
 }

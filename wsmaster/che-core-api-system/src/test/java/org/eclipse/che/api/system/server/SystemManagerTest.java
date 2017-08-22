@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.system.server;
 
+import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDOWN;
+import static org.eclipse.che.api.system.shared.SystemStatus.READY_TO_SHUTDOWN;
+import static org.eclipse.che.api.system.shared.SystemStatus.RUNNING;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertEquals;
+
+import java.util.Iterator;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
@@ -22,16 +31,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.Iterator;
-
-import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDOWN;
-import static org.eclipse.che.api.system.shared.SystemStatus.READY_TO_SHUTDOWN;
-import static org.eclipse.che.api.system.shared.SystemStatus.RUNNING;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
-
 /**
  * Tests {@link SystemManager}.
  *
@@ -40,61 +39,59 @@ import static org.testng.Assert.assertEquals;
 @Listeners(MockitoTestNGListener.class)
 public class SystemManagerTest {
 
-    @Mock
-    private ServiceTerminator terminator;
+  @Mock private ServiceTerminator terminator;
 
-    @Mock
-    private EventService eventService;
+  @Mock private EventService eventService;
 
-    @Captor
-    private ArgumentCaptor<SystemStatusChangedEvent> eventsCaptor;
+  @Captor private ArgumentCaptor<SystemStatusChangedEvent> eventsCaptor;
 
-    private SystemManager systemManager;
+  private SystemManager systemManager;
 
-    @BeforeMethod
-    public void init() {
-        MockitoAnnotations.initMocks(this);
-        systemManager = new SystemManager(terminator, eventService);
-    }
+  @BeforeMethod
+  public void init() {
+    MockitoAnnotations.initMocks(this);
+    systemManager = new SystemManager(terminator, eventService);
+  }
 
-    @Test
-    public void isRunningByDefault() {
-        assertEquals(systemManager.getSystemStatus(), RUNNING);
-    }
+  @Test
+  public void isRunningByDefault() {
+    assertEquals(systemManager.getSystemStatus(), RUNNING);
+  }
 
-    @Test
-    public void servicesAreStopped() throws Exception {
-        systemManager.stopServices();
+  @Test
+  public void servicesAreStopped() throws Exception {
+    systemManager.stopServices();
 
-        verifyShutdownCompleted();
-    }
+    verifyShutdownCompleted();
+  }
 
-    @Test(expectedExceptions = ConflictException.class)
-    public void exceptionIsThrownWhenStoppingServicesTwice() throws Exception {
-        systemManager.stopServices();
-        systemManager.stopServices();
-    }
+  @Test(expectedExceptions = ConflictException.class)
+  public void exceptionIsThrownWhenStoppingServicesTwice() throws Exception {
+    systemManager.stopServices();
+    systemManager.stopServices();
+  }
 
-    @Test
-    public void shutdownDoesNotFailIfServicesAreAlreadyStopped() throws Exception {
-        systemManager.stopServices();
-        systemManager.shutdown();
+  @Test
+  public void shutdownDoesNotFailIfServicesAreAlreadyStopped() throws Exception {
+    systemManager.stopServices();
+    systemManager.shutdown();
 
-        verifyShutdownCompleted();
-    }
+    verifyShutdownCompleted();
+  }
 
-    @Test
-    public void shutdownStopsServicesIfNotStopped() throws Exception {
-        systemManager.shutdown();
+  @Test
+  public void shutdownStopsServicesIfNotStopped() throws Exception {
+    systemManager.shutdown();
 
-        verifyShutdownCompleted();
-    }
+    verifyShutdownCompleted();
+  }
 
-    private void verifyShutdownCompleted() throws InterruptedException {
-        verify(terminator, timeout(2000)).terminateAll();
-        verify(eventService, times(2)).publish(eventsCaptor.capture());
-        Iterator<SystemStatusChangedEvent> eventsIt = eventsCaptor.getAllValues().iterator();
-        assertEquals(eventsIt.next(), new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN));
-        assertEquals(eventsIt.next(), new SystemStatusChangedEvent(PREPARING_TO_SHUTDOWN, READY_TO_SHUTDOWN));
-    }
+  private void verifyShutdownCompleted() throws InterruptedException {
+    verify(terminator, timeout(2000)).terminateAll();
+    verify(eventService, times(2)).publish(eventsCaptor.capture());
+    Iterator<SystemStatusChangedEvent> eventsIt = eventsCaptor.getAllValues().iterator();
+    assertEquals(eventsIt.next(), new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN));
+    assertEquals(
+        eventsIt.next(), new SystemStatusChangedEvent(PREPARING_TO_SHUTDOWN, READY_TO_SHUTDOWN));
+  }
 }

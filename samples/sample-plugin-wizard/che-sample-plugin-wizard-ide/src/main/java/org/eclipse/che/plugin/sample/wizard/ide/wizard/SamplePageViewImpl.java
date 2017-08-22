@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.sample.wizard.ide.wizard;
 
 import com.google.gwt.core.client.GWT;
@@ -20,53 +20,45 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-
 public class SamplePageViewImpl implements SamplePageView {
 
-    private       ActionDelegate       delegate;
-    private final DockLayoutPanel      rootElement;
-    @UiField
-    TextBox compilerVersion;
+  private ActionDelegate delegate;
+  private final DockLayoutPanel rootElement;
+  @UiField TextBox compilerVersion;
 
-    private static SamplePageViewImplUiBinder uiBinder = GWT.create(SamplePageViewImplUiBinder.class);
+  private static SamplePageViewImplUiBinder uiBinder = GWT.create(SamplePageViewImplUiBinder.class);
 
+  @Inject
+  public SamplePageViewImpl() {
+    rootElement = uiBinder.createAndBindUi(this);
+    compilerVersion.setFocus(true);
+  }
 
-    @Inject
-    public SamplePageViewImpl() {
-        rootElement = uiBinder.createAndBindUi(this);
-        compilerVersion.setFocus(true);
-    }
+  @UiHandler({"compilerVersion"})
+  void onKeyUp(KeyUpEvent event) {
+    delegate.onCompilerVersionChanged();
+  }
 
-    @UiHandler({"compilerVersion"})
-    void onKeyUp(KeyUpEvent event) {
-        delegate.onCompilerVersionChanged();
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 
+  /** Returns the {@link Widget} aspect of the receiver. */
+  @Override
+  public Widget asWidget() {
+    return rootElement;
+  }
 
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public String getCompilerVersion() {
+    return compilerVersion.getText();
+  }
 
-    /**
-     * Returns the {@link Widget} aspect of the receiver.
-     */
-    @Override
-    public Widget asWidget() {
-        return rootElement;
-    }
+  @Override
+  public void setCompilerVersion(String version) {
+    compilerVersion.setText(version);
+  }
 
-    @Override
-    public String getCompilerVersion() {
-        return compilerVersion.getText();
-    }
-
-    @Override
-    public void setCompilerVersion(String version) {
-        compilerVersion.setText(version);
-    }
-
-    interface SamplePageViewImplUiBinder extends UiBinder<DockLayoutPanel, SamplePageViewImpl> {
-    }
-
+  interface SamplePageViewImplUiBinder extends UiBinder<DockLayoutPanel, SamplePageViewImpl> {}
 }

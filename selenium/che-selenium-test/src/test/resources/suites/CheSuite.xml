@@ -1,0 +1,942 @@
+<!--
+
+    Copyright (c) 2012-2017 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Eclipse Che selenium tests"
+       verbose="10"
+       parallel="classes"
+       thread-count="4">
+
+    <test name="all">
+        <classes>
+            <class name="org.eclipse.che.selenium.addsshkey.AddSshKeyForGitHubTest"/>
+            <class name="org.eclipse.che.selenium.assistant.CheckFindActionFeatureInCheTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkSearchActionsForAllItemsTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.assistant.CheckFindActionFeatureInCheTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkSearchActionsForMenuItemsTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.assistant.KeyBindingsTest"/>
+            <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest"/>
+            <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForLanguageTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="createAndDeleteProjectTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.dashboard.DeleteRunningWorkspaceTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.DeleteStoppingWorkspaceTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.ImportMavenProjectFromGitHubTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkAbilityImportMavenProjectTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromZipTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="importProjectFromZipTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.dashboard.RenameWorkspaceTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckCodeigniterStackTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkCodeigniterStack"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckExpressStackTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkExpressStack"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckLaravelStackTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkLaravelStack"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckRailsStackTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkRailsStack"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckSwiftStackTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkSwiftStack"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.dashboard.stacks.CheckSymfonyStackTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkExpressStack"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
+            <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
+            <class name="org.eclipse.che.selenium.debugger.CppProjectDebuggingTest">
+                <methods>
+                    <!-- https://github.com/eclipse/che/issues/4524 -->
+                    <exclude name="shouldDebugCppProject"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.debugger.DebugExternalClassTest">
+                <methods>
+                    <!-- https://github.com/eclipse/che/issues/4636 -->
+                    <exclude name="shouldDebugJreClass"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.debugger.InnerClassAndLambdaDebuggingTest">
+                <methods>
+                    <!-- https://github.com/eclipse/che/issues/4211 -->
+                    <exclude name="shouldDebugInnerClass"/>
+                    <exclude name="shouldDebugMethodLocalInnerClass"/>
+                    <exclude name="shouldDebugStaticInnerClass"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.debugger.MultimoduleProjectDebuggingTest">
+                <methods>
+                    <!-- https://github.com/eclipse/che/issues/4268 -->
+                    <exclude name="shouldDebugStaticMethod"/>
+
+                    <!-- https://github.com/eclipse/che/issues/4286 -->
+                    <exclude name="shouldGoIntoConstructor"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest">
+                <methods>
+                    <!-- https://github.com/eclipse/che/issues/4720 -->
+                    <exclude name="debugNodeJsTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.debugger.PhpProjectDebuggingTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="shouldDebugCliPhpScriptFromFirstLine"/>
+
+                    <!-- unstable -->
+                    <exclude name="shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteFeaturesInEditorTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteJSFilesTest">
+                <methods>
+                    <!-- https://jira.codenvycorp.com/browse/CHE-905 -->
+                    <exclude name="checkAutocompleteJSFilesTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteProposalJavaDocTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="shouldDisplayJavaDocOfJreClass"/>
+
+                    <!-- unstable -->
+                    <exclude name="shouldWorkAroundAbsentSourcesOfExternalLib"/>
+
+                    <!-- unstable -->
+                    <exclude name="updateDependencyWithInheritTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteWithInheritTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.CheckAutocompleteFeaturesInTheTestFolderTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.EditorMemberActiveLineForOpenedTabTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.EditorValidationTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.FormatterTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.InheritClassTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.JavaDocPopupTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.OpenDeclarationTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.QuickFixAndCodeAssistantFeaturesTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.ShowHintsCommandTest"/>
+            <class name="org.eclipse.che.selenium.editor.CheckReplaceFeatureInEditorTest"/>
+            <class name="org.eclipse.che.selenium.editor.CheckRestoringOfSplitEditor">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkRestoringStateSplittedEditor"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.editor.CheckSearchFeatureInEditorTest"/>
+            <class name="org.eclipse.che.selenium.editor.CheckWorkingWithTabByUsingTabListTest"/>
+            <class name="org.eclipse.che.selenium.editor.CheckWorkingWithTabsByUsingContextMenuTest"/>
+            <class name="org.eclipse.che.selenium.editor.ContextMenuEditorTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkFind"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.editor.ContextMenuEditorTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkNaviFileStructure"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.editor.SplitEditorFeatureTest"/>
+            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerUserCreatePolicyTest"/>
+            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerClickCreatePolicyTest"/>
+            <class name="org.eclipse.che.selenium.factory.CheckBitnamiCodeIgniterFactory"/>
+            <class name="org.eclipse.che.selenium.factory.CheckBitnamiSwiftFactory"/>
+            <class name="org.eclipse.che.selenium.factory.CheckBitnamiLaravelFactoryTest"/>
+            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectory"/>
+            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolder"/>
+            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranch"/>
+            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithMultiModuleTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkFactoryProcessing"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSincePolicyTest"/>
+            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSvnCVSTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkFactoryProcessing"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithUntilPolicyTest"/>
+            <class name="org.eclipse.che.selenium.factory.CheckOpenFileFeatureTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkOpenFileFeatureTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.factory.CheckRunCommandFeatureTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkRunCommandFeatureTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.factory.CheckWelcomePanelOnCodenvyTest"/>
+            <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashBoard">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="createFactoryFromDashBoard"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.factory.CreateFactoryFromUiWithKeepDirTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="createFactoryFromUiWithKeepDirTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolder">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="factoryWithDirectUrlWithKeepDirectory"/>
+
+                    <!-- unstable -->
+                    <exclude name="factoryWithDirectUrlWithRootFolder"/>
+
+                    <!-- unstable -->
+                    <exclude name="factoryWithDirectUrlWithSpecificBranch"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSparseCheckoutTest"/>
+            <class name="org.eclipse.che.selenium.filewatcher.EditFilesWithTabsTest"/>
+            <class name="org.eclipse.che.selenium.filewatcher.RefactoringFeatureTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkRefactorFilesFromIde"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.filewatcher.RemoveFilesWithActiveTabs">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkDeletionWithMultiOpenedTabFromIde"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkDeletionWithSingleOpenedTabFromIde"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRemovingWithoutIde"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.filewatcher.UpdateFilesWithoutIDE">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkEditingFileWithoutIDE"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.filewatcher.CheckDeletingProjectByApiTest"/>
+            <class name="org.eclipse.che.selenium.filewatcher.CheckFileWatcherExcludeFeatureTest"/>
+            <class name="org.eclipse.che.selenium.git.AddFilesToIndexTest">
+                <methods>
+                    <!-- https://github.com/eclipse/che/issues/5071 -->
+                    <exclude name="addFilesTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.AmendCommitTest"/>
+            <class name="org.eclipse.che.selenium.git.CheckoutBranchTest">
+                <methods>
+                    <!-- https://github.com/eclipse/che/issues/5071 -->
+                    <exclude name="checkoutBranchTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkCheckoutReference"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkoutToRemoteBranchTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="renameAndDeleteRemoteBranchTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
+            <class name="org.eclipse.che.selenium.git.CommitFilesTest">
+                <methods>
+                    <!-- https://github.com/eclipse/che/issues/5071 -->
+                    <exclude name="commitFilesTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
+            <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest"/>
+            <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
+            <class name="org.eclipse.che.selenium.git.GitPullTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="pullTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
+            <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkImportProjectSubmoduleByHttpsUrl"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkImportProjectSubmoduleBySshUrl"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkImportProjectSubmoduleFromGithub"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
+            <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest">
+                <methods>
+                    <!-- https://github.com/eclipse/che/issues/1853 -->
+                    <exclude name="keepDirectoryGitImport"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.PullRequestPluginTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkFactoryOnGitHub"/>
+
+                    <!-- unstable -->
+                    <exclude name="createPullRequest"/>
+
+                    <!-- unstable -->
+                    <exclude name="updatePullRequest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.PullRequestPluginWithForkTest"/>
+            <class name="org.eclipse.che.selenium.git.PushChangeNotUpdatedRepoTest"/>
+            <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
+            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
+            <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
+            <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
+            <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkAutocompleteAfterSave"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.intelligencecommand.CheckBasicFunctionalityInCommandsExplorerTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="shouldCreateAndRunBuildCommand"/>
+
+                    <!-- unstable -->
+                    <exclude name="shouldCreateDifferentTypesCommandsInDifferentGoals"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.intelligencecommand.CheckIntelligenceCommandFromToolbarTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="launchClonedWepAppTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.intelligencecommand.CommandsEditorTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkComamandsEditor"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.intelligencecommand.CommandsPaletteTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="commandPaletteTest"/>
+
+                    <!-- unstable -->
+                    <exclude name="newCommandTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.intelligencecommand.PreviewUrlIntoCommandsEditorTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkSavePreviewUrlIntoCommand"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.mavenplugin.CheckGeneratingMavenArchetypeTest"/>
+            <class name="org.eclipse.che.selenium.mavenplugin.CheckMavenPluginTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkAbbilityJustCreatedFileFromModule"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkAbilityClassAfterIncludingNodules"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkMavenPluginStatusBar"/>
+
+                    <!-- unstable -->
+                    <exclude name="excludeIncludeModules"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.mavenplugin.GenerateEffectivePomTest"/>
+            <class name="org.eclipse.che.selenium.miscellaneous.CheckCreatingProjectInEmptyWsTest"/>
+            <class name="org.eclipse.che.selenium.miscellaneous.CheckMacrosFeatureTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkMacrosFeature"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.CheckWsAgentAfterStopProcessTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkDialogAfterKillingProcess"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.ConvertToProjectFromConfigurationTest"/>
+            <class name="org.eclipse.che.selenium.miscellaneous.ConvertToProjectWithPomFileTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkConvertToProjectWithPomFile"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.DialogAboutTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="dialogAboutTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.FileStructureBaseOperationTest"/>
+            <class name="org.eclipse.che.selenium.miscellaneous.FileStructureByKeyboardTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkFileStructureByKeyboard"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.FileStructureCodeEditorTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkFileStructureCodeEditor"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.FileStructureNodesTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkFileStructureNodes"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.FindTextFeatureTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkFindByFileMask"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkFindIntoSelectedPath"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkFindTextBasic"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkFindTextForm"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkFindWholeWordOnly"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRecentlyCreatedFiles"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.FindUsagesBaseOperationTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkFindUsagesBaseOperation"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.ImplementationBaseOperationsTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkImplementationInEditor"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.NavigateToFileTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkFunctionNavigateFile"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.ResolveDependencyAfterRecreateProjectTest"/>
+            <class name="org.eclipse.che.selenium.miscellaneous.TerminalTypingTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkTerminalTypingCharsWithoutShift"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.WorkingWithSplitPanelTest"/>
+            <class name="org.eclipse.che.selenium.miscellaneous.WorkingWithTerminalTest"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0087Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0091Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0093Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0097Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0114Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0115Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0119Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0120Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0121Test">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="test0121"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0122Test"/>
+            <class name="org.eclipse.che.selenium.plainjava.ConfigureClasspathBaseTest"/>
+            <class name="org.eclipse.che.selenium.plainjava.ConfigureSomeSourceFoldersTest"/>
+            <class name="org.eclipse.che.selenium.plainjava.PlainJavaProjectConfigureClasspathTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkConfigureClasspathPlainJavaProject"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.plainjava.RunPlainJavaProjectTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkRunPlainJavaProject"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit4Test"/>
+            <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginTestNgTest"/>
+            <class name="org.eclipse.che.selenium.preferences.CheckErrorsWarningsTabTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="errorsWarningTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckAutoSaveForFileWhichAlreadyExistTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckCollapseAllNodesProjectTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckCopyCutFeaturesForFilesTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckErrorMessageWhenCreationDuplicateFolderOrFileTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckHiddenFolderAndFileCreatedFromCommandTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckOnValidAndInvalidClassNameTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckOnValidAndInvalidPackageNameTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckRecentFilesAndRevealResourceTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckRefreshProjectTreeTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckShowHideHiddenFilesTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckTreeStructureAfterCloseTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckTreeStructureAfterCloseTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="openProjectWizard"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.ClosingSeveralOpenFilesTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateNewFoldersTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateNewJavaFilesFromContextMenuTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateNewJavaFilesTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateNewNotJavaFilesFromContextMenuTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateNewNotJavaFilesTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateNewPackageFromContextMenuTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateNewPackagesWithHelpCreationJavaClassTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreatePackagesAndFilesWithHelpIconCreateTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="createWithHelpCreateIcon"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectInSelectedFolderTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="createProjectInSelectedFolder"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectsForArtikPluginTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.DeleteFilesFromContextMenuTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.DeleteFilesPackagesAndProjectWithHelpDeleteIconTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.DeleteFilesTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.DeletePackageFromContextMenuTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="deletePackageFromContextMenuTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.DeletePackageTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.DeletePackageWithOpenedFilesTabTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.DeleteProjectsTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.dependencies.TransitiveDependencyTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkUpdateLibraryAfterChangingDependencyTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkUpdateLibraryAfterChangingDependencyTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.FileNotExistIntoEditorAfterDeleteTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.FileOpenedAfterCreationTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.JustCreatedFileNotExistIntoEditorAfterDeleteTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.NavigationByKeyboardTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.OpenFileWithHelpContextMenuTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.PreviewHtmlFileTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.RenamedAlreadyCreatedNotJavaFileTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="renameWhenFileIsOpenedIntoEditor"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.RenameJustCreatedNotJavaFileTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="renameWhenFileIsOpenedIntoEditor"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.RenameProjectTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="renameProjectTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.ShowFileReferenceTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="dialogWithPathAndFqnShouldBeDisplayed"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.projectexplorer.CheckDisplayingArtifactIdTest"/>
+            <class name="org.eclipse.che.selenium.refactor.fields.FailNotPrivateFieldTest"/>
+            <class name="org.eclipse.che.selenium.refactor.fields.FailPrivateFieldTest"/>
+            <class name="org.eclipse.che.selenium.refactor.fields.RenameNotPrivateFieldTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkBugFiveEightTwoOne26"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameAnnotation24"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameAnnotation25"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameDelegate28"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameEnumField31"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameGenerics32"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameGenerics33"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameGenerics36"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameNotPrivateField10"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameNotPrivateField5"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameNotPrivateField6"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameNotPrivateField7"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameNotPrivateField8"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameNotPrivateField9"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.fields.RenamePrivateFieldSmokeTest"/>
+            <class name="org.eclipse.che.selenium.refactor.fields.RenamePrivateFieldTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField1"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField10"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField11"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField2"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField3"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField4"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField5"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField6"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField7"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField8"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenamePrivateField9"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkRenameUnicode12"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.methods.RenameMethodInInterfaceTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="test0"/>
+
+                    <!-- unstable -->
+                    <exclude name="test12"/>
+
+                    <!-- unstable -->
+                    <exclude name="test20"/>
+
+                    <!-- unstable -->
+                    <exclude name="test31"/>
+
+                    <!-- unstable -->
+                    <exclude name="test44"/>
+
+                    <!-- unstable -->
+                    <exclude name="testAnnotation1"/>
+
+                    <!-- unstable -->
+                    <exclude name="testFail12"/>
+
+                    <!-- unstable -->
+                    <exclude name="testFail33"/>
+
+                    <!-- unstable -->
+                    <exclude name="testFail5"/>
+
+                    <!-- unstable -->
+                    <exclude name="testGenerics01"/>
+
+                    <!-- unstable -->
+                    <exclude name="test0"/>
+
+                    <!-- unstable -->
+                    <exclude name="test10"/>
+
+                    <!-- unstable -->
+                    <exclude name="test11"/>
+
+                    <!-- unstable -->
+                    <exclude name="test12"/>
+
+                    <!-- unstable -->
+                    <exclude name="test2"/>
+
+                    <!-- unstable -->
+                    <exclude name="test23"/>
+
+                    <!-- unstable -->
+                    <exclude name="testAnon0"/>
+
+                    <!-- unstable -->
+                    <exclude name="testFail5"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.methods.RenamePrivateMethodTest"/>
+            <class name="org.eclipse.che.selenium.refactor.methods.RenameStaticMethodsTest"/>
+            <class name="org.eclipse.che.selenium.refactor.methods.RenameVirtualMethodsTest"/>
+            <class name="org.eclipse.che.selenium.refactor.move.CodeAssistAfterMoveItemTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkCodeAssistAfterMoveItem"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.move.FailMoveItemTest"/>
+            <class name="org.eclipse.che.selenium.refactor.move.MoveItemsTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkMoveItem5"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.move.MoveItemsTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkMoveItem9"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.move.MoveJavaClassToSubpackageTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkProjectTreeAfterMoveJavaFile"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.move.MoveJavaFileInNewSourceFolderTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkMoveJavaClassInNewSourceFolder"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.packages.RenamePackageSpringTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkRenamePackageSpringApp"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.packages.RenamePackageTest">
+                <methods>
+                    <!-- https://github.com/eclipse/che/issues/1960 -->
+                    <exclude name="checkTest0"/>
+
+                    <!-- https://github.com/eclipse/che/issues/1960 -->
+                    <exclude name="checkTest1"/>
+
+                    <!-- unstable -->
+                    <exclude name="checkTest2"/>
+
+                    <!-- https://github.com/eclipse/che/issues/1960 -->
+                    <exclude name="checkTest3"/>
+
+                    <!-- https://github.com/eclipse/che/issues/1960 -->
+                    <exclude name="checkTest4"/>
+
+                    <!-- https://github.com/eclipse/che/issues/1960 -->
+                    <exclude name="checkTest7"/>
+
+                    <!-- https://github.com/eclipse/che/issues/1960 -->
+                    <exclude name="checkTest8"/>
+
+                    <!-- https://github.com/eclipse/che/issues/1960 -->
+                    <exclude name="checkTestHierarchical9_1"/>
+
+                    <!-- https://github.com/eclipse/che/issues/1960 -->
+                    <exclude name="checkTestPackageRenameWithResource12"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.parameters.FailParametersTest"/>
+            <class name="org.eclipse.che.selenium.refactor.parameters.RenameParametersTest"/>
+            <class name="org.eclipse.che.selenium.refactor.preview.CheckTreeInRefactorPanelTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="previewChangeTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.preview.PreviewRefreshTest"/>
+            <class name="org.eclipse.che.selenium.refactor.types.GenericsTest"/>
+            <class name="org.eclipse.che.selenium.refactor.types.IllegalTypeNameTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="illegalTypeName4"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.types.RenameTypeTest"/>
+            <class name="org.eclipse.che.selenium.refactor.types.TestAnnotationsTest"/>
+            <class name="org.eclipse.che.selenium.refactor.types.TestEnumerationsTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="testEnum1"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.refactor.types.TestFailTest"/>
+            <class name="org.eclipse.che.selenium.subversion.CommitTest"/>
+            <class name="org.eclipse.che.selenium.subversion.CopyTest"/>
+            <class name="org.eclipse.che.selenium.subversion.DiffViewTest"/>
+            <class name="org.eclipse.che.selenium.subversion.LockFileTest"/>
+            <class name="org.eclipse.che.selenium.subversion.PropertiesTest"/>
+            <class name="org.eclipse.che.selenium.subversion.SvnUpdateTest"/>
+            <class name="org.eclipse.che.selenium.subversion.UpdateToRevisionTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="updateToRevisionTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.swagger.SwaggerTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkNameProjectTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.workspaces.CheckStopStartWsTest"/>
+            <class name="org.eclipse.che.selenium.workspaces.CreateWorkspaceOnDashboardTest"/>
+            <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRefreshTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkRestoreStateOfProjectTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRenameWorkspaceTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkProjectAfterRenameWs"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
+            <class name="org.eclipse.che.selenium.workspaces.SnapshotTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="snapshotTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.workspaces.WorkingWithJavaMySqlStackTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkJavaMySqlAndRunApp"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.workspaces.WorkingWithNodeWsTest">
+                <methods>
+                    <!-- unstable -->
+                    <exclude name="checkNodeJsWsAndRunApp"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
+        </classes>
+    </test>
+</suite>

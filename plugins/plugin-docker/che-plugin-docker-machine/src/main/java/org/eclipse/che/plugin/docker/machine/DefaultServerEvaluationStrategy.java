@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,22 +7,20 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.docker.machine;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
+import java.util.Map;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 
-import java.util.Map;
-
 /**
- * Represents the default server evaluation strategy. By default, calling
- * {@link ServerEvaluationStrategy#getServers(ContainerInfo, String, Map)} will return a completed
- * {@link ServerImpl} with internal and external address set to the address of the Docker host.
+ * Represents the default server evaluation strategy. By default, calling {@link
+ * ServerEvaluationStrategy#getServers(ContainerInfo, String, Map)} will return a completed {@link
+ * ServerImpl} with internal and external address set to the address of the Docker host.
  *
  * <p>The addresses used for internal and external address can be overridden via the properties
  * {@code che.docker.ip} and {@code che.docker.ip.external}, respectively.
@@ -33,9 +31,10 @@ import java.util.Map;
  */
 public class DefaultServerEvaluationStrategy extends BaseServerEvaluationStrategy {
 
-    @Inject
-    public DefaultServerEvaluationStrategy(@Nullable @Named("che.docker.ip") String internalAddress,
-                                           @Nullable @Named("che.docker.ip.external") String externalAddress) {
-        super(internalAddress, externalAddress, null, null, null, false);
-    }
+  @Inject
+  public DefaultServerEvaluationStrategy(
+      @Nullable @Named("che.docker.ip") String internalAddress,
+      @Nullable @Named("che.docker.ip.external") String externalAddress) {
+    super(internalAddress, externalAddress, null, null, null, false);
+  }
 }

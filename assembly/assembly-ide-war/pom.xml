@@ -422,23 +422,9 @@
                             <sources>
                                 <source>${generated.sources.directory}</source>
                                 <source>src/main/java</source>
+                                <source>src/main/webapp</source>
                             </sources>
                         </configuration>
-                    </execution>
-                    <execution>
-                      <id>add-resource</id>
-                      <phase>generate-resources</phase>
-                      <goals>
-                        <goal>add-resource</goal>
-                      </goals>
-                      <configuration>
-                        <resources>
-                          <resource>
-                            <directory>src/main/webapp</directory>
-                            <targetPath></targetPath>
-                          </resource>
-                        </resources>
-                      </configuration>
                     </execution>
                 </executions>
             </plugin>

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,86 +7,97 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.commons.lang.concurrent;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /** @author andrew00x */
 public class ThreadLocalPropagateContextTest {
-    private static ThreadLocal<String> tl1 = new ThreadLocal<>();
+  private static ThreadLocal<String> tl1 = new ThreadLocal<>();
 
-    private ExecutorService exec;
-    private final String tlValue = "my value";
+  private ExecutorService exec;
+  private final String tlValue = "my value";
 
-    @BeforeTest
-    public void setUp() {
-        tl1.set(tlValue);
-        ThreadLocalPropagateContext.addThreadLocal(tl1);
-        Assert.assertEquals(ThreadLocalPropagateContext.getThreadLocals().length, 1);
-        exec = Executors.newSingleThreadExecutor();
+  @BeforeTest
+  public void setUp() {
+    tl1.set(tlValue);
+    ThreadLocalPropagateContext.addThreadLocal(tl1);
+    Assert.assertEquals(ThreadLocalPropagateContext.getThreadLocals().length, 1);
+    exec = Executors.newSingleThreadExecutor();
+  }
+
+  @AfterTest
+  public void tearDown() {
+    if (exec != null) {
+      exec.shutdownNow();
     }
+    ThreadLocalPropagateContext.removeThreadLocal(tl1);
+    Assert.assertEquals(ThreadLocalPropagateContext.getThreadLocals().length, 0);
+    tl1.remove();
+  }
 
-    @AfterTest
-    public void tearDown() {
-        if (exec != null) {
-            exec.shutdownNow();
-        }
-        ThreadLocalPropagateContext.removeThreadLocal(tl1);
-        Assert.assertEquals(ThreadLocalPropagateContext.getThreadLocals().length, 0);
-        tl1.remove();
-    }
-
-    @Test
-    public void testRunnableWithoutThreadLocalPropagateContext() throws Exception {
-        final String[] holder = new String[1];
-        exec.submit(new Runnable() {
-            @Override
-            public void run() {
+  @Test
+  public void testRunnableWithoutThreadLocalPropagateContext() throws Exception {
+    final String[] holder = new String[1];
+    exec.submit(
+            new Runnable() {
+              @Override
+              public void run() {
                 holder[0] = tl1.get();
-            }
-        }).get();
-        Assert.assertNull(holder[0]);
-    }
+              }
+            })
+        .get();
+    Assert.assertNull(holder[0]);
+  }
 
-    @Test
-    public void testRunnableWithThreadLocalPropagateContext() throws Exception {
-        final String[] holder = new String[1];
-        exec.submit(ThreadLocalPropagateContext.wrap(new Runnable() {
-            @Override
-            public void run() {
-                holder[0] = tl1.get();
-            }
-        })).get();
-        Assert.assertEquals(holder[0], tlValue);
-    }
+  @Test
+  public void testRunnableWithThreadLocalPropagateContext() throws Exception {
+    final String[] holder = new String[1];
+    exec.submit(
+            ThreadLocalPropagateContext.wrap(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    holder[0] = tl1.get();
+                  }
+                }))
+        .get();
+    Assert.assertEquals(holder[0], tlValue);
+  }
 
-    @Test
-    public void testCallableWithoutThreadLocalPropagateContext() throws Exception {
-        final String v = exec.submit(new Callable<String>() {
-            @Override
-            public String call() {
-                return tl1.get();
-            }
-        }).get();
-        Assert.assertNull(v);
-    }
+  @Test
+  public void testCallableWithoutThreadLocalPropagateContext() throws Exception {
+    final String v =
+        exec.submit(
+                new Callable<String>() {
+                  @Override
+                  public String call() {
+                    return tl1.get();
+                  }
+                })
+            .get();
+    Assert.assertNull(v);
+  }
 
-    @Test
-    public void testCallableWithThreadLocalPropagateContext() throws Exception {
-        final String v = exec.submit(ThreadLocalPropagateContext.wrap(new Callable<String>() {
-            @Override
-            public String call() {
-                return tl1.get();
-            }
-        })).get();
-        Assert.assertEquals(v, tlValue);
-    }
+  @Test
+  public void testCallableWithThreadLocalPropagateContext() throws Exception {
+    final String v =
+        exec.submit(
+                ThreadLocalPropagateContext.wrap(
+                    new Callable<String>() {
+                      @Override
+                      public String call() {
+                        return tl1.get();
+                      }
+                    }))
+            .get();
+    Assert.assertEquals(v, tlValue);
+  }
 }

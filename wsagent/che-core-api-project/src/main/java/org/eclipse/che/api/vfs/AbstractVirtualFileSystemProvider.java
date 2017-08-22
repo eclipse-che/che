@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,44 +7,45 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.vfs;
 
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.che.api.core.ServerException;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 public abstract class AbstractVirtualFileSystemProvider implements VirtualFileSystemProvider {
-    protected final AtomicReference<VirtualFileSystem> fileSystemReference = new AtomicReference<>();
+  protected final AtomicReference<VirtualFileSystem> fileSystemReference = new AtomicReference<>();
 
-    @Override
-    public VirtualFileSystem getVirtualFileSystem(boolean create) throws ServerException {
-        VirtualFileSystem fileSystem = fileSystemReference.get();
-        if (fileSystem == null && create) {
-            VirtualFileSystem newFileSystem = createVirtualFileSystem(() -> fileSystemReference.set(null));
-            fileSystemReference.compareAndSet(null, newFileSystem);
-            fileSystem = fileSystemReference.get();
-        }
-        return fileSystem;
+  @Override
+  public VirtualFileSystem getVirtualFileSystem(boolean create) throws ServerException {
+    VirtualFileSystem fileSystem = fileSystemReference.get();
+    if (fileSystem == null && create) {
+      VirtualFileSystem newFileSystem =
+          createVirtualFileSystem(() -> fileSystemReference.set(null));
+      fileSystemReference.compareAndSet(null, newFileSystem);
+      fileSystem = fileSystemReference.get();
     }
+    return fileSystem;
+  }
 
-    @Override
-    public VirtualFileSystem getVirtualFileSystem() throws ServerException {
-        return getVirtualFileSystem(true);
+  @Override
+  public VirtualFileSystem getVirtualFileSystem() throws ServerException {
+    return getVirtualFileSystem(true);
+  }
+
+  protected abstract VirtualFileSystem createVirtualFileSystem(CloseCallback closeCallback)
+      throws ServerException;
+
+  @Override
+  public void close() throws ServerException {
+    VirtualFileSystem virtualFileSystem = fileSystemReference.get();
+    if (virtualFileSystem != null) {
+      virtualFileSystem.close();
     }
+    fileSystemReference.set(null);
+  }
 
-    protected abstract VirtualFileSystem createVirtualFileSystem(CloseCallback closeCallback) throws ServerException;
-
-    @Override
-    public void close() throws ServerException {
-        VirtualFileSystem virtualFileSystem = fileSystemReference.get();
-        if (virtualFileSystem != null) {
-            virtualFileSystem.close();
-        }
-        fileSystemReference.set(null);
-    }
-
-    public interface CloseCallback {
-        void onClose();
-    }
+  public interface CloseCallback {
+    void onClose();
+  }
 }

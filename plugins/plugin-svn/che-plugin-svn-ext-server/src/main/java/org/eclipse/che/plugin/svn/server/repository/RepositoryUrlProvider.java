@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.svn.server.repository;
 
 import org.eclipse.che.plugin.svn.server.SubversionException;
@@ -19,14 +19,12 @@ import org.eclipse.che.plugin.svn.server.SubversionException;
  */
 public interface RepositoryUrlProvider {
 
-    /**
-     * Detects repository url based on location.
-     *
-     * @param projectPath
-     *      the absolute project path
-     * @return the repository url of the given project
-     * @throws SubversionException
-     *      if any error occurs
-     */
-    String getRepositoryUrl(String projectPath) throws SubversionException;
+  /**
+   * Detects repository url based on location.
+   *
+   * @param projectPath the absolute project path
+   * @return the repository url of the given project
+   * @throws SubversionException if any error occurs
+   */
+  String getRepositoryUrl(String projectPath) throws SubversionException;
 }

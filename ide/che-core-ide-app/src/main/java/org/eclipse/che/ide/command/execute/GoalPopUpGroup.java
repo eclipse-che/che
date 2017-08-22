@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.command.execute;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
@@ -30,46 +29,47 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 class GoalPopUpGroup extends DefaultActionGroup {
 
-    private final CommandGoal  commandGoal;
-    private final IconRegistry iconRegistry;
+  private final CommandGoal commandGoal;
+  private final IconRegistry iconRegistry;
 
-    @Inject
-    GoalPopUpGroup(@Assisted String goalId,
-                   ActionManager actionManager,
-                   CommandGoalRegistry goalRegistry,
-                   IconRegistry iconRegistry) {
-        super(actionManager);
+  @Inject
+  GoalPopUpGroup(
+      @Assisted String goalId,
+      ActionManager actionManager,
+      CommandGoalRegistry goalRegistry,
+      IconRegistry iconRegistry) {
+    super(actionManager);
 
-        this.iconRegistry = iconRegistry;
-        commandGoal = goalRegistry.getGoalForId(goalId);
+    this.iconRegistry = iconRegistry;
+    commandGoal = goalRegistry.getGoalForId(goalId);
 
-        setPopup(true);
+    setPopup(true);
 
-        // set icon
-        final SVGResource commandTypeIcon = getCommandGoalIcon();
-        if (commandTypeIcon != null) {
-            getTemplatePresentation().setSVGResource(commandTypeIcon);
-        }
+    // set icon
+    final SVGResource commandTypeIcon = getCommandGoalIcon();
+    if (commandTypeIcon != null) {
+      getTemplatePresentation().setSVGResource(commandTypeIcon);
+    }
+  }
+
+  @Override
+  public void update(ActionEvent e) {
+    e.getPresentation().setText(commandGoal.getId() + " (" + getChildrenCount() + ")");
+  }
+
+  private SVGResource getCommandGoalIcon() {
+    final String goalId = commandGoal.getId();
+
+    final Icon icon = iconRegistry.getIconIfExist("command.goal." + goalId);
+
+    if (icon != null) {
+      final SVGImage svgImage = icon.getSVGImage();
+
+      if (svgImage != null) {
+        return icon.getSVGResource();
+      }
     }
 
-    @Override
-    public void update(ActionEvent e) {
-        e.getPresentation().setText(commandGoal.getId() + " (" + getChildrenCount() + ")");
-    }
-
-    private SVGResource getCommandGoalIcon() {
-        final String goalId = commandGoal.getId();
-
-        final Icon icon = iconRegistry.getIconIfExist("command.goal." + goalId);
-
-        if (icon != null) {
-            final SVGImage svgImage = icon.getSVGImage();
-
-            if (svgImage != null) {
-                return icon.getSVGResource();
-            }
-        }
-
-        return null;
-    }
+    return null;
+  }
 }

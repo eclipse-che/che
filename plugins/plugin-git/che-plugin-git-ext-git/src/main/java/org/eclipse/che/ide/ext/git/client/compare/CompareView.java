@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.git.client.compare;
 
 import com.google.inject.ImplementedBy;
-
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
@@ -22,7 +21,7 @@ import org.eclipse.che.ide.api.mvp.View;
 @ImplementedBy(CompareViewImpl.class)
 interface CompareView extends View<CompareView.ActionDelegate> {
 
-  interface ActionDelegate {
+    interface ActionDelegate {
     /**
      * Performs some actions in response to user's closing the window.
      *
@@ -44,14 +43,13 @@ interface CompareView extends View<CompareView.ActionDelegate> {
     void processContent(String content);
   }
 
-  void getEditableContent(ContentConsumer contentConsumer);
-
-  /**
-   * Set a title for the window.
-   *
-   * @param title text that will be as a title in the window
-   */
-  void setTitle(String title);
+  void getEditableContent(ContentConsumer contentConsumer);/**
+     * Set a title for the window.
+     *
+     * @param title
+              text that will be as a title in the window
+     */
+    void setTitle(String title);
 
   /**
    * Set left and right column titles.

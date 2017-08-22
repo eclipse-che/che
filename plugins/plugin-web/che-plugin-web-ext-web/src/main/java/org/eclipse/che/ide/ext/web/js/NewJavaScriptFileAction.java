@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.web.js;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -17,11 +21,6 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.web.WebLocalizationConstant;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * Action to create new JavaScript file.
@@ -32,21 +31,29 @@ import com.google.web.bindery.event.shared.EventBus;
 @Singleton
 public class NewJavaScriptFileAction extends AbstractNewResourceAction {
 
-    @Inject
-    public NewJavaScriptFileAction(WebLocalizationConstant localizationConstant,
-                                   DialogFactory dialogFactory,
-                                   CoreLocalizationConstant coreLocalizationConstant,
-                                   EventBus eventBus,
-                                   AppContext appContext,
-                                   NotificationManager notificationManager,
-                                   Provider<EditorAgent> editorAgentProvider) {
-        super(localizationConstant.newJavaScriptFileActionTitle(),
-              localizationConstant.newJavaScriptFileActionDescription(),
-              null, dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager, editorAgentProvider);
-    }
+  @Inject
+  public NewJavaScriptFileAction(
+      WebLocalizationConstant localizationConstant,
+      DialogFactory dialogFactory,
+      CoreLocalizationConstant coreLocalizationConstant,
+      EventBus eventBus,
+      AppContext appContext,
+      NotificationManager notificationManager,
+      Provider<EditorAgent> editorAgentProvider) {
+    super(
+        localizationConstant.newJavaScriptFileActionTitle(),
+        localizationConstant.newJavaScriptFileActionDescription(),
+        null,
+        dialogFactory,
+        coreLocalizationConstant,
+        eventBus,
+        appContext,
+        notificationManager,
+        editorAgentProvider);
+  }
 
-    @Override
-    protected String getExtension() {
-        return "js";
-    }
+  @Override
+  protected String getExtension() {
+    return "js";
+  }
 }

@@ -10,9 +10,29 @@
  */
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Iterables.getFirst;
+import static java.util.Arrays.stream;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.joining;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -25,9 +45,9 @@ import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
+import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 
@@ -173,10 +193,10 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         .show();
   }
 
-  private void show(@Nullable String diff) {
-    AlteredFiles alteredFiles = new AlteredFiles(project, diff);
-    filesToCommit.clear();
-    allFiles = alteredFiles.getAlteredFilesList();
+    private void show(@Nullable String diff) {
+        AlteredFiles alteredFiles = new AlteredFiles(project,diff);
+        filesToCommit.clear();
+        allFiles = alteredFiles.getAlteredFilesList();
 
     view.setEnableCommitButton(!view.getMessage().isEmpty());
     view.focusInMessageField();
@@ -188,10 +208,12 @@ public class CommitPresenter implements CommitView.ActionDelegate {
             .collect(Collectors.toSet()));
   }
 
-  @Override
-  public void onCommitClicked() {
-    Path location = project.getLocation();
-    Path[] filesToCommitArray = getFilesToCommitArray();
+
+
+    @Override
+    public void onCommitClicked() {
+        Path location = project.getLocation();
+        Path[] filesToCommitArray = getFilesToCommitArray();
 
     service
         .add(location, false, filesToCommitArray)

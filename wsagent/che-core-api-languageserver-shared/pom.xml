@@ -41,17 +41,6 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/lsapi/**</exclude>
-                        <exclude>**/model/Extended*</exclude>
-                        <exclude>**/JsonDecision.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <executions>
                     <execution>

@@ -10,8 +10,16 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.LIST;
+import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
+
 import com.google.inject.Inject;
 
+import java.util.Map;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
@@ -28,27 +36,28 @@ import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.T
  */
 public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
 
-  private static final String REVISION = "HEAD";
-
-  private final ChangesPanelView view;
-  private final GitLocalizationConstant locale;
+    private static final String REVISION = "HEAD";private final ChangesPanelView        view;
+    private final GitLocalizationConstant locale;
 
   private AlteredFiles changedFiles;
   private ViewMode viewMode;
 
   private FileNodeDoubleClickHandler fileNodeDoubleClickHandler;
 
-  @Inject
-  public ChangesPanelPresenter(
-      GitLocalizationConstant locale, ChangesPanelView view, ComparePresenter comparePresenter) {
-    this.locale = locale;
-    this.view = view;
-    this.view.setDelegate(this);
-    this.viewMode = TREE;
+    @Inject
+    public ChangesPanelPresenter(GitLocalizationConstant locale,
+                                 ChangesPanelView view,
 
-    this.fileNodeDoubleClickHandler =
-        (path, status) -> comparePresenter.showCompareWithLatest(changedFiles, path, REVISION);
-  }
+                                 ComparePresenter comparePresenter) {
+        this.locale = locale;
+        this.view = view;
+        this.view.setDelegate(this);
+        this.viewMode = TREE;
+
+        this.fileNodeDoubleClickHandler =
+            (path, status) ->
+                              comparePresenter.showCompareWithLatest(changedFiles, path, REVISION);
+    }
 
   /**
    * Show panel with changed files. If empty map with changed files is received, all buttons would

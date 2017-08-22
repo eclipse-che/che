@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.machine.ssh;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.HashSet;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
@@ -20,12 +25,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.HashSet;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Tests for{@link SshMachineInstance}
  *
@@ -33,37 +32,31 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class SshMachineInstanceTest {
-    @Mock
-    private Machine      machine;
-    @Mock
-    private SshClient    sshClient;
-    @Mock
-    private LineConsumer outputConsumer;
+  @Mock private Machine machine;
+  @Mock private SshClient sshClient;
+  @Mock private LineConsumer outputConsumer;
 
-    private SshMachineInstance sshMachineInstance;
+  private SshMachineInstance sshMachineInstance;
 
-    @BeforeMethod
-    public void setUp() {
-        when(machine.getConfig()).thenReturn(mock(MachineConfig.class));
-        when(machine.getEnvName()).thenReturn("EnvName");
-        when(machine.getId()).thenReturn("Id");
-        when(machine.getOwner()).thenReturn("Owner");
-        when(machine.getRuntime()).thenReturn(mock(MachineRuntimeInfo.class));
-        when(machine.getWorkspaceId()).thenReturn("WorkspaceId");
+  @BeforeMethod
+  public void setUp() {
+    when(machine.getConfig()).thenReturn(mock(MachineConfig.class));
+    when(machine.getEnvName()).thenReturn("EnvName");
+    when(machine.getId()).thenReturn("Id");
+    when(machine.getOwner()).thenReturn("Owner");
+    when(machine.getRuntime()).thenReturn(mock(MachineRuntimeInfo.class));
+    when(machine.getWorkspaceId()).thenReturn("WorkspaceId");
 
-        sshMachineInstance = new SshMachineInstance(machine,
-                                                    sshClient,
-                                                    outputConsumer,
-                                                    mock(SshMachineFactory.class),
-                                                    new HashSet<>());
-    }
+    sshMachineInstance =
+        new SshMachineInstance(
+            machine, sshClient, outputConsumer, mock(SshMachineFactory.class), new HashSet<>());
+  }
 
-    @Test
-    public void shouldCloseOutputConsumerAndStopClientOnDestroy() throws Exception {
-        sshMachineInstance.destroy();
+  @Test
+  public void shouldCloseOutputConsumerAndStopClientOnDestroy() throws Exception {
+    sshMachineInstance.destroy();
 
-        verify(outputConsumer).close();
-        verify(sshClient).stop();
-    }
-
+    verify(outputConsumer).close();
+    verify(sshClient).stop();
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,65 +7,63 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.testing.ide.messages;
 
-/**
- * Visitor of test messages.
- */
+/** Visitor of test messages. */
 public interface TestingMessageVisitor {
 
-    /** visits message from test method. */
-    void visitTestingMessage(ClientTestingMessage message);
+  /** visits message from test method. */
+  void visitTestingMessage(ClientTestingMessage message);
 
-    /** visits test message with status. */
-    void visitMessageWithStatus(Message message);
+  /** visits test message with status. */
+  void visitMessageWithStatus(Message message);
 
-    /** visits test message when suite is started. */
-    void visitTestSuiteStarted(TestSuiteStarted suiteStarted);
+  /** visits test message when suite is started. */
+  void visitTestSuiteStarted(TestSuiteStarted suiteStarted);
 
-    /** visits test message when suite is finished. */
-    void visitTestSuiteFinished(TestSuiteFinished suiteFinished);
+  /** visits test message when suite is finished. */
+  void visitTestSuiteFinished(TestSuiteFinished suiteFinished);
 
-    /** visits StdErr test message. */
-    void visitTestStdErr(TestStdErr testStdErr);
+  /** visits StdErr test message. */
+  void visitTestStdErr(TestStdErr testStdErr);
 
-    /** visits test message when test is started. */
-    void visitTestStarted(TestStarted testStarted);
+  /** visits test message when test is started. */
+  void visitTestStarted(TestStarted testStarted);
 
-    /** visits StdOut test message. */
-    void visitTestStdOut(TestStdOut testStdOut);
+  /** visits StdOut test message. */
+  void visitTestStdOut(TestStdOut testStdOut);
 
-    /** visits test message when test is failed. */
-    void visitTestFailed(TestFailed testFailed);
+  /** visits test message when test is failed. */
+  void visitTestFailed(TestFailed testFailed);
 
-    /** visits test message when test is finished. */
-    void visitTestFinished(TestFinished testFinished);
+  /** visits test message when test is finished. */
+  void visitTestFinished(TestFinished testFinished);
 
-    /** visits test message when test is ignored. */
-    void visitTestIgnored(TestIgnored testIgnored);
+  /** visits test message when test is ignored. */
+  void visitTestIgnored(TestIgnored testIgnored);
 
-    /** visits test message when suite tree is started. */
-    void visitSuiteTreeStarted(SuiteTreeStarted suiteTreeStarted);
+  /** visits test message when suite tree is started. */
+  void visitSuiteTreeStarted(SuiteTreeStarted suiteTreeStarted);
 
-    /** visits test message when test count. */
-    void visitTestCount(TestCount testCount);
+  /** visits test message when test count. */
+  void visitTestCount(TestCount testCount);
 
-    /** visits test message when test report attached. */
-    void visitTestReporterAttached(TestReporterAttached testReporterAttached);
+  /** visits test message when test report attached. */
+  void visitTestReporterAttached(TestReporterAttached testReporterAttached);
 
-    /** visits test message when suite tree is ended. */
-    void visitSuiteTreeEnded(SuiteTreeEnded suiteTreeEnded);
+  /** visits test message when suite tree is ended. */
+  void visitSuiteTreeEnded(SuiteTreeEnded suiteTreeEnded);
 
-    /** visits suite tree node message. */
-    void visitSuiteTreeNode(SuiteTreeNode suiteTreeNode);
+  /** visits suite tree node message. */
+  void visitSuiteTreeNode(SuiteTreeNode suiteTreeNode);
 
-    /** visits suite tree node message is ended. */
-    void visitBuildTreeEnded(BuildTreeEnded buildTreeEnded);
+  /** visits suite tree node message is ended. */
+  void visitBuildTreeEnded(BuildTreeEnded buildTreeEnded);
 
-    /** visits root presentation message. */
-    void visitRootPresentation(RootPresentationMessage presentationMessage);
+  /** visits root presentation message. */
+  void visitRootPresentation(RootPresentationMessage presentationMessage);
 
-    /** visits uncapture output message. */
-    void visitUncapturedOutput(UncapturedOutputMessage uncapturedOutputMessage);
+  /** visits uncapture output message. */
+  void visitUncapturedOutput(UncapturedOutputMessage uncapturedOutputMessage);
 }

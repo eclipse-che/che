@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.editor.preferences.editorproperties;
 
 import com.google.gwt.core.client.GWT;
@@ -26,22 +26,22 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class EditorPropertiesViewImpl extends Composite implements EditorPropertiesView {
 
-    private static final EditorPropertiesSectionViewImplUiBinder UI_BINDER = GWT.create(EditorPropertiesSectionViewImplUiBinder.class);
+  private static final EditorPropertiesSectionViewImplUiBinder UI_BINDER =
+      GWT.create(EditorPropertiesSectionViewImplUiBinder.class);
 
-    @UiField
-    FlowPanel sectionsPanel;
+  @UiField FlowPanel sectionsPanel;
 
-    public EditorPropertiesViewImpl() {
-        initWidget(UI_BINDER.createAndBindUi(this));
-    }
+  public EditorPropertiesViewImpl() {
+    initWidget(UI_BINDER.createAndBindUi(this));
+  }
 
-    @Override
-    public AcceptsOneWidget getEditorSectionsContainer() {
-        SimplePanel container = new SimplePanel();
-        sectionsPanel.add(container);
-        return container;
-    }
+  @Override
+  public AcceptsOneWidget getEditorSectionsContainer() {
+    SimplePanel container = new SimplePanel();
+    sectionsPanel.add(container);
+    return container;
+  }
 
-    interface EditorPropertiesSectionViewImplUiBinder extends UiBinder<Widget, EditorPropertiesViewImpl> {
-    }
+  interface EditorPropertiesSectionViewImplUiBinder
+      extends UiBinder<Widget, EditorPropertiesViewImpl> {}
 }

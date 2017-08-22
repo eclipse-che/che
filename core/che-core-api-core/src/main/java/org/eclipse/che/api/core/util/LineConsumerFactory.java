@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.api.core.util;
 
-/**
- * A factory for {@link LineConsumer}
- */
+/** A factory for {@link LineConsumer} */
 @FunctionalInterface
 public interface LineConsumerFactory {
 
-    LineConsumer newLineConsumer();
+  LineConsumer newLineConsumer();
 
-    LineConsumerFactory NULL = () -> LineConsumer.DEV_NULL;
-
+  LineConsumerFactory NULL = () -> LineConsumer.DEV_NULL;
 }

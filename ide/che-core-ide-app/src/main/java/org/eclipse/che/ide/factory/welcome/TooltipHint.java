@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.factory.welcome;
 
 import com.google.gwt.core.client.GWT;
@@ -24,73 +24,67 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 
-/**
- * @author Vitaliy Guliy
- */
+/** @author Vitaliy Guliy */
 public class TooltipHint extends UIObject {
 
-    private static TooltipHintUiBinder uiBinder = GWT.create(TooltipHintUiBinder.class);
+  private static TooltipHintUiBinder uiBinder = GWT.create(TooltipHintUiBinder.class);
 
-    interface TooltipHintUiBinder extends UiBinder<Element, TooltipHint> {
-    }
+  interface TooltipHintUiBinder extends UiBinder<Element, TooltipHint> {}
 
-    @UiField
-    TableCellElement messageElement;
+  @UiField TableCellElement messageElement;
 
-    @UiField
-    DivElement closeButton;
+  @UiField DivElement closeButton;
 
-    private int opacity = 0;
+  private int opacity = 0;
 
-    private int top   = 1;
-    private int delta = 3;
+  private int top = 1;
+  private int delta = 3;
 
-    public TooltipHint(String text) {
-        setElement(uiBinder.createAndBindUi(this));
-        messageElement.setInnerHTML(SafeHtmlUtils.htmlEscape(text));
+  public TooltipHint(String text) {
+    setElement(uiBinder.createAndBindUi(this));
+    messageElement.setInnerHTML(SafeHtmlUtils.htmlEscape(text));
 
-        DOM.sinkEvents((com.google.gwt.dom.client.Element)closeButton.cast(), Event.ONCLICK);
-        DOM.setEventListener((com.google.gwt.dom.client.Element)closeButton.cast(), event -> close());
+    DOM.sinkEvents((com.google.gwt.dom.client.Element) closeButton.cast(), Event.ONCLICK);
+    DOM.setEventListener((com.google.gwt.dom.client.Element) closeButton.cast(), event -> close());
 
-        getElement().getStyle().setProperty("opacity", "0");
+    getElement().getStyle().setProperty("opacity", "0");
+    getElement().getStyle().setTop(top, Unit.PX);
+    RootPanel.get().getElement().appendChild(getElement());
+
+    getElement().getStyle().setZIndex(Integer.MAX_VALUE);
+
+    new Timer() {
+      @Override
+      public void run() {
+        opacity += 1;
+        top += delta;
         getElement().getStyle().setTop(top, Unit.PX);
-        RootPanel.get().getElement().appendChild(getElement());
 
-        getElement().getStyle().setZIndex(Integer.MAX_VALUE);
+        if (opacity >= 10) {
+          getElement().getStyle().setProperty("opacity", "1");
+          cancel();
+        } else {
+          getElement().getStyle().setProperty("opacity", "0." + opacity);
+        }
+      }
+    }.scheduleRepeating(50);
+  }
 
-        new Timer() {
-            @Override
-            public void run() {
-                opacity += 1;
-                top += delta;
-                getElement().getStyle().setTop(top, Unit.PX);
+  private void close() {
+    opacity = 10;
 
-                if (opacity >= 10) {
-                    getElement().getStyle().setProperty("opacity", "1");
-                    cancel();
-                } else {
-                    getElement().getStyle().setProperty("opacity", "0." + opacity);
-                }
-            }
-        }.scheduleRepeating(50);
-    }
-
-    private void close() {
-        opacity = 10;
-
-        // Hide animation
-        new Timer() {
-            @Override
-            public void run() {
-                opacity--;
-                if (opacity <= 0) {
-                    cancel();
-                    getElement().getParentElement().removeChild(getElement());
-                } else {
-                    getElement().getStyle().setProperty("opacity", "0." + opacity);
-                }
-            }
-        }.scheduleRepeating(50);
-    }
-
+    // Hide animation
+    new Timer() {
+      @Override
+      public void run() {
+        opacity--;
+        if (opacity <= 0) {
+          cancel();
+          getElement().getParentElement().removeChild(getElement());
+        } else {
+          getElement().getStyle().setProperty("opacity", "0." + opacity);
+        }
+      }
+    }.scheduleRepeating(50);
+  }
 }

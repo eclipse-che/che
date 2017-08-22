@@ -10,19 +10,28 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.revisionslist;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
@@ -42,31 +51,32 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
  */
 @Singleton
 public class RevisionListPresenter implements RevisionListView.ActionDelegate {
-  private final ComparePresenter comparePresenter;
-  private final DialogFactory dialogFactory;
-  private final RevisionListView view;
-  private final GitServiceClient service;
-  private final GitLocalizationConstant locale;
-  private final NotificationManager notificationManager;
+    private final ComparePresenter        comparePresenter;
+    private final DialogFactory           dialogFactory;
+    private final RevisionListView        view;
+    private final GitServiceClient        service;
+    private final GitLocalizationConstant locale;
+    private final  NotificationManager     notificationManager;
 
   private Revision selectedRevision;
   private Project project;
   private Path selectedFilePath;
 
-  @Inject
-  public RevisionListPresenter(
-      RevisionListView view,
-      ComparePresenter comparePresenter,
-      GitServiceClient service,
-      GitLocalizationConstant locale,
-      NotificationManager notificationManager,
-      DialogFactory dialogFactory) {
-    this.view = view;
-    this.comparePresenter = comparePresenter;
-    this.dialogFactory = dialogFactory;
-    this.service = service;
-    this.locale = locale;
-    this.notificationManager = notificationManager;
+    @Inject
+    public RevisionListPresenter(RevisionListView view,
+                                 ComparePresenter comparePresenter,
+                                 GitServiceClient service,
+                                 GitLocalizationConstant locale,
+                                 NotificationManager notificationManager,
+                                 DialogFactory dialogFactory) {
+
+        this.view = view;
+        this.comparePresenter = comparePresenter;
+        this.dialogFactory = dialogFactory;
+        this.service = service;
+        this.locale = locale;
+
+        this.notificationManager = notificationManager;
 
     this.view.setDelegate(this);
   }
@@ -143,34 +153,28 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
             });
   }
 
-  private void compare() {
-    service
-        .diff(
-            project.getLocation(),
-            singletonList(selectedFilePath.toString()),
-            NAME_STATUS,
-            false,
-            0,
-            selectedRevision.getId(),
-            false)
-        .then(
-            diff -> {
-              if (diff.isEmpty()) {
-                dialogFactory
-                    .createMessageDialog(
-                        locale.compareMessageIdenticalContentTitle(),
-                        locale.compareMessageIdenticalContentText(),
-                        null)
-                    .show();
-              } else {
-                AlteredFiles alteredFiles = new AlteredFiles(project, diff);
-                comparePresenter.showCompareWithLatest(
-                    alteredFiles, null, selectedRevision.getId());
-              }
-            })
-        .catchError(
-            arg -> {
-              notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
-            });
-  }
+    private void compare() {
+        service.diff(project.getLocation(),
+                     singletonList(selectedFilePath.toString()),
+                     NAME_STATUS,
+                     false,
+                     0,
+                     selectedRevision.getId(),
+                     false)
+               .then(diff -> {
+                   if (diff.isEmpty()) {
+                       dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
+                                                         locale.compareMessageIdenticalContentText(), null).show();
+                   } else {
+                       AlteredFiles alteredFiles = new AlteredFiles(project,diff);
+                               comparePresenter.showCompareWithLatest(
+                                                                     alteredFiles, null, selectedRevision.getId());
+                           }
+                       })
+
+
+               .catchError(arg -> {
+                   notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
+               });
+    }
 }

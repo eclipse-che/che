@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
+import static java.util.Comparator.naturalOrder;
+import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -18,7 +21,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.inject.Inject;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -35,16 +43,6 @@ import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.compare.NameComparator;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.Comparator.naturalOrder;
-import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
 
 /**
  * Implementation of {@link ChangesPanelView}.
@@ -103,23 +101,17 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
     tree.getSelectionModel().addSelectionChangedHandler(handler);
   }
 
-  @Override
-  public void viewChangedFiles(AlteredFiles files, ViewMode viewMode) {
-    NodeStorage nodeStorage = tree.getNodeStorage();
-    nodeStorage.clear();
-    if (viewMode == TREE) {
-      getGroupedNodes(files.getChangedFilesMap()).forEach(nodeStorage::add);
-      tree.expandAll();
-    } else {
-      files
-          .getAlteredFilesList()
-          .forEach(
-              file ->
-                  nodeStorage.add(
-                      new ChangedFileNode(
-                          file, files.getStatusByFilePath(file), nodesResources, delegate, false)));
+    @Override
+    public void viewChangedFiles(AlteredFiles files, ViewMode viewMode) {
+        NodeStorage nodeStorage = tree.getNodeStorage();
+        nodeStorage.clear();
+        if (viewMode == TREE) {
+            getGroupedNodes(files.getChangedFilesMap()).forEach(nodeStorage::add);
+            tree.expandAll();
+        } else {
+            files.getAlteredFilesList().forEach(file -> nodeStorage.add(new ChangedFileNode(file, files.getStatusByFilePath(file), nodesResources, delegate, false)));
+        }
     }
-  }
 
   @Override
   public void resetPanelState() {

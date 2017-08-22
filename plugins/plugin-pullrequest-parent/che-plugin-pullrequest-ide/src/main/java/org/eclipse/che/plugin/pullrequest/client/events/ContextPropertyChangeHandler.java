@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.pullrequest.client.events;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -18,11 +18,10 @@ import com.google.gwt.event.shared.EventHandler;
  * @author Kevin Pollet
  */
 public interface ContextPropertyChangeHandler extends EventHandler {
-    /**
-     * Called when a property of the context object changed.
-     *
-     * @param event
-     *         the {@link ContextPropertyChangeEvent} event.
-     */
-    void onContextPropertyChange(ContextPropertyChangeEvent event);
+  /**
+   * Called when a property of the context object changed.
+   *
+   * @param event the {@link ContextPropertyChangeEvent} event.
+   */
+  void onContextPropertyChange(ContextPropertyChangeEvent event);
 }

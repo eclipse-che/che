@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,26 +7,26 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.plugin.pullrequest.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface HostUser {
-    String getId();
+  String getId();
 
-    HostUser withId(String id);
+  HostUser withId(String id);
 
-    String getName();
+  String getName();
 
-    HostUser withName(String name);
+  HostUser withName(String name);
 
-    String getLogin();
+  String getLogin();
 
-    HostUser withLogin(String login);
+  HostUser withLogin(String login);
 
-    String getUrl();
+  String getUrl();
 
-    HostUser withUrl(String url);
+  HostUser withUrl(String url);
 }

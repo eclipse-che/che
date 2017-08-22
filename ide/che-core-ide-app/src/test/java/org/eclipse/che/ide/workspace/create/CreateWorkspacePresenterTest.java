@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,29 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.workspace.create;
+
+import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.MAX_COUNT;
+import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.RECIPE_TYPE;
+import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.SKIP_COUNT;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Provider;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -47,331 +64,289 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.MAX_COUNT;
-import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.RECIPE_TYPE;
-import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.SKIP_COUNT;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-/**
- * @author Dmitry Shnurenko
- */
+/** @author Dmitry Shnurenko */
 @RunWith(MockitoJUnitRunner.class)
 public class CreateWorkspacePresenterTest {
-    //constructor mocks
-    @Mock
-    private CreateWorkspaceView          view;
-    @Mock
-    private DtoFactory                   dtoFactory;
-    @Mock
-    private WorkspaceServiceClient       workspaceClient;
-    @Mock
-    private CoreLocalizationConstant     locale;
-    @Mock
-    private Provider<WorkspaceComponent> wsComponentProvider;
-    @Mock
-    private RecipeServiceClient          recipeServiceClient;
-    @Mock
-    private BrowserAddress               browserAddress;
-
-    //additional mocks
-    @Mock
-    private Callback<Component, Exception>  componentCallback;
-    @Mock
-    private HidePopupCallBack               popupCallBack;
-    @Mock
-    private Promise<List<RecipeDescriptor>> recipesPromise;
-    @Mock
-    private Promise<WorkspaceDto>           userWsPromise;
-    @Mock
-    private RecipeDescriptor                recipeDescriptor;
-    @Mock
-    private DefaultWorkspaceComponent       workspaceComponent;
-    @Mock
-    private MachineLimitsDto                limitsDto;
-
-    //DTOs
-    private MachineConfigDto   machineConfigDto;
-    private WorkspaceConfigDto workspaceConfigDto;
-    @Mock
-    private MachineDto         machineDto;
-    @Mock
-    private MachineSourceDto   machineSourceDto;
-    // Mocks too
-    private EnvironmentDto       environmentDto;
-    private EnvironmentRecipeDto environmentRecipeDto;
-    private ExtendedMachineDto   extendedMachineDto;
-    @Mock
-    private CommandDto         commandDto;
-    @Mock
-    private WorkspaceDto  usersWorkspaceDto;
-
-    @Captor
-    private ArgumentCaptor<Operation<List<RecipeDescriptor>>> recipeOperation;
-    @Captor
-    private ArgumentCaptor<Operation<WorkspaceDto>>      workspaceOperation;
-    @Captor
-    private ArgumentCaptor<Operation<PromiseError>>           errorOperation;
-
-    @InjectMocks
-    private CreateWorkspacePresenter presenter;
-
-    @Before
-    public void setUp() {
-        machineConfigDto = mock(MachineConfigDto.class, new SelfReturningAnswer());
-        workspaceConfigDto = mock(WorkspaceConfigDto.class, new SelfReturningAnswer());
-        when(usersWorkspaceDto.getConfig()).thenReturn(workspaceConfigDto);
-
-        when(dtoFactory.createDto(MachineSourceDto.class)).thenReturn(machineSourceDto);
-        when(machineSourceDto.withType(anyString())).thenReturn(machineSourceDto);
-        when(machineSourceDto.withLocation(anyString())).thenReturn(machineSourceDto);
-
-        when(dtoFactory.createDto(MachineLimitsDto.class)).thenReturn(limitsDto);
-        when(limitsDto.withRam(anyInt())).thenReturn(limitsDto);
-
-        when(dtoFactory.createDto(MachineConfigDto.class)).thenReturn(machineConfigDto);
-
-        when(dtoFactory.createDto(EnvironmentDto.class)).thenReturn(environmentDto);
-
-        when(dtoFactory.createDto(WorkspaceConfigDto.class)).thenReturn(workspaceConfigDto);
-
-        when(dtoFactory.createDto(WorkspaceDto.class)).thenReturn(usersWorkspaceDto);
-        environmentDto = mock(EnvironmentDto.class, new SelfReturningAnswer());
-        when(dtoFactory.createDto(EnvironmentDto.class)).thenReturn(environmentDto);
-        environmentRecipeDto = mock(EnvironmentRecipeDto.class, new SelfReturningAnswer());
-        when(dtoFactory.createDto(EnvironmentRecipeDto.class)).thenReturn(environmentRecipeDto);
-        extendedMachineDto = mock(ExtendedMachineDto.class, new SelfReturningAnswer());
-        when(dtoFactory.createDto(ExtendedMachineDto.class)).thenReturn(extendedMachineDto);
-
-        when(wsComponentProvider.get()).thenReturn(workspaceComponent);
-
-        when(recipeServiceClient.getAllRecipes()).thenReturn(recipesPromise);
-        when(view.getWorkspaceName()).thenReturn("test");
-        when(view.getRecipeUrl()).thenReturn("recipe");
-    }
-
-    @Test
-    public void delegateShouldBeSet() {
-        verify(view).setDelegate(presenter);
-    }
-
-    @Test
-    public void dialogShouldBeShown() {
-        presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
-
-        verify(browserAddress).getWorkspaceName();
-        verify(view).setWorkspaceName(anyString());
+  //constructor mocks
+  @Mock private CreateWorkspaceView view;
+  @Mock private DtoFactory dtoFactory;
+  @Mock private WorkspaceServiceClient workspaceClient;
+  @Mock private CoreLocalizationConstant locale;
+  @Mock private Provider<WorkspaceComponent> wsComponentProvider;
+  @Mock private RecipeServiceClient recipeServiceClient;
+  @Mock private BrowserAddress browserAddress;
+
+  //additional mocks
+  @Mock private Callback<Component, Exception> componentCallback;
+  @Mock private HidePopupCallBack popupCallBack;
+  @Mock private Promise<List<RecipeDescriptor>> recipesPromise;
+  @Mock private Promise<WorkspaceDto> userWsPromise;
+  @Mock private RecipeDescriptor recipeDescriptor;
+  @Mock private DefaultWorkspaceComponent workspaceComponent;
+  @Mock private MachineLimitsDto limitsDto;
+
+  //DTOs
+  private MachineConfigDto machineConfigDto;
+  private WorkspaceConfigDto workspaceConfigDto;
+  @Mock private MachineDto machineDto;
+  @Mock private MachineSourceDto machineSourceDto;
+  // Mocks too
+  private EnvironmentDto environmentDto;
+  private EnvironmentRecipeDto environmentRecipeDto;
+  private ExtendedMachineDto extendedMachineDto;
+  @Mock private CommandDto commandDto;
+  @Mock private WorkspaceDto usersWorkspaceDto;
+
+  @Captor private ArgumentCaptor<Operation<List<RecipeDescriptor>>> recipeOperation;
+  @Captor private ArgumentCaptor<Operation<WorkspaceDto>> workspaceOperation;
+  @Captor private ArgumentCaptor<Operation<PromiseError>> errorOperation;
+
+  @InjectMocks private CreateWorkspacePresenter presenter;
+
+  @Before
+  public void setUp() {
+    machineConfigDto = mock(MachineConfigDto.class, new SelfReturningAnswer());
+    workspaceConfigDto = mock(WorkspaceConfigDto.class, new SelfReturningAnswer());
+    when(usersWorkspaceDto.getConfig()).thenReturn(workspaceConfigDto);
+
+    when(dtoFactory.createDto(MachineSourceDto.class)).thenReturn(machineSourceDto);
+    when(machineSourceDto.withType(anyString())).thenReturn(machineSourceDto);
+    when(machineSourceDto.withLocation(anyString())).thenReturn(machineSourceDto);
+
+    when(dtoFactory.createDto(MachineLimitsDto.class)).thenReturn(limitsDto);
+    when(limitsDto.withRam(anyInt())).thenReturn(limitsDto);
 
-        verify(view).show();
-    }
+    when(dtoFactory.createDto(MachineConfigDto.class)).thenReturn(machineConfigDto);
 
-    @Test
-    public void errorLabelShouldBeShownWhenWorkspaceNameLengthIsInCorrect() {
-        when(view.getWorkspaceName()).thenReturn("te");
+    when(dtoFactory.createDto(EnvironmentDto.class)).thenReturn(environmentDto);
 
-        presenter.onNameChanged();
+    when(dtoFactory.createDto(WorkspaceConfigDto.class)).thenReturn(workspaceConfigDto);
 
-        verify(locale).createWsNameLengthIsNotCorrect();
-        verify(locale, never()).createWsNameIsNotCorrect();
-        verify(locale, never()).createWsNameAlreadyExist();
-    }
+    when(dtoFactory.createDto(WorkspaceDto.class)).thenReturn(usersWorkspaceDto);
+    environmentDto = mock(EnvironmentDto.class, new SelfReturningAnswer());
+    when(dtoFactory.createDto(EnvironmentDto.class)).thenReturn(environmentDto);
+    environmentRecipeDto = mock(EnvironmentRecipeDto.class, new SelfReturningAnswer());
+    when(dtoFactory.createDto(EnvironmentRecipeDto.class)).thenReturn(environmentRecipeDto);
+    extendedMachineDto = mock(ExtendedMachineDto.class, new SelfReturningAnswer());
+    when(dtoFactory.createDto(ExtendedMachineDto.class)).thenReturn(extendedMachineDto);
 
-    @Test
-    public void errorLabelShouldBeShownWhenWorkspaceNameIsInCorrect() {
-        when(view.getWorkspaceName()).thenReturn("test/*");
+    when(wsComponentProvider.get()).thenReturn(workspaceComponent);
 
-        presenter.onNameChanged();
+    when(recipeServiceClient.getAllRecipes()).thenReturn(recipesPromise);
+    when(view.getWorkspaceName()).thenReturn("test");
+    when(view.getRecipeUrl()).thenReturn("recipe");
+  }
 
-        verify(locale, never()).createWsNameLengthIsNotCorrect();
-        verify(locale).createWsNameIsNotCorrect();
-        verify(locale, never()).createWsNameAlreadyExist();
-    }
+  @Test
+  public void delegateShouldBeSet() {
+    verify(view).setDelegate(presenter);
+  }
 
-    @Test
-    public void errorLabelShouldBeShownWhenWorkspaceNameAlreadyExist() {
-        when(workspaceConfigDto.getName()).thenReturn("test");
+  @Test
+  public void dialogShouldBeShown() {
+    presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
 
-        presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
-        reset(locale);
+    verify(browserAddress).getWorkspaceName();
+    verify(view).setWorkspaceName(anyString());
 
-        presenter.onNameChanged();
+    verify(view).show();
+  }
 
-        verify(locale, never()).createWsNameLengthIsNotCorrect();
-        verify(locale, never()).createWsNameIsNotCorrect();
-        verify(locale).createWsNameAlreadyExist();
-    }
+  @Test
+  public void errorLabelShouldBeShownWhenWorkspaceNameLengthIsInCorrect() {
+    when(view.getWorkspaceName()).thenReturn("te");
 
+    presenter.onNameChanged();
 
-    @Test
-    public void errorLabelShouldNotBeShownWhenFormIsCorrect() {
-        when(view.getRecipeUrl()).thenReturn("http://localhost/correct/url");
+    verify(locale).createWsNameLengthIsNotCorrect();
+    verify(locale, never()).createWsNameIsNotCorrect();
+    verify(locale, never()).createWsNameAlreadyExist();
+  }
 
-        presenter.onRecipeUrlChanged();
+  @Test
+  public void errorLabelShouldBeShownWhenWorkspaceNameIsInCorrect() {
+    when(view.getWorkspaceName()).thenReturn("test/*");
 
-        verify(locale, never()).createWsNameLengthIsNotCorrect();
-        verify(locale, never()).createWsNameIsNotCorrect();
-        verify(locale, never()).createWsNameAlreadyExist();
+    presenter.onNameChanged();
 
-        verify(view).showValidationNameError("");
+    verify(locale, never()).createWsNameLengthIsNotCorrect();
+    verify(locale).createWsNameIsNotCorrect();
+    verify(locale, never()).createWsNameAlreadyExist();
+  }
 
-        verify(view).setVisibleUrlError(false);
+  @Test
+  public void errorLabelShouldBeShownWhenWorkspaceNameAlreadyExist() {
+    when(workspaceConfigDto.getName()).thenReturn("test");
 
-        verify(view).setEnableCreateButton(true);
-    }
+    presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
+    reset(locale);
 
-    @Test
-    public void errorLabelShouldBeShownWhenRecipeUrlIsNotCorrect() {
-        when(view.getRecipeUrl()).thenReturn("xxx://localh/correct/url");
+    presenter.onNameChanged();
 
-        presenter.onRecipeUrlChanged();
+    verify(locale, never()).createWsNameLengthIsNotCorrect();
+    verify(locale, never()).createWsNameIsNotCorrect();
+    verify(locale).createWsNameAlreadyExist();
+  }
 
-        verify(locale, never()).createWsNameLengthIsNotCorrect();
-        verify(locale, never()).createWsNameIsNotCorrect();
-        verify(locale, never()).createWsNameAlreadyExist();
+  @Test
+  public void errorLabelShouldNotBeShownWhenFormIsCorrect() {
+    when(view.getRecipeUrl()).thenReturn("http://localhost/correct/url");
 
-        verify(view).showValidationNameError("");
+    presenter.onRecipeUrlChanged();
 
-        verify(view).setVisibleUrlError(anyBoolean());
-    }
+    verify(locale, never()).createWsNameLengthIsNotCorrect();
+    verify(locale, never()).createWsNameIsNotCorrect();
+    verify(locale, never()).createWsNameAlreadyExist();
 
-    @Test
-    public void recipesShouldBeFoundAndShown() throws Exception {
-        List<RecipeDescriptor> recipes = Collections.singletonList(recipeDescriptor);
+    verify(view).showValidationNameError("");
 
-        callSearchRecipesApplyMethod(recipes);
+    verify(view).setVisibleUrlError(false);
 
-        verify(popupCallBack, never()).hidePopup();
-        verify(view).showFoundByTagRecipes(recipes);
-        verify(view).setVisibleTagsError(false);
-    }
+    verify(view).setEnableCreateButton(true);
+  }
 
-    private void callSearchRecipesApplyMethod(List<RecipeDescriptor> recipes) throws Exception {
-        List<String> tags = Collections.singletonList("test1 test2");
+  @Test
+  public void errorLabelShouldBeShownWhenRecipeUrlIsNotCorrect() {
+    when(view.getRecipeUrl()).thenReturn("xxx://localh/correct/url");
 
-        when(view.getTags()).thenReturn(tags);
-        when(recipeServiceClient.searchRecipes(Matchers.<List<String>>anyObject(),
-                                               anyString(),
-                                               anyInt(),
-                                               anyInt())).thenReturn(recipesPromise);
+    presenter.onRecipeUrlChanged();
 
-        presenter.onTagsChanged(popupCallBack);
+    verify(locale, never()).createWsNameLengthIsNotCorrect();
+    verify(locale, never()).createWsNameIsNotCorrect();
+    verify(locale, never()).createWsNameAlreadyExist();
 
-        verify(view).getTags();
-        verify(recipeServiceClient).searchRecipes(tags, RECIPE_TYPE, SKIP_COUNT, MAX_COUNT);
-        verify(recipesPromise).then(recipeOperation.capture());
+    verify(view).showValidationNameError("");
 
-        recipeOperation.getValue().apply(recipes);
-    }
+    verify(view).setVisibleUrlError(anyBoolean());
+  }
 
-    @Test
-    public void errorLabelShouldBeShowWhenRecipesNotFound() throws Exception {
-        List<RecipeDescriptor> recipes = new ArrayList<>();
+  @Test
+  public void recipesShouldBeFoundAndShown() throws Exception {
+    List<RecipeDescriptor> recipes = Collections.singletonList(recipeDescriptor);
 
-        callSearchRecipesApplyMethod(recipes);
+    callSearchRecipesApplyMethod(recipes);
 
-        verify(view).setVisibleTagsError(true);
-        verify(popupCallBack).hidePopup();
-        verify(view, never()).showFoundByTagRecipes(Matchers.<List<RecipeDescriptor>>anyObject());
-    }
+    verify(popupCallBack, never()).hidePopup();
+    verify(view).showFoundByTagRecipes(recipes);
+    verify(view).setVisibleTagsError(false);
+  }
 
-    @Test
-    public void predefinedRecipesShouldBeFound() {
-        presenter.onPredefinedRecipesClicked();
+  private void callSearchRecipesApplyMethod(List<RecipeDescriptor> recipes) throws Exception {
+    List<String> tags = Collections.singletonList("test1 test2");
 
-        verify(view).showPredefinedRecipes(Matchers.<List<RecipeDescriptor>>anyObject());
-    }
+    when(view.getTags()).thenReturn(tags);
+    when(recipeServiceClient.searchRecipes(
+            Matchers.<List<String>>anyObject(), anyString(), anyInt(), anyInt()))
+        .thenReturn(recipesPromise);
 
-    @Test
-    public void dialogShouldBeHiddenWhenUserClicksOnCreateButton() {
-        clickOnCreateButton();
+    presenter.onTagsChanged(popupCallBack);
 
-        verify(view).hide();
-    }
+    verify(view).getTags();
+    verify(recipeServiceClient).searchRecipes(tags, RECIPE_TYPE, SKIP_COUNT, MAX_COUNT);
+    verify(recipesPromise).then(recipeOperation.capture());
 
-    private void clickOnCreateButton() {
-        when(workspaceClient.create(Matchers.<WorkspaceConfigDto>anyObject(), anyString())).thenReturn(userWsPromise);
-        when(userWsPromise.then(Matchers.<Operation<WorkspaceDto>>anyObject())).thenReturn(userWsPromise);
-        when(userWsPromise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(userWsPromise);
-        when(recipeServiceClient.getAllRecipes()).thenReturn(recipesPromise);
+    recipeOperation.getValue().apply(recipes);
+  }
 
-        presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
+  @Test
+  public void errorLabelShouldBeShowWhenRecipesNotFound() throws Exception {
+    List<RecipeDescriptor> recipes = new ArrayList<>();
 
-        presenter.onCreateButtonClicked();
+    callSearchRecipesApplyMethod(recipes);
 
-        verify(recipeServiceClient).getAllRecipes();
-        verify(recipesPromise).then(Matchers.<Operation<List<RecipeDescriptor>>>anyObject());
+    verify(view).setVisibleTagsError(true);
+    verify(popupCallBack).hidePopup();
+    verify(view, never()).showFoundByTagRecipes(Matchers.<List<RecipeDescriptor>>anyObject());
+  }
 
-        verify(view).show();
-    }
+  @Test
+  public void predefinedRecipesShouldBeFound() {
+    presenter.onPredefinedRecipesClicked();
 
-    @Test
-    public void workspaceConfigShouldBeGot() {
-        when(view.getWorkspaceName()).thenReturn("name");
-        when(view.getRecipeUrl()).thenReturn("test");
+    verify(view).showPredefinedRecipes(Matchers.<List<RecipeDescriptor>>anyObject());
+  }
 
-        clickOnCreateButton();
+  @Test
+  public void dialogShouldBeHiddenWhenUserClicksOnCreateButton() {
+    clickOnCreateButton();
 
-        verify(view, times(2)).getWorkspaceName();
+    verify(view).hide();
+  }
 
-        verify(dtoFactory).createDto(EnvironmentDto.class);
-    }
+  private void clickOnCreateButton() {
+    when(workspaceClient.create(Matchers.<WorkspaceConfigDto>anyObject(), anyString()))
+        .thenReturn(userWsPromise);
+    when(userWsPromise.then(Matchers.<Operation<WorkspaceDto>>anyObject()))
+        .thenReturn(userWsPromise);
+    when(userWsPromise.catchError(Matchers.<Operation<PromiseError>>anyObject()))
+        .thenReturn(userWsPromise);
+    when(recipeServiceClient.getAllRecipes()).thenReturn(recipesPromise);
 
-    @Test
-    public void workspaceShouldBeCreatedForDevMachine() throws Exception {
-        when(machineConfigDto.isDev()).thenReturn(true);
+    presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
 
-        callApplyCreateWorkspaceMethod();
+    presenter.onCreateButtonClicked();
 
-        verify(wsComponentProvider).get();
-        verify(workspaceComponent).startWorkspace(usersWorkspaceDto, componentCallback);
-    }
+    verify(recipeServiceClient).getAllRecipes();
+    verify(recipesPromise).then(Matchers.<Operation<List<RecipeDescriptor>>>anyObject());
 
-    private void callApplyCreateWorkspaceMethod() throws Exception {
-        Map<String, EnvironmentDto> environments = new HashMap<>();
-        environments.put("name", environmentDto);
+    verify(view).show();
+  }
 
-        when(workspaceConfigDto.getDefaultEnv()).thenReturn("name");
-        when(workspaceConfigDto.getEnvironments()).thenReturn(environments);
+  @Test
+  public void workspaceConfigShouldBeGot() {
+    when(view.getWorkspaceName()).thenReturn("name");
+    when(view.getRecipeUrl()).thenReturn("test");
 
-        clickOnCreateButton();
+    clickOnCreateButton();
 
-        verify(userWsPromise).then(workspaceOperation.capture());
-        workspaceOperation.getValue().apply(usersWorkspaceDto);
-    }
+    verify(view, times(2)).getWorkspaceName();
 
-    @Test
-    public void workspaceShouldBeCreatedForNotDevMachine() throws Exception {
-        when(machineConfigDto.isDev()).thenReturn(false);
+    verify(dtoFactory).createDto(EnvironmentDto.class);
+  }
 
-        callApplyCreateWorkspaceMethod();
+  @Test
+  public void workspaceShouldBeCreatedForDevMachine() throws Exception {
+    when(machineConfigDto.isDev()).thenReturn(true);
 
-        verify(workspaceComponent).startWorkspace(usersWorkspaceDto, componentCallback);
-    }
+    callApplyCreateWorkspaceMethod();
 
-    @Test
-    public void errorShouldBeCaughtWhenCreatesWorkSpace() throws Exception {
-        final PromiseError promiseError = mock(PromiseError.class);
+    verify(wsComponentProvider).get();
+    verify(workspaceComponent).startWorkspace(usersWorkspaceDto, componentCallback);
+  }
 
-        clickOnCreateButton();
+  private void callApplyCreateWorkspaceMethod() throws Exception {
+    Map<String, EnvironmentDto> environments = new HashMap<>();
+    environments.put("name", environmentDto);
 
-        verify(userWsPromise).catchError(errorOperation.capture());
-        errorOperation.getValue().apply(promiseError);
+    when(workspaceConfigDto.getDefaultEnv()).thenReturn("name");
+    when(workspaceConfigDto.getEnvironments()).thenReturn(environments);
 
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(promiseError).getCause();
-        verify(componentCallback).onFailure(Matchers.<Exception>anyObject());
-    }
+    clickOnCreateButton();
+
+    verify(userWsPromise).then(workspaceOperation.capture());
+    workspaceOperation.getValue().apply(usersWorkspaceDto);
+  }
+
+  @Test
+  public void workspaceShouldBeCreatedForNotDevMachine() throws Exception {
+    when(machineConfigDto.isDev()).thenReturn(false);
+
+    callApplyCreateWorkspaceMethod();
+
+    verify(workspaceComponent).startWorkspace(usersWorkspaceDto, componentCallback);
+  }
+
+  @Test
+  public void errorShouldBeCaughtWhenCreatesWorkSpace() throws Exception {
+    final PromiseError promiseError = mock(PromiseError.class);
+
+    clickOnCreateButton();
+
+    verify(userWsPromise).catchError(errorOperation.capture());
+    errorOperation.getValue().apply(promiseError);
+
+    //noinspection ThrowableResultOfMethodCallIgnored
+    verify(promiseError).getCause();
+    verify(componentCallback).onFailure(Matchers.<Exception>anyObject());
+  }
 }

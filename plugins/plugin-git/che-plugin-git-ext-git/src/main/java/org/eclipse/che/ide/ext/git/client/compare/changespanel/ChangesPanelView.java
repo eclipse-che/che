@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;

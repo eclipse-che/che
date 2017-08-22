@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.maven.data;
 
 import java.io.Serializable;
@@ -18,21 +18,21 @@ import java.io.Serializable;
  * @author Evgen Vidolob
  */
 public class MavenParent implements Serializable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private final MavenKey mavenKey;
-    private final String   relativePath;
+  private final MavenKey mavenKey;
+  private final String relativePath;
 
-    public MavenParent(MavenKey mavenKey, String relativePath) {
-        this.mavenKey = mavenKey;
-        this.relativePath = relativePath;
-    }
+  public MavenParent(MavenKey mavenKey, String relativePath) {
+    this.mavenKey = mavenKey;
+    this.relativePath = relativePath;
+  }
 
-    public MavenKey getMavenKey() {
-        return mavenKey;
-    }
+  public MavenKey getMavenKey() {
+    return mavenKey;
+  }
 
-    public String getRelativePath() {
-        return relativePath;
-    }
+  public String getRelativePath() {
+    return relativePath;
+  }
 }

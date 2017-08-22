@@ -10,9 +10,16 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.branchlist;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
+import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -27,15 +34,6 @@ import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresent
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
-
-import javax.validation.constraints.NotNull;
-
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
-import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * Presenter for displaying list of branches for comparing selected with local changes.

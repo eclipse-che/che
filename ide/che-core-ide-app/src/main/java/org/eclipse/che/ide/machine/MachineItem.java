@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.machine;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.machine.MachineEntityImpl;
 
@@ -24,9 +23,8 @@ import org.eclipse.che.ide.api.machine.MachineEntityImpl;
  */
 public class MachineItem extends MachineEntityImpl {
 
-    @Inject
-    public MachineItem(@Assisted MachineDto descriptor) {
-        super(descriptor);
-    }
-
+  @Inject
+  public MachineItem(@Assisted MachineDto descriptor) {
+    super(descriptor);
+  }
 }

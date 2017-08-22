@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,53 +7,52 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.rest;
 
 /**
- * Created by The eXo Platform SARL        .<br/>
+ * Created by The eXo Platform SARL .<br>
  * HTTP methods
  *
  * @author Gennady Azarenkov
  */
 public interface HTTPMethod {
 
-    String GET = "GET";
+  String GET = "GET";
 
-    String PUT = "PUT";
+  String PUT = "PUT";
 
-    String POST = "POST";
+  String POST = "POST";
 
-    String DELETE = "DELETE";
+  String DELETE = "DELETE";
 
-    String SEARCH = "SEARCH";
+  String SEARCH = "SEARCH";
 
-    String PROPFIND = "PROPFIND";
+  String PROPFIND = "PROPFIND";
 
-    String PROPPATCH = "PROPPATCH";
+  String PROPPATCH = "PROPPATCH";
 
-    String HEAD = "HEAD";
+  String HEAD = "HEAD";
 
-    String CHECKIN = "CHECKIN";
+  String CHECKIN = "CHECKIN";
 
-    String CHECKOUT = "CHECKOUT";
+  String CHECKOUT = "CHECKOUT";
 
-    String COPY = "COPY";
+  String COPY = "COPY";
 
-    String LOCK = "LOCK";
+  String LOCK = "LOCK";
 
-    String MOVE = "MOVE";
+  String MOVE = "MOVE";
 
-    String UNLOCK = "UNLOCK";
+  String UNLOCK = "UNLOCK";
 
-    String OPTIONS = "OPTIONS";
+  String OPTIONS = "OPTIONS";
 
-    String MKCOL = "MKCOL";
+  String MKCOL = "MKCOL";
 
-    String REPORT = "REPORT";
+  String REPORT = "REPORT";
 
-    String UPDATE = "UPDATE";
+  String UPDATE = "UPDATE";
 
-    String ACL = "ACL";
-
+  String ACL = "ACL";
 }
