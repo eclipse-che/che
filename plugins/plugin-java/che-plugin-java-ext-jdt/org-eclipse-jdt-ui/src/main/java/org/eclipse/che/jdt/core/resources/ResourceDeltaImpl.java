@@ -32,7 +32,7 @@ public class ResourceDeltaImpl implements IResourceDelta {
   public ResourceDeltaImpl(File workspace, ProjectItemModifiedEvent event) {
     this.workspace = workspace;
     path = event.getPath();
-    //        status|= KIND_MASK;
+
     switch (event.getType()) {
       case UPDATED:
         status |= CHANGED | CONTENT;
@@ -42,6 +42,8 @@ public class ResourceDeltaImpl implements IResourceDelta {
         break;
       case DELETED:
         status |= REMOVED;
+        break;
+      default:
     }
   }
 

@@ -34,7 +34,7 @@ public class ServerException extends Exception {
     this.errorMessageProvided = checkErrorMessageProvided();
     this.message = getMessageFromJSON(response.getText());
     this.errorCode = getErrorCodeFromJSON(response.getText());
-    //        parseJsonAttributes(response.getText());
+    this.parseJsonAttributes(response.getText());
   }
 
   public ServerException(Response response, String message) {
@@ -105,17 +105,17 @@ public class ServerException extends Exception {
     return false;
   }
 
-  //    private native void parseJsonAttributes(String json) /*-{
-  //        try {
-  //            var attributes = JSON.parse(json).attributes;
-  //            for(var key in attributes) {
-  //                this.@org.eclipse.che.ide.commons.exception.ServerException.attributes::put(Ljava/lang/String;Ljava/lang/String;)(key, attributes[key]);
-  //            }
-  //
-  //        } catch (e) {
-  //            console.log(e.message, e);
-  //        }
-  //    }-*/;
+  private native void parseJsonAttributes(String json) /*-{
+          try {
+              var attributes = JSON.parse(json).attributes;
+              var exceptionAttributes = this.@org.eclipse.che.ide.commons.exception.ServerException::attributes;
+              for(var key in attributes) {
+                  exceptionAttributes.@java.util.Map::put(*)(key, attributes[key]);
+              }
+          } catch (e) {
+              console.log(e.message, e);
+          }
+      }-*/;
 
   public boolean isErrorMessageProvided() {
     return errorMessageProvided;
