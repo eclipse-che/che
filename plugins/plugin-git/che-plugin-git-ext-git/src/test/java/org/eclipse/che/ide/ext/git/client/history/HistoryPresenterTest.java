@@ -13,13 +13,11 @@ package org.eclipse.che.ide.ext.git.client.history;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.MODIFIED;
 import static org.eclipse.che.ide.resource.Path.EMPTY;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -46,23 +44,6 @@ import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.resource.Path.EMPTY;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class HistoryPresenterTest extends BaseTest {
 
@@ -146,18 +127,19 @@ public class HistoryPresenterTest extends BaseTest {
     verify(notificationManager).notify(eq("error"), eq(FAIL), eq(EMERGE_MODE));
   }
 
-    @Test
-    public void shouldShowCompareWhenOneFileChangedInCurrentRevision() throws Exception {
-        final String diff = "M\tfile";
-    final AlteredFiles alteredFiles = new AlteredFiles(project, diff);Revision parentRevision = mock(Revision.class);
-        Revision selectedRevision = mock(Revision.class);
-        when(parentRevision.getId()).thenReturn("commitA");
-        when(selectedRevision.getId()).thenReturn("commitB");
-        LogResponse logResponse = mock(LogResponse.class);
-        List<Revision> revisions = new ArrayList<>();
-        revisions.add(selectedRevision);
-        revisions.add(parentRevision);
-        when(logResponse.getCommits()).thenReturn(revisions);
+  @Test
+  public void shouldShowCompareWhenOneFileChangedInCurrentRevision() throws Exception {
+    final String diff = "M\tfile";
+    final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
+    Revision parentRevision = mock(Revision.class);
+    Revision selectedRevision = mock(Revision.class);
+    when(parentRevision.getId()).thenReturn("commitA");
+    when(selectedRevision.getId()).thenReturn("commitB");
+    LogResponse logResponse = mock(LogResponse.class);
+    List<Revision> revisions = new ArrayList<>();
+    revisions.add(selectedRevision);
+    revisions.add(parentRevision);
+    when(logResponse.getCommits()).thenReturn(revisions);
 
     presenter.show();
     presenter.onRevisionSelected(selectedRevision);
@@ -168,22 +150,22 @@ public class HistoryPresenterTest extends BaseTest {
     stringCaptor.getValue().apply(diff);
 
     verify(comparePresenter)
-        .showCompareBetweenRevisions(
-            eq(alteredFiles), anyString(), eq("commitA"), eq("commitB"));
+        .showCompareBetweenRevisions(eq(alteredFiles), anyString(), eq("commitA"), eq("commitB"));
   }
 
-    @Test
-    public void shouldShowChangedListWhenSeveralFilesChangedInSelectedRevision() throws Exception {
-        final String diff = "M\tfile1\nM\tfile2";
-    final AlteredFiles alteredFiles = new AlteredFiles(project, diff);Revision revisionA = mock(Revision.class);
-        Revision revisionB = mock(Revision.class);
-        when(revisionA.getId()).thenReturn("commitA");
-        when(revisionB.getId()).thenReturn("commitB");
-        LogResponse logResponse = mock(LogResponse.class);
-        List<Revision> revisions = new ArrayList<>();
-        revisions.add(revisionA);
-        revisions.add(revisionB);
-        when(logResponse.getCommits()).thenReturn(revisions);
+  @Test
+  public void shouldShowChangedListWhenSeveralFilesChangedInSelectedRevision() throws Exception {
+    final String diff = "M\tfile1\nM\tfile2";
+    final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
+    Revision revisionA = mock(Revision.class);
+    Revision revisionB = mock(Revision.class);
+    when(revisionA.getId()).thenReturn("commitA");
+    when(revisionB.getId()).thenReturn("commitB");
+    LogResponse logResponse = mock(LogResponse.class);
+    List<Revision> revisions = new ArrayList<>();
+    revisions.add(revisionA);
+    revisions.add(revisionB);
+    when(logResponse.getCommits()).thenReturn(revisions);
 
     presenter.show();
     presenter.onRevisionSelected(revisionA);

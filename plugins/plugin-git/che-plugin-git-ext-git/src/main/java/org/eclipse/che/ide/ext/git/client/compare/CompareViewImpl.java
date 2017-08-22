@@ -51,11 +51,12 @@ final class CompareViewImpl extends Window implements CompareView {
   @UiField(provided = true)
   final GitLocalizationConstant locale;
 
-    private final Button btnSaveChanges;
+  private final Button btnSaveChanges;
   private final Button btnNextDiff;
-  private final Button btnPrevDiff;private ActionDelegate delegate;
-    private ThemeAgent     themeAgent;
-    private CompareWidget  compare;
+  private final Button btnPrevDiff;
+  private ActionDelegate delegate;
+  private ThemeAgent themeAgent;
+  private CompareWidget compare;
 
   private final CompareFactory compareFactory;
   private final LoaderFactory loaderFactory;
@@ -73,19 +74,22 @@ final class CompareViewImpl extends Window implements CompareView {
 
     setWidget(UI_BINDER.createAndBindUi(this));
 
-        Button closeButton = createButton(locale.buttonClose(), "git-compare-close-btn",  event->
-                onClose());
-            Button refreshButton =
+    Button closeButton =
+        createButton(locale.buttonClose(), "git-compare-close-btn", event -> onClose());
+    Button refreshButton =
         createButton(locale.buttonRefresh(), "git-compare-refresh-btn", event -> compare.refresh());
 
-        btnSaveChanges = createButton(locale.buttonSaveChanges(), "git-compare-save-changes-btn",
-             event-> delegate.onSaveChangesClicked() );
-                btnNextDiff =
+    btnSaveChanges =
+        createButton(
+            locale.buttonSaveChanges(),
+            "git-compare-save-changes-btn",
+            event -> delegate.onSaveChangesClicked());
+    btnNextDiff =
         createButton(
             locale.buttonNextDiff(),
             "git-compare-next-diff-btn",
             event -> delegate.onNextDiffClicked());
-        btnPrevDiff =
+    btnPrevDiff =
         createButton(
             locale.buttonPreviousDiff(),
             "git-compare-prev-diff-btn",
@@ -105,15 +109,15 @@ final class CompareViewImpl extends Window implements CompareView {
     this.delegate = delegate;
   }
 
-    @Override
-    protected void onClose() {
-        compare.getContent( content->
-                delegate.onClose(content));
-            }
+  @Override
+  protected void onClose() {
+    compare.getContent(content -> delegate.onClose(content));
+  }
 
-    @Override
+  @Override
   public void getEditableContent(ContentConsumer contentConsumer) {
-    compare.getContent(contentConsumer::processContent);}
+    compare.getContent(contentConsumer::processContent);
+  }
 
   @Override
   public void setColumnTitles(String leftTitle, String rightTitle) {
@@ -146,11 +150,12 @@ final class CompareViewImpl extends Window implements CompareView {
     compareConfig.setShowTitle(false);
     compareConfig.setShowLineStatus(false);
 
-        compare = new CompareWidget(compareConfig, themeAgent.getCurrentThemeId(), loaderFactory);
-        comparePanel.clear();
-        comparePanel.add(compare);
-    }
-@Override
+    compare = new CompareWidget(compareConfig, themeAgent.getCurrentThemeId(), loaderFactory);
+    comparePanel.clear();
+    comparePanel.add(compare);
+  }
+
+  @Override
   public void setEnableSaveChangesButton(boolean enabled) {
     btnSaveChanges.setEnabled(enabled);
   }

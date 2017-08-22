@@ -15,15 +15,12 @@ import static org.eclipse.che.api.git.shared.Constants.DEFAULT_PAGE_SIZE;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Revision;
@@ -37,17 +34,6 @@ import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.resource.Path;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.git.shared.Constants.DEFAULT_PAGE_SIZE;
-import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Presenter for displaying list of revisions for comparing selected with local changes.
@@ -174,34 +160,42 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
             });
   }
 
-    private void compare() {
-        final String revisionA = revisions.indexOf(selectedRevision) + 1 == revisions.size() ? null
-                                : revisions.get(revisions.indexOf(selectedRevision) + 1).getId();
-        final String revisionB = selectedRevision.getId();
-        service.diff(project.getLocation(), singletonList(selectedPath.toString()),
-                     NAME_STATUS,
-                     true,
-                     0,
-                     revisionA,
-                     revisionB)
-               .then(diff -> {
-                   if (diff.isEmpty()) {
-                       dialogFactory.createMessageDialog(locale.historyTitle(), locale.historyNothingToDisplay(), null).show();
-                       return;
-                   }
-                   AlteredFiles alteredFiles = new AlteredFiles(project, diff);
-                   if (alteredFiles.getFilesQuantity() == 1) {
-                       comparePresenter.showCompareBetweenRevisions(
-                                                                    alteredFiles, null,
-                                                                    revisionA,
-                                                                    revisionB);
-                   } else {
+  private void compare() {
+    final String revisionA =
+        revisions.indexOf(selectedRevision) + 1 == revisions.size()
+            ? null
+            : revisions.get(revisions.indexOf(selectedRevision) + 1).getId();
+    final String revisionB = selectedRevision.getId();
+    service
+        .diff(
+            project.getLocation(),
+            singletonList(selectedPath.toString()),
+            NAME_STATUS,
+            true,
+            0,
+            revisionA,
+            revisionB)
+        .then(
+            diff -> {
+              if (diff.isEmpty()) {
+                dialogFactory
+                    .createMessageDialog(
+                        locale.historyTitle(), locale.historyNothingToDisplay(), null)
+                    .show();
+                return;
+              }
+              AlteredFiles alteredFiles = new AlteredFiles(project, diff);
+              if (alteredFiles.getFilesQuantity() == 1) {
+                comparePresenter.showCompareBetweenRevisions(
+                    alteredFiles, null, revisionA, revisionB);
+              } else {
 
-                       changesListPresenter.show(alteredFiles, revisionA, revisionB);
-                   }
-               })
-               .catchError(error -> {
-                   notificationManager.notify(locale.diffFailed(), FAIL, EMERGE_MODE);
-               });
-    }
+                changesListPresenter.show(alteredFiles, revisionA, revisionB);
+              }
+            })
+        .catchError(
+            error -> {
+              notificationManager.notify(locale.diffFailed(), FAIL, EMERGE_MODE);
+            });
+  }
 }

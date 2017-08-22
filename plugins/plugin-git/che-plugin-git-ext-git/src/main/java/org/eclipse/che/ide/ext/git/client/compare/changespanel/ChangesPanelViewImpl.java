@@ -101,17 +101,23 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
     tree.getSelectionModel().addSelectionChangedHandler(handler);
   }
 
-    @Override
-    public void viewChangedFiles(AlteredFiles files, ViewMode viewMode) {
-        NodeStorage nodeStorage = tree.getNodeStorage();
-        nodeStorage.clear();
-        if (viewMode == TREE) {
-            getGroupedNodes(files.getChangedFilesMap()).forEach(nodeStorage::add);
-            tree.expandAll();
-        } else {
-            files.getAlteredFilesList().forEach(file -> nodeStorage.add(new ChangedFileNode(file, files.getStatusByFilePath(file), nodesResources, delegate, false)));
-        }
+  @Override
+  public void viewChangedFiles(AlteredFiles files, ViewMode viewMode) {
+    NodeStorage nodeStorage = tree.getNodeStorage();
+    nodeStorage.clear();
+    if (viewMode == TREE) {
+      getGroupedNodes(files.getChangedFilesMap()).forEach(nodeStorage::add);
+      tree.expandAll();
+    } else {
+      files
+          .getAlteredFilesList()
+          .forEach(
+              file ->
+                  nodeStorage.add(
+                      new ChangedFileNode(
+                          file, files.getStatusByFilePath(file), nodesResources, delegate, false)));
     }
+  }
 
   @Override
   public void resetPanelState() {

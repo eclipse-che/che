@@ -11,12 +11,9 @@
 package org.eclipse.che.ide.ext.git.client.compare.changeslist;
 
 import static com.google.common.collect.Iterables.getFirst;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
@@ -25,8 +22,6 @@ import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFolderNode
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
-
-import static com.google.common.collect.Iterables.getFirst;
 
 /**
  * Presenter for displaying window with list of changed files.
@@ -37,40 +32,40 @@ import static com.google.common.collect.Iterables.getFirst;
  */
 @Singleton
 public class ChangesListPresenter implements ChangesListView.ActionDelegate {
-    private final ChangesListView       view;
-    private final  ChangesPanelPresenter changesPanelPresenter;
-    private final ComparePresenter      comparePresenter;
+  private final ChangesListView view;
+  private final ChangesPanelPresenter changesPanelPresenter;
+  private final ComparePresenter comparePresenter;
 
-    private AlteredFiles alteredFiles;
-    private String  file;
-    private String  revisionA;
-    private String  revisionB;
+  private AlteredFiles alteredFiles;
+  private String file;
+  private String revisionA;
+  private String revisionB;
 
+  @Inject
+  public ChangesListPresenter(
+      ChangesListView view,
+      ComparePresenter comparePresenter,
+      ChangesPanelPresenter changesPanelPresenter) {
+    this.comparePresenter = comparePresenter;
+    this.view = view;
 
-    @Inject
-    public ChangesListPresenter(ChangesListView view,
-                                ComparePresenter comparePresenter,
+    this.changesPanelPresenter = changesPanelPresenter;
+    this.changesPanelPresenter.setFileNodeDoubleClickHandler(
+        (path, status) -> this.onCompareClicked());
+    this.view.setDelegate(this);
 
-                                ChangesPanelPresenter changesPanelPresenter) {
-        this.comparePresenter = comparePresenter;
-        this.view = view;
-
-        this.changesPanelPresenter = changesPanelPresenter;
-        this.changesPanelPresenter.setFileNodeDoubleClickHandler((path, status) -> this.onCompareClicked());
-        this.view.setDelegate(this);
-
-        SelectionChangedHandler handler = event -> {
-            Node node = getFirst(event.getSelection(), null);
-            if (node == null) {
-                return;
-            }
-            if (node instanceof ChangedFolderNode) {
-                ChangesListPresenter.this.view.setEnableCompareButton(false);
-                return;
-            }
-            ChangesListPresenter.this.view.setEnableCompareButton(true);
-            ChangesListPresenter.this.file = node.getName();
-
+    SelectionChangedHandler handler =
+        event -> {
+          Node node = getFirst(event.getSelection(), null);
+          if (node == null) {
+            return;
+          }
+          if (node instanceof ChangedFolderNode) {
+            ChangesListPresenter.this.view.setEnableCompareButton(false);
+            return;
+          }
+          ChangesListPresenter.this.view.setEnableCompareButton(true);
+          ChangesListPresenter.this.file = node.getName();
         };
 
     ChangesPanelView changesPanelView = changesPanelPresenter.getView();
@@ -104,14 +99,13 @@ public class ChangesListPresenter implements ChangesListView.ActionDelegate {
     view.close();
   }
 
-    @Override
-    public void onCompareClicked() {
-        if (revisionB == null) {
+  @Override
+  public void onCompareClicked() {
+    if (revisionB == null) {
 
-                           comparePresenter.showCompareWithLatest(alteredFiles,file, revisionA);
-                       }
-                    else {
-            comparePresenter.showCompareBetweenRevisions(alteredFiles,file, revisionA, revisionB);
-        }
+      comparePresenter.showCompareWithLatest(alteredFiles, file, revisionA);
+    } else {
+      comparePresenter.showCompareBetweenRevisions(alteredFiles, file, revisionA, revisionB);
     }
+  }
 }

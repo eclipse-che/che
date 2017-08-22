@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
-import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
@@ -20,8 +19,6 @@ import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
-
-import java.util.Set;
 
 /**
  * The view of {@link ChangesPanelPresenter}.

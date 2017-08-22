@@ -48,9 +48,9 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
     /** Set the commit message for an amend commit. */
     void setAmendCommitMessage();
 
-        /** Get list of changed files paths. */
-        List<String> getChangedFiles();
-    }
+    /** Get list of changed files paths. */
+    List<String> getChangedFiles();
+  }
 
   /** @return entered message */
   @NotNull

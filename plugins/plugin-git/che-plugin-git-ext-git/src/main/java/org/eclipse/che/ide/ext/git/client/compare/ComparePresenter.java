@@ -19,7 +19,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -42,39 +41,39 @@ import org.eclipse.che.ide.resource.Path;
 @Singleton
 public class ComparePresenter implements CompareView.ActionDelegate {
 
+  private final EventBus eventBus;
+  private final DialogFactory dialogFactory;
+  private final CompareView view;
+  private final GitServiceClient service;
+  private final GitLocalizationConstant locale;
+  private final NotificationManager notificationManager;
 
-    private final EventBus                eventBus;
-    private final DialogFactory           dialogFactory;
-    private final CompareView             view;
-    private final GitServiceClient        service;
-    private final GitLocalizationConstant locale;
-    private final NotificationManager     notificationManager;
-
-    private boolean compareWithLatest;
+  private boolean compareWithLatest;
   private AlteredFiles alteredFiles;
-  private int currentFileIndex;private File    comparedFile;
-    private String  revision;
-    private String  localContent;
-    private String revisionA;
+  private int currentFileIndex;
+  private File comparedFile;
+  private String revision;
+  private String localContent;
+  private String revisionA;
   private String revisionB;
 
-    @Inject
-    public ComparePresenter(
-                            EventBus eventBus,
-                            DialogFactory dialogFactory,
-                            CompareView view,
-                            GitServiceClient service,
-                            GitLocalizationConstant locale,
-                            NotificationManager notificationManager) {
+  @Inject
+  public ComparePresenter(
+      EventBus eventBus,
+      DialogFactory dialogFactory,
+      CompareView view,
+      GitServiceClient service,
+      GitLocalizationConstant locale,
+      NotificationManager notificationManager) {
 
-        this.eventBus = eventBus;
-        this.dialogFactory = dialogFactory;
-        this.view = view;
-        this.service = service;
-        this.locale = locale;
-        this.notificationManager = notificationManager;
-        this.view.setDelegate(this);
-    }
+    this.eventBus = eventBus;
+    this.dialogFactory = dialogFactory;
+    this.view = view;
+    this.service = service;
+    this.locale = locale;
+    this.notificationManager = notificationManager;
+    this.view.setDelegate(this);
+  }
 
   /**
    * Show compare window for given set of files between given revision and HEAD.
@@ -91,7 +90,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     this.compareWithLatest = true;
 
-        currentFileIndex = findFileIndexOrFirst(currentFile);
+    currentFileIndex = findFileIndexOrFirst(currentFile);
     showCompareForCurrentFile();
   }
 
@@ -161,73 +160,97 @@ public class ComparePresenter implements CompareView.ActionDelegate {
   }
 
   private void showCompareWithLatestForFile(
-      final Path gitDirLocation, final Path relPath, final Status status) {if (status.equals(ADDED)) {
-            showCompare("");
-            return;
-        }
-
-
-
-        if (status.equals(DELETED)) {
-            service.showFileContent(gitDirLocation, relPath, revision)
-                   .then(content -> {
-                       view.setTitle(relPath.toString());
-                       view.setColumnTitles(locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
-                       view.show(content.getContent(), "", relPath.toString(), true);
-                   })
-                   .catchError(error -> {
-                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                   });
-        } else {
-            service.showFileContent(gitDirLocation, relPath, revision)
-                   .then(content -> {
-                       showCompare(content.getContent());
-                   })
-                   .catchError(error -> {
-                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                   });
-        }
+      final Path gitDirLocation, final Path relPath, final Status status) {
+    if (status.equals(ADDED)) {
+      showCompare("");
+      return;
     }
+
+    if (status.equals(DELETED)) {
+      service
+          .showFileContent(gitDirLocation, relPath, revision)
+          .then(
+              content -> {
+                view.setTitle(relPath.toString());
+                view.setColumnTitles(
+                    locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
+                view.show(content.getContent(), "", relPath.toString(), true);
+              })
+          .catchError(
+              error -> {
+                notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+              });
+    } else {
+      service
+          .showFileContent(gitDirLocation, relPath, revision)
+          .then(
+              content -> {
+                showCompare(content.getContent());
+              })
+          .catchError(
+              error -> {
+                notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+              });
+    }
+  }
 
   private void showCompareBetweenRevisionsForFile(
       final Path gitDir, final Path relPath, final Status status) {
     view.setTitle(relPath.toString());
 
-
-        if (status == Status.ADDED) {
-            service.showFileContent(gitDir, relPath, revisionB)
-                   .then(response -> {
-                       view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
-                                            revisionA == null ? "" : revisionA + locale.compareReadOnlyTitle());
-                       view.show("", response.getContent(), relPath.toString(), true);
-                   })
-                   .catchError(error -> {
-                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                   });
-        } else if (status == Status.DELETED) {
-            service.showFileContent(gitDir, relPath, revisionA)
-                   .then(response -> {
-                       view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(), revisionA + locale.compareReadOnlyTitle());
-                       view.show(response.getContent(), "", relPath.toString(), true);
-                   })
-                   .catchError(error -> {
-                       notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                   });
-        } else {
-            service.showFileContent(gitDir, relPath, revisionA)
-                   .then(contentAResponse -> {
-                       service.showFileContent(gitDir, relPath, revisionB)
-                              .then(contentBResponse -> {
-                                  view.setColumnTitles(revisionB + locale.compareReadOnlyTitle(),
-                                                       revisionA + locale.compareReadOnlyTitle());
-                                  view.show(contentAResponse.getContent(), contentBResponse.getContent(), relPath.toString(), true);
-                              })
-                              .catchError(error -> {
-                                  notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                              });
-                   });
-        }
+    if (status == Status.ADDED) {
+      service
+          .showFileContent(gitDir, relPath, revisionB)
+          .then(
+              response -> {
+                view.setColumnTitles(
+                    revisionB + locale.compareReadOnlyTitle(),
+                    revisionA == null ? "" : revisionA + locale.compareReadOnlyTitle());
+                view.show("", response.getContent(), relPath.toString(), true);
+              })
+          .catchError(
+              error -> {
+                notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+              });
+    } else if (status == Status.DELETED) {
+      service
+          .showFileContent(gitDir, relPath, revisionA)
+          .then(
+              response -> {
+                view.setColumnTitles(
+                    revisionB + locale.compareReadOnlyTitle(),
+                    revisionA + locale.compareReadOnlyTitle());
+                view.show(response.getContent(), "", relPath.toString(), true);
+              })
+          .catchError(
+              error -> {
+                notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+              });
+    } else {
+      service
+          .showFileContent(gitDir, relPath, revisionA)
+          .then(
+              contentAResponse -> {
+                service
+                    .showFileContent(gitDir, relPath, revisionB)
+                    .then(
+                        contentBResponse -> {
+                          view.setColumnTitles(
+                              revisionB + locale.compareReadOnlyTitle(),
+                              revisionA + locale.compareReadOnlyTitle());
+                          view.show(
+                              contentAResponse.getContent(),
+                              contentBResponse.getContent(),
+                              relPath.toString(),
+                              true);
+                        })
+                    .catchError(
+                        error -> {
+                          notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
+                        });
+              });
     }
+  }
 
   @Override
   public void onClose(final String newContent) {
@@ -236,11 +259,11 @@ public class ComparePresenter implements CompareView.ActionDelegate {
       return;
     }
 
-        ConfirmCallback confirmCallback =
-                                                            () -> {
-                                                                saveContent(newContent);
-                                                                view.hide();
-                                                            };
+    ConfirmCallback confirmCallback =
+        () -> {
+          saveContent(newContent);
+          view.hide();
+        };
 
     CancelCallback cancelCallback = view::hide;
 
