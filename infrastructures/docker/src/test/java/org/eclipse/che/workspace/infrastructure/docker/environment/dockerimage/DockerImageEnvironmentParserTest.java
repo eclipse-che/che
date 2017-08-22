@@ -45,8 +45,9 @@ public class DockerImageEnvironmentParserTest {
   @BeforeMethod
   public void setUp() throws Exception {
     when(environment.getRecipe()).thenReturn(recipe);
-    when(environment.getMachines()).thenReturn(singletonMap(DEFAULT_DOCKER_IMAGE, machineConfig));
+    when(environment.getMachines()).thenReturn(singletonMap(DEFAULT_MACHINE_NAME, machineConfig));
     when(recipe.getType()).thenReturn("dockerimage");
+    when(recipe.getContent()).thenReturn(DEFAULT_DOCKER_IMAGE);
   }
 
   @Test(
