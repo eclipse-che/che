@@ -26,8 +26,8 @@ import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -43,17 +43,20 @@ public class Dashboard {
 
   private final TestIdeUrlProvider testIdeUrlProvider;
   private final TestDashboardUrlProvider testDashboardUrlProvider;
+  private final LoginPage loginPage;
 
   @Inject
   public Dashboard(
       SeleniumWebDriver seleniumWebDriver,
       DefaultTestUser defaultUser,
       TestIdeUrlProvider testIdeUrlProvider,
-      TestDashboardUrlProvider testDashboardUrlProvider) {
+      TestDashboardUrlProvider testDashboardUrlProvider,
+      LoginPage loginPage) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.defaultUser = defaultUser;
     this.testIdeUrlProvider = testIdeUrlProvider;
     this.testDashboardUrlProvider = testDashboardUrlProvider;
+    this.loginPage = loginPage;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -190,19 +193,10 @@ public class Dashboard {
 
   /** Open dashboard as default uses */
   public void open() {
-    open(defaultUser.getAuthToken());
-  }
-
-  public void open(String authToken) {
-    seleniumWebDriver.get(testIdeUrlProvider.get().toString());
-
-    Cookie accessKey = new Cookie("session-access-key", authToken);
-    seleniumWebDriver.manage().addCookie(accessKey);
-
     seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
-
-    // renew session to avoid an error "HTTP Status 403 - CSRF nonce validation failed" https://github.com/codenvy/codenvy/issues/2255
-    seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
+    if (loginPage.isOpened()) {
+      loginPage.login(defaultUser.getName(), defaultUser.getPassword());
+    }
   }
 
   public WebDriver driver() {

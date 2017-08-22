@@ -63,7 +63,7 @@ public class TestUserImpl implements TestUser {
     this.password = NameGenerator.generate("Pwd1", 6);
     this.name = email.split("@")[0];
 
-    this.id = userServiceClient.create(email, password).getId();
+    this.id = userServiceClient.create(name, email, password);
 
     LOG.info("User name='{}', password '{}', id='{}' has been created", name, password, id);
 
@@ -115,7 +115,7 @@ public class TestUserImpl implements TestUser {
     }
 
     try {
-      userServiceClient.deleteByEmail(email);
+      userServiceClient.delete(getId());
       LOG.info("User name='{}', id='{}' removed", name, id);
     } catch (Exception e) {
       LOG.error(format("Failed to remove user name='%s', id='%s'", email, id), e);

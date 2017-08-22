@@ -10,65 +10,93 @@
  */
 package org.eclipse.che.selenium.core.client;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.net.URLEncoder;
-import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.api.user.shared.dto.UserDto;
-import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestAdminHttpJsonRequestFactory;
+import java.io.IOException;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import org.eclipse.che.keycloak.shared.KeycloakConstants;
+import org.eclipse.che.selenium.core.user.AdminTestUser;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/** @author Musienko Maxim */
+/**
+ * @author Musienko Maxim
+ * @author Dmytro Nochevnov
+ */
 @Singleton
 public class TestUserServiceClient {
-  private final String apiEndpoint;
-  private final HttpJsonRequestFactory requestFactory;
+  private static final Logger LOG = LoggerFactory.getLogger(TestUserServiceClient.class);
+
+  private final Keycloak keycloak;
+  private final String realm;
 
   @Inject
   public TestUserServiceClient(
-      TestApiEndpointUrlProvider apiEndpointProvider,
-      TestAdminHttpJsonRequestFactory requestFactory) {
-    this.apiEndpoint = apiEndpointProvider.get().toString();
-    this.requestFactory = requestFactory;
+      AdminTestUser adminTestUser,
+      @Named(KeycloakConstants.AUTH_SERVER_URL_SETTING) String authServerUrl,
+      @Named(KeycloakConstants.REALM_SETTING) String realm,
+      @Named(KeycloakConstants.PRIVATE_CLIENT_ID_SETTING) String clientId,
+      @Named(KeycloakConstants.PRIVATE_CLIENT_SECRET_SETTING) String clientSecret) {
+    this.realm = realm;
+    this.keycloak =
+        KeycloakBuilder.builder()
+            .serverUrl(authServerUrl)
+            .realm("master")
+            .username(adminTestUser.getName())
+            .password(adminTestUser.getPassword())
+            .clientId("admin-cli")
+            .build();
   }
 
-  public User getByEmail(String email) throws Exception {
-    String url = apiEndpoint + "user/find?email=" + URLEncoder.encode(email, "UTF-8");
-    HttpJsonResponse response = requestFactory.fromUrl(url).useGetMethod().request();
-
-    return response.asDto(UserDto.class);
+  public void delete(String id) throws IOException {
+    keycloak.realm(realm).users().delete(id);
   }
 
-  public void deleteByEmail(String email) throws Exception {
-    String url = apiEndpoint + "user/" + getByEmail(email).getId();
-    requestFactory.fromUrl(url).useDeleteMethod().request();
-  }
+  /**
+   * Creates user.
+   *
+   * @param name
+   * @param email
+   * @param password
+   * @return id of user
+   * @throws Exception
+   */
+  public String create(String name, String email, String password) throws IOException {
+    String userId;
 
-  public User create(String email, String password) throws Exception {
-    String url = apiEndpoint + "user";
-    return requestFactory
-        .fromUrl(url)
-        .usePostMethod()
-        .setBody(
-            newDto(UserDto.class)
-                .withName(email.split("@")[0])
-                .withPassword(password)
-                .withEmail(email))
-        .request()
-        .asDto(UserDto.class);
-  }
+    UserRepresentation user = new UserRepresentation();
+    user.setUsername(name);
+    user.setEmail(email);
+    user.setEnabled(true);
 
-  public UserDto getUser(String auth) throws Exception {
-    String url = apiEndpoint + "user";
-    return requestFactory
-        .fromUrl(url)
-        .useGetMethod()
-        .setAuthorizationHeader(auth)
-        .request()
-        .asDto(UserDto.class);
+    try {
+      Response res = keycloak.realm(realm).users().create(user);
+      if (res.getStatus() != Status.CREATED.getStatusCode()) {
+        throw new IOException(
+            String.format(
+                "Server status '%s'. Error message: '%s'", res.getStatus(), res.getEntity()));
+      }
+
+      userId = res.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
+
+      // set password
+      CredentialRepresentation credential = new CredentialRepresentation();
+      credential.setType(CredentialRepresentation.PASSWORD);
+      credential.setValue(password);
+      credential.setTemporary(false);
+
+      keycloak.realm(realm).users().get(userId).resetPassword(credential);
+    } catch (RuntimeException e) {
+      throw new IOException(
+          String.format("Error of creation of user with name '%s' occurred.", name), e);
+    }
+
+    return userId;
   }
 }
