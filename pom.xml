@@ -34,6 +34,7 @@
         <module>samples</module>
         <module>dashboard</module>
         <module>assembly</module>
+        <module>selenium</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
@@ -1165,6 +1166,16 @@
             <dependency>
                 <groupId>org.eclipse.che.sample</groupId>
                 <artifactId>che-sample-plugin-wizard-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.selenium</groupId>
+                <artifactId>che-selenium-core</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.selenium</groupId>
+                <artifactId>che-selenium-test</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

@@ -1,0 +1,65 @@
+{
+  "v": "4.0",
+  "name": "SomeName",
+  "workspace": {
+    "defaultEnv": "wss",
+    "environments": {
+      "wss": {
+        "machines": {
+          "dev-machine": {
+            "attributes": {
+              "memoryLimitBytes": "2147483648"
+            },
+            "servers": {},
+            "agents": [
+              "org.eclipse.che.terminal",
+              "org.eclipse.che.ws-agent",
+              "org.eclipse.che.ssh",
+              "org.eclipse.che.exec"
+            ]
+          }
+        },
+        "recipe": {
+          "location": "codenvy/ubuntu_jdk8",
+          "type": "dockerimage"
+        }
+      }
+    },
+    "projects": [
+      {
+        "links": [],
+        "name": "Spring",
+        "attributes": {},
+        "type": "maven",
+        "source": {
+          "location": "https://github.com/codenvy-templates/web-spring-java-simple.git",
+          "type": "git",
+          "parameters": {}
+        },
+        "path": "/Spring",
+        "problems": [],
+        "mixins": [
+          "git"
+        ]
+      }
+    ],
+    "name": "WelcomePanel",
+    "commands": [],
+    "links": []
+  },
+
+  "ide": {
+    "onAppLoaded": {
+      "actions": [
+        {
+          "properties": {
+            "greetingTitle": "Getting Started",
+            "greetingContentUrl": "welcome_url"
+          },
+          "id": "openWelcomePage"
+        }
+      ]
+    }
+  }
+
+}
