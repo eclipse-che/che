@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.editor.preferences;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Set;
@@ -46,10 +48,13 @@ public class EditorPreferencePresenter extends AbstractPreferencePagePresenter
 
   @Override
   public void go(final AcceptsOneWidget container) {
-    AcceptsOneWidget preferencesContainer = view.getEditorPreferencesContainer();
-
-    editorPreferenceSections.forEach(section -> section.go(preferencesContainer));
-
+    FlowPanel preferencesContainer = view.getEditorPreferencesContainer();
+    editorPreferenceSections.forEach(
+        section -> {
+          SimplePanel sectionPanel = new SimplePanel();
+          section.go(sectionPanel);
+          preferencesContainer.add(sectionPanel);
+        });
     container.setWidget(view);
   }
 
