@@ -51,6 +51,8 @@ public class EditorFileStatusNotificationOperation
 
   private NotificationManager notificationManager;
 
+  private boolean suspended = false;
+
   @Inject
   public EditorFileStatusNotificationOperation(
       EventBus eventBus,
@@ -73,12 +75,24 @@ public class EditorFileStatusNotificationOperation
         .withBiConsumer(this);
   }
 
+  public void suspend() {
+    suspended = true;
+  }
+
+  public void resume() {
+    suspended = false;
+  }
+
   public void inject(NotificationManager notificationManager) {
     this.notificationManager = notificationManager;
   }
 
   @Override
   public void accept(String endpointId, FileStateUpdateDto params) {
+    if (suspended) {
+      return;
+    }
+
     final FileWatcherEventType status = params.getType();
     final String stringPath = params.getPath();
     final String name = stringPath.substring(stringPath.lastIndexOf("/") + 1);

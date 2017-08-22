@@ -478,10 +478,7 @@ export class CreateProjectController {
       }
     };
 
-    let machineNames = this.getMachineNames(workspace.config);
-    machineNames.forEach((machine: string) => {
-      this.jsonRpcMasterApi.subscribeEnvironmentOutput(workspaceId, machine, this.environmentOutputHandler);
-    });
+    this.jsonRpcMasterApi.subscribeEnvironmentOutput(workspaceId, this.environmentOutputHandler);
 
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
     startWorkspacePromise.then(() => {
@@ -527,18 +524,6 @@ export class CreateProjectController {
     } else {
       return log;
     }
-  }
-
-  getMachineNames(workspaceConfig: any): Array<string> {
-    let machines = [];
-    let environments = workspaceConfig.environments;
-    let envName = workspaceConfig.defaultEnv;
-    let defaultEnvironment = environments[envName];
-    if (!defaultEnvironment) {
-      return machines;
-    }
-
-    return Object.keys(defaultEnvironment.machines);
   }
 
   createProjectInWorkspace(workspaceId: string, projectName: string, projectData: any): void {
@@ -695,10 +680,7 @@ export class CreateProjectController {
     let workspace = this.cheAPI.getWorkspace().getWorkspaceById(workspaceId);
     this.jsonRpcMasterApi.unSubscribeEnvironmentStatus(workspaceId, this.statusHandler);
     this.jsonRpcMasterApi.unSubscribeWsAgentOutput(workspaceId, this.agentOutputHandler);
-    let machineNames = this.getMachineNames(workspace.config);
-    machineNames.forEach((machine: string) => {
-      this.jsonRpcMasterApi.unSubscribeEnvironmentOutput(workspaceId, machine, this.environmentOutputHandler);
-    });
+    this.jsonRpcMasterApi.unSubscribeEnvironmentOutput(workspaceId, this.environmentOutputHandler);
     this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getWsAgentApi().unSubscribeProjectImport(projectName, this.projectImportHandler);
   }
 

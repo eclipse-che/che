@@ -582,8 +582,7 @@ export class CheWorkspace {
     if (this.subscribedWorkspacesIds.indexOf(workspaceId) < 0) {
       this.subscribedWorkspacesIds.push(workspaceId);
       this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspaceId, (message: any) => {
-        // filter workspace events, which really indicate the status change:
-        if (this.workspaceStatuses.indexOf(message.eventType) >= 0) {
+        if (this.workspaceStatuses.indexOf(message.status) >= 0) {
           this.getWorkspaceById(workspaceId).status = message.status;
         }
 

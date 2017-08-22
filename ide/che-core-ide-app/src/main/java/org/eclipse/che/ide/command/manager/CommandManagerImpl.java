@@ -87,7 +87,6 @@ public class CommandManagerImpl implements CommandManager {
     commands = new HashMap<>();
     registerNative();
 
-    // TODO (spi ide): Temporary solution while a better mechanism of obtaining appContext.getProjects() with Promises is being considered...
     eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> fetchCommands());
     eventBus.addHandler(
         WorkspaceStoppedEvent.TYPE,

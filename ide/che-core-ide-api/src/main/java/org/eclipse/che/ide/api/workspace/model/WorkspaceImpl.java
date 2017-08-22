@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /** Data object for {@link Workspace}. */
@@ -30,6 +31,7 @@ public class WorkspaceImpl implements Workspace {
   private boolean isTemporary;
   private WorkspaceStatus status;
   private RuntimeImpl runtime;
+  private Map<String, String> links;
 
   public WorkspaceImpl(
       String id,
@@ -38,7 +40,8 @@ public class WorkspaceImpl implements Workspace {
       Runtime runtime,
       Map<String, String> attributes,
       boolean isTemporary,
-      WorkspaceStatus status) {
+      WorkspaceStatus status,
+      Map<String, String> links) {
     this.id = id;
     this.namespace = namespace;
     if (config != null) {
@@ -57,9 +60,12 @@ public class WorkspaceImpl implements Workspace {
     }
     this.isTemporary = isTemporary;
     this.status = status;
+    if (links != null) {
+      this.links = new HashMap<>(links);
+    }
   }
 
-  public WorkspaceImpl(Workspace workspace) {
+  public WorkspaceImpl(WorkspaceImpl workspace) {
     this(
         workspace.getId(),
         workspace.getNamespace(),
@@ -67,7 +73,20 @@ public class WorkspaceImpl implements Workspace {
         workspace.getRuntime(),
         workspace.getAttributes(),
         workspace.isTemporary(),
-        workspace.getStatus());
+        workspace.getStatus(),
+        workspace.getLinks());
+  }
+
+  public WorkspaceImpl(WorkspaceDto workspace) {
+    this(
+        workspace.getId(),
+        workspace.getNamespace(),
+        workspace.getConfig(),
+        workspace.getRuntime(),
+        workspace.getAttributes(),
+        workspace.isTemporary(),
+        workspace.getStatus(),
+        workspace.getLinks());
   }
 
   @Override
@@ -101,6 +120,13 @@ public class WorkspaceImpl implements Workspace {
   @Override
   public WorkspaceStatus getStatus() {
     return status;
+  }
+
+  public Map<String, String> getLinks() {
+    if (links == null) {
+      links = new HashMap<>();
+    }
+    return links;
   }
 
   @Nullable
