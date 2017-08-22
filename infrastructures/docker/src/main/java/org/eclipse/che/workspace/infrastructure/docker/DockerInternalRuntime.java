@@ -449,7 +449,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     // TODO do we need dev machine flag at all?
     String devMachineName =
         WsAgentMachineFinderUtil.getWsAgentServerMachine(getContext().getEnvironment())
-            .orElseThrow(() -> new InternalInfrastructureException("Machine with wsagent is not found"));
+            .orElseThrow(
+                () -> new InternalInfrastructureException("Machine with wsagent is not found"));
 
     for (Map.Entry<String, DockerMachine> dockerMachineEntry : machines.entrySet()) {
       SnapshotImpl snapshot =

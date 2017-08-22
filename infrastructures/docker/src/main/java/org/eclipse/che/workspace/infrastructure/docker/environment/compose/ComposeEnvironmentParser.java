@@ -42,8 +42,7 @@ public class ComposeEnvironmentParser implements DockerConfigSourceSpecificEnvir
   private static final ObjectMapper YAML_PARSER = new ObjectMapper(new YAMLFactory());
 
   @Override
-  public DockerEnvironment parse(InternalEnvironment environment)
-      throws ValidationException {
+  public DockerEnvironment parse(InternalEnvironment environment) throws ValidationException {
     checkNotNull(environment, "Environment should not be null");
     InternalRecipe recipe = environment.getRecipe();
     checkNotNull(environment.getRecipe(), "Environment recipe should not be null");
