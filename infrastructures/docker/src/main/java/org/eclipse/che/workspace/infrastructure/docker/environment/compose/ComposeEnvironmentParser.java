@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
@@ -44,7 +43,7 @@ public class ComposeEnvironmentParser implements DockerConfigSourceSpecificEnvir
 
   @Override
   public DockerEnvironment parse(InternalEnvironment environment)
-      throws ValidationException, InfrastructureException {
+      throws ValidationException {
     checkNotNull(environment, "Environment should not be null");
     InternalRecipe recipe = environment.getRecipe();
     checkNotNull(environment.getRecipe(), "Environment recipe should not be null");

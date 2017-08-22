@@ -12,11 +12,11 @@ package org.eclipse.che.workspace.infrastructure.docker.environment;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
 import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkNotNull;
 
 import com.google.common.base.Joiner;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -58,7 +58,7 @@ public class EnvironmentParser {
     InternalRecipe recipe = environment.getRecipe();
     checkNotNull(recipe, "Environment recipe should not be null");
     checkNotNull(recipe.getType(), "Environment recipe type should not be null");
-    checkArgument(recipe.getContent() != null, "Recipe of environment must contain content");
+    checkNotNull(recipe.getContent(), "Recipe of environment must contain content");
 
     DockerConfigSourceSpecificEnvironmentParser parser = environmentParsers.get(recipe.getType());
     if (parser == null) {
@@ -72,6 +72,7 @@ public class EnvironmentParser {
 
     for (Map.Entry<String, DockerContainerConfig> entry :
         dockerEnvironment.getContainers().entrySet()) {
+
       InternalMachineConfig machineConfig = environment.getMachines().get(entry.getKey());
       if (machineConfig != null) {
         normalizeMachine(entry.getKey(), entry.getValue(), machineConfig);
@@ -107,5 +108,6 @@ public class EnvironmentParser {
 
       container.getExpose().add(normalizedPort);
     }
+    container.setExpose(container.getExpose().stream().distinct().collect(Collectors.toList()));
   }
 }
