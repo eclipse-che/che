@@ -20,62 +20,61 @@ import java.util.List;
 /**
  * A node in a trie that can be used for efficient autocompletion lookup.
  *
- * @param <T>
- *         value object type
+ * @param <T> value object type
  */
 public final class TrieNode<T> {
-    private final String prefix;
+  private final String prefix;
 
-    private final List<TrieNode<T>> children;
+  private final List<TrieNode<T>> children;
 
-    private T value;
+  private T value;
 
-    private TrieNode(String prefix) {
-        this.prefix = prefix;
-        this.value = null;
-        this.children = new ArrayList<>();
+  private TrieNode(String prefix) {
+    this.prefix = prefix;
+    this.value = null;
+    this.children = new ArrayList<>();
+  }
+
+  public static <T> TrieNode<T> makeNode(String prefix) {
+    return new TrieNode<T>(prefix);
+  }
+
+  public List<TrieNode<T>> getChildren() {
+    return children;
+  }
+
+  TrieNode<T> findInsertionBranch(String prefix) {
+    for (int i = 0, size = children.size(); i < size; i++) {
+      TrieNode<T> child = children.get(i);
+      if (prefix.startsWith(child.getPrefix())) {
+        return child;
+      }
     }
+    return null;
+  }
 
-    public static <T> TrieNode<T> makeNode(String prefix) {
-        return new TrieNode<T>(prefix);
-    }
+  public void addChild(TrieNode<T> child) {
+    children.add(child);
+  }
 
-    public List<TrieNode<T>> getChildren() {
-        return children;
-    }
+  public boolean getIsLeaf() {
+    return this.value != null;
+  }
 
-    TrieNode<T> findInsertionBranch(String prefix) {
-        for (int i = 0, size = children.size(); i < size; i++) {
-            TrieNode<T> child = children.get(i);
-            if (prefix.startsWith(child.getPrefix())) {
-                return child;
-            }
-        }
-        return null;
-    }
+  public String getPrefix() {
+    return this.prefix;
+  }
 
-    public void addChild(TrieNode<T> child) {
-        children.add(child);
-    }
+  public void setValue(T value) {
+    this.value = value;
+  }
 
-    public boolean getIsLeaf() {
-        return this.value != null;
-    }
+  public T getValue() {
+    return this.value;
+  }
 
-    public String getPrefix() {
-        return this.prefix;
-    }
-
-    public void setValue(T value) {
-        this.value = value;
-    }
-
-    public T getValue() {
-        return this.value;
-    }
-
-    @Override
-    public String toString() {
-        return this.prefix;
-    }
+  @Override
+  public String toString() {
+    return this.prefix;
+  }
 }

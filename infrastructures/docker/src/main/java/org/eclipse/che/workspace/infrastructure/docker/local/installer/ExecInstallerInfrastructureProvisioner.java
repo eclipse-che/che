@@ -1,20 +1,19 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.workspace.infrastructure.docker.local.installer;
-
-import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Provides volumes configuration of machine for exec installer
@@ -24,15 +23,16 @@ import javax.inject.Singleton;
  * @author Alexander Garagatyi
  */
 @Singleton
-public class ExecInstallerInfrastructureProvisioner extends InstallerBinariesInfrastructureProvisioner {
+public class ExecInstallerInfrastructureProvisioner
+    extends InstallerBinariesInfrastructureProvisioner {
 
-    private static final String CONTAINER_TARGET = ":/mnt/che/exec-agent";
-    private static final String EXEC             = "exec";
+  private static final String CONTAINER_TARGET = ":/mnt/che/exec-agent";
+  private static final String EXEC = "exec";
 
-    @Inject
-    public ExecInstallerInfrastructureProvisioner(
-            @Nullable @Named("che.docker.volumes_agent_options") String agentVolumeOptions,
-            @Named("che.workspace.exec_linux_amd64") String execArchivePath) {
-        super(agentVolumeOptions, execArchivePath, CONTAINER_TARGET, "org.eclipse.che.exec", EXEC);
-    }
+  @Inject
+  public ExecInstallerInfrastructureProvisioner(
+      @Nullable @Named("che.docker.volumes_agent_options") String agentVolumeOptions,
+      @Named("che.workspace.exec_linux_amd64") String execArchivePath) {
+    super(agentVolumeOptions, execArchivePath, CONTAINER_TARGET, "org.eclipse.che.exec", EXEC);
+  }
 }

@@ -1,21 +1,20 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.workspace.infrastructure.docker.provisioner.dns;
 
+import javax.inject.Inject;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisioner;
-
-import javax.inject.Inject;
 
 /**
  * Adds DNS configuration to {@link DockerContainerConfig}.
@@ -23,17 +22,17 @@ import javax.inject.Inject;
  * @author Alexander Garagatyi
  */
 public class DnsSettingsProvisioner implements ContainerSystemSettingsProvisioner {
-    private DnsResolversProvider dnsResolversProvider;
+  private DnsResolversProvider dnsResolversProvider;
 
-    @Inject
-    public DnsSettingsProvisioner(DnsResolversProvider dnsResolversProvider) {
-        this.dnsResolversProvider = dnsResolversProvider;
-    }
+  @Inject
+  public DnsSettingsProvisioner(DnsResolversProvider dnsResolversProvider) {
+    this.dnsResolversProvider = dnsResolversProvider;
+  }
 
-    @Override
-    public void provision(DockerEnvironment internalEnv) throws InfrastructureException {
-        for (DockerContainerConfig containerConfig : internalEnv.getContainers().values()) {
-            containerConfig.getDns().addAll(dnsResolversProvider.get());
-        }
+  @Override
+  public void provision(DockerEnvironment internalEnv) throws InfrastructureException {
+    for (DockerContainerConfig containerConfig : internalEnv.getContainers().values()) {
+      containerConfig.getDns().addAll(dnsResolversProvider.get());
     }
+  }
 }

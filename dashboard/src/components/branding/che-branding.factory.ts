@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {CheService} from '../api/che-service.factory';
@@ -19,6 +19,7 @@ interface IBranding {
   favicon?: string;
   loader?: string;
   ideResources?: string;
+  websocketContext?: string;
   helpPath?: string;
   helpTitle?: string;
   supportEmail?: string;
@@ -35,12 +36,12 @@ interface IBranding {
     priorityStacks?: Array<string>;
     defaultStack?: string;
     creationLink?: string;
-  }
+  };
   footer?: {
     content?: string;
     links?: Array<{title: string, location: string}>;
     email?: {title: string, address: string, subject: string};
-  }
+  };
 }
 
 const ASSET_PREFIX = 'assets/branding/';
@@ -59,6 +60,7 @@ const DEFAULT_DOCS_WORKSPACE = '/docs/getting-started/intro/index.html';
 const DEFAULT_WORKSPACE_PRIORITY_STACKS = ['Java', 'Java-MySQL', 'Blank'];
 const DEFAULT_WORKSPACE_DEFAULT_STACK = 'java-mysql';
 const DEFAULT_WORKSPACE_CREATION_LINK = '#/create-workspace';
+const DEFAULT_WEBSOCKET_CONTEXT = '/api/websocket';
 
 /**
  * This class is handling the branding data in Che.
@@ -113,6 +115,7 @@ export class CheBranding {
         favicon: this.getProductFavicon(),
         loaderURL: this.getLoaderUrl(),
         ideResourcesPath: this.getIdeResourcesPath(),
+        websocketContext: this.getWebsocketContext(),
         helpPath: this.getProductHelpPath(),
         helpTitle: this.getProductHelpTitle(),
         footer: this.getFooter(),
@@ -199,6 +202,15 @@ export class CheBranding {
   }
 
   /**
+   * Gets ide resources path.
+   * @returns {string}
+   */
+  getWebsocketContext(): string {
+    debugger;
+    return this.brandingData.websocketContext ? this.brandingData.websocketContext : DEFAULT_WEBSOCKET_CONTEXT;
+  }
+
+  /**
    * Gets product help path.
    * @returns {string}
    */
@@ -211,7 +223,7 @@ export class CheBranding {
    * @returns {string}
    */
   getProductHelpTitle(): string {
-    return this.brandingData.helpTitle ? this.brandingData.helpTitle : null
+    return this.brandingData.helpTitle ? this.brandingData.helpTitle : null;
   }
 
   /**

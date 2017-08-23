@@ -1,53 +1,47 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.docker.client.json;
 
-/**
- * @author andrew00x
- */
+/** @author andrew00x */
 public class ProgressDetail {
-    private long start;
-    private long current;
-    private long total;
+  private long start;
+  private long current;
+  private long total;
 
-    public long getStart() {
-        return start;
-    }
+  public long getStart() {
+    return start;
+  }
 
-    public void setStart(long start) {
-        this.start = start;
-    }
+  public void setStart(long start) {
+    this.start = start;
+  }
 
-    public long getCurrent() {
-        return current;
-    }
+  public long getCurrent() {
+    return current;
+  }
 
-    public void setCurrent(long current) {
-        this.current = current;
-    }
+  public void setCurrent(long current) {
+    this.current = current;
+  }
 
-    public long getTotal() {
-        return total;
-    }
+  public long getTotal() {
+    return total;
+  }
 
-    public void setTotal(long total) {
-        this.total = total;
-    }
+  public void setTotal(long total) {
+    this.total = total;
+  }
 
-    @Override
-    public String toString() {
-        return "ProgressDetail{" +
-               "start=" + start +
-               ", current=" + current +
-               ", total=" + total +
-               '}';
-    }
+  @Override
+  public String toString() {
+    return "ProgressDetail{" + "start=" + start + ", current=" + current + ", total=" + total + '}';
+  }
 }

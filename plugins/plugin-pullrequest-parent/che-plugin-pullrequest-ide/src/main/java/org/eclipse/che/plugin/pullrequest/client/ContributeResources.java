@@ -1,53 +1,50 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.pullrequest.client;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-/**
- * Contributor plugin resources.
- */
+/** Contributor plugin resources. */
 public interface ContributeResources extends ClientBundle {
-    @Source({"Contribute.css", "org/eclipse/che/ide/api/ui/style.css"})
-    ContributeCss contributeCss();
+  @Source({"Contribute.css", "org/eclipse/che/ide/api/ui/style.css"})
+  ContributeCss contributeCss();
 
-    @Source("images/refresh.svg")
-    SVGResource refreshIcon();
+  @Source("images/refresh.svg")
+  SVGResource refreshIcon();
 
-    interface ContributeCss extends CssResource {
-        String blueButton();
+  interface ContributeCss extends CssResource {
+    String blueButton();
 
-        String openOnVcsButton();
+    String openOnVcsButton();
 
-        String errorMessage();
+    String errorMessage();
 
-        String inputError();
+    String inputError();
 
-        String inputField();
+    String inputField();
 
-        String statusSteps();
+    String statusSteps();
 
-        String stepLabel();
+    String stepLabel();
 
-        String checkIcon();
+    String checkIcon();
 
-        String errorIcon();
+    String errorIcon();
 
-        String stepLabelRow();
+    String stepLabelRow();
 
-        String statusTitleStepLabel();
+    String statusTitleStepLabel();
 
-        String statusIndexStepLabel();
-    }
+    String statusIndexStepLabel();
+  }
 }

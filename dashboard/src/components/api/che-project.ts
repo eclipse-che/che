@@ -1,15 +1,14 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWebsocket} from './che-websocket.factory';
 
 interface ICHEProjectResource<T> extends ng.resource.IResourceClass<T> {
   import: any;
@@ -29,10 +28,8 @@ interface ICHEProjectResource<T> extends ng.resource.IResourceClass<T> {
  * @author Florent Benoit
  */
 export class CheProject {
-
   private $q: ng.IQService;
   private $resource: ng.resource.IResourceService;
-  private cheWebsocket: CheWebsocket;
   private resolveMap: Map <string, any>;
   private estimateMap: Map <string, any>;
   private projectDetailsMap: Map <string, any>;
@@ -42,10 +39,9 @@ export class CheProject {
   /**
    * Default constructor that is using resource
    */
-  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, cheWebsocket: CheWebsocket, wsagentPath: string) {
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, wsagentPath: string) {
     this.$q = $q;
     this.$resource = $resource;
-    this.cheWebsocket = cheWebsocket;
 
     // project details map with key projectPath
     this.projectDetailsMap = new Map();

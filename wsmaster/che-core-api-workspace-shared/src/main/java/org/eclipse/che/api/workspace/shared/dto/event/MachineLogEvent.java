@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.workspace.shared.dto.event;
 
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
@@ -21,49 +21,38 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface MachineLogEvent {
 
-    /**
-     * Returns the contents of the log event.
-     */
-    String getText();
+  /** Returns the contents of the log event. */
+  String getText();
 
-    void setText(String text);
+  void setText(String text);
 
-    MachineLogEvent withText(String text);
+  MachineLogEvent withText(String text);
 
-    /**
-     * Returns the name of the machine that produces the logs.
-     */
-    String getMachineName();
+  /** Returns the name of the machine that produces the logs. */
+  String getMachineName();
 
-    void setMachineName(String machineName);
+  void setMachineName(String machineName);
 
-    MachineLogEvent withMachineName(String machineName);
+  MachineLogEvent withMachineName(String machineName);
 
-    /**
-     * Returns runtime identity.
-     */
-    RuntimeIdentityDto getRuntimeId();
+  /** Returns runtime identity. */
+  RuntimeIdentityDto getRuntimeId();
 
-    void setRuntimeId(RuntimeIdentityDto runtimeId);
+  void setRuntimeId(RuntimeIdentityDto runtimeId);
 
-    MachineLogEvent withRuntimeId(RuntimeIdentityDto runtimeId);
+  MachineLogEvent withRuntimeId(RuntimeIdentityDto runtimeId);
 
-    /**
-     * Returns time in format '2017-06-27T17:11:09.306+03:00'
-     */
-    String getTime();
+  /** Returns time in format '2017-06-27T17:11:09.306+03:00' */
+  String getTime();
 
-    void setTime(String time);
+  void setTime(String time);
 
-    MachineLogEvent withTime(String time);
+  MachineLogEvent withTime(String time);
 
-    /**
-     * Returns standard streams, if present otherwise, null will be returned.
-     */
-    String getStream();
+  /** Returns standard streams, if present otherwise, null will be returned. */
+  String getStream();
 
-    void setStream(String stream);
+  void setStream(String stream);
 
-    MachineLogEvent withStream(String stream);
-
+  MachineLogEvent withStream(String stream);
 }
