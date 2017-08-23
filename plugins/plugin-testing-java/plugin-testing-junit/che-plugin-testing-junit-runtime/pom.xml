@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-testing-junit</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.17.0-SNAPSHOT</version>
+        <version>5.18.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-testing-junit-runtime</artifactId>
     <dependencies>
