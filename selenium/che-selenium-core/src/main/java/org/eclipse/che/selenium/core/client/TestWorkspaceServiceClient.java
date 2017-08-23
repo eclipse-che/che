@@ -159,9 +159,13 @@ public class TestWorkspaceServiceClient {
     EnvironmentDto environment = workspace.getEnvironments().get("replaced_name");
     environment
         .getMachines()
-        .get("dev-machine")
-        .getAttributes()
-        .put("memoryLimitBytes", Long.toString(convertToByte(memory, memoryUnit)));
+        .values()
+        .stream()
+        .filter(m -> m.getInstallers().contains("org.eclipse.che.ws-agent"))
+        .forEach(
+            m ->
+                m.getAttributes()
+                    .put("memoryLimitBytes", Long.toString(convertToByte(memory, memoryUnit))));
     workspace.getEnvironments().remove("replaced_name");
     workspace.getEnvironments().put(workspaceName, environment);
     workspace.setName(workspaceName);
