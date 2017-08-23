@@ -144,7 +144,7 @@ class IdeSvc {
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
     this.openedWorkspace = workspace;
 
-    let ideUrlLink = this.getHrefLink(workspace, 'ide url');
+    let ideUrlLink = workspace.links.ide;
 
     if (this.ideAction != null) {
       appendUrl = appendUrl + '&action=' + this.ideAction;
@@ -189,25 +189,6 @@ class IdeSvc {
       // update list of recent workspaces
       this.cheWorkspace.fetchWorkspaces();
     });
-  }
-
-  /**
-   * Gets link from a workspace
-   * @param workspace the workspace on which analyze the links
-   * @param name the name of the link to find (rel attribute)
-   * @returns empty or the href attribute of the link
-   */
-  getHrefLink(workspace: any, name: string): string {
-    let links = workspace.links;
-    let i = 0;
-    while (i < links.length) {
-      let link = links[i];
-      if (link.rel === name) {
-        return link.href;
-      }
-      i++;
-    }
-    return '';
   }
 
   /**

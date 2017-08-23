@@ -19,6 +19,9 @@ import {CheJsonRpcMasterApi} from './json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from './json-rpc/che-json-rpc-api.factory';
 import {CheBranding} from '../branding/che-branding.factory';
 
+const WS_AGENT_HTTP_LINK: string = 'wsagent/http';
+const WS_AGENT_WS_LINK: string = 'wsagent/ws';
+
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   create: any;
   createWithNamespace: any;
@@ -138,24 +141,20 @@ export class CheWorkspace {
 
     let runtimeConfig = this.getWorkspaceById(workspaceId).runtime;
     if (runtimeConfig) {
-      let wsAgentLink = this.lodash.find(runtimeConfig.links, (link: any) => {
-        return link.rel === 'wsagent';
+      let machines = runtimeConfig.machines;
+      let wsAgentLink: any;
+      let wsAgentWebocketLink: any;
+      Object.keys(machines).forEach((key: string) => {
+        let machine = machines[key];
+        if (machine.servers[WS_AGENT_HTTP_LINK]) {
+          wsAgentLink = machine.servers[WS_AGENT_HTTP_LINK];
+        }
+        if (machine.servers[WS_AGENT_WS_LINK]) {
+          wsAgentWebocketLink = machine.servers[WS_AGENT_WS_LINK];
+        }
       });
 
-      if (!wsAgentLink) {
-        return null;
-      }
-
-      let wsAgentWebocketLink;
-      if (runtimeConfig.devMachine) {
-        let websocketLink = this.lodash.find(runtimeConfig.devMachine.links, (link: any) => {
-          return link.rel === 'wsagent.websocket';
-        });
-        wsAgentWebocketLink = websocketLink ? websocketLink.href : '';
-        wsAgentWebocketLink = wsAgentWebocketLink.replace('/api/ws', '');
-      }
-
-      let workspaceAgentData = {path: wsAgentLink.href, websocket: wsAgentWebocketLink, clientId: this.cheJsonRpcMasterApi.getClientId()};
+      let workspaceAgentData = {path: wsAgentLink.url, websocket: wsAgentWebocketLink.url, clientId: this.cheJsonRpcMasterApi.getClientId()};
       let wsagent: CheWorkspaceAgent = new CheWorkspaceAgent(this.$resource, this.$q, this.$websocket, workspaceAgentData);
       this.workspaceAgents.set(workspaceId, wsagent);
       return wsagent;

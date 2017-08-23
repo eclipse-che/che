@@ -449,13 +449,7 @@ export class StackController {
         this.$log.error(error);
       });
       this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
-      let tmpWorkspaceIdeUrl = '';
-      angular.forEach(workspace.links, (link: any) => {
-        if (link.rel === 'ide url') {
-          tmpWorkspaceIdeUrl = link.href;
-          return;
-        }
-      });
+      let tmpWorkspaceIdeUrl = workspace.links.ide;
       if (!tmpWorkspaceIdeUrl) {
         this.cheNotification.showError('Testing stack failed.');
         return;
