@@ -16,6 +16,8 @@ import static com.google.gwt.dom.client.Style.Unit.PCT;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -50,6 +52,21 @@ public class EditorPartStackView extends ResizeComposite
 
   interface PartStackUiBinder extends UiBinder<Widget, EditorPartStackView> {}
 
+  /**
+   * Listener to handle clicking on Add tab button.
+   */
+  interface AddTabButtonClickListener {
+
+    /**
+     * Is called when Add tab button clicked.
+     *
+     * @param mouseX absolute mouse left
+     * @param mouseY absolute mouse top
+     */
+    void onAddTabButtonClicked(int mouseX, int mouseY);
+
+  }
+
   private static final PartStackUiBinder UI_BINDER = GWT.create(PartStackUiBinder.class);
 
   @UiField DockLayoutPanel parent;
@@ -71,6 +88,7 @@ public class EditorPartStackView extends ResizeComposite
   private ActionDelegate delegate;
   private EditorPaneMenu editorPaneMenu;
   private TabItem activeTab;
+  private AddTabButtonClickListener addTabButtonClickListener;
 
   public EditorPartStackView() {
     this.tabs = new HashMap<>();
@@ -79,6 +97,16 @@ public class EditorPartStackView extends ResizeComposite
     initWidget(UI_BINDER.createAndBindUi(this));
 
     plusPanel.getElement().setInnerHTML(FontAwesome.PLUS);
+    plusPanel.addDomHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        if (addTabButtonClickListener != null) {
+          addTabButtonClickListener.onAddTabButtonClicked(
+              getAbsoluteLeft(plusPanel.getElement()) + 15,
+              getAbsoluteTop(plusPanel.getElement()) + 15);
+        }
+      }
+    }, ClickEvent.getType());
 
     partViewContainer =
         new AcceptsOneWidget() {
@@ -91,6 +119,30 @@ public class EditorPartStackView extends ResizeComposite
     addDomHandler(this, MouseDownEvent.getType());
 
     setMaximized(false);
+  }
+
+  /**
+   * Returns absolute left position of the element.
+   *
+   * @param element element
+   * @return element left position
+   */
+  private native int getAbsoluteLeft(JavaScriptObject element) /*-{
+      return element.getBoundingClientRect().left;
+  }-*/;
+
+  /**
+   * Returns absolute top position of the element.
+   *
+   * @param element element
+   * @return element top position
+   */
+  private native int getAbsoluteTop(JavaScriptObject element) /*-{
+      return element.getBoundingClientRect().top;
+  }-*/;
+
+  public void setAddTabButtonClickListener(AddTabButtonClickListener listener) {
+    addTabButtonClickListener = listener;
   }
 
   /** {@inheritDoc} */
@@ -141,10 +193,6 @@ public class EditorPartStackView extends ResizeComposite
     contents.add(partPresenter);
     partPresenter.go(partViewContainer);
   }
-
-  private native int getAbsoluteTop(JavaScriptObject element) /*-{
-      return element.getBoundingClientRect().top;
-  }-*/;
 
   /**
    * Ensures active tab and plus button are visible.
