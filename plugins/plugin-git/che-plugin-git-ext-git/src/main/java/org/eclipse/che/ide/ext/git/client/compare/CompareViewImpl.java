@@ -27,6 +27,7 @@ import org.eclipse.che.ide.orion.compare.CompareConfig;
 import org.eclipse.che.ide.orion.compare.CompareFactory;
 import org.eclipse.che.ide.orion.compare.CompareWidget;
 import org.eclipse.che.ide.orion.compare.FileOptions;
+import org.eclipse.che.ide.ui.button.ButtonAlignment;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.window.Window;
 
@@ -88,18 +89,21 @@ final class CompareViewImpl extends Window implements CompareView {
         createButton(
             locale.buttonNextDiff(),
             "git-compare-next-diff-btn",
-            event -> delegate.onNextDiffClicked());
+            event -> delegate.onNextDiffClicked(),
+            ButtonAlignment.LEFT);
     btnPrevDiff =
         createButton(
             locale.buttonPreviousDiff(),
             "git-compare-prev-diff-btn",
-            event -> delegate.onPreviousDiffClicked());
+            event -> delegate.onPreviousDiffClicked(),
+            ButtonAlignment.LEFT);
 
     addButtonToFooter(closeButton);
     addButtonToFooter(refreshButton);
     addButtonToFooter(btnSaveChanges);
-    addButtonToFooter(btnNextDiff);
+
     addButtonToFooter(btnPrevDiff);
+    addButtonToFooter(btnNextDiff);
 
     comparePanel.getElement().setId(Document.get().createUniqueId());
   }
