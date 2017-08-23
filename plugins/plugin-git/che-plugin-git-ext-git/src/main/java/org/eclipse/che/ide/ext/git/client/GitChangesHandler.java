@@ -33,7 +33,6 @@ import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.vcs.EditedRegionType;
 import org.eclipse.che.ide.api.vcs.HasVcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsStatus;
@@ -159,7 +158,7 @@ public class GitChangesHandler {
             render.addChangeMarker(
                 edition.getBeginLine(),
                 edition.getEndLine(),
-                EditedRegionType.valueOf(edition.getType().toString())));
+                edition.getType()));
   }
 
   public void apply(String endpointId, IndexChangedEventDto dto) {

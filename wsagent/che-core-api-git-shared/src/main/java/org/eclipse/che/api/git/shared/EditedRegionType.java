@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.api.vcs;
+package org.eclipse.che.api.git.shared;
 
 /** Type of the change in the file. */
 public enum EditedRegionType {

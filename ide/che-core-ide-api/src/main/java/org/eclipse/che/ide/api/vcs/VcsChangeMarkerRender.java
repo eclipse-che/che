@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.api.vcs;
 
+import org.eclipse.che.api.git.shared.EditedRegionType;
+
 /** Component that handles VCS change markers. */
 public interface VcsChangeMarkerRender {
 

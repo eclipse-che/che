@@ -35,15 +35,9 @@ public interface EditedRegion {
   EditedRegion withEndLine(int endLine);
 
   /** Status of the edition e.g. insertion, modification, deletion. */
-  Type getType();
+  EditedRegionType getType();
 
-  void setType(Type type);
+  void setType(EditedRegionType type);
 
-  EditedRegion withType(Type type);
-
-  enum Type {
-    INSERTION,
-    MODIFICATION,
-    DELETION
-  }
+  EditedRegion withType(EditedRegionType type);
 }

@@ -22,7 +22,9 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
-import static org.eclipse.che.api.git.shared.EditedRegion.Type.*;
+import static org.eclipse.che.api.git.shared.EditedRegionType.DELETION;
+import static org.eclipse.che.api.git.shared.EditedRegionType.INSERTION;
+import static org.eclipse.che.api.git.shared.EditedRegionType.MODIFICATION;
 import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -96,25 +98,8 @@ import org.eclipse.che.api.git.params.RemoteUpdateParams;
 import org.eclipse.che.api.git.params.ResetParams;
 import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.params.TagCreateParams;
-import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.BranchListMode;
-import org.eclipse.che.api.git.shared.DiffCommitFile;
-import org.eclipse.che.api.git.shared.EditedRegion;
-import org.eclipse.che.api.git.shared.GitUser;
-import org.eclipse.che.api.git.shared.MergeResult;
-import org.eclipse.che.api.git.shared.ProviderInfo;
-import org.eclipse.che.api.git.shared.PullResponse;
-import org.eclipse.che.api.git.shared.PushResponse;
-import org.eclipse.che.api.git.shared.RebaseResponse;
+import org.eclipse.che.api.git.shared.*;
 import org.eclipse.che.api.git.shared.RebaseResponse.RebaseStatus;
-import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.git.shared.RemoteReference;
-import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.git.shared.ShowFileContentResponse;
-import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
-import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
@@ -767,7 +752,7 @@ class JGitConnection implements GitConnection {
             .stream()
             .map(
                 edit -> {
-                  EditedRegion.Type type = null;
+                  EditedRegionType type = null;
                   switch (edit.getType()) {
                     case INSERT:
                       {
