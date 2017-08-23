@@ -109,7 +109,10 @@ declare namespace che {
   export interface IWorkspace {
     id?: string;
     projects?: any;
-    links?: Array<any>;
+    links?: {
+      ide?: string
+      [rel: string]: string;
+    };
     temporary?: boolean;
     status?: string;
     namespace?: string;
