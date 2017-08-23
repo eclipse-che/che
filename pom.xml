@@ -35,7 +35,7 @@
         <module>samples</module>
         <module>dashboard</module>
         <module>assembly</module>
-        <module>selenium</module>
+        <!--<module>selenium</module>-->
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
