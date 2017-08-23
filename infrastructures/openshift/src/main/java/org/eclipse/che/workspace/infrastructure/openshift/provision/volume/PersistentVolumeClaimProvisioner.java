@@ -25,9 +25,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.Utils;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
 
@@ -61,7 +61,7 @@ public class PersistentVolumeClaimProvisioner implements ConfigurationProvisione
 
   @Override
   public void provision(
-      EnvironmentImpl environment, OpenShiftEnvironment osEnv, RuntimeIdentity runtimeIdentity)
+      InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity runtimeIdentity)
       throws InfrastructureException {
     if (pvcEnable) {
       osEnv
@@ -79,11 +79,13 @@ public class PersistentVolumeClaimProvisioner implements ConfigurationProvisione
                   .endResources()
                   .endSpec()
                   .build());
-      final String devMachineName = Utils.getDevMachineName(environment);
+      String devMachineName =
+          WsAgentMachineFinderUtil.getWsAgentServerMachine(environment)
+              .orElseThrow(() -> new InfrastructureException("Machine with wsagent not found"));
       for (Pod pod : osEnv.getPods().values()) {
         for (Container container : pod.getSpec().getContainers()) {
           final String machineName = pod.getMetadata().getName() + "/" + container.getName();
-          if (devMachineName != null && devMachineName.equals(machineName)) {
+          if (devMachineName.equals(machineName)) {
             final VolumeMount volumeMount =
                 new VolumeMountBuilder()
                     .withMountPath(projectFolderPath)

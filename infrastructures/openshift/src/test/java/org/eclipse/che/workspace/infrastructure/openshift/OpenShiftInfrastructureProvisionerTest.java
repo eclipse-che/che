@@ -14,7 +14,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.InstallerConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.PersistentVolumeClaimProvisioner;
@@ -35,7 +35,7 @@ public class OpenShiftInfrastructureProvisionerTest {
 
   @Mock private InstallerConfigProvisioner installerProvisioner;
   @Mock private PersistentVolumeClaimProvisioner pvcProvisioner;
-  @Mock private EnvironmentImpl environment;
+  @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
 

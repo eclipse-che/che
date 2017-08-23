@@ -11,17 +11,18 @@
 package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.workspace.server.Utils.getDevMachineName;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.base.Strings;
 import java.io.IOException;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
@@ -63,13 +64,16 @@ public class ProjectsVolumeProvisioner implements ConfigurationProvisioner {
 
   @Override
   public void provision(
-      EnvironmentImpl envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+      InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    String devMachineName = getDevMachineName(envConfig);
-    if (devMachineName == null) {
-      throw new InternalInfrastructureException("ws-machine is not found on installers applying");
+    Optional<String> devMachineOpt = WsAgentMachineFinderUtil.getWsAgentServerMachine(envConfig);
+    if (!devMachineOpt.isPresent()) {
+      // should not happen
+      // no wsagent - no projects volume is needed
+      return;
     }
+    String devMachineName = devMachineOpt.get();
 
     DockerContainerConfig devMachineConfig = internalEnv.getContainers().get(devMachineName);
     if (devMachineConfig == null) {

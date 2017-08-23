@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
@@ -19,6 +20,8 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.workspace.server.RecipeRetriever;
 
 /**
  * Starting point of describing the contract which infrastructure provider should implement for
@@ -27,16 +30,24 @@ import org.eclipse.che.api.core.notification.EventService;
  * @author gazarenkov
  */
 public abstract class RuntimeInfrastructure {
+  private final Set<String> recipeTypes;
+  private final String name;
+  private final InstallerRegistry installerRegistry;
+  private final RecipeRetriever recipeRetriever;
+  private final EventService eventService;
 
-  protected final Set<String> recipeTypes;
-  protected final String name;
-  protected final EventService eventService;
-
-  public RuntimeInfrastructure(String name, Collection<String> types, EventService eventService) {
+  public RuntimeInfrastructure(
+      String name,
+      Collection<String> types,
+      EventService eventService,
+      InstallerRegistry installerRegistry,
+      RecipeRetriever recipeRetriever) {
     Preconditions.checkArgument(!types.isEmpty());
     this.name = Objects.requireNonNull(name);
     this.recipeTypes = ImmutableSet.copyOf(types);
     this.eventService = eventService;
+    this.installerRegistry = installerRegistry;
+    this.recipeRetriever = recipeRetriever;
   }
 
   /** Returns the name of this runtime infrastructure. */
@@ -58,19 +69,50 @@ public abstract class RuntimeInfrastructure {
   }
 
   /**
-   * An Infrastructure implementation should be able to preliminary estimate incoming Environment.
-   * For example: for validating it before storing The method SHOULD validate Environment. If it is
-   * valid, an Infrastructure MAY return more fine grained Environment For example: - if Machines
-   * are not described this method may add machine descriptions calculated against Recipe -
-   * implementation may add additional Attributes based on incoming Recipe
+   * Preliminary estimates incoming Environment. Should be used for environment validation before
+   * storing and creation of {@link RuntimeContext}.
+   *
+   * <p>It is supposed that result is used as a parameter of the method {@link
+   * #prepare(RuntimeIdentity, InternalEnvironment)}. <br>
+   * Note: this method will be eventually final, but it is not for now for workaround in Docker
+   * infra - in dockerimage environment image should be in content, not in location. It is marked
+   * with {@link Beta} annotation to hint that. Do not override this method. <br>
+   * Workaround should be removed after resolution of https://github.com/eclipse/che/issues/6006
    *
    * @param environment incoming Environment to estimate
-   * @return calculated environment if any or same environment as incoming or null. In all of this
-   *     cases Environment is taken as valid.
+   * @return calculated internal environment.
    * @throws ValidationException if incoming Environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
-  public abstract Environment estimate(Environment environment)
+  @Beta
+  public InternalEnvironment estimate(Environment environment)
+      throws ValidationException, InfrastructureException {
+    InternalEnvironment internalEnvironment =
+        new InternalEnvironment(environment, installerRegistry, recipeRetriever);
+    internalEstimate(internalEnvironment);
+    return internalEnvironment;
+  }
+
+  /**
+   * An Infrastructure implementation should be able to preliminary estimate incoming environment.
+   * This method is not supposed to be called by clients of class {@link RuntimeInfrastructure}.
+   *
+   * <p>For example: for validating it before storing. The method SHOULD validate an incoming
+   * internal environment. If it is valid, an Infrastructure MAY return more fine grained {@link
+   * InternalEnvironment}. <br>
+   * For example:
+   * <li>- if Machines are not described in environment machines list this method may add machine
+   *     descriptions calculated against Recipe
+   * <li>- implementation may add additional Attributes based on incoming Recipe, e.g. default RAM
+   *     amount if it is neither set in Recipe nor attributes
+   * <li>- implementation may add warnings which identify some precautions which may be returned to
+   *     the user
+   *
+   * @param env internal representation of environment
+   * @throws ValidationException if incoming Environment is not valid
+   * @throws InfrastructureException if any other error occurred
+   */
+  protected abstract void internalEstimate(InternalEnvironment env)
       throws ValidationException, InfrastructureException;
 
   /**
@@ -93,12 +135,12 @@ public abstract class RuntimeInfrastructure {
    * RuntimeContext, this is supposedly "fast" method On the second phase Runtime is created with
    * RuntimeContext.start() which is supposedly "long" method
    *
-   * @param id the RuntimeIdentityImpl
-   * @param environment incoming Environment (configuration)
+   * @param id the RuntimeIdentity
+   * @param environment incoming internal environment
    * @return new RuntimeContext object
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
-  public abstract RuntimeContext prepare(RuntimeIdentity id, Environment environment)
+  public abstract RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
       throws ValidationException, InfrastructureException;
 }

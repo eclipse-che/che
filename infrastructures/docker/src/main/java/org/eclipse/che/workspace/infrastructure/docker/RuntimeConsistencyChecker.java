@@ -13,15 +13,16 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import java.util.Map;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 
 /** Checks whether runtime is consistent with its configuration. */
 @Singleton
 class RuntimeConsistencyChecker {
-  void check(Environment environment, DockerInternalRuntime runtime) throws ValidationException {
-    Map<String, ? extends MachineConfig> configs = environment.getMachines();
+  void check(InternalEnvironment environment, DockerInternalRuntime runtime)
+      throws ValidationException {
+    Map<String, InternalMachineConfig> configs = environment.getMachines();
     Map<String, ? extends Machine> machines = runtime.getMachines();
     if (configs.size() != machines.size()) {
       throw new ValidationException(

@@ -14,12 +14,12 @@ import com.google.common.collect.ImmutableSet;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.workspace.server.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser;
@@ -33,28 +33,31 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
 
   @Inject
   public OpenShiftInfrastructure(
-      EventService eventService,
       OpenShiftRuntimeContextFactory runtimeContextFactory,
       OpenShiftEnvironmentParser envParser,
-      OpenShiftInfrastructureProvisioner infrastructureProvisioner) {
-    super("openshift", ImmutableSet.of("openshift"), eventService);
+      OpenShiftInfrastructureProvisioner infrastructureProvisioner,
+      EventService eventService,
+      InstallerRegistry installerRegistry,
+      RecipeRetriever recipeRetriever) {
+    super(
+        "openshift",
+        ImmutableSet.of("openshift"),
+        eventService,
+        installerRegistry,
+        recipeRetriever);
     this.runtimeContextFactory = runtimeContextFactory;
     this.envParser = envParser;
     this.infrastructureProvisioner = infrastructureProvisioner;
   }
 
   @Override
-  public Environment estimate(Environment environment)
-      throws ValidationException, InfrastructureException {
-    //TODO implement estimation and validation here
-    return environment;
-  }
+  public void internalEstimate(InternalEnvironment environment)
+      throws ValidationException, InfrastructureException {}
 
   @Override
-  public RuntimeContext prepare(RuntimeIdentity id, Environment originEnv)
+  public OpenShiftRuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
-    final EnvironmentImpl environment = new EnvironmentImpl(originEnv);
-    final OpenShiftEnvironment openShiftEnvironment = envParser.parse(environment);
+    OpenShiftEnvironment openShiftEnvironment = envParser.parse(environment);
 
     infrastructureProvisioner.provision(environment, openShiftEnvironment, id);
 

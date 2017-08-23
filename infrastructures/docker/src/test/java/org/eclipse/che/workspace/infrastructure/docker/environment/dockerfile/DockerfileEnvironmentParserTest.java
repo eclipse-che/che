@@ -10,8 +10,23 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.dockerfile;
 
+import static java.util.Collections.singletonMap;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
+import com.google.common.collect.ImmutableMap;
+import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
+import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 /**
  * @author Alexander Garagatyi
@@ -19,99 +34,81 @@ import org.testng.annotations.Listeners;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DockerfileEnvironmentParserTest {
-  /*
   private static final String DEFAULT_MACHINE_NAME = "dev-machine";
-  private static final String DEFAULT_DOCKERFILE   = "FROM codenvy/ubuntu_jdk8\n";
+  private static final String DEFAULT_DOCKERFILE = "FROM codenvy/ubuntu_jdk8\n";
 
-  @Mock
-  private Environment environment;
-  @Mock
-  private Recipe      recipe;
+  @Mock InternalEnvironment environment;
+  @Mock InternalRecipe recipe;
+  @Mock InternalMachineConfig machineConfig;
 
-  @InjectMocks
-  public DockerfileEnvironmentParser parser;
+  DockerfileEnvironmentParser parser = new DockerfileEnvironmentParser();
 
-  @Test
-  public void shouldBeAbleToParseDockerfileEnvironmentFromContent() throws ServerException {
-      Environment environment = createDockerfileEnvConfig(DEFAULT_DOCKERFILE, null, DEFAULT_MACHINE_NAME);
+  @BeforeMethod
+  public void setUp() throws Exception {
+    when(environment.getRecipe()).thenReturn(recipe);
+    when(environment.getMachines()).thenReturn(singletonMap(DEFAULT_MACHINE_NAME, machineConfig));
+    when(recipe.getType()).thenReturn(DockerfileEnvironmentParser.TYPE);
+    when(recipe.getContent()).thenReturn(DEFAULT_DOCKERFILE);
+    when(recipe.getContentType()).thenReturn(DockerfileEnvironmentParser.CONTENT_TYPE);
+  }
 
-      CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-      expected.getServices().put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withBuild(
-              new CheServiceBuildContextImpl().withDockerfileContent(DEFAULT_DOCKERFILE)));
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Environment of type '.*' doesn't support multiple machines, but contains machines: .*"
+  )
+  public void shouldFailIfSeveralMachineConfigsArePresent() throws Exception {
+    // given
+    when(environment.getMachines())
+        .thenReturn(
+            ImmutableMap.of(DEFAULT_MACHINE_NAME, machineConfig, "anotherMachine", machineConfig));
 
-      // when
-      CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
-
-      // then
-      assertEquals(cheServicesEnvironment, expected);
+    // when
+    parser.parse(environment);
   }
 
   @Test
-  public void shouldBeAbleToParseDockerfileEnvironmentFromLocation() throws Exception {
-      // given
-      String recipeLocation = "http://localhost:8080/recipe/url";
-      EnvironmentImpl environment = createDockerfileEnvConfig(null, recipeLocation, DEFAULT_MACHINE_NAME);
+  public void shouldBeAbleToParseDockerfileEnvironment() throws Exception {
+    // given
+    DockerContainerConfig container =
+        new DockerContainerConfig()
+            .setBuild(new DockerBuildContext().setDockerfileContent(DEFAULT_DOCKERFILE));
+    DockerEnvironment expected =
+        new DockerEnvironment().setContainers(singletonMap(DEFAULT_MACHINE_NAME, container));
 
-      CheServicesEnvironmentImpl expected = new CheServicesEnvironmentImpl();
-      expected.getServices().put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withBuild(
-              new CheServiceBuildContextImpl().withContext(recipeLocation)));
+    // when
+    DockerEnvironment actual = parser.parse(environment);
 
-      // when
-      CheServicesEnvironmentImpl cheServicesEnvironment = parser.parse(environment);
-
-      // then
-      Assert.assertEquals(cheServicesEnvironment, expected);
+    // then
+    assertEquals(actual, expected);
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class,
-        expectedExceptionsMessageRegExp = "Environment of type '.*' doesn't support multiple machines, but contains machines: .*")
-  public void shouldThrowExceptionOnParseOfDockerfileEnvWithSeveralExtendedMachines() throws Exception {
-      // given
-      EnvironmentImpl environment = createDockerfileEnvConfig();
-      environment.getMachines().put("anotherMachine", new ExtendedMachineImpl(emptyList(), emptyMap(), emptyMap()));
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Dockerfile environment parser doesn't support recipe type 'dockerimage'"
+  )
+  public void shouldThrowExceptionInCaseEnvironmentContainsNotSupportedRecipeType()
+      throws Exception {
+    // given
+    when(recipe.getType()).thenReturn("dockerimage");
 
-      // when
-      parser.parse(environment);
+    // when
+    parser.parse(environment);
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class,
-        expectedExceptionsMessageRegExp = "Content type '.*' of recipe of environment is unsupported." +
-                                          " Supported values are: text/x-dockerfile")
-  public void shouldThrowExceptionOnParseOfDockerfileEnvWithNotSupportedContentType() throws Exception {
-      // given
-      EnvironmentImpl environment = createDockerfileEnvConfig();
-      environment.getRecipe().setContentType("dockerfile");
+  @Test(
+    expectedExceptions = ValidationException.class,
+    expectedExceptionsMessageRegExp =
+        "Content type '.*' of recipe of environment is unsupported."
+            + " Supported values are: text/x-dockerfile"
+  )
+  public void shouldThrowExceptionOnParseOfDockerfileEnvWithNotSupportedContentType()
+      throws Exception {
+    // given
+    when(recipe.getContentType()).thenReturn("dockerfile");
 
-      // when
-      parser.parse(environment);
+    // when
+    parser.parse(environment);
   }
-
-  @Test(expectedExceptions = IllegalArgumentException.class,
-        expectedExceptionsMessageRegExp = "Dockerfile environment parser doesn't support recipe type 'dockerImage'")
-  public void shouldThrowExceptionInCaseEnvironmentContainsNotSupportedRecipeType() throws ServerException {
-      // given
-      EnvironmentImpl environment = createDockerfileEnvConfig();
-      environment.getRecipe().setType("dockerImage");
-
-      // when
-      parser.parse(environment);
-  }
-
-  private EnvironmentImpl createDockerfileEnvConfig() {
-      return createDockerfileEnvConfig(DEFAULT_DOCKERFILE, null, DEFAULT_MACHINE_NAME);
-  }
-
-  private EnvironmentImpl createDockerfileEnvConfig(String recipeContent,
-                                                           String recipeLocation,
-                                                           String machineName) {
-      return new EnvironmentImpl(new EnvironmentRecipeImpl("dockerfile",
-                                                           "text/x-dockerfile",
-                                                           recipeContent,
-                                                           recipeLocation),
-                                 singletonMap(machineName,
-                                              new ExtendedMachineImpl(emptyList(),
-                                                                      emptyMap(),
-                                                                      emptyMap())));
-  }
-  */
 }

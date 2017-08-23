@@ -85,7 +85,7 @@ public class WorkspaceValidator {
 
       // TODO: spi: deal with exceptions
       try {
-        runtimes.estimate(environment);
+        runtimes.validate(environment);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
       }

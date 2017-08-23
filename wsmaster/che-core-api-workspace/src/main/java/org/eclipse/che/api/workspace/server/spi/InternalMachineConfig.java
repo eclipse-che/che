@@ -37,37 +37,37 @@ public class InternalMachineConfig {
   private final Map<String, ServerConfig> servers;
   private final Map<String, String> attributes;
 
-  private final InstallerRegistry installerRegistry;
-
-  public InternalMachineConfig(MachineConfig originalConfig, InstallerRegistry installerRegistry)
+  InternalMachineConfig(MachineConfig originalConfig, InstallerRegistry installerRegistry)
       throws InfrastructureException {
-    this.installerRegistry = installerRegistry;
     this.installers = new ArrayList<>();
-    this.servers = new HashMap<>();
-    this.servers.putAll(originalConfig.getServers());
+    this.servers = new HashMap<>(originalConfig.getServers());
     this.attributes = new HashMap<>(originalConfig.getAttributes());
 
-    if (installerRegistry != null) initInstallers(originalConfig.getInstallers());
+    initInstallers(originalConfig.getInstallers(), installerRegistry);
   }
 
-  /** @return servers */
+  /**
+   * Returns unmodifiable map of servers configured in the machine.
+   *
+   * <p>Note that servers provided by installers in this machine are already added to this map.
+   */
   public Map<String, ServerConfig> getServers() {
     return Collections.unmodifiableMap(servers);
   }
 
-  /** @return installers */
+  /** Returns unmodifiable list of installers configs of the machine. */
   public List<InstallerImpl> getInstallers() {
-    return installers;
+    return Collections.unmodifiableList(installers);
   }
 
-  /** @return attributes */
+  /** Returns unmodifiable map of machine attributes. */
   public Map<String, String> getAttributes() {
-    return attributes;
+    return Collections.unmodifiableMap(attributes);
   }
 
-  private void initInstallers(List<String> installersKeys) throws InfrastructureException {
+  private void initInstallers(List<String> installersKeys, InstallerRegistry installerRegistry)
+      throws InfrastructureException {
     try {
-      // TODO ensure already contains dependencies
       List<Installer> sortedInstallers = installerRegistry.getOrderedInstallers(installersKeys);
       for (Installer installer : sortedInstallers) {
         this.installers.add(new InstallerImpl(installer));

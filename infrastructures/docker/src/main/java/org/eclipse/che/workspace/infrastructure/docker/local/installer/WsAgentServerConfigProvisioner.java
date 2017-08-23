@@ -10,13 +10,13 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.local.installer;
 
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.Utils;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.inject.CheBootstrap;
 import org.eclipse.che.workspace.infrastructure.docker.local.server.DockerExtConfBindingProvider;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -24,44 +24,41 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ConfigurationProvisioner;
 
 /**
- * Provides volumes configuration of machine for wsagent installer
+ * Provides volumes configuration of machine for wsagent server.
  *
  * <p>On Windows MUST be locate in "user.home" directory in case limitation windows+docker.
  *
  * @author Alexander Garagatyi
  */
 @Singleton
-public class WsAgentInstallerInfrastructureProvisioner implements ConfigurationProvisioner {
-  private final WsAgentBinariesInfrastructureProvisioner binariesProvisioner;
+public class WsAgentServerConfigProvisioner implements ConfigurationProvisioner {
   private final String extConfBinding;
 
   @Inject
-  public WsAgentInstallerInfrastructureProvisioner(
-      WsAgentBinariesInfrastructureProvisioner binariesProvisioner,
-      DockerExtConfBindingProvider dockerExtConfBindingProvider) {
-
+  public WsAgentServerConfigProvisioner(DockerExtConfBindingProvider dockerExtConfBindingProvider) {
     this.extConfBinding = dockerExtConfBindingProvider.get();
-    this.binariesProvisioner = binariesProvisioner;
   }
 
   @Override
   public void provision(
-      EnvironmentImpl envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+      InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    binariesProvisioner.provision(envConfig, internalEnv, identity);
-
-    if (extConfBinding != null) {
-      String devMachineName = Utils.getDevMachineName(envConfig);
-      if (devMachineName == null) {
-        throw new InternalInfrastructureException("Dev machine is not found in environment");
-      }
-      DockerContainerConfig containerConfig = internalEnv.getContainers().get(devMachineName);
-      containerConfig.getVolumes().add(extConfBinding);
-      containerConfig
-          .getEnvironment()
-          .put(
-              CheBootstrap.CHE_LOCAL_CONF_DIR, DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);
+    if (extConfBinding == null) {
+      // nothing to bind
+      return;
     }
+    Optional<String> devMachineOptional =
+        WsAgentMachineFinderUtil.getWsAgentServerMachine(envConfig);
+    if (!devMachineOptional.isPresent()) {
+      // no wsagent server found - do nothing
+      return;
+    }
+    String devMachineName = devMachineOptional.get();
+    DockerContainerConfig containerConfig = internalEnv.getContainers().get(devMachineName);
+    containerConfig.getVolumes().add(extConfBinding);
+    containerConfig
+        .getEnvironment()
+        .put(CheBootstrap.CHE_LOCAL_CONF_DIR, DockerExtConfBindingProvider.EXT_CHE_LOCAL_CONF_DIR);
   }
 }

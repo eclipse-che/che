@@ -10,18 +10,22 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
+import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.Utils;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -46,7 +50,7 @@ public class ProjectsVolumeProvisionerTest {
   @Mock private WindowsPathEscaper pathEscaper;
 
   private ProjectsVolumeProvisioner provisioner;
-  private EnvironmentImpl environment;
+  private InternalEnvironment environment;
   private DockerEnvironment dockerEnvironment;
 
   @BeforeMethod
@@ -58,26 +62,25 @@ public class ProjectsVolumeProvisionerTest {
     dockerEnvironment = createDockerEnvironment(MACHINE_1_NAME);
   }
 
-  @Test(
-    expectedExceptions = InternalInfrastructureException.class,
-    expectedExceptionsMessageRegExp = "ws-machine is not found on installers applying"
-  )
-  public void shouldThrowExceptionIfDevMachineIsNotFound() throws Exception {
+  @Test
+  public void shouldNotAddVolumeIfWsAgentServerIsNotFound() throws Exception {
     // given
-    environment
-        .getMachines()
-        .get(MACHINE_1_NAME)
-        .setInstallers(Collections.singletonList("org.eclipse.che.ssh"));
+    InternalMachineConfig machineConfig = environment.getMachines().get(MACHINE_1_NAME);
+    when(machineConfig.getServers())
+        .thenReturn(singletonMap("org.eclipse.che.ssh", new ServerConfigImpl()));
+    DockerEnvironment expectedDockerEnv = new DockerEnvironment(dockerEnvironment);
 
     // when
     provisioner.provision(environment, dockerEnvironment, RUNTIME_IDENTITY);
+
+    // then
+    assertEquals(dockerEnvironment, expectedDockerEnv);
   }
 
   @Test
   public void shouldAddProjectsVolumeToDevMachine() throws Exception {
     // given
     when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(PATH_ON_HOST);
-    EnvironmentImpl expectedEnvironment = new EnvironmentImpl(environment);
     DockerEnvironment expectedDockerEnv = new DockerEnvironment(dockerEnvironment);
     expectedDockerEnv
         .getContainers()
@@ -90,7 +93,6 @@ public class ProjectsVolumeProvisionerTest {
 
     // then
     assertEquals(dockerEnvironment, expectedDockerEnv);
-    assertEquals(environment, expectedEnvironment);
   }
 
   @Test
@@ -99,7 +101,6 @@ public class ProjectsVolumeProvisionerTest {
     when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(PATH_ON_HOST);
     environment = createEnvironment(MACHINE_1_NAME, MACHINE_1_NAME, MACHINE_2_NAME);
     dockerEnvironment = createDockerEnvironment(MACHINE_1_NAME, MACHINE_2_NAME);
-    EnvironmentImpl expectedEnvironment = new EnvironmentImpl(environment);
     DockerEnvironment expectedDockerEnv = new DockerEnvironment(dockerEnvironment);
     expectedDockerEnv
         .getContainers()
@@ -112,7 +113,6 @@ public class ProjectsVolumeProvisionerTest {
 
     // then
     assertEquals(dockerEnvironment, expectedDockerEnv);
-    assertEquals(environment, expectedEnvironment);
   }
 
   @Test(
@@ -136,7 +136,6 @@ public class ProjectsVolumeProvisionerTest {
         new ProjectsVolumeProvisioner(
             workspaceFolderPathProvider, pathEscaper, PATH_IN_CONTAINER, options);
     when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(PATH_ON_HOST);
-    EnvironmentImpl expectedEnvironment = new EnvironmentImpl(environment);
     DockerEnvironment expectedDockerEnv = new DockerEnvironment(dockerEnvironment);
     expectedDockerEnv
         .getContainers()
@@ -149,20 +148,23 @@ public class ProjectsVolumeProvisionerTest {
 
     // then
     assertEquals(dockerEnvironment, expectedDockerEnv);
-    assertEquals(environment, expectedEnvironment);
   }
 
-  private EnvironmentImpl createEnvironment(
-      String nameOfMachineWithWsagentInstaller, String... machinesNames) {
-    EnvironmentImpl environment = new EnvironmentImpl();
+  private InternalEnvironment createEnvironment(
+      String nameOfMachineWithWsagentServer, String... machinesNames) {
+
+    Map<String, InternalMachineConfig> machines = new HashMap<>();
     for (String machineName : machinesNames) {
-      environment.getMachines().put(machineName, new MachineConfigImpl());
+      InternalMachineConfig machine = mock(InternalMachineConfig.class);
+      machines.put(machineName, machine);
+      if (machineName.equals(nameOfMachineWithWsagentServer)) {
+        when(machine.getServers())
+            .thenReturn(
+                singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, new ServerConfigImpl()));
+      }
     }
-    environment
-        .getMachines()
-        .get(nameOfMachineWithWsagentInstaller)
-        .getInstallers()
-        .add(Utils.WSAGENT_INSTALLER);
+    InternalEnvironment environment = mock(InternalEnvironment.class);
+    when(environment.getMachines()).thenReturn(machines);
     return environment;
   }
 

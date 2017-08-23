@@ -15,11 +15,9 @@ import static org.testng.Assert.assertEquals;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.workspace.server.RecipeDownloader;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -31,8 +29,6 @@ import org.testng.annotations.Test;
  */
 @Listeners(MockitoTestNGListener.class)
 public class BuildContextTest {
-
-  @Mock private RecipeDownloader recipeDownloader;
 
   @InjectMocks private ComposeEnvironmentParser parser;
 

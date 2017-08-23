@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.spi;
+package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 

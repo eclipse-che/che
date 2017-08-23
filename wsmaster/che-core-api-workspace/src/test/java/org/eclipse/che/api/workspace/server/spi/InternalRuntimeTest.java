@@ -38,15 +38,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.URLRewriter;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
@@ -573,13 +570,16 @@ public class InternalRuntimeTest {
   private static class TestInternalRuntime extends InternalRuntime<RuntimeContext> {
     public TestInternalRuntime(URLRewriter urlRewriter, boolean running)
         throws ValidationException, InfrastructureException {
+      /*super(new TestRuntimeContext(new EnvironmentImpl(new RecipeImpl("type", "contentType", "content", null),
+                                                 emptyMap(),
+                                                 null),
+                             new RuntimeIdentityImpl("ws", "env", "owner"),
+                             null,
+                             null),
+      urlRewriter,
+      running);*/
       super(
-          new TestRuntimeContext(
-              new EnvironmentImpl(
-                  new RecipeImpl("type", "contentType", "content", null), emptyMap(), null),
-              new RuntimeIdentityImpl("ws", "env", "owner"),
-              null,
-              null),
+          new TestRuntimeContext(null, new RuntimeIdentityImpl("ws", "env", "owner"), null),
           urlRewriter,
           running);
     }
@@ -604,12 +604,11 @@ public class InternalRuntimeTest {
   private static class TestRuntimeContext extends RuntimeContext {
 
     public TestRuntimeContext(
-        Environment environment,
+        InternalEnvironment environment,
         RuntimeIdentity identity,
-        RuntimeInfrastructure infrastructure,
-        InstallerRegistry installerRegistry)
+        RuntimeInfrastructure infrastructure)
         throws ValidationException, InfrastructureException {
-      super(environment, identity, infrastructure, installerRegistry);
+      super(environment, identity, infrastructure);
     }
 
     @Override

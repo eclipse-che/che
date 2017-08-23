@@ -16,9 +16,8 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.Recipe;
-import org.eclipse.che.api.workspace.server.RecipeDownloader;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerBuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -37,7 +36,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class ComposeEnvironmentParserTest {
 
-  private static final String TEXT = "to be or not to be";
   private static final String COMPOSE_CONTENT =
       "services: \n"
           + "  machine1: \n"
@@ -87,9 +85,8 @@ public class ComposeEnvironmentParserTest {
           + "  machine3: \n"
           + "    image: codenvy/ubuntu_jdk8\n";
 
-  @Mock private Environment environment;
-  @Mock private Recipe recipe;
-  @Mock private RecipeDownloader recipeDownloader;
+  @Mock private InternalEnvironment environment;
+  @Mock private InternalRecipe recipe;
 
   @InjectMocks private ComposeEnvironmentParser parser;
 
@@ -132,21 +129,6 @@ public class ComposeEnvironmentParserTest {
     // given
     when(recipe.getContentType()).thenReturn("text/x-yaml");
     when(recipe.getContent()).thenReturn(COMPOSE_CONTENT);
-    DockerEnvironment expectedEnv = createTestEnv();
-
-    //when
-    DockerEnvironment cheContainersEnvironment = parser.parse(environment);
-
-    //then
-    assertEquals(cheContainersEnvironment, expectedEnv);
-  }
-
-  @Test
-  public void shouldBeAbleToParseComposeEnvironmentWithApplicationByLocation() throws Exception {
-    // given
-    when(recipe.getContentType()).thenReturn("text/yaml");
-    when(recipeDownloader.getRecipe(TEXT)).thenReturn(COMPOSE_CONTENT);
-    when(recipe.getLocation()).thenReturn(TEXT);
     DockerEnvironment expectedEnv = createTestEnv();
 
     //when

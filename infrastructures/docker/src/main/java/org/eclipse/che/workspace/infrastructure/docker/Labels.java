@@ -18,8 +18,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
 
 /**
  * Helps to convert docker infrastructure entities to docker labels and vise-versa.

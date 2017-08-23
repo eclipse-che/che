@@ -18,8 +18,11 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.workspace.server.RecipeRetriever;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.docker.container.ContainersStartStrategy;
 import org.eclipse.che.workspace.infrastructure.docker.container.DockerContainers;
@@ -27,6 +30,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigS
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentNormalizer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.EnvironmentValidator;
+import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /**
@@ -52,10 +56,12 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
       InfrastructureProvisioner infrastructureProvisioner,
       EnvironmentNormalizer environmentNormalizer,
       Map<String, DockerConfigSourceSpecificEnvironmentParser> environmentParsers,
-      EventService eventService,
       DockerRuntimeContextFactory contextFactory,
-      DockerContainers containers) {
-    super("docker", environmentParsers.keySet(), eventService);
+      DockerContainers containers,
+      EventService eventService,
+      InstallerRegistry installerRegistry,
+      RecipeRetriever recipeRetriever) {
+    super("docker", environmentParsers.keySet(), eventService, installerRegistry, recipeRetriever);
     this.dockerEnvironmentValidator = dockerEnvironmentValidator;
     this.dockerEnvironmentParser = dockerEnvironmentParser;
     this.startStrategy = startStrategy;
@@ -66,9 +72,23 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
   }
 
   @Override
-  public Environment estimate(Environment environment)
+  public InternalEnvironment estimate(Environment environment)
       throws ValidationException, InfrastructureException {
-    // TODO spi: get recipe from non-impl specific code
+    // workaround that in dockerimage environment image is in location field instead of content
+    if (DockerImageEnvironmentParser.TYPE.equals(environment.getRecipe().getType())
+        && environment.getRecipe().getLocation() != null) {
+      // move image from location to content
+      EnvironmentImpl envCopy = new EnvironmentImpl(environment);
+      envCopy.getRecipe().setContent(environment.getRecipe().getLocation());
+      envCopy.getRecipe().setLocation(null);
+      return super.estimate(envCopy);
+    }
+    return super.estimate(environment);
+  }
+
+  @Override
+  public void internalEstimate(InternalEnvironment environment)
+      throws ValidationException, InfrastructureException {
     DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
     dockerEnvironmentValidator.validate(environment, dockerEnvironment);
     // check that order can be resolved
@@ -76,16 +96,12 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     // TODO add an actual estimation of what is missing in the environment
     // memory
     // machines
-
-    return environment;
   }
 
   @Override
-  public DockerRuntimeContext prepare(RuntimeIdentity identity, Environment originEnv)
+  public DockerRuntimeContext prepare(RuntimeIdentity identity, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
-    // TODO spi: get recipe from non-impl specific code
-    // Copy to be able to change env and protect from env changes by method caller
-    EnvironmentImpl environment = new EnvironmentImpl(originEnv);
+
     DockerEnvironment dockerEnvironment = dockerEnvironmentParser.parse(environment);
     dockerEnvironmentValidator.validate(environment, dockerEnvironment);
 

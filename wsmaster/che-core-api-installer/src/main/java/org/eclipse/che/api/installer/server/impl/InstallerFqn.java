@@ -17,7 +17,10 @@ import org.eclipse.che.api.installer.server.exception.IllegalInstallerKeyExcepti
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.commons.annotation.Nullable;
 
-/** @author Anatolii Bazko */
+/**
+ * @author Anatolii Bazko
+ * @author Alexander Garagatyi
+ */
 public class InstallerFqn implements Serializable {
   public static final String LATEST_VERSION_TAG = "latest";
 
@@ -101,6 +104,23 @@ public class InstallerFqn implements Serializable {
 
     for (InstallerFqn fqn : installerFqns) {
       if (fqn.getId().equals(installerId)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /** Indicates if installer id is contained in the giving list of installers. */
+  public static boolean idInInstallerList(
+      String installerId, @Nullable Collection<? extends Installer> installers) {
+    Objects.requireNonNull(installerId, "Installer ID is null");
+    if (installers == null) {
+      return false;
+    }
+
+    for (Installer installer : installers) {
+      if (installer.getId().equals(installerId)) {
         return true;
       }
     }

@@ -15,52 +15,41 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.inject.Inject;
-import javax.inject.Named;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.RecipeDownloader;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.container.ContainerNameGenerator;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /** @author Alexander Garagatyi */
 public class EnvironmentNormalizer {
-  private final RecipeDownloader recipeDownloader;
-  private final Pattern recipeApiPattern;
   private final ContainerNameGenerator containerNameGenerator;
 
   @Inject
-  public EnvironmentNormalizer(
-      RecipeDownloader recipeDownloader,
-      @Named("che.api") String apiEndpoint,
-      ContainerNameGenerator containerNameGenerator) {
-    this.recipeDownloader = recipeDownloader;
-    this.recipeApiPattern =
-        Pattern.compile(
-            "(^https?"
-                + apiEndpoint.substring(apiEndpoint.indexOf(":"))
-                + "/recipe/.*$)|(^/recipe/.*$)");
+  public EnvironmentNormalizer(ContainerNameGenerator containerNameGenerator) {
     this.containerNameGenerator = containerNameGenerator;
   }
 
   public void normalize(
-      Environment environment, DockerEnvironment dockerEnvironment, RuntimeIdentity identity)
+      InternalEnvironment environment,
+      DockerEnvironment dockerEnvironment,
+      RuntimeIdentity identity)
       throws InfrastructureException {
+
     String networkId = identity.getWorkspaceId() + "_" + identity.getEnvName();
     dockerEnvironment.setNetwork(networkId);
 
     Map<String, DockerContainerConfig> containers = dockerEnvironment.getContainers();
     for (Map.Entry<String, DockerContainerConfig> containerEntry : containers.entrySet()) {
-      normalize(
-          identity.getOwner(),
-          identity.getWorkspaceId(),
-          containerEntry.getKey(),
-          containerEntry.getValue());
+      DockerContainerConfig containerConfig = containerEntry.getValue();
+      containerConfig.setContainerName(
+          containerNameGenerator.generateContainerName(
+              identity.getWorkspaceId(),
+              containerConfig.getId(),
+              identity.getOwner(),
+              containerEntry.getKey()));
     }
     normalizeNames(dockerEnvironment);
   }
@@ -127,37 +116,5 @@ public class EnvironmentNormalizer {
       }
     }
     containerToNormalizeLinks.setLinks(normalizedLinks);
-  }
-
-  private void normalize(
-      String namespace, String workspaceId, String machineName, DockerContainerConfig container)
-      throws InfrastructureException {
-
-    // download dockerfile if it is hosted by API to avoid problems with unauthorized requests from docker daemon
-    if (container.getBuild() != null
-        && container.getBuild().getContext() != null
-        && recipeApiPattern.matcher(container.getBuild().getContext()).matches()) {
-
-      String recipeContent;
-      try {
-        recipeContent = recipeDownloader.getRecipe(container.getBuild().getContext());
-      } catch (ServerException e) {
-        throw new InfrastructureException(e.getLocalizedMessage(), e);
-      }
-      container.getBuild().setDockerfileContent(recipeContent);
-      container.getBuild().setContext(null);
-      container.getBuild().setDockerfilePath(null);
-    }
-    if (container.getId() == null) {
-      container.setId(generateMachineId());
-    }
-
-    container.setContainerName(
-        containerNameGenerator.generateContainerName(
-            workspaceId, container.getId(), namespace, machineName));
-  }
-
-  private String generateMachineId() {
-    return NameGenerator.generate("machine", 16);
   }
 }

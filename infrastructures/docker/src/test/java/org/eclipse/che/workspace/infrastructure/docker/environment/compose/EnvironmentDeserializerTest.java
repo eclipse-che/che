@@ -18,12 +18,10 @@ import static org.testng.Assert.fail;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.workspace.server.RecipeDownloader;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.EnvironmentDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -37,8 +35,6 @@ import org.testng.annotations.Test;
  */
 @Listeners(MockitoTestNGListener.class)
 public class EnvironmentDeserializerTest {
-
-  @Mock private RecipeDownloader recipeDownloader;
 
   @InjectMocks private ComposeEnvironmentParser parser;
 

@@ -11,10 +11,10 @@
 package org.eclipse.che.workspace.infrastructure.docker.provisioner.labels;
 
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.docker.Labels;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -28,10 +28,10 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.Configuration
 public class LabelsProvisioner implements ConfigurationProvisioner {
   @Override
   public void provision(
-      EnvironmentImpl envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
+      InternalEnvironment envConfig, DockerEnvironment internalEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    for (Map.Entry<String, ? extends MachineConfig> entry : envConfig.getMachines().entrySet()) {
+    for (Map.Entry<String, InternalMachineConfig> entry : envConfig.getMachines().entrySet()) {
       String name = entry.getKey();
       DockerContainerConfig container = internalEnv.getContainers().get(name);
       container
