@@ -49,6 +49,7 @@ public class OrganizeImportsActionTest {
     when(editorAgent.getActiveEditor()).thenReturn(editor);
   }
 
+  @Test
   public void prepareAction() throws Exception {
     verify(locale).organizeImportsName();
     verify(locale).organizeImportsDescription();

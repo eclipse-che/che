@@ -1,0 +1,1627 @@
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+package org.eclipse.che.selenium.pageobject;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+/** @author Musienko Maxim */
+@Singleton
+public class CodenvyEditor {
+
+  public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
+
+  public static final class EditorContextMenu {
+    public static final String REFACTORING = "contextMenu/Refactoring";
+    public static final String REFACTORING_MOVE = "contextMenu/Refactoring/Move";
+    public static final String REFACTORING_RENAME = "contextMenu/Refactoring/Rename";
+
+    public static final String UNDO = "contextMenu/Undo";
+    public static final String REDO = "contextMenu/Redo";
+    public static final String FORMAT = "contextMenu/Format";
+    public static final String QUICK_DOC = "contextMenu/Quick Documentation";
+    public static final String QUICK_FIX = "contextMenu/Quick Fix";
+    public static final String OPEN_DECLARATION = "contextMenu/Open Declaration";
+    public static final String NAVIGATE_FILE_STRUCTURE = "contextMenu/Navigate File Structure";
+    public static final String FIND = "contextMenu/Find";
+    public static final String CLOSE = "contextMenu/Close";
+
+    private EditorContextMenu() {}
+  }
+
+  public static final class MarkersType {
+    public static final String ERROR_MARKER_OVERVIEW =
+        "//div[@class='ruler annotations']/div[@class='annotation error']";
+    public static final String WARNING_MARKER_OVERVIEW =
+        "//div[@class='ruler annotations']/div[@class='annotation warning']";
+    public static final String TASK_MARKER_OVERVIEW =
+        "//div[@class='ruler annotations']/div[@class='annotation task']";
+    public static final String ERROR_MARKER =
+        "//div[@class='ruler overview']/div[@class='annotationOverview error']";
+    public static final String WARNING_MARKER =
+        "//div[@class='ruler overview']/div[@class='annotationOverview warning']";
+    public static final String INFO_MARKER = "//div[@class='annotationHTML info']";
+
+    private MarkersType() {}
+  }
+
+  protected final SeleniumWebDriver seleniumWebDriver;
+  protected final Loader loader;
+  protected final ActionsFactory actionsFactory;
+  protected final AskForValueDialog askForValueDialog;
+
+  private final WebDriverWait redrawDriverWait;
+  private final WebDriverWait elemDriverWait;
+  private final WebDriverWait loadPageDriverWait;
+  private final WebDriverWait attachElemDriverWait;
+  private final WebDriverWait loaderDriverWait;
+
+  @Inject
+  public CodenvyEditor(
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      ActionsFactory actionsFactory,
+      AskForValueDialog askForValueDialog) {
+    this.seleniumWebDriver = seleniumWebDriver;
+    this.loader = loader;
+    this.actionsFactory = actionsFactory;
+    this.askForValueDialog = askForValueDialog;
+    redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    elemDriverWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
+    loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
+    attachElemDriverWait = new WebDriverWait(seleniumWebDriver, ATTACHING_ELEM_TO_DOM_SEC);
+    loaderDriverWait = new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC);
+    PageFactory.initElements(seleniumWebDriver, this);
+  }
+
+  /** Class introduce base Xpath locators for DOM navigation inside editor */
+  public static final class Locators {
+    private Locators() {}
+
+    public static final String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
+    public static final String EDITOR_TABS_PANEL = "gwt-debug-editorPartStack-tabsPanel";
+    public static final String ACTIVE_LINE_NUMBER =
+        "//div[@class='textviewSelection']/following::div[contains(text(),':')]";
+    public static final String POSITION_CURSOR_NUMBER =
+        "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[text()='%s']";
+    public static final String ACTIVE_EDITOR_ENTRY_POINT =
+        "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[@active]";
+    public static final String ORION_ACTIVE_EDITOR_CONTAINER_XPATH =
+        ACTIVE_EDITOR_ENTRY_POINT + "//div[@class='textviewContent' and @contenteditable='true']";
+    public static final String ORION_CONTENT_ACTIVE_EDITOR_XPATH =
+        ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "/div";
+    public static final String ACTIVE_LINES_XPATH =
+        "//div[@class='textviewSelection']/preceding::div[@class='annotationLine currentLine'][1]";
+    public static final String ACTIVE_LINE_HIGHLIGHT =
+        "//div[@class='annotationLine currentLine' and @role='presentation']";
+    public static final String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
+    public static final String TAB_FILE_NAME_XPATH =
+        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s']";
+    public static final String TAB_FILE_CLOSE_ICON =
+        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s']/following::div[1]";
+    public static final String ALL_TABS_XPATH =
+        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[string-length(text())>0]";
+    public static final String SELECTED_ITEM_IN_EDITOR =
+        "//div[@contenteditable='true']//span[contains(text(), '%s')]";
+
+    public static final String ASSIST_CONTENT_CONTAINER =
+        "//div[@class='contentassist']/following-sibling::div";
+    public static final String AUTOCOMPLETE_CONTAINER =
+        "//div[text()='Proposals:']//following::div/ulist";
+    public static final String PROPOSITION_CONTAINER = "//div[@id='gwt_root']/following::div/ulist";
+    public static final String SHOW_HINTS_POP_UP = "//div[@class='popupContent']/div[1]";
+
+    public static final String RULER_ANNOTATIONS = "//div[@class='ruler annotations']";
+    public static final String RULER_OVERVIEW = "//div[@class='ruler overview']";
+    public static final String RULER_LINES = "//div[@class='ruler lines']";
+    public static final String RULER_FOLDING = "//div[@class='ruler folding']";
+
+    public static final String IMPLEMENTATION_CONTAINER =
+        "//div[contains(text(), 'Choose Implementation of %s')]/parent::div";
+    public static final String IMPLEMENTATION_CONTENT =
+        "//div[contains(text(), 'Choose Implementation of')]/following::div";
+    public static final String IMPLEMENTATIONS_ITEM =
+        "//div[contains(text(), 'Choose Implementation of')]/following::span[text()='%s']";
+    public static final String PUNCTUATION_SEPARATOR =
+        "//span[contains(@class,'punctuation separator space')]";
+    public static final String TEXT_VIEW_RULER = "//div[@class='textviewInnerRightRuler']";
+
+    public static final String DOWNLOAD_SOURCES_LINK = "//anchor[text()='Download sources']";
+
+    public static final String TAB_LIST_BUTTON =
+        "//div[@id='gwt-debug-editorPartStack-tabsPanel']/div[1]/div";
+    public static final String ITEM_TAB_LIST =
+        "//div[@class='popupContent']//div[text()='%s']/parent::div";
+
+    public static final String NOTIFICATION_PANEL_ID = "gwt-debug-leftNotificationGutter";
+    public static final String DEBUGGER_PREFIX_XPATH =
+        "//div[@class[contains(., 'rulerLines')] and text()='%d']";
+    public static final String DEBUGGER_BREAK_POINT_INACTIVE =
+        "//div[@class='breakpoint inactive' and text()='%d']";
+    public static final String DEBUGGER_BREAK_POINT_ACTIVE =
+        "//div[@class='breakpoint active' and text()='%d']";
+    public static final String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
+    public static final String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
+        "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
+  }
+
+  public enum TabAction {
+    CLOSE("contextMenu/Close"),
+    CLOSE_ALL("contextMenu/Close All"),
+    CLOSE_OTHER("contextMenu/Close Other"),
+    CLOSE_ALL_BUT_PINNED("contextMenu/Close All But Pinned"),
+    REOPEN_CLOSED_TAB("contextMenu/Reopen Closed Tab"),
+    PIN_UNPIN_TAB("contextMenu/Pin/Unpin Tab"),
+    SPLIT_VERTICALLY("contextMenu/Split Pane In Two Columns"),
+    SPIT_HORISONTALLY("contextMenu/Split Pane In Two Rows");
+
+    private String id;
+
+    TabAction(String id) {
+      this.id = id;
+    }
+  }
+
+  @FindBy(id = Locators.EDITOR_TABS_PANEL)
+  private WebElement editorTabsPanel;
+
+  @FindBy(xpath = Locators.ACTIVE_LINE_NUMBER)
+  private WebElement activeLineNumber;
+
+  @FindBy(xpath = Locators.AUTOCOMPLETE_CONTAINER)
+  private WebElement autocompleteContainer;
+
+  @FindBy(id = Locators.NOTIFICATION_PANEL_ID)
+  private WebElement notificationPanel;
+
+  @FindBy(xpath = Locators.PROPOSITION_CONTAINER)
+  private WebElement propositionContainer;
+
+  @FindBy(xpath = Locators.JAVA_DOC_POPUP)
+  private WebElement javaDocPopUp;
+
+  @FindBy(xpath = Locators.ASSIST_CONTENT_CONTAINER)
+  private WebElement assistContentContainer;
+
+  @FindBy(xpath = Locators.IMPLEMENTATION_CONTENT)
+  private WebElement implementationContent;
+
+  @FindBy(xpath = Locators.ACTIVE_LINES_XPATH)
+  private WebElement activeLineXpath;
+
+  @FindBy(xpath = Locators.SHOW_HINTS_POP_UP)
+  private WebElement showHintsPopUp;
+
+  @FindBy(xpath = Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH)
+  private WebElement activeEditorContainer;
+
+  @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP)
+  private WebElement autocompleteProposalJavaDocPopup;
+
+  /**
+   * wait active editor
+   *
+   * @param userTimeOut timeout defined of the user
+   */
+  public void waitActiveEditor(int userTimeOut) {
+    loader.waitOnClosed();
+    new WebDriverWait(seleniumWebDriver, userTimeOut).until(visibilityOf(activeEditorContainer));
+  }
+
+  /** wait active editor */
+  public void waitActiveEditor() {
+    loader.waitOnClosed();
+    loadPageDriverWait.until(visibilityOf(activeEditorContainer));
+  }
+
+  /**
+   * get text from active tab of orion editor
+   *
+   * @return text from active tab of orion editor
+   */
+  public String getVisibleTextFromEditor() {
+    waitActiveEditor();
+    List<WebElement> lines =
+        elemDriverWait.until(
+            presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
+    return getTextFromOrionLines(lines);
+  }
+
+  /**
+   * get visible text from split editor
+   *
+   * @param indexOfEditor index of editor that was split
+   */
+  public String getTextFromSplitEditor(int indexOfEditor) {
+    List<WebElement> lines =
+        seleniumWebDriver.findElements(By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH));
+    List<WebElement> inner = lines.get(indexOfEditor - 1).findElements(By.tagName("div"));
+    return getTextFromOrionLines(inner);
+  }
+
+  /**
+   * wait expected text in orion editor
+   *
+   * @param text expected text
+   * @param customTimeout time for waiting , that was defined by user
+   */
+  public void waitTextIntoEditor(final String text, final int customTimeout) {
+    new WebDriverWait(seleniumWebDriver, customTimeout)
+        .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
+  }
+
+  /**
+   * wait text into split editor with defined index
+   *
+   * @param numOfEditor number of the split editor
+   * @param customTimeout timeout defined by user
+   */
+  public void waitTextInDefinedSplitEditor(
+      int numOfEditor, final int customTimeout, String expectedText) {
+    new WebDriverWait(seleniumWebDriver, customTimeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> getTextFromSplitEditor(numOfEditor).contains(expectedText));
+  }
+
+  /**
+   * wait expected text in orion editor
+   *
+   * @param text expected text
+   */
+  public void waitTextIntoEditor(final String text) {
+    try {
+      loadPageDriverWait.until(
+          (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+      attachElemDriverWait.until(
+          (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
+    }
+    loader.waitOnClosed();
+  }
+
+  /**
+   * wait expected text is not present in orion editor
+   *
+   * @param text expected text
+   */
+  public void waitTextNotPresentIntoEditor(final String text) {
+    loadPageDriverWait.until(
+        (ExpectedCondition<Boolean>) webDriver -> !(getVisibleTextFromEditor().contains(text)));
+  }
+
+  /** wait closing of tab with specified name */
+  public void waitWhileFileIsClosed(String nameOfFile) {
+    elemDriverWait.until(
+        invisibilityOfElementLocated(
+            By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile))));
+  }
+
+  /**
+   * select tab by name, click on close icon and wait while content will be saved and orion
+   * disappear file should be unchanged
+   */
+  public void closeFileByNameWithSaving(String nameFile) {
+    loader.waitOnClosed();
+    selectTabByName(nameFile);
+    waitTabFileWithSavedStatus(nameFile);
+    clickOnCloseFileIcon(nameFile);
+    waitWhileFileIsClosed(nameFile);
+    loader.waitOnClosed();
+  }
+
+  /**
+   * click on close icon in the file
+   *
+   * @param fileName name of File which must be close
+   */
+  public void clickOnCloseFileIcon(String fileName) {
+    loadPageDriverWait
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(String.format(Locators.TAB_FILE_CLOSE_ICON, fileName))))
+        .click();
+  }
+
+  /** get all open editor tabs and close this */
+  public void closeAllTabs() {
+    loader.waitOnClosed();
+    List<WebElement> tabs;
+    tabs =
+        redrawDriverWait.until(visibilityOfAllElementsLocatedBy(By.xpath(Locators.ALL_TABS_XPATH)));
+    for (WebElement tab : tabs) {
+      closeFileByNameWithSaving(tab.getText());
+    }
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.ALL_TABS_XPATH)));
+  }
+
+  /** close all tabs by using context menu */
+  public void closeAllTabsByContextMenu() {
+    List<WebElement> tabs;
+    tabs =
+        redrawDriverWait.until(visibilityOfAllElementsLocatedBy(By.xpath(Locators.ALL_TABS_XPATH)));
+    WebElement tab =
+        loadPageDriverWait.until(
+            visibilityOfElementLocated(
+                By.xpath(
+                    String.format(
+                        Locators.TAB_FILE_CLOSE_ICON, tabs.get(tabs.size() - 1).getText()))));
+    actionsFactory.createAction(seleniumWebDriver).contextClick(tab).perform();
+    redrawDriverWait.until(visibilityOfElementLocated(By.id(CLOSE_ALL_TABS))).click();
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.ALL_TABS_XPATH)));
+  }
+
+  /**
+   * Open context menu for tab by name
+   *
+   * @param tabName name of tab
+   */
+  public void openContextMenuForTabByName(String tabName) {
+    WebElement tab =
+        redrawDriverWait.until(
+            visibilityOfElementLocated(
+                By.xpath(String.format(Locators.TAB_FILE_CLOSE_ICON, tabName))));
+    actionsFactory.createAction(seleniumWebDriver).contextClick(tab).perform();
+  }
+
+  /** Run action for tab from the context menu */
+  public void runActionForTabFromContextMenu(TabAction tabAction) {
+    redrawDriverWait.until(visibilityOfElementLocated(By.id(tabAction.id))).click();
+  }
+
+  /** type text by into orion editor with pause 1 sec. */
+  public void typeTextIntoEditor(String text) {
+    loader.waitOnClosed();
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
+    loader.waitOnClosed();
+  }
+
+  /**
+   * type text into orion editor pause for saving on server side is not set
+   *
+   * @param text text to type
+   */
+  public void typeTextIntoEditorWithoutDelayForSaving(String text) {
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
+  }
+
+  /**
+   * type text into specific line editor. Cursor will be activated id the end of the line. Line must
+   * not be empty. Not recommended to use
+   *
+   * @param text text to type
+   */
+  public void typeTextIntoEditor(String text, int line) {
+    setCursorToLine(line);
+    typeTextIntoEditor(text);
+  }
+
+  /** returns focus in the end of current line (in active tab) */
+  //TODO in some cases (for example if we do step into in debug mode and opens editor after that, focus will be lost). But this problem should be fixed. After the we can remove this method
+  public void returnFocusInCurrentLine() {
+    List<WebElement> lines =
+        seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_HIGHLIGHT));
+    Collections.sort(
+        lines, (o1, o2) -> Integer.compare(o1.getLocation().getX(), o2.getLocation().getX()));
+    lines = lines.subList(0, lines.size() / 2); // filter lines from preview
+    for (WebElement line : lines) {
+      if (line.isDisplayed()) {
+        try {
+          int lineWidth = line.getSize().getWidth();
+          Actions action = actionsFactory.createAction(seleniumWebDriver);
+          action.moveToElement(line, lineWidth - 1, 0).click().perform();
+        } catch (Exception ignore) {
+        }
+      }
+    }
+  }
+
+  /**
+   * set cursor in specified line
+   *
+   * @param positionLine is the specified number line
+   */
+  public void setCursorToLine(int positionLine) {
+    loader.waitOnClosed();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .sendKeys(Keys.chord(Keys.CONTROL, "l"))
+        .perform();
+    askForValueDialog.waitFormToOpen();
+    loader.waitOnClosed();
+    askForValueDialog.typeAndWaitText(String.valueOf(positionLine));
+    loader.waitOnClosed();
+    askForValueDialog.clickOkBtn();
+    askForValueDialog.waitFormToClose();
+    waitActiveEditor();
+    expectedNumberOfActiveLine(positionLine);
+  }
+
+  /**
+   * set cursor in specified position
+   *
+   * @param positionLine is the specified number line
+   * @param positionChar is the specified number char
+   */
+  public void setCursorToDefinedLineAndChar(int positionLine, int positionChar) {
+    loader.waitOnClosed();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .sendKeys(Keys.chord(Keys.CONTROL, "l"))
+        .perform();
+    askForValueDialog.waitFormToOpen();
+    loader.waitOnClosed();
+    askForValueDialog.typeAndWaitText(
+        String.valueOf(positionLine) + ":" + String.valueOf(positionChar));
+    loader.waitOnClosed();
+    askForValueDialog.clickOkBtn();
+    askForValueDialog.waitFormToClose();
+    waitActiveEditor();
+    waitSpecifiedValueForLineAndChar(positionLine, positionChar);
+  }
+
+  /** launch code assistant with ctrl+space keys and wait container is open */
+  public void launchAutocompleteAndWaitContainer() {
+    loader.waitOnClosed();
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(Keys.CONTROL).perform();
+    typeTextIntoEditor(Keys.SPACE.toString());
+    action.keyUp(Keys.CONTROL).perform();
+    waitAutocompleteContainer();
+  }
+
+  /** launch code assistant with ctrl+space keys */
+  public void launchAutocomplete() {
+    loader.waitOnClosed();
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(Keys.CONTROL).perform();
+    typeTextIntoEditor(Keys.SPACE.toString());
+    action.keyUp(Keys.CONTROL).perform();
+  }
+
+  /** type ESC key into editor and wait closing of the autocomplete */
+  public void closeAutocomplete() {
+    typeTextIntoEditor(Keys.ESCAPE.toString());
+    waitAutocompleteContainerIsClosed();
+  }
+
+  /** wait while autocomplete form opened */
+  public void waitAutocompleteContainer() {
+    elemDriverWait.until(visibilityOf(autocompleteContainer));
+  }
+
+  /** wait while autocomplete form will closed */
+  public void waitAutocompleteContainerIsClosed() {
+    loadPageDriverWait.until(
+        invisibilityOfElementLocated(By.xpath(Locators.AUTOCOMPLETE_CONTAINER)));
+  }
+
+  /**
+   * wait specified text in autocomplete
+   *
+   * @param value
+   */
+  public void waitTextIntoAutocompleteContainer(final String value) {
+    elemDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            webDriver -> getAllVisibleTextFromAutocomplete().contains(value));
+  }
+
+  /**
+   * wait the marker
+   *
+   * @param markerType is the type of the marker
+   * @param position is the number position
+   */
+  public void waitMarkerInPosition(String markerType, int position) {
+    loadPageDriverWait.until(
+        visibilityOfElementLocated(By.xpath(String.format(markerType, position))));
+    setCursorToLine(position);
+    expectedNumberOfActiveLine(position);
+  }
+
+  /**
+   * wait the marker and click him
+   *
+   * @param markerType is the type of the marker
+   * @param position is the number position
+   */
+  public void waitMarkerInPositionAndClick(String markerType, int position) {
+    loadPageDriverWait
+        .until(visibilityOfElementLocated(By.xpath(String.format(markerType, position))))
+        .click();
+  }
+
+  /**
+   * wait the 'marker' disappears
+   *
+   * @param markerType is the type of the marker
+   * @param position is the number position
+   */
+  public void waitMarkerDisappears(String markerType, int position) {
+    elemDriverWait.until(
+        invisibilityOfElementLocated(By.xpath(String.format(markerType, position))));
+    expectedNumberOfActiveLine(position);
+  }
+
+  /**
+   * wait while all markers disappear
+   *
+   * @param markerType is type of the marker
+   */
+  public void waitAllMarkersDisappear(String markerType) {
+    loaderDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> driver.findElements(By.xpath(markerType)).size() == 0);
+  }
+
+  /**
+   * wait while all markers appear
+   *
+   * @param markerType is type of the marker
+   */
+  public void waitCodeAssistMarkers(String markerType) {
+    elemDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> driver.findElements(By.xpath(markerType)).size() > 0);
+  }
+
+  /** @return text from autocomplete */
+  public String getAllVisibleTextFromAutocomplete() {
+    waitAutocompleteContainer();
+    return autocompleteContainer.getText();
+  }
+
+  /**
+   * Go to the item in autocomplete proposals list and press enter key.
+   *
+   * @param item item in the autocomplete proposals list.
+   */
+  public void enterAutocompleteProposal(String item) {
+    selectAutocompleteProposal(item);
+    WebElement highlightEItem =
+        autocompleteContainer.findElement(
+            By.xpath("//li[@selected='true']//span[text()=\"" + item + "\"]"));
+    redrawDriverWait.until(ExpectedConditions.visibilityOf(highlightEItem));
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER.toString()).perform();
+  }
+
+  /**
+   * select the item into autocomplete container and send double click to item
+   *
+   * @param item item in the autocomplete proposals list.
+   */
+  public void selectItemIntoAutocompleteAndPasteByDoubleClick(String item) {
+    selectAutocompleteProposal(item);
+    WebElement highlightEItem =
+        autocompleteContainer.findElement(
+            By.xpath("//li[@selected='true']//span[text()=\"" + item + "\"]"));
+    redrawDriverWait.until(visibilityOf(highlightEItem));
+    actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
+  }
+
+  /**
+   * Select item by clicking on it in autocomplete container.
+   *
+   * @param item item from autocomplete list.
+   */
+  public void selectAutocompleteProposal(String item) {
+    String locator = String.format(Locators.AUTOCOMPLETE_CONTAINER + "/li/span[text()='%s']", item);
+    redrawDriverWait
+        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)))
+        .click();
+  }
+
+  /** move the mouse to the marker and wait the 'assist content container' */
+  public void moveToMarkerAndWaitAssistContent(String markerType) {
+    WebElement element = seleniumWebDriver.findElement(By.xpath(markerType));
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(element).perform();
+    waitAnnotationCodeAssistIsOpen();
+  }
+
+  /** wait annotations code assist is open */
+  public void waitAnnotationCodeAssistIsOpen() {
+    elemDriverWait.until(ExpectedConditions.visibilityOf(assistContentContainer));
+  }
+
+  /** wait annotations code assist is closed */
+  public void waitAnnotationCodeAssistIsClosed() {
+    loaderDriverWait.until(
+        invisibilityOfElementLocated(By.xpath(Locators.ASSIST_CONTENT_CONTAINER)));
+  }
+
+  /** wait specified text in annotation code assist */
+  public void waitTextIntoAnnotationAssist(final String expectedText) {
+    elemDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            webDriver -> {
+              List<WebElement> items =
+                  seleniumWebDriver.findElements(
+                      By.xpath(Locators.ASSIST_CONTENT_CONTAINER + "//span"));
+              for (WebElement item : items) {
+                if (item.getText().contains(expectedText)) {
+                  return true;
+                }
+              }
+              return false;
+            });
+  }
+
+  /**
+   * wait specified text in proposition assist panel
+   *
+   * @param value expected text in error proposition
+   */
+  public void waitTextIntoFixErrorProposition(final String value) {
+    elemDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            webDriver -> getAllVisibleTextFromProposition().contains(value));
+  }
+
+  /** @return text from proposition assist panel */
+  public String getAllVisibleTextFromProposition() {
+    waitPropositionAssistContainer();
+    return propositionContainer.getText();
+  }
+
+  /** wait assist proposition container is open */
+  public void waitPropositionAssistContainer() {
+    elemDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.PROPOSITION_CONTAINER)));
+  }
+
+  /** wait assist proposition container is closed */
+  public void waitErrorPropositionPanelClosed() {
+    loaderDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.PROPOSITION_CONTAINER)));
+  }
+
+  /** launch the 'code assist proposition' container */
+  public void launchPropositionAssistPanel() {
+    loader.waitOnClosed();
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(Keys.ALT).perform();
+    action.sendKeys(Keys.ENTER.toString()).perform();
+    action.keyUp(Keys.ALT).perform();
+    waitPropositionAssistContainer();
+  }
+
+  /** launch the 'code assist proposition' container in JS files */
+  public void launchPropositionAssistPanelForJSFiles() {
+    loader.waitOnClosed();
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(Keys.LEFT_CONTROL).perform();
+    action.sendKeys(Keys.SPACE.toString()).perform();
+    action.keyUp(Keys.LEFT_CONTROL).perform();
+  }
+
+  /**
+   * selected the first item into the 'assist proposition' container and send double click to the
+   * first item
+   */
+  public void selectFirstItemIntoFixErrorPropByDoubleClick() {
+    String tmpLocator = Locators.PROPOSITION_CONTAINER + "/li";
+    redrawDriverWait.until(visibilityOfElementLocated(By.xpath(tmpLocator))).click();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .doubleClick(seleniumWebDriver.findElement(By.xpath(tmpLocator)))
+        .perform();
+    waitErrorPropositionPanelClosed();
+  }
+
+  /**
+   * selected the first item into the 'assist proposition' container and send enter key to the first
+   * item
+   */
+  public void selectFirstItemIntoFixErrorPropByEnter() {
+    String tmpLocator = Locators.PROPOSITION_CONTAINER + "/li";
+    redrawDriverWait.until(visibilityOfElementLocated(By.xpath(tmpLocator))).click();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .doubleClick(seleniumWebDriver.findElement(By.xpath(tmpLocator)))
+        .perform();
+    waitErrorPropositionPanelClosed();
+  }
+
+  /**
+   * select the expectedItem into assist proposition container and send double click to expectedItem
+   *
+   * @param expectedItem
+   */
+  // TODO this method is not checked in 4.x version. Locators can be invalid
+  public void enterTextIntoFixErrorPropByDoubleClick(String expectedItem) {
+    WebElement itemForClick =
+        seleniumWebDriver.findElement(
+            By.xpath(
+                String.format(
+                    Locators.PROPOSITION_CONTAINER + "/li/span[text()=\"%s\"]", expectedItem)));
+    redrawDriverWait.until(visibilityOf(itemForClick));
+    actionsFactory.createAction(seleniumWebDriver).doubleClick(itemForClick).perform();
+  }
+
+  /**
+   * click on the item into proposition container and send enter key to item
+   *
+   * @param item
+   */
+  public void enterTextIntoFixErrorPropByEnter(String item) {
+    attachElemDriverWait
+        .until(
+            visibilityOf(
+                propositionContainer.findElement(
+                    By.xpath(String.format("//li//span[text()=\"%s\"]", item)))))
+        .click();
+    WebElement highlightEItem =
+        propositionContainer.findElement(
+            By.xpath(String.format("//li//span[text()=\"%s\"]", item)));
+    redrawDriverWait.until(visibilityOf(highlightEItem));
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER.toString()).perform();
+  }
+
+  /**
+   * in Js file editor click on the item into proposition container and send enter key to item
+   *
+   * @param item
+   */
+  public void enterTextIntoFixErrorPropByEnterForJsFiles(String item, String description) {
+    attachElemDriverWait
+        .until(
+            presenceOfElementLocated(
+                By.xpath(
+                    String.format(
+                        "//span[text()='%s']/span[text()='%s']/ancestor::div[1]",
+                        description, item))))
+        .click();
+  }
+
+  /** invoke the 'Show hints' to all parameters on the overloaded constructor or method */
+  public void callShowHintsPopUp() {
+    loader.waitOnClosed();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(Keys.CONTROL)
+        .sendKeys("p")
+        .keyUp(Keys.CONTROL)
+        .perform();
+    loader.waitOnClosed();
+  }
+
+  /** wait the 'Show hints' pop up panel is opened */
+  public void waitShowHintsPopUpOpened() {
+    redrawDriverWait.until(visibilityOf(showHintsPopUp));
+  }
+
+  /** wait the 'Show hints' pop up panel is closed */
+  public void waitShowHintsPopUpClosed() {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.SHOW_HINTS_POP_UP)));
+  }
+
+  /**
+   * wait expected text into the 'Show hints' pop up panel
+   *
+   * @param expText expected value
+   */
+  public void waitExpTextIntoShowHintsPopUp(String expText) {
+    loadPageDriverWait.until(
+        (ExpectedCondition<Boolean>) webDriver -> getTextFromShowHintsPopUp().contains(expText));
+  }
+
+  /** get text from the 'Show hints' pop up panel */
+  public String getTextFromShowHintsPopUp() {
+    waitShowHintsPopUpOpened();
+    return showHintsPopUp.getText();
+  }
+
+  /**
+   * wait while open file tab with specified name becomes without '*' unsaved status
+   *
+   * @param nameOfFile name of tab for checking
+   */
+  public void waitTabFileWithSavedStatus(String nameOfFile) {
+    elemDriverWait.until(
+        visibilityOfElementLocated(
+            By.xpath(String.format(Locators.ACTIVE_TAB_FILE_NAME, nameOfFile))));
+  }
+
+  /**
+   * wait the active tab file name
+   *
+   * @param nameOfFile is specified file name
+   */
+  public void waitActiveTabFileName(String nameOfFile) {
+    loadPageDriverWait.until(
+        presenceOfElementLocated(
+            By.xpath(String.format(Locators.ACTIVE_TAB_FILE_NAME, nameOfFile))));
+  }
+
+  /** check that files have been closed. (Check disappears all text areas and tabs) */
+  public void waitWhileAllFilesWillClosed() {
+    elemDriverWait.until(
+        invisibilityOfElementLocated(
+            By.xpath("//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()]")));
+    elemDriverWait.until(
+        invisibilityOfElementLocated(By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH)));
+  }
+
+  /**
+   * select open file tab with click
+   *
+   * @param nameOfFile name of tab for select
+   */
+  public void selectTabByName(String nameOfFile) {
+    redrawDriverWait
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile))))
+        .click();
+  }
+
+  /**
+   * wait tab with expected name is not present
+   *
+   * @param nameOfFile name of closing tab
+   */
+  public void waitTabIsNotPresent(String nameOfFile) {
+    elemDriverWait.until(
+        invisibilityOfElementLocated(
+            By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile))));
+  }
+
+  /**
+   * wait tab with expected name is present
+   *
+   * @param nameOfFile name of appearing tab
+   */
+  public void waitTabIsPresent(String nameOfFile) {
+    loadPageDriverWait.until(
+        visibilityOfAllElementsLocatedBy(
+            By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile))));
+    loader.waitOnClosed();
+  }
+
+  /**
+   * wait tab with expected name is present
+   *
+   * @param nameOfFile name of appearing tab
+   * @param customTimeout time waiting of tab in editor. Set in seconds.
+   */
+  public void waitTabIsPresent(String nameOfFile, int customTimeout) {
+    new WebDriverWait(seleniumWebDriver, customTimeout)
+        .until(
+            visibilityOfAllElementsLocatedBy(
+                By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile))));
+    loader.waitOnClosed();
+  }
+
+  //TODO this will be able to after adding feature 'Go to line' and 'Delete line'
+  public void selectLineAndDelete(int numberOfLine) {
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    setCursorToLine(numberOfLine);
+    typeTextIntoEditor(Keys.HOME.toString());
+    action.keyDown(Keys.SHIFT).perform();
+    typeTextIntoEditor(Keys.END.toString());
+    action.keyUp(Keys.SHIFT).perform();
+    typeTextIntoEditor(Keys.DELETE.toString());
+    loader.waitOnClosed();
+  }
+
+  //TODO this will be able to after adding feature 'Go to line' and 'Delete line'
+  public void selectLineAndDelete() {
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    typeTextIntoEditor(Keys.HOME.toString());
+    action.keyDown(Keys.SHIFT).perform();
+    typeTextIntoEditor(Keys.END.toString());
+    action.keyUp(Keys.SHIFT).perform();
+    typeTextIntoEditor(Keys.DELETE.toString());
+  }
+
+  /** Deletes current line with Ctrl+D */
+  public void deleteCurrentLine() {
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(Keys.CONTROL).perform();
+    action.sendKeys("d").perform();
+    action.keyUp(Keys.CONTROL).perform();
+    loader.waitOnClosed();
+  }
+
+  /** Deletes current line with Ctrl+D and inserts new line instead */
+  public void deleteCurrentLineAndInsertNew() {
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(Keys.CONTROL).perform();
+    action.sendKeys("d").perform();
+    action.keyUp(Keys.CONTROL).perform();
+    action.sendKeys(Keys.ARROW_UP.toString()).perform();
+    action.sendKeys(Keys.END.toString()).perform();
+    action.sendKeys(Keys.ENTER.toString()).perform();
+  }
+
+  /** delete all content with ctrl+A and del keys */
+  public void deleteAllContent() {
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(Keys.CONTROL).perform();
+    action.sendKeys("a").perform();
+    action.keyUp(Keys.CONTROL).perform();
+    action.sendKeys(Keys.DELETE.toString()).perform();
+    waitEditorIsEmpty();
+  }
+
+  /** wait while the IDE line panel with number of line will be visible */
+  public void waitDebugerLineIsVisible(int line) {
+    loadPageDriverWait.until(
+        visibilityOfElementLocated(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, line))));
+  }
+
+  /**
+   * wait breakpoint with inactive state in defined position
+   *
+   * @param position the position in the codenvy - editor
+   */
+  public void waitBreakPointWithInactiveState(int position) {
+    redrawDriverWait.until(
+        visibilityOfElementLocated(
+            By.xpath(String.format(Locators.DEBUGGER_BREAK_POINT_INACTIVE, position))));
+  }
+
+  /**
+   * set breakpoint on specified position on the IDE breakpoint panel
+   *
+   * @param position position of the breakpoint
+   */
+  public void setBreakPointAndWaitInactiveState(int position) {
+    waitActiveEditor();
+    waitDebugerLineIsVisible(position);
+    seleniumWebDriver
+        .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
+        .click();
+    waitBreakPointWithInactiveState(position);
+  }
+
+  /**
+   * Set breakpoint on specified position on the IDE breakpoint panel and wait on active state of
+   * it.
+   *
+   * @param position position of the breakpoint
+   */
+  public void setBreakPointAndWaitActiveState(int position) {
+    waitActiveEditor();
+    waitDebugerLineIsVisible(position);
+    seleniumWebDriver
+        .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
+        .click();
+    waitBreakPointWithActiveState(position);
+  }
+
+  /**
+   * wait breakpoint with active state in defined position
+   *
+   * @param position the position in the codenvy - editor
+   */
+  public void waitBreakPointWithActiveState(int position) {
+    redrawDriverWait.until(
+        visibilityOfElementLocated(
+            By.xpath(String.format(Locators.DEBUGGER_BREAK_POINT_ACTIVE, position))));
+  }
+
+  /** wait while editor will be empty */
+  public void waitEditorIsEmpty() {
+    elemDriverWait.until((WebDriver driver) -> getVisibleTextFromEditor().isEmpty());
+  }
+
+  /** wait javadoc popup opened */
+  public void waitJavaDocPopUpOpened() {
+    elemDriverWait.until(ExpectedConditions.visibilityOf(javaDocPopUp));
+  }
+
+  /** wait javadoc popup closed */
+  public void waitJavaDocPopUpClosed() {
+    loadPageDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.JAVA_DOC_POPUP)));
+  }
+
+  /** check text present in javadoc popup */
+  public void checkTextToBePresentInJavaDocPopUp(String text) {
+    loadPageDriverWait.until(frameToBeAvailableAndSwitchToIt(By.xpath(Locators.JAVA_DOC_POPUP)));
+    loadPageDriverWait.until(textToBePresentInElementLocated(By.tagName("body"), text));
+    seleniumWebDriver.switchTo().parentFrame();
+  }
+
+  /**
+   * check text after go to link in javadoc at popup
+   *
+   * @param text
+   * @param textLink text of link
+   */
+  public void checkTextAfterGoToLinkInJavaDocPopUp(String text, String textLink) {
+    loadPageDriverWait.until(frameToBeAvailableAndSwitchToIt(By.xpath(Locators.JAVA_DOC_POPUP)));
+    WebElement link =
+        loadPageDriverWait.until(
+            elementToBeClickable(By.xpath(String.format("//a[text()='%s']", textLink))));
+    seleniumWebDriver.get(link.getAttribute("href"));
+    loadPageDriverWait.until(textToBePresentInElementLocated(By.tagName("body"), text));
+    seleniumWebDriver.navigate().back();
+    seleniumWebDriver.switchTo().parentFrame();
+  }
+
+  /** open JavaDoc popup */
+  public void openJavaDocPopUp() {
+    loader.waitOnClosed();
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(Keys.CONTROL).perform();
+    action.sendKeys(Keys.chord("q")).perform();
+    action.keyUp(Keys.CONTROL).perform();
+  }
+
+  /**
+   * wait the text in active line of current tab
+   *
+   * @param text is the text of elements active line
+   */
+  public void waitTextElementsActiveLine(final String text) {
+    waitActiveEditor();
+    redrawDriverWait.until(visibilityOf(activeLineXpath));
+    redrawDriverWait.until(
+        (ExpectedCondition<Boolean>) driver -> activeLineXpath.getText().contains(text));
+  }
+
+  /** get number of current active line */
+  public int getNumberOfActiveLine() {
+    waitActiveEditor();
+    int numberLine =
+        Integer.parseInt(
+            redrawDriverWait.until(visibilityOf(activeLineNumber)).getText().split(":")[0]);
+    return numberLine;
+  }
+
+  /**
+   * check that active line has expected number
+   *
+   * @param expectedLine expected number of active line
+   */
+  public void expectedNumberOfActiveLine(final int expectedLine) {
+    waitActiveEditor();
+    redrawDriverWait.until(
+        (ExpectedCondition<Boolean>) driver -> expectedLine == getNumberOfActiveLine());
+  }
+
+  /**
+   * get Line value for cursor from the codenvy - editor
+   *
+   * @return line value
+   */
+  public int getPositionOfLine() {
+    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(Locators.ACTIVE_LINE_NUMBER)));
+    List<WebElement> numLines =
+        seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_NUMBER));
+    int numberLine = 0;
+    for (WebElement numLine : numLines) {
+      if (numLine.isDisplayed()) {
+        numberLine =
+            Integer.parseInt(redrawDriverWait.until(visibilityOf(numLine)).getText().split(":")[0]);
+        break;
+      }
+    }
+    return numberLine;
+  }
+
+  /**
+   * get Char value for cursor from the codenvy - editor
+   *
+   * @return char value
+   */
+  public int getPositionOfChar() {
+    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(Locators.ACTIVE_LINE_NUMBER)));
+    List<WebElement> numLines =
+        seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_NUMBER));
+    int numberChar = 0;
+    for (WebElement numLine : numLines) {
+      if (numLine.isDisplayed()) {
+        numberChar =
+            Integer.parseInt(redrawDriverWait.until(visibilityOf(numLine)).getText().split(":")[1]);
+        break;
+      }
+    }
+    return numberChar;
+  }
+
+  /**
+   * wait specified values for Line and Char cursor positions in the Codenvy editor
+   *
+   * @param linePosition expected line position
+   * @param charPosition expected char position
+   */
+  public void waitSpecifiedValueForLineAndChar(final int linePosition, final int charPosition) {
+    redrawDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            webDriver ->
+                (getPositionOfLine() == linePosition) && (getPositionOfChar() == charPosition));
+  }
+
+  /**
+   * wait specified values for Line and Char cursor positions in the Codenvy editor
+   *
+   * @param lineAndChar expected line and char position. For example: 1:25
+   */
+  public void waitSpecifiedValueForLineAndChar(String lineAndChar) {
+    redrawDriverWait.until(
+        visibilityOfElementLocated(
+            By.xpath(String.format(Locators.POSITION_CURSOR_NUMBER, lineAndChar))));
+  }
+
+  /** launch the 'Refactor' form by keyboard */
+  public void launchRefactorFormFromEditor() {
+    loader.waitOnClosed();
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(Keys.SHIFT).sendKeys(Keys.F6).keyUp(Keys.SHIFT).perform();
+    loader.waitOnClosed();
+  }
+
+  /**
+   * click on the selected element in the editor
+   *
+   * @param nameElement name of element
+   */
+  public void clickOnSelectedElementInEditor(String nameElement) {
+    WebElement item =
+        seleniumWebDriver.findElement(
+            By.xpath(String.format(Locators.SELECTED_ITEM_IN_EDITOR, nameElement)));
+    item.click();
+    waitActiveEditor();
+  }
+
+  /**
+   * wait the 'Implementation(s)' form is open
+   *
+   * @param fileName is name of the selected file
+   */
+  public void waitImplementationFormIsOpen(String fileName) {
+    redrawDriverWait.until(
+        visibilityOfElementLocated(
+            By.xpath(String.format(Locators.IMPLEMENTATION_CONTAINER, fileName))));
+  }
+
+  /** wait the 'Implementation(s)' form is closed */
+  public void waitImplementationFormIsClosed(String fileName) {
+    redrawDriverWait.until(
+        invisibilityOfElementLocated(
+            By.xpath(String.format(Locators.IMPLEMENTATION_CONTAINER, fileName))));
+  }
+
+  /** launch the 'Implementation(s)' form by keyboard */
+  public void launchImplementationFormByKeyboard() {
+    loader.waitOnClosed();
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action
+        .keyDown(Keys.CONTROL)
+        .keyDown(Keys.ALT)
+        .sendKeys("b")
+        .keyUp(Keys.ALT)
+        .keyUp(Keys.CONTROL)
+        .perform();
+  }
+
+  /** close the forms in the editor by 'Escape' */
+  public void cancelFormInEditorByEscape() {
+    typeTextIntoEditor(Keys.ESCAPE.toString());
+  }
+
+  /**
+   * wait expected text in the 'Implementation' form
+   *
+   * @param expText expected value
+   */
+  public void waitTextInImplementationForm(String expText) {
+    redrawDriverWait.until(
+        (ExpectedCondition<Boolean>) driver -> getTextFromImplementationForm().contains(expText));
+  }
+
+  /** get text from 'Implementation(s)' form */
+  public String getTextFromImplementationForm() {
+    return implementationContent.getText();
+  }
+
+  /**
+   * perform 'double click on the item in the 'Implementation' form
+   *
+   * @param fileName is name of item
+   */
+  public void chooseImplementationByDoubleClick(String fileName) {
+    WebElement fileImplement =
+        seleniumWebDriver.findElement(
+            By.xpath(String.format(Locators.IMPLEMENTATIONS_ITEM, fileName)));
+    redrawDriverWait.until(visibilityOf(fileImplement));
+    actionsFactory.createAction(seleniumWebDriver).doubleClick(fileImplement).perform();
+  }
+
+  /**
+   * select defined implementation in the 'Implementation' form
+   *
+   * @param fileName is name of item
+   */
+  public void selectImplementationByClick(String fileName) {
+    redrawDriverWait
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(String.format(Locators.IMPLEMENTATIONS_ITEM, fileName))))
+        .click();
+  }
+
+  /**
+   * check what text line is present once
+   *
+   * @param line text line
+   * @return true if text line present once or false in other cases
+   */
+  public boolean checkWhatTextLinePresentOnce(String line) {
+    String visibleTextFromEditor = getVisibleTextFromEditor();
+    int index = visibleTextFromEditor.indexOf(line);
+    if (index > 0) {
+      return !visibleTextFromEditor
+          .substring(index + 1, visibleTextFromEditor.length())
+          .contains(line);
+    }
+    return false;
+  }
+
+  /**
+   * click on web element by Xpath
+   *
+   * @param xPath is Xpath of web element
+   */
+  public void clickOnElementByXpath(String xPath) {
+    redrawDriverWait.until(elementToBeClickable(By.xpath(xPath))).click();
+  }
+
+  /**
+   * returns the quantity of annotations submitted to the left ruler in editor
+   *
+   * @param markerType type of marker
+   * @return quantity of annotations
+   */
+  public int getQuantityMarkers(String markerType) {
+    redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.RULER_OVERVIEW)));
+    List<WebElement> annotationList =
+        redrawDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(markerType)));
+    return annotationList.size();
+  }
+
+  /**
+   * wait that annotations are not present
+   *
+   * @param markerType type of marker
+   */
+  public void waitAnnotationsAreNotPresent(String markerType) {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(markerType)));
+  }
+
+  /**
+   * remove line and everything after it
+   *
+   * @param numberOfLine number of line
+   */
+  public void removeLineAndAllAfterIt(int numberOfLine) {
+    setCursorToLine(numberOfLine);
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    action.keyDown(Keys.CONTROL).perform();
+    action.keyDown(Keys.SHIFT).perform();
+    action.sendKeys(Keys.END.toString()).perform();
+    action.keyUp(Keys.CONTROL).perform();
+    action.keyUp(Keys.SHIFT).perform();
+    action.sendKeys(Keys.DELETE).perform();
+  }
+
+  /** wait the ruler overview is present */
+  public void waitRulerOverviewIsPresent() {
+    redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.RULER_OVERVIEW)));
+  }
+
+  /** wait the ruler overview is not present */
+  public void waitRulerOverviewIsNotPresent() {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.RULER_OVERVIEW)));
+  }
+
+  /** wait the ruler annotation is present */
+  public void waitRulerAnnotationsIsPresent() {
+    redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.RULER_ANNOTATIONS)));
+  }
+
+  /** wait the ruler annotation is not present */
+  public void waitRulerAnnotationsIsNotPresent() {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.RULER_ANNOTATIONS)));
+  }
+
+  /** wait the ruler line is present */
+  public void waitRulerLineIsPresent() {
+    redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.RULER_LINES)));
+  }
+
+  /** wait the ruler line is not present */
+  public void waitRulerLineIsNotPresent() {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.RULER_LINES)));
+  }
+
+  /** wait the ruler folding is present */
+  public void waitRulerFoldingIsPresent() {
+    redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.RULER_FOLDING)));
+  }
+
+  /** wait the ruler folding is not present */
+  public void waitRulerFoldingIsNotPresent() {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.RULER_FOLDING)));
+  }
+
+  /** wait the all punctuation separators are present */
+  public void waitAllPunctuationSeparatorsArePresent() {
+    redrawDriverWait.until(
+        visibilityOfAllElementsLocatedBy(By.xpath(Locators.PUNCTUATION_SEPARATOR)));
+  }
+
+  /** wait the all punctuation separators are not present */
+  public void waitAllPunctuationSeparatorsAreNotPresent() {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.PUNCTUATION_SEPARATOR)));
+  }
+
+  /** wait the text view ruler is present */
+  public void waitTextViewRulerIsPresent() {
+    redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.TEXT_VIEW_RULER)));
+  }
+
+  /** wait the text view ruler is not present */
+  public void waitTextViewRulerIsNotPresent() {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.TEXT_VIEW_RULER)));
+  }
+
+  /** click on 'Download sources' link in the editor */
+  public void clickOnDownloadSourcesLink() {
+    redrawDriverWait
+        .until(visibilityOfElementLocated(By.xpath(Locators.DOWNLOAD_SOURCES_LINK)))
+        .click();
+  }
+
+  /**
+   * Change width of window for the Editor.
+   *
+   * @param xOffset horizontal move offset.
+   */
+  public void changeWidthWindowForEditor(int xOffset) {
+    WebElement moveElement =
+        redrawDriverWait.until(
+            visibilityOfElementLocated(
+                By.xpath("//div[@id='gwt-debug-navPanel']/parent::div/following::div[1]")));
+    actionsFactory.createAction(seleniumWebDriver).dragAndDropBy(moveElement, xOffset, 0).perform();
+  }
+
+  /** Open list of the tabs Note: This possible if opened tabs don't fit in the tab bar. */
+  public void openTabList() {
+    redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.TAB_LIST_BUTTON))).click();
+  }
+
+  /**
+   * Wait the tab is present in the tab list
+   *
+   * @param tabName name of tab
+   */
+  public void waitTabIsPresentInTabList(String tabName) {
+    redrawDriverWait.until(
+        visibilityOfElementLocated(By.xpath(String.format(Locators.ITEM_TAB_LIST, tabName))));
+  }
+
+  /**
+   * Wait the tab is not present in the tab list
+   *
+   * @param tabName name of tab
+   */
+  public void waitTabIsNotPresentInTabList(String tabName) {
+    redrawDriverWait.until(
+        invisibilityOfElementLocated(By.xpath(String.format(Locators.ITEM_TAB_LIST, tabName))));
+  }
+
+  /**
+   * Click on tab in the tab list
+   *
+   * @param tabName name of tab
+   */
+  public void clickOnTabInTabList(String tabName) {
+    redrawDriverWait
+        .until(visibilityOfElementLocated(By.xpath(String.format(Locators.ITEM_TAB_LIST, tabName))))
+        .click();
+  }
+
+  /**
+   * Select tab by index of editor window after split
+   *
+   * @param index index of editor window
+   * @param tabName name of tab
+   */
+  public void selectTabByIndexEditorWindow(int index, String tabName) {
+    List<WebElement> windowList =
+        redrawDriverWait.until(
+            presenceOfAllElementsLocatedBy(
+                By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, tabName))));
+    windowList.get(index).click();
+  }
+
+  /**
+   * Select tab by index of editor window after split and open context menu
+   *
+   * @param index index of editor window
+   * @param tabName name of tab
+   */
+  public void selectTabByIndexEditorWindowAndOpenMenu(int index, String tabName) {
+    List<WebElement> windowList =
+        redrawDriverWait.until(
+            presenceOfAllElementsLocatedBy(
+                By.xpath(String.format(Locators.TAB_FILE_CLOSE_ICON, tabName))));
+    actionsFactory.createAction(seleniumWebDriver).contextClick(windowList.get(index)).perform();
+  }
+
+  /**
+   * Check the tab of file is present once in editor
+   *
+   * @param expectTab expect name of tab
+   */
+  public boolean tabIsPresentOnce(String expectTab) {
+    List<WebElement> windowList =
+        redrawDriverWait.until(presenceOfAllElementsLocatedBy(By.id(Locators.EDITOR_TABS_PANEL)));
+    int counter = 0;
+    for (WebElement webElement : windowList) {
+      if (webElement.getText().contains(expectTab)) {
+        counter++;
+      }
+    }
+    return counter == 1;
+  }
+
+  /**
+   * Auxiliary method for reading text from Orion editor.
+   *
+   * @param lines List of WebElements that contain text (mostly <div> tags after
+   *     ORION_ACTIVE_EDITOR_CONTAINER_XPATH locator)
+   * @return the normalized text
+   */
+  private String getTextFromOrionLines(List<WebElement> lines) {
+    StringBuilder stringBuilder = new StringBuilder();
+    try {
+      for (WebElement line : lines) {
+        List<WebElement> elements = line.findElements(By.tagName("span"));
+        elements.remove(elements.size() - 1);
+        for (WebElement elem : elements) {
+          stringBuilder.append(elem.getText());
+        }
+        stringBuilder.append("\n");
+      }
+      stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+    }
+    // If an editor do not attached to the DOM (we will have state element exception). We wait attaching 2 second and try to read text again.
+    catch (WebDriverException ex) {
+      WaitUtils.sleepQuietly(2);
+      stringBuilder.setLength(0);
+      for (WebElement line : lines) {
+        List<WebElement> elements = line.findElements(By.tagName("span"));
+        elements.remove(elements.size() - 1);
+        for (WebElement elem : elements) {
+          stringBuilder.append(elem.getText());
+        }
+        stringBuilder.append("\n");
+      }
+      stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+    }
+
+    return stringBuilder.toString();
+  }
+
+  /** open context menu into editor */
+  public void openContextMenuInEditor() {
+    WebElement element = loadPageDriverWait.until(visibilityOf(activeEditorContainer));
+    Actions act = actionsFactory.createAction(seleniumWebDriver);
+    act.contextClick(element).perform();
+    waitContextMenu();
+  }
+
+  /**
+   * open context menu on the selected element into editor
+   *
+   * @param selectedElement is the selected element into editor
+   */
+  public void openContextMenuOnElementInEditor(String selectedElement) {
+    WebElement element =
+        loadPageDriverWait.until(
+            visibilityOfElementLocated(
+                By.xpath(String.format(Locators.SELECTED_ITEM_IN_EDITOR, selectedElement))));
+    Actions act = actionsFactory.createAction(seleniumWebDriver);
+    act.contextClick(element).perform();
+    waitContextMenu();
+  }
+
+  /** wait context menu form is open */
+  public void waitContextMenu() {
+    loadPageDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.CONTEXT_MENU)));
+  }
+
+  /** wait context menu form is not present */
+  public void waitContextMenuIsNotPresent() {
+    loadPageDriverWait.until(invisibilityOfElementLocated(By.xpath(Locators.CONTEXT_MENU)));
+  }
+
+  /**
+   * click on element from context menu by name
+   *
+   * @param item is a name into context menu
+   */
+  public void clickOnItemInContextMenu(String item) {
+    redrawDriverWait.until(visibilityOfElementLocated(By.id(item))).click();
+    loader.waitOnClosed();
+  }
+
+  /**
+   * Get html code of java doc of autocomplete proposal.
+   *
+   * @return html code of JavaDoc of already opened autocomplete proposal by making request on 'src'
+   *     attribute of iframe of JavaDoc popup.
+   */
+  public String getAutocompleteProposalJavaDocHtml() throws IOException {
+    new FluentWait<>(seleniumWebDriver)
+        .withTimeout(LOAD_PAGE_TIMEOUT_SEC * 2, SECONDS)
+        .pollingEvery(LOAD_PAGE_TIMEOUT_SEC / 2, SECONDS)
+        .ignoring(StaleElementReferenceException.class, NoSuchElementException.class)
+        .until(ExpectedConditions.attributeToBeNotEmpty(autocompleteProposalJavaDocPopup, "src"));
+
+    URL connectionUrl = new URL(autocompleteProposalJavaDocPopup.getAttribute("src"));
+    HttpURLConnection connection = (HttpURLConnection) connectionUrl.openConnection();
+    connection.setRequestMethod("GET");
+
+    try (BufferedReader br =
+        new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
+      return br.lines().collect(Collectors.joining());
+    } finally {
+      connection.disconnect();
+    }
+  }
+}
