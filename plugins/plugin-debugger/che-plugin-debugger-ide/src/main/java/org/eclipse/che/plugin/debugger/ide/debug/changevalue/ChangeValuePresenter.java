@@ -32,8 +32,6 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
   private final DebuggerPresenter debuggerPresenter;
   private final DebuggerLocalizationConstant constant;
 
-  private Variable variable;
-
   @Inject
   public ChangeValuePresenter(
       ChangeValueView view,
@@ -48,9 +46,9 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
   }
 
   public void showDialog() {
-    variable = debuggerPresenter.getSelectedVariable();
-    view.setValueTitle(constant.changeValueViewExpressionFieldTitle(variable.getName()));
-    view.setValue(variable.getValue().getString());
+    Variable selectedVariable = debuggerPresenter.getSelectedVariable();
+    view.setValueTitle(constant.changeValueViewExpressionFieldTitle(selectedVariable.getName()));
+    view.setValue(selectedVariable.getValue().getString());
     view.focusInValueField();
     view.selectAllText();
     view.setEnableChangeButton(false);
@@ -65,12 +63,22 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
   @Override
   public void onChangeClicked() {
     Debugger debugger = debuggerManager.getActiveDebugger();
-    if (debugger != null) {
-      Variable newVariable =
-          new VariableImpl(new SimpleValueImpl(view.getValue()), variable.getVariablePath());
-      final long threadId = debuggerPresenter.getSelectedThreadId();
-      final int frameIndex = debuggerPresenter.getSelectedFrameIndex();
-      debugger.setValue(newVariable, threadId, frameIndex);
+    if (debugger != null && debugger.isSuspended()) {
+      Variable selectedVariable = debuggerPresenter.getSelectedVariable();
+
+      if (selectedVariable != null) {
+        Variable newVariable =
+            new VariableImpl(
+                selectedVariable.getType(),
+                selectedVariable.getName(),
+                new SimpleValueImpl(view.getValue()),
+                selectedVariable.isPrimitive(),
+                selectedVariable.getVariablePath());
+
+        final long threadId = debuggerPresenter.getSelectedThreadId();
+        final int frameIndex = debuggerPresenter.getSelectedFrameIndex();
+        debugger.setValue(newVariable, threadId, frameIndex);
+      }
     }
 
     view.close();

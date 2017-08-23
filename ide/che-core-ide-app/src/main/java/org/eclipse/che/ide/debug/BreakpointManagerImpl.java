@@ -25,6 +25,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -616,7 +619,7 @@ public class BreakpointManagerImpl
   }
 
   @Override
-  public void onValueChanged(List<String> path, String newValue) {}
+  public void onValueChanged(Variable variable, long threadId, int frameIndex) {}
 
   @Override
   public void addObserver(BreakpointManagerObserver observer) {

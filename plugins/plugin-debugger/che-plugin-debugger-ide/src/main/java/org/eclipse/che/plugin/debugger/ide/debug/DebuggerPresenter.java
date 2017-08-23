@@ -23,8 +23,9 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import javax.validation.constraints.NotNull;
+
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
@@ -78,12 +79,9 @@ public class DebuggerPresenter extends BasePresenter
   private final WorkspaceAgent workspaceAgent;
   private final DebuggerResourceHandlerFactory resourceHandlerManager;
 
-  private MutableVariable selectedVariable;
   private List<Variable> variables;
   private List<? extends ThreadDump> threadDump;
   private Location executionPoint;
-  private long selectedThreadId;
-  private int selectedFrameIndex;
   private DebuggerDescriptor debuggerDescriptor;
 
   @Inject
@@ -114,8 +112,8 @@ public class DebuggerPresenter extends BasePresenter
     this.debuggerManager.addObserver(this);
     this.breakpointManager.addObserver(this);
 
-    resetState();
-    updateBreakpoints();
+    resetView();
+    addDebuggerPanel();
   }
 
   @Override
@@ -140,156 +138,79 @@ public class DebuggerPresenter extends BasePresenter
 
   @Override
   public void go(AcceptsOneWidget container) {
-    view.setBreakpoints(breakpointManager.getBreakpointList());
-
     container.setWidget(view);
     debuggerToolbar.go(view.getDebuggerToolbarPanel());
   }
 
   @Override
-  public void onExpandVariablesTree() {
-    List<? extends Variable> rootVariables = selectedVariable.getVariables();
+  public void onExpandVariablesTree(MutableVariable variable) {
+    List<? extends Variable> rootVariables = variable.getValue().getVariables();
     if (rootVariables.isEmpty()) {
       Debugger debugger = debuggerManager.getActiveDebugger();
       if (debugger != null) {
         Promise<? extends SimpleValue> promise =
-            debugger.getValue(selectedVariable, selectedThreadId, selectedFrameIndex);
+            debugger.getValue(variable, view.getSelectedThreadId(), view.getSelectedFrameIndex());
 
         promise
             .then(
                 value -> {
-                  selectedVariable.setValue(value);
-                  view.setVariablesIntoSelectedVariable(value.getVariables());
-                  view.updateSelectedVariable();
+                  view.setVariableValue(variable, value);
                 })
             .catchError(
                 error -> {
-                  notificationManager.notify(
-                      constant.failedToGetVariableValueTitle(),
-                      error.getMessage(),
-                      FAIL,
-                      FLOAT_MODE);
+                  Log.error(DebuggerPresenter.class, error.getCause());
                 });
       }
     }
   }
 
   @Override
-  public void onSelectedVariableElement(@NotNull MutableVariable variable) {
-    this.selectedVariable = variable;
-  }
-
-  @Override
   public void onSelectedThread(long threadId) {
-    selectedThreadId = threadId;
-    selectedFrameIndex = 0;
-
-    for (ThreadDump td : threadDump) {
-      if (td.getId() == selectedThreadId) {
-        view.setFrames(td.getFrames());
-      }
-    }
-    updateStackFrameDump();
+    updateStackFrameDump(threadId);
+    updateVariables(threadId, 0);
   }
 
   @Override
   public void onSelectedFrame(int frameIndex) {
-    if (selectedFrameIndex != frameIndex) {
-      updateStackFrameDump();
-    }
-
-    selectedFrameIndex = frameIndex;
+    long selectedThreadId = view.getSelectedThreadId();
+    updateVariables(selectedThreadId, frameIndex);
 
     for (ThreadDump td : threadDump) {
       if (td.getId() == selectedThreadId) {
-        final StackFrameDump stackFrameDump = td.getFrames().get(selectedFrameIndex);
-
-        Debugger debugger = debuggerManager.getActiveDebugger();
-        if (debugger != null) {
-          DebuggerResourceHandler handler =
-              resourceHandlerManager.getOrDefault(debugger.getDebuggerType());
-          handler.open(
-              stackFrameDump.getLocation(),
-              new AsyncCallback<VirtualFile>() {
-                @Override
-                public void onFailure(Throwable caught) {}
-
-                @Override
-                public void onSuccess(VirtualFile result) {}
-              });
-        }
+        StackFrameDump stackFrameDump = td.getFrames().get(frameIndex);
+        open(stackFrameDump.getLocation());
       }
     }
   }
 
+  private void open(Location location) {
+    Debugger debugger = debuggerManager.getActiveDebugger();
+    if (debugger != null) {
+      DebuggerResourceHandler handler =
+          resourceHandlerManager.getOrDefault(debugger.getDebuggerType());
+
+      handler.open(
+          location,
+          new AsyncCallback<VirtualFile>() {
+            @Override
+            public void onFailure(Throwable caught) {}
+
+            @Override
+            public void onSuccess(VirtualFile result) {}
+          });
+    }
+  }
+
   public long getSelectedThreadId() {
-    return selectedThreadId;
+    return view.getSelectedThreadId();
   }
 
   public int getSelectedFrameIndex() {
-    return selectedFrameIndex;
-  }
-
-  public void showDebuggerPanel() {
-    partStack.setActivePart(this);
-  }
-
-  public void hideDebuggerPanel() {
-    partStack.minimize();
-  }
-
-  public boolean isDebuggerPanelOpened() {
-    return partStack.getActivePart() == this;
-  }
-
-  public boolean isDebuggerPanelPresent() {
-    return partStack != null && partStack.containsPart(this);
-  }
-
-  private void resetState() {
-    variables = new ArrayList<>();
-    threadDump = new ArrayList<>();
-    selectedThreadId = -1;
-    selectedFrameIndex = -1;
-    selectedVariable = null;
-    executionPoint = null;
-    debuggerDescriptor = null;
-    view.setVariables(emptyList());
-    view.setVMName("");
-    view.setExecutionPoint(null);
-    view.setThreads(emptyList(), -1);
-    view.setFrames(emptyList());
-  }
-
-  public void updateView() {
-    if (debuggerDescriptor == null) {
-      view.setVMName("");
-    } else {
-      view.setVMName(debuggerDescriptor.getInfo());
-    }
-
-    view.setExecutionPoint(executionPoint);
-
-    view.setBreakpoints(breakpointManager.getBreakpointList());
-    updateThreadDump();
-    updateStackFrameDump();
-
-    showView();
+    return view.getSelectedFrameIndex();
   }
 
   protected void updateBreakpoints() {
     view.setBreakpoints(breakpointManager.getBreakpointList());
-
-    if (!breakpointManager.getBreakpointList().isEmpty() && !isDebuggerPanelPresent()) {
-      showView();
-      showDebuggerPanel();
-    }
-  }
-
-  public void showView() {
-    if (partStack == null || !partStack.containsPart(this)) {
-      workspaceAgent.openPart(this, PartStackType.INFORMATION);
-    }
   }
 
   protected void updateThreadDump() {
@@ -300,8 +221,11 @@ public class DebuggerPresenter extends BasePresenter
           .then(
               threadDump -> {
                 DebuggerPresenter.this.threadDump = threadDump;
-                view.setThreads(threadDump, selectedThreadId);
-                onSelectedThread(selectedThreadId);
+                if (executionPoint != null) {
+                  view.setThreads(threadDump, executionPoint.getThreadId());
+                  updateStackFrameDump(executionPoint.getThreadId());
+                  updateVariables(executionPoint.getThreadId(), 0);
+                }
               })
           .catchError(
               error -> {
@@ -310,19 +234,29 @@ public class DebuggerPresenter extends BasePresenter
     }
   }
 
-  protected void updateStackFrameDump() {
+  protected void updateStackFrameDump(long threadId) {
+    for (ThreadDump td : threadDump) {
+      if (td.getId() == threadId) {
+        view.setFrames(td.getFrames());
+      }
+    }
+  }
+
+  protected void updateVariables(long threadId, int frameIndex) {
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null && debugger.isSuspended()) {
-      Promise<? extends StackFrameDump> promise =
-          debugger.getStackFrameDump(selectedThreadId, selectedFrameIndex);
+      Promise<? extends StackFrameDump> promise = debugger.getStackFrameDump(threadId, frameIndex);
       promise
           .then(
               stackFrameDump -> {
-                variables = new ArrayList<>();
-                variables.addAll(stackFrameDump.getFields());
-                variables.addAll(stackFrameDump.getVariables());
+                if (threadId == view.getSelectedThreadId()
+                    && frameIndex == view.getSelectedFrameIndex()) {
 
-                view.setVariables(variables);
+                  variables = new LinkedList<>();
+                  variables.addAll(stackFrameDump.getFields());
+                  variables.addAll(stackFrameDump.getVariables());
+                  view.setVariables(variables);
+                }
               })
           .catchError(
               error -> {
@@ -331,9 +265,8 @@ public class DebuggerPresenter extends BasePresenter
     }
   }
 
-  /** @return selected variable in variables tree or null if no selected variables */
   public Variable getSelectedVariable() {
-    return selectedVariable;
+    return view.getSelectedDebuggerVariable();
   }
 
   public ToolbarPresenter getDebuggerToolbar() {
@@ -343,6 +276,7 @@ public class DebuggerPresenter extends BasePresenter
   @Override
   public void onDebuggerAttached(
       final DebuggerDescriptor debuggerDescriptor, Promise<Void> connect) {
+
     final String address = debuggerDescriptor.getAddress();
     final StatusNotification notification =
         notificationManager.notify(constant.debuggerConnectingTitle(address), PROGRESS, FLOAT_MODE);
@@ -356,7 +290,7 @@ public class DebuggerPresenter extends BasePresenter
               notification.setContent(constant.debuggerConnectedDescription(address));
               notification.setStatus(SUCCESS);
 
-              updateView();
+              view.setVMName(debuggerDescriptor.getInfo());
               showDebuggerPanel();
             })
         .catchError(
@@ -372,11 +306,11 @@ public class DebuggerPresenter extends BasePresenter
   public void onDebuggerDisconnected() {
     String address = debuggerDescriptor != null ? debuggerDescriptor.getAddress() : "";
     String content = constant.debuggerDisconnectedDescription(address);
+
     notificationManager.notify(
         constant.debuggerDisconnectedTitle(), content, SUCCESS, NOT_EMERGE_MODE);
 
-    resetState();
-    updateView();
+    resetView();
   }
 
   @Override
@@ -399,38 +333,91 @@ public class DebuggerPresenter extends BasePresenter
 
   @Override
   public void onPreStepInto() {
-    resetState();
+    clearExecutionPoint();
   }
 
   @Override
   public void onPreStepOut() {
-    resetState();
+    clearExecutionPoint();
   }
 
   @Override
   public void onPreStepOver() {
-    resetState();
+    clearExecutionPoint();
   }
 
   @Override
   public void onPreResume() {
-    resetState();
+    clearExecutionPoint();
+  }
+
+  private void clearExecutionPoint() {
+    executionPoint = null;
+    variables = new ArrayList<>();
+    threadDump = new ArrayList<>();
+    view.setExecutionPoint(null);
+    view.setThreads(emptyList(), -1);
+    view.setFrames(emptyList());
+    view.setVariables(emptyList());
+  }
+
+  private void resetView() {
+    variables = new ArrayList<>();
+    threadDump = new ArrayList<>();
+    executionPoint = null;
+    debuggerDescriptor = null;
+    updateBreakpoints();
+    view.setVMName("");
+    view.setExecutionPoint(null);
+    view.setThreads(emptyList(), -1);
+    view.setFrames(emptyList());
+    view.setVariables(emptyList());
   }
 
   @Override
   public void onBreakpointStopped(String filePath, Location location) {
     executionPoint = location;
-    selectedThreadId = executionPoint.getThreadId();
-    selectedFrameIndex = 0;
-
-    updateView();
+    view.setExecutionPoint(executionPoint);
+    updateThreadDump();
   }
 
   @Override
-  public void onValueChanged(List<String> path, String newValue) {
-    updateStackFrameDump(); // TODO
+  public void onValueChanged(Variable variable, long threadId, int frameIndex) {
+    if (view.getSelectedThreadId() == threadId && view.getSelectedFrameIndex() == frameIndex) {
+      Debugger debugger = debuggerManager.getActiveDebugger();
+      if (debugger != null && debugger.isSuspended()) {
+        Promise<? extends SimpleValue> promise = debugger.getValue(variable, threadId, frameIndex);
+        promise
+            .then(
+                value -> {
+                  view.setVariableValue(variable, value);
+                })
+            .catchError(
+                error -> {
+                  Log.error(DebuggerPresenter.class, error.getCause());
+                });
+      }
+    }
   }
 
   @Override
   public void onActiveDebuggerChanged(@Nullable Debugger activeDebugger) {}
+
+  public void addDebuggerPanel() {
+    if (partStack == null || !partStack.containsPart(this)) {
+      workspaceAgent.openPart(this, PartStackType.INFORMATION);
+    }
+  }
+
+  public void showDebuggerPanel() {
+    partStack.setActivePart(this);
+  }
+
+  public void hideDebuggerPanel() {
+    partStack.minimize();
+  }
+
+  public boolean isDebuggerPanelOpened() {
+    return partStack.getActivePart() == this;
+  }
 }

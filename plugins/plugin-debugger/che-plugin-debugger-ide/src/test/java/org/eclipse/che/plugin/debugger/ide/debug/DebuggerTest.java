@@ -605,7 +605,7 @@ public class DebuggerTest extends BaseTest {
 
     verify(promiseVoid).then(operationVoidCaptor.capture());
     operationVoidCaptor.getValue().apply(null);
-    verify(observer).onValueChanged(path, newValue);
+    verify(observer).onValueChanged(variable, THREAD_ID, FRAME_INDEX);
 
     verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
     operationPromiseErrorCaptor.getValue().apply(promiseError);

@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.ide.debug;
 
-import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 
@@ -52,5 +52,5 @@ public interface DebuggerObserver {
   void onBreakpointStopped(String filePath, Location location);
 
   /** Event happens when value changed. */
-  void onValueChanged(List<String> path, String newValue);
+  void onValueChanged(Variable variable, long threadId, int frameIndex);
 }

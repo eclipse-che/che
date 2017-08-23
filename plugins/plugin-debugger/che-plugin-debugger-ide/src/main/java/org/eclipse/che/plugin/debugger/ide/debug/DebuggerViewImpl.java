@@ -10,6 +10,12 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import elemental.dom.Element;
+import elemental.events.KeyboardEvent;
+import elemental.events.MouseEvent;
+import elemental.html.SpanElement;
+import elemental.html.TableElement;
+
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -23,19 +29,15 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import elemental.dom.Element;
-import elemental.events.KeyboardEvent;
-import elemental.events.MouseEvent;
-import elemental.html.TableElement;
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.constraints.NotNull;
+
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.impl.MutableVariableImpl;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.debug.Breakpoint;
@@ -48,6 +50,10 @@ import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.input.SignalEvent;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
+
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The class business logic which allow us to change visual representation of debugger panel.
@@ -120,7 +126,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
           @Override
           public void onNodeClosed(@NotNull TreeNodeElement<MutableVariable> node) {
-            selectedVariable = null;
+            selectedVariable = node;
           }
 
           @Override
@@ -138,15 +144,13 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
           @Override
           public void onNodeExpanded(@NotNull final TreeNodeElement<MutableVariable> node) {
             selectedVariable = node;
-            delegate.onSelectedVariableElement(selectedVariable.getData());
-            delegate.onExpandVariablesTree();
+            delegate.onExpandVariablesTree(node.getData());
           }
 
           @Override
           public void onNodeSelected(
               @NotNull TreeNodeElement<MutableVariable> node, @NotNull SignalEvent event) {
             selectedVariable = node;
-            delegate.onSelectedVariableElement(selectedVariable.getData());
           }
 
           @Override
@@ -161,47 +165,6 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
     this.variablesPanel.add(variables);
     minimizeButton.ensureDebugId("debugger-minimizeBut");
-  }
-
-  private SimpleList<Breakpoint> createBreakpointList() {
-    TableElement breakPointsElement = Elements.createTableElement();
-    breakPointsElement.setAttribute("style", "width: 100%");
-
-    SimpleList.ListEventDelegate<Breakpoint> breakpointListEventDelegate =
-        new SimpleList.ListEventDelegate<Breakpoint>() {
-          public void onListItemClicked(Element itemElement, Breakpoint itemData) {
-            breakpoints.getSelectionModel().setSelectedItem(itemData);
-          }
-
-          public void onListItemDoubleClicked(Element listItemBase, Breakpoint itemData) {}
-        };
-
-    return SimpleList.create(
-        (SimpleList.View) breakPointsElement,
-        coreRes.defaultSimpleListCss(),
-        new BreakpointItemRender(debuggerResources),
-        breakpointListEventDelegate);
-  }
-
-  private SimpleList<StackFrameDump> createFramesList() {
-    TableElement frameElement = Elements.createTableElement();
-    frameElement.setAttribute("style", "width: 100%");
-
-    SimpleList.ListEventDelegate<StackFrameDump> frameListEventDelegate =
-        new SimpleList.ListEventDelegate<StackFrameDump>() {
-          public void onListItemClicked(Element itemElement, StackFrameDump itemData) {
-            frames.getSelectionModel().setSelectedItem(itemData);
-            delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex());
-          }
-
-          public void onListItemDoubleClicked(Element listItemBase, StackFrameDump itemData) {}
-        };
-
-    return SimpleList.create(
-        (SimpleList.View) frameElement,
-        coreRes.defaultSimpleListCss(),
-        new FrameItemRender(),
-        frameListEventDelegate);
   }
 
   @Override
@@ -226,8 +189,33 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
       root = new MutableVariableImpl();
       this.variables.getModel().setRoot(root);
     }
-    root.setVariables(variables);
+    root.setValue(new SimpleValueImpl(variables, null));
     this.variables.renderTree(0);
+  }
+
+  @Override
+  public void setVariableValue(Variable variable, SimpleValue value) {
+    MutableVariableImpl nodeData = new MutableVariableImpl(variable);
+
+    TreeNodeElement<MutableVariable> node = variables.getNode(nodeData);
+    if (node != null) {
+      node.getData().setValue(value);
+
+      SpanElement element = variables.getModel().getNodeRenderer().renderNodeContents(nodeData);
+      node.getNodeLabel().setInnerHTML(element.getInnerHTML());
+
+      for (Variable nestedVariable : value.getVariables()) {
+        setVariableValue(nestedVariable, nestedVariable.getValue());
+      }
+
+      if (node.isOpen()) {
+        if (value.getVariables().isEmpty()) {
+          variables.closeNode(node);
+        } else {
+          variables.expandNode(node);
+        }
+      }
+    }
   }
 
   @Override
@@ -272,18 +260,6 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   }
 
   @Override
-  public void updateSelectedVariable() {
-    variables.closeNode(selectedVariable);
-    variables.expandNode(selectedVariable);
-  }
-
-  @Override
-  public void setVariablesIntoSelectedVariable(@NotNull List<? extends Variable> variables) {
-    MutableVariable rootVariable = selectedVariable.getData();
-    rootVariable.setVariables(variables);
-  }
-
-  @Override
   public MutableVariable getSelectedDebuggerVariable() {
     if (selectedVariable != null) {
       return selectedVariable.getData();
@@ -296,8 +272,60 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
     return toolbarPanel;
   }
 
+  @Override
+  public long getSelectedThreadId() {
+    String selectedValue = threads.getSelectedValue();
+    return selectedValue == null ? -1 : Integer.parseInt(selectedValue);
+  }
+
+  @Override
+  public int getSelectedFrameIndex() {
+    return frames.getSelectionModel().getSelectedIndex();
+  }
+
   @UiHandler({"threads"})
   void onThreadChanged(ChangeEvent event) {
     delegate.onSelectedThread(Integer.parseInt(threads.getSelectedValue()));
+  }
+
+  private SimpleList<Breakpoint> createBreakpointList() {
+    TableElement breakPointsElement = Elements.createTableElement();
+    breakPointsElement.setAttribute("style", "width: 100%");
+
+    SimpleList.ListEventDelegate<Breakpoint> breakpointListEventDelegate =
+        new SimpleList.ListEventDelegate<Breakpoint>() {
+          public void onListItemClicked(Element itemElement, Breakpoint itemData) {
+            breakpoints.getSelectionModel().setSelectedItem(itemData);
+          }
+
+          public void onListItemDoubleClicked(Element listItemBase, Breakpoint itemData) {}
+        };
+
+    return SimpleList.create(
+        (SimpleList.View) breakPointsElement,
+        coreRes.defaultSimpleListCss(),
+        new BreakpointItemRender(debuggerResources),
+        breakpointListEventDelegate);
+  }
+
+  private SimpleList<StackFrameDump> createFramesList() {
+    TableElement frameElement = Elements.createTableElement();
+    frameElement.setAttribute("style", "width: 100%");
+
+    SimpleList.ListEventDelegate<StackFrameDump> frameListEventDelegate =
+        new SimpleList.ListEventDelegate<StackFrameDump>() {
+          public void onListItemClicked(Element itemElement, StackFrameDump itemData) {
+            frames.getSelectionModel().setSelectedItem(itemData);
+            delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex());
+          }
+
+          public void onListItemDoubleClicked(Element listItemBase, StackFrameDump itemData) {}
+        };
+
+    return SimpleList.create(
+        (SimpleList.View) frameElement,
+        coreRes.defaultSimpleListCss(),
+        new FrameItemRender(),
+        frameListEventDelegate);
   }
 }

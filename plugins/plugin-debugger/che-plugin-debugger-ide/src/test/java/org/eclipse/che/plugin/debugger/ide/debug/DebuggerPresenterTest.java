@@ -33,6 +33,10 @@ import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
+import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
+import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -66,6 +70,8 @@ import org.mockito.Mockito;
  */
 public class DebuggerPresenterTest extends BaseTest {
   public static final String ERROR_MESSAGE = "error message";
+  private static final long THREAD_ID = 1;
+  private static final int FRAME_INDEX = 0;
 
   @Mock private DebuggerView view;
   @Mock private DebuggerLocalizationConstant constant;
@@ -165,7 +171,7 @@ public class DebuggerPresenterTest extends BaseTest {
 
   @Test
   public void testShowAndUpdateView() {
-    presenter.updateView();
+    presenter.refreshState();
     verify(view).setVMName(eq(""));
   }
 
@@ -279,17 +285,20 @@ public class DebuggerPresenterTest extends BaseTest {
 
     presenter.onBreakpointStopped(filePath, executionPoint);
 
-    verify(presenter).updateView();
+    verify(presenter).refreshState();
     verify(view).setExecutionPoint(any(Location.class));
   }
 
   @Test
   public void testOnValueChanged() {
-    doReturn(promiseString).when(debugger).getStackFrameDump(anyLong(), anyInt());
+    doReturn(promiseString).when(debugger).getStackFrameDump(THREAD_ID, FRAME_INDEX);
     doReturn(promiseString).when(promiseString).then((Operation<String>) any());
 
     ArrayList<String> path = new ArrayList<>();
     String newValue = "newValue";
-    presenter.onValueChanged(path, newValue);
+    presenter.onValueChanged(
+        new VariableImpl(new SimpleValueImpl(newValue), new VariablePathImpl(path)),
+        THREAD_ID,
+        FRAME_INDEX);
   }
 }

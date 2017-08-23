@@ -15,9 +15,11 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.mvp.View;
@@ -38,15 +40,7 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
      * Performs any actions appropriate in response to the user having pressed the expand button in
      * variables tree.
      */
-    void onExpandVariablesTree();
-
-    /**
-     * Performs any actions appropriate in response to the user having selected variable in*
-     * variables tree.
-     *
-     * @param variable variable that is selected
-     */
-    void onSelectedVariableElement(@NotNull MutableVariable variable);
+    void onExpandVariablesTree(MutableVariable variable);
 
     /** Is invoked when a new thread is selected. */
     void onSelectedThread(long threadId);
@@ -72,6 +66,9 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
    * @param variables available variables
    */
   void setVariables(@NotNull List<? extends Variable> variables);
+
+  /** Updates variable in the list */
+  void setVariableValue(@NotNull Variable variable, @NotNull SimpleValue value);
 
   /**
    * Sets breakpoints.
@@ -103,22 +100,11 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
    */
   void setTitle(@NotNull String title);
 
-  /** Update contents for selected variable. */
-  void updateSelectedVariable();
+  /** Returns selected thread id {@link ThreadDump#getId()} or -1 if there is no selection. */
+  long getSelectedThreadId();
 
-  /**
-   * Add elements into selected variable.
-   *
-   * @param variables variable what need to add into
-   */
-  void setVariablesIntoSelectedVariable(@NotNull List<? extends Variable> variables);
-
-  /**
-   * Sets whether this object is visible.
-   *
-   * @param visible <code>true</code> to show the tab, <code>false</code> to hide it
-   */
-  void setVisible(boolean visible);
+  /** Returns selected frame index inside thread or -1 if there is no selection. */
+  int getSelectedFrameIndex();
 
   /**
    * Returns selected variable in the variables list on debugger panel or null if no selection.

@@ -10,17 +10,10 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import javax.validation.constraints.NotNull;
+
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -74,6 +67,15 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
+
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * The common debugger.
@@ -646,7 +648,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public void setValue(final Variable variable, long threadId, int frameIndex) {
+  public void setValue(final Variable variable, final long threadId, final int frameIndex) {
     if (isConnected()) {
       Promise<Void> promise =
           service.setValue(debugSessionDto.getId(), toDto(variable), threadId, frameIndex);
@@ -655,8 +657,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
           .then(
               it -> {
                 for (DebuggerObserver observer : observers) {
-                  observer.onValueChanged(
-                      variable.getVariablePath().getPath(), variable.getValue().getString());
+                  observer.onValueChanged(variable, threadId, frameIndex);
                 }
               })
           .catchError(
