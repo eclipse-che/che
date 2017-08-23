@@ -719,37 +719,19 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   }
 
   @Override
-  public Promise<VcsChangeMarkerRender> getOrCreateVcsChangeMarkerRender() {
-    return Promises.create(
-        (resolve, reject) -> {
-          String vcsChangeMarker = "vcsChangeMarker";
-          OrionTextViewOverlay textView = editorWidget.getTextView();
-          java.util.Optional<OrionExtRulerOverlay> optional =
-              stream(textView.getRulers())
-                  .filter(ruler -> vcsChangeMarker.equals(ruler.getStyle().getStyleClass()))
-                  .findAny();
-          if (optional.isPresent()) {
-            resolve.apply(vcsChangeMarkerRender);
-          } else {
-            OrionStyleOverlay style = OrionStyleOverlay.create();
-            style.setStyleClass(vcsChangeMarker);
-            OrionExtRulerOverlay.create(
-                editorWidget.getEditor().getAnnotationModel(),
-                style,
-                OrionExtRulerOverlay.RulerLocation.LEFT.getLocation(),
-                OrionExtRulerOverlay.RulerOverview.PAGE.getOverview(),
-                orionExtRulerOverlay -> {
-                  textView.addRuler(orionExtRulerOverlay, textView.getRulers().length + 1);
-                  OrionVcsChangeMarkersRuler orionVcsChangeMarkersRuler =
-                      new OrionVcsChangeMarkersRuler(
-                          orionExtRulerOverlay, editorWidget.getEditor());
-
+  public VcsChangeMarkerRender getVcsChangeMarkersRender() {
+    OrionTextViewOverlay textView = editorWidget.getTextView();
+    if (vcsChangeMarkerRender == null) {
+      stream(textView.getRulers())
+          .filter(ruler -> "ruler folding".equals(ruler.getStyle().getStyleClass()))
+          .findAny()
+          .ifPresent(
+              ruler ->
                   vcsChangeMarkerRender =
-                      vcsChangeMarkerRenderFactory.create(orionVcsChangeMarkersRuler);
-                  resolve.apply(vcsChangeMarkerRender);
-                });
-          }
-        });
+                      vcsChangeMarkerRenderFactory.create(
+                          new OrionVcsChangeMarkersRuler(ruler, editorWidget.getEditor())));
+    }
+    return vcsChangeMarkerRender;
   }
 
   @Override

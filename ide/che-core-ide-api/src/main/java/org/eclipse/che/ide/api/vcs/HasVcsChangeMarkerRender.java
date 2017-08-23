@@ -10,11 +10,9 @@
  */
 package org.eclipse.che.ide.api.vcs;
 
-import org.eclipse.che.api.promises.client.Promise;
-
 /** Indicates that the editor can handle VCS change markers. */
 public interface HasVcsChangeMarkerRender {
 
-  /** Returns new, or created instance (if was created earlier) of {@link VcsChangeMarkerRender}. */
-  Promise<VcsChangeMarkerRender> getOrCreateVcsChangeMarkerRender();
+  /** Returns an instance of {@link VcsChangeMarkerRender}. */
+  VcsChangeMarkerRender getVcsChangeMarkersRender();
 }

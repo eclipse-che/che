@@ -45,6 +45,8 @@ public class GitIndexChangedDetector {
 
   private static final String GIT_DIR = ".git";
   private static final String INDEX_FILE = "index";
+  private static final String COMMIT_MESSAGE_FILE = "COMMIT_EDITMSG";
+  private static final String ORIG_HEAD_FILE = "ORIG_HEAD";
   private static final String INCOMING_METHOD = "track/git-index";
   private static final String OUTGOING_METHOD = "event/git-index";
 
@@ -89,7 +91,9 @@ public class GitIndexChangedDetector {
   private PathMatcher matcher() {
     return it ->
         !isDirectory(it)
-            && INDEX_FILE.equals(it.getFileName().toString())
+            && (INDEX_FILE.equals(it.getFileName().toString())
+                || COMMIT_MESSAGE_FILE.equals(it.getFileName().toString())
+                || ORIG_HEAD_FILE.equals(it.getFileName().toString()))
             && GIT_DIR.equals(it.getParent().getFileName().toString());
   }
 
