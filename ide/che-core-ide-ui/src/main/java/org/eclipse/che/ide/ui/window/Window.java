@@ -158,7 +158,8 @@ public abstract class Window implements IsWidget {
     return createButton(title, debugId, clickHandler, ButtonAlignment.RIGHT);
   }
 
-  protected Button createButton(String title, String debugId, ClickHandler clickHandler, ButtonAlignment alignment) {
+  protected Button createButton(
+      String title, String debugId, ClickHandler clickHandler, ButtonAlignment alignment) {
     Button button = new Button();
     button.setText(title);
     button.ensureDebugId(debugId);
@@ -175,7 +176,8 @@ public abstract class Window implements IsWidget {
     return createPrimaryButton(title, debugId, clickHandler, ButtonAlignment.RIGHT);
   }
 
-  protected Button createPrimaryButton(String title, String debugId, ClickHandler clickHandler, ButtonAlignment alignment) {
+  protected Button createPrimaryButton(
+      String title, String debugId, ClickHandler clickHandler, ButtonAlignment alignment) {
     Button button = createButton(title, debugId, clickHandler);
     button.addStyleName(resources.windowCss().primaryButton());
     addButtonAlignment(button, alignment);
