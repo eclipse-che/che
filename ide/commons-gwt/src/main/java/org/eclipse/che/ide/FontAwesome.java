@@ -60,10 +60,16 @@ public class FontAwesome {
   public static final String MINUS = "<i class=\"fa fa-minus-circle\"></i>";
 
   /** http://fortawesome.github.io/Font-Awesome/icon/plus-circle/ */
-  public static final String PLUS = "<i class=\"fa fa-plus-circle\"></i>";
+  public static final String PLUS_CIRCLE = "<i class=\"fa fa-plus-circle\"></i>";
+
+  /** http://fortawesome.github.io/Font-Awesome/icon/plus/ */
+  public static final String PLUS = "<i class=\"fa fa-plus\"></i>";
 
   /** http://fortawesome.github.io/Font-Awesome/icon/refresh/ */
   public static final String REFRESH = "<i class=\"fa fa-refresh\"></i>";
+
+  /** http://fortawesome.github.io/Font-Awesome/icon/retweet/ */
+  public static final String RETWEET = "<i class=\"fa fa-retweet\" aria-hidden=\"true\"></i>";
 
   /** http://fortawesome.github.io/Font-Awesome/icon/exchange/ */
   public static final String EXCHANGE = "<i class=\"fa fa-exchange\"></i>";
@@ -118,4 +124,5 @@ public class FontAwesome {
 
   /** http://fontawesome.io/icon/arrow-down/ */
   public static final String ARROW_DOWN = "<i class=\"fa fa-arrow-down\"></i>";
+
 }

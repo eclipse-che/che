@@ -12,7 +12,6 @@ package org.eclipse.che.ide.processes.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.action.*;
@@ -24,17 +23,13 @@ import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_SSH_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
-import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
- * Console tree context menu.
+ * Menu for adding new tab in processes panel.
  *
  * @author Vitaliy Guliy
  */
@@ -90,13 +85,14 @@ public class AddTabMenu extends ContextMenu {
         AddSSHMenuAction addSSHMenuAction = new AddSSHMenuAction(machine.getName());
         actionGroup.add(addSSHMenuAction);
       }
-
     }
 
     return actionGroup;
   }
 
-
+  /**
+   * Action to add new Terminal tab.
+   */
   public class NewTerminalMenuAction extends Action {
 
     private String machineName;
@@ -119,6 +115,9 @@ public class AddTabMenu extends ContextMenu {
     
   }
 
+  /**
+   * Action to add new SSH tab.
+   */
   public class AddSSHMenuAction extends Action {
 
     private String machineName;

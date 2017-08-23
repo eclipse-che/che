@@ -18,6 +18,7 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.inject.Singleton;
+import org.eclipse.che.ide.processes.actions.AddTabMenuFactory;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenuFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelView;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelViewImpl;
@@ -28,6 +29,7 @@ public class ProcessesGinModule extends AbstractGinModule {
   protected void configure() {
     bind(ProcessesPanelView.class).to(ProcessesPanelViewImpl.class).in(Singleton.class);
     install(new GinFactoryModuleBuilder().build(ConsoleTreeContextMenuFactory.class));
+    install(new GinFactoryModuleBuilder().build(AddTabMenuFactory.class));
 
     GinMapBinder.newMapBinder(binder(), String.class, ProcessTreeNodeRenderStrategy.class)
         .addBinding(COMMAND_NODE.getStringValue())

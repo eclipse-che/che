@@ -70,13 +70,14 @@
 }
 
 .popupMenuTextDelimiter {
-    background: editorPanelBackgroundColor;
+    background: mainMenuDelimiterBackground;
+    font-weight: bold;
 }
 
 .popupMenuTextDelimiter > div {
     display: inline-block;
     line-height: 20px;
-    margin-left: 14px;
+    margin-left: 5px;
     margin-bottom: 0;
 }
 

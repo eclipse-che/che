@@ -12,7 +12,9 @@ package org.eclipse.che.ide.ui.multisplitpanel.panel;
 
 import static com.google.gwt.user.client.ui.DockLayoutPanel.Direction.CENTER;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -117,11 +119,39 @@ public class SubPanelViewImpl extends Composite
     menuPanel.add(menu);
 
     plusPanel.getElement().setInnerHTML(FontAwesome.PLUS);
+    plusPanel.addDomHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        delegate.onAddTabButtonClicked(
+            getAbsoluteLeft(plusPanel.getElement()) + 15,
+            getAbsoluteTop(plusPanel.getElement()) + 15);
+      }
+    }, ClickEvent.getType());
 
     widgetsPanel.ensureDebugId("process-output-panel-holder");
     widgetsPanel.addDomHandler(
         event -> delegate.onWidgetFocused(widgetsPanel.getVisibleWidget()), ClickEvent.getType());
   }
+
+  /**
+   * Returns absolute left position of the element.
+   *
+   * @param element element
+   * @return element left position
+   */
+  private native int getAbsoluteLeft(JavaScriptObject element) /*-{
+      return element.getBoundingClientRect().left;
+  }-*/;
+
+  /**
+   * Returns absolute top position of the element.
+   *
+   * @param element element
+   * @return element top position
+   */
+  private native int getAbsoluteTop(JavaScriptObject element) /*-{
+      return element.getBoundingClientRect().top;
+  }-*/;
 
   @Override
   public void setDelegate(ActionDelegate delegate) {
@@ -361,92 +391,91 @@ public class SubPanelViewImpl extends Composite
     ensureActiveTabVisibleTimer.schedule(200);
   }
 
-    /**
-     * Timer to prevent updating tabs visibility while resizing.
-     * It needs to update tabs once when resizing has stopped.
-     */
-    private Timer ensureActiveTabVisibleTimer = new Timer() {
-        @Override
-        public void run() {
-            ensureActiveTabVisible();
-        }
-    };
+  /**
+   * Timer to prevent updating tabs visibility while resizing.
+   * It needs to update tabs once when resizing has stopped.
+   */
+  private Timer ensureActiveTabVisibleTimer = new Timer() {
+    @Override
+    public void run() {
+      ensureActiveTabVisible();
+    }
+  };
 
-    /**
-     * Ensures active tab and plus button are visible
-     */
-    private void ensureActiveTabVisible() {
-        // do nothing if selected tab is null
-        if (selectedTab == null) {
-            return;
-        }
-
-        // do nothing if selected tab is visible and plus button is visible
-        if (selectedTab.asWidget().getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop() &&
-                plusPanel.getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop() &&
-                tabsPanelWidth == tabsPanel.getOffsetWidth()) {
-            return;
-        }
-
-        tabsPanelWidth = tabsPanel.getOffsetWidth();
-
-        // hide all widgets except plus button
-        for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
-            Widget w = tabsPanel.getWidget(i);
-            if (plusPanel == w) {
-                continue;
-            }
-
-            w.setVisible(false);
-        }
-
-        // determine selected tab index
-        int selectedTabIndex = tabsPanel.getWidgetIndex(selectedTab.asWidget());
-
-        // show all possible tabs before selected tab
-        for (int i = selectedTabIndex; i >= 0; i--) {
-            Widget w = tabsPanel.getWidget(i);
-
-            // skip for plus button
-            if (plusPanel == w) {
-                continue;
-            }
-
-            // set tab visible
-            w.setVisible(true);
-
-            // continue cycle if plus button visible
-            if (plusPanel.getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop()) {
-                continue;
-            }
-
-            // otherwise hide tab and break
-            w.setVisible(false);
-            break;
-        }
-
-        // show all possible tabs after selected tab
-        for (int i = selectedTabIndex + 1; i < tabsPanel.getWidgetCount(); i++) {
-            Widget w = tabsPanel.getWidget(i);
-
-            // skip for plus button
-            if (plusPanel == w) {
-                continue;
-            }
-
-            // set tab visible
-            w.setVisible(true);
-
-            // continue cycle if plus button visible
-            if (plusPanel.getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop()) {
-                continue;
-            }
-
-            // otherwise hide tab and break
-            w.setVisible(false);
-            break;
-        }
+  /**
+   * Ensures active tab and plus button are visible
+   */
+  private void ensureActiveTabVisible() {
+    // do nothing if selected tab is null
+    if (selectedTab == null) {
+      return;
     }
 
-}
+    // do nothing if selected tab is visible and plus button is visible
+    if (selectedTab.asWidget().getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop() &&
+        plusPanel.getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop() &&
+        tabsPanelWidth == tabsPanel.getOffsetWidth()) {
+      return;
+    }
 
+    tabsPanelWidth = tabsPanel.getOffsetWidth();
+
+    // hide all widgets except plus button
+    for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
+      Widget w = tabsPanel.getWidget(i);
+      if (plusPanel == w) {
+        continue;
+      }
+
+      w.setVisible(false);
+    }
+
+    // determine selected tab index
+    int selectedTabIndex = tabsPanel.getWidgetIndex(selectedTab.asWidget());
+
+    // show all possible tabs before selected tab
+    for (int i = selectedTabIndex; i >= 0; i--) {
+      Widget w = tabsPanel.getWidget(i);
+
+      // skip for plus button
+      if (plusPanel == w) {
+        continue;
+      }
+
+      // set tab visible
+      w.setVisible(true);
+
+      // continue cycle if plus button visible
+      if (plusPanel.getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop()) {
+        continue;
+      }
+
+      // otherwise hide tab and break
+      w.setVisible(false);
+      break;
+    }
+
+    // show all possible tabs after selected tab
+    for (int i = selectedTabIndex + 1; i < tabsPanel.getWidgetCount(); i++) {
+      Widget w = tabsPanel.getWidget(i);
+
+      // skip for plus button
+      if (plusPanel == w) {
+        continue;
+      }
+
+      // set tab visible
+      w.setVisible(true);
+
+      // continue cycle if plus button visible
+      if (plusPanel.getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop()) {
+        continue;
+      }
+
+      // otherwise hide tab and break
+      w.setVisible(false);
+      break;
+    }
+  }
+
+}

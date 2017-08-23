@@ -50,8 +50,8 @@ public class ToolbarControllerViewImpl extends Composite implements ToolbarContr
    * @return element left position
    */
   private native int getAbsoluteLeft(JavaScriptObject element) /*-{
-        return element.getBoundingClientRect().left;
-    }-*/;
+    return element.getBoundingClientRect().left;
+  }-*/;
 
   /**
    * Returns absolute top position of the element.
@@ -60,8 +60,8 @@ public class ToolbarControllerViewImpl extends Composite implements ToolbarContr
    * @return element top position
    */
   private native int getAbsoluteTop(JavaScriptObject element) /*-{
-        return element.getBoundingClientRect().top;
-    }-*/;
+    return element.getBoundingClientRect().top;
+  }-*/;
 
   @Override
   public void setDelegate(ActionDelegate delegate) {
