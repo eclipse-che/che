@@ -35,6 +35,7 @@
         <module>dashboard</module>
         <module>assembly</module>
         <module>assembly-multiuser</module>
+        <module>selenium</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
@@ -1285,6 +1286,7 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
+<<<<<<< HEAD
                 <groupId>org.keycloak</groupId>
                 <artifactId>keycloak-common</artifactId>
                 <version>${org.keycloak.version}</version>
@@ -1293,6 +1295,16 @@
                 <groupId>org.keycloak</groupId>
                 <artifactId>keycloak-core</artifactId>
                 <version>${org.keycloak.version}</version>
+=======
+                <groupId>org.eclipse.che.selenium</groupId>
+                <artifactId>che-selenium-core</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.selenium</groupId>
+                <artifactId>che-selenium-test</artifactId>
+                <version>${che.version}</version>
+>>>>>>> master
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
