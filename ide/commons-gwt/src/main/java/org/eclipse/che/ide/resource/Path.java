@@ -1177,13 +1177,9 @@ public final class Path {
     return commonPath;
   }
 
-  /** Returns path encoded by segments. */
+  /** Returns path encoded by segments without device. */
   public String getEncodedPath() {
     StringBuilder encodedPath = new StringBuilder();
-
-    if (device != null) {
-      encodedPath.append(device);
-    }
 
     if (hasLeadingSeparator()) {
       encodedPath.append(SEPARATOR);
@@ -1194,7 +1190,7 @@ public final class Path {
       encodedPath.append(SEPARATOR);
     }
 
-    if (!isEmpty() && !hasTrailingSeparator()) {
+    if (!isEmpty() && !isRoot() && !hasTrailingSeparator()) {
       encodedPath.deleteCharAt(encodedPath.length() - 1);
     }
 

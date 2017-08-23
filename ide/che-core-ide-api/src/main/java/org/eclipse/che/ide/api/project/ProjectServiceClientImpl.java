@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.project;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
 import static com.google.gwt.http.client.RequestBuilder.PUT;
-import static com.google.gwt.http.client.URL.encodeQueryString;
+import static com.google.gwt.http.client.URL.encodePathSegment;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
@@ -209,7 +209,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
             + FILE
             + path.parent().getEncodedPath()
             + "?name="
-            + encodeQueryString(path.lastSegment());
+            + encodePathSegment(path.lastSegment());
 
     return reqFactory
         .createPostRequest(url, null)
@@ -294,7 +294,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     final String url =
         getBaseUrl()
             + TREE
-            + path.getEncodedPath()
+            + path.addLeadingSeparator().getEncodedPath()
             + "?depth="
             + depth
             + "&includeFiles="
