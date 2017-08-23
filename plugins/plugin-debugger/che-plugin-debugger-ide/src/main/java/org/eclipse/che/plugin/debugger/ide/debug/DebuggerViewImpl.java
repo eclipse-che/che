@@ -34,7 +34,7 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.impl.MutableVariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
@@ -224,23 +224,23 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   }
 
   @Override
-  public void setThreads(List<? extends ThreadDump> threadDumps, long threadIdToSelect) {
+  public void setThreadDump(List<? extends ThreadState> threadDump, long threadIdToSelect) {
     threads.clear();
 
-    for (int i = 0; i < threadDumps.size(); i++) {
-      ThreadDump td = threadDumps.get(i);
+    for (int i = 0; i < threadDump.size(); i++) {
+      ThreadState ts = threadDump.get(i);
       String item =
           "\""
-              + td.getName()
+              + ts.getName()
               + "\"@"
-              + td.getId()
+              + ts.getId()
               + " in group \""
-              + td.getGroupName()
+              + ts.getGroupName()
               + "\": "
-              + td.getStatus();
-      threads.addItem(item, String.valueOf(td.getId()));
+              + ts.getStatus();
+      threads.addItem(item, String.valueOf(ts.getId()));
 
-      if (td.getId() == threadIdToSelect) {
+      if (ts.getId() == threadIdToSelect) {
         threads.setSelectedIndex(i);
       }
     }

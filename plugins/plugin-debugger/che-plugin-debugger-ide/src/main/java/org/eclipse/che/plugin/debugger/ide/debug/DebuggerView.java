@@ -17,9 +17,8 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
-import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.mvp.View;
@@ -78,10 +77,10 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
   void setBreakpoints(@NotNull List<Breakpoint> breakPoints);
 
   /**
-   * Sets the list of the threads and select the one with {@link ThreadDump#getId()} equal to {@code
+   * Sets thread dump and select the thread with {@link ThreadState#getId()} equal to {@code
    * activeThreadId}.
    */
-  void setThreads(@NotNull List<? extends ThreadDump> threadDumps, long threadIdToSelect);
+  void setThreadDump(@NotNull List<? extends ThreadState> threadDump, long threadIdToSelect);
 
   /** Sets the list of frames for selected thread. */
   void setFrames(@NotNull List<? extends StackFrameDump> stackFrameDumps);
@@ -100,7 +99,7 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
    */
   void setTitle(@NotNull String title);
 
-  /** Returns selected thread id {@link ThreadDump#getId()} or -1 if there is no selection. */
+  /** Returns selected thread id {@link ThreadState#getId()} or -1 if there is no selection. */
   long getSelectedThreadId();
 
   /** Returns selected frame index inside thread or -1 if there is no selection. */

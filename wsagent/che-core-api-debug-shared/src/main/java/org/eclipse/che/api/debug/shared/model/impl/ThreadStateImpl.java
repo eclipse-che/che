@@ -13,11 +13,11 @@ package org.eclipse.che.api.debug.shared.model.impl;
 import com.google.common.base.Objects;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 
 /** @author Anatolii Bazko */
-public class ThreadDumpImpl implements ThreadDump {
+public class ThreadStateImpl implements ThreadState {
   private final String name;
   private final String groupName;
   private final ThreadStatus status;
@@ -25,7 +25,7 @@ public class ThreadDumpImpl implements ThreadDump {
   private final List<? extends StackFrameDump> frames;
   private final long id;
 
-  public ThreadDumpImpl(
+  public ThreadStateImpl(
       long id,
       String name,
       String groupName,
@@ -73,8 +73,8 @@ public class ThreadDumpImpl implements ThreadDump {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof ThreadDumpImpl)) return false;
-    ThreadDumpImpl that = (ThreadDumpImpl) o;
+    if (!(o instanceof ThreadStateImpl)) return false;
+    ThreadStateImpl that = (ThreadStateImpl) o;
     return isSuspended == that.isSuspended
         && id == that.id
         && Objects.equal(name, that.name)

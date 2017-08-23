@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
 import org.eclipse.che.api.debugger.server.DtoConverter;
@@ -54,10 +54,10 @@ public class ThreadDumpTest2 {
 
   @Test
   public void shouldGetThreadDump() throws Exception {
-    List<ThreadDumpDto> threads =
-        debugger.getThreadDumps().stream().map(DtoConverter::asDto).collect(toList());
+    List<ThreadStateDto> threads =
+        debugger.getThreadDump().stream().map(DtoConverter::asDto).collect(toList());
 
-    for (ThreadDump t : threads) {
+    for (ThreadState t : threads) {
       assertFalse(t.isSuspended());
       assertTrue(t.getFrames().isEmpty());
     }

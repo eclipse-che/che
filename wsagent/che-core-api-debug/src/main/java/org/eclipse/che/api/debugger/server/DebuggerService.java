@@ -36,11 +36,11 @@ import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
-import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ActionDto;
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
 import org.eclipse.che.api.debug.shared.model.action.StartAction;
@@ -190,10 +190,10 @@ public class DebuggerService {
   @GET
   @Path("{id}/threaddump")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<ThreadDumpDto> getThreadDumps(@PathParam("id") String sessionId)
+  public List<ThreadStateDto> getThreadDump(@PathParam("id") String sessionId)
       throws DebuggerException {
-    List<ThreadDump> threadDumps = debuggerManager.getDebugger(sessionId).getThreadDumps();
-    return threadDumps.stream().map(DtoConverter::asDto).collect(Collectors.toList());
+    List<ThreadState> threadStates = debuggerManager.getDebugger(sessionId).getThreadDump();
+    return threadStates.stream().map(DtoConverter::asDto).collect(Collectors.toList());
   }
 
   @GET

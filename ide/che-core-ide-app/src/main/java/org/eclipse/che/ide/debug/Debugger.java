@@ -12,10 +12,10 @@ package org.eclipse.che.ide.debug;
 
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -81,7 +81,7 @@ public interface Debugger extends DebuggerObservable {
   /**
    * Evaluates the given expression inside a specific frame.
    *
-   * @param threadId the unique thread id {@link ThreadDump#getId()}
+   * @param threadId the unique thread id {@link ThreadState#getId()}
    * @param frameIndex the frame index inside the thread
    */
   Promise<String> evaluate(String expression, long threadId, int frameIndex);
@@ -90,7 +90,7 @@ public interface Debugger extends DebuggerObservable {
    * Gets the value of the given variable inside a specific frame.
    *
    * @param variable the variable to get value from
-   * @param threadId the unique thread id {@link ThreadDump#getId()}
+   * @param threadId the unique thread id {@link ThreadState#getId()}
    * @param frameIndex the frame index inside the thread
    */
   Promise<? extends SimpleValue> getValue(Variable variable, long threadId, int frameIndex);
@@ -98,19 +98,19 @@ public interface Debugger extends DebuggerObservable {
   /**
    * Gets a stack frame dump.
    *
-   * @param threadId the unique thread id {@link ThreadDump#getId()}
+   * @param threadId the unique thread id {@link ThreadState#getId()}
    * @param frameIndex the frame index inside the thread
    */
   Promise<? extends StackFrameDump> getStackFrameDump(long threadId, int frameIndex);
 
   /** Gets thread dump. */
-  Promise<List<ThreadDumpDto>> getThreadDump();
+  Promise<List<ThreadStateDto>> getThreadDump();
 
   /**
    * Sets a new value in the variable inside a specific frame.
    *
    * @param variable the variable to update
-   * @param threadId the unique thread id {@link ThreadDump#getId()}
+   * @param threadId the unique thread id {@link ThreadState#getId()}
    * @param frameIndex the frame index inside the thread
    */
   void setValue(Variable variable, long threadId, int frameIndex);

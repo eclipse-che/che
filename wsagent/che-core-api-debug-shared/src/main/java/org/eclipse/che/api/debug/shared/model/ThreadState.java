@@ -14,7 +14,7 @@ import java.util.List;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author Anatoliy Bazko */
-public interface ThreadDump {
+public interface ThreadState {
 
   /** Returns thread name. */
   String getName();
@@ -29,7 +29,7 @@ public interface ThreadDump {
   /** Returns list of frames of the thread. */
   List<? extends StackFrameDump> getFrames();
 
-  /** Returns thread state. */
+  /** Returns thread status. */
   ThreadStatus getStatus();
 
   /** Indicates if thread is suspended. */

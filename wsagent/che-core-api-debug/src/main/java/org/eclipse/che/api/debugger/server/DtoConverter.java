@@ -23,7 +23,7 @@ import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.MethodDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
-import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
@@ -38,7 +38,7 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Method;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
@@ -184,16 +184,16 @@ public final class DtoConverter {
     }
   }
 
-  public static ThreadDumpDto asDto(ThreadDump threadDump) {
+  public static ThreadStateDto asDto(ThreadState threadState) {
     List<StackFrameDumpDto> threads =
-        threadDump.getFrames().stream().map(DtoConverter::asDto).collect(toList());
+        threadState.getFrames().stream().map(DtoConverter::asDto).collect(toList());
 
-    return newDto(ThreadDumpDto.class)
-        .withId(threadDump.getId())
-        .withName(threadDump.getName())
-        .withGroupName(threadDump.getGroupName())
-        .withSuspended(threadDump.isSuspended())
-        .withStatus(threadDump.getStatus())
+    return newDto(ThreadStateDto.class)
+        .withId(threadState.getId())
+        .withName(threadState.getName())
+        .withGroupName(threadState.getGroupName())
+        .withSuspended(threadState.isSuspended())
+        .withStatus(threadState.getStatus())
         .withFrames(threads);
   }
 

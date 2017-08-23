@@ -11,53 +11,53 @@
 package org.eclipse.che.api.debug.shared.dto;
 
 import java.util.List;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author Anatolii Bazko */
 @DTO
-public interface ThreadDumpDto extends ThreadDump {
+public interface ThreadStateDto extends ThreadState {
 
   @Override
   long getId();
 
   void setId(long id);
 
-  ThreadDumpDto withId(long id);
+  ThreadStateDto withId(long id);
 
   @Override
   String getName();
 
   void setName(String name);
 
-  ThreadDumpDto withName(String name);
+  ThreadStateDto withName(String name);
 
   @Override
   String getGroupName();
 
   void setGroupName(String groupName);
 
-  ThreadDumpDto withGroupName(String groupName);
+  ThreadStateDto withGroupName(String groupName);
 
   @Override
   List<StackFrameDumpDto> getFrames();
 
   void setFrames(List<StackFrameDumpDto> frames);
 
-  ThreadDumpDto withFrames(List<StackFrameDumpDto> frames);
+  ThreadStateDto withFrames(List<StackFrameDumpDto> frames);
 
   @Override
   ThreadStatus getStatus();
 
   void setStatus(ThreadStatus status);
 
-  ThreadDumpDto withStatus(ThreadStatus status);
+  ThreadStateDto withStatus(ThreadStatus status);
 
   @Override
   boolean isSuspended();
 
   void setSuspended(boolean suspended);
 
-  ThreadDumpDto withSuspended(boolean suspended);
+  ThreadStateDto withSuspended(boolean suspended);
 }

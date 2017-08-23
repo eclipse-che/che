@@ -53,7 +53,7 @@ import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
@@ -64,7 +64,7 @@ import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
-import org.eclipse.che.api.debug.shared.model.impl.ThreadDumpImpl;
+import org.eclipse.che.api.debug.shared.model.impl.ThreadStateImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
@@ -384,8 +384,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
   }
 
   @Override
-  public List<ThreadDump> getThreadDumps() throws DebuggerException {
-    List<ThreadDump> threadDumps = new LinkedList<>();
+  public List<ThreadState> getThreadDump() throws DebuggerException {
+    List<ThreadState> threadStates = new LinkedList<>();
 
     for (ThreadReference t : vm.allThreads()) {
       List<JdbStackFrame> frames = new LinkedList<>();
@@ -398,8 +398,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
         // Thread isn't suspended. Information isn't available.
       }
 
-      threadDumps.add(
-          new ThreadDumpImpl(
+      threadStates.add(
+          new ThreadStateImpl(
               t.uniqueID(),
               t.name(),
               t.threadGroup().name(),
@@ -408,7 +408,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
               frames));
     }
 
-    return threadDumps;
+    return threadStates;
   }
   /**
    * Get value of variable with specified path. Each item in path is name of variable.

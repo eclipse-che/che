@@ -17,7 +17,7 @@ import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
@@ -235,12 +235,12 @@ public interface Debugger {
   }
 
   /**
-   * Gets thread dumps.
+   * Gets a thread dump.
    *
-   * @return {@link ThreadDump}
+   * @return snapshot of the state of all threads
    * @throws DebuggerException if any error occur
    */
-  default List<ThreadDump> getThreadDumps() throws DebuggerException {
+  default List<ThreadState> getThreadDump() throws DebuggerException {
     return Collections.emptyList();
   }
 

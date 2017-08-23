@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
@@ -62,11 +62,11 @@ public class EvaluateExpressionTest1 {
   @Test(dataProvider = "evaluateExpression")
   public void shouldEvaluateExpression(String expression, String expectedResult, int frameIndex)
       throws Exception {
-    Optional<ThreadDump> main =
-        debugger.getThreadDumps().stream().filter(t -> t.getName().equals("main")).findAny();
+    Optional<ThreadState> main =
+        debugger.getThreadDump().stream().filter(t -> t.getName().equals("main")).findAny();
     assertTrue(main.isPresent());
 
-    ThreadDump mainThread = main.get();
+    ThreadState mainThread = main.get();
 
     String actualResult = debugger.evaluate(expression, mainThread.getId(), frameIndex);
     assertEquals(actualResult, expectedResult);

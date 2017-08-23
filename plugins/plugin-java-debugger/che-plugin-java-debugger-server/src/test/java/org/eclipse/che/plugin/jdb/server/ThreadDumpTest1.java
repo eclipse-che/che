@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Method;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
@@ -66,26 +66,26 @@ public class ThreadDumpTest1 {
 
   @Test
   public void shouldGetThreadDump() throws Exception {
-    List<ThreadDumpDto> threads =
-        debugger.getThreadDumps().stream().map(DtoConverter::asDto).collect(toList());
+    List<ThreadStateDto> threads =
+        debugger.getThreadDump().stream().map(DtoConverter::asDto).collect(toList());
 
     validateMainThreadDump(threads);
     validateSomeThreadDump(threads);
     validateFinalizerThreadDump(threads);
   }
 
-  private void validateMainThreadDump(List<ThreadDumpDto> threads) {
-    Optional<ThreadDumpDto> mainThread =
+  private void validateMainThreadDump(List<ThreadStateDto> threads) {
+    Optional<ThreadStateDto> mainThread =
         threads.stream().filter(t -> t.getName().equals("main")).findAny();
     assertTrue(mainThread.isPresent());
 
-    ThreadDump threadDump = mainThread.get();
-    assertEquals(threadDump.getName(), "main");
-    assertEquals(threadDump.getGroupName(), "main");
-    assertTrue(threadDump.isSuspended());
-    assertEquals(threadDump.getStatus(), ThreadStatus.RUNNING);
+    ThreadState threadState = mainThread.get();
+    assertEquals(threadState.getName(), "main");
+    assertEquals(threadState.getGroupName(), "main");
+    assertTrue(threadState.isSuspended());
+    assertEquals(threadState.getStatus(), ThreadStatus.RUNNING);
 
-    List<? extends StackFrameDump> frames = threadDump.getFrames();
+    List<? extends StackFrameDump> frames = threadState.getFrames();
     assertEquals(frames.size(), 1);
 
     StackFrameDump stackFrameDump = frames.get(0);
@@ -103,18 +103,18 @@ public class ThreadDumpTest1 {
     assertEquals(method.getName(), "main");
   }
 
-  private void validateFinalizerThreadDump(List<ThreadDumpDto> threads) {
-    Optional<ThreadDumpDto> finalizerThread =
+  private void validateFinalizerThreadDump(List<ThreadStateDto> threads) {
+    Optional<ThreadStateDto> finalizerThread =
         threads.stream().filter(t -> t.getName().equals("Finalizer")).findAny();
     assertTrue(finalizerThread.isPresent());
 
-    ThreadDump threadDump = finalizerThread.get();
-    assertEquals(threadDump.getName(), "Finalizer");
-    assertEquals(threadDump.getGroupName(), "system");
-    assertTrue(threadDump.isSuspended());
-    assertEquals(threadDump.getStatus(), ThreadStatus.WAIT);
+    ThreadState threadState = finalizerThread.get();
+    assertEquals(threadState.getName(), "Finalizer");
+    assertEquals(threadState.getGroupName(), "system");
+    assertTrue(threadState.isSuspended());
+    assertEquals(threadState.getStatus(), ThreadStatus.WAIT);
 
-    List<? extends StackFrameDump> frames = threadDump.getFrames();
+    List<? extends StackFrameDump> frames = threadState.getFrames();
     assertEquals(frames.size(), 4);
 
     StackFrameDump stackFrameDump = frames.get(0);
@@ -132,18 +132,18 @@ public class ThreadDumpTest1 {
     assertTrue(method.getArguments().isEmpty());
   }
 
-  private void validateSomeThreadDump(List<ThreadDumpDto> threads) {
-    Optional<ThreadDumpDto> someThread =
+  private void validateSomeThreadDump(List<ThreadStateDto> threads) {
+    Optional<ThreadStateDto> someThread =
         threads.stream().filter(t -> t.getName().equals("SomeThread")).findAny();
     assertTrue(someThread.isPresent());
 
-    ThreadDump threadDump = someThread.get();
-    assertEquals(threadDump.getName(), "SomeThread");
-    assertEquals(threadDump.getGroupName(), "main");
-    assertTrue(threadDump.isSuspended());
-    assertEquals(threadDump.getStatus(), ThreadStatus.RUNNING);
+    ThreadState threadState = someThread.get();
+    assertEquals(threadState.getName(), "SomeThread");
+    assertEquals(threadState.getGroupName(), "main");
+    assertTrue(threadState.isSuspended());
+    assertEquals(threadState.getStatus(), ThreadStatus.RUNNING);
 
-    List<? extends StackFrameDump> frames = threadDump.getFrames();
+    List<? extends StackFrameDump> frames = threadState.getFrames();
     assertEquals(frames.size(), 1);
 
     StackFrameDump stackFrameDump = frames.get(0);

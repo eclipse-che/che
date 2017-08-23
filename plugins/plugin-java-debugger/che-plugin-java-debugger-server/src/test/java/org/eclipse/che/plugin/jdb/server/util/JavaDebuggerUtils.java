@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
@@ -89,8 +89,8 @@ public class JavaDebuggerUtils {
    * @see ThreadReference#uniqueID()
    */
   public static long findMainThreadId(JavaDebugger javaDebugger) throws DebuggerException {
-    Optional<ThreadDump> main =
-        javaDebugger.getThreadDumps().stream().filter(t -> t.getName().equals("main")).findAny();
+    Optional<ThreadState> main =
+        javaDebugger.getThreadDump().stream().filter(t -> t.getName().equals("main")).findAny();
     main.orElseThrow(() -> new DebuggerException("Main thread not found"));
     return main.get().getId();
   }

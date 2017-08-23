@@ -21,7 +21,7 @@ import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
-import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
@@ -332,7 +332,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public Promise<List<ThreadDumpDto>> getThreadDump() {
+  public Promise<List<ThreadStateDto>> getThreadDump() {
     if (!isConnected()) {
       return Promises.reject(JsPromiseError.create("Debugger is not connected"));
     }

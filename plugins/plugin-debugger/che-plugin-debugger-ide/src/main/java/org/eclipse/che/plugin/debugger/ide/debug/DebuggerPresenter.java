@@ -30,7 +30,7 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -79,10 +79,10 @@ public class DebuggerPresenter extends BasePresenter
   private final WorkspaceAgent workspaceAgent;
   private final DebuggerResourceHandlerFactory resourceHandlerManager;
 
-  private List<Variable> variables;
-  private List<? extends ThreadDump> threadDump;
-  private Location executionPoint;
-  private DebuggerDescriptor debuggerDescriptor;
+  private List<Variable>              variables;
+  private List<? extends ThreadState> threadDump;
+  private Location                    executionPoint;
+  private DebuggerDescriptor          debuggerDescriptor;
 
   @Inject
   public DebuggerPresenter(
@@ -175,9 +175,9 @@ public class DebuggerPresenter extends BasePresenter
     long selectedThreadId = view.getSelectedThreadId();
     updateVariables(selectedThreadId, frameIndex);
 
-    for (ThreadDump td : threadDump) {
-      if (td.getId() == selectedThreadId) {
-        StackFrameDump stackFrameDump = td.getFrames().get(frameIndex);
+    for (ThreadState ts : threadDump) {
+      if (ts.getId() == selectedThreadId) {
+        StackFrameDump stackFrameDump = ts.getFrames().get(frameIndex);
         open(stackFrameDump.getLocation());
       }
     }
@@ -222,7 +222,7 @@ public class DebuggerPresenter extends BasePresenter
               threadDump -> {
                 DebuggerPresenter.this.threadDump = threadDump;
                 if (executionPoint != null) {
-                  view.setThreads(threadDump, executionPoint.getThreadId());
+                  view.setThreadDump(threadDump, executionPoint.getThreadId());
                   updateStackFrameDump(executionPoint.getThreadId());
                   updateVariables(executionPoint.getThreadId(), 0);
                 }
@@ -235,9 +235,9 @@ public class DebuggerPresenter extends BasePresenter
   }
 
   protected void updateStackFrameDump(long threadId) {
-    for (ThreadDump td : threadDump) {
-      if (td.getId() == threadId) {
-        view.setFrames(td.getFrames());
+    for (ThreadState ts : threadDump) {
+      if (ts.getId() == threadId) {
+        view.setFrames(ts.getFrames());
       }
     }
   }
@@ -356,7 +356,7 @@ public class DebuggerPresenter extends BasePresenter
     variables = new ArrayList<>();
     threadDump = new ArrayList<>();
     view.setExecutionPoint(null);
-    view.setThreads(emptyList(), -1);
+    view.setThreadDump(emptyList(), -1);
     view.setFrames(emptyList());
     view.setVariables(emptyList());
   }
@@ -369,7 +369,7 @@ public class DebuggerPresenter extends BasePresenter
     updateBreakpoints();
     view.setVMName("");
     view.setExecutionPoint(null);
-    view.setThreads(emptyList(), -1);
+    view.setThreadDump(emptyList(), -1);
     view.setFrames(emptyList());
     view.setVariables(emptyList());
   }

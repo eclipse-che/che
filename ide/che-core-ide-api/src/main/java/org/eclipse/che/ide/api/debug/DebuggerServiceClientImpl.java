@@ -23,7 +23,7 @@ import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
-import org.eclipse.che.api.debug.shared.dto.ThreadDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
@@ -140,11 +140,11 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
   }
 
   @Override
-  public Promise<List<ThreadDumpDto>> getThreadDump(String id) {
+  public Promise<List<ThreadStateDto>> getThreadDump(String id) {
     final String requestUrl = getBaseUrl(id) + "/threaddump";
     return asyncRequestFactory
         .createGetRequest(requestUrl)
-        .send(dtoUnmarshallerFactory.newListUnmarshaller(ThreadDumpDto.class));
+        .send(dtoUnmarshallerFactory.newListUnmarshaller(ThreadStateDto.class));
   }
 
   @Override

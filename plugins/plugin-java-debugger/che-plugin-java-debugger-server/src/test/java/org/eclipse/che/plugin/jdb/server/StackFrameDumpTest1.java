@@ -31,7 +31,7 @@ import org.eclipse.che.api.debug.shared.dto.MethodDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.debug.shared.model.ThreadDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
@@ -69,11 +69,11 @@ public class StackFrameDumpTest1 {
 
   @Test
   public void shouldGetStackFrameDump() throws Exception {
-    Optional<ThreadDump> main =
-        debugger.getThreadDumps().stream().filter(t -> t.getName().equals("main")).findAny();
+    Optional<ThreadState> main =
+        debugger.getThreadDump().stream().filter(t -> t.getName().equals("main")).findAny();
     assertTrue(main.isPresent());
 
-    ThreadDump mainThread = main.get();
+    ThreadState mainThread = main.get();
     assertEquals(mainThread.getFrames().size(), 3);
 
     validateFrame0(mainThread.getId());
