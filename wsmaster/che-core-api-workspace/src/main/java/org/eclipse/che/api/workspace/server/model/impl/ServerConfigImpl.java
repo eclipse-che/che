@@ -105,7 +105,7 @@ public class ServerConfigImpl implements ServerConfig {
     return Objects.equals(id, that.id)
         && Objects.equals(port, that.port)
         && Objects.equals(protocol, that.protocol)
-        && getPath().equals(that.getPath());
+        && Objects.equals(path, that.path);
   }
 
   @Override

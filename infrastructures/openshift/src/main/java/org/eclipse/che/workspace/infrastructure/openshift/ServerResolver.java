@@ -70,15 +70,28 @@ public class ServerResolver {
                 (name, config) ->
                     servers.put(
                         name,
-                        new ServerImpl(
-                            config.getProtocol()
-                                + "://"
-                                + route.getSpec().getHost()
-                                + config.getPath(),
-                            ServerStatus.UNKNOWN)));
+                        newServer(
+                            config.getProtocol(), route.getSpec().getHost(), config.getPath())));
       }
     }
     return servers;
+  }
+
+  private ServerImpl newServer(String protocol, String host, String path) {
+    StringBuilder ub = new StringBuilder();
+    if (protocol != null) {
+      ub.append(protocol).append("://");
+    } else {
+      ub.append("tcp://");
+    }
+    ub.append(host);
+    if (path != null) {
+      if (!path.isEmpty() && !path.startsWith("/")) {
+        ub.append("/");
+      }
+      ub.append(path);
+    }
+    return new ServerImpl(ub.toString(), ServerStatus.UNKNOWN);
   }
 
   private List<Service> getMatchedServices(Pod pod, Container container) {

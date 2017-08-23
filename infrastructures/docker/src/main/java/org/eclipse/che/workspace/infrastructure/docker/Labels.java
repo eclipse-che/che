@@ -94,7 +94,9 @@ public final class Labels {
     public Serializer server(String ref, ServerConfig server) {
       labels.put(String.format(SERVER_PORT_LABEL_FMT, ref), server.getPort());
       labels.put(String.format(SERVER_PROTOCOL_LABEL_FMT, ref), server.getProtocol());
-      labels.put(String.format(SERVER_PATH_LABEL_FMT, ref), server.getPath());
+      if (server.getPath() != null) {
+        labels.put(String.format(SERVER_PATH_LABEL_FMT, ref), server.getPath());
+      }
       return this;
     }
 
