@@ -12,6 +12,8 @@ package org.eclipse.che.selenium.core.client;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.dto.server.DtoFactory.getInstance;
 
 import com.google.inject.Inject;
@@ -216,8 +218,8 @@ public class TestProjectServiceClient {
     Map<String, ? extends Machine> machines =
         workspaceServiceClient.getById(workspaceId).getRuntime().getMachines();
     for (Machine machine : machines.values()) {
-      if (machine.getServers().get("wsagent/http") != null) {
-        return machine.getServers().get("wsagent/http").getUrl() + "/project";
+      if (containsWsAgentServer(machine)) {
+        return machine.getServers().get(SERVER_WS_AGENT_HTTP_REFERENCE).getUrl() + "/project";
       }
     }
     throw new RuntimeException("Cannot find dev machine on workspace");

@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
@@ -73,6 +75,16 @@ public class WsAgentMachineFinderUtil {
   }
 
   /**
+   * Checks whether provided {@link MachineConfig} contains wsagent server.
+   *
+   * @param machine machine to check
+   * @return true when wsagent server is found in provided machine, false otherwise
+   */
+  public static boolean containsWsAgentServer(Machine machine) {
+    return machine.getServers().keySet().contains(SERVER_WS_AGENT_HTTP_REFERENCE);
+  }
+
+  /**
    * Checks whether provided {@link InternalMachineConfig} contains wsagent installer or server.
    *
    * @param machineConfig machine config to check
@@ -81,5 +93,16 @@ public class WsAgentMachineFinderUtil {
   public static boolean containsWsAgentServerOrInstaller(InternalMachineConfig machineConfig) {
     return machineConfig.getServers().keySet().contains(SERVER_WS_AGENT_HTTP_REFERENCE)
         || InstallerFqn.idInInstallerList(WS_AGENT_INSTALLER, machineConfig.getInstallers());
+  }
+
+  /**
+   * Checks whether provided {@link MachineConfig} contains wsagent installer or server.
+   *
+   * @param machineConfig machine config to check
+   * @return true when wsagent server or installer is found in provided machine, false otherwise
+   */
+  public static boolean containsWsAgentServerOrInstaller(MachineConfig machineConfig) {
+    return machineConfig.getServers().keySet().contains(SERVER_WS_AGENT_HTTP_REFERENCE)
+        || InstallerFqn.idInKeyList(WS_AGENT_INSTALLER, machineConfig.getInstallers());
   }
 }

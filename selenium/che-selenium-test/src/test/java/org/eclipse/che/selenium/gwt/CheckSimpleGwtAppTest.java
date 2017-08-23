@@ -99,7 +99,9 @@ public class CheckSimpleGwtAppTest {
     consoles.waitExpectedTextIntoConsole("The code server is ready", APPLICATION_START_TIMEOUT_SEC);
 
     String url =
-        workspaceServiceClient.getServerByExposedPort(testWorkspace.getId(), "9876/tcp").getUrl();
+        workspaceServiceClient
+            .getServerFromDevMachineBySymbolicName(testWorkspace.getId(), "9876/tcp")
+            .getUrl();
     ide.driver().get(url);
 
     new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)

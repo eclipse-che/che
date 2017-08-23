@@ -14,6 +14,8 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -29,9 +31,11 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -161,7 +165,7 @@ public class TestWorkspaceServiceClient {
         .getMachines()
         .values()
         .stream()
-        .filter(m -> m.getInstallers().contains("org.eclipse.che.ws-agent"))
+        .filter(WsAgentMachineFinderUtil::containsWsAgentServerOrInstaller)
         .forEach(
             m ->
                 m.getAttributes()
@@ -218,10 +222,12 @@ public class TestWorkspaceServiceClient {
    * Return ServerDto object by exposed port
    *
    * @param workspaceId workspace id of current user
-   * @param exposedPort exposed port of server
+   * @param serverName exposed port of server
    * @return ServerDto object
    */
-  public Server getServerByExposedPort(String workspaceId, String exposedPort) throws Exception {
+  @Nullable
+  public Server getServerFromDevMachineBySymbolicName(String workspaceId, String serverName)
+      throws Exception {
     Workspace workspace =
         requestFactory.fromUrl(getIdBasedUrl(workspaceId)).request().asDto(WorkspaceDto.class);
 
@@ -229,8 +235,8 @@ public class TestWorkspaceServiceClient {
 
     Map<String, ? extends Machine> machines = workspace.getRuntime().getMachines();
     for (Machine machine : machines.values()) {
-      if (machine.getServers().get("wsagent/http") != null) {
-        return machine.getServers().get(exposedPort);
+      if (containsWsAgentServer(machine)) {
+        return machine.getServers().get(serverName);
       }
     }
     return null;
