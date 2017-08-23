@@ -50,8 +50,14 @@ public class JavaFormatterService {
   private static final String CHE_FORMATTER_XML = "che-formatter.xml";
   private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
 
-  @Inject private ProjectManager projectManager;
-  @Inject private Formatter formatter;
+  private ProjectManager projectManager;
+  private Formatter formatter;
+
+  @Inject
+  public JavaFormatterService(ProjectManager projectManager, Formatter formatter) {
+    this.formatter = formatter;
+    this.projectManager = projectManager;
+  }
 
   @POST
   @Path("/format")
@@ -133,10 +139,14 @@ public class JavaFormatterService {
       throws ServerException, NotFoundException {
     RegisteredProject project = projectManager.getProject(projectPath);
     FolderEntry baseFolder = project.getBaseFolder();
-    VirtualFileEntry cheFolder = baseFolder.getChild(CHE_FOLDER);
-    FolderEntry cheFolderEntry = (FolderEntry) cheFolder;
-    VirtualFileEntry formatter = cheFolderEntry.getChild(CHE_FORMATTER_XML);
     try {
+      VirtualFileEntry cheFolder = baseFolder.getChild(CHE_FOLDER);
+      if (cheFolder == null) {
+        cheFolder = baseFolder.createFolder(CHE_FOLDER);
+      }
+      FolderEntry cheFolderEntry = (FolderEntry) cheFolder;
+      VirtualFileEntry formatter = cheFolderEntry.getChild(CHE_FORMATTER_XML);
+
       if (formatter == null) {
         cheFolderEntry.createFile(CHE_FORMATTER_XML, content.getBytes());
       } else {
