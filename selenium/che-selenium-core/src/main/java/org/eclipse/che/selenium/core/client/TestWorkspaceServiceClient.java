@@ -208,10 +208,6 @@ public class TestWorkspaceServiceClient {
         .getServers()
         .get(valueOf(port) + "/tcp")
         .getUrl();
-        .getRuntime()
-        .getServers()
-        .get(valueOf(port) + "/tcp")
-        .getAddress();
   }
 
   /**
@@ -234,7 +230,6 @@ public class TestWorkspaceServiceClient {
       }
     }
     return null;
-    return workspace.getRuntime().getDevMachine().getRuntime().getServers().get(exposedPort);
   }
 
   /**
