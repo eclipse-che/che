@@ -117,6 +117,7 @@ public class RefactoringUpdater {
             pathChanged.add(change.getPath());
             registerRemovedFile(change);
           }
+          continue;
         default:
           continue;
       }

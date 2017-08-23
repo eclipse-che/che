@@ -515,6 +515,7 @@ public class UnicodeUtils {
           case ZERO_OR_MORE:
             strBuilder.append('*');
             break;
+          default:
         }
 
         return new CharacterClass(strBuilder.toString());

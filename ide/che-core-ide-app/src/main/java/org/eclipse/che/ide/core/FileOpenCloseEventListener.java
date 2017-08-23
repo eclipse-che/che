@@ -64,6 +64,7 @@ public class FileOpenCloseEventListener {
 
                   break;
                 }
+              default:
             }
           }
 

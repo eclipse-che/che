@@ -261,7 +261,7 @@ public class ReorgUtils {
 
   public static IResource[] setMinus(IResource[] setToRemoveFrom, IResource[] elementsToRemove) {
     Set<IResource> setMinus =
-        new HashSet<IResource>(setToRemoveFrom.length - setToRemoveFrom.length);
+        new HashSet<IResource>(setToRemoveFrom.length - elementsToRemove.length);
     setMinus.addAll(Arrays.asList(setToRemoveFrom));
     setMinus.removeAll(Arrays.asList(elementsToRemove));
     return setMinus.toArray(new IResource[setMinus.size()]);
@@ -270,7 +270,7 @@ public class ReorgUtils {
   public static IJavaElement[] setMinus(
       IJavaElement[] setToRemoveFrom, IJavaElement[] elementsToRemove) {
     Set<IJavaElement> setMinus =
-        new HashSet<IJavaElement>(setToRemoveFrom.length - setToRemoveFrom.length);
+        new HashSet<IJavaElement>(setToRemoveFrom.length - elementsToRemove.length);
     setMinus.addAll(Arrays.asList(setToRemoveFrom));
     setMinus.removeAll(Arrays.asList(elementsToRemove));
     return setMinus.toArray(new IJavaElement[setMinus.size()]);

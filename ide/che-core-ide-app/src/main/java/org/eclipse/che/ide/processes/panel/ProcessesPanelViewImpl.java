@@ -122,6 +122,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
               case TERMINAL_NODE:
                 delegate.onCloseTerminal(node);
                 break;
+              default:
             }
           }
         });
@@ -287,6 +288,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
               case MACHINE_NODE:
                 removeCallback.remove();
                 break;
+              default:
             }
           }
         });

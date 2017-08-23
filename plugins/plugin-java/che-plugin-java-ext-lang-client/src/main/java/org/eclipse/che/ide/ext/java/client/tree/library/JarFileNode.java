@@ -238,6 +238,7 @@ public class JarFileNode extends SyntheticNode<JarEntry>
 
           break;
         }
+      default:
     }
   }
 
