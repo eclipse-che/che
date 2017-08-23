@@ -87,7 +87,6 @@ public class ProjectTypeRegistryImpl implements ProjectTypeRegistry {
               typeDescriptors.forEach(
                   projectTypeDto -> projectTypes.put(projectTypeDto.getId(), projectTypeDto));
 
-              // TODO (spi ide): Temporary solution while a better mechanism of obtaining ProjectTypeRegistry instance with Promises is being considered...
               eventBus.fireEvent(new ProjectTypesLoadedEvent());
             })
         .catchError(

@@ -18,8 +18,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 public class RuntimeConsistencyCheckerTest {
 
   @Test(dataProvider = "consistentRuntimesProvider")
-  public void consistentRuntimes(Environment environment, DockerInternalRuntime runtime)
+  public void consistentRuntimes(InternalEnvironment environment, DockerInternalRuntime runtime)
       throws ValidationException {
     new RuntimeConsistencyChecker().check(environment, runtime);
   }
@@ -36,7 +36,7 @@ public class RuntimeConsistencyCheckerTest {
     dataProvider = "inconsistentRuntimesProvider",
     expectedExceptions = ValidationException.class
   )
-  public void inconsistentRuntimes(Environment environment, DockerInternalRuntime runtime)
+  public void inconsistentRuntimes(InternalEnvironment environment, DockerInternalRuntime runtime)
       throws ValidationException {
     new RuntimeConsistencyChecker().check(environment, runtime);
   }
@@ -59,13 +59,13 @@ public class RuntimeConsistencyCheckerTest {
     };
   }
 
-  private static Environment environment(String... names) {
-    Map<String, MachineConfig> configs = new HashMap<>();
+  private static InternalEnvironment environment(String... names) {
+    Map<String, InternalMachineConfig> configs = new HashMap<>();
     for (String name : names) {
-      configs.put(name, mock(MachineConfig.class));
+      configs.put(name, mock(InternalMachineConfig.class));
     }
 
-    Environment environment = mock(Environment.class);
+    InternalEnvironment environment = mock(InternalEnvironment.class);
     doReturn(configs).when(environment).getMachines();
     when(environment.toString()).thenReturn(Arrays.toString(names));
     return environment;

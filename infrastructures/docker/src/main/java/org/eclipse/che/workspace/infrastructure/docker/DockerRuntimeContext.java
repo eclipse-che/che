@@ -22,11 +22,9 @@ import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.workspace.server.Utils;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
@@ -47,7 +45,6 @@ public class DockerRuntimeContext extends RuntimeContext {
 
   private final DockerEnvironment dockerEnvironment;
   private final List<String> orderedContainers;
-  private final String devMachineName;
   private final String websocketEndpointBase;
   private final DockerRuntimeFactory runtimeFactory;
   private final DockerContainers containers;
@@ -58,10 +55,9 @@ public class DockerRuntimeContext extends RuntimeContext {
   public DockerRuntimeContext(
       @Assisted DockerRuntimeInfrastructure infrastructure,
       @Assisted RuntimeIdentity identity,
-      @Assisted Environment environment,
+      @Assisted InternalEnvironment environment,
       @Assisted DockerEnvironment dockerEnv,
       @Assisted List<String> containersOrder,
-      InstallerRegistry installerRegistry,
       DockerRuntimeFactory runtimeFactory,
       DockerContainers containers,
       DockerSharedPool sharedPool,
@@ -69,8 +65,7 @@ public class DockerRuntimeContext extends RuntimeContext {
       @Named("che.websocket.endpoint.base") String websocketEndpointBase)
       throws InfrastructureException, ValidationException {
 
-    super(environment, identity, infrastructure, installerRegistry);
-    this.devMachineName = Utils.getDevMachineName(environment);
+    super(environment, identity, infrastructure);
     this.dockerEnvironment = dockerEnv;
     this.orderedContainers = ImmutableList.copyOf(containersOrder);
     this.websocketEndpointBase = websocketEndpointBase;
@@ -83,11 +78,6 @@ public class DockerRuntimeContext extends RuntimeContext {
   /** Returns docker environment which based on normalized context environment configuration. */
   public DockerEnvironment getDockerEnvironment() {
     return dockerEnvironment;
-  }
-
-  /** Returns the name of the dev machine. */
-  public String getDevMachineName() {
-    return devMachineName;
   }
 
   /** Returns the list of the ordered containers, machines must be started in the same order. */
@@ -107,6 +97,7 @@ public class DockerRuntimeContext extends RuntimeContext {
 
   @Override
   public DockerInternalRuntime getRuntime() throws InfrastructureException {
+    RuntimeIdentity identity = getIdentity();
     List<ContainerListEntry> runningContainers = containers.find(identity);
     if (runningContainers.isEmpty()) {
       return runtimeFactory.create(this);
@@ -114,7 +105,7 @@ public class DockerRuntimeContext extends RuntimeContext {
 
     DockerInternalRuntime runtime = runtimeFactory.create(this, runningContainers);
     try {
-      consistencyChecker.check(environment, runtime);
+      consistencyChecker.check(getEnvironment(), runtime);
       runtime.checkServers();
     } catch (InfrastructureException | ValidationException x) {
       LOG.warn(

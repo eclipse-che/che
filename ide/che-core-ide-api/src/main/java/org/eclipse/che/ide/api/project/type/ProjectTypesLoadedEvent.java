@@ -14,7 +14,6 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 /** Fired when {@link ProjectTypeRegistry} is initialized. */
-// TODO (spi ide): Temporary solution while a better mechanism of obtaining ProjectTypeRegistry instance with Promises is being considered...
 public class ProjectTypesLoadedEvent extends GwtEvent<ProjectTypesLoadedEvent.Handler> {
 
   public static final Type<ProjectTypesLoadedEvent.Handler> TYPE = new Type<>();

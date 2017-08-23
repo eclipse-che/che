@@ -19,7 +19,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.ExecInstallerInfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.TerminalInstallerInfrastructureProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentInstallerInfrastructureProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentBinariesInfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.network.CheMasterExtraHostProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.network.CheMasterNetworkProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.projects.LocalWorkspaceFilesCleaner;
@@ -40,7 +40,7 @@ public class LocalDockerModule extends AbstractModule {
             binder(), ConfigurationProvisioner.class, Names.named(LOCAL_INSTALLERS_PROVISIONERS));
     localInstallersProvisioners.addBinding().to(ExecInstallerInfrastructureProvisioner.class);
     localInstallersProvisioners.addBinding().to(TerminalInstallerInfrastructureProvisioner.class);
-    localInstallersProvisioners.addBinding().to(WsAgentInstallerInfrastructureProvisioner.class);
+    localInstallersProvisioners.addBinding().to(WsAgentBinariesInfrastructureProvisioner.class);
 
     Multibinder<ContainerSystemSettingsProvisioner> settingsProvisionerMB =
         Multibinder.newSetBinder(binder(), ContainerSystemSettingsProvisioner.class);

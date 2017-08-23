@@ -13,8 +13,8 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.InstallerConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.PersistentVolumeClaimProvisioner;
@@ -40,7 +40,7 @@ public class OpenShiftInfrastructureProvisioner {
   }
 
   public void provision(
-      EnvironmentImpl environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+      InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     installerConfigProvisioner.provision(environment, osEnv, identity);
     persistentVolumeClaimProvisioner.provision(environment, osEnv, identity);

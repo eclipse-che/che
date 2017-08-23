@@ -17,15 +17,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.Map;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.Recipe;
-import org.eclipse.che.api.workspace.server.RecipeDownloader;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
@@ -44,22 +41,12 @@ public class ComposeEnvironmentParser implements DockerConfigSourceSpecificEnvir
 
   private static final ObjectMapper YAML_PARSER = new ObjectMapper(new YAMLFactory());
 
-  private final RecipeDownloader recipeDownloader;
-
-  @Inject
-  public ComposeEnvironmentParser(RecipeDownloader recipeDownloader) {
-    this.recipeDownloader = recipeDownloader;
-  }
-
   @Override
-  public DockerEnvironment parse(Environment environment)
-      throws ValidationException, InfrastructureException {
+  public DockerEnvironment parse(InternalEnvironment environment) throws ValidationException {
     checkNotNull(environment, "Environment should not be null");
-    Recipe recipe = environment.getRecipe();
+    InternalRecipe recipe = environment.getRecipe();
     checkNotNull(environment.getRecipe(), "Environment recipe should not be null");
-
-    String content = getContentOfRecipe(recipe);
-    ComposeEnvironment composeEnvironment = parse(content, recipe.getContentType());
+    ComposeEnvironment composeEnvironment = parse(recipe.getContent(), recipe.getContentType());
     return asDockerEnvironment(composeEnvironment);
   }
 
@@ -109,18 +96,6 @@ public class ComposeEnvironmentParser implements DockerConfigSourceSpecificEnvir
       return YAML_PARSER.writeValueAsString(composeEnvironment);
     } catch (JsonProcessingException e) {
       throw new ValidationException(e.getLocalizedMessage(), e);
-    }
-  }
-
-  private String getContentOfRecipe(Recipe environmentRecipe) throws InfrastructureException {
-    if (environmentRecipe.getContent() != null) {
-      return environmentRecipe.getContent();
-    } else {
-      try {
-        return recipeDownloader.getRecipe(environmentRecipe.getLocation());
-      } catch (ServerException e) {
-        throw new InfrastructureException(e.getLocalizedMessage(), e);
-      }
     }
   }
 

@@ -15,8 +15,8 @@ import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator
 
 import com.google.common.base.Joiner;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.DockerConfigSourceSpecificEnvironmentParser;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -28,12 +28,13 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  * @author Alexander Andrienko
  */
 public class DockerImageEnvironmentParser implements DockerConfigSourceSpecificEnvironmentParser {
+  public static final String TYPE = "dockerimage";
 
   @Override
-  public DockerEnvironment parse(Environment environment) throws ValidationException {
-    Recipe recipe = environment.getRecipe();
+  public DockerEnvironment parse(InternalEnvironment environment) throws ValidationException {
+    InternalRecipe recipe = environment.getRecipe();
 
-    if (!"dockerimage".equals(recipe.getType())) {
+    if (!TYPE.equals(recipe.getType())) {
       throw new ValidationException(
           format(
               "Docker image environment parser doesn't support recipe type '%s'",
@@ -43,13 +44,12 @@ public class DockerImageEnvironmentParser implements DockerConfigSourceSpecificE
     DockerEnvironment dockerEnv = new DockerEnvironment();
     DockerContainerConfig container = new DockerContainerConfig();
     dockerEnv.getContainers().put(getMachineName(environment), container);
-
-    container.setImage(recipe.getLocation());
+    container.setImage(recipe.getContent());
 
     return dockerEnv;
   }
 
-  private String getMachineName(Environment environment) throws ValidationException {
+  private String getMachineName(InternalEnvironment environment) throws ValidationException {
     checkArgument(
         environment.getMachines().size() == 1,
         "Environment of type '%s' doesn't support multiple machines, but contains machines: %s",

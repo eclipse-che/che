@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
 /**
@@ -33,6 +34,6 @@ public interface DockerConfigSourceSpecificEnvironmentParser {
    * @throws InfrastructureException when parsing fails due to some internal server error or
    *     inability to parse environment due to other reasons
    */
-  DockerEnvironment parse(Environment environment)
+  DockerEnvironment parse(InternalEnvironment environment)
       throws ValidationException, InfrastructureException;
 }

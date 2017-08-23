@@ -10,20 +10,9 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
-import com.google.common.collect.ImmutableMap;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import javax.ws.rs.HttpMethod;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.core.rest.HttpRequestHelper;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 
 /**
  * A Context for running Workspace's Runtime
@@ -32,28 +21,18 @@ import org.eclipse.che.api.installer.server.InstallerRegistry;
  */
 public abstract class RuntimeContext {
 
-  protected final Environment environment;
-  protected final RuntimeIdentity identity;
-  protected final RuntimeInfrastructure infrastructure;
-  protected final InternalRecipe recipe;
-  protected final Map<String, InternalMachineConfig> internalMachines = new HashMap<>();
+  private final InternalEnvironment environment;
+  private final RuntimeIdentity identity;
+  private final RuntimeInfrastructure infrastructure;
 
   public RuntimeContext(
-      Environment environment,
+      InternalEnvironment internalEnvironment,
       RuntimeIdentity identity,
-      RuntimeInfrastructure infrastructure,
-      InstallerRegistry installerRegistry)
+      RuntimeInfrastructure infrastructure)
       throws ValidationException, InfrastructureException {
-    this.environment = environment;
+    this.environment = internalEnvironment;
     this.identity = identity;
     this.infrastructure = infrastructure;
-    this.recipe = resolveRecipe(environment.getRecipe());
-
-    Map<String, ? extends MachineConfig> effectiveMachines = environment.getMachines();
-    for (Map.Entry<String, ? extends MachineConfig> entry : effectiveMachines.entrySet()) {
-      internalMachines.put(
-          entry.getKey(), new InternalMachineConfig(entry.getValue(), installerRegistry));
-    }
   }
 
   /**
@@ -92,67 +71,13 @@ public abstract class RuntimeContext {
     return identity;
   }
 
-  /**
-   * Return internal machines map.
-   *
-   * @return immutable copy of internal machines map.
-   */
-  public Map<String, InternalMachineConfig> getMachineConfigs() {
-    return ImmutableMap.copyOf(internalMachines);
-  }
-
   /** @return RuntimeInfrastructure the Context created from */
   public RuntimeInfrastructure getInfrastructure() {
     return infrastructure;
   }
 
-  private InternalRecipe resolveRecipe(Recipe recipe) throws InfrastructureException {
-    if (recipe.getContent() != null && !recipe.getContent().isEmpty()) {
-      return new InternalRecipe(recipe, recipe.getContent());
-    } else if (recipe.getLocation() != null && !recipe.getLocation().isEmpty()) {
-
-      try {
-        URL recipeUrl = new URL(recipe.getLocation());
-        if (recipeUrl.getProtocol().startsWith("http")) {
-          String script =
-              HttpRequestHelper.requestString(recipe.getLocation(), HttpMethod.GET, null, null);
-          return new InternalRecipe(recipe, script);
-        } else {
-          return new InternalRecipe(recipe, recipe.getLocation());
-        }
-      } catch (MalformedURLException e) {
-        return new InternalRecipe(recipe, recipe.getLocation());
-      } catch (Exception x) {
-        throw new InfrastructureException(x);
-      }
-
-    } else {
-      return new InternalRecipe(recipe, "");
-    }
-  }
-
-  protected class InternalRecipe {
-
-    private final String content;
-    private final String type;
-    private final String contentType;
-
-    public InternalRecipe(Recipe recipe, String content) {
-      this.content = content;
-      this.type = recipe.getType();
-      this.contentType = recipe.getContentType();
-    }
-
-    public String getType() {
-      return type;
-    }
-
-    public String getContentType() {
-      return contentType;
-    }
-
-    public String getContent() {
-      return content;
-    }
+  /** Returns {@link InternalEnvironment} runtime is based on */
+  public InternalEnvironment getEnvironment() {
+    return environment;
   }
 }

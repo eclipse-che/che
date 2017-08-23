@@ -21,8 +21,8 @@ import static org.testng.Assert.assertEquals;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
@@ -42,7 +42,7 @@ public class ToolingServersEnvVarsProvisionerTest {
 
   @Mock private ServerEnvironmentVariableProvider provider1;
   @Mock private ServerEnvironmentVariableProvider provider2;
-  @Mock private EnvironmentImpl envConfig;
+  @Mock private InternalEnvironment envConfig;
 
   private DockerEnvironment dockerEnvironment;
 

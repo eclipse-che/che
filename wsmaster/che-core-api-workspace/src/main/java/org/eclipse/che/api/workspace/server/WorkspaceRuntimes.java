@@ -43,13 +43,14 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -122,16 +123,14 @@ public class WorkspaceRuntimes {
     recover();
   }
 
-  // TODO Doesn't look like correct place for this logic. Where this code should be?
-  public Environment estimate(Environment environment)
+  public void validate(Environment environment)
       throws NotFoundException, InfrastructureException, ValidationException {
-    // TODO decide whether throw exception when dev machine not found
     String type = environment.getRecipe().getType();
     if (!infraByRecipe.containsKey(type)) {
       throw new NotFoundException("Infrastructure not found for type: " + type);
     }
 
-    return infraByRecipe.get(type).estimate(environment);
+    infraByRecipe.get(type).estimate(environment);
   }
 
   /**
@@ -217,7 +216,8 @@ public class WorkspaceRuntimes {
     RuntimeIdentity runtimeId =
         new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName());
     try {
-      RuntimeContext runtimeContext = infra.prepare(runtimeId, environment);
+      InternalEnvironment internalEnvironment = infra.estimate(environment);
+      RuntimeContext runtimeContext = infra.prepare(runtimeId, internalEnvironment);
 
       InternalRuntime runtime = runtimeContext.getRuntime();
       if (runtime == null) {
@@ -386,7 +386,8 @@ public class WorkspaceRuntimes {
 
     InternalRuntime runtime;
     try {
-      runtime = infra.prepare(identity, environment).getRuntime();
+      InternalEnvironment internalEnvironment = infra.estimate(environment);
+      runtime = infra.prepare(identity, internalEnvironment).getRuntime();
     } catch (InfrastructureException | ValidationException x) {
       LOG.error(
           "Couldn't recover runtime '{}:{}'. Error: {}",

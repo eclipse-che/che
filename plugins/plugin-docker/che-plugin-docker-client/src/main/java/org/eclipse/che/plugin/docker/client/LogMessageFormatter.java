@@ -35,6 +35,7 @@ public interface LogMessageFormatter extends MessageFormatter<LogMessage> {
             case DOCKER:
               sb.append("[DOCKER]");
               break;
+            default:
           }
           final String content = logMessage.getContent();
           if (content != null) {

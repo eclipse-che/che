@@ -33,6 +33,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
+import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.ServersReadinessChecker;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
@@ -294,7 +295,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
   private void startMachine(String name, DockerContainerConfig containerConfig)
       throws InfrastructureException, InterruptedException {
-    InternalMachineConfig machineCfg = getContext().getMachineConfigs().get(name);
+    InternalMachineConfig machineCfg = getContext().getEnvironment().getMachines().get(name);
 
     DockerMachine machine =
         containerStarter.startContainer(
@@ -441,10 +442,16 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
    *
    * @param machines the active machines map
    */
-  private void snapshotMachines(Map<String, DockerMachine> machines) {
+  private void snapshotMachines(Map<String, DockerMachine> machines)
+      throws InternalInfrastructureException {
     List<SnapshotImpl> newSnapshots = new ArrayList<>();
     final RuntimeIdentity identity = getContext().getIdentity();
-    String devMachineName = getContext().getDevMachineName();
+    // TODO do we need dev machine flag at all?
+    String devMachineName =
+        WsAgentMachineFinderUtil.getWsAgentServerMachine(getContext().getEnvironment())
+            .orElseThrow(
+                () -> new InternalInfrastructureException("Machine with wsagent is not found"));
+
     for (Map.Entry<String, DockerMachine> dockerMachineEntry : machines.entrySet()) {
       SnapshotImpl snapshot =
           SnapshotImpl.builder()
@@ -452,7 +459,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
               .setType("docker") //TODO: do we need that at all?
               .setWorkspaceId(identity.getWorkspaceId())
               .setDescription(identity.getEnvName())
-              .setDev(dockerMachineEntry.getKey().equals(devMachineName))
+              .setDev(devMachineName.equals(dockerMachineEntry.getKey()))
               .setEnvName(identity.getEnvName())
               .setMachineName(dockerMachineEntry.getKey())
               .useCurrentCreationDate()

@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.bootstrap;
 
+import static org.eclipse.che.ide.actions.StartUpActionsParser.getStartUpActions;
+
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.Location;
@@ -25,7 +27,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.actions.StartUpActionsParser;
 import org.eclipse.che.ide.api.WindowActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
@@ -140,16 +141,18 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
             (Function<WorkspaceImpl, Void>)
                 workspace -> {
                   ((AppContextImpl) appContext).setWorkspace(workspace);
-                  ((AppContextImpl) appContext)
-                      .setStartAppActions(StartUpActionsParser.getStartUpActions());
-                  browserAddress.setAddress(
-                      workspace.getNamespace(), workspace.getConfig().getName());
+                  ((AppContextImpl) appContext).setStartAppActions(getStartUpActions());
+
+                  String workspaceName = workspace.getConfig().getName();
+                  browserAddress.setAddress(workspace.getNamespace(), workspaceName);
+
                   return null;
                 })
         .catchError(
             (Operation<PromiseError>)
                 err -> {
                   createWs(); // temporary solution while dashboard doesn't work
+
                   throw new OperationException("Can not get workspace: " + err.getCause());
                 });
   }

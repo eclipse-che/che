@@ -11,7 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.provision.volume;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.workspace.server.Utils.WSAGENT_INSTALLER;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,8 +32,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -48,7 +50,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class PersistentVolumeClaimProvisionerTest {
 
-  @Mock private EnvironmentImpl environment;
+  @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
 
@@ -73,9 +75,10 @@ public class PersistentVolumeClaimProvisionerTest {
             true, "claim-che-workspace", "10Gi", "ReadWriteOnce", "/projects");
     final Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     when(osEnv.getPersistentVolumeClaims()).thenReturn(pvcs);
-    final MachineConfigImpl devMachine = mock(MachineConfigImpl.class);
+    final InternalMachineConfig devMachine = mock(InternalMachineConfig.class);
     when(environment.getMachines()).thenReturn(ImmutableMap.of("test/machine", devMachine));
-    when(devMachine.getInstallers()).thenReturn(singletonList(WSAGENT_INSTALLER));
+    when(devMachine.getServers())
+        .thenReturn(singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, new ServerConfigImpl()));
     final String podName = "test";
     final Pod pod = mock(Pod.class);
     final PodSpec podSpec = mock(PodSpec.class);

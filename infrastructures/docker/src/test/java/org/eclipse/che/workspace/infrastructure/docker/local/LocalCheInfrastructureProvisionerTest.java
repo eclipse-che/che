@@ -13,9 +13,10 @@ package org.eclipse.che.workspace.infrastructure.docker.local;
 import static org.mockito.Matchers.eq;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.local.dod.DockerApiHostEnvVariableProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.LocalInstallersConfigProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentServerConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.projects.ProjectsVolumeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisionersApplier;
@@ -41,9 +42,10 @@ public class LocalCheInfrastructureProvisionerTest {
   @Mock private LabelsProvisioner labelsProvisioner;
   @Mock private DockerApiHostEnvVariableProvisioner dockerApiEnvProvisioner;
   @Mock private ToolingServersEnvVarsProvisioner toolingServersEnvVarsProvisioner;
-  @Mock private EnvironmentImpl environment;
+  @Mock private InternalEnvironment environment;
   @Mock private DockerEnvironment dockerEnvironment;
   @Mock private RuntimeIdentity runtimeIdentity;
+  @Mock private WsAgentServerConfigProvisioner wsAgentServerConfigProvisioner;
   @InjectMocks private LocalCheInfrastructureProvisioner provisioner;
 
   private Object[] allInnerProvisioners;
@@ -58,7 +60,8 @@ public class LocalCheInfrastructureProvisionerTest {
           installerConfigProvisioner,
           labelsProvisioner,
           dockerApiEnvProvisioner,
-          toolingServersEnvVarsProvisioner
+          toolingServersEnvVarsProvisioner,
+          wsAgentServerConfigProvisioner
         };
   }
 
@@ -89,6 +92,9 @@ public class LocalCheInfrastructureProvisionerTest {
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder
         .verify(toolingServersEnvVarsProvisioner)
+        .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(wsAgentServerConfigProvisioner)
         .provision(eq(environment), eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verifyNoMoreInteractions();
   }

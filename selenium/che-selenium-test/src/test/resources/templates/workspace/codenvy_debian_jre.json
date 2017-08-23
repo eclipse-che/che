@@ -1,0 +1,31 @@
+{
+  "environments": {
+    "replaced_name": {
+      "machines": {
+        "dev-machine": {
+          "agents": [
+            "org.eclipse.che.terminal",
+            "org.eclipse.che.ws-agent",
+            "org.eclipse.che.ssh",
+            "org.eclipse.che.ls.csharp",
+            "org.eclipse.che.ls.json",
+            "org.eclipse.che.ls.php"
+          ],
+          "attributes": {
+            "memoryLimitBytes": "desired_memory_value"
+          }
+        }
+      },
+      "recipe": {
+        "content": "FROM codenvy/debian_jre",
+        "contentType": "text/x-dockerfile",
+        "type": "dockerfile"
+      }
+    }
+  },
+  "defaultEnv": "replaced_name",
+  "projects": [],
+  "name": "replaced_name",
+  "attributes": {},
+  "temporary": false
+}

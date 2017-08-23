@@ -42,9 +42,10 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.spi.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -101,17 +102,16 @@ public class DockerInternalRuntimeTest {
 
     doNothing().when(networks).createNetwork(anyString());
     when(runtimeContext.getIdentity()).thenReturn(IDENTITY);
-    when(runtimeContext.getDevMachineName()).thenReturn(DB_MACHINE);
     when(runtimeContext.getDockerEnvironment()).thenReturn(environment);
     final LinkedList<String> orderedContainers = new LinkedList<>();
     orderedContainers.add(DEV_MACHINE);
     orderedContainers.add(DB_MACHINE);
     when(runtimeContext.getOrderedContainers()).thenReturn(orderedContainers);
-    when(runtimeContext.getMachineConfigs())
+    InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
+    when(runtimeContext.getEnvironment()).thenReturn(internalEnvironment);
+    when(internalEnvironment.getMachines())
         .thenReturn(
-            ImmutableMap.of(
-                DEV_MACHINE, internalMachineCfg1,
-                DB_MACHINE, internalMachineCfg2));
+            ImmutableMap.of(DEV_MACHINE, internalMachineCfg1, DB_MACHINE, internalMachineCfg2));
     dockerRuntime =
         new DockerInternalRuntime(
             runtimeContext,

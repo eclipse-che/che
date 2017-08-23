@@ -18,19 +18,16 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.shared.model.Installer;
-import org.eclipse.che.api.workspace.server.Utils;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.ServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
@@ -57,31 +54,28 @@ public class InstallerConfigProvisioner implements ConfigurationProvisioner {
 
   private static final String ENVIRONMENT_PROPERTY = "environment";
 
-  private final InstallerRegistry installerRegistry;
   private final String cheServerEndpoint;
 
   @Inject
   public InstallerConfigProvisioner(
-      InstallerRegistry installerRegistry,
       @Named("che.infra.openshift.che_server_endpoint") String cheServerEndpoint) {
-    this.installerRegistry = installerRegistry;
     this.cheServerEndpoint = cheServerEndpoint;
   }
 
   @Override
   public void provision(
-      EnvironmentImpl environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+      InternalEnvironment environment, OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
+
     for (Pod pod : osEnv.getPods().values()) {
       String podName = pod.getMetadata().getName();
       for (Container container : pod.getSpec().getContainers()) {
         String containerName = container.getName();
         String machineName = podName + "/" + containerName;
-        MachineConfig machineConf = environment.getMachines().get(machineName);
+        InternalMachineConfig machineConf = environment.getMachines().get(machineName);
 
-        List<String> installers = machineConf.getInstallers();
         Map<String, ServerConfig> name2Server = new HashMap<>();
-        for (Installer installer : getInstallers(installers)) {
+        for (Installer installer : machineConf.getInstallers()) {
           provisionEnv(container, installer.getProperties());
           name2Server.putAll(installer.getServers());
         }
@@ -91,21 +85,21 @@ public class InstallerConfigProvisioner implements ConfigurationProvisioner {
         // CHE_API is used by installers for agent binary downloading
         container.getEnv().removeIf(env -> "CHE_API".equals(env.getName()));
         container.getEnv().add(new EnvVar("CHE_API", cheServerEndpoint, null));
-
-        // WORKSPACE_ID is required only by workspace agent
-        if (Utils.isDev(machineConf)) {
+      }
+    }
+    // TODO incorrect place for env variable addition. workspace ID is needed for wsagent server, not installer
+    // WORKSPACE_ID is required only by workspace agent
+    String devMachineName =
+        WsAgentMachineFinderUtil.getWsAgentServerMachine(environment)
+            .orElseThrow(() -> new InfrastructureException("Machine with wsagent not found"));
+    for (Pod pod : osEnv.getPods().values()) {
+      for (Container container : pod.getSpec().getContainers()) {
+        final String machineName = pod.getMetadata().getName() + "/" + container.getName();
+        if (devMachineName.equals(machineName)) {
           container.getEnv().removeIf(env -> "CHE_WORKSPACE_ID".equals(env.getName()));
           container.getEnv().add(new EnvVar("CHE_WORKSPACE_ID", identity.getWorkspaceId(), null));
         }
       }
-    }
-  }
-
-  private List<Installer> getInstallers(List<String> installerIds) throws InfrastructureException {
-    try {
-      return installerRegistry.getOrderedInstallers(installerIds);
-    } catch (InstallerException e) {
-      throw new InfrastructureException(e.getMessage(), e);
     }
   }
 

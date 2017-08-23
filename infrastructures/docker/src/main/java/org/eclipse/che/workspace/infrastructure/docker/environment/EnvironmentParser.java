@@ -12,18 +12,19 @@ package org.eclipse.che.workspace.infrastructure.docker.environment;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkArgument;
 import static org.eclipse.che.workspace.infrastructure.docker.ArgumentsValidator.checkNotNull;
 
 import com.google.common.base.Joiner;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 
@@ -50,19 +51,14 @@ public class EnvironmentParser {
    * @throws ValidationException if provided environment is illegal
    * @throws InfrastructureException if fetching of environment recipe content fails
    */
-  public DockerEnvironment parse(Environment environment)
+  public DockerEnvironment parse(InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
 
     checkNotNull(environment, "Environment should not be null");
-    Recipe recipe = environment.getRecipe();
+    InternalRecipe recipe = environment.getRecipe();
     checkNotNull(recipe, "Environment recipe should not be null");
     checkNotNull(recipe.getType(), "Environment recipe type should not be null");
-    checkArgument(
-        recipe.getContent() != null || recipe.getLocation() != null,
-        "Recipe of environment must contain location or content");
-    checkArgument(
-        recipe.getContent() == null || recipe.getLocation() == null,
-        "Recipe of environment contains mutually exclusive fields location and content");
+    checkNotNull(recipe.getContent(), "Recipe of environment must contain content");
 
     DockerConfigSourceSpecificEnvironmentParser parser = environmentParsers.get(recipe.getType());
     if (parser == null) {
@@ -76,7 +72,8 @@ public class EnvironmentParser {
 
     for (Map.Entry<String, DockerContainerConfig> entry :
         dockerEnvironment.getContainers().entrySet()) {
-      MachineConfig machineConfig = environment.getMachines().get(entry.getKey());
+
+      InternalMachineConfig machineConfig = environment.getMachines().get(entry.getKey());
       if (machineConfig != null) {
         normalizeMachine(entry.getKey(), entry.getValue(), machineConfig);
       }
@@ -86,7 +83,7 @@ public class EnvironmentParser {
   }
 
   private void normalizeMachine(
-      String name, DockerContainerConfig container, MachineConfig machineConfig)
+      String name, DockerContainerConfig container, InternalMachineConfig machineConfig)
       throws ValidationException {
     if (machineConfig.getAttributes().containsKey("memoryLimitBytes")) {
       try {
@@ -111,5 +108,6 @@ public class EnvironmentParser {
 
       container.getExpose().add(normalizedPort);
     }
+    container.setExpose(container.getExpose().stream().distinct().collect(Collectors.toList()));
   }
 }
