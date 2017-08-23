@@ -118,6 +118,7 @@ public class EditorFileStatusNotificationOperation
 
           break;
         }
+      default:
     }
   }
 
