@@ -37,7 +37,6 @@ import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 
 /**
  * Represents IDE initialization strategy in case of loading from a Factory. Inherits initialization
@@ -62,7 +61,6 @@ class FactoryIdeInitializationStrategy extends DefaultIdeInitializationStrategy 
       Provider<WorkspacePresenter> workspacePresenterProvider,
       EventBus eventBus,
       QueryParameters queryParameters,
-      Provider<CreateWorkspacePresenter> createWsPresenter,
       DialogFactory dialogFactory,
       FactoryServiceClient factoryServiceClient) {
     super(
@@ -76,7 +74,6 @@ class FactoryIdeInitializationStrategy extends DefaultIdeInitializationStrategy 
         appStateManager,
         workspacePresenterProvider,
         eventBus,
-        createWsPresenter,
         dialogFactory);
 
     this.queryParameters = queryParameters;
