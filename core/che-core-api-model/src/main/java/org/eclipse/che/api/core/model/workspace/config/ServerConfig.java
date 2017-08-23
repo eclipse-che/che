@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.core.model.workspace.config;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 /**
  * Configuration of server that can be started inside of machine.
  *
@@ -47,5 +49,6 @@ public interface ServerConfig {
   String getProtocol();
 
   /** Path used by server. */
+  @Nullable
   String getPath();
 }

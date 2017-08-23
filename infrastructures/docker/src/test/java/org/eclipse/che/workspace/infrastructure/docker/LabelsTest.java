@@ -11,9 +11,9 @@
 package org.eclipse.che.workspace.infrastructure.docker;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -36,6 +36,7 @@ public class LabelsTest {
             .runtimeId(new RuntimeIdentityImpl("workspace123", "my-env", "owner"))
             .server("my-server1/http", new ServerConfigImpl("8000/tcp", "http", "/api/info"))
             .server("my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect"))
+            .server("my-server3", new ServerConfigImpl("7070/tcp", "http", null))
             .labels();
     Map<String, String> expected =
         ImmutableMap.<String, String>builder()
@@ -49,6 +50,8 @@ public class LabelsTest {
             .put("org.eclipse.che.server.my-server2.port", "8080/tcp")
             .put("org.eclipse.che.server.my-server2.protocol", "ws")
             .put("org.eclipse.che.server.my-server2.path", "/connect")
+            .put("org.eclipse.che.server.my-server3.port", "7070/tcp")
+            .put("org.eclipse.che.server.my-server3.protocol", "http")
             .build();
 
     assertEquals(serialized, expected);
@@ -70,9 +73,15 @@ public class LabelsTest {
             .put("org.eclipse.che.server.my-server2.port", "8080/tcp")
             .put("org.eclipse.che.server.my-server2.protocol", "ws")
             .put("org.eclipse.che.server.my-server2.path", "/connect")
+            .put("org.eclipse.che.server.my-server3.port", "7070/tcp")
+            .put("org.eclipse.che.server.my-server3.protocol", "http")
             .build();
 
     Labels.Deserializer deserializer = Labels.newDeserializer(labels);
+    Map<String, ServerConfig> expectedServers = new HashMap<>();
+    expectedServers.put("my-server1/http", new ServerConfigImpl("8000/tcp", "http", "/api/info"));
+    expectedServers.put("my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect"));
+    expectedServers.put("my-server3", new ServerConfigImpl("7070/tcp", "http", null));
 
     assertEquals(deserializer.machineName(), "dev-machine");
 
@@ -82,16 +91,6 @@ public class LabelsTest {
     assertEquals(runtimeId.getOwner(), "owner", "workspace owner");
 
     Map<String, ServerConfig> servers = deserializer.servers();
-    ServerConfig server1 = servers.get("my-server1/http");
-    assertNotNull(server1, "first server");
-    assertEquals(server1.getPort(), "8000/tcp");
-    assertEquals(server1.getProtocol(), "http");
-    assertEquals(server1.getPath(), "/api/info");
-
-    ServerConfig server2 = servers.get("my-server2");
-    assertNotNull(server2, "second server");
-    assertEquals(server2.getPort(), "8080/tcp");
-    assertEquals(server2.getProtocol(), "ws");
-    assertEquals(server2.getPath(), "/connect");
+    assertEquals(servers, expectedServers);
   }
 }
