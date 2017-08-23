@@ -132,6 +132,7 @@ public interface DebuggerServiceClient {
    * Returns a value of the variable inside the specific frame.
    *
    * @param id debug session id
+   * @param variableDto the variable to get value from
    * @param threadId the unique thread id {@link ThreadState#getId()}
    * @param frameIndex the frame index inside the thread
    */

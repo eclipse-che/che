@@ -33,7 +33,6 @@ public interface Location {
   String getResourceProjectPath();
 
   /** Returns the method is being executed. */
-  @Nullable
   Method getMethod();
 
   /** Returns thread id. */

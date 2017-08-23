@@ -81,6 +81,7 @@ public interface Debugger extends DebuggerObservable {
   /**
    * Evaluates the given expression inside a specific frame.
    *
+   * @param expression the expression to evaluate
    * @param threadId the unique thread id {@link ThreadState#getId()}
    * @param frameIndex the frame index inside the thread
    */

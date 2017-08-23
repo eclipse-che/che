@@ -21,7 +21,7 @@ import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.dom.Elements;
 
 /**
- * Renders variable item the panel.
+ * Renders variable item on the debugger panel.
  *
  * @see MutableVariable
  * @author Anatolii Bazko

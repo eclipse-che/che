@@ -22,6 +22,5 @@ public interface StackFrameDump {
   List<? extends Variable> getVariables();
 
   /** Returns location of the frame. */
-  @Nullable
   Location getLocation();
 }

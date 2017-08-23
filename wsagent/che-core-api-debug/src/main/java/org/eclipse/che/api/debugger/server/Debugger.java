@@ -131,7 +131,7 @@ public interface Debugger {
     throw new DebuggerException("Unsupported operation for current debugger implementation.");
   }
   /**
-   * Sets the new value {@link Variable#getValue()} of the variable {@link*
+   * Sets the new value {@link Variable#getValue()} of the variable {@link
    * Variable#getVariablePath()}.
    *
    * @deprecated

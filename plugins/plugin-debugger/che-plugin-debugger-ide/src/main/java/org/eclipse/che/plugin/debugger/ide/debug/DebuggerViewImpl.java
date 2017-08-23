@@ -229,17 +229,18 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
     for (int i = 0; i < threadDump.size(); i++) {
       ThreadState ts = threadDump.get(i);
-      String item =
-          "\""
-              + ts.getName()
-              + "\"@"
-              + ts.getId()
-              + " in group \""
-              + ts.getGroupName()
-              + "\": "
-              + ts.getStatus();
-      threads.addItem(item, String.valueOf(ts.getId()));
 
+      StringBuilder title = new StringBuilder();
+      title.append("\"");
+      title.append(ts.getName());
+      title.append("\"@");
+      title.append(ts.getId());
+      title.append(" in group \"");
+      title.append(ts.getGroupName());
+      title.append("\": ");
+      title.append(ts.getStatus());
+
+      threads.addItem(title.toString(), String.valueOf(ts.getId()));
       if (ts.getId() == threadIdToSelect) {
         threads.setSelectedIndex(i);
       }

@@ -419,7 +419,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
    *   <li>If need to get field of this object of current frame then first element in array always
    *       should be 'this'.
    *   <li>If need to get static field in current frame then first element in array always should
-   *       be* 'static'.
+   *       be 'static'.
    *   <li>If need to get local variable in current frame then first element should be the name of
    *       local variable.
    * </ol>
