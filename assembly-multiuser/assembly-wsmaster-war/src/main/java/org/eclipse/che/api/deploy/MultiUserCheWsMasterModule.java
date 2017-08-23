@@ -11,6 +11,7 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
 import javax.sql.DataSource;
 import org.eclipse.che.api.factory.server.permissions.FactoryPermissionsFilter;
 import org.eclipse.che.api.permission.server.jpa.SystemPermissionsJpaModule;
@@ -33,5 +34,6 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     bind(UserServicePermissionsFilter.class);
     bind(FactoryPermissionsFilter.class);
     bind(ActivityPermissionsFilter.class);
+    bindConstant().annotatedWith(Names.named("system.super_privileged_mode")).to(false);
   }
 }

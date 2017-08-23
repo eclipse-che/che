@@ -54,13 +54,13 @@
 
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
 
-        <!--class>com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl</class>
-        <class>com.codenvy.api.permission.server.model.impl.AbstractPermissions</class>
-        <class>com.codenvy.api.workspace.server.model.impl.WorkerImpl</class>
-        <class>com.codenvy.api.workspace.server.stack.StackPermissionsImpl</class>
-        <class>com.codenvy.api.machine.server.recipe.RecipePermissionsImpl</class>
+        <class>org.eclipse.che.api.permission.server.model.impl.SystemPermissionsImpl</class>
+        <class>org.eclipse.che.api.permission.server.model.impl.AbstractPermissions</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.WorkerImpl</class>
+        <class>org.eclipse.che.api.workspace.server.stack.StackPermissionsImpl</class>
+        <class>org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl</class>
 
-        <class>com.codenvy.resource.spi.impl.ResourceImpl</class>
+        <!--class>com.codenvy.resource.spi.impl.ResourceImpl</class>
         <class>com.codenvy.resource.spi.impl.FreeResourcesLimitImpl</class>
         <class>com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl</class>
         <class>com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl</class>

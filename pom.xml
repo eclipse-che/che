@@ -421,12 +421,12 @@
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-user</artifactId>
                 <version>${che.version}</version>
+                <classifier>tests</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-user</artifactId>
                 <version>${che.version}</version>
-                <classifier>tests</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -1286,14 +1286,6 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.keycloak</groupId>
-                <artifactId>keycloak-common</artifactId>
-                <version>${org.keycloak.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.keycloak</groupId>
-                <artifactId>keycloak-core</artifactId>
-                <version>${org.keycloak.version}</version>
                 <groupId>org.eclipse.che.selenium</groupId>
                 <artifactId>che-selenium-core</artifactId>
                 <version>${che.version}</version>
@@ -1302,6 +1294,16 @@
                 <groupId>org.eclipse.che.selenium</groupId>
                 <artifactId>che-selenium-test</artifactId>
                 <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-common</artifactId>
+                <version>${org.keycloak.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-core</artifactId>
+                <version>${org.keycloak.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
