@@ -171,7 +171,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
           .showFileContent(gitDirLocation, relPath, revision)
           .then(
               content -> {
-                view.setTitle(relPath.toString());
+                view.setTitle(getTitleForFile(relPath.toString()));
                 view.setColumnTitles(
                     locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
                 view.show(content.getContent(), "", relPath.toString(), true);
@@ -196,7 +196,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
   private void showCompareBetweenRevisionsForFile(
       final Path gitDir, final Path relPath, final Status status) {
-    view.setTitle(relPath.toString());
+    view.setTitle(getTitleForFile(relPath.toString()));
 
     if (status == Status.ADDED) {
       service
@@ -323,7 +323,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             local -> {
               localContent = local;
               final String path = comparedFile.getLocation().removeFirstSegments(1).toString();
-              view.setTitle(path);
+              view.setTitle(getTitleForFile(path));
               view.setColumnTitles(
                   locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
               view.show(remoteContent, localContent, path, false);
@@ -376,5 +376,15 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             error -> {
               notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
             });
+  }
+
+  private String getTitleForFile(String file) {
+    return "Review diff in: "
+        + file
+        + " ("
+        + (currentFileIndex + 1)
+        + '/'
+        + alteredFiles.getFilesQuantity()
+        + ')';
   }
 }
