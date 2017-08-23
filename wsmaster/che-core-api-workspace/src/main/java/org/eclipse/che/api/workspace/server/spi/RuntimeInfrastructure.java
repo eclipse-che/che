@@ -76,7 +76,8 @@ public abstract class RuntimeInfrastructure {
    * #prepare(RuntimeIdentity, InternalEnvironment)}. <br>
    * Note: this method will be eventually final, but it is not for now for workaround in Docker
    * infra - in dockerimage environment image should be in content, not in location. It is marked
-   * with {@link Beta} annotation to hint that. Do not override this method.
+   * with {@link Beta} annotation to hint that. Do not override this method. <br>
+   * Workaround should be removed after resolution of https://github.com/eclipse/che/issues/6006
    *
    * @param environment incoming Environment to estimate
    * @return calculated internal environment.

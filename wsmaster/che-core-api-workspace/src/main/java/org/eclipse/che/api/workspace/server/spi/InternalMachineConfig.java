@@ -68,7 +68,6 @@ public class InternalMachineConfig {
   private void initInstallers(List<String> installersKeys, InstallerRegistry installerRegistry)
       throws InfrastructureException {
     try {
-      // TODO ensure already contains dependencies
       List<Installer> sortedInstallers = installerRegistry.getOrderedInstallers(installersKeys);
       for (Installer installer : sortedInstallers) {
         this.installers.add(new InstallerImpl(installer));

@@ -52,9 +52,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
 
   @Override
   public void internalEstimate(InternalEnvironment environment)
-      throws ValidationException, InfrastructureException {
-    //TODO implement estimation and validation here
-  }
+      throws ValidationException, InfrastructureException {}
 
   @Override
   public OpenShiftRuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
