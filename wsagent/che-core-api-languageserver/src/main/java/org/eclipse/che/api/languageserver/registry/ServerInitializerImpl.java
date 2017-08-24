@@ -167,20 +167,20 @@ public class ServerInitializerImpl implements ServerInitializer {
       CLIENT_CAPABILITIES.setWorkspace(workspace);
 
       TextDocumentClientCapabilities textDocument = new TextDocumentClientCapabilities();
-      textDocument.setCodeAction(new CodeActionCapabilities());
-      textDocument.setCodeLens(new CodeLensCapabilities());
-      textDocument.setCompletion(new CompletionCapabilities(new CompletionItemCapabilities()));
-      textDocument.setDefinition(new DefinitionCapabilities());
-      textDocument.setDocumentHighlight(new DocumentHighlightCapabilities());
-      textDocument.setDocumentLink(new DocumentLinkCapabilities());
-      textDocument.setDocumentSymbol(new DocumentSymbolCapabilities());
-      textDocument.setFormatting(new FormattingCapabilities());
-      textDocument.setHover(new HoverCapabilities());
-      textDocument.setOnTypeFormatting(new OnTypeFormattingCapabilities());
-      textDocument.setRangeFormatting(new RangeFormattingCapabilities());
-      textDocument.setReferences(new ReferencesCapabilities());
-      textDocument.setRename(new RenameCapabilities());
-      textDocument.setSignatureHelp(new SignatureHelpCapabilities());
+      textDocument.setCodeAction(new CodeActionCapabilities(false));
+      textDocument.setCodeLens(new CodeLensCapabilities(false));
+      textDocument.setCompletion(new CompletionCapabilities(new CompletionItemCapabilities(false)));
+      textDocument.setDefinition(new DefinitionCapabilities(false));
+      textDocument.setDocumentHighlight(new DocumentHighlightCapabilities(false));
+      textDocument.setDocumentLink(new DocumentLinkCapabilities(false));
+      textDocument.setDocumentSymbol(new DocumentSymbolCapabilities(false));
+      textDocument.setFormatting(new FormattingCapabilities(false));
+      textDocument.setHover(new HoverCapabilities(false));
+      textDocument.setOnTypeFormatting(new OnTypeFormattingCapabilities(false));
+      textDocument.setRangeFormatting(new RangeFormattingCapabilities(false));
+      textDocument.setReferences(new ReferencesCapabilities(false));
+      textDocument.setRename(new RenameCapabilities(false));
+      textDocument.setSignatureHelp(new SignatureHelpCapabilities(false));
       textDocument.setSynchronization(new SynchronizationCapabilities(true, false, true));
       CLIENT_CAPABILITIES.setTextDocument(textDocument);
     }
