@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.java.languageserver;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,6 +22,7 @@ import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
 import org.eclipse.che.api.languageserver.registry.DocumentFilter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
+import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.che.plugin.java.inject.JavaModule;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -57,7 +59,14 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
             languageServerProcess.getInputStream(),
             languageServerProcess.getOutputStream());
     launcher.startListening();
-    return launcher.getRemoteProxy();
+    LanguageServer proxy = launcher.getRemoteProxy();
+    LanguageServer wrapped =
+        (LanguageServer)
+            Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class[] {LanguageServer.class},
+                new DynamicWrapper(new JavaLSWrapper(proxy), proxy));
+    return wrapped;
   }
 
   protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
