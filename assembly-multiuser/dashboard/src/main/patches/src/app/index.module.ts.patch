@@ -8,9 +8,9 @@
 +
 +function buildKeycloakConfig(keycloakSettings) {
 +    return {
-+        url: keycloakSettings['che.keycloak.auth-server-url'],
++        url: keycloakSettings['che.keycloak.auth_server_url'],
 +        realm: keycloakSettings['che.keycloak.realm'],
-+        clientId: keycloakSettings['che.keycloak.client-id']
++        clientId: keycloakSettings['che.keycloak.client_id']
 +    };
 +}
 +
@@ -30,7 +30,7 @@
 +        new Promise((resolve, reject) => {
 +          const script = document.createElement('script');
 +          script.async = true;
-+          script.src = keycloakSettings['che.keycloak.auth-server-url'] + '/js/keycloak.js';
++          script.src = keycloakSettings['che.keycloak.auth_server_url'] + '/js/keycloak.js';
 +          script.addEventListener('load', resolve);
 +          script.addEventListener('error', () => reject('Error loading script.'));
 +          script.addEventListener('abort', () => reject('Script loading aborted.'));
