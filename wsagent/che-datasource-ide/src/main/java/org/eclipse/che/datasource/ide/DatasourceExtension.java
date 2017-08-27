@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.datasource.ide.newDatasource.NewDatasourceWizardAction;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 
@@ -31,6 +30,12 @@ public class DatasourceExtension {
      *
      * @param actionManager
      *         the {@link ActionManager} that is used to register our actions
+     * @param newDatasourceWizardAction
+     *         new datasource wizard action
+     * @param connectorsInitializer
+     *         initializes the available connectors
+     * @param availableJdbcDrivers
+     *         available jdbc drivers in the agent
      * @param newDatasourceWizardAction
      *         new datasource wizard action
      */
@@ -50,7 +55,7 @@ public class DatasourceExtension {
         mainMenu.add(datasourceGroup, new Constraints(AFTER, GROUP_HELP));
 
 
-        // add HelloWorldAction to context menu as last entry
+        // add Datasource to context menu as last entry
         DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction("resourceOperation");
         mainContextMenuGroup.add(newDatasourceWizardAction, Constraints.LAST);
 

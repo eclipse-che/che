@@ -39,9 +39,6 @@ public class DatasourceClientServiceImpl implements DatasourceClientService {
     private final AsyncRequestFactory asyncRequestFactory;
     private final AppContext          appContext;
 
-    /**
-     * @param restContext rest context
-     */
     @Inject
     public DatasourceClientServiceImpl(final @Named(DatasourceGinModule.DATASOURCE_CONTEXT_NAME) String restContext,
                                           final DtoFactory dtoFactory,
@@ -58,8 +55,6 @@ public class DatasourceClientServiceImpl implements DatasourceClientService {
     @Override
     public void getAvailableDrivers(AsyncRequestCallback<String> asyncRequestCallback) throws RequestException {
         String url = formatUrl(ServicePaths.DATABASE_TYPES_PATH, "", null);
-//        String url = appContext.getDevMachine().getWsAgentBaseUrl() +"/databasetypes";
-        Log.error(DatasourceClientServiceImpl.class, "URL is : "+url);
         final AsyncRequest getRequest = asyncRequestFactory.createGetRequest(url, false);
         getRequest.send(asyncRequestCallback);
     }
@@ -90,18 +85,11 @@ public class DatasourceClientServiceImpl implements DatasourceClientService {
 
     /**
      * Builds the target REST service url.
-     *
-     * @param root the root of the service
-     * @param service the rest service
-     * @param param the parameters
-     * @return the url
+     * TODO : Add the agent context to the url
      */
+
     private String formatUrl(final String root, final String service, final String param) {
         StringBuilder sb = new StringBuilder(appContext.getDevMachine().getWsAgentBaseUrl());
-//        if (restServiceContext != null && !restServiceContext.isEmpty()) {
-//            sb.append("/")
-//              .append(restServiceContext);
-//        }
         if (root != null && !root.isEmpty()) {
             sb.append("/")
               .append(root);
@@ -115,7 +103,6 @@ public class DatasourceClientServiceImpl implements DatasourceClientService {
             sb.append('/')
               .append(param);
         }
-        Log.debug(DatasourceClientServiceImpl.class, "Create REST URL : " + sb.toString());
         return sb.toString();
     }
 }
