@@ -12,6 +12,7 @@ package org.eclipse.che.datasource.ide.newDatasource.connector;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -81,6 +82,9 @@ public class DefaultNewDatasourceConnectorViewImpl extends Composite implements 
     @UiField
     DatasourceUiResources datasourceUiResources;
 
+    @UiField
+    Label testConnectionText;
+
     private ActionDelegate delegate;
 
 
@@ -102,6 +106,8 @@ public class DefaultNewDatasourceConnectorViewImpl extends Composite implements 
         projectsList.setWidth("100px");
 
         configureTitleCaption.setText("Settings");
+
+
     }
 
     @Override
@@ -162,6 +168,7 @@ public class DefaultNewDatasourceConnectorViewImpl extends Composite implements 
     @UiHandler("passwordField")
     public void onPasswordNameFieldChanged(KeyUpEvent event) {
         delegate.passwordChanged(passwordField.getText());
+        delegate.onClickTestConnectionButton();
     }
 
     @Override
@@ -242,6 +249,13 @@ public class DefaultNewDatasourceConnectorViewImpl extends Composite implements 
 
     @UiHandler("testConnectionButton")
     void handleClick(ClickEvent e) {
+        Log.info(DefaultNewDatasourceConnectorViewImpl.class,"button clicked");
+        delegate.onClickTestConnectionButton();
+    }
+
+    @UiHandler("testConnectionText")
+    void handleTextClick(ClickEvent e) {
+        Log.info(DefaultNewDatasourceConnectorViewImpl.class,"button clicked");
         delegate.onClickTestConnectionButton();
     }
 
@@ -250,7 +264,7 @@ public class DefaultNewDatasourceConnectorViewImpl extends Composite implements 
         // turn button green
         testConnectionButton.setStyleName(datasourceUiResources.datasourceUiCSS().datasourceWizardTestConnectionOK());
         // clear error messages
-        testConnectionErrorMessage.setText("");
+        testConnectionErrorMessage.setText("Connection Established Successfully!");
     }
 
     @Override
@@ -277,6 +291,8 @@ public class DefaultNewDatasourceConnectorViewImpl extends Composite implements 
         passwordFieldIsDirty = true;
     }
 
+
+
     @Override
     public boolean isPasswordFieldDirty() {
         return passwordFieldIsDirty;
@@ -292,23 +308,4 @@ public class DefaultNewDatasourceConnectorViewImpl extends Composite implements 
         this.runnerProcessId = runnerProcessId;
     }
 
-    // @UiHandler("radioUserPref")
-    // void handleRadioUserPrefClick(ClickEvent e) {
-    // delegate.onClickRadioUserPref(); TODO
-    // }
-
-    // @UiHandler("radioProject")
-    // void handleRadioProjectClick(ClickEvent e) {
-    // delegate.onClickRadioProject(); TODO
-    // }
-
-    // @Override
-    // public void setRadioUserPrefValue(final boolean value) {
-    // radioUserPref.setValue(value);
-    // }
-
-    // @Override
-    // public void setRadioProjectValue(final boolean value) {
-    // radioProject.setValue(value);
-    // }
 }

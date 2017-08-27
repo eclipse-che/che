@@ -16,6 +16,7 @@ import org.eclipse.che.datasource.ide.newDatasource.InitializableWizardDialog;
 import org.eclipse.che.datasource.ide.newDatasource.NewDatasourceWizard;
 import org.eclipse.che.datasource.ide.newDatasource.NewDatasourceWizardFactory;
 import org.eclipse.che.datasource.ide.newDatasource.connector.AbstractNewDatasourceConnectorPage;
+import org.eclipse.che.datasource.ide.newDatasource.connector.DefaultNewDatasourceConnectorPage;
 import org.eclipse.che.datasource.ide.newDatasource.connector.NewDatasourceConnector;
 import org.eclipse.che.datasource.ide.newDatasource.connector.NewDatasourceConnectorAgent;
 import org.eclipse.che.datasource.ide.newDatasource.presenter.NewDatasourceWizardMainPagePresenter;
@@ -180,9 +181,15 @@ public class NewDatasourceWizardPresenter implements InitializableWizardDialog<D
         }
 
         NewDatasourceConnector connector = newDatasourceConnectorAgent.getConnector(id);
+        Log.info(NewDatasourceWizardPresenter.class, "id is "+id);
+        Log.info(NewDatasourceWizardPresenter.class, connector.getClass());
         if (connector != null) {
             for (Provider<? extends AbstractNewDatasourceConnectorPage> provider : connector.getWizardPages()) {
+                Log.info(NewDatasourceWizardPresenter.class, "Got Connector page");
+                Log.info(NewDatasourceWizardPresenter.class, provider.getClass());
                 connectorPage = provider.get();
+                Log.info(NewDatasourceWizardPresenter.class, connectorPage.getClass());
+                Log.info(NewDatasourceWizardPresenter.class, "connector page class is here");
                 connectorPage.setContext(wizard.getContext());
                 connectorPage.setUpdateDelegate(this);
                 connectorPage.init(wizard.getDataObject());
@@ -191,7 +198,7 @@ public class NewDatasourceWizardPresenter implements InitializableWizardDialog<D
                 }
                 break;
             }
-            view.showPage(connectorPage, "settings");
+            view.showPage(connectorPage, "categories");
         }
     }
 

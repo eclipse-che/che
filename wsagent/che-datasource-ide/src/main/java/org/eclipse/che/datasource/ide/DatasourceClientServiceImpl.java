@@ -18,6 +18,7 @@ import com.google.inject.name.Named;
 import org.eclipse.che.datasource.ide.inject.DatasourceGinModule;
 import org.eclipse.che.datasource.shared.DatabaseConfigurationDTO;
 import org.eclipse.che.datasource.shared.ServicePaths;
+import org.eclipse.che.datasource.shared.TextDTO;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequest;
@@ -74,6 +75,16 @@ public class DatasourceClientServiceImpl implements DatasourceClientService {
                                          final @NotNull AsyncRequestCallback<String> asyncRequestCallback) throws RequestException {
         String url = formatUrl(ServicePaths.TEST_DATABASE_CONNECTIVITY_PATH, "", null);
         final AsyncRequest postRequest = asyncRequestFactory.createPostRequest(url, configuration, false);
+        postRequest.send(asyncRequestCallback);
+    }
+
+
+    @Override
+    public void encryptText(final String textToEncrypt,
+                            final AsyncRequestCallback<String> asyncRequestCallback) throws RequestException {
+        TextDTO textDTO = dtoFactory.createDto(TextDTO.class).withValue(textToEncrypt);
+        String url = formatUrl( ServicePaths.ENCRYPT_TEXT_PATH, "", null);
+        AsyncRequest postRequest = asyncRequestFactory.createPostRequest(url, textDTO, false);
         postRequest.send(asyncRequestCallback);
     }
 

@@ -31,4 +31,7 @@ public interface DatasourceClientService {
     void testDatabaseConnectivity(@NotNull DatabaseConfigurationDTO configuration,
                                   @NotNull AsyncRequestCallback<String> asyncRequestCallback) throws RequestException;
 
+    void encryptText(@NotNull String textToEncrypt,
+                     @NotNull AsyncRequestCallback<String> asyncRequestCallback) throws RequestException;
+
 }

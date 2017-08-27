@@ -154,7 +154,7 @@
                 <g:north size="28.0">
                   <g:DockLayoutPanel unit="PCT">
 	                  <g:west size="35">
-	                  	<g:Label text="" />
+	                  	<g:Label ui:field="testConnectionText" text="Test Connection" />
 	                  </g:west>
 	                  <g:center>
 	                  	<g:Button ui:field="testConnectionButton" text="Test Connection" addStyleNames="{datasourceUiResources.datasourceUiCSS.datasourceWizardTestConnection},{style.testButtonText}" />

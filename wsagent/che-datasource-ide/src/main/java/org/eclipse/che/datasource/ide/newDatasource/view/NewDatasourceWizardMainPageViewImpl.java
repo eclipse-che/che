@@ -112,6 +112,7 @@ public class NewDatasourceWizardMainPageViewImpl implements NewDatasourceWizardM
         @Override
         public void onNodeSelected(TreeNodeElement<String> node,
                                    SignalEvent event) {
+            Log.info(NewDatasourceWizardMainPageViewImpl.class,"Node selected");
             String key = node.getData();
             if (key.equals(NOTCLOUD.toString())
                 || key.equals(GOOGLE.toString())
@@ -123,6 +124,7 @@ public class NewDatasourceWizardMainPageViewImpl implements NewDatasourceWizardM
                     connector = ndconnector;
                     if (connector.getTitle().equals(key)) {
                         if (delegate.connectorEnabled(connector.getId())) {
+                            Log.info(NewDatasourceWizardMainPageViewImpl.class,"on connector selected");
                             delegate.onConnectorSelected(connector.getId());
                         } else {
                             categoriesTree.getSelectionModel()

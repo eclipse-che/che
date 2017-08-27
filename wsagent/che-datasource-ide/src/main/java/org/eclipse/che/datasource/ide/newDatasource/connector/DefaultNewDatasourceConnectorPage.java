@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.che.datasource.ide.newDatasource.connector;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.inject.Inject;
 
 import org.eclipse.che.datasource.ide.DatasourceClientService;
 import org.eclipse.che.datasource.ide.InitializableWizardPage;
@@ -21,6 +22,8 @@ import org.eclipse.che.datasource.shared.DatabaseType;
 import org.eclipse.che.datasource.shared.DefaultDatasourceDefinitionDTO;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.util.loging.Log;
+
 import javax.validation.constraints.NotNull;
 
 public class DefaultNewDatasourceConnectorPage extends AbstractNewDatasourceConnectorPage
@@ -29,7 +32,7 @@ public class DefaultNewDatasourceConnectorPage extends AbstractNewDatasourceConn
     private final int          defaultPort;
     private final DatabaseType databaseType;
     private final DtoFactory   dtoFactory;
-
+    protected DefaultNewDatasourceConnectorView view;
     public DefaultNewDatasourceConnectorPage(@NotNull final DefaultNewDatasourceConnectorView view,
                                              @NotNull final DatasourceClientService service,
                                              @NotNull final NotificationManager notificationManager,
@@ -46,7 +49,8 @@ public class DefaultNewDatasourceConnectorPage extends AbstractNewDatasourceConn
 
     @Override
     public void go(final AcceptsOneWidget container) {
-        container.setWidget(getView());
+        Log.info(DefaultNewDatasourceConnectorPage.class,"Inside go set widget");
+        container.setWidget(getView().asWidget());
         updateView();
     }
 
@@ -74,7 +78,7 @@ public class DefaultNewDatasourceConnectorPage extends AbstractNewDatasourceConn
                                                     .withRunnerProcessId(getView().getRunnerProcessId());
 
         result.withUsername(getView().getUsername())
-              .withPassword(getView().getEncryptedPassword());
+              .withPassword(getView().getPassword());
 
         result.withConfigurationConnectorId(dataObject.getConfigurationConnectorId());
         return result;

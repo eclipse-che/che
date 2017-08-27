@@ -17,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.DriverManager;
 
 /**
  * Service for testing the connections with the datasources
@@ -58,6 +59,7 @@ public class TestConnectionService {
 
         try (final Connection connection = this.jdbcConnectionFactory.getDatabaseConnection(databaseConfig)) {
             if (connection != null) {
+                LOG.info("Connection fab Success");
                 testResult.setTestResult(Status.SUCCESS);
             } else {
                 testResult.setTestResult(Status.FAILURE);

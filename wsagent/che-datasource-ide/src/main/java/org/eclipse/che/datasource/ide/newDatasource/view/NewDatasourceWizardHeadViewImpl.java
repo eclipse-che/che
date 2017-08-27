@@ -21,8 +21,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.resources.client.CssResource;
 import com.google.inject.Inject;
 
+import org.eclipse.che.datasource.ide.newDatasource.presenter.NewDatasourceWizardPresenter;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,8 +59,10 @@ public class NewDatasourceWizardHeadViewImpl extends Window implements NewDataso
         switch (place) {
             case "categories":
                 datasourcesPanel.clear();
+                Log.info(NewDatasourceWizardPresenter.class, "catagories clear");
                 break;
             case "settings":
+                Log.info(NewDatasourceWizardPresenter.class, "Inside switch case");
                 settingsPanel.clear();
                 break;
             default:
@@ -68,8 +72,10 @@ public class NewDatasourceWizardHeadViewImpl extends Window implements NewDataso
             switch (place) {
                 case "categories":
                     datasourcesPanel.add(pageCache.get(presenter));
+                    Log.info(NewDatasourceWizardPresenter.class, "catagories cashe");
                     break;
                 case "settings":
+                    Log.info(NewDatasourceWizardPresenter.class, "Inside page cache");
                     settingsPanel.add(pageCache.get(presenter));
                     break;
                 default:
@@ -80,8 +86,10 @@ public class NewDatasourceWizardHeadViewImpl extends Window implements NewDataso
                 case "categories":
                     presenter.go(datasourcesPanel);
                     pageCache.put(presenter, datasourcesPanel.getWidget());
+                    Log.info(NewDatasourceWizardPresenter.class, "catagories show");
                     break;
                 case "settings":
+                    Log.info(NewDatasourceWizardPresenter.class, "presenter.go");
                     presenter.go(settingsPanel);
                     pageCache.put(presenter, settingsPanel.getWidget());
                     break;

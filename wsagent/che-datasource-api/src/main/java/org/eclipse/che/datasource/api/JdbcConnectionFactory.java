@@ -90,11 +90,13 @@ public class JdbcConnectionFactory {
 
         Properties info = new Properties();
         info.setProperty("user", configuration.getUsername());
+        LOG.info("user : "+configuration.getUsername());
 
         final String password = configuration.getPassword();
         if (password != null && !password.isEmpty()) {
             try {
-                info.setProperty("password", encryptTextService.decryptText(password));
+                LOG.info("This is password : " + password);
+                info.setProperty("password", password);
             } catch (final Exception e1) {
                 LOG.error("Couldn't decrypt the password, trying by setting the password without decryption", e1);
                 info.setProperty("password", password);
@@ -103,38 +105,9 @@ public class JdbcConnectionFactory {
             info.setProperty("password", "");
         }
 
-        try {
-            Map<String, String> preferences = getPreferences();
-
-            CheSSLSocketFactoryKeyStoreSettings sslSettings = new CheSSLSocketFactoryKeyStoreSettings();
-            if (configuration.getUseSSL()) {
-                info.setProperty("useSSL", Boolean.toString(configuration.getUseSSL()));
-                String sslKeyStore = preferences.get(KeyStoreObject.SSL_KEY_STORE_PREF_ID);
-                sslSettings.setKeyStorePassword(SslKeyStoreService.getDefaultKeystorePassword());
-                if (sslKeyStore != null) {
-                    sslSettings.setKeyStoreContent(Base64.decodeBase64(sslKeyStore));
-                }
-            }
-
-            if (configuration.getVerifyServerCertificate()) {
-                info.setProperty("verifyServerCertificate", Boolean.toString(configuration.getVerifyServerCertificate()));
-                String trustStore = preferences.get(KeyStoreObject.TRUST_STORE_PREF_ID);
-                sslSettings.setTrustStorePassword(SslKeyStoreService.getDefaultTrustorePassword());
-                if (trustStore != null) {
-                    sslSettings.setTrustStoreContent(Base64.decodeBase64(trustStore));
-                }
-            }
-
-            CheSSLSocketFactory.keystore.set(sslSettings);
-
-
-        } catch (Exception e) {
-            LOG.error("An error occured while getting keystore from Codenvy Preferences, JDBC connection will be performed without SSL", e);
-        }
         String jdbcUrl = getJdbcUrl(configuration);
-        LOG.error("This is JDBC URL : " + jdbcUrl);
-        final Connection connection = DriverManager.getConnection(jdbcUrl, info);
-
+        LOG.info("This is JDBC URL : " + jdbcUrl);
+        final Connection connection = DriverManager.getConnection(jdbcUrl, info.getProperty("user"),info.getProperty("password"));
         return connection;
     }
 
@@ -194,6 +167,7 @@ public class JdbcConnectionFactory {
      * @throws DatabaseDefinitionException in case the datasource configuration is incorrect
      */
     private String getMySQLJdbcUrl(final DatabaseConfigurationDTO configuration) {
+        LOG.info("In mysql jdbc url");
         String url = MessageFormat.format(URL_TEMPLATE_MYSQL,
                 configuration.getHostName(),
                 Integer.toString(configuration.getPort()),

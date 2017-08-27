@@ -21,6 +21,7 @@ import org.eclipse.che.datasource.ide.events.JdbcDriversFetchedEventHandler;
 import org.eclipse.che.datasource.ide.newDatasource.connector.NewDatasourceConnector;
 import org.eclipse.che.datasource.ide.newDatasource.connector.NewDatasourceConnectorAgent;
 import org.eclipse.che.datasource.ide.newDatasource.view.NewDatasourceWizardMainPageView;
+import org.eclipse.che.datasource.ide.newDatasource.view.NewDatasourceWizardMainPageViewImpl;
 import org.eclipse.che.datasource.shared.DatabaseConfigurationDTO;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.util.loging.Log;
@@ -97,12 +98,16 @@ public class NewDatasourceWizardMainPagePresenter extends AbstractWizardPage<Dat
                             /** Update view from data-object. */
     private void updateView() {
         for (NewDatasourceConnector connector : dbConnectors) {
-//            if (dataObject.getConfigurationConnectorId().equals(connector.getId())) {
-//                Log.info(NewDatasourceWizardMainPagePresenter.class,"inside if");
-//
-//                view.selectConnector(connector);
-//                break;
-//            }
+            try{
+                if (dataObject.getConfigurationConnectorId().equals(connector.getId())) {
+                    Log.info(NewDatasourceWizardMainPagePresenter.class,"inside if");
+
+                    view.selectConnector(connector);
+                    break;
+                }
+            }catch (Exception e){
+                Log.error(NewDatasourceWizardMainPagePresenter.class,"Update view error: "+e.getLocalizedMessage());
+            }
         }
     }
 
@@ -112,6 +117,7 @@ public class NewDatasourceWizardMainPagePresenter extends AbstractWizardPage<Dat
 
         for (NewDatasourceConnector connector : dbConnectors) {
             if (id.equals(connector.getId())) {
+                Log.info(NewDatasourceWizardMainPageViewImpl.class, "on connector selected presenter"+id);
                 selectedConnector = connector;
                 break;
             }
