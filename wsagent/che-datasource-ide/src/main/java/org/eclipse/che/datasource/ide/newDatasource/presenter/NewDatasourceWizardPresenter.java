@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,21 +16,14 @@ import org.eclipse.che.datasource.ide.newDatasource.InitializableWizardDialog;
 import org.eclipse.che.datasource.ide.newDatasource.NewDatasourceWizard;
 import org.eclipse.che.datasource.ide.newDatasource.NewDatasourceWizardFactory;
 import org.eclipse.che.datasource.ide.newDatasource.connector.AbstractNewDatasourceConnectorPage;
-import org.eclipse.che.datasource.ide.newDatasource.connector.DefaultNewDatasourceConnectorPage;
 import org.eclipse.che.datasource.ide.newDatasource.connector.NewDatasourceConnector;
 import org.eclipse.che.datasource.ide.newDatasource.connector.NewDatasourceConnectorAgent;
-import org.eclipse.che.datasource.ide.newDatasource.presenter.NewDatasourceWizardMainPagePresenter;
 import org.eclipse.che.datasource.ide.newDatasource.view.NewDatasourceWizardHeadView;
 import org.eclipse.che.datasource.shared.DatabaseConfigurationDTO;
-import org.eclipse.che.datasource.shared.TextDTO;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.StringUnmarshaller;
-import org.eclipse.che.ide.util.loging.Log;
-import com.google.gwt.http.client.RequestException;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -76,28 +69,7 @@ public class NewDatasourceWizardPresenter implements InitializableWizardDialog<D
 
     @Override
     public void onSaveClicked() {
-//        if (connectorPage.getView().isPasswordFieldDirty()) {
-//            try {
-//                service.encryptText(connectorPage.getView().getPassword(), new AsyncRequestCallback<String>(new StringUnmarshaller()) {
-//                    @Override
-//                    protected void onSuccess(final String encryptedText) {
-//                        TextDTO encryptedTextDTO = dtoFactory.createDtoFromJson(encryptedText, TextDTO.class);
-//                        connectorPage.getView().setEncryptedPassword(encryptedTextDTO.getValue(), false);
-//
-//                        completeWizard();
-//                    }
-//
-//                    @Override
-//                    protected void onFailure(Throwable exception) {
-//                        Log.error(DefaultNewDatasourceConnectorViewImpl.class, exception);
-//                    }
-//                });
-//            } catch (RequestException e2) {
-//                Log.error(DefaultNewDatasourceConnectorViewImpl.class, e2);
-//            }
-//        } else {
-//            completeWizard();
-//        }
+    //TODO : Have to implement
     }
 
     private void completeWizard() {
@@ -181,15 +153,9 @@ public class NewDatasourceWizardPresenter implements InitializableWizardDialog<D
         }
 
         NewDatasourceConnector connector = newDatasourceConnectorAgent.getConnector(id);
-        Log.info(NewDatasourceWizardPresenter.class, "id is "+id);
-        Log.info(NewDatasourceWizardPresenter.class, connector.getClass());
         if (connector != null) {
             for (Provider<? extends AbstractNewDatasourceConnectorPage> provider : connector.getWizardPages()) {
-                Log.info(NewDatasourceWizardPresenter.class, "Got Connector page");
-                Log.info(NewDatasourceWizardPresenter.class, provider.getClass());
                 connectorPage = provider.get();
-                Log.info(NewDatasourceWizardPresenter.class, connectorPage.getClass());
-                Log.info(NewDatasourceWizardPresenter.class, "connector page class is here");
                 connectorPage.setContext(wizard.getContext());
                 connectorPage.setUpdateDelegate(this);
                 connectorPage.init(wizard.getDataObject());
@@ -208,8 +174,6 @@ public class NewDatasourceWizardPresenter implements InitializableWizardDialog<D
     }
 
     private void initPage(final WizardPage page) {
-        Log.info(NewDatasourceWizardPresenter.class, "Initializing wizard page : " + page.getClass());
         ((InitializableWizardPage)page).initPage(configuration);
-        Log.info(NewDatasourceWizardPresenter.class, "Wizard page initialization done");
     }
 }

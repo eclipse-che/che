@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.che.datasource.ide.newDatasource.connector;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -31,7 +30,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.datasource.ide.DatasourceUiResources;
-import org.eclipse.che.ide.util.loging.Log;
 
 import javax.annotation.Nullable;
 
@@ -249,13 +247,11 @@ public class DefaultNewDatasourceConnectorViewImpl extends Composite implements 
 
     @UiHandler("testConnectionButton")
     void handleClick(ClickEvent e) {
-        Log.info(DefaultNewDatasourceConnectorViewImpl.class,"button clicked");
         delegate.onClickTestConnectionButton();
     }
 
     @UiHandler("testConnectionText")
     void handleTextClick(ClickEvent e) {
-        Log.info(DefaultNewDatasourceConnectorViewImpl.class,"button clicked");
         delegate.onClickTestConnectionButton();
     }
 
@@ -287,7 +283,6 @@ public class DefaultNewDatasourceConnectorViewImpl extends Composite implements 
 
     @UiHandler("passwordField")
     public void handlePasswordFieldChanges(ChangeEvent event) {
-        Log.info(DefaultNewDatasourceConnectorViewImpl.class, "Password field changed " + passwordField.getText());
         passwordFieldIsDirty = true;
     }
 

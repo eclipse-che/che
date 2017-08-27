@@ -27,9 +27,7 @@ import elemental.html.SpanElement;
 
 
 import org.eclipse.che.datasource.ide.newDatasource.connector.NewDatasourceConnector;
-import org.eclipse.che.datasource.ide.newDatasource.presenter.NewDatasourceWizardMainPagePresenter;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.collections.Array;
 import org.eclipse.che.ide.ui.tree.NodeDataAdapter;
 import org.eclipse.che.ide.ui.tree.NodeRenderer;
 import org.eclipse.che.ide.ui.tree.Tree;

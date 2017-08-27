@@ -52,7 +52,6 @@ public class NewDatasourceWizardAction extends Action {
      */
     public void actionPerformed() {
         try {
-
             availableJdbcDrivers.fetch();
             wizard.show();
         } catch (final Exception exception) {

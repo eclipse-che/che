@@ -20,9 +20,6 @@ import org.eclipse.che.datasource.shared.DatabaseType;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 
-/**
- * Created by Wafa on 20/01/14.
- */
 public class MysqlDatasourceConnectorPage extends DefaultNewDatasourceConnectorPage {
 
     @Inject

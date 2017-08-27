@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2017 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,10 +18,8 @@ import org.eclipse.che.datasource.ide.newDatasource.NewDatasourceWizardMessages;
 import org.eclipse.che.datasource.shared.ConnectionTestResultDTO;
 import org.eclipse.che.datasource.shared.DatabaseConfigurationDTO;
 import org.eclipse.che.datasource.shared.DatabaseType;
-import org.eclipse.che.datasource.shared.TextDTO;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
@@ -65,7 +63,6 @@ public abstract class AbstractNewDatasourceConnectorPage extends AbstractWizardP
 
     @Override
     public void go(final AcceptsOneWidget container) {
-        Log.info(AbstractNewDatasourceConnectorPage.class,"Executing go");
         container.setWidget(getView().asWidget());
     }
 
@@ -84,7 +81,6 @@ public abstract class AbstractNewDatasourceConnectorPage extends AbstractWizardP
     public void onClickTestConnectionButton() {
         if (getView().isPasswordFieldDirty()) {
             getView().setEncryptedPassword(getView().getPassword(), false);
-            Log.info(AbstractNewDatasourceConnectorPage.class,"clicked");
             doOnClickTestConnectionButton();
 
         }
@@ -96,42 +92,29 @@ public abstract class AbstractNewDatasourceConnectorPage extends AbstractWizardP
 
     public void doOnClickTestConnectionButton() {
         DatabaseConfigurationDTO configuration = getConfiguredDatabase();
-        Log.info(AbstractNewDatasourceConnectorPage.class,"config done");
 
         final Notification connectingNotification = new Notification(messages.startConnectionTest());
-//        notificationManager.showNotification(connectingNotification);
 
         try {
-            Log.info(AbstractNewDatasourceConnectorPage.class,"try service");
 
             service.testDatabaseConnectivity(configuration, new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                 @Override
                 protected void onSuccess(String result) {
-                    Log.info(AbstractNewDatasourceConnectorPage.class,"Success");
 
                     final ConnectionTestResultDTO testResult = dtoFactory.createDtoFromJson(result, ConnectionTestResultDTO.class);
                     if (ConnectionTestResultDTO.Status.SUCCESS.equals(testResult.getTestResult())) {
 
                         getView().onTestConnectionSuccess();
-//                        connectingNotification.setState(messages.connectionTestSuccessNotification());
-//                        connectingNotification.setStatus(Notification.Status.FINISHED);
                     } else {
                         getView().onTestConnectionFailure(messages.connectionTestFailureSuccessMessage() + " "
                                                           + testResult.getFailureMessage());
-//                        connectingNotification.setMessage(messages.connectionTestFailureSuccessNotification());
-//                        connectingNotification.setType(Type.ERROR);
-//                        connectingNotification.setStatus(Notification.S`tatus.FINISHED);
                     }
                 }
 
                 @Override
                 protected void onFailure(final Throwable exception) {
-                    Log.info(AbstractNewDatasourceConnectorPage.class,"Failure");
 
                     getView().onTestConnectionFailure(messages.connectionTestFailureSuccessMessage());
-//                    connectingNotification.setMessage(messages.connectionTestFailureSuccessNotification());
-//                    connectingNotification.setType(Type.ERROR);
-//                    connectingNotification.setStatus(Notification.Status.FINISHED);
                 }
             }
 
@@ -139,9 +122,6 @@ public abstract class AbstractNewDatasourceConnectorPage extends AbstractWizardP
         } catch (final RequestException e) {
             Log.debug(AbstractNewDatasourceConnectorPage.class, e.getMessage());
             getView().onTestConnectionFailure(messages.connectionTestFailureSuccessMessage());
-//            connectingNotification.setMessage(messages.connectionTestFailureSuccessNotification());
-//            connectingNotification.setType(Type.ERROR);
-//            connectingNotification.setStatus(Notification.Status.FINISHED);
         }
     }
 

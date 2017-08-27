@@ -11,7 +11,6 @@
 package org.eclipse.che.datasource.ide.newDatasource.connector;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.inject.Inject;
 
 import org.eclipse.che.datasource.ide.DatasourceClientService;
 import org.eclipse.che.datasource.ide.InitializableWizardPage;
@@ -22,7 +21,6 @@ import org.eclipse.che.datasource.shared.DatabaseType;
 import org.eclipse.che.datasource.shared.DefaultDatasourceDefinitionDTO;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
 
@@ -49,7 +47,6 @@ public class DefaultNewDatasourceConnectorPage extends AbstractNewDatasourceConn
 
     @Override
     public void go(final AcceptsOneWidget container) {
-        Log.info(DefaultNewDatasourceConnectorPage.class,"Inside go set widget");
         container.setWidget(getView().asWidget());
         updateView();
     }
