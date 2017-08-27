@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.che.datasource.api;
 
 import com.google.common.base.Throwables;
@@ -17,12 +27,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.DriverManager;
 
 /**
  * Service for testing the connections with the datasources
  *
- * @author "Sudaraka Jayathilaka"
  */
 @Path(ServicePaths.TEST_DATABASE_CONNECTIVITY_PATH)
 public class TestConnectionService {
@@ -59,11 +67,9 @@ public class TestConnectionService {
 
         try (final Connection connection = this.jdbcConnectionFactory.getDatabaseConnection(databaseConfig)) {
             if (connection != null) {
-                LOG.info("Connection fab Success");
                 testResult.setTestResult(Status.SUCCESS);
             } else {
                 testResult.setTestResult(Status.FAILURE);
-                // no message
             }
         } catch (final SQLException e) {
             LOG.debug("Connection test failed ; error messages : {} | {}", e.getMessage());
