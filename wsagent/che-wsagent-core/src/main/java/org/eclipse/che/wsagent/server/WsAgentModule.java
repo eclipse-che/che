@@ -25,22 +25,23 @@ import org.eclipse.che.inject.DynaModule;
  */
 @DynaModule
 public class WsAgentModule extends AbstractModule {
-  @Override
-  protected void configure() {
-    bind(ApiInfoService.class);
-    install(new org.eclipse.che.security.oauth.OAuthAgentModule());
-    install(new org.eclipse.che.api.core.rest.CoreRestModule());
-    install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
-    install(new org.eclipse.che.api.project.server.ProjectApiModule());
-    install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
-    install(new org.eclipse.che.plugin.ssh.key.SshModule());
-    install(new org.eclipse.che.api.languageserver.LanguageServerModule());
-    install(new org.eclipse.che.api.debugger.server.DebuggerModule());
-    install(new org.eclipse.che.api.git.GitModule());
-    install(new org.eclipse.che.git.impl.jgit.JGitModule());
-    install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
-    install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
-  }
+    @Override
+    protected void configure() {
+        bind(ApiInfoService.class);
+        install(new org.eclipse.che.security.oauth.OAuthAgentModule());
+        install(new org.eclipse.che.api.core.rest.CoreRestModule());
+        install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
+        install(new org.eclipse.che.api.project.server.ProjectApiModule());
+        install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
+        install(new org.eclipse.che.plugin.ssh.key.SshModule());
+        install(new org.eclipse.che.api.languageserver.LanguageServerModule());
+        install(new org.eclipse.che.api.debugger.server.DebuggerModule());
+        install(new org.eclipse.che.api.git.GitModule());
+        install(new org.eclipse.che.datasource.api.DatasourceModule());
+        install(new org.eclipse.che.git.impl.jgit.JGitModule());
+        install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
+        install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
+    }
 
   //it's need for WSocketEventBusClient and in the future will be replaced with the property
   @Named("notification.client.event_subscriptions")

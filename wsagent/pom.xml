@@ -43,5 +43,10 @@
         <module>che-core-api-testing-shared</module>
         <module>wsagent-local</module>
         <module>che-wsagent-core</module>
+        <module>che-datasource-shared</module>
+        <module>che-datasource-api</module>
+        <module>che-datasource-ssl-socket-factory</module>
+        <module>che-datasource-ide</module>
+        <module>che-datasource-client-store</module>
     </modules>
 </project>
