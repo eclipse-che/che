@@ -97,6 +97,14 @@ import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.params.TagCreateParams;
 import org.eclipse.che.api.git.shared.*;
 import org.eclipse.che.api.git.shared.RebaseResponse.RebaseStatus;
+import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.api.git.shared.RemoteReference;
+import org.eclipse.che.api.git.shared.RevertResult;
+import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.git.shared.ShowFileContentResponse;
+import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.git.shared.StatusFormat;
+import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.event.GitCommitEvent;
 import org.eclipse.che.api.git.shared.event.GitRepositoryInitializedEvent;
 import org.eclipse.che.api.git.shared.event.GitResetEvent;
@@ -120,6 +128,7 @@ import org.eclipse.jgit.api.RebaseCommand;
 import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
+import org.eclipse.jgit.api.RevertCommand;
 import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.TagCommand;
@@ -148,6 +157,7 @@ import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.merge.ResolveMerger;
+import org.eclipse.jgit.merge.ResolveMerger.MergeFailureReason;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
@@ -1669,6 +1679,66 @@ class JGitConnection implements GitConnection {
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
     }
+  }
+
+  @Override
+  public RevertResult revert(String commit) throws GitException {
+    RevCommit revCommit;
+    RevertCommand revertCommand = getGit().revert();
+    try {
+      revertCommand.include(this.repository.resolve(commit));
+      revCommit = revertCommand.call();
+    } catch (IOException | GitAPIException exception) {
+      throw new GitException(exception.getMessage(), exception);
+    }
+
+    Map<String, RevertResult.RevertStatus> conflicts =
+        new HashMap<String, RevertResult.RevertStatus>();
+    if (revertCommand.getFailingResult() != null) {
+      Map<String, MergeFailureReason> failingPaths =
+          revertCommand.getFailingResult().getFailingPaths();
+      if (failingPaths != null && !failingPaths.isEmpty()) {
+        for (Map.Entry<String, MergeFailureReason> failingPathEntry : failingPaths.entrySet()) {
+          RevertResult.RevertStatus revertStatus = RevertResult.RevertStatus.FAILED;
+          switch (failingPathEntry.getValue()) {
+            case COULD_NOT_DELETE:
+              revertStatus = RevertResult.RevertStatus.COULD_NOT_DELETE;
+              break;
+            case DIRTY_INDEX:
+              revertStatus = RevertResult.RevertStatus.DIRTY_INDEX;
+              break;
+            case DIRTY_WORKTREE:
+              revertStatus = RevertResult.RevertStatus.DIRTY_WORKTREE;
+              break;
+          }
+          conflicts.put(failingPathEntry.getKey(), revertStatus);
+        }
+      }
+    }
+    List<String> unmergedPaths = revertCommand.getUnmergedPaths();
+    if (unmergedPaths != null && !unmergedPaths.isEmpty()) {
+      for (String unmergedPath : unmergedPaths) {
+        if (!conflicts.containsKey(unmergedPath)) {
+          conflicts.put(unmergedPath, RevertResult.RevertStatus.FAILED);
+        }
+      }
+    }
+
+    List<Ref> jGitRevertedCommits = revertCommand.getRevertedRefs();
+    List<String> revertedCommits = new ArrayList<String>();
+    if (jGitRevertedCommits != null) {
+      for (Ref ref : jGitRevertedCommits) {
+        revertedCommits.add(ref.getObjectId().name());
+      }
+    }
+    String newHead = null;
+    if (revCommit != null) {
+      newHead = revCommit.getId().getName();
+    }
+    return newDto(RevertResult.class)
+        .withRevertedCommits(revertedCommits)
+        .withConflicts(conflicts)
+        .withNewHead(newHead);
   }
 
   @Override
