@@ -1,12 +1,12 @@
 /*
  * Copyright 2009 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -27,7 +27,7 @@ public class AbstractWorker extends JavaScriptObject {
 
   /**
    * Takes care of reporting exceptions to the console in hosted mode.
-   * 
+   *
    * @param listener the listener object to call back.
    * @param port argument from the callback.
    */
@@ -49,9 +49,8 @@ public class AbstractWorker extends JavaScriptObject {
   }
 
   /**
-   * A handler that will be called if the worker encounters an error. Replaces
-   * any existing handler.
-   * 
+   * A handler that will be called if the worker encounters an error. Replaces any existing handler.
+   *
    * @param handler handler to set when a worker encounters an error.
    */
   public final native void setOnError(ErrorHandler handler) /*-{
@@ -59,5 +58,4 @@ public class AbstractWorker extends JavaScriptObject {
       @com.google.gwt.webworker.client.AbstractWorker::onErrorImpl(Lcom/google/gwt/webworker/client/ErrorHandler;Lcom/google/gwt/webworker/client/ErrorEvent;)(handler, event);
     }
   }-*/;
-
 }

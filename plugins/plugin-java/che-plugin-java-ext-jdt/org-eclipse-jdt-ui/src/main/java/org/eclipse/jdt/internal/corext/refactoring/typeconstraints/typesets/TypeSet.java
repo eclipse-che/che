@@ -1,251 +1,209 @@
-/*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c) 2000,
+ * 2011 IBM Corporation and others. All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0 which accompanies this
+ * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Robert M. Fuhrer (rfuhrer@watson.ibm.com), IBM Corporation - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Robert M. Fuhrer (rfuhrer@watson.ibm.com), IBM Corporation - initial API and
+ * implementation *****************************************************************************
+ */
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
 
+import java.util.Iterator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
 
-import java.util.Iterator;
-
 public abstract class TypeSet implements ITypeSet {
 
-	public TType chooseSingleType() {
-		return null;
-	}
+  public TType chooseSingleType() {
+    return null;
+  }
 
-	public ITypeSet restrictedTo(ITypeSet restrictionSet) {
-		throw new UnsupportedOperationException();
-	}
+  public ITypeSet restrictedTo(ITypeSet restrictionSet) {
+    throw new UnsupportedOperationException();
+  }
 
-	protected TType getJavaLangObject() {
-		return fTypeSetEnvironment.getJavaLangObject();
-	}
+  protected TType getJavaLangObject() {
+    return fTypeSetEnvironment.getJavaLangObject();
+  }
 
-	protected TypeSetEnvironment getTypeSetEnvironment() {
-		return fTypeSetEnvironment;
-	}
+  protected TypeSetEnvironment getTypeSetEnvironment() {
+    return fTypeSetEnvironment;
+  }
 
-	static private int sID= 0;
+  private static int sID = 0;
 
-	static public int getCount() { return sID; }
-	static public void resetCount() { sID= 0; }
+  public static int getCount() {
+    return sID;
+  }
 
-	/**
-	 * An ID unique to this EnumeratedTypeSet instance, to aid in debugging the sharing
-	 * of TypeSets across ConstraintVariables in a TypeEstimateEnvironment.
-	 */
-	protected final int fID;
-	private final TypeSetEnvironment fTypeSetEnvironment;
+  public static void resetCount() {
+    sID = 0;
+  }
 
-	protected TypeSet(TypeSetEnvironment typeSetEnvironment) {
-		fTypeSetEnvironment= typeSetEnvironment;
-		fID= sID++;
-	}
+  /**
+   * An ID unique to this EnumeratedTypeSet instance, to aid in debugging the sharing of TypeSets
+   * across ConstraintVariables in a TypeEstimateEnvironment.
+   */
+  protected final int fID;
 
-	/**
-	 * @return <code>true</code> iff this set represents the universe of TTypes
-	 */
-	abstract public boolean isUniverse();
+  private final TypeSetEnvironment fTypeSetEnvironment;
 
-	abstract public TypeSet makeClone();
+  protected TypeSet(TypeSetEnvironment typeSetEnvironment) {
+    fTypeSetEnvironment = typeSetEnvironment;
+    fID = sID++;
+  }
 
-	/**
-	 * @param s2 another type set 
-	 * @return intersection of this type set with the given type set
-	 */
-	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
-		return null;
-	}
-	
-	@Override
-	public abstract boolean equals(Object obj);
-	
-	@Override
-	public abstract int hashCode();
+  /** @return <code>true</code> iff this set represents the universe of TTypes */
+  public abstract boolean isUniverse();
 
-	/**
-	 * Computes and returns a <em>new</em> TypeSet representing the intersection of the
-	 * receiver with s2. Does not modify the receiver or argument sets.
-	 * @param s2 another type set
-	 * @return the new TypeSet
-	 */
-	public TypeSet intersectedWith(TypeSet s2) {
-		if (s2.isUniverse())
-			return makeClone();
-		else if (isUniverse())
-			return s2.makeClone();
-		else if (isEmpty() || s2.isEmpty())
-			return getTypeSetEnvironment().getEmptyTypeSet();
-		else if (isSingleton()) {
-			if (s2.contains(anyMember()))
-				return makeClone();
-			else
-				return getTypeSetEnvironment().getEmptyTypeSet();
-		} else if (s2.isSingleton()) {
-				if (contains(s2.anyMember()))
-					return s2.makeClone();
-				else
-					return getTypeSetEnvironment().getEmptyTypeSet();
-		} else if (s2 instanceof TypeSetIntersection) {
-			TypeSetIntersection x= (TypeSetIntersection) s2;
-			// xsect(A,xsect(A,B)) = xsect(A,B) and
-			// xsect(B,xsect(A,B)) = xsect(A,B)
-			if (x.getLHS().equals(this) || x.getRHS().equals(this))
-				return x;
-		}
+  public abstract TypeSet makeClone();
 
-		TypeSet result= specialCasesIntersectedWith(s2);
+  /**
+   * @param s2 another type set
+   * @return intersection of this type set with the given type set
+   */
+  protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
+    return null;
+  }
 
-		if (result != null)
-			return result;
-		else
-			return new TypeSetIntersection(this, s2);
-	}
+  @Override
+  public abstract boolean equals(Object obj);
 
-	/**
-	 * Returns the TypeSet resulting from union'ing the receiver with the argument.
-	 * Does not modify the receiver or the argument sets.
-	 * 
-	 * @param that another type set
-	 * @return the union type set
-	 */
-	public TypeSet addedTo(TypeSet that) {
-		if (isUniverse() || that.isUniverse())
-			return getTypeSetEnvironment().getUniverseTypeSet();
-		if ((this instanceof EnumeratedTypeSet || this instanceof SingletonTypeSet) &&
-			(that instanceof EnumeratedTypeSet || that instanceof SingletonTypeSet)) {
-			EnumeratedTypeSet result= enumerate();
+  @Override
+  public abstract int hashCode();
 
-			result.addAll(that);
-			return result;
-		}
-		return new TypeSetUnion(this, that);
-	}
+  /**
+   * Computes and returns a <em>new</em> TypeSet representing the intersection of the receiver with
+   * s2. Does not modify the receiver or argument sets.
+   *
+   * @param s2 another type set
+   * @return the new TypeSet
+   */
+  public TypeSet intersectedWith(TypeSet s2) {
+    if (s2.isUniverse()) return makeClone();
+    else if (isUniverse()) return s2.makeClone();
+    else if (isEmpty() || s2.isEmpty()) return getTypeSetEnvironment().getEmptyTypeSet();
+    else if (isSingleton()) {
+      if (s2.contains(anyMember())) return makeClone();
+      else return getTypeSetEnvironment().getEmptyTypeSet();
+    } else if (s2.isSingleton()) {
+      if (contains(s2.anyMember())) return s2.makeClone();
+      else return getTypeSetEnvironment().getEmptyTypeSet();
+    } else if (s2 instanceof TypeSetIntersection) {
+      TypeSetIntersection x = (TypeSetIntersection) s2;
+      // xsect(A,xsect(A,B)) = xsect(A,B) and
+      // xsect(B,xsect(A,B)) = xsect(A,B)
+      if (x.getLHS().equals(this) || x.getRHS().equals(this)) return x;
+    }
 
-	/**
-	 * @return a new TypeSet representing the set of all sub-types of the
-	 * types in the receiver.
-	 */
-	public TypeSet subTypes() {
-		if (isUniverse() || contains(getJavaLangObject()))
-			return getTypeSetEnvironment().getUniverseTypeSet();
+    TypeSet result = specialCasesIntersectedWith(s2);
 
-		if (isSingleton())
-			return possiblyArraySubTypeSetFor(anyMember());
+    if (result != null) return result;
+    else return new TypeSetIntersection(this, s2);
+  }
 
-		return getTypeSetEnvironment().createSubTypesSet(this);
-	}
+  /**
+   * Returns the TypeSet resulting from union'ing the receiver with the argument. Does not modify
+   * the receiver or the argument sets.
+   *
+   * @param that another type set
+   * @return the union type set
+   */
+  public TypeSet addedTo(TypeSet that) {
+    if (isUniverse() || that.isUniverse()) return getTypeSetEnvironment().getUniverseTypeSet();
+    if ((this instanceof EnumeratedTypeSet || this instanceof SingletonTypeSet)
+        && (that instanceof EnumeratedTypeSet || that instanceof SingletonTypeSet)) {
+      EnumeratedTypeSet result = enumerate();
 
-	private TypeSet possiblyArraySubTypeSetFor(TType t) {
-		// In Java, subTypes(x[]) == (subTypes(x))[]
-//		if (t.isArrayType()) {
-//			ArrayType at= (ArrayType) t;
-//
-//			return new ArrayTypeSet(possiblyArraySubTypeSetFor(at.getArrayElementType()));
-//		} else
+      result.addAll(that);
+      return result;
+    }
+    return new TypeSetUnion(this, that);
+  }
 
-		return getTypeSetEnvironment().createSubTypesOfSingleton(t);
-	}
+  /** @return a new TypeSet representing the set of all sub-types of the types in the receiver. */
+  public TypeSet subTypes() {
+    if (isUniverse() || contains(getJavaLangObject()))
+      return getTypeSetEnvironment().getUniverseTypeSet();
 
-	private TypeSet possiblyArraySuperTypeSetFor(TType t) {
-		// In Java, superTypes(x[]) == (superTypes(x))[] union {Object}
-//		if (t.isArrayType()) {
-//			ArrayType at= (ArrayType) t;
-//
-//			return new ArraySuperTypeSet(possiblyArraySuperTypeSetFor(at.getArrayElementType()));
-//		} else
-			return getTypeSetEnvironment().createSuperTypesOfSingleton(t);
-	}
+    if (isSingleton()) return possiblyArraySubTypeSetFor(anyMember());
 
-	/**
-	 * @return a new TypeSet representing the set of all super-types of the
-	 * types in the receiver
-	 */
-	public TypeSet superTypes() {
-		if (isUniverse())
-			return getTypeSetEnvironment().getUniverseTypeSet();
+    return getTypeSetEnvironment().createSubTypesSet(this);
+  }
 
-		if (isSingleton())
-			return possiblyArraySuperTypeSetFor(anyMember());
+  private TypeSet possiblyArraySubTypeSetFor(TType t) {
+    // In Java, subTypes(x[]) == (subTypes(x))[]
+    //		if (t.isArrayType()) {
+    //			ArrayType at= (ArrayType) t;
+    //
+    //			return new ArrayTypeSet(possiblyArraySubTypeSetFor(at.getArrayElementType()));
+    //		} else
 
-		return getTypeSetEnvironment().createSuperTypesSet(this);
-	}
+    return getTypeSetEnvironment().createSubTypesOfSingleton(t);
+  }
 
-	/**
-	 * @return true iff the type set contains no types
-	 */
-	abstract public boolean isEmpty();
+  private TypeSet possiblyArraySuperTypeSetFor(TType t) {
+    // In Java, superTypes(x[]) == (superTypes(x))[] union {Object}
+    //		if (t.isArrayType()) {
+    //			ArrayType at= (ArrayType) t;
+    //
+    //			return new ArraySuperTypeSet(possiblyArraySuperTypeSetFor(at.getArrayElementType()));
+    //		} else
+    return getTypeSetEnvironment().createSuperTypesOfSingleton(t);
+  }
 
-	/**
-	 * @return the types in the upper bound of this set
-	 */
-	abstract public TypeSet upperBound();
+  /** @return a new TypeSet representing the set of all super-types of the types in the receiver */
+  public TypeSet superTypes() {
+    if (isUniverse()) return getTypeSetEnvironment().getUniverseTypeSet();
 
-	/**
-	 * @return the types in the lower bound of this set
-	 */
-	abstract public TypeSet lowerBound();
+    if (isSingleton()) return possiblyArraySuperTypeSetFor(anyMember());
 
-	/**
-	 * @return true iff this TypeSet has a unique lower bound
-	 */
-	abstract public boolean hasUniqueLowerBound();
+    return getTypeSetEnvironment().createSuperTypesSet(this);
+  }
 
-	/**
-	 * @return true iff this TypeSet has a unique upper bound other than
-	 * java.lang.Object
-	 */
-	abstract public boolean hasUniqueUpperBound();
+  /** @return true iff the type set contains no types */
+  public abstract boolean isEmpty();
 
-	/**
-	 * @return the unique lower bound of this set of types, if it has one,
-	 * or null otherwise
-	 */
-	abstract public TType uniqueLowerBound();
+  /** @return the types in the upper bound of this set */
+  public abstract TypeSet upperBound();
 
-	/**
-	 * @return the unique upper bound of this set of types, if it has one,
-	 * or null otherwise
-	 */
-	abstract public TType uniqueUpperBound();
+  /** @return the types in the lower bound of this set */
+  public abstract TypeSet lowerBound();
 
-	/**
-	 * @param t a type
-	 * @return true iff the type set contains the given type
-	 */
-	abstract public boolean contains(TType t);
+  /** @return true iff this TypeSet has a unique lower bound */
+  public abstract boolean hasUniqueLowerBound();
 
-	/**
-	 * @param s another type set
-	 * @return true iff the type set contains all of the types in the given TypeSet
-	 */
-	abstract public boolean containsAll(TypeSet s);
+  /** @return true iff this TypeSet has a unique upper bound other than java.lang.Object */
+  public abstract boolean hasUniqueUpperBound();
 
-	/**
-	 * @return an iterator over the types in the receiver
-	 */
-	abstract public Iterator<TType> iterator();
+  /** @return the unique lower bound of this set of types, if it has one, or null otherwise */
+  public abstract TType uniqueLowerBound();
 
-	/**
-	 * @return a new TypeSet enumerating the receiver's contents
-	 */
-	abstract public EnumeratedTypeSet enumerate();
+  /** @return the unique upper bound of this set of types, if it has one, or null otherwise */
+  public abstract TType uniqueUpperBound();
 
-	/**
-	 * @return true iff the given set has precisely one element
-	 */
-	abstract public boolean isSingleton();
+  /**
+   * @param t a type
+   * @return true iff the type set contains the given type
+   */
+  public abstract boolean contains(TType t);
 
-	/**
-	 * @return an arbitrary member of the given Typeset
-	 */
-	abstract public TType anyMember();
+  /**
+   * @param s another type set
+   * @return true iff the type set contains all of the types in the given TypeSet
+   */
+  public abstract boolean containsAll(TypeSet s);
+
+  /** @return an iterator over the types in the receiver */
+  public abstract Iterator<TType> iterator();
+
+  /** @return a new TypeSet enumerating the receiver's contents */
+  public abstract EnumeratedTypeSet enumerate();
+
+  /** @return true iff the given set has precisely one element */
+  public abstract boolean isSingleton();
+
+  /** @return an arbitrary member of the given Typeset */
+  public abstract TType anyMember();
 }

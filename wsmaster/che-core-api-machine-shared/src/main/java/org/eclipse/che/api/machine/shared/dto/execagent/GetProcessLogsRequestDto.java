@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.machine.shared.dto.execagent;
 
 import org.eclipse.che.api.machine.shared.dto.execagent.event.DtoWithPid;
@@ -15,25 +15,25 @@ import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface GetProcessLogsRequestDto extends DtoWithPid {
-    GetProcessLogsRequestDto withPid(int pid);
+  GetProcessLogsRequestDto withPid(int pid);
 
-    String getFrom();
+  String getFrom();
 
-    GetProcessLogsRequestDto withFrom(String from);
+  GetProcessLogsRequestDto withFrom(String from);
 
-    String getTill();
+  String getTill();
 
-    GetProcessLogsRequestDto withTill(String till);
+  GetProcessLogsRequestDto withTill(String till);
 
-    String getFormat();
+  String getFormat();
 
-    GetProcessLogsRequestDto withFormat(String format);
+  GetProcessLogsRequestDto withFormat(String format);
 
-    int getLimit();
+  int getLimit();
 
-    GetProcessLogsRequestDto withLimit(int limit);
+  GetProcessLogsRequestDto withLimit(int limit);
 
-    int getSkip();
+  int getSkip();
 
-    GetProcessLogsRequestDto withSkip(int limit);
+  GetProcessLogsRequestDto withSkip(int limit);
 }

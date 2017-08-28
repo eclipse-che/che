@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -14,21 +14,25 @@ import {CheRemoteLogin} from './che-remote-login';
 import {CheRemoteRecipe} from './che-remote-recipe';
 import {CheRemoteWorkspace} from './che-remote-workspace';
 import {CheRemoteProject} from './che-remote-project';
+import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
 
 /**
  * This class is handling the call to remote API
  * @author Florent Benoit
  */
 export class CheRemote {
+  private $resource: ng.resource.IResourceService;
+  private $q: ng.IQService;
+  private cheJsonRpcApi: CheJsonRpcApi;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource, $q, cheWebsocket) {
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, cheJsonRpcApi: CheJsonRpcApi) {
     this.$resource = $resource;
     this.$q = $q;
-    this.cheWebsocket = cheWebsocket;
+    this.cheJsonRpcApi = cheJsonRpcApi;
   }
 
   /**
@@ -38,7 +42,7 @@ export class CheRemote {
    * @param password the password on the remote server
    * @returns {*|promise|N|n}
    */
-  newAuth(url, login, password) {
+  newAuth(url: string, login: string, password: string): ng.IPromise<any> {
     let remoteLogin = new CheRemoteLogin(this.$resource, url);
     return remoteLogin.authenticate(login, password);
   }
@@ -49,8 +53,8 @@ export class CheRemote {
    * @param token
    * @returns {*}
    */
-  newWorkspace(remoteConfig) {
-    return new CheRemoteWorkspace(this.$resource, this.$q, this.cheWebsocket, remoteConfig);
+  newWorkspace(remoteConfig: any): CheRemoteWorkspace {
+    return new CheRemoteWorkspace(this.$resource, this.$q, this.cheJsonRpcApi, remoteConfig);
   }
 
   /**
@@ -59,7 +63,7 @@ export class CheRemote {
    * @param token
    * @returns {*}
    */
-  newProject(remoteConfig) {
+  newProject(remoteConfig: any): CheRemoteProject {
     return new CheRemoteProject(this.$resource, remoteConfig);
   }
 
@@ -69,7 +73,7 @@ export class CheRemote {
    * @param token
    * @returns {*}
    */
-  newRecipe(remoteConfig) {
-    return new CheRemoteRecipe(this.$resource, remoteConfig)
+  newRecipe(remoteConfig: any): CheRemoteRecipe {
+    return new CheRemoteRecipe(this.$resource, remoteConfig);
   }
 }

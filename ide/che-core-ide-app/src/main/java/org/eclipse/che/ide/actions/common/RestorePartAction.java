@@ -1,13 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.actions.common;
 
 import com.google.inject.Inject;
@@ -26,33 +26,35 @@ import org.eclipse.che.ide.api.parts.PartStack;
  */
 public class RestorePartAction extends Action implements ActivePartChangedHandler {
 
-    private PartStack activePartStack;
+  private PartStack activePartStack;
 
-    @Inject
-    public RestorePartAction(final EventBus eventBus,
-                             final CoreLocalizationConstant coreLocalizationConstant) {
-        super(coreLocalizationConstant.actionRestorePartTitle(), coreLocalizationConstant.actionRestorePartDescription());
-        eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+  @Inject
+  public RestorePartAction(
+      final EventBus eventBus, final CoreLocalizationConstant coreLocalizationConstant) {
+    super(
+        coreLocalizationConstant.actionRestorePartTitle(),
+        coreLocalizationConstant.actionRestorePartDescription());
+    eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+  }
+
+  @Override
+  public void update(ActionEvent e) {
+    if (activePartStack == null) {
+      e.getPresentation().setEnabledAndVisible(false);
+      return;
     }
 
-    @Override
-    public void update(ActionEvent e) {
-        if (activePartStack == null) {
-            e.getPresentation().setEnabledAndVisible(false);
-            return;
-        }
+    e.getPresentation()
+        .setEnabledAndVisible(PartStack.State.MAXIMIZED == activePartStack.getPartStackState());
+  }
 
-        e.getPresentation().setEnabledAndVisible(PartStack.State.MAXIMIZED == activePartStack.getPartStackState());
-    }
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    activePartStack.restore();
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        activePartStack.restore();
-    }
-
-    @Override
-    public void onActivePartChanged(ActivePartChangedEvent event) {
-        activePartStack = event.getActivePart().getPartStack();
-    }
-
+  @Override
+  public void onActivePartChanged(ActivePartChangedEvent event) {
+    activePartStack = event.getActivePart().getPartStack();
+  }
 }

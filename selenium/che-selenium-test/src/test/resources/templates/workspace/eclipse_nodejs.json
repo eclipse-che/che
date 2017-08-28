@@ -1,0 +1,28 @@
+{
+  "name": "replaced_name",
+  "environments": {
+    "replaced_name": {
+      "machines": {
+        "dev-machine": {
+          "attributes": {
+            "memoryLimitBytes": "desired_memory_value"
+          },
+          "agents": [
+            "org.eclipse.che.terminal",
+            "org.eclipse.che.ws-agent",
+            "org.eclipse.che.ssh"
+          ],
+          "servers": {}
+        }
+      },
+      "recipe": {
+        "location": "eclipse/node",
+        "type": "dockerimage"
+      }
+    }
+  },
+  "commands": [],
+  "projects": [],
+  "defaultEnv": "replaced_name",
+  "links": []
+}

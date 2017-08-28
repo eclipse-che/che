@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -33,6 +33,7 @@ import {CheSsh} from './che-ssh.factory';
 import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
 import {CheUser} from './che-user.factory';
 import {ChePageObject} from './paging-resource/page-object.factory';
+import {CheJsonRpcApi} from './json-rpc/che-json-rpc-api.factory';
 
 export class ApiConfig {
 
@@ -60,5 +61,6 @@ export class ApiConfig {
     register.factory('cheNamespaceRegistry', CheNamespaceRegistry);
     register.factory('cheUser', CheUser);
     register.factory('chePageObject', ChePageObject);
+    register.factory('cheJsonRpcApi', CheJsonRpcApi);
   }
 }

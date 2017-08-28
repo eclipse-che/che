@@ -1,17 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.machine.shared.dto;
 
 import org.eclipse.che.api.core.model.machine.Server;
-import org.eclipse.che.api.core.model.machine.ServerProperties;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -21,38 +20,38 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface ServerDto extends Server {
-    @Override
-    String getProtocol();
+  @Override
+  String getProtocol();
 
-    void setProtocol(String protocol);
+  void setProtocol(String protocol);
 
-    ServerDto withProtocol(String protocol);
+  ServerDto withProtocol(String protocol);
 
-    @Override
-    String getAddress();
+  @Override
+  String getAddress();
 
-    void setAddress(String address);
+  void setAddress(String address);
 
-    ServerDto withAddress(String address);
+  ServerDto withAddress(String address);
 
-    @Override
-    String getUrl();
+  @Override
+  String getUrl();
 
-    void setUrl(String url);
+  void setUrl(String url);
 
-    ServerDto withUrl(String url);
+  ServerDto withUrl(String url);
 
-    @Override
-    String getRef();
+  @Override
+  String getRef();
 
-    void setRef(String ref);
+  void setRef(String ref);
 
-    ServerDto withRef(String ref);
+  ServerDto withRef(String ref);
 
-    @Override
-    ServerPropertiesDto getProperties();
+  @Override
+  ServerPropertiesDto getProperties();
 
-    void setProperties(ServerPropertiesDto properties);
+  void setProperties(ServerPropertiesDto properties);
 
-    ServerDto withProperties(ServerPropertiesDto properties);
+  ServerDto withProperties(ServerPropertiesDto properties);
 }
