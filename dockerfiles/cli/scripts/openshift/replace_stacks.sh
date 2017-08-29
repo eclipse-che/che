@@ -12,10 +12,11 @@ command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc 
 command -v jq >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool jq (https://stedolan.github.io/jq) is required but it's not installed. Aborting."; exit 1; }
 
 if [ -z "${CHE_API_ENDPOINT+x}" ]; then
-    echo -n "[CHE] Variable \$CHE_API_ENDPOINT is not set. Trying to infer it..."
+    echo -n "[CHE] Inferring \$CHE_API_ENDPOINT..."
     che_host=$(oc get route che -o jsonpath='{.spec.host}')
     if [ -z "${che_host}" ]; then echo >&2 "[CHE] [ERROR] Failed to infer environment variable \$CHE_API_ENDPOINT. Aborting. Please set it and run ${0} script again."; exit 1; fi
-    CHE_API_ENDPOINT="http://${che_host}/api"
+    if [[ $(oc get route che -o jsonpath='{.spec.tls}') ]]; then protocol="https" ; else protocol="http"; fi
+    CHE_API_ENDPOINT="${protocol}://${che_host}/api"
     echo "done (${CHE_API_ENDPOINT})"
 fi
 

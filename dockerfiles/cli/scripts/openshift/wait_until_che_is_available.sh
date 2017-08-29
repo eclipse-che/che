@@ -12,10 +12,11 @@ command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc 
 command -v jq >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool jq (https://stedolan.github.io/jq) is required but it's not installed. Aborting."; exit 1; }
 
 if [ -z "${CHE_API_ENDPOINT+x}" ]; then
-    echo -n "[CHE] Variable \$CHE_API_ENDPOINT is not set. Trying to infer it..."
+    echo -n "[CHE] Inferring \$CHE_API_ENDPOINT..."
     che_host=$(oc get route che -o jsonpath='{.spec.host}')
     if [ -z "${che_host}" ]; then echo >&2 "[CHE] [ERROR] Failed to infer environment variable \$CHE_API_ENDPOINT. Aborting. Please set it and run ${0} script again."; exit 1; fi
-    export CHE_API_ENDPOINT="http://${che_host}/api"
+    if [[ $(oc get route che -o jsonpath='{.spec.tls}') ]]; then protocol="https" ; else protocol="http"; fi
+    CHE_API_ENDPOINT="${protocol}://${che_host}/api"
     echo "done (${CHE_API_ENDPOINT})"
 fi
 
@@ -23,13 +24,14 @@ available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "
 progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
 
 DEPLOYMENT_TIMEOUT_SEC=120
+POLLING_INTERVAL_SEC=5
 end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
 while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
   available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
   progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
   timeout_in=$((end-SECONDS))
   echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
-  sleep 10
+  sleep ${POLLING_INTERVAL_SEC}
 done
 
 if [ "${progressing}" == "\"True\"" ] && [ "${available}" == "\"True\"" ]; then
