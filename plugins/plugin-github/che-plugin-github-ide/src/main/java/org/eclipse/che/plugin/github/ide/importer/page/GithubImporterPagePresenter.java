@@ -55,10 +55,10 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
   // the transport protocol
   private static final RegExp PROTOCOL = RegExp.compile("((http|https|git|ssh|ftp|ftps)://)");
   // the address of the remote server between // and /
-  private static final RegExp HOST1 = RegExp.compile("//([A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-:]+)+/");
+  private static final RegExp HOST1 = RegExp.compile("//([0-9a-zA-Z_\\.\\-]+)/");
   // the address of the remote server between @ and : or /
   private static final RegExp HOST2 =
-      RegExp.compile("@([A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-:]+)+[:/]");
+      RegExp.compile("@([0-9a-zA-Z_\\.\\-]+)[:\\/]");
   // the repository name
   private static final RegExp REPO_NAME = RegExp.compile("/[A-Za-z0-9_.\\-]+$");
   // start with white space
