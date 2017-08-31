@@ -10,14 +10,13 @@
  */
 package org.eclipse.che.plugin.java.languageserver;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncherTemplate;
 import org.eclipse.che.api.languageserver.registry.DocumentFilter;
@@ -27,6 +26,9 @@ import org.eclipse.che.plugin.java.inject.JavaModule;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author Evgen Vidolob
@@ -64,7 +66,7 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate {
         (LanguageServer)
             Proxy.newProxyInstance(
                 getClass().getClassLoader(),
-                new Class[] {LanguageServer.class},
+                new Class[] {LanguageServer.class, FileContentAccess.class},
                 new DynamicWrapper(new JavaLSWrapper(proxy), proxy));
     return wrapped;
   }
