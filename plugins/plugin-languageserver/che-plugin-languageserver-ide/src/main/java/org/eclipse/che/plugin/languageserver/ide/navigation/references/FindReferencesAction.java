@@ -17,6 +17,7 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
 import com.google.inject.Inject;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedLocation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -29,7 +30,6 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConf
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ReferenceContext;
 import org.eclipse.lsp4j.ReferenceParams;
@@ -102,7 +102,7 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
     paramsDTO.setPosition(Position);
     paramsDTO.setTextDocument(identifierDTO);
     paramsDTO.setContext(contextDTO);
-    Promise<List<Location>> promise = client.references(paramsDTO);
+    Promise<List<ExtendedLocation>> promise = client.references(paramsDTO);
     presenter.openLocation(promise);
   }
 }
