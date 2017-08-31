@@ -39,7 +39,7 @@ public class EditorQuickOpenEntry extends QuickOpenEntry {
   public boolean run(Mode mode) {
     if (mode == Mode.OPEN) {
       String filePath = getFilePath();
-      editorHelper.openFile(filePath, getTextRange());
+      editorHelper.openPath(filePath, getTextRange());
       return true;
     }
     return false;
