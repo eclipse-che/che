@@ -195,7 +195,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     return getCapabilities(fileUri);
   }
 
-  private List<LanguageServerLauncher> findLaunchers(String projectPath, String fileUri) {
+  List<LanguageServerLauncher> findLaunchers(String projectPath, String fileUri) {
     String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(fileUri));
     LanguageDescription language = languageRecognizer.recognizeByPath(wsPath);
     if (language == null) {
