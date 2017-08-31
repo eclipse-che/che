@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import java.util.Collections;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedLocation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.HasAction;
@@ -29,7 +30,6 @@ import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
-import org.eclipse.lsp4j.Location;
 
 /** @author Evgen Vidolob */
 public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelegate>
@@ -58,10 +58,10 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
   }
 
   @Override
-  public void setLocations(List<Location> locations) {
+  public void setLocations(List<ExtendedLocation> locations) {
     tree.getNodeStorage().clear();
     //TODO workaround, tree has bug with adding list of nodes
-    for (Location location : locations) {
+    for (ExtendedLocation location : locations) {
       tree.getNodeStorage().add(new LocationNode(location));
     }
 
@@ -73,25 +73,25 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
   }
 
   private class LocationNode extends AbstractTreeNode implements HasAction, HasPresentation {
-    private final Location location;
+    private final ExtendedLocation location;
     private NodePresentation nodePresentation;
 
-    public LocationNode(Location location) {
-      this.location = location;
+    public LocationNode(ExtendedLocation location2) {
+      this.location = location2;
     }
 
     @Override
     public void updatePresentation(@NotNull NodePresentation presentation) {
-      presentation.setPresentableText(location.getUri());
+      presentation.setPresentableText(location.getLocation().getUri());
       presentation.setInfoText(
           "From:"
-              + location.getRange().getStart().getLine()
+              + location.getLocation().getRange().getStart().getLine()
               + ":"
-              + location.getRange().getStart().getCharacter()
+              + location.getLocation().getRange().getStart().getCharacter()
               + " To:"
-              + location.getRange().getEnd().getLine()
+              + location.getLocation().getRange().getEnd().getLine()
               + ":"
-              + location.getRange().getEnd().getCharacter());
+              + location.getLocation().getRange().getEnd().getCharacter());
     }
 
     @Override
@@ -119,7 +119,7 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
 
     @Override
     public String getName() {
-      return location.getUri();
+      return location.getLocation().getUri();
     }
 
     @Override
