@@ -29,6 +29,7 @@ import java.util.Base64;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -40,6 +41,7 @@ import org.eclipse.che.keycloak.shared.KeycloakConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
 
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakAuthenticationFilter.class);
