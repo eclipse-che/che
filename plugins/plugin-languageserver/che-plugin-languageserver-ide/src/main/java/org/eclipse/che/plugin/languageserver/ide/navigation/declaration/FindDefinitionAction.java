@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedLocation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -30,7 +31,6 @@ import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
-import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 
@@ -83,7 +83,7 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
     TextDocumentPositionParams paramsDTO =
         dtoBuildHelper.createTDPP(textEditor.getDocument(), textEditor.getCursorPosition());
 
-    final Promise<List<Location>> promise = client.definition(paramsDTO);
+    final Promise<List<ExtendedLocation>> promise = client.definition(paramsDTO);
     promise
         .then(
             arg -> {
