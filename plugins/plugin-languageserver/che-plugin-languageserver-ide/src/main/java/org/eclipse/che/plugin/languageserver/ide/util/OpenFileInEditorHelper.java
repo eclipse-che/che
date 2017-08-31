@@ -25,8 +25,6 @@ import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 
@@ -39,18 +37,29 @@ import org.eclipse.che.ide.ui.smartTree.data.Node;
 public class OpenFileInEditorHelper {
 
   private final EditorAgent editorAgent;
-  private final ProjectExplorerPresenter projectExplorer;
   private final AppContext appContext;
 
   @Inject
-  public OpenFileInEditorHelper(
-      EditorAgent editorAgent, ProjectExplorerPresenter projectExplorer, AppContext appContext) {
+  public OpenFileInEditorHelper(EditorAgent editorAgent, AppContext appContext) {
     this.editorAgent = editorAgent;
-    this.projectExplorer = projectExplorer;
     this.appContext = appContext;
   }
 
-  public void openFile(final String filePath, final TextRange selectionRange) {
+  public void openPath(final String filePath, final TextRange selectionRange) {
+    doIfUnopened(
+        filePath,
+        selectionRange,
+        () -> {
+          appContext.getWorkspaceRoot().getFile(filePath).then(openNode(selectionRange));
+        });
+  }
+
+  public void openFile(VirtualFile file, TextRange selectionRange) {
+    doIfUnopened(
+        file.getLocation().toString(), selectionRange, () -> doOpenFile(file, selectionRange));
+  }
+
+  private void doIfUnopened(final String filePath, final TextRange selectionRange, Runnable r) {
     if (Strings.isNullOrEmpty(filePath)) {
       return;
     }
@@ -61,12 +70,11 @@ public class OpenFileInEditorHelper {
       fileOpened(editorPartPresenter, selectionRange);
       return;
     }
-
-    appContext.getWorkspaceRoot().getFile(filePath).then(openNode(selectionRange));
+    r.run();
   }
 
   public void openFile(String filePath) {
-    openFile(filePath, null);
+    openPath(filePath, null);
   }
 
   private Function<Optional<File>, Optional<File>> openNode(final TextRange selectionRange) {
@@ -74,24 +82,14 @@ public class OpenFileInEditorHelper {
       @Override
       public Optional<File> apply(Optional<File> node) {
         if (node.isPresent()) {
-          openFile(node.get(), selectionRange);
+          doOpenFile(node.get(), selectionRange);
         }
         return node;
       }
     };
   }
 
-  private Function<Node, Node> selectNode() {
-    return new Function<Node, Node>() {
-      @Override
-      public Node apply(Node node) {
-        projectExplorer.setSelection(new Selection<>(node));
-        return node;
-      }
-    };
-  }
-
-  private void openFile(VirtualFile result, final TextRange selectionRange) {
+  private void doOpenFile(VirtualFile result, final TextRange selectionRange) {
     editorAgent.openEditor(
         result,
         new OpenEditorCallbackImpl() {
