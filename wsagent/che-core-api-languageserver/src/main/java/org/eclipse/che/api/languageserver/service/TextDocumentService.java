@@ -16,7 +16,6 @@ import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.pr
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removeUriScheme;
 
-import com.google.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -34,8 +33,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -47,17 +48,19 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CompletionIt
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.DocumentHighlightDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedCompletionItemDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedCompletionListDto;
+import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ExtendedLocationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.HoverDto;
-import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.LocationDto;
-import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.RenameResultDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHelpDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.TextEditDto;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedLocation;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedTextDocumentEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedTextEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
+import org.eclipse.che.api.languageserver.shared.model.FileContentParameters;
 import org.eclipse.che.api.languageserver.shared.model.RenameResult;
+import org.eclipse.che.api.languageserver.shared.util.Constants;
 import org.eclipse.che.api.languageserver.util.LSOperation;
 import org.eclipse.che.api.languageserver.util.OperationUtil;
 import org.eclipse.jface.text.BadLocationException;
@@ -92,6 +95,8 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Singleton;
+
 /**
  * Json RPC API for the textDoc
  *
@@ -114,7 +119,10 @@ public class TextDocumentService {
   @PostConstruct
   public void configureMethods() {
     dtoToDtoList(
-        "definition", TextDocumentPositionParams.class, LocationDto.class, this::definition);
+        "definition",
+        TextDocumentPositionParams.class,
+        ExtendedLocationDto.class,
+        this::definition);
     dtoToDtoList("codeAction", CodeActionParams.class, CommandDto.class, this::codeAction);
     dtoToDtoList(
         "documentSymbol",
@@ -127,7 +135,7 @@ public class TextDocumentService {
         DocumentRangeFormattingParams.class,
         TextEditDto.class,
         this::rangeFormatting);
-    dtoToDtoList("references", ReferenceParams.class, LocationDto.class, this::references);
+    dtoToDtoList("references", ReferenceParams.class, ExtendedLocationDto.class, this::references);
     dtoToDtoList(
         "onTypeFormatting",
         DocumentOnTypeFormattingParams.class,
@@ -162,6 +170,13 @@ public class TextDocumentService {
     dtoToNothing("didClose", DidCloseTextDocumentParams.class, this::didClose);
     dtoToNothing("didOpen", DidOpenTextDocumentParams.class, this::didOpen);
     dtoToNothing("didSave", DidSaveTextDocumentParams.class, this::didSave);
+
+    requestHandler
+        .newConfiguration()
+        .methodName("textDocument/fileContent")
+        .paramsAsDto(FileContentParameters.class)
+        .resultAsString()
+        .withFunction(this::getFileContent);
   }
 
   private List<CommandDto> codeAction(CodeActionParams params) {
@@ -348,10 +363,10 @@ public class TextDocumentService {
     }
   }
 
-  private List<LocationDto> references(ReferenceParams referenceParams) {
+  private List<ExtendedLocationDto> references(ReferenceParams referenceParams) {
     String uri = prefixURI(referenceParams.getTextDocument().getUri());
     referenceParams.getTextDocument().setUri(uri);
-    List<LocationDto> result = new ArrayList<>();
+    List<ExtendedLocationDto> result = new ArrayList<>();
     try {
       List<InitializedLanguageServer> servers =
           languageServerRegistry
@@ -380,8 +395,8 @@ public class TextDocumentService {
                 InitializedLanguageServer element, List<? extends Location> locations) {
               locations.forEach(
                   o -> {
-                    o.setUri(removePrefixUri(o.getUri()));
-                    result.add(new LocationDto(o));
+                    ExtendedLocation extendedLocation = extendLocation(element, o);
+                    result.add(new ExtendedLocationDto(extendedLocation));
                   });
               return true;
             }
@@ -393,7 +408,8 @@ public class TextDocumentService {
     }
   }
 
-  private List<LocationDto> definition(TextDocumentPositionParams textDocumentPositionParams) {
+  private List<ExtendedLocationDto> definition(
+      TextDocumentPositionParams textDocumentPositionParams) {
     String uri = prefixURI(textDocumentPositionParams.getTextDocument().getUri());
     textDocumentPositionParams.getTextDocument().setUri(uri);
     try {
@@ -403,7 +419,7 @@ public class TextDocumentService {
               .stream()
               .flatMap(Collection::stream)
               .collect(Collectors.toList());
-      List<LocationDto> result = new ArrayList<>();
+      List<ExtendedLocationDto> result = new ArrayList<>();
       OperationUtil.doInParallel(
           servers,
           new LSOperation<InitializedLanguageServer, List<? extends Location>>() {
@@ -428,8 +444,7 @@ public class TextDocumentService {
                 InitializedLanguageServer element, List<? extends Location> locations) {
               locations.forEach(
                   o -> {
-                    o.setUri(removePrefixUri(o.getUri()));
-                    result.add(new LocationDto(o));
+                    result.add(new ExtendedLocationDto(extendLocation(element, o)));
                   });
               return true;
             }
@@ -908,6 +923,24 @@ public class TextDocumentService {
     }
     return Collections.emptyList();
   }
+  
+  private String getFileContent(FileContentParameters params) {
+    InitializedLanguageServer server =
+        languageServerRegistry.getServer(params.getLanguagesServerId());
+    if (server == null) {
+      throw new JsonRpcException(-27000, "did not find language server");
+    }
+    org.eclipse.lsp4j.services.TextDocumentService originatingService =
+        server.getServer().getTextDocumentService();
+    if (!(originatingService instanceof FileContentAccess)) {
+      throw new JsonRpcException(-27000, "language server does not implement file access");
+    }
+    try {
+      return ((FileContentAccess) originatingService).getFileContent().get(10, TimeUnit.SECONDS);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
 
   private <P> void dtoToNothing(String name, Class<P> pClass, Consumer<P> consumer) {
     requestHandler
@@ -940,5 +973,12 @@ public class TextDocumentService {
 
   private boolean truish(Boolean b) {
     return b != null && b;
+  }
+
+  private ExtendedLocation extendLocation(InitializedLanguageServer element, Location o) {
+    if (LanguageServiceUtils.isProjectUri(o.getUri())) {
+      o.setUri(Constants.CHE_WKSP_SCHEME + removePrefixUri(o.getUri()));
+    }
+    return new ExtendedLocation(element.getId(), o);
   }
 }
