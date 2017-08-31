@@ -16,6 +16,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.util.List;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedLocation;
+import org.eclipse.che.api.languageserver.shared.util.Constants;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -28,8 +30,8 @@ import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
+import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
-import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -43,6 +45,7 @@ public class OpenLocationPresenter extends BasePresenter
   private final OpenFileInEditorHelper helper;
   private final NotificationManager notificationManager;
   private final String title;
+  private final TextDocumentServiceClient textDocumentService;
 
   @Inject
   public OpenLocationPresenter(
@@ -51,24 +54,26 @@ public class OpenLocationPresenter extends BasePresenter
       WorkspaceAgent workspaceAgent,
       OpenFileInEditorHelper helper,
       NotificationManager notificationManager,
+      TextDocumentServiceClient textDocumentService,
       @Assisted String title) {
     this.resources = resources;
     this.view = view;
     this.workspaceAgent = workspaceAgent;
     this.helper = helper;
     this.notificationManager = notificationManager;
+    this.textDocumentService = textDocumentService;
     this.title = title;
     view.setDelegate(this);
     view.setTitle(title);
   }
 
-  // TODO maybe we should use some generic data object not a DTO
-  public void openLocation(Promise<List<Location>> promise) {
+  //TODO maybe we should use some generic data object not a DTO
+  public void openLocation(Promise<List<ExtendedLocation>> promise) {
     promise
         .then(
-            new Operation<List<Location>>() {
+            new Operation<List<ExtendedLocation>>() {
               @Override
-              public void apply(List<Location> arg) throws OperationException {
+              public void apply(List<ExtendedLocation> arg) throws OperationException {
                 showLocations(arg);
               }
             })
@@ -89,8 +94,8 @@ public class OpenLocationPresenter extends BasePresenter
         StatusNotification.DisplayMode.FLOAT_MODE);
   }
 
-  private void showLocations(List<Location> locations) {
-    view.setLocations(locations);
+  private void showLocations(List<ExtendedLocation> arg) {
+    view.setLocations(arg);
     openPart();
   }
 
@@ -125,12 +130,19 @@ public class OpenLocationPresenter extends BasePresenter
   }
 
   @Override
-  public void onLocationSelected(Location location) {
-    Range range = location.getRange();
-    helper.openFile(
-        location.getUri(),
+  public void onLocationSelected(ExtendedLocation location) {
+    Range range = location.getLocation().getRange();
+    String uri = location.getLocation().getUri();
+    TextRange selectionRange =
         new TextRange(
             new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
-            new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter())));
+            new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
+    if (uri.startsWith(Constants.CHE_WKSP_SCHEME)) {
+      helper.openPath(
+          location.getLocation().getUri().substring(Constants.CHE_WKSP_SCHEME.length()),
+          selectionRange);
+    } else {
+      helper.openFile(new LanguageServerFile(textDocumentService, location), selectionRange);
+    }
   }
 }
