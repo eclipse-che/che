@@ -92,6 +92,7 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -930,13 +931,14 @@ public class TextDocumentService {
     if (server == null) {
       throw new JsonRpcException(-27000, "did not find language server");
     }
-    org.eclipse.lsp4j.services.TextDocumentService originatingService =
-        server.getServer().getTextDocumentService();
+    LanguageServer originatingService = server.getServer();
     if (!(originatingService instanceof FileContentAccess)) {
       throw new JsonRpcException(-27000, "language server does not implement file access");
     }
     try {
-      return ((FileContentAccess) originatingService).getFileContent().get(10, TimeUnit.SECONDS);
+      return ((FileContentAccess) originatingService)
+          .getFileContent(params.getUri())
+          .get(10, TimeUnit.SECONDS);
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
