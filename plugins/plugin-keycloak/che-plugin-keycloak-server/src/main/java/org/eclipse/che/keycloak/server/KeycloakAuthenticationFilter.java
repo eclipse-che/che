@@ -82,7 +82,7 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
     Jws<Claims> jwt;
     try {
       jwt = Jwts.parser().setSigningKey(getJwtPublicKey(false)).parseClaimsJws(token);
-      LOG.debug("JWT = " + jwt.toString());
+      LOG.debug("JWT = ", jwt);
       //OK, we can trust this JWT
     } catch (SignatureException
         | NoSuchAlgorithmException
@@ -93,7 +93,7 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
       try {
         LOG.info("Retrying after updating the public key", e);
         jwt = Jwts.parser().setSigningKey(getJwtPublicKey(true)).parseClaimsJws(token);
-        LOG.debug("JWT = " + jwt.toString());
+        LOG.debug("JWT = ", jwt);
         //OK, we can trust this JWT
       } catch (SignatureException
           | NoSuchAlgorithmException
