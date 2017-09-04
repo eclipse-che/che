@@ -10,7 +10,9 @@
  */
 package org.eclipse.che.plugin.testing.ide.action;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.CURSOR_POSITION;
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.PROJECT;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -18,9 +20,10 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
-import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaFile;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
-import com.google.common.base.Optional;
+import com.google.gwt.xml.client.Document;
+import com.google.gwt.xml.client.XMLParser;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -43,12 +46,11 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.editor.JavaReconsilerEvent;
-import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
@@ -115,7 +117,10 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
             isEditorInFocus = true;
             contextType = CURSOR_POSITION;
             TextEditor activeEditor = (TextEditor) activePart;
-            if (activeEditor.getEditorInput().getFile().getName().endsWith(".java")) {
+            String fileName = activeEditor.getEditorInput().getFile().getName();
+            if (fileName.endsWith(".xml")) {
+              detectSuite(activeEditor);
+            } else if (fileName.endsWith(".java")) {
               detectTests(activeEditor);
             } else {
               isEnable = false;
@@ -142,6 +147,20 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
 
   @Override
   public abstract void actionPerformed(ActionEvent e);
+
+  private void detectSuite(TextEditor editor) {
+    this.currentEditor = editor;
+    Document parse = XMLParser.parse(editor.getDocument().getContents());
+    String suiteTagName = parse.getDocumentElement().getTagName();
+    if ("suite".equals(suiteTagName)) {
+      TestPosition testNgPosition = dtoFactory.createDto(TestPosition.class);
+      testNgPosition.setFrameworkName("testng");
+      this.testPosition = singletonList(testNgPosition);
+      isEnable = true;
+    } else {
+      isEnable = false;
+    }
+  }
 
   private void detectTests(TextEditor editor) {
     this.currentEditor = editor;
@@ -246,25 +265,19 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
     }
 
     Resource resource = resources[0];
-    if (resource.isProject() && JavaUtil.isJavaProject((Project) resource)) {
+    if (resource.isProject() && isJavaProject((Project) resource)) {
       contextType = PROJECT;
       isEnable = true;
       return;
     }
 
     Project project = resource.getProject();
-    if (!JavaUtil.isJavaProject(project)) {
+    if (!isJavaProject(project)) {
       isEnable = false;
       return;
     }
 
-    Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
-    if (!srcFolder.isPresent() || resource.getLocation().equals(srcFolder.get().getLocation())) {
-      isEnable = false;
-      return;
-    }
-
-    if (resource.getResourceType() == FILE && isJavaFile(resource)) {
+    if (isJavaTestFile(resource)) {
       contextType = TestExecutionContext.ContextType.FILE;
     } else if (resource instanceof Container) {
       contextType = TestExecutionContext.ContextType.FOLDER;
@@ -306,5 +319,20 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
     eventsProcessor.setDebuggerConfiguration(debugger, debugConfigurationsManager);
 
     debugConfigurationsManager.apply(debugger);
+  }
+
+  private boolean isJavaTestFile(Resource resource) {
+    if (resource.getResourceType() != FILE) {
+      return false;
+    }
+    final String ext = ((File) resource).getExtension();
+
+    if (isNullOrEmpty(ext)) {
+      return false;
+    } else if ("java".equals(ext) || "class".equals(ext) || "xml".equals(ext)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

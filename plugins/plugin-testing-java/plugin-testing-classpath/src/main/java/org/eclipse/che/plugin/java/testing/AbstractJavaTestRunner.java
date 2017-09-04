@@ -179,7 +179,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
   }
 
   /**
-   * Creates test suite which should be ran.
+   * Finds tests which should be ran.
    *
    * @param context information about test runner
    * @param javaProject current project
@@ -188,7 +188,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
    * @return list of full qualified names of test classes. If it is the declaration of a test method
    *     it should be: parent fqn + '#' + method name (a.b.c.ClassName#methodName)
    */
-  protected List<String> createTestSuite(
+  protected List<String> findTests(
       TestExecutionContext context,
       IJavaProject javaProject,
       String methodAnnotation,

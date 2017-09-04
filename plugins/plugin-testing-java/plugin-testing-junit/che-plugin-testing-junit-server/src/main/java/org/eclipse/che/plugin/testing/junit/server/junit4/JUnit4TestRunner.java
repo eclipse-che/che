@@ -106,7 +106,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
     parameters.getClassPath().addAll(classPath);
 
     List<String> suite =
-        createTestSuite(
+        findTests(
             context,
             javaProject,
             JavaTestAnnotations.JUNIT4X_TEST.getName(),

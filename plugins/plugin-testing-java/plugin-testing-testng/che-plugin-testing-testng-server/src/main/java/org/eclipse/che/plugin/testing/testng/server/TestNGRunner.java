@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.testing.testng.server;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 
@@ -37,6 +38,7 @@ import org.eclipse.che.plugin.java.testing.ClasspathUtil;
 import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
 import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -135,8 +137,15 @@ public class TestNGRunner extends AbstractJavaTestRunner {
   }
 
   private File createSuite(TestExecutionContext context, IJavaProject javaProject) {
+    String filePath = context.getFilePath();
+    if (!isNullOrEmpty(filePath) && filePath.endsWith(".xml")) {
+      String path =
+          filePath.substring(javaProject.getPath().toString().length(), filePath.length());
+      IFile file = javaProject.getProject().getFile(path);
+      return suiteUtil.writeSuite(System.getProperty(JAVA_IO_TMPDIR), file);
+    }
     List<String> testSuite =
-        createTestSuite(context, javaProject, JavaTestAnnotations.TESTNG_TEST.getName(), "");
+        findTests(context, javaProject, JavaTestAnnotations.TESTNG_TEST.getName(), "");
 
     Map<String, List<String>> classes = buildTestNgSuite(testSuite, context);
 
