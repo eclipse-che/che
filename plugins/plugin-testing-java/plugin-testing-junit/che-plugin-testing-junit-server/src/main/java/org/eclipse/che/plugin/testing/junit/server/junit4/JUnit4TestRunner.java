@@ -76,6 +76,11 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
   }
 
   @Override
+  protected boolean isTestSuite(String filePath, IJavaProject project) {
+    return false;
+  }
+
+  @Override
   public boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
     try {
       int flags = method.getFlags();

@@ -17,6 +17,7 @@ import static java.util.Collections.singletonList;
 import com.beust.jcommander.JCommander;
 import com.google.inject.name.Named;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestResult;
 import org.eclipse.che.api.testing.shared.dto.TestResultDto;
@@ -39,11 +43,13 @@ import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
 import org.eclipse.che.plugin.java.testing.JavaTestFinder;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 /** TestNG implementation for the test runner service. */
 public class TestNGRunner extends AbstractJavaTestRunner {
@@ -206,5 +212,29 @@ public class TestNGRunner extends AbstractJavaTestRunner {
   protected boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
     return javaTestFinder.isTest(
         method, compilationUnit, JavaTestAnnotations.TESTNG_TEST.getName());
+  }
+
+  @Override
+  protected boolean isTestSuite(String filePath, IJavaProject project) {
+    int projectPathLength = project.getPath().toString().length();
+    String path = filePath.substring(projectPathLength, filePath.length());
+    IFile file = project.getProject().getFile(path);
+
+    if (!file.exists()) {
+      return false;
+    }
+
+    SAXParserFactory factory = SAXParserFactory.newInstance();
+    TestNGSuiteParser suiteParser = new TestNGSuiteParser();
+    try {
+      SAXParser parser = factory.newSAXParser();
+      parser.parse(file.getContents(), suiteParser);
+    } catch (ParserConfigurationException | SAXException | IOException e) {
+      LOG.error("It is not possible to parse file " + path, e);
+    } catch (CoreException e) {
+      LOG.error("It is not possible to read file " + path, e);
+    }
+
+    return suiteParser.isSuite();
   }
 }

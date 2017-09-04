@@ -67,9 +67,19 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
     }
 
     List<TestPosition> result = new ArrayList<>();
+
+    String filePath = context.getFilePath();
+    if (filePath.endsWith(".xml")) {
+      if (isTestSuite(filePath, javaProject)) {
+        TestPosition testPosition =
+            DtoFactory.newDto(TestPosition.class).withFrameworkName(getName());
+        result.add(testPosition);
+      }
+      return result;
+    }
+
     try {
-      ICompilationUnit compilationUnit =
-          findCompilationUnitByPath(javaProject, context.getFilePath());
+      ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, filePath);
       if (context.getOffset() == -1) {
         addAllTestsMethod(result, compilationUnit);
       } else {
@@ -120,6 +130,15 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
    * @return {@code true} if the method is test method otherwise returns {@code false}
    */
   protected abstract boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit);
+
+  /**
+   * Verify if the file is test suite.
+   *
+   * @param filePath path to the file
+   * @param project parent project
+   * @return {@code true} if the file is test suite otherwise returns {@code false}
+   */
+  protected abstract boolean isTestSuite(String filePath, IJavaProject project);
 
   /** Returns {@link IJavaProject} by path */
   protected IJavaProject getJavaProject(String projectPath) {

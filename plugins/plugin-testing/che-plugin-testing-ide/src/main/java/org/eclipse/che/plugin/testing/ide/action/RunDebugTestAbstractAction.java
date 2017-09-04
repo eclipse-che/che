@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.testing.ide.action;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.CURSOR_POSITION;
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.PROJECT;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -22,8 +21,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
-import com.google.gwt.xml.client.Document;
-import com.google.gwt.xml.client.XMLParser;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -118,9 +115,7 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
             contextType = CURSOR_POSITION;
             TextEditor activeEditor = (TextEditor) activePart;
             String fileName = activeEditor.getEditorInput().getFile().getName();
-            if (fileName.endsWith(".xml")) {
-              detectSuite(activeEditor);
-            } else if (fileName.endsWith(".java")) {
+            if (fileName.endsWith(".java") || fileName.endsWith(".xml")) {
               detectTests(activeEditor);
             } else {
               isEnable = false;
@@ -147,20 +142,6 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
 
   @Override
   public abstract void actionPerformed(ActionEvent e);
-
-  private void detectSuite(TextEditor editor) {
-    this.currentEditor = editor;
-    Document parse = XMLParser.parse(editor.getDocument().getContents());
-    String suiteTagName = parse.getDocumentElement().getTagName();
-    if ("suite".equals(suiteTagName)) {
-      TestPosition testNgPosition = dtoFactory.createDto(TestPosition.class);
-      testNgPosition.setFrameworkName("testng");
-      this.testPosition = singletonList(testNgPosition);
-      isEnable = true;
-    } else {
-      isEnable = false;
-    }
-  }
 
   private void detectTests(TextEditor editor) {
     this.currentEditor = editor;
@@ -189,7 +170,7 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
    * @param frameworkAndTestName name of the test framework
    * @return test execution context
    */
-  protected TestExecutionContext createTestExecutionContext(
+  private TestExecutionContext createTestExecutionContext(
       Pair<String, String> frameworkAndTestName,
       TestExecutionContext.ContextType contextType,
       String selectedNodePath) {
@@ -257,7 +238,7 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
   }
 
   /** Analyzes project tree selection. Needs for detecting context type for the test runner. */
-  protected void analyzeProjectTreeSelection() {
+  private void analyzeProjectTreeSelection() {
     Resource[] resources = appContext.getResources();
     if (resources == null || resources.length > 1) {
       isEnable = false;
@@ -329,10 +310,8 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
 
     if (isNullOrEmpty(ext)) {
       return false;
-    } else if ("java".equals(ext) || "class".equals(ext) || "xml".equals(ext)) {
-      return true;
     } else {
-      return false;
+      return "java".equals(ext) || "class".equals(ext) || "xml".equals(ext);
     }
   }
 }
