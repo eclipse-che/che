@@ -255,6 +255,7 @@ public class Tooltip
           Elements.addClassName(css.tooltipRight(), contentElement);
         }
         break;
+      default:
     }
   }
 

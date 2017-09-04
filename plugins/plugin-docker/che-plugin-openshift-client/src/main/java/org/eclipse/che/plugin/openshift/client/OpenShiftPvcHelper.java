@@ -183,6 +183,7 @@ public class OpenShiftPvcHelper {
         switch (phase) {
           case POD_PHASE_FAILED:
             LOG.info("Pod command {} failed", Arrays.toString(jobCommand));
+            // fall through
           case POD_PHASE_SUCCEEDED:
             openShiftClient.resource(pod).delete();
             updateCreatedDirs(command, phase, allDirsArray);

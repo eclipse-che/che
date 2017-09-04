@@ -105,6 +105,8 @@ public class ChangedFileNode extends AbstractTreeNode implements HasPresentation
         return;
       case COPIED:
         presentation.setPresentableTextCss("color: purple;");
+        return;
+      default:
     }
   }
 
