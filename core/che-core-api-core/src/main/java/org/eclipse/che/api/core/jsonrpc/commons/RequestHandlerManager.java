@@ -47,6 +47,8 @@ public class RequestHandlerManager {
 
   private final Map<String, Category> methodToCategory = new ConcurrentHashMap<>();
   private final Map<String, OneToOneHandler> oneToOneHandlers = new ConcurrentHashMap<>();
+  private final Map<String, OneToPromiseOneHandler> oneToPromiseOneHandlers =
+      new ConcurrentHashMap<>();
   private final Map<String, OneToManyHandler> oneToManyHandlers = new ConcurrentHashMap<>();
   private final Map<String, OneToNoneHandler> oneToNoneHandlers = new ConcurrentHashMap<>();
   private final Map<String, ManyToOneHandler> manyToOneHandlers = new ConcurrentHashMap<>();
@@ -76,6 +78,16 @@ public class RequestHandlerManager {
 
     methodToCategory.put(method, Category.ONE_TO_ONE);
     oneToOneHandlers.put(method, new OneToOneHandler<>(pClass, rClass, biFunction));
+  }
+
+  public synchronized <P, R> void registerOneToPromiseOne(
+      String method,
+      Class<P> pClass,
+      Class<R> rClass,
+      BiFunction<String, P, JsonRpcPromise<R>> function) {
+    mustNotBeRegistered(method);
+    methodToCategory.put(method, Category.ONE_TO_PROMISE_ONE);
+    oneToPromiseOneHandlers.put(method, new OneToPromiseOneHandler<>(pClass, rClass, function));
   }
 
   public synchronized <P, R> void registerOneToMany(
@@ -182,6 +194,8 @@ public class RequestHandlerManager {
         break;
       case NONE_TO_NONE:
         noneToNoneHandlers.remove(method);
+      case ONE_TO_PROMISE_ONE:
+        oneToPromiseOneHandlers.remove(method);
     }
 
     return true;
@@ -214,6 +228,10 @@ public class RequestHandlerManager {
       case NONE_TO_MANY:
         NoneToManyHandler noneToManyHandler = noneToManyHandlers.get(method);
         transmitMany(endpointId, requestId, noneToManyHandler.handle(endpointId));
+        break;
+      case ONE_TO_PROMISE_ONE:
+        OneToPromiseOneHandler promiseOneHandler = oneToPromiseOneHandlers.get(method);
+        transmitPromiseOne(endpointId, requestId, promiseOneHandler.handle(endpointId, params));
         break;
       default:
         LOGGER.error("Something went wrong trying to find out handler category");
@@ -268,6 +286,17 @@ public class RequestHandlerManager {
     transmitter.transmit(endpointId, message);
   }
 
+  private void transmitPromiseOne(
+      String endpointId, String requestId, JsonRpcPromise<Object> promise) {
+    promise.onSuccess(result -> transmitOne(endpointId, requestId, result));
+    promise.onFailure(
+        jsonRpcError -> {
+          JsonRpcResponse jsonRpcResponse = new JsonRpcResponse(requestId, null, jsonRpcError);
+          String message = marshaller.marshall(jsonRpcResponse);
+          transmitter.transmit(endpointId, message);
+        });
+  }
+
   public enum Category {
     ONE_TO_ONE,
     ONE_TO_MANY,
@@ -277,7 +306,8 @@ public class RequestHandlerManager {
     MANY_TO_NONE,
     NONE_TO_ONE,
     NONE_TO_MANY,
-    NONE_TO_NONE
+    NONE_TO_NONE,
+    ONE_TO_PROMISE_ONE
   }
 
   private class OneToOneHandler<P, R> {
@@ -294,6 +324,24 @@ public class RequestHandlerManager {
     private R handle(String endpointId, JsonRpcParams params) {
       P dto = dtoComposer.composeOne(params, pClass);
       return biFunction.apply(endpointId, dto);
+    }
+  }
+
+  private class OneToPromiseOneHandler<P, R> {
+    private final Class<P> pClass;
+    private final Class<R> rClass;
+    private BiFunction<String, P, JsonRpcPromise<R>> function;
+
+    private OneToPromiseOneHandler(
+        Class<P> pClass, Class<R> rClass, BiFunction<String, P, JsonRpcPromise<R>> function) {
+      this.pClass = pClass;
+      this.rClass = rClass;
+      this.function = function;
+    }
+
+    private JsonRpcPromise<R> handle(String endpointId, JsonRpcParams params) {
+      P dto = dtoComposer.composeOne(params, pClass);
+      return function.apply(endpointId, dto);
     }
   }
 

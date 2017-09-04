@@ -10,8 +10,11 @@
  */
 package org.eclipse.che.api.languageserver.registry;
 
+import com.google.inject.assistedinject.Assisted;
 import java.util.concurrent.CompletableFuture;
+import javax.inject.Inject;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
@@ -30,10 +33,16 @@ public class CheLanguageClient implements LanguageClient {
   private static final Logger LOG = LoggerFactory.getLogger(CheLanguageClient.class);
 
   private EventService eventService;
+  private ShowMessageJsonRpcTransmitter transmitter;
   private String serverId;
 
-  public CheLanguageClient(EventService eventService, String serverId) {
+  @Inject
+  public CheLanguageClient(
+      EventService eventService,
+      ShowMessageJsonRpcTransmitter transmitter,
+      @Assisted String serverId) {
     this.eventService = eventService;
+    this.transmitter = transmitter;
     this.serverId = serverId;
   }
 
@@ -45,7 +54,7 @@ public class CheLanguageClient implements LanguageClient {
   @Override
   public CompletableFuture<MessageActionItem> showMessageRequest(
       ShowMessageRequestParams requestParams) {
-    return CompletableFuture.completedFuture(null);
+    return transmitter.sendShowMessageRequest(requestParams);
   }
 
   @Override

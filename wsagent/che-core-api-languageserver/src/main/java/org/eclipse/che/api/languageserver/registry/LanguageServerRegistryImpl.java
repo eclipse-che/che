@@ -55,6 +55,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   private final Provider<ProjectManager> projectManagerProvider;
   private final ServerInitializer initializer;
   private EventService eventService;
+  private CheLanguageClientFactory clientFactory;
 
   @Inject
   public LanguageServerRegistryImpl(
@@ -62,12 +63,14 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       Set<LanguageDescription> languages,
       Provider<ProjectManager> projectManagerProvider,
       ServerInitializer initializer,
-      EventService eventService) {
+      EventService eventService,
+      CheLanguageClientFactory clientFactory) {
     this.languages = new ArrayList<>(languages);
     this.launchers = new ArrayList<>(languageServerLaunchers);
     this.projectManagerProvider = projectManagerProvider;
     this.initializer = initializer;
     this.eventService = eventService;
+    this.clientFactory = clientFactory;
     this.launchedServers = new HashMap<>();
     this.initializedServers = new HashMap<>();
   }
@@ -118,7 +121,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
           servers.add(launcher);
           String id = String.valueOf(serverId.incrementAndGet());
           initializer
-              .initialize(launcher, new CheLanguageClient(eventService, id), projectPath)
+              .initialize(launcher, clientFactory.create(id), projectPath)
               .thenAccept(
                   pair -> {
                     synchronized (initializedServers) {
