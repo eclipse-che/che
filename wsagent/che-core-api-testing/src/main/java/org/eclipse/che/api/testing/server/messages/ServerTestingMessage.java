@@ -93,9 +93,9 @@ public class ServerTestingMessage implements TestingMessage {
     if (text == null || text.isEmpty()) {
       return text;
     }
-    int finaleLenght = calulateUnescapedLenght(text);
+    int finalLength = calculateUnescapedLength(text);
     int length = text.length();
-    char[] result = new char[finaleLenght];
+    char[] result = new char[finalLength];
     int resultPos = 0;
     for (int i = 0; i < length; i++) {
       char c = text.charAt(i);
@@ -113,13 +113,13 @@ public class ServerTestingMessage implements TestingMessage {
     return new String(result);
   }
 
-  private static int calulateUnescapedLenght(String text) {
+  private static int calculateUnescapedLength(String text) {
     int result = 0;
-    int lenght = text.length();
+    int length = text.length();
 
-    for (int i = 0; i < lenght; i++) {
+    for (int i = 0; i < length; i++) {
       char c = text.charAt(i);
-      if (c == ESCAPE_SEPARATOR && i < lenght - 1) {
+      if (c == ESCAPE_SEPARATOR && i < length - 1) {
         char nextChar = text.charAt(i + 1);
         if (unescape(nextChar) != 0) {
           i++;
