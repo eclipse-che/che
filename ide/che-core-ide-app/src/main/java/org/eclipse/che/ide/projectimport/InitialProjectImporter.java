@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.factory.utils;
+package org.eclipse.che.ide.projectimport;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.collect.Lists.newArrayList;
@@ -31,6 +31,8 @@ import static org.eclipse.che.ide.util.StringUtils.isNullOrEmpty;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
@@ -47,7 +49,7 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.projectimport.AbstractImporter;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.projectimport.wizard.ProjectImportOutputJsonRpcNotifier;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -79,7 +81,8 @@ public class InitialProjectImporter extends AbstractImporter {
       CoreLocalizationConstant locale,
       AskCredentialsDialog askCredentialsDialog,
       DialogFactory dialogFactory,
-      PromiseProvider promises) {
+      PromiseProvider promises,
+      EventBus eventBus) {
 
     super(appContext, subscriberFactory);
 
@@ -90,6 +93,30 @@ public class InitialProjectImporter extends AbstractImporter {
     this.askCredentialsDialog = askCredentialsDialog;
     this.dialogFactory = dialogFactory;
     this.promises = promises;
+
+    eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> importProjects());
+  }
+
+  /** Imports all projects described in workspace configuration but not existed on file system. */
+  private void importProjects() {
+    if (appContext.getFactory() != null) {
+      return;
+    }
+
+    Project[] projects = appContext.getProjects();
+
+    List<Project> importProjects = new ArrayList<>();
+    for (Project project : projects) {
+      if (project.exists()
+          || project.getSource() == null
+          || project.getSource().getLocation() == null) {
+        continue;
+      }
+
+      importProjects.add(project);
+    }
+
+    importProjects(importProjects, null);
   }
 
   /**
