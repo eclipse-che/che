@@ -94,10 +94,10 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
               handleWorkspaceEvents(workspaceDto, callback, null);
             })
         .catchError(
-            error -> {
+            caught -> {
               needToReloadComponents = true;
               String dialogTitle = locale.getWsErrorDialogTitle();
-              String dialogContent = locale.getWsErrorDialogContent(error.getMessage());
+              String dialogContent = locale.getWsErrorDialogContent(caught.getMessage());
               dialogFactory.createMessageDialog(dialogTitle, dialogContent, null).show();
             });
   }
@@ -106,28 +106,24 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
   public void onWsAgentStarted(WsAgentStateEvent event) {
     super.onWsAgentStarted(event);
 
-    Scheduler.get()
-        .scheduleDeferred(
-            () -> {
-              importProjects();
-            });
+    Scheduler.get().scheduleDeferred(this::importProjects);
   }
 
   /** Imports all projects described in workspace configuration but not existed on file system. */
   private void importProjects() {
-    final Project[] projects = appContext.getProjects();
+    Project[] projects = appContext.getProjects();
 
     List<Project> importProjects = new ArrayList<>();
     for (Project project : projects) {
-      if (project.getSource() == null
-          || project.getSource().getLocation() == null
-          || project.exists()) {
+      if (project.exists()
+          || project.getSource() == null
+          || project.getSource().getLocation() == null) {
         continue;
       }
 
       importProjects.add(project);
     }
 
-    initialProjectImporter.importProjects(importProjects);
+    initialProjectImporter.importProjects(importProjects, null);
   }
 }

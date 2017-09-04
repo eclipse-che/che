@@ -48,7 +48,7 @@ public class CheLanguageClient implements LanguageClient {
 
   @Override
   public void telemetryEvent(Object object) {
-    // not supported yet.
+    LOG.info("Telemetry: {}", object);
   }
 
   @Override
