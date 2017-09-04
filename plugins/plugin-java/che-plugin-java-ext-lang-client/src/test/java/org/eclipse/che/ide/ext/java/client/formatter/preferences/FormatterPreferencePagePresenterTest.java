@@ -10,11 +10,6 @@
  */
 package org.eclipse.che.ide.ext.java.client.formatter.preferences;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
-
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.api.promises.client.Operation;
@@ -30,7 +25,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(GwtMockitoTestRunner.class)
 public class FormatterPreferencePagePresenterTest {
@@ -78,7 +80,7 @@ public class FormatterPreferencePagePresenterTest {
 
   @Test
   public void pageSouldBeShown() throws Exception {
-    AcceptsOneWidget acceptsOneWidget = Mockito.mock(AcceptsOneWidget.class);
+    AcceptsOneWidget acceptsOneWidget = mock(AcceptsOneWidget.class);
 
     presenter.go(acceptsOneWidget);
 
