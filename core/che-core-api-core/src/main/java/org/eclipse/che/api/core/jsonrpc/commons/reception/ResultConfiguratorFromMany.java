@@ -94,16 +94,6 @@ public class ResultConfiguratorFromMany<P> {
     return new FunctionConfiguratorManyToOne<>(requestHandlerManager, method, pClass, rClass);
   }
 
-  public ConsumerConfiguratorManyToNone<P> resultAsEmpty() {
-    LOGGER.debug(
-        "Configuring incoming request result: method: "
-            + method
-            + ", result object class: "
-            + Void.class);
-
-    return new ConsumerConfiguratorManyToNone<>(requestHandlerManager, method, pClass);
-  }
-
   public FunctionConfiguratorManyToOne<P, String> resultAsString() {
     LOGGER.debug(
         "Configuring incoming request result: method: "

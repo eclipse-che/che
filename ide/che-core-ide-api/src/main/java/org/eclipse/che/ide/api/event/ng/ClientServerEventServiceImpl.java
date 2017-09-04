@@ -19,7 +19,6 @@ import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperation
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.api.promises.client.Promise;
@@ -29,6 +28,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 /** @author Roman Nikitenko */
 @Singleton
 public class ClientServerEventServiceImpl implements ClientServerEventService {
+
   private static final String ENDPOINT_ID = "ws-agent";
   private static final String OUTCOMING_METHOD = "track:editor-file";
 
@@ -45,55 +45,48 @@ public class ClientServerEventServiceImpl implements ClientServerEventService {
   }
 
   @Override
-  public Promise<Void> sendFileTrackingStartEvent(String path) {
+  public Promise<Boolean> sendFileTrackingStartEvent(String path) {
     return transmit(path, "", START);
   }
 
   @Override
-  public Promise<Void> sendFileTrackingStopEvent(String path) {
+  public Promise<Boolean> sendFileTrackingStopEvent(String path) {
     return transmit(path, "", STOP);
   }
 
   @Override
-  public Promise<Void> sendFileTrackingSuspendEvent() {
+  public Promise<Boolean> sendFileTrackingSuspendEvent() {
     return transmit("", "", SUSPEND);
   }
 
   @Override
-  public Promise<Void> sendFileTrackingResumeEvent() {
+  public Promise<Boolean> sendFileTrackingResumeEvent() {
     return transmit("", "", RESUME);
   }
 
   @Override
-  public Promise<Void> sendFileTrackingMoveEvent(String oldPath, String newPath) {
+  public Promise<Boolean> sendFileTrackingMoveEvent(String oldPath, String newPath) {
     return transmit(oldPath, newPath, MOVE);
   }
 
-  private Promise<Void> transmit(String path, String oldPath, FileTrackingOperationDto.Type type) {
+  private Promise<Boolean> transmit(
+      String path, String oldPath, FileTrackingOperationDto.Type type) {
     final FileTrackingOperationDto dto =
         dtoFactory
             .createDto(FileTrackingOperationDto.class)
             .withPath(path)
             .withType(type)
             .withOldPath(oldPath);
-    return promises.create(
-        (AsyncCallback<Void> callback) -> {
-          JsonRpcPromise<Void> jsonRpcPromise =
-              requestTransmitter
-                  .newRequest()
-                  .endpointId(ENDPOINT_ID)
-                  .methodName(OUTCOMING_METHOD)
-                  .paramsAsDto(dto)
-                  .sendAndReceiveResultAsEmpty();
-          jsonRpcPromise.onSuccess(
-              aVoid -> {
-                callback.onSuccess(null);
-              });
 
-          jsonRpcPromise.onFailure(
-              jsonRpcError -> {
-                callback.onFailure(new Throwable(jsonRpcError.getMessage()));
-              });
-        });
+    return promises.create(
+        (AsyncCallback<Boolean> callback) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(ENDPOINT_ID)
+                .methodName(OUTCOMING_METHOD)
+                .paramsAsDto(dto)
+                .sendAndReceiveResultAsBoolean()
+                .onSuccess(callback::onSuccess)
+                .onFailure(error -> callback.onFailure(new Throwable(error.getMessage()))));
   }
 }
