@@ -18,9 +18,9 @@ public interface VcsChangeMarkerRender {
   /**
    * Add change marker to the gutter on the given lines.
    *
-   * @param lineStart first line of the marker
-   * @param lineEnd lastLine of the marker
-   * @param type tpe of the marker e.g. insertion, modification, deletion
+   * @param lineStart the first line number of the marker
+   * @param lineEnd the last line number of the marker
+   * @param type type of the marker e.g. insertion, modification, deletion
    */
   void addChangeMarker(int lineStart, int lineEnd, EditedRegionType type);
 

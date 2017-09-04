@@ -291,9 +291,9 @@ public interface GitServiceClient {
    * Get list of edited regions (insertions, modifications, removals) of the file.
    *
    * @param project project (root of GIT repository)
-   * @param file path of the file
+   * @param filePath path of the file
    */
-  Promise<List<EditedRegion>> getEditedRegions(Path project, String file);
+  Promise<List<EditedRegion>> getEditedRegions(Path project, String filePath);
 
   /**
    * Get the file content from specified revision or branch.

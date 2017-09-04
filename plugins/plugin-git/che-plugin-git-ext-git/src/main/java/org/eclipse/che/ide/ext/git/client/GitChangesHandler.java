@@ -131,7 +131,8 @@ public class GitChangesHandler {
         .stream()
         .filter(
             editor ->
-                editor.getEditorInput().getFile().getLocation().equals(Path.valueOf(dto.getPath())))
+                editor.getEditorInput().getFile().getLocation().equals(Path.valueOf(dto.getPath()))
+                    && editor instanceof VcsChangeMarkerRender)
         .forEach(
             editor -> {
               VcsStatus vcsStatus = VcsStatus.from(dto.getStatus().toString());
@@ -156,9 +157,7 @@ public class GitChangesHandler {
     editedRegions.forEach(
         edition ->
             render.addChangeMarker(
-                edition.getBeginLine(),
-                edition.getEndLine(),
-                edition.getType()));
+                edition.getBeginLine(), edition.getEndLine(), edition.getType()));
   }
 
   public void apply(String endpointId, IndexChangedEventDto dto) {
@@ -193,6 +192,8 @@ public class GitChangesHandler {
     editorAgentProvider
         .get()
         .getOpenedEditors()
+        .stream()
+        .filter(editor -> editor instanceof VcsChangeMarkerRender)
         .forEach(
             editor -> {
               EditorTab tab = multiPartStackProvider.get().getTabByPart(editor);

@@ -92,6 +92,9 @@ public class GitIndexChangedDetector {
     return it ->
         !isDirectory(it)
             && (INDEX_FILE.equals(it.getFileName().toString())
+                /* When making a commit or reset index with the help of JGit,
+                it does not update Git status immediately after changes in 'index' file,
+                so need to additionally detect changes in 'COMMIT_EDITMSG' and 'ORIG_HEAD' files.*/
                 || COMMIT_MESSAGE_FILE.equals(it.getFileName().toString())
                 || ORIG_HEAD_FILE.equals(it.getFileName().toString()))
             && GIT_DIR.equals(it.getParent().getFileName().toString());

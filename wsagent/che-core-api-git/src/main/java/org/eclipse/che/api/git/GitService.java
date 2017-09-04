@@ -252,7 +252,7 @@ public class GitService {
   @GET
   @Path("edits")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<EditedRegion> getEditedRegions(@Required @QueryParam("file") String file)
+  public List<EditedRegion> getEditedRegions(@Required @QueryParam("filePath") String file)
       throws ApiException {
     requiredNotNull(file, "File path");
     try (GitConnection gitConnection = getGitConnection()) {
