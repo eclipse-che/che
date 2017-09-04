@@ -23,7 +23,7 @@
     <artifactId>che-assembly-parent</artifactId>
     <version>5.18.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Che IDE Assembly Multiuser:: Parent</name>
+    <name>Che IDE Assembly Multiuser :: Parent</name>
     <modules>
         <module>assembly-wsagent-war</module>
         <module>assembly-wsagent-server</module>

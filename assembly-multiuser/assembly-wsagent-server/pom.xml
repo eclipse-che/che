@@ -20,7 +20,7 @@
     </parent>
     <artifactId>assembly-wsagent-server</artifactId>
     <packaging>pom</packaging>
-    <name>Fabric8 IDE Assembly Workspace Agent Server</name>
+    <name>Che IDE Assembly Multiuser :: Agent Server</name>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.assembly-multiuser</groupId>

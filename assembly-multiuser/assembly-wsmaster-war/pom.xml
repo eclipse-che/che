@@ -25,7 +25,7 @@
     </parent>
     <artifactId>assembly-wsmaster-war</artifactId>
     <packaging>war</packaging>
-    <name>Fabric8 IDE :: Compiling WS Master WAR</name>
+    <name>Che IDE Assembly Multiuser :: Compiling WS Master WAR</name>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che</groupId>

@@ -25,7 +25,7 @@
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
-    <name>Fabric8 IDE :: Assemblies Tomcat</name>
+    <name>Che IDE Assembly Multiuser :: Assemblies Tomcat</name>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.assembly-multiuser</groupId>
