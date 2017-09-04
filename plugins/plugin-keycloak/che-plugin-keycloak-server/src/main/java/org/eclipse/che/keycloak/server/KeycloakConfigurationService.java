@@ -15,6 +15,7 @@ import static org.eclipse.che.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_
 import static org.eclipse.che.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
 import static org.eclipse.che.keycloak.shared.KeycloakConstants.GITHUB_ENDPOINT_SETTING;
 import static org.eclipse.che.keycloak.shared.KeycloakConstants.OSO_ENDPOINT_SETTING;
+import static org.eclipse.che.keycloak.shared.KeycloakConstants.PROFILE_ENDPOINT_SETTING;
 import static org.eclipse.che.keycloak.shared.KeycloakConstants.REALM_SETTING;
 
 import com.google.common.collect.Maps;
@@ -50,6 +51,7 @@ public class KeycloakConfigurationService extends Service {
     settings.put(AUTH_SERVER_URL_SETTING, serverURL);
     settings.put(CLIENT_ID_SETTING, clientId);
     settings.put(REALM_SETTING, realm);
+    settings.put(PROFILE_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/protocol/openid-connect/userinfo");
     settings.put(OSO_ENDPOINT_SETTING, osoEndpoint);
     settings.put(GITHUB_ENDPOINT_SETTING, gitHubEndpoint);
     KeycloakSettings.set(Collections.unmodifiableMap(settings));
