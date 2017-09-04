@@ -15,7 +15,6 @@ import static java.lang.String.valueOf;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -219,10 +218,10 @@ public class TestWorkspaceServiceClient {
   }
 
   /**
-   * Return ServerDto object by exposed port
+   * Return ServerDto object from runtime by it's symbolic name
    *
    * @param workspaceId workspace id of current user
-   * @param serverName exposed port of server
+   * @param serverName server name
    * @return ServerDto object
    */
   @Nullable
