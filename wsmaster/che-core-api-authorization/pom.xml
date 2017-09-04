@@ -39,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-permission-shared</artifactId>
+            <artifactId>che-core-api-permission</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -68,11 +68,6 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-permission</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
