@@ -10,8 +10,19 @@
  */
 package org.eclipse.che.ide.api.project;
 
-import com.google.inject.Inject;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.gwt.http.client.RequestBuilder.DELETE;
+import static com.google.gwt.http.client.RequestBuilder.PUT;
+import static com.google.gwt.safehtml.shared.UriUtils.encodeAllowEscapes;
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
+import com.google.inject.Inject;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
@@ -34,19 +45,6 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.gwt.http.client.RequestBuilder.DELETE;
-import static com.google.gwt.http.client.RequestBuilder.PUT;
-import static com.google.gwt.safehtml.shared.UriUtils.encodeAllowEscapes;
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 /**
  * Implementation of {@link ProjectServiceClient}.
@@ -159,7 +157,8 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
       queryParameters.append("&text=").append(expression.getText());
     }
     if (expression.getMaxItems() == 0) {
-      expression.setMaxItems(100); //for avoiding block client by huge response until search not support pagination will limit result here
+      expression.setMaxItems(
+          100); //for avoiding block client by huge response until search not support pagination will limit result here
     }
     queryParameters.append("&maxItems=").append(expression.getMaxItems());
     if (expression.getSkipCount() != 0) {
