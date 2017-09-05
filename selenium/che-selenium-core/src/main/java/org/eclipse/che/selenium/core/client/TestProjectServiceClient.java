@@ -219,7 +219,12 @@ public class TestProjectServiceClient {
         workspaceServiceClient.getById(workspaceId).getRuntime().getMachines();
     for (Machine machine : machines.values()) {
       if (containsWsAgentServer(machine)) {
-        return machine.getServers().get(SERVER_WS_AGENT_HTTP_REFERENCE).getUrl() + "/project";
+        String wsAgentUrl = machine.getServers().get(SERVER_WS_AGENT_HTTP_REFERENCE).getUrl();
+            if (wsAgentUrl != null) {
+              return wsAgentUrl + "/project";
+            } else {
+              throw new RuntimeException("null dev machine URL");
+            }
       }
     }
     throw new RuntimeException("Cannot find dev machine on workspace");

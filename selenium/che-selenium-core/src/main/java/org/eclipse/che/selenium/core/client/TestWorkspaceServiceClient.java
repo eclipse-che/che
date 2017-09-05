@@ -18,12 +18,9 @@ import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.cont
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.File;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -35,7 +32,6 @@ import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
@@ -153,12 +149,8 @@ public class TestWorkspaceServiceClient {
 
   /** Creates a new workspace. */
   public Workspace createWorkspace(
-      String workspaceName, int memory, MemoryMeasure memoryUnit, String pathToPattern)
+      String workspaceName, int memory, MemoryMeasure memoryUnit, WorkspaceConfigDto workspace)
       throws Exception {
-    String json = FileUtils.readFileToString(new File(pathToPattern), Charset.forName("UTF-8"));
-    WorkspaceConfigDto workspace =
-        DtoFactory.getInstance().createDtoFromJson(json, WorkspaceConfigDto.class);
-
     EnvironmentDto environment = workspace.getEnvironments().get("replaced_name");
     environment
         .getMachines()
@@ -203,7 +195,13 @@ public class TestWorkspaceServiceClient {
     return requestFactory.fromUrl(getIdBasedUrl(workspaceId)).request().asDto(WorkspaceDto.class);
   }
 
-  /** Return server URL related with defined port */
+  /**
+   * Return server URL related with defined port
+   *
+   * @deprecated use {@link #getServerFromDevMachineBySymbolicName(String, String)} to retrieve
+   *     server URL from instead
+   */
+  @Deprecated
   public String getServerAddressByPort(String workspaceId, int port) throws Exception {
     Workspace workspace = getById(workspaceId);
     ensureRunningStatus(workspace);

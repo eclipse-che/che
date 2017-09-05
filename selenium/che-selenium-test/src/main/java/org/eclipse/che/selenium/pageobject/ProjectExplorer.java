@@ -107,8 +107,8 @@ public class ProjectExplorer {
   }
 
   public interface ProjectExplorerOptionsMenuItem {
-    String MAXIMAZE = "contextMenu/Maximize";
-    String MINIMAZE = "contextMenu/Minimize";
+    String MAXIMIZE = "contextMenu/Maximize";
+    String MINIMIZE = "contextMenu/Minimize";
     String COLLAPSE_ALL = "contextMenu/Collapse All";
     String REFRESH_MAIN = "contextMenu/Refresh 'main'";
     String LINK_WITH_EDITOR = "contextMenu/Link with editor";
