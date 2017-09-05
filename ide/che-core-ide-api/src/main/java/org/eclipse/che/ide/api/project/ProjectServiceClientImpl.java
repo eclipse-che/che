@@ -156,9 +156,11 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     if (expression.getText() != null && !expression.getText().isEmpty()) {
       queryParameters.append("&text=").append(expression.getText());
     }
-    if (expression.getMaxItems() != 0) {
-      queryParameters.append("&maxItems=").append(expression.getMaxItems());
+    if (expression.getMaxItems() == 0) {
+      expression.setMaxItems(
+          100); //for avoiding block client by huge response until search not support pagination will limit result here
     }
+    queryParameters.append("&maxItems=").append(expression.getMaxItems());
     if (expression.getSkipCount() != 0) {
       queryParameters.append("&skipCount=").append(expression.getSkipCount());
     }
