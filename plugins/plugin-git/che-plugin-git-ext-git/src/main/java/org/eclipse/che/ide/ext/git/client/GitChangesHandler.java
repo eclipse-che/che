@@ -132,7 +132,7 @@ public class GitChangesHandler {
         .filter(
             editor ->
                 editor.getEditorInput().getFile().getLocation().equals(Path.valueOf(dto.getPath()))
-                    && editor instanceof VcsChangeMarkerRender)
+                    && editor instanceof HasVcsChangeMarkerRender)
         .forEach(
             editor -> {
               VcsStatus vcsStatus = VcsStatus.from(dto.getStatus().toString());
@@ -193,7 +193,7 @@ public class GitChangesHandler {
         .get()
         .getOpenedEditors()
         .stream()
-        .filter(editor -> editor instanceof VcsChangeMarkerRender)
+        .filter(editor -> editor instanceof HasVcsChangeMarkerRender)
         .forEach(
             editor -> {
               EditorTab tab = multiPartStackProvider.get().getTabByPart(editor);

@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.editor.orion.client;
 
 import static java.lang.Boolean.parseBoolean;
-import static java.util.Arrays.stream;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -36,15 +35,13 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
+
+import org.eclipse.che.api.promises.client.*;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -135,6 +132,7 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.vcs.HasVcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionAttributesOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionExtRulerOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
@@ -194,6 +192,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private final SignatureHelpView signatureHelpView;
   private final EditorContextMenu contextMenu;
   private final AutoSaveMode autoSaveMode;
+  private final PromiseProvider promises;
   private final ClientServerEventService clientServerEventService;
   private final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation;
 
@@ -242,6 +241,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       final SignatureHelpView signatureHelpView,
       final EditorContextMenu contextMenu,
       final AutoSaveMode autoSaveMode,
+      final PromiseProvider promises,
       final ClientServerEventService clientServerEventService,
       final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation) {
     this.codeAssistantFactory = codeAssistantFactory;
@@ -266,6 +266,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     this.signatureHelpView = signatureHelpView;
     this.contextMenu = contextMenu;
     this.autoSaveMode = autoSaveMode;
+    this.promises = promises;
     this.clientServerEventService = clientServerEventService;
     this.editorFileStatusNotificationOperation = editorFileStatusNotificationOperation;
 
@@ -719,18 +720,10 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
 
   @Override
   public VcsChangeMarkerRender getVcsChangeMarkersRender() {
-    OrionTextViewOverlay textView = editorWidget.getTextView();
-    if (vcsChangeMarkerRender == null) {
-      stream(textView.getRulers())
-          .filter(ruler -> "ruler folding".equals(ruler.getStyle().getStyleClass()))
-          .findAny()
-          .ifPresent(
-              ruler ->
-                  vcsChangeMarkerRender =
-                      vcsChangeMarkerRenderFactory.create(
-                          new OrionVcsChangeMarkersRuler(ruler, editorWidget.getEditor())));
-    }
-    return vcsChangeMarkerRender;
+
+    String a = "dsgsdg";
+
+    return this.vcsChangeMarkerRender;
   }
 
   @Override
@@ -1152,7 +1145,11 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
               setupFileContentUpdateHandler();
 
               isInitialized = true;
-              openEditorCallback.onEditorOpened(OrionEditorPresenter.this);
+              initializeChangeMarkersRender()
+                  .then(
+                      arg -> {
+                        openEditorCallback.onEditorOpened(OrionEditorPresenter.this);
+                      });
             }
           });
 
@@ -1176,6 +1173,58 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                             updateDirtyState(true);
                           }));
     }
+  }
+
+  private Promise<Void> initializeChangeMarkersRender() {
+    OrionTextViewOverlay textView = editorWidget.getTextView();
+    List<OrionExtRulerOverlay> rulers = Arrays.asList(textView.getRulers());
+
+    OrionStyleOverlay style = OrionStyleOverlay.create();
+    style.setStyleClass("vcsChangeMarker");
+
+    OrionAttributesOverlay attributesOverlay = OrionAttributesOverlay.create();
+    attributesOverlay.setAttribute(
+        "style",
+        "width: 8px; position: relative; float: left; background-color: "
+            + org.eclipse.che.ide.api.theme.Style.theme.editorGutterLineNumberBackgroundColor());
+    style.setAttributes(attributesOverlay);
+
+    return Promises.create(
+        (resolve, reject) ->
+            OrionExtRulerOverlay.create(
+                editorWidget.getEditor().getAnnotationModel(),
+                style,
+                OrionExtRulerOverlay.RulerLocation.LEFT.getLocation(),
+                OrionExtRulerOverlay.RulerOverview.PAGE.getOverview(),
+                orionExtRulerOverlay -> {
+                  int rulerPosition = 0;
+                  OrionExtRulerOverlay rulerLines = getRuler(rulers, "ruler lines");
+                  if (rulerLines != null) {
+                    rulerPosition = rulers.indexOf(rulerLines) + 1;
+                  } else {
+                    OrionExtRulerOverlay rulerAnnotations = getRuler(rulers, "ruler annotations");
+                    if (rulerAnnotations != null) {
+                      rulerPosition = rulers.indexOf(rulerAnnotations) + 1;
+                    }
+                  }
+
+                  textView.addRuler(orionExtRulerOverlay, rulerPosition);
+                  OrionVcsChangeMarkersRuler orionVcsChangeMarkersRuler =
+                      new OrionVcsChangeMarkersRuler(
+                          orionExtRulerOverlay, editorWidget.getEditor());
+
+                  this.vcsChangeMarkerRender =
+                      vcsChangeMarkerRenderFactory.create(orionVcsChangeMarkersRuler);
+                  resolve.apply(null);
+                }));
+  }
+
+  private OrionExtRulerOverlay getRuler(List<OrionExtRulerOverlay> rulers, String name) {
+    return rulers
+        .stream()
+        .filter(ruler -> name.equals(ruler.getStyle().getStyleClass()))
+        .findAny()
+        .orElse(null);
   }
 
   @Override
