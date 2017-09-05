@@ -10,9 +10,13 @@
  */
 package org.eclipse.che.api.machine.server.recipe;
 
+import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -66,7 +70,7 @@ import org.eclipse.che.api.permission.shared.model.Permissions;
             + "AND recipePermission.userId IS NULL "
   )
 })
-@Table(name = "recipepermissions")
+@Table(name = "che_recipepermissions")
 public class RecipePermissionsImpl extends AbstractPermissions {
 
   @Column(name = "recipeid")
@@ -76,6 +80,11 @@ public class RecipePermissionsImpl extends AbstractPermissions {
   @JoinColumn(name = "recipeid", insertable = false, updatable = false)
   private RecipeImpl recipe;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Column(name = "actions")
+  @CollectionTable(name = "che_recipepermissions_actions")
+  protected List<String> actions;
+
   public RecipePermissionsImpl() {}
 
   public RecipePermissionsImpl(Permissions permissions) {
@@ -83,8 +92,11 @@ public class RecipePermissionsImpl extends AbstractPermissions {
   }
 
   public RecipePermissionsImpl(String userId, String instanceId, List<String> allowedActions) {
-    super(userId, allowedActions);
+    super(userId);
     this.recipeId = instanceId;
+    if (allowedActions != null) {
+      this.actions = new ArrayList<>(allowedActions);
+    }
   }
 
   @Override
@@ -95,6 +107,11 @@ public class RecipePermissionsImpl extends AbstractPermissions {
   @Override
   public String getDomainId() {
     return RecipeDomain.DOMAIN_ID;
+  }
+
+  @Override
+  public List<String> getActions() {
+    return actions;
   }
 
   @Override

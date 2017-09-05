@@ -10,12 +10,9 @@
  */
 package org.eclipse.che.api.permission.server.model.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -48,24 +45,17 @@ public abstract class AbstractPermissions implements Permissions {
   @JoinColumn(name = "userid", insertable = false, updatable = false)
   private UserImpl user;
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  @Column(name = "actions")
-  protected List<String> actions;
-
   @Transient private String userIdHolder;
 
   public AbstractPermissions() {}
 
   public AbstractPermissions(Permissions permissions) {
-    this(permissions.getUserId(), permissions.getActions());
+    this(permissions.getUserId());
   }
 
-  public AbstractPermissions(String userId, List<String> actions) {
+  public AbstractPermissions(String userId) {
     this.userIdHolder = userId;
     this.userId = userId;
-    if (actions != null) {
-      this.actions = new ArrayList<>(actions);
-    }
   }
 
   /** Returns used id */
@@ -88,9 +78,7 @@ public abstract class AbstractPermissions implements Permissions {
 
   /** List of actions which user can perform for particular instance */
   @Override
-  public List<String> getActions() {
-    return actions;
-  }
+  public abstract List<String> getActions();
 
   @PreUpdate
   @PrePersist
@@ -136,14 +124,6 @@ public abstract class AbstractPermissions implements Permissions {
 
   @Override
   public String toString() {
-    return "AbstractPermissions{"
-        + "id='"
-        + id
-        + '\''
-        + ", user="
-        + user
-        + ", actions="
-        + actions
-        + '}';
+    return "AbstractPermissions{" + "id='" + id + '\'' + ", user=" + user + '}';
   }
 }

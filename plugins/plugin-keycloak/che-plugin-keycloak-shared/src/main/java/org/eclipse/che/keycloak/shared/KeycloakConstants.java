@@ -31,8 +31,10 @@ public class KeycloakConstants {
       KEYCLOAK_SETTING_PREFIX + PRIVATE_PREFIX + "client-secret";
 
   public static final String OSO_ENDPOINT_SETTING = KEYCLOAK_SETTING_PREFIX + "oso.endpoint";
-  public static final String PROFILE_ENDPOINT_SETTING = KEYCLOAK_SETTING_PREFIX + "profile.endpoint";
-  public static final String PASSWORD_ENDPOINT_SETTING = KEYCLOAK_SETTING_PREFIX + "password.endpoint";
+  public static final String PROFILE_ENDPOINT_SETTING =
+      KEYCLOAK_SETTING_PREFIX + "profile.endpoint";
+  public static final String PASSWORD_ENDPOINT_SETTING =
+      KEYCLOAK_SETTING_PREFIX + "password.endpoint";
   public static final String LOGOUT_ENDPOINT_SETTING = KEYCLOAK_SETTING_PREFIX + "logout.endpoint";
   public static final String GITHUB_ENDPOINT_SETTING = KEYCLOAK_SETTING_PREFIX + "github.endpoint";
 

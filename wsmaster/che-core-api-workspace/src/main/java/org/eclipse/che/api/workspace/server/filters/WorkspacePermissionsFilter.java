@@ -116,6 +116,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
         if (superPrivilegesChecker.hasSuperPrivileges()) {
           return;
         }
+        // fall through
       case "startById":
       case "createSnapshot":
         key = ((String) arguments[0]);
@@ -131,6 +132,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
         if (superPrivilegesChecker.hasSuperPrivileges()) {
           return;
         }
+        // fall through
       case "checkAgentHealth":
         key = ((String) arguments[0]);
         action = READ;

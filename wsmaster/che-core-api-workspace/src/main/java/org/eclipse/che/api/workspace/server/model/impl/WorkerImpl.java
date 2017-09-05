@@ -10,9 +10,13 @@
  */
 package org.eclipse.che.api.workspace.server.model.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -51,7 +55,7 @@ import org.eclipse.che.api.workspace.server.model.Worker;
             + "AND worker.workspaceId = :workspaceId "
   )
 })
-@Table(name = "worker")
+@Table(name = "che_worker")
 public class WorkerImpl extends AbstractPermissions implements Worker {
 
   @Column(name = "workspaceid")
@@ -61,11 +65,19 @@ public class WorkerImpl extends AbstractPermissions implements Worker {
   @JoinColumn(name = "workspaceid", insertable = false, updatable = false)
   private WorkspaceImpl workspace;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Column(name = "actions")
+  @CollectionTable(name = "che_worker_actions")
+  protected List<String> actions;
+
   public WorkerImpl() {}
 
   public WorkerImpl(String workspaceId, String userId, List<String> actions) {
-    super(userId, actions);
+    super(userId);
     this.workspaceId = workspaceId;
+    if (actions != null) {
+      this.actions = new ArrayList<>(actions);
+    }
   }
 
   public WorkerImpl(Worker worker) {
@@ -80,6 +92,11 @@ public class WorkerImpl extends AbstractPermissions implements Worker {
   @Override
   public String getDomainId() {
     return WorkspaceDomain.DOMAIN_ID;
+  }
+
+  @Override
+  public List<String> getActions() {
+    return actions;
   }
 
   @Override

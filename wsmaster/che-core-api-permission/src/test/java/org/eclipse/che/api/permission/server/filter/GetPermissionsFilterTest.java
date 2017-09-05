@@ -173,12 +173,14 @@ public class GetPermissionsFilterTest {
 
     String domainId;
     String instanceId;
+    List<String> actions;
 
     public TestPermissions(
         String userId, String domainId, String instanceId, List<String> allowedActions) {
-      super(userId, allowedActions);
+      super(userId);
       this.domainId = domainId;
       this.instanceId = instanceId;
+      this.actions = allowedActions;
     }
 
     @Override
@@ -189,6 +191,11 @@ public class GetPermissionsFilterTest {
     @Override
     public String getDomainId() {
       return domainId;
+    }
+
+    @Override
+    public List<String> getActions() {
+      return actions;
     }
   }
 }

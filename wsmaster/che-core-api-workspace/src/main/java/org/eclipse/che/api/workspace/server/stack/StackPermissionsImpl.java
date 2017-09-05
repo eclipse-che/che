@@ -10,9 +10,13 @@
  */
 package org.eclipse.che.api.workspace.server.stack;
 
+import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -61,6 +65,7 @@ import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
   )
 })
 @Table(
+  name = "che_stackpermissions",
   indexes = {@Index(columnList = "userId, stackId", unique = true), @Index(columnList = "stackId")}
 )
 public class StackPermissionsImpl extends AbstractPermissions {
@@ -72,6 +77,11 @@ public class StackPermissionsImpl extends AbstractPermissions {
   @JoinColumn(name = "stackid", insertable = false, updatable = false)
   private StackImpl stack;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Column(name = "actions")
+  @CollectionTable(name = "che_stackpermissions_actions")
+  protected List<String> actions;
+
   public StackPermissionsImpl() {}
 
   public StackPermissionsImpl(Permissions permissions) {
@@ -79,8 +89,11 @@ public class StackPermissionsImpl extends AbstractPermissions {
   }
 
   public StackPermissionsImpl(String userId, String instanceId, List<String> allowedActions) {
-    super(userId, allowedActions);
+    super(userId);
     this.stackId = instanceId;
+    if (allowedActions != null) {
+      this.actions = new ArrayList<>(allowedActions);
+    }
   }
 
   @Override
@@ -91,6 +104,11 @@ public class StackPermissionsImpl extends AbstractPermissions {
   @Override
   public String getDomainId() {
     return StackDomain.DOMAIN_ID;
+  }
+
+  @Override
+  public List<String> getActions() {
+    return actions;
   }
 
   @Override

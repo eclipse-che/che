@@ -55,7 +55,9 @@ public class KeycloakConfigurationService extends Service {
     settings.put(REALM_SETTING, realm);
     settings.put(PROFILE_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/account");
     settings.put(PASSWORD_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/account/password");
-    settings.put(LOGOUT_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/protocol/openid-connect/logout");
+    settings.put(
+        LOGOUT_ENDPOINT_SETTING,
+        serverURL + "/realms/" + realm + "/protocol/openid-connect/logout");
     settings.put(OSO_ENDPOINT_SETTING, osoEndpoint);
     settings.put(GITHUB_ENDPOINT_SETTING, gitHubEndpoint);
     KeycloakSettings.set(Collections.unmodifiableMap(settings));

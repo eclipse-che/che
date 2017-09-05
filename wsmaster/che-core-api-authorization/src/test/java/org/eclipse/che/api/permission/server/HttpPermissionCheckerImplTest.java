@@ -25,6 +25,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
+import org.eclipse.che.api.permission.shared.dto.PermissionsDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;

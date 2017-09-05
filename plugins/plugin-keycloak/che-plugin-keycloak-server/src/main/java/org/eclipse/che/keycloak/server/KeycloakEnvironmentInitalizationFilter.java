@@ -31,6 +31,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.permission.server.AuthorizedSubject;
+import org.eclipse.che.api.permission.server.PermissionChecker;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
@@ -48,12 +50,16 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
 
   private final UserManager userManager;
   private final RequestTokenExtractor tokenExtractor;
+  private final PermissionChecker permissionChecker;
 
   @Inject
   public KeycloakEnvironmentInitalizationFilter(
-      UserManager userManager, RequestTokenExtractor tokenExtractor) {
+      UserManager userManager,
+      RequestTokenExtractor tokenExtractor,
+      PermissionChecker permissionChecker) {
     this.userManager = userManager;
     this.tokenExtractor = tokenExtractor;
+    this.permissionChecker = permissionChecker;
   }
 
   @Override
@@ -83,7 +89,9 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
               claims.getSubject(),
               claims.get("email", String.class),
               claims.get("preferred_username", String.class));
-      subject = new SubjectImpl(user.getName(), user.getId(), token, false);
+      subject =
+          new AuthorizedSubject(
+              new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
       session.setAttribute("che_subject", subject);
     }
 

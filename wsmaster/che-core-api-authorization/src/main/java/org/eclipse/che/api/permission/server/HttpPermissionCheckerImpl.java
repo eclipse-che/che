@@ -24,6 +24,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.permission.shared.dto.PermissionsDto;
 
 /**
  * Implementation of {@link PermissionChecker} that load permissions by http requests to {@link

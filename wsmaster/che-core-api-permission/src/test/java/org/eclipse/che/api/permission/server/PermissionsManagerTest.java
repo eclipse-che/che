@@ -313,6 +313,8 @@ public class PermissionsManagerTest {
 
     private String instanceId;
 
+    List<String> actions;
+
     @Override
     public String getInstanceId() {
       return instanceId;
@@ -325,9 +327,15 @@ public class PermissionsManagerTest {
 
     public TestPermissionsImpl(
         String userId, String domainId, String instanceId, List<String> actions) {
-      super(userId, actions);
+      super(userId);
       this.domainId = domainId;
       this.instanceId = instanceId;
+      this.actions = actions;
+    }
+
+    @Override
+    public List<String> getActions() {
+      return actions;
     }
   }
 }

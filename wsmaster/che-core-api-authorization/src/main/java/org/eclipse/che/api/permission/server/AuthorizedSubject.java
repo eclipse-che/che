@@ -12,14 +12,6 @@ package org.eclipse.che.api.permission.server;
 
 import static java.lang.String.format;
 
-import java.io.IOException;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -29,63 +21,67 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Sets up implementation of {@link Subject} that can check permissions by {@link PermissionChecker}
+ * Sets up implementation of {@link Subject} that can check permissions.
  *
  * @author Sergii Leschenko
  */
 public class AuthorizedSubject implements Subject {
-    private final Subject baseSubject;
 
-    public AuthorizedSubject(Subject baseSubject) {
-      this.baseSubject = baseSubject;
+  private static final Logger LOG = LoggerFactory.getLogger(AuthorizedSubject.class);
+
+  private final Subject baseSubject;
+  private final PermissionChecker permissionChecker;
+
+  public AuthorizedSubject(Subject baseSubject, PermissionChecker permissionChecker) {
+    this.baseSubject = baseSubject;
+    this.permissionChecker = permissionChecker;
+  }
+
+  @Override
+  public String getUserName() {
+    return baseSubject.getUserName();
+  }
+
+  @Override
+  public boolean hasPermission(String domain, String instance, String action) {
+    try {
+      return permissionChecker.hasPermission(getUserId(), domain, instance, action);
+    } catch (NotFoundException nfe) {
+      return false;
+    } catch (ServerException | ConflictException e) {
+      LOG.error(
+          format(
+              "Can't check permissions for user '%s' and instance '%s' of domain '%s'",
+              getUserId(), domain, instance),
+          e);
+      throw new RuntimeException("Can't check user's permissions", e);
     }
+  }
 
-    @Override
-    public String getUserName() {
-      return baseSubject.getUserName();
-    }
-
-    @Override
-    public boolean hasPermission(String domain, String instance, String action) {
-      try {
-        return permissionChecker.hasPermission(getUserId(), domain, instance, action);
-      } catch (NotFoundException nfe) {
-        return false;
-      } catch (ServerException | ConflictException e) {
-        LOG.error(
-            format(
-                "Can't check permissions for user '%s' and instance '%s' of domain '%s'",
-                getUserId(), domain, instance),
-            e);
-        throw new RuntimeException("Can't check user's permissions", e);
+  @Override
+  public void checkPermission(String domain, String instance, String action)
+      throws ForbiddenException {
+    if (!hasPermission(domain, instance, action)) {
+      String message = "User is not authorized to perform " + action + " of " + domain;
+      if (instance != null) {
+        message += " with id '" + instance + "'";
       }
+      throw new ForbiddenException(message);
     }
+  }
 
-    @Override
-    public void checkPermission(String domain, String instance, String action)
-        throws ForbiddenException {
-      if (!hasPermission(domain, instance, action)) {
-        String message = "User is not authorized to perform " + action + " of " + domain;
-        if (instance != null) {
-          message += " with id '" + instance + "'";
-        }
-        throw new ForbiddenException(message);
-      }
-    }
+  @Override
+  public String getToken() {
+    return baseSubject.getToken();
+  }
 
-    @Override
-    public String getToken() {
-      return baseSubject.getToken();
-    }
+  @Override
+  public String getUserId() {
+    return baseSubject.getUserId();
+  }
 
-    @Override
-    public String getUserId() {
-      return baseSubject.getUserId();
-    }
-
-    @Override
-    public boolean isTemporary() {
-      return baseSubject.isTemporary();
-    }
+  @Override
+  public boolean isTemporary() {
+    return baseSubject.isTemporary();
   }
 }
