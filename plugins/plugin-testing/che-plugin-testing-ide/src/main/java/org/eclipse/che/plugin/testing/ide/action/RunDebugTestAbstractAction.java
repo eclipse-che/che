@@ -21,6 +21,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
+import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -48,6 +49,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.editor.JavaReconsilerEvent;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
@@ -261,10 +263,15 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
     if (isJavaTestFile(resource)) {
       contextType = TestExecutionContext.ContextType.FILE;
     } else if (resource instanceof Container) {
+      Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
+      if (!srcFolder.isPresent() || resource.getLocation().equals(srcFolder.get().getLocation())) {
+        isEnable = false;
+        return;
+      }
       contextType = TestExecutionContext.ContextType.FOLDER;
     }
-    selectedNodePath = resource.getLocation().toString();
     isEnable = true;
+    selectedNodePath = resource.getLocation().toString();
   }
 
   private void onTestRanSuccessfully(
