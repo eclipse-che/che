@@ -39,12 +39,18 @@ public class CheCodeFormatterOptions {
     return DefaultCodeFormatterConstants.getEclipseDefaultSettings();
   }
 
+  /**
+   * Parses code formatter file.
+   *
+   * @param file file which describes formatting settings
+   * @return map with formatting settings
+   */
   public static Map<String, String> getFormatSettingsFromFile(File file) {
     SAXParserFactory factory = SAXParserFactory.newInstance();
     XMLParser parserXML = new XMLParser();
-    try {
+    try (FileInputStream fis = new FileInputStream(file)) {
       SAXParser parser = factory.newSAXParser();
-      parser.parse(new FileInputStream(file), parserXML);
+      parser.parse(fis, parserXML);
     } catch (ParserConfigurationException | SAXException | IOException e) {
       LOG.error("It is not possible to parse file " + file.getName(), e);
     }
