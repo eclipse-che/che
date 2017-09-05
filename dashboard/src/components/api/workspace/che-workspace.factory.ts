@@ -266,6 +266,11 @@ export class CheWorkspace {
         workspaces.push(workspace);
         this.updateWorkspacesList(workspace);
       });
+    }, (error: any) => {
+      if (error && error.status === 304) {
+        return this.$q.when();
+      }
+      return this.$q.reject(error);
     });
 
     return resultPromise;
@@ -732,7 +737,7 @@ export class CheWorkspace {
     });
   }
 
-  private formJsonRpcApiLocation($location: ng.ILocationService, proxySettings : string, devmode: boolean): string {
+  private formJsonRpcApiLocation($location: ng.ILocationService, proxySettings: string, devmode: boolean): string {
     let wsUrl;
 
     if (devmode) {

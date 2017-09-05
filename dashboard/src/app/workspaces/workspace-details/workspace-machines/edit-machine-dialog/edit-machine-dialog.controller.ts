@@ -154,11 +154,11 @@ export class EditMachineDialogController {
     this._stringifyMachineRecipe();
     if (this.isCompose()) {
       if (this.isAdd) {
-        this.environmentManager.addMachine(this.environment, this.machine);
+        this.environment = this.environmentManager.addMachine(this.environment, this.machine);
         if (this.machineRAM) {
           const machine = this.environment.machines[this.machine.name];
-          if (machine.attributes && machine.attributes.memoryLimitBytes) {
-            machine.attributes.memoryLimitBytes = this.machineRAM;
+          if (machine.attributes && machine.attributes.memoryLimitBytes !==  this.machineRAM) {
+            delete  machine.attributes.memoryLimitBytes;
           }
         }
       } else {

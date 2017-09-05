@@ -316,33 +316,38 @@ export class WorkspacesConfig {
         controller: 'ListWorkspacesCtrl',
         controllerAs: 'listWorkspacesCtrl'
       })
-      .accessWhen('/workspace/:namespace*/:workspaceName', {
-        title: (params: any) => { return params.workspaceName; },
-        reloadOnSearch: false,
-        templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
-        controller: 'WorkspaceDetailsController',
-        controllerAs: 'workspaceDetailsController',
-        resolve: {
-          initData: ['$route', 'cheWorkspace', 'workspaceConfigService', ($route: ng.route.IRouteService, cheWorkspace: CheWorkspace, workspaceConfigService: WorkspaceConfigService) => {
-            return workspaceConfigService.resolveWorkspaceRoute().then(() => {
-              const {namespace, workspaceName} = $route.current.params;
-              const workspaceDetails = cheWorkspace.getWorkspaceByName(namespace, workspaceName);
-              return {namespaceId: namespace, workspaceName: workspaceName, workspaceDetails: workspaceDetails};
-            });
-          }]
-        }
-      })
-      .accessWhen('/create-workspace', {
-        title: 'New Workspace',
-        templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
-        controller: 'CreateWorkspaceController',
-        controllerAs: 'createWorkspaceController',
-        resolve: {
-          initData: ['workspaceConfigService', (workspaceConfigService: WorkspaceConfigService) => {
-            return workspaceConfigService.resolveWorkspaceRoute();
-          }]
-        }
-      });
+        .accessWhen('/workspace/:namespace*/:workspaceName', {
+          title: (params: any) => {
+            return params.workspaceName;
+          },
+          reloadOnSearch: false,
+          templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
+          controller: 'WorkspaceDetailsController',
+          controllerAs: 'workspaceDetailsController',
+          resolve: {
+            initData: ['$q', '$route', 'cheWorkspace', 'workspaceConfigService', ($q: ng.IQService, $route: ng.route.IRouteService, cheWorkspace: CheWorkspace, workspaceConfigService: WorkspaceConfigService) => {
+              return workspaceConfigService.resolveWorkspaceRoute().then(() => {
+                const {namespace, workspaceName} = $route.current.params;
+                const workspaceDetails = cheWorkspace.getWorkspaceByName(namespace, workspaceName);
+                if (!workspaceDetails) {
+                  return $q.reject();
+                }
+                return {namespaceId: namespace, workspaceName: workspaceName, workspaceDetails: workspaceDetails};
+              });
+            }]
+          }
+        })
+        .accessWhen('/create-workspace', {
+          title: 'New Workspace',
+          templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
+          controller: 'CreateWorkspaceController',
+          controllerAs: 'createWorkspaceController',
+          resolve: {
+            initData: ['workspaceConfigService', (workspaceConfigService: WorkspaceConfigService) => {
+              return workspaceConfigService.resolveWorkspaceRoute();
+            }]
+          }
+        });
     });
   }
 }

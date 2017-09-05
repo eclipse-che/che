@@ -50,9 +50,11 @@
         </div>
         <!-- Actions -->
         <div flex="10" layout="column" layout-align="center end" class="machine-actions">
-          <did flex layout="row">
+          <div flex layout="row">
             <div ng-click="editMachine({name: machine.name, event: $event})">
-              <span class="fa fa-pencil"></span>
+              <span class="fa fa-pencil"
+                    uib-tooltip="Edit"
+                    tooltip-append-to-body="true"></span>
             </div>
             <div popover-placement="bottom"
                  popover-append-to-body="true"
@@ -62,12 +64,16 @@
                 '<a href=\'{{pageUrl}}?tab=Agents\'>Agents</a>
                  <a href=\'{{pageUrl}}?tab=Servers\'>Servers</a>
                  <a href=\'{{pageUrl}}?tab=Env_Variables\'>Environment Variables</a>'">
-              <span class="material-design icon-ic_settings_24px"></span>
+              <span class="material-design icon-ic_settings_24px"
+                    uib-tooltip="Settings"
+                    tooltip-append-to-body="true"></span>
             </div>
             <div ng-click="deleteMachine({name: machine.name, event: $event})">
-              <span class="fa fa-trash-o"></span>
+              <span class="fa fa-trash-o"
+                    uib-tooltip="Delete"
+                    tooltip-append-to-body="true"></span>
             </div>
-          </did>
+          </div>
         </div>
       </div>
     </div>

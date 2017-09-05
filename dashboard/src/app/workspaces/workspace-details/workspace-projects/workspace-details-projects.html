@@ -65,7 +65,7 @@
   <che-list class="workspace-details-projects-list" flex ng-show="workspaceDetailsProjectsCtrl.cheListHelper.visibleItemsNumber > 0">
     <che-project-item
             ng-repeat="project in workspaceDetailsProjectsCtrl.cheListHelper.getVisibleItems() | orderBy:workspaceDetailsProjectsCtrl.projectOrderBy"
-            che-project-item-workspace="workspaceDetailsProjectsCtrl.workspace"
+            che-project-item-workspace="workspaceDetailsProjectsCtrl.workspaceDetails"
             che-on-checkbox-click="workspaceDetailsProjectsCtrl.cheListHelper.updateBulkSelectionStatus()"
             ng-model="workspaceDetailsProjectsCtrl.cheListHelper.itemsSelectionStatus[project.name]"
             che-project-item-project="project"

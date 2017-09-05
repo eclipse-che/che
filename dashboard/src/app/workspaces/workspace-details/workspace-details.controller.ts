@@ -75,7 +75,10 @@ export class WorkspaceDetailsController {
     this.workspaceName = initData.workspaceName;
     this.workspaceId = initData.workspaceDetails.id;
 
-    const action = this.updateWorkspaceData.bind(this);
+    const action = (workspaceDetails: che.IWorkspace) => {
+      this.workspaceDetails = angular.copy(this.cheWorkspace.getWorkspaceById(this.originWorkspaceDetails.id));
+      this.updateWorkspaceData(workspaceDetails);
+    };
     this.cheWorkspace.subscribeOnWorkspaceChange(initData.workspaceDetails.id, action);
     this.updateWorkspaceData(initData.workspaceDetails);
 
@@ -268,11 +271,12 @@ export class WorkspaceDetailsController {
     this.workspaceDetailsService.applyChanges(this.originWorkspaceDetails, this.workspaceDetails).then((data: any) => {
       this.cheNotification.showInfo('Workspace updated.');
       this.$scope.$broadcast('edit-workspace-details', {status: 'saved'});
-
       this.saving = false;
-      this.loading = false;
-
-      this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceName).search({tab: this.tab[this.selectedTabIndex]});
+      this.cheWorkspace.fetchWorkspaceDetails(this.originWorkspaceDetails.id).then(() => {
+        this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceDetails.config.name).search({tab: this.tab[this.selectedTabIndex]});
+      }).finally(() => {
+        this.loading = false;
+      });
     }, (error: any) => {
       this.$scope.$broadcast('edit-workspace-details', {status: 'failed'});
       this.cheNotification.showError('Update workspace failed.', error);

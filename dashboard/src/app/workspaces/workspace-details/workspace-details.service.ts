@@ -209,73 +209,105 @@ export class WorkspaceDetailsService {
    * @return {angular.IPromise<any>}
    */
   applyChanges(oldWorkspace: che.IWorkspace, newWorkspace: che.IWorkspace): ng.IPromise<any> {
+    if (angular.equals(oldWorkspace.config, newWorkspace.config)) {
+      return this.$q.when();
+    }
+
+    const initStatus = oldWorkspace.status;
+
+    const oldConfig = angular.copy(oldWorkspace.config);
+    delete oldConfig.projects;
+    const newConfig = angular.copy(newWorkspace.config);
+    delete newConfig.projects;
+
     const projectTemplatesToAdd = this.workspaceDetailsProjectsService.getProjectTemplates(),
           hasProjectsToAdd = projectTemplatesToAdd.length > 0,
           projectNamesToDelete = this.workspaceDetailsProjectsService.getProjectNamesToDelete(),
           hasProjectsToDelete = projectNamesToDelete.length > 0,
-          hasConfigChanges = !projectTemplatesToAdd.length && !projectNamesToDelete.length && false === angular.equals(oldWorkspace.config, newWorkspace.config);
+          hasConfigChanges = !angular.equals(newConfig, oldConfig);
 
     return this.$q.when().then(() => {
-      /* Stop workspace */
-
-      const status = this.getWorkspaceStatus(newWorkspace.id);
-
-      if (WorkspaceStatus[status] === WorkspaceStatus.STARTING || WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
-        this.stopWorkspace(newWorkspace.id);
-        return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
-      }
-
-      if (WorkspaceStatus[status] === WorkspaceStatus.STOPPING || WorkspaceStatus[status] === WorkspaceStatus.SNAPSHOTTING) {
-        return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
-      }
-
-      return this.$q.when();
-
-    }).then(() => {
-      /* Apply config changes, add projects */
-
-      if (!hasProjectsToAdd && !hasConfigChanges) {
+      // update config
+      if (!projectTemplatesToAdd && !hasConfigChanges) {
         return this.$q.when();
       }
 
-      return this.applyConfigChanges(newWorkspace);
+      return this.$q.when().then(() => {
+        /* Stop workspace */
+        const status = this.getWorkspaceStatus(newWorkspace.id);
 
-    }).then(() => {
-      /* Run workspace */
+        if (WorkspaceStatus[status] === WorkspaceStatus.STARTING || WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
+          this.stopWorkspace(newWorkspace.id);
+          return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
+        }
 
-      const status = this.getWorkspaceStatus(newWorkspace.id);
+        if (WorkspaceStatus[status] === WorkspaceStatus.STOPPING || WorkspaceStatus[status] === WorkspaceStatus.SNAPSHOTTING) {
+          return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
+        }
 
-      if (WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
         return this.$q.when();
-      }
-
-      if (WorkspaceStatus[status] === WorkspaceStatus.STARTING) {
-        return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]);
-      }
-
-      this.cheWorkspace.startWorkspace(newWorkspace.id, newWorkspace.config.defaultEnv);
-      return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]).then(() => {
-        return this.cheWorkspace.fetchWorkspaceDetails(newWorkspace.id);
+      }).then(() => {
+        return this.applyConfigChanges(newWorkspace);
+      }).then(() => {
+        // restore init status
+        if (WorkspaceStatus[initStatus] === WorkspaceStatus.STARTING || WorkspaceStatus[initStatus] === WorkspaceStatus.RUNNING) {
+          this.cheWorkspace.startWorkspace(newWorkspace.id, newWorkspace.config.defaultEnv);
+          return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]).then(() => {
+            return this.cheWorkspace.fetchWorkspaceDetails(newWorkspace.id);
+          });
+        }
       });
-
     }).then(() => {
-      /* Delete projects */
-
-      if (projectNamesToDelete.length === 0) {
+      if (!hasProjectsToAdd && !hasProjectsToDelete) {
         return this.$q.when();
       }
 
-      return this.workspaceDetailsProjectsService.deleteSelectedProjects(newWorkspace.id, projectNamesToDelete);
+      return this.$q.when().then(() => {
+        const status = this.getWorkspaceStatus(newWorkspace.id);
 
-    }).then(() => {
-      /* Add project commands if there are new projects added */
+        if (WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
+          return this.$q.when();
+        }
 
-      if (!hasProjectsToDelete) {
+        if (WorkspaceStatus[status] === WorkspaceStatus.STARTING) {
+          return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]);
+        }
+
+        this.cheWorkspace.startWorkspace(newWorkspace.id, newWorkspace.config.defaultEnv);
+        return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]).then(() => {
+          return this.cheWorkspace.fetchWorkspaceDetails(newWorkspace.id);
+        });
+      }).then(() => {
+        // delete projects
+        if (!hasProjectsToDelete) {
+          return this.$q.when();
+        }
+
+        return this.workspaceDetailsProjectsService.deleteSelectedProjects(newWorkspace.id, projectNamesToDelete);
+      }).then(() => {
+        // add projects
+        if (!hasProjectsToAdd) {
+          return this.$q.when();
+        }
+
+        // add commands
+        return this.createWorkspaceSvc.addProjectCommands(newWorkspace.id, projectTemplatesToAdd);
+      }).then(() => {
+        if (WorkspaceStatus[initStatus] === WorkspaceStatus.STOPPED || WorkspaceStatus[initStatus] === WorkspaceStatus.STOPPING) {
+          // stop workspace
+          const status = this.getWorkspaceStatus(newWorkspace.id);
+
+          if (WorkspaceStatus[status] === WorkspaceStatus.STARTING || WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
+            this.stopWorkspace(newWorkspace.id);
+            return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
+          }
+
+          if (WorkspaceStatus[status] === WorkspaceStatus.STOPPING || WorkspaceStatus[status] === WorkspaceStatus.SNAPSHOTTING) {
+            return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
+          }
+        }
         return this.$q.when();
-      }
-
-      // add commands
-      return this.createWorkspaceSvc.addProjectCommands(newWorkspace.id, projectTemplatesToAdd);
+      });
     });
   }
 
