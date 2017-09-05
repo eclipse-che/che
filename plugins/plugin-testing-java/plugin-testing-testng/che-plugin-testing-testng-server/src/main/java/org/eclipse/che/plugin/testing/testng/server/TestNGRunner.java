@@ -104,7 +104,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
     }
 
     JavaParameters parameters = new JavaParameters();
-    parameters.setJavaExecutable(JAVA_EXECUTABLE);
+    parameters.setJavaExecutable(System.getProperties().getProperty("java.home") + "/bin/java");
     parameters.setMainClassName("org.testng.CheTestNGLauncher");
     String outputDirectory = getOutputDirectory(javaProject);
     parameters.getParametersList().add("-d", outputDirectory);
