@@ -109,10 +109,10 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     if (projectPath == null) {
       return null;
     }
-    List<LanguageServerLauncher> launchers = findLaunchers(projectPath, fileUri);
+    List<LanguageServerLauncher> requiredToLaunch = findLaunchers(projectPath, fileUri);
     // launchers is the set of things we need to have initialized
 
-    for (LanguageServerLauncher launcher : new ArrayList<>(launchers)) {
+    for (LanguageServerLauncher launcher : new ArrayList<>(requiredToLaunch)) {
       synchronized (initializedServers) {
         List<LanguageServerLauncher> servers =
             launchedServers.computeIfAbsent(projectPath, k -> new ArrayList<>());
@@ -129,7 +129,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                           initializedServers.computeIfAbsent(projectPath, k -> new ArrayList<>());
                       initialized.add(
                           new InitializedLanguageServer(id, pair.first, pair.second, launcher));
-                      launchers.remove(launcher);
+                      requiredToLaunch.remove(launcher);
                       initializedServers.notifyAll();
                     }
                   })
@@ -144,7 +144,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                                 + t.getMessage()));
                     LOG.error("Error launching language server " + launcher, t);
                     synchronized (initializedServers) {
-                      launchers.remove(launcher);
+                      requiredToLaunch.remove(launcher);
                       servers.remove(launcher);
                       initializedServers.notifyAll();
                     }
@@ -162,12 +162,18 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       List<InitializedLanguageServer> initForProject = initializedServers.get(projectPath);
       if (initForProject != null) {
         for (InitializedLanguageServer initialized : initForProject) {
-          launchers.remove(initialized.getLauncher());
+          requiredToLaunch.remove(initialized.getLauncher());
         }
       }
-      while (!launchers.isEmpty()) {
+      while (!requiredToLaunch.isEmpty()) {
         try {
           initializedServers.wait();
+          initForProject = initializedServers.get(projectPath);
+          if (initForProject != null) {
+            for (InitializedLanguageServer initialized : initForProject) {
+              requiredToLaunch.remove(initialized.getLauncher());
+            }
+          }
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
           return null;
