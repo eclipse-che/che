@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.gwt;
 
-import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
@@ -20,20 +19,17 @@ import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.CODENVY_
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.COMMON;
 
 import com.google.inject.Inject;
-import java.io.File;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.file.Paths;
-import java.util.Collections;
 import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceImpl;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -43,6 +39,7 @@ import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -51,10 +48,6 @@ public class CheckSimpleGwtAppTest {
   private static final String BUILD_COMMAND = "build";
   private static final String RUN_GWT_COMMAND = "runGwt";
   private static final String GWT_CODESERVER_NAME = "gwt-codeserver";
-  private static final String WS_CONFIG_PATH =
-      CheckSimpleGwtAppTest.class
-          .getResource("/templates/workspace/" + CODENVY_UBUNTU_JDK8)
-          .getPath();
 
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -66,6 +59,7 @@ public class CheckSimpleGwtAppTest {
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private WorkspaceDtoDeserializer workspaceDtoDeserializer;
   @Inject private TestUser testUser;
   private String projectName;
 
@@ -74,20 +68,17 @@ public class CheckSimpleGwtAppTest {
     projectName = NameGenerator.generate("project", 4);
 
     WorkspaceConfigDto workspace =
-        DtoFactory.getInstance()
-            .createDtoFromJson(
-                readFileToString(new File(WS_CONFIG_PATH), Charset.forName("UTF-8")),
-                WorkspaceConfigDto.class);
+        workspaceDtoDeserializer.deserializeWorkspaceTemplate(CODENVY_UBUNTU_JDK8);
 
     workspace
         .getEnvironments()
         .get("replaced_name")
         .getMachines()
         .get("dev-machine")
-        .setServers(
-            Collections.singletonMap(
-                GWT_CODESERVER_NAME,
-                newDto(ServerConfigDto.class).withProtocol("http").withPort("9876")));
+        .getServers()
+        .put(
+            GWT_CODESERVER_NAME,
+            newDto(ServerConfigDto.class).withProtocol("http").withPort("9876"));
 
     testWorkspace =
         new TestWorkspaceImpl(
@@ -114,6 +105,11 @@ public class CheckSimpleGwtAppTest {
         RUN_GWT_COMMAND,
         CUSTOM,
         testWorkspace.getId());
+  }
+
+  @AfterClass
+  public void tearDown() {
+    testWorkspace.delete();
   }
 
   @Test
