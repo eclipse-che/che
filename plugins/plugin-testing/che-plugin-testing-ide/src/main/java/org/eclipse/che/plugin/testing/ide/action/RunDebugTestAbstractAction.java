@@ -10,7 +10,8 @@
  */
 package org.eclipse.che.plugin.testing.ide.action;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Iterables.contains;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.CURSOR_POSITION;
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.PROJECT;
@@ -315,10 +316,6 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
     }
     final String ext = ((File) resource).getExtension();
 
-    if (isNullOrEmpty(ext)) {
-      return false;
-    } else {
-      return "java".equals(ext) || "class".equals(ext) || "xml".equals(ext);
-    }
+    return contains(newHashSet("java", "class", "xml"), ext);
   }
 }
