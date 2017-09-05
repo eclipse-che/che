@@ -720,9 +720,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
 
   @Override
   public VcsChangeMarkerRender getVcsChangeMarkersRender() {
-
-    String a = "dsgsdg";
-
     return this.vcsChangeMarkerRender;
   }
 
