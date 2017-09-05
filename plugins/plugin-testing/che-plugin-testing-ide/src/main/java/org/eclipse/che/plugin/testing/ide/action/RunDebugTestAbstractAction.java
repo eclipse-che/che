@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.plugin.testing.ide.action;
 
-import static com.google.common.collect.Iterables.contains;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.CURSOR_POSITION;
@@ -316,6 +315,6 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
     }
     final String ext = ((File) resource).getExtension();
 
-    return contains(newHashSet("java", "class", "xml"), ext);
+    return newHashSet("java", "class", "xml").contains(ext);
   }
 }
