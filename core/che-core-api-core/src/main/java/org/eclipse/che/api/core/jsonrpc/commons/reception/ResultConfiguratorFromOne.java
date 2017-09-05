@@ -102,6 +102,20 @@ public class ResultConfiguratorFromOne<P> {
     return new FunctionConfiguratorOneToOne<>(requestHandlerManager, method, pClass, rClass);
   }
 
+  public <R> PromiseConfigurationOneToOne<P, R> resultAsPromiseDto(Class<R> rClass) {
+    checkNotNull(rClass, "Result class must not be null");
+
+    LOGGER.debug(
+        "Configuring incoming request result: "
+            + "method: "
+            + method
+            + ", "
+            + "result object class: "
+            + rClass);
+
+    return new PromiseConfigurationOneToOne<>(requestHandlerManager, method, pClass, rClass);
+  }
+
   public FunctionConfiguratorOneToOne<P, String> resultAsString() {
     LOGGER.debug(
         "Configuring incoming request result: "
