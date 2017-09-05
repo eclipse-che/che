@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.editor.orion.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayString;
 
 /**
@@ -53,5 +54,9 @@ public class OrionHighlightingConfigurationOverlay extends JavaScriptObject {
    */
   public final native void setPatterns(String patternsAsJsonArray) /*-{
         this.patterns = eval(patternsAsJsonArray);
-    }-*/;
+  }-*/;
+
+  public final native JsArray<JavaScriptObject> getPatterns() /*-{
+      return this.patterns;
+  }-*/;
 }
