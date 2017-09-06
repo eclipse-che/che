@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.api.project.wizard;
+package org.eclipse.che.ide.projectimport.wizard;
 
 /**
  * Factory for {@link ProjectNotificationSubscriber} component.

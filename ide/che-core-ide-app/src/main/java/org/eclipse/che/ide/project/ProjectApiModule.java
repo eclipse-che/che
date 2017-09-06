@@ -18,14 +18,13 @@ import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
-import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.projectimport.InitialProjectImporter;
 import org.eclipse.che.ide.projectimport.ProjectImportNotificationSubscriber;
+import org.eclipse.che.ide.projectimport.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardFactory;
 import org.eclipse.che.ide.projectimport.wizard.ProjectImportOutputJsonRpcNotifier;
-import org.eclipse.che.ide.projectimport.wizard.ProjectNotificationSubscriberImpl;
+import org.eclipse.che.ide.projectimport.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.projectimport.zip.ZipImportWizardRegistrar;
 import org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar;
 import org.eclipse.che.ide.projecttype.ProjectTemplateRegistryImpl;
@@ -70,9 +69,6 @@ public class ProjectApiModule extends AbstractGinModule {
 
     install(new GinFactoryModuleBuilder().build(ImportWizardFactory.class));
 
-    bind(ProjectNotificationSubscriber.class)
-        .to(ProjectNotificationSubscriberImpl.class)
-        .in(Singleton.class);
     install(
         new GinFactoryModuleBuilder()
             .implement(

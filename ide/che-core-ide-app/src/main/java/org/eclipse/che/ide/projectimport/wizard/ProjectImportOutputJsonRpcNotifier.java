@@ -25,7 +25,6 @@ import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 
 /**
