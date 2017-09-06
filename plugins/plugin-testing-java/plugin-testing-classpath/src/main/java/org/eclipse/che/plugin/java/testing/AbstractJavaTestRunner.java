@@ -48,8 +48,6 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractJavaTestRunner.class);
   private static final String TEST_OUTPUT_FOLDER = "/test-output";
 
-  protected static final String JAVA_EXECUTABLE = "java";
-
   private int debugPort = -1;
   private String workspacePath;
   private JavaTestFinder javaTestFinder;

@@ -95,7 +95,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
 
   private ProcessHandler startTestProcess(IJavaProject javaProject, TestExecutionContext context) {
     JavaParameters parameters = new JavaParameters();
-    parameters.setJavaExecutable(JAVA_EXECUTABLE);
+    parameters.setJavaExecutable(System.getProperty("java.home") + "/bin/java");
     parameters.setMainClassName(MAIN_CLASS_NAME);
     parameters.setWorkingDirectory(workspacePath + javaProject.getPath());
 
