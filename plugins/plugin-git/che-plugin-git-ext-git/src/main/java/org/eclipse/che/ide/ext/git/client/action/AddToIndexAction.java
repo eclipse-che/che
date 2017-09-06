@@ -55,7 +55,11 @@ public class AddToIndexAction extends GitAction {
       ProcessesPanelPresenter consolesPanelPresenter,
       GitServiceClient service,
       NotificationManager notificationManager) {
-    super(constant.addToIndexTitle(), constant.addToIndexTitle(), FontAwesome.PLUS, appContext);
+    super(
+        constant.addToIndexTitle(),
+        constant.addToIndexTitle(),
+        FontAwesome.PLUS_CIRCLE,
+        appContext);
     this.presenter = presenter;
     this.constant = constant;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;

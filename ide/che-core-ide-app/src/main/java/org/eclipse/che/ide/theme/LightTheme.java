@@ -695,6 +695,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String mainMenuDelimiterBackground() {
+    return "#ececec";
+  }
+
+  @Override
   public String getMainMenuSelectedBkgColor() {
     return "#ffffff";
   }

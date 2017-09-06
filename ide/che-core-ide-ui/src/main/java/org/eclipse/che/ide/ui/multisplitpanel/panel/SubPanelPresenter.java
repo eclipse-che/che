@@ -40,6 +40,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
 
   private FocusListener focusListener;
   private DoubleClickListener doubleClickListener;
+  private AddTabButtonClickListener addTabButtonClickListener;
 
   @AssistedInject
   public SubPanelPresenter(
@@ -148,6 +149,11 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
   }
 
   @Override
+  public void setAddTabButtonClickListener(AddTabButtonClickListener listener) {
+    addTabButtonClickListener = listener;
+  }
+
+  @Override
   public void onWidgetFocused(IsWidget widget) {
     focusListener.focusGained(this, widget);
   }
@@ -162,6 +168,13 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     final WidgetRemovingListener listener = removingListeners.get(widget);
     if (listener != null) {
       listener.onWidgetRemoving(removeCallback);
+    }
+  }
+
+  @Override
+  public void onAddTabButtonClicked(int mouseX, int mouseY) {
+    if (addTabButtonClickListener != null) {
+      addTabButtonClickListener.onAddTabButtonClicked(mouseX, mouseY);
     }
   }
 }

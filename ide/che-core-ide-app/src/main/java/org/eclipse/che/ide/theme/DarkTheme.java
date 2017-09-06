@@ -723,6 +723,11 @@ public class DarkTheme implements Theme {
   }
 
   @Override
+  public String mainMenuDelimiterBackground() {
+    return "#383f53";
+  }
+
+  @Override
   public String getMainMenuSelectedBkgColor() {
     return "#2e3a45";
   }

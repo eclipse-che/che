@@ -211,6 +211,7 @@
 
 /*Main Menu*/
 @eval mainMenuBkgColor org.eclipse.che.ide.api.theme.Style.getMainMenuBkgColor();
+@eval mainMenuDelimiterBackground org.eclipse.che.ide.api.theme.Style.theme.mainMenuDelimiterBackground();
 @eval mainMenuSelectedBkgColor org.eclipse.che.ide.api.theme.Style.getMainMenuSelectedBkgColor();
 @eval mainMenuSelectedBorderColor org.eclipse.che.ide.api.theme.Style.getMainMenuSelectedBorderColor();
 @eval mainMenuFontColor org.eclipse.che.ide.api.theme.Style.getMainMenuFontColor();

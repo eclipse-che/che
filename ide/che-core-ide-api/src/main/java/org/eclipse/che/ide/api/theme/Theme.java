@@ -876,6 +876,13 @@ public interface Theme {
   String getMainMenuBkgColor();
 
   /**
+   * Delimiter background color of main menu
+   *
+   * @return the color
+   */
+  String mainMenuDelimiterBackground();
+
+  /**
    * Background color of selected menu items
    *
    * @return the color

@@ -60,6 +60,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     implements ProcessesPanelView,
         SubPanel.FocusListener,
         SubPanel.DoubleClickListener,
+        SubPanel.AddTabButtonClickListener,
         RequiresResize {
 
   @UiField(provided = true)
@@ -176,6 +177,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     final SubPanel subPanel = subPanelFactory.newPanel();
     subPanel.setFocusListener(this);
     subPanel.setDoubleClickListener(this);
+    subPanel.setAddTabButtonClickListener(this);
     splitLayoutPanel.add(subPanel.getView());
     focusedSubPanel = subPanel;
 
@@ -505,12 +507,23 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         ((RequiresResize) widget).onResize();
       }
     }
+
+    for (SubPanel panel : widget2Panels.values()) {
+      if (panel.getView() instanceof RequiresResize) {
+        ((RequiresResize) panel.getView()).onResize();
+      }
+    }
   }
 
   @Override
   public void setProcessesTreeVisible(boolean visible) {
     splitLayoutPanel.setWidgetHidden(navigationPanel, !visible);
     navigationPanelVisible = visible;
+  }
+
+  @Override
+  public void onAddTabButtonClicked(int mouseX, int mouseY) {
+    delegate.onAddTabButtonClicked(mouseX, mouseY);
   }
 
   @Override

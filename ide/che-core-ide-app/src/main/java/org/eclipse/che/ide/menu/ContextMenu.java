@@ -44,9 +44,9 @@ import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 @Singleton
 public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
 
-  private final ActionManager actionManager;
-  private final KeyBindingAgent keyBindingAgent;
-  private final Provider<PerspectiveManager> managerProvider;
+  protected final ActionManager actionManager;
+  protected final KeyBindingAgent keyBindingAgent;
+  protected final Provider<PerspectiveManager> managerProvider;
 
   private PopupMenu popupMenu;
   private MenuLockLayer lockLayer;

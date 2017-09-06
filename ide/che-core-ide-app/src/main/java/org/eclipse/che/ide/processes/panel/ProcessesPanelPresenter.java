@@ -90,6 +90,7 @@ import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
+import org.eclipse.che.ide.processes.actions.AddTabMenuFactory;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenu;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenuFactory;
 import org.eclipse.che.ide.terminal.TerminalFactory;
@@ -136,6 +137,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   private final CommandConsoleFactory commandConsoleFactory;
   private final DialogFactory dialogFactory;
   private final ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
+  private final AddTabMenuFactory addTabMenuFactory;
   private final CommandTypeRegistry commandTypeRegistry;
   private final ExecAgentCommandManager execAgentCommandManager;
   private final Provider<MacroProcessor> macroProcessorProvider;
@@ -158,6 +160,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       CommandConsoleFactory commandConsoleFactory,
       DialogFactory dialogFactory,
       ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory,
+      AddTabMenuFactory addTabMenuFactory,
       CommandManager commandManager,
       CommandTypeRegistry commandTypeRegistry,
       SshServiceClient sshServiceClient,
@@ -175,6 +178,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     this.commandConsoleFactory = commandConsoleFactory;
     this.dialogFactory = dialogFactory;
     this.consoleTreeContextMenuFactory = consoleTreeContextMenuFactory;
+    this.addTabMenuFactory = addTabMenuFactory;
     this.eventBus = eventBus;
     this.commandTypeRegistry = commandTypeRegistry;
     this.execAgentCommandManager = execAgentCommandManager;
@@ -1284,6 +1288,18 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   @Override
+  public void onAddTabButtonClicked(final int mouseX, final int mouseY) {
+    Scheduler.get()
+        .scheduleDeferred(
+            new Scheduler.ScheduledCommand() {
+              @Override
+              public void execute() {
+                addTabMenuFactory.newAddTabMenu().show(mouseX, mouseY);
+              }
+            });
+  }
+
+  @Override
   public void onDownloadWorkspaceOutput(DownloadWorkspaceOutputEvent event) {
     WorkspaceImpl workspace = appContext.getWorkspace();
     Optional<MachineImpl> devMachine = workspace.getDevMachine();
@@ -1324,15 +1340,15 @@ public class ProcessesPanelPresenter extends BasePresenter
    * @param text file content
    */
   private native void download(String fileName, String text) /*-{
-        var element = $doc.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        element.setAttribute('download', fileName);
+    var element = $doc.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', fileName);
 
-        element.style.display = 'none';
-        $doc.body.appendChild(element);
+    element.style.display = 'none';
+    $doc.body.appendChild(element);
 
-        element.click();
+    element.click();
 
-        $doc.body.removeChild(element);
-    }-*/;
+    $doc.body.removeChild(element);
+  }-*/;
 }
