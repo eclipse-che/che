@@ -113,6 +113,9 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
         .then(showUI())
         .then(
             arg -> {
+              WorkspaceImpl workspace = appContext.getWorkspace();
+              browserAddress.setAddress(workspace.getNamespace(), workspace.getConfig().getName());
+
               eventBus.fireEvent(new BasicIDEInitializedEvent());
             });
   }
@@ -136,9 +139,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
                 workspace -> {
                   ((AppContextImpl) appContext).setWorkspace(workspace);
                   ((AppContextImpl) appContext).setStartAppActions(getStartUpActions());
-
-                  String workspaceName = workspace.getConfig().getName();
-                  browserAddress.setAddress(workspace.getNamespace(), workspaceName);
 
                   return null;
                 })

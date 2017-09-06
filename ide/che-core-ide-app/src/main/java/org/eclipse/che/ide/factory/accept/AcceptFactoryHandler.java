@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.factory.model.IdeImpl;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.factory.utils.FactoryProjectImporter;
 
 /**
@@ -68,7 +68,7 @@ public class AcceptFactoryHandler {
     }
 
     eventBus.addHandler(
-        WorkspaceRunningEvent.TYPE,
+        WorkspaceReadyEvent.getType(),
         e -> {
           if (isImportingStarted) {
             return;
