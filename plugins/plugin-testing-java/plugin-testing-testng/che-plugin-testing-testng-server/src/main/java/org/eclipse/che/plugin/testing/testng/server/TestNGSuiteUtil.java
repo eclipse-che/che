@@ -10,12 +10,15 @@
  */
 package org.eclipse.che.plugin.testing.testng.server;
 
+import com.google.common.io.ByteStreams;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Singleton;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.xml.XmlClass;
@@ -69,6 +72,16 @@ public class TestNGSuiteUtil {
     try {
       com.google.common.io.Files.write(suite.toXml().getBytes("UTF-8"), result);
     } catch (IOException e) {
+      LOG.error("Can't write TestNG suite xml file.", e);
+    }
+    return result;
+  }
+
+  public File writeSuite(String suitePath, IFile file) {
+    File result = new File(suitePath, "che-testng-suite.xml");
+    try {
+      com.google.common.io.Files.write(ByteStreams.toByteArray(file.getContents()), result);
+    } catch (CoreException | IOException e) {
       LOG.error("Can't write TestNG suite xml file.", e);
     }
     return result;
