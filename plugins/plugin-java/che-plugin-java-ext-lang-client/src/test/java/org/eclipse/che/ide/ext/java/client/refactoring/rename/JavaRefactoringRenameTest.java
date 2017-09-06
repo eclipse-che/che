@@ -129,16 +129,16 @@ public class JavaRefactoringRenameTest {
   @Mock private Document document;
   @Mock private HandlesUndoRedo undoRedo;
   @Mock private Promise<Void> updateAfterRefactoringPromise;
-  @Mock private Promise<Void> fileTrackingSuspendEventPromise;
-  @Mock private Promise<Void> fileTrackingResumeEventPromise;
+  @Mock private Promise<Boolean> fileTrackingSuspendEventPromise;
+  @Mock private Promise<Boolean> fileTrackingResumeEventPromise;
   @Mock private Promise<Void> handleMovingFilesPromise;
 
   @Captor private ArgumentCaptor<Operation<RenameRefactoringSession>> renameRefCaptor;
   @Captor private ArgumentCaptor<LinkedMode.LinkedModeListener> inputArgumentCaptor;
   @Captor private ArgumentCaptor<Operation<RefactoringResult>> refactoringStatusCaptor;
   @Captor private ArgumentCaptor<Operation<PromiseError>> refactoringErrorCaptor;
-  @Captor private ArgumentCaptor<Operation<Void>> clientServerSuspendOperation;
-  @Captor private ArgumentCaptor<Operation<Void>> clientServerResumeOperation;
+  @Captor private ArgumentCaptor<Operation<Boolean>> clientServerSuspendOperation;
+  @Captor private ArgumentCaptor<Operation<Boolean>> clientServerResumeOperation;
   @Captor private ArgumentCaptor<Operation<Void>> updateAfterRefactoringOperation;
 
   @InjectMocks private JavaRefactoringRename refactoringRename;
