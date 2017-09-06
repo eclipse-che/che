@@ -58,6 +58,8 @@ public class SubPanelViewImpl extends Composite
 
   interface SubPanelViewImplUiBinder extends UiBinder<Widget, SubPanelViewImpl> {}
 
+  private static final int POPUP_OFFSET = 15;
+
   private final TabItemFactory tabItemFactory;
   private final Menu menu;
   private final Map<Tab, WidgetToShow> tabs2Widgets;
@@ -124,8 +126,8 @@ public class SubPanelViewImpl extends Composite
           @Override
           public void onClick(ClickEvent clickEvent) {
             delegate.onAddTabButtonClicked(
-                getAbsoluteLeft(plusPanel.getElement()) + 15,
-                getAbsoluteTop(plusPanel.getElement()) + 15);
+                getAbsoluteLeft(plusPanel.getElement()) + POPUP_OFFSET,
+                getAbsoluteTop(plusPanel.getElement()) + POPUP_OFFSET);
           }
         },
         ClickEvent.getType());

@@ -65,6 +65,8 @@ public class EditorPartStackView extends ResizeComposite
 
   private static final PartStackUiBinder UI_BINDER = GWT.create(PartStackUiBinder.class);
 
+  private static final int POPUP_OFFSET = 15;
+
   @UiField DockLayoutPanel parent;
 
   @UiField FlowPanel tabsPanel;
@@ -99,8 +101,8 @@ public class EditorPartStackView extends ResizeComposite
           public void onClick(ClickEvent clickEvent) {
             if (addTabButtonClickListener != null) {
               addTabButtonClickListener.onAddTabButtonClicked(
-                  getAbsoluteLeft(plusPanel.getElement()) + 15,
-                  getAbsoluteTop(plusPanel.getElement()) + 15);
+                  getAbsoluteLeft(plusPanel.getElement()) + POPUP_OFFSET,
+                  getAbsoluteTop(plusPanel.getElement()) + POPUP_OFFSET);
             }
           }
         },
