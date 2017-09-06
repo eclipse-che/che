@@ -90,7 +90,8 @@ final class CompareViewImpl extends Window implements CompareView {
     Button closeButton =
         createButton(locale.buttonClose(), "git-compare-close-btn", event -> onClose());
     Button refreshButton =
-        createButton(locale.buttonRefresh(), "git-compare-refresh-btn", event -> compareWidget.refresh());
+        createButton(
+            locale.buttonRefresh(), "git-compare-refresh-btn", event -> compareWidget.refresh());
 
     btnSaveChanges =
         createButton(
@@ -188,7 +189,7 @@ final class CompareViewImpl extends Window implements CompareView {
           }
 
           @Override
-          public void onFailure(Throwable caught) { }
+          public void onFailure(Throwable caught) {}
         });
   }
 
@@ -208,14 +209,15 @@ final class CompareViewImpl extends Window implements CompareView {
   }
 
   /**
-   * Dynamically loads theme for compare widget.
-   * This is done here to not to load big css when user doesn't need it.
+   * Dynamically loads theme for compare widget. This is done here to not to load big css when user
+   * doesn't need it.
    */
   private void loadCompareTheme() {
     String themeUrl = GWT.getModuleBaseURL();
     switch (themeAgent.getCurrentThemeId()) {
       case LIGHT_THEME_ID:
         themeUrl += "/built-compare-codenvy.css";
+        break;
       case DARK_THEME_ID:
       default:
         themeUrl += "/built-compare-dark-codenvy.css";
