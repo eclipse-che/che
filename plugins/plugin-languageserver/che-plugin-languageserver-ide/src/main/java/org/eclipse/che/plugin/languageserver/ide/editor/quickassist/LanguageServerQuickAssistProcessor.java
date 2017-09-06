@@ -120,21 +120,21 @@ public class LanguageServerQuickAssistProcessor implements QuickAssistProcessor 
     QueryAnnotationsEvent.QueryCallback annotationCallback =
         new QueryAnnotationsEvent.QueryCallback() {
 
-          @SuppressWarnings("ReturnValueIgnored")
           @Override
           public void respond(
               Map<Annotation, org.eclipse.che.ide.api.editor.text.Position> annotations) {
-            List<Diagnostic> diagnostics = new ArrayList<>();
             // iteration with range never returns anything; need to filter ourselves.
             // https://github.com/eclipse/che/issues/4338
-            annotations
-                .entrySet()
-                .stream()
-                .filter((e) -> e.getValue().overlapsWith(range.getStartOffset(), range.getLength()))
-                .map(Entry::getKey)
-                .map(a -> (DiagnosticAnnotation) a)
-                .map(DiagnosticAnnotation::getDiagnostic)
-                .collect(Collectors.toList());
+            List<Diagnostic> diagnostics =
+                annotations
+                    .entrySet()
+                    .stream()
+                    .filter(
+                        (e) -> e.getValue().overlapsWith(range.getStartOffset(), range.getLength()))
+                    .map(Entry::getKey)
+                    .map(a -> (DiagnosticAnnotation) a)
+                    .map(DiagnosticAnnotation::getDiagnostic)
+                    .collect(Collectors.toList());
 
             CodeActionContext context = new CodeActionContext(diagnostics);
 
