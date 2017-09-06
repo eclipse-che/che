@@ -75,6 +75,10 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     this.view.setDelegate(this);
   }
 
+  public boolean isShown() {
+    return view.isVisible();
+  }
+
   /**
    * Show compare window for given set of files between given revision and HEAD.
    *
@@ -253,7 +257,9 @@ public class ComparePresenter implements CompareView.ActionDelegate {
   }
 
   @Override
-  public void onClose(final String newContent) {
+  public void onClose() {
+    final String newContent = view.getEditableContent();
+
     if (!isSaveNeeded(newContent)) {
       view.hide();
       return;
@@ -281,39 +287,27 @@ public class ComparePresenter implements CompareView.ActionDelegate {
   @Override
   public void onSaveChangesClicked() {
     if (compareWithLatest) {
-      view.getEditableContent(
-          content -> {
-            if (isSaveNeeded(content)) {
-              saveContent(content);
-            }
-          });
+      final String content = view.getEditableContent();
+      if (isSaveNeeded(content)) {
+        saveContent(content);
+      }
     }
   }
 
   @Override
   public void onNextDiffClicked() {
-    view.getEditableContent(
-        content -> {
-          if (isSaveNeeded(content)) {
-            saveContent(content);
-          }
+    onSaveChangesClicked();
 
-          currentFileIndex++;
-          showCompareForCurrentFile();
-        });
+    currentFileIndex++;
+    showCompareForCurrentFile();
   }
 
   @Override
   public void onPreviousDiffClicked() {
-    view.getEditableContent(
-        content -> {
-          if (isSaveNeeded(content)) {
-            saveContent(content);
-          }
+    onSaveChangesClicked();
 
-          currentFileIndex--;
-          showCompareForCurrentFile();
-        });
+    currentFileIndex--;
+    showCompareForCurrentFile();
   }
 
   private void showCompare(final String remoteContent) {

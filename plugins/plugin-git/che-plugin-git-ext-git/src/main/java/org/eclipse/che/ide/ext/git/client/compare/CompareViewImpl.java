@@ -10,10 +10,17 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare;
 
+import static org.eclipse.che.ide.ext.git.client.compare.CompareInitializer.GIT_COMPARE_MODULE;
+import static org.eclipse.che.ide.theme.DarkTheme.DARK_THEME_ID;
+import static org.eclipse.che.ide.theme.LightTheme.LIGHT_THEME_ID;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -25,11 +32,10 @@ import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.orion.compare.CompareConfig;
 import org.eclipse.che.ide.orion.compare.CompareFactory;
-import org.eclipse.che.ide.orion.compare.CompareWidget;
 import org.eclipse.che.ide.orion.compare.FileOptions;
 import org.eclipse.che.ide.ui.button.ButtonAlignment;
-import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.requirejs.ModuleHolder;
 
 /**
  * Implementation of {@link CompareView}.
@@ -55,30 +61,36 @@ final class CompareViewImpl extends Window implements CompareView {
   private final Button btnSaveChanges;
   private final Button btnNextDiff;
   private final Button btnPrevDiff;
+
+  private final ModuleHolder moduleHolder;
+  private final CompareInitializer compareInitializer;
+  private final CompareFactory compareFactory;
+
   private ActionDelegate delegate;
   private ThemeAgent themeAgent;
-  private CompareWidget compare;
-
-  private final CompareFactory compareFactory;
-  private final LoaderFactory loaderFactory;
+  private boolean themeLoaded;
+  private GitCompareOverlay compareWidget;
+  private boolean visible;
 
   @Inject
   public CompareViewImpl(
       CompareFactory compareFactory,
       GitLocalizationConstant locale,
-      LoaderFactory loaderFactory,
-      ThemeAgent themeAgent) {
+      ThemeAgent themeAgent,
+      CompareInitializer compareInitializer,
+      ModuleHolder moduleHolder) {
     this.compareFactory = compareFactory;
     this.locale = locale;
-    this.loaderFactory = loaderFactory;
     this.themeAgent = themeAgent;
+    this.compareInitializer = compareInitializer;
+    this.moduleHolder = moduleHolder;
 
     setWidget(UI_BINDER.createAndBindUi(this));
 
     Button closeButton =
         createButton(locale.buttonClose(), "git-compare-close-btn", event -> onClose());
     Button refreshButton =
-        createButton(locale.buttonRefresh(), "git-compare-refresh-btn", event -> compare.refresh());
+        createButton(locale.buttonRefresh(), "git-compare-refresh-btn", event -> compareWidget.refresh());
 
     btnSaveChanges =
         createButton(
@@ -115,12 +127,13 @@ final class CompareViewImpl extends Window implements CompareView {
 
   @Override
   protected void onClose() {
-    compare.getContent(content -> delegate.onClose(content));
+    visible = false;
+    delegate.onClose();
   }
 
   @Override
-  public void getEditableContent(ContentConsumer contentConsumer) {
-    compare.getContent(contentConsumer::processContent);
+  public String getEditableContent() {
+    return compareWidget.getContent();
   }
 
   @Override
@@ -130,33 +143,53 @@ final class CompareViewImpl extends Window implements CompareView {
   }
 
   @Override
+  public boolean isVisible() {
+    return visible;
+  }
+
+  @Override
   public void show(String oldContent, String newContent, String fileName, boolean readOnly) {
+    if (!themeLoaded) {
+      loadCompareTheme();
+      themeLoaded = true;
+    }
+
     dockPanel.setSize(
         String.valueOf((com.google.gwt.user.client.Window.getClientWidth() / 100) * 95) + "px",
         String.valueOf((com.google.gwt.user.client.Window.getClientHeight() / 100) * 90) + "px");
 
     super.show();
+    visible = true;
 
-    FileOptions newFile = compareFactory.createFieOptions();
-    newFile.setReadOnly(readOnly);
+    compareInitializer.injectCompareWidget(
+        new AsyncCallback<Void>() {
+          @Override
+          public void onSuccess(Void result) {
+            JavaScriptObject gitCompare = moduleHolder.getModule(GIT_COMPARE_MODULE);
 
-    FileOptions oldFile = compareFactory.createFieOptions();
-    oldFile.setReadOnly(true);
+            FileOptions newFile = compareFactory.createFieOptions();
+            newFile.setReadOnly(readOnly);
 
-    newFile.setContent(newContent);
-    newFile.setName(fileName);
-    oldFile.setContent(oldContent);
-    oldFile.setName(fileName);
+            FileOptions oldFile = compareFactory.createFieOptions();
+            oldFile.setReadOnly(true);
 
-    CompareConfig compareConfig = compareFactory.createCompareConfig();
-    compareConfig.setNewFile(newFile);
-    compareConfig.setOldFile(oldFile);
-    compareConfig.setShowTitle(false);
-    compareConfig.setShowLineStatus(false);
+            newFile.setContent(newContent);
+            newFile.setName(fileName);
+            oldFile.setContent(oldContent);
+            oldFile.setName(fileName);
 
-    compare = new CompareWidget(compareConfig, themeAgent.getCurrentThemeId(), loaderFactory);
-    comparePanel.clear();
-    comparePanel.add(compare);
+            CompareConfig compareConfig = compareFactory.createCompareConfig();
+            compareConfig.setNewFile(newFile);
+            compareConfig.setOldFile(oldFile);
+            compareConfig.setShowTitle(false);
+            compareConfig.setShowLineStatus(false);
+
+            compareWidget = GitCompareOverlay.create(gitCompare, compareConfig);
+          }
+
+          @Override
+          public void onFailure(Throwable caught) { }
+        });
   }
 
   @Override
@@ -172,5 +205,25 @@ final class CompareViewImpl extends Window implements CompareView {
   @Override
   public void setEnablePreviousDiffButton(boolean enabled) {
     btnPrevDiff.setEnabled(enabled);
+  }
+
+  /**
+   * Dynamically loads theme for compare widget.
+   * This is done here to not to load big css when user doesn't need it.
+   */
+  private void loadCompareTheme() {
+    String themeUrl = GWT.getModuleBaseURL();
+    switch (themeAgent.getCurrentThemeId()) {
+      case LIGHT_THEME_ID:
+        themeUrl += "/built-compare-codenvy.css";
+      case DARK_THEME_ID:
+      default:
+        themeUrl += "/built-compare-dark-codenvy.css";
+    }
+
+    Element styleSheetLink = Document.get().createElement("link");
+    styleSheetLink.setAttribute("rel", "stylesheet");
+    styleSheetLink.setAttribute("href", themeUrl);
+    Document.get().getElementsByTagName("head").getItem(0).appendChild(styleSheetLink);
   }
 }

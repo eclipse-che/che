@@ -54,6 +54,8 @@ public class CompareWidget extends Composite {
 
   public CompareWidget(
       final CompareConfig compareConfig, final String themeId, LoaderFactory loaderFactory) {
+    if (true) return;
+
     this.compareConfig = compareConfig;
     this.frame = new Frame(GWT.getModuleBaseURL() + "/Compare.html");
     initWidget(frame);

@@ -22,12 +22,8 @@ import org.eclipse.che.ide.api.mvp.View;
 interface CompareView extends View<CompareView.ActionDelegate> {
 
   interface ActionDelegate {
-    /**
-     * Performs some actions in response to user's closing the window.
-     *
-     * @param newContent new content of compare widget
-     */
-    void onClose(String newContent);
+    /** Performs some actions in response to user's closing the window. */
+    void onClose();
 
     /** Performs save of editable panel in diff dialog. Does nothing if content isn't editable. */
     void onSaveChangesClicked();
@@ -39,11 +35,9 @@ interface CompareView extends View<CompareView.ActionDelegate> {
     void onPreviousDiffClicked();
   }
 
-  interface ContentConsumer {
-    void processContent(String content);
-  }
+  /** Returns content of editable part of the widget */
+  String getEditableContent();
 
-  void getEditableContent(ContentConsumer contentConsumer);
   /**
    * Set a title for the window.
    *
@@ -61,6 +55,9 @@ interface CompareView extends View<CompareView.ActionDelegate> {
 
   /** Hide compare window. */
   void hide();
+
+  /** Shows whether widget is opened */
+  boolean isVisible();
 
   /**
    * Show compare window with specified contents.
