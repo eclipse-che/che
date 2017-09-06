@@ -10,12 +10,6 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
-import elemental.dom.Element;
-import elemental.events.KeyboardEvent;
-import elemental.events.MouseEvent;
-import elemental.html.SpanElement;
-import elemental.html.TableElement;
-
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -29,7 +23,15 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import elemental.dom.Element;
+import elemental.events.KeyboardEvent;
+import elemental.events.MouseEvent;
+import elemental.html.SpanElement;
+import elemental.html.TableElement;
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
@@ -40,7 +42,6 @@ import org.eclipse.che.api.debug.shared.model.impl.MutableVariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ui.list.SimpleList;
@@ -50,10 +51,6 @@ import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.input.SignalEvent;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The class business logic which allow us to change visual representation of debugger panel.

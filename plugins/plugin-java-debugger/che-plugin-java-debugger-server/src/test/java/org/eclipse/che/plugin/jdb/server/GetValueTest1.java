@@ -53,8 +53,9 @@ public class GetValueTest1 {
   public void setUp() throws Exception {
     ProjectApiUtils.ensure();
 
-    Location location = new LocationImpl("org.eclipse.GetValueTest1", 26);
-
+    Location location =
+        new LocationImpl(
+            "/test/src/org/eclipse/GetValueTest1.java", 26, false, -1, "/test", null, -1);
     debuggerEvents = new ArrayBlockingQueue<>(10);
     debugger = startJavaDebugger(new BreakpointImpl(location), debuggerEvents);
 

@@ -10,10 +10,10 @@
  */
 package org.eclipse.che.ide.debug;
 
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.debug.Breakpoint;
 
 /** @author Anatoliy Bazko */
 public interface DebuggerObserver {

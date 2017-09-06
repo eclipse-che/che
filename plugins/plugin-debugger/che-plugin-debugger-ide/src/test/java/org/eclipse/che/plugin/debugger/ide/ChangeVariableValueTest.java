@@ -61,6 +61,7 @@ public class ChangeVariableValueTest extends BaseTest {
     when(var.getVariablePath()).thenReturn(varPath);
     when(simpleValueDto.getString()).thenReturn(VAR_VALUE);
     when(dtoFactory.createDto(VariableDto.class)).thenReturn(mock(VariableDto.class));
+    when(debugger.isSuspended()).thenReturn(true);
   }
 
   @Test

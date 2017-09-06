@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
-import org.eclipse.che.ide.api.debug.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
@@ -49,11 +49,11 @@ public class BreakpointItemRender extends SimpleList.ListItemRenderer<Breakpoint
     // Add title
     sb.appendHtmlConstant("<td>");
 
-    String path = itemData.getPath();
+    String path = itemData.getLocation().getTarget();
     sb.appendEscaped(
         path.substring(path.lastIndexOf("/") + 1)
             + ":"
-            + String.valueOf(itemData.getLineNumber() + 1));
+            + String.valueOf(itemData.getLocation().getLineNumber() + 1));
     sb.appendHtmlConstant("</td></tr></table>");
 
     label.setInnerHTML(sb.toSafeHtml().asString());

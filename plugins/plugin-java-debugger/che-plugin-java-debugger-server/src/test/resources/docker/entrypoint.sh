@@ -17,10 +17,14 @@ javac -g org/eclipse/StackFrameDumpTest1.java
 javac -g org/eclipse/GetValueTest1.java
 javac -g org/eclipse/EvaluateExpressionTest1.java
 javac -g com/HelloWorld.java
+javac -g org/eclipse/BreakpointsTest.java
 
-java -Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y org.eclipse.ThreadDumpTest1
-java -Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y org.eclipse.ThreadDumpTest2
-java -Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y org.eclipse.StackFrameDumpTest1
-java -Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y org.eclipse.GetValueTest1
-java -Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y org.eclipse.EvaluateExpressionTest1
-java -Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y com.HelloWorld
+DEBUG_OPT="-Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=y"
+
+java ${DEBUG_OPT} org.eclipse.BreakpointsTest
+java ${DEBUG_OPT} org.eclipse.ThreadDumpTest1
+java ${DEBUG_OPT} org.eclipse.ThreadDumpTest2
+java ${DEBUG_OPT} org.eclipse.StackFrameDumpTest1
+java ${DEBUG_OPT} org.eclipse.GetValueTest1
+java ${DEBUG_OPT} org.eclipse.EvaluateExpressionTest1
+java ${DEBUG_OPT} com.HelloWorld

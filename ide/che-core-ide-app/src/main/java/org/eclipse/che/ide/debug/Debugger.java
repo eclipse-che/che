@@ -12,7 +12,9 @@ package org.eclipse.che.ide.debug;
 
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
@@ -34,21 +36,24 @@ public interface Debugger extends DebuggerObservable {
   /**
    * Adds new breakpoint.
    *
-   * @param file the file
-   * @param lineNumber the line number
+   * @param file the file where breakpoint will be added
+   * @param breakpoint the breakpoint to add
    */
-  void addBreakpoint(VirtualFile file, int lineNumber);
+  void addBreakpoint(VirtualFile file, Breakpoint breakpoint);
 
   /**
    * Deletes the given breakpoint on server.
    *
-   * @param file the file
-   * @param lineNumber the line number
+   * @param file the file where breakpoint will be removed from
+   * @param breakpoint the breakpoint to delete
    */
-  void deleteBreakpoint(VirtualFile file, int lineNumber);
+  void deleteBreakpoint(VirtualFile file, Breakpoint breakpoint);
 
   /** Deletes all breakpoints. */
   void deleteAllBreakpoints();
+
+  /** Returns breakpoints. */
+  Promise<List<BreakpointDto>> getAllBreakpoints();
 
   /**
    * Connects to server.

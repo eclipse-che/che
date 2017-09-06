@@ -19,7 +19,6 @@ import org.eclipse.che.api.debug.shared.model.Method;
 public class LocationImpl implements Location {
   private final String target;
   private final int lineNumber;
-  private final String resourcePath;
   private final boolean externalResource;
   private final int externalResourceId;
   private final String resourceProjectPath;
@@ -29,7 +28,6 @@ public class LocationImpl implements Location {
   public LocationImpl(
       String target,
       int lineNumber,
-      String resourcePath,
       boolean externalResource,
       int externalResourceId,
       String resourceProjectPath,
@@ -37,7 +35,6 @@ public class LocationImpl implements Location {
       long threadId) {
     this.target = target;
     this.lineNumber = lineNumber;
-    this.resourcePath = resourcePath;
     this.externalResource = externalResource;
     this.externalResourceId = externalResourceId;
     this.resourceProjectPath = resourceProjectPath;
@@ -46,11 +43,11 @@ public class LocationImpl implements Location {
   }
 
   public LocationImpl(String target, int lineNumber) {
-    this(target, lineNumber, null, false, 0, null, null, -1);
+    this(target, lineNumber, false, 0, null, null, -1);
   }
 
   public LocationImpl(String target) {
-    this(target, 0, null, false, 0, null, null, -1);
+    this(target, 0, false, 0, null, null, -1);
   }
 
   @Override
@@ -61,11 +58,6 @@ public class LocationImpl implements Location {
   @Override
   public int getLineNumber() {
     return lineNumber;
-  }
-
-  @Override
-  public String getResourcePath() {
-    return resourcePath;
   }
 
   @Override
@@ -103,7 +95,6 @@ public class LocationImpl implements Location {
         && externalResourceId == location.externalResourceId
         && threadId == location.threadId
         && equal(target, location.target)
-        && equal(resourcePath, location.resourcePath)
         && equal(resourceProjectPath, location.resourceProjectPath)
         && equal(method, location.method);
   }
@@ -113,7 +104,6 @@ public class LocationImpl implements Location {
     return com.google.common.base.Objects.hashCode(
         target,
         lineNumber,
-        resourcePath,
         externalResource,
         externalResourceId,
         resourceProjectPath,
@@ -129,9 +119,6 @@ public class LocationImpl implements Location {
         + '\''
         + ", lineNumber="
         + lineNumber
-        + ", resourcePath='"
-        + resourcePath
-        + '\''
         + ", externalResource="
         + externalResource
         + ", externalResourceId="

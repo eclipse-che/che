@@ -88,7 +88,6 @@ public final class DtoConverter {
         .withThreadId(location.getThreadId())
         .withLineNumber(location.getLineNumber())
         .withExternalResourceId(location.getExternalResourceId())
-        .withResourcePath(location.getResourcePath())
         .withResourceProjectPath(location.getResourceProjectPath())
         .withExternalResource(location.isExternalResource())
         .withMethod(location.getMethod() == null ? null : asDto(location.getMethod()));

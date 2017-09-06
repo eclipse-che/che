@@ -462,7 +462,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   private void sendAddBreakpointFiles() {
     Set<String> breakpointFiles = new HashSet<>();
     for (ZendDbgBreakpoint dbgBreakpoint : breakpoints.values()) {
-      breakpointFiles.add(dbgBreakpoint.getLocation().getResourcePath());
+      breakpointFiles.add(dbgBreakpoint.getLocation().getTarget());
     }
     debugConnection.sendRequest(new AddFilesRequest(breakpointFiles));
   }
@@ -470,7 +470,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   private void sendAddBreakpoints(String remoteFilePath) {
     List<ZendDbgBreakpoint> fileBreakpoints = new ArrayList<>();
     for (ZendDbgBreakpoint dbgBreakpoint : breakpoints.values()) {
-      if (dbgBreakpoint.getLocation().getResourcePath().equals(remoteFilePath)) {
+      if (dbgBreakpoint.getLocation().getTarget().equals(remoteFilePath)) {
         fileBreakpoints.add(dbgBreakpoint);
       }
     }
@@ -494,7 +494,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
                 1,
                 2,
                 dbgBreakpoint.getLocation().getLineNumber(),
-                dbgBreakpoint.getLocation().getResourcePath()));
+                dbgBreakpoint.getLocation().getTarget()));
     if (isOK(response)) {
       // Breakpoint was successfully registered in active session, send breakpoint activated event
       breakpointIds.put(dbgBreakpoint, response.getBreakpointID());

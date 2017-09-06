@@ -117,7 +117,7 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
       VirtualFile file = editor.getEditorInput().getFile();
       String filePath = file.getLocation().toString();
 
-      if (filePath.equals(location.getResourcePath()) || filePath.equals(location.getTarget())) {
+      if (filePath.equals(location.getTarget())) {
         openFileAndScrollToLine(file, location.getLineNumber(), callback);
         return;
       }
@@ -141,7 +141,7 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
 
     project
         .get()
-        .getFile(getPath(location))
+        .getFile(location.getTarget())
         .then(
             file -> {
               if (file.isPresent()) {
@@ -161,7 +161,7 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
 
     appContext
         .getWorkspaceRoot()
-        .getFile(getPath(location))
+        .getFile(location.getTarget())
         .then(
             file -> {
               if (file.isPresent()) {
@@ -179,7 +179,7 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
   protected void searchSource(final Location location, final AsyncCallback<VirtualFile> callback) {
     appContext
         .getWorkspaceRoot()
-        .search(getPath(location), "")
+        .search(location.getTarget(), "")
         .then(
             new Operation<List<SearchResult>>() {
               @Override
@@ -262,9 +262,5 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
       TextEditor textEditor = (TextEditor) editor;
       textEditor.setCursorPosition(new TextPosition(lineNumber - 1, 0));
     }
-  }
-
-  protected String getPath(Location location) {
-    return location.getResourcePath() != null ? location.getResourcePath() : location.getTarget();
   }
 }

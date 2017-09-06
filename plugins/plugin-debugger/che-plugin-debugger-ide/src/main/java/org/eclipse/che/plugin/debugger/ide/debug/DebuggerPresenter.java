@@ -25,7 +25,7 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
@@ -34,7 +34,6 @@ import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointManagerObserver;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -79,10 +78,10 @@ public class DebuggerPresenter extends BasePresenter
   private final WorkspaceAgent workspaceAgent;
   private final DebuggerResourceHandlerFactory resourceHandlerManager;
 
-  private List<Variable>              variables;
+  private List<Variable> variables;
   private List<? extends ThreadState> threadDump;
-  private Location                    executionPoint;
-  private DebuggerDescriptor          debuggerDescriptor;
+  private Location executionPoint;
+  private DebuggerDescriptor debuggerDescriptor;
 
   @Inject
   public DebuggerPresenter(
@@ -144,23 +143,20 @@ public class DebuggerPresenter extends BasePresenter
 
   @Override
   public void onExpandVariablesTree(MutableVariable variable) {
-    List<? extends Variable> rootVariables = variable.getValue().getVariables();
-    if (rootVariables.isEmpty()) {
-      Debugger debugger = debuggerManager.getActiveDebugger();
-      if (debugger != null) {
-        Promise<? extends SimpleValue> promise =
-            debugger.getValue(variable, view.getSelectedThreadId(), view.getSelectedFrameIndex());
+    Debugger debugger = debuggerManager.getActiveDebugger();
+    if (debugger != null && debugger.isSuspended()) {
+      Promise<? extends SimpleValue> promise =
+          debugger.getValue(variable, view.getSelectedThreadId(), view.getSelectedFrameIndex());
 
-        promise
-            .then(
-                value -> {
-                  view.setVariableValue(variable, value);
-                })
-            .catchError(
-                error -> {
-                  Log.error(DebuggerPresenter.class, error.getCause());
-                });
-      }
+      promise
+          .then(
+              value -> {
+                view.setVariableValue(variable, value);
+              })
+          .catchError(
+              error -> {
+                Log.error(DebuggerPresenter.class, error.getCause());
+              });
     }
   }
 
@@ -183,7 +179,7 @@ public class DebuggerPresenter extends BasePresenter
     }
   }
 
-  private void open(Location location) {
+  protected void open(Location location) {
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null) {
       DebuggerResourceHandler handler =

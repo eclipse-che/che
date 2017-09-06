@@ -26,10 +26,6 @@ public interface LocationDto extends Location {
 
   void setExternalResource(boolean externalResource);
 
-  void setResourcePath(String resourcePath);
-
-  LocationDto withResourcePath(String resourcePath);
-
   LocationDto withExternalResource(boolean externalResource);
 
   void setExternalResourceId(int externalResourceId);

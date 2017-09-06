@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.api.debug.shared.model;
 
-import org.eclipse.che.commons.annotation.Nullable;
-
 /** @author Anatoliy Bazko */
 public interface Location {
   /** The target, e.g.: file, fqn, memory address etc. */
@@ -19,9 +17,6 @@ public interface Location {
 
   /** The line number in a file or in a class. */
   int getLineNumber();
-
-  /** Returns path to the resource. */
-  String getResourcePath();
 
   /** Returns true if breakpoint resource is external resource, or false otherwise. */
   boolean isExternalResource();

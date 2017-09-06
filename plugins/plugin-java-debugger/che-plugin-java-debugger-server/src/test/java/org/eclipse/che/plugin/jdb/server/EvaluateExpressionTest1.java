@@ -44,11 +44,11 @@ public class EvaluateExpressionTest1 {
   public void setUp() throws Exception {
     ProjectApiUtils.ensure();
 
-    Location location = new LocationImpl("org.eclipse.EvaluateExpressionTest1", 21);
-
+    Location location =
+        new LocationImpl(
+            "/test/src/org/eclipse/EvaluateExpressionTest1.java", 21, false, -1, "/test", null, -1);
     debuggerEvents = new ArrayBlockingQueue<>(10);
     debugger = startJavaDebugger(new BreakpointImpl(location), debuggerEvents);
-
     ensureSuspendAtDesiredLocation(location, debuggerEvents);
   }
 

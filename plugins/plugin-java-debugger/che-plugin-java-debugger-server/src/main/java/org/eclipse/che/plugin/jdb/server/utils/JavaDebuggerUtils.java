@@ -21,8 +21,11 @@ import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -37,6 +40,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
@@ -78,14 +82,13 @@ public class JavaDebuggerUtils {
     if (type.isBinary()) {
       IClassFile classFile = type.getClassFile();
       int libId = classFile.getAncestor(IPackageFragmentRoot.PACKAGE_FRAGMENT_ROOT).hashCode();
-      return new LocationImpl(
-          fqn, location.lineNumber(), null, true, libId, typeProjectPath, null, -1);
+      return new LocationImpl(fqn, location.lineNumber(), true, libId, typeProjectPath, null, -1);
     } else {
       ICompilationUnit compilationUnit = type.getCompilationUnit();
       typeProjectPath = type.getJavaProject().getPath().toOSString();
       String resourcePath = compilationUnit.getPath().toOSString();
       return new LocationImpl(
-          fqn, location.lineNumber(), resourcePath, false, -1, typeProjectPath, null, -1);
+          resourcePath, location.lineNumber(), false, -1, typeProjectPath, null, -1);
     }
   }
 
@@ -145,25 +148,51 @@ public class JavaDebuggerUtils {
    * return outer class fqn.
    *
    * @param projectPath project path which contains class with {@code outerClassFqn}
-   * @param outerClassFqn fqn outer class
+   * @param filePath path to the file
    * @param lineNumber line position to search
    * @throws DebuggerException
    */
-  public String findFqnByPosition(String projectPath, String outerClassFqn, int lineNumber)
+  public String findFqnByPosition(String projectPath, String filePath, int lineNumber)
       throws DebuggerException {
+
     if (projectPath == null) {
-      return outerClassFqn;
+      return filePath;
     }
 
     IJavaProject project = MODEL.getJavaProject(projectPath);
 
+    IPath path = Path.fromOSString(filePath);
+
+    String fqn = null;
+    for (int i = path.segmentCount(); i > 0; i--) {
+      try {
+        IClasspathEntry classpathEntry =
+            ((JavaProject) project).getClasspathEntryFor(path.removeLastSegments(i));
+
+        if (classpathEntry != null) {
+          fqn =
+              path.removeFirstSegments(path.segmentCount() - i)
+                  .removeFileExtension()
+                  .toString()
+                  .replace("/", ".");
+          break;
+        }
+      } catch (JavaModelException e) {
+        return filePath;
+      }
+    }
+
+    if (fqn == null) {
+      return filePath;
+    }
+
     IType outerClass;
     IMember iMember;
     try {
-      outerClass = project.findType(outerClassFqn);
+      outerClass = project.findType(fqn);
 
       if (outerClass == null) {
-        return outerClassFqn;
+        return filePath;
       }
 
       String source;
@@ -185,7 +214,7 @@ public class JavaDebuggerUtils {
       throw new DebuggerException(
           format(
               "Unable to find source for class with fqn '%s' in the project '%s'",
-              outerClassFqn, project),
+              filePath, project),
           e);
     } catch (BadLocationException e) {
       throw new DebuggerException("Unable to calculate breakpoint location", e);
@@ -198,7 +227,7 @@ public class JavaDebuggerUtils {
       return iMember.getDeclaringType().getFullyQualifiedName();
     }
 
-    return outerClassFqn;
+    return filePath;
   }
 
   /**

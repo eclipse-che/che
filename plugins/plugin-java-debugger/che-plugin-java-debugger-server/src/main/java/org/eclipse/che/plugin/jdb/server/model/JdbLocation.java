@@ -33,6 +33,16 @@ public class JdbLocation implements Location {
     this(stackFrame, new JdbMethod(stackFrame));
   }
 
+  /**
+   * Intends to create location when thread is not suspended. Information concerning thread and
+   * frame are not available.
+   */
+  public JdbLocation(com.sun.jdi.Location jdiLocation) {
+    this.internal = getLocation(jdiLocation);
+    this.method = null;
+    this.jdiStackFrame = null;
+  }
+
   public JdbLocation(StackFrame jdiStackFrame, Method method) {
     this.jdiStackFrame = jdiStackFrame;
     this.internal = getLocation(jdiStackFrame.location());
@@ -47,11 +57,6 @@ public class JdbLocation implements Location {
   @Override
   public int getLineNumber() {
     return internal.getLineNumber();
-  }
-
-  @Override
-  public String getResourcePath() {
-    return internal.getResourcePath();
   }
 
   @Override
@@ -76,7 +81,7 @@ public class JdbLocation implements Location {
 
   @Override
   public long getThreadId() {
-    return jdiStackFrame.thread().uniqueID();
+    return jdiStackFrame == null ? -1 : jdiStackFrame.thread().uniqueID();
   }
 
   private Location getLocation(com.sun.jdi.Location jdiLocation) {

@@ -25,14 +25,12 @@ import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
 public class ZendDbgLocationHandler {
 
   public static final Location createVFS(
-      String target, String resourcePath, String resourceProjectPath, int lineNumber) {
-    return new LocationImpl(
-        target, lineNumber, resourcePath, false, 0, resourceProjectPath, null, -1);
+      String target, String resourceProjectPath, int lineNumber) {
+    return new LocationImpl(target, lineNumber, false, 0, resourceProjectPath, null, -1);
   }
 
   public static final Location createDBG(String resourcePath, int lineNumber) {
-    return new LocationImpl(
-        Path.of(resourcePath).getName(), lineNumber, resourcePath, false, 0, null, null, -1);
+    return new LocationImpl(Path.of(resourcePath).getName(), lineNumber, false, 0, null, null, -1);
   }
 
   /**
@@ -43,18 +41,16 @@ public class ZendDbgLocationHandler {
    */
   public Location convertToVFS(Location dbgLocation) {
     VirtualFileEntry localFileEntry =
-        ZendDbgFileUtils.findVirtualFileEntry(dbgLocation.getResourcePath());
+        ZendDbgFileUtils.findVirtualFileEntry(dbgLocation.getTarget());
     if (localFileEntry == null) {
       return null;
     }
     String resourceProjectPath = localFileEntry.getProject();
     String target = localFileEntry.getName();
-    String resourcePath = localFileEntry.getPath().toString();
     int lineNumber = dbgLocation.getLineNumber();
     return new LocationImpl(
         target,
         lineNumber,
-        resourcePath,
         false,
         0,
         resourceProjectPath,
@@ -69,16 +65,8 @@ public class ZendDbgLocationHandler {
    * @return DBG specific location.
    */
   public Location convertToDBG(Location vfsLocation) {
-    String resourcePath = ZendDbgFileUtils.findAbsolutePath(vfsLocation.getResourcePath());
     int lineNumber = vfsLocation.getLineNumber();
     return new LocationImpl(
-        null,
-        lineNumber,
-        resourcePath,
-        false,
-        0,
-        null,
-        vfsLocation.getMethod(),
-        vfsLocation.getThreadId());
+        null, lineNumber, false, 0, null, vfsLocation.getMethod(), vfsLocation.getThreadId());
   }
 }

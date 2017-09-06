@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.jdb.server;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.getProperty;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -29,14 +30,11 @@ import org.eclipse.che.api.debug.shared.model.Method;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.ThreadStatus;
-import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
-import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
 import org.eclipse.che.api.debugger.server.DtoConverter;
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.jdb.server.util.ProjectApiUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -55,13 +53,21 @@ public class ThreadDumpTest1 {
   public void setUp() throws Exception {
     ProjectApiUtils.ensure();
 
-    initJavaDebugger();
-    ensureSuspendAtDesiredLocation();
+    debugger = new JavaDebugger("localhost", parseInt(getProperty("debug.port")), events::add);
+    Location location =
+        new LocationImpl(
+            "/test/src/org/eclipse/ThreadDumpTest1.java", 26, false, -1, "/test", null, -1);
+    BreakpointImpl breakpoint = new BreakpointImpl(location);
+
+    debugger.start(new StartActionImpl(Collections.singletonList(breakpoint)));
+    ensureSuspendAtDesiredLocation(location, events);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    terminateVirtualMachineQuietly(debugger);
+    if (debugger != null) {
+      terminateVirtualMachineQuietly(debugger);
+    }
   }
 
   @Test
@@ -94,10 +100,9 @@ public class ThreadDumpTest1 {
 
     Location location = stackFrameDump.getLocation();
     assertEquals(location.getLineNumber(), 26);
-    assertEquals(location.getTarget(), "org.eclipse.ThreadDumpTest1");
+    assertEquals(location.getTarget(), "/test/src/org/eclipse/ThreadDumpTest1.java");
     assertEquals(location.getExternalResourceId(), -1);
     assertEquals(location.getResourceProjectPath(), "/test");
-    assertEquals(location.getResourcePath(), "/test/src/org/eclipse/ThreadDumpTest1.java");
 
     Method method = location.getMethod();
     assertEquals(method.getName(), "main");
@@ -125,7 +130,6 @@ public class ThreadDumpTest1 {
     assertEquals(location.getLineNumber(), -1);
     assertEquals(location.getTarget(), "java.lang.Object");
     assertNull(location.getResourceProjectPath());
-    assertNull(location.getResourcePath());
 
     Method method = location.getMethod();
     assertEquals(method.getName(), "wait");
@@ -152,32 +156,12 @@ public class ThreadDumpTest1 {
 
     Location location = stackFrameDump.getLocation();
     assertEquals(location.getLineNumber(), 41);
-    assertEquals(location.getTarget(), "org.eclipse.ThreadDumpTest1$SomeThread");
+    assertEquals(location.getTarget(), "/test/src/org/eclipse/ThreadDumpTest1.java");
     assertEquals(location.getExternalResourceId(), -1);
     assertEquals(location.getResourceProjectPath(), "/test");
-    assertEquals(location.getResourcePath(), "/test/src/org/eclipse/ThreadDumpTest1.java");
 
     Method method = location.getMethod();
     assertEquals(method.getName(), "run");
     assertTrue(method.getArguments().isEmpty());
-  }
-
-  private void initJavaDebugger() throws DebuggerException, InterruptedException {
-    debugger = new JavaDebugger("localhost", parseInt(getProperty("debug.port")), events::add);
-
-    BreakpointImpl breakpoint =
-        new BreakpointImpl(new LocationImpl("org.eclipse.ThreadDumpTest1", 26));
-    debugger.start(new StartActionImpl(Collections.singletonList(breakpoint)));
-  }
-
-  private void ensureSuspendAtDesiredLocation() throws InterruptedException {
-    DebuggerEvent debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
-
-    debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof SuspendEvent);
-
-    SuspendEvent suspendEvent = (SuspendEvent) debuggerEvent;
-    assertEquals(suspendEvent.getLocation().getLineNumber(), 26);
   }
 }

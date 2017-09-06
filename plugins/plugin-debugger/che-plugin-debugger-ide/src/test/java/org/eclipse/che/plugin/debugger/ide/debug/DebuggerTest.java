@@ -23,6 +23,7 @@ import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,8 +50,8 @@ import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
-import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -60,8 +61,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
@@ -104,7 +103,6 @@ public class DebuggerTest extends BaseTest {
   private static final int FRAME_INDEX = 0;
 
   public static final int LINE_NUMBER = 20;
-  public static final String FQN = "org.test.Test";
   public static final String PATH = "test/src/main/java/Test.java";
 
   @Mock private DebuggerServiceClient service;
@@ -144,8 +142,6 @@ public class DebuggerTest extends BaseTest {
 
   @Captor private ArgumentCaptor<Operation<DebuggerInfo>> argumentCaptorOperationJavaDebuggerInfo;
 
-  public final Breakpoint TEST_BREAKPOINT =
-      new Breakpoint(Breakpoint.Type.BREAKPOINT, LINE_NUMBER, PATH, file, true);
   public DebuggerDescriptor debuggerDescriptor;
 
   private AbstractDebugger debugger;
@@ -173,17 +169,18 @@ public class DebuggerTest extends BaseTest {
     doReturn(Path.valueOf(PATH)).when(file).getLocation();
 
     debugger =
-        new TestDebugger(
-            service,
-            transmitter,
-            configurator,
-            dtoFactory,
-            localStorageProvider,
-            eventBus,
-            debuggerManager,
-            notificationManager,
-            "id",
-            debuggerResourceHandlerFactory);
+        spy(
+            new TestDebugger(
+                service,
+                transmitter,
+                configurator,
+                dtoFactory,
+                localStorageProvider,
+                eventBus,
+                debuggerManager,
+                notificationManager,
+                "id",
+                debuggerResourceHandlerFactory));
     doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
     doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -392,6 +389,7 @@ public class DebuggerTest extends BaseTest {
     MockSettings mockSettings =
         new MockSettingsImpl<>().defaultAnswer(RETURNS_SMART_NULLS).extraInterfaces(Resource.class);
     Project project = mock(Project.class);
+    doReturn(project).when(debugger).getProject(any());
     when(optional.isPresent()).thenReturn(true);
     when(optional.get()).thenReturn(project);
     when(project.getPath()).thenReturn(PATH);
@@ -407,26 +405,19 @@ public class DebuggerTest extends BaseTest {
     doReturn(promiseVoid).when(service).addBreakpoint(SESSION_ID, breakpointDto);
     doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>) any());
     when(locationDto.withLineNumber(LINE_NUMBER + 1)).thenReturn(locationDto);
-    when(locationDto.withResourcePath(PATH)).thenReturn(locationDto);
     when(locationDto.withResourceProjectPath(PATH)).thenReturn(locationDto);
     when(locationDto.withTarget(anyString())).thenReturn(locationDto);
+    when(breakpointDto.getLocation().getLineNumber()).thenReturn(LINE_NUMBER);
     when(breakpointDto.withLocation(locationDto)).thenReturn(breakpointDto);
     when(breakpointDto.withEnabled(true)).thenReturn(breakpointDto);
 
-    debugger.addBreakpoint(virtualFile, LINE_NUMBER);
+    debugger.addBreakpoint(virtualFile, breakpointDto);
 
-    verify(locationDto).withLineNumber(LINE_NUMBER + 1);
-    verify(locationDto).withTarget(FQN);
-    verify(locationDto).withResourcePath(PATH);
-    verify(locationDto).withResourceProjectPath(PATH);
-
-    verify(breakpointDto).withLocation(locationDto);
-    verify(breakpointDto).withEnabled(true);
-
+    verify(service).addBreakpoint(SESSION_ID, breakpointDto);
     verify(promiseVoid).then(operationVoidCaptor.capture());
     operationVoidCaptor.getValue().apply(null);
     verify(observer).onBreakpointAdded(breakpointCaptor.capture());
-    assertEquals(breakpointCaptor.getValue(), TEST_BREAKPOINT);
+    assertEquals(breakpointCaptor.getValue(), breakpointDto);
 
     verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
     operationPromiseErrorCaptor.getValue().apply(promiseError);
@@ -434,29 +425,16 @@ public class DebuggerTest extends BaseTest {
   }
 
   @Test
-  public void testAddBreakpointWithoutConnection() throws Exception {
-    debugger.setDebugSession(null);
-    debugger.addBreakpoint(file, LINE_NUMBER);
-
-    verify(service, never()).addBreakpoint(any(), any());
-    verify(observer).onBreakpointAdded(breakpointCaptor.capture());
-    assertEquals(breakpointCaptor.getValue(), TEST_BREAKPOINT);
-  }
-
-  @Test
   public void testDeleteBreakpoint() throws Exception {
     doReturn(promiseVoid).when(service).deleteBreakpoint(SESSION_ID, locationDto);
     doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>) any());
 
-    debugger.deleteBreakpoint(file, LINE_NUMBER);
-
-    verify(locationDto).setLineNumber(LINE_NUMBER + 1);
-    verify(locationDto).setTarget(FQN);
+    debugger.deleteBreakpoint(file, breakpointDto);
 
     verify(promiseVoid).then(operationVoidCaptor.capture());
     operationVoidCaptor.getValue().apply(null);
     verify(observer).onBreakpointDeleted(breakpointCaptor.capture());
-    assertEquals(TEST_BREAKPOINT, breakpointCaptor.getValue());
+    assertEquals(breakpointDto, breakpointCaptor.getValue());
 
     verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
     operationPromiseErrorCaptor.getValue().apply(promiseError);
@@ -466,7 +444,7 @@ public class DebuggerTest extends BaseTest {
   @Test
   public void testDeleteBreakpointWithoutConnection() throws Exception {
     debugger.setDebugSession(null);
-    debugger.deleteBreakpoint(file, LINE_NUMBER);
+    debugger.deleteBreakpoint(file, breakpointDto);
 
     verify(service, never()).deleteBreakpoint(any(), any());
   }
@@ -638,17 +616,6 @@ public class DebuggerTest extends BaseTest {
           requestHandlerManager,
           debuggerResourceHandlerFactory,
           id);
-    }
-
-    @Override
-    protected String fqnToPath(Location location) {
-      return PATH;
-    }
-
-    @Nullable
-    @Override
-    protected String pathToFqn(VirtualFile file) {
-      return FQN;
     }
 
     @Override

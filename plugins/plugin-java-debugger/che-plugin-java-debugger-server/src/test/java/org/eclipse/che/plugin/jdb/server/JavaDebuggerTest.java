@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.jdb.server;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -21,7 +20,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
@@ -35,7 +33,6 @@ import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepIntoActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOutActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOverActionImpl;
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.jdb.server.util.ProjectApiUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -88,65 +85,7 @@ public class JavaDebuggerTest {
 
     Location location = ((SuspendEvent) debuggerEvent).getLocation();
     assertEquals(location.getLineNumber(), 17);
-    assertEquals(location.getTarget(), "com.HelloWorld");
-  }
-
-  @Test(priority = 30)
-  public void testAddBreakpoint() throws Exception {
-    int breakpointsCount = debugger.getAllBreakpoints().size();
-
-    debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 18), false, null));
-
-    DebuggerEvent debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
-
-    Breakpoint breakpoint = ((BreakpointActivatedEvent) debuggerEvent).getBreakpoint();
-    assertEquals(breakpoint.getLocation().getLineNumber(), 18);
-    assertEquals(breakpoint.getLocation().getTarget(), "com.HelloWorld");
-    assertTrue(breakpoint.isEnabled());
-
-    assertEquals(debugger.getAllBreakpoints().size(), breakpointsCount + 1);
-  }
-
-  @Test(priority = 50, expectedExceptions = DebuggerException.class)
-  public void testAddBreakpointToUnExistedLocation() throws Exception {
-    debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 1), false, null));
-  }
-
-  @Test(priority = 60)
-  public void testRemoveBreakpoint() throws Exception {
-    debugger.deleteBreakpoint(new LocationImpl("com.HelloWorld", 17));
-    assertEquals(debugger.getAllBreakpoints().size(), 1);
-  }
-
-  @Test(priority = 70)
-  public void testRemoveUnExistedBreakpoint() throws Exception {
-    int breakpointsCount = debugger.getAllBreakpoints().size();
-
-    debugger.deleteBreakpoint(new LocationImpl("com.HelloWorld", 2));
-
-    assertEquals(debugger.getAllBreakpoints().size(), breakpointsCount);
-  }
-
-  @Test(priority = 80)
-  public void testGetAllBreakpoints() throws Exception {
-    assertFalse(debugger.getAllBreakpoints().isEmpty());
-
-    debugger.deleteAllBreakpoints();
-
-    assertTrue(debugger.getAllBreakpoints().isEmpty());
-
-    debugger.addBreakpoint(new BreakpointImpl(new LocationImpl("com.HelloWorld", 18), false, null));
-
-    DebuggerEvent debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
-
-    assertEquals(debugger.getAllBreakpoints().size(), 1);
-
-    Breakpoint breakpoint = debugger.getAllBreakpoints().get(0);
-    assertEquals(breakpoint.getLocation().getLineNumber(), 18);
-    assertEquals(breakpoint.getLocation().getTarget(), "com.HelloWorld");
-    assertTrue(breakpoint.isEnabled());
+    assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
   }
 
   @Test(priority = 90)
@@ -162,18 +101,17 @@ public class JavaDebuggerTest {
     DebuggerEvent debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
     Location location = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 20);
     assertEquals(location.getExternalResourceId(), -1);
     assertEquals(location.getResourceProjectPath(), "/test");
-    assertEquals(location.getResourcePath(), "/test/src/com/HelloWorld.java");
 
     debugger.stepInto(new StepIntoActionImpl());
 
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
     location = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 28);
 
     debugger.stepOut(new StepOutActionImpl());
@@ -181,7 +119,7 @@ public class JavaDebuggerTest {
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
     location = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 20);
 
     debugger.stepOver(new StepOverActionImpl());
@@ -189,7 +127,7 @@ public class JavaDebuggerTest {
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
     location = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 21);
 
     debugger.stepOver(new StepOverActionImpl());
@@ -197,7 +135,7 @@ public class JavaDebuggerTest {
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
     location = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 23);
 
     debugger.stepOver(new StepOverActionImpl());
@@ -205,7 +143,7 @@ public class JavaDebuggerTest {
     debuggerEvent = events.take();
     assertTrue(debuggerEvent instanceof SuspendEvent);
     location = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(location.getTarget(), "com.HelloWorld");
+    assertEquals(location.getTarget(), "/test/src/com/HelloWorld.java");
     assertEquals(location.getLineNumber(), 24);
   }
 

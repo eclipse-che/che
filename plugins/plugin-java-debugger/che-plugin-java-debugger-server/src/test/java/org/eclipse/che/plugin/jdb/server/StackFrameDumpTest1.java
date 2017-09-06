@@ -54,7 +54,9 @@ public class StackFrameDumpTest1 {
   public void setUp() throws Exception {
     ProjectApiUtils.ensure();
 
-    Location location = new LocationImpl("org.eclipse.StackFrameDumpTest1", 25);
+    Location location =
+        new LocationImpl(
+            "/test/src/org/eclipse/StackFrameDumpTest1.java", 25, false, -1, "/test", null, -1);
     debugger = startJavaDebugger(new BreakpointImpl(location), callback);
 
     ensureSuspendAtDesiredLocation(location, callback);
@@ -86,7 +88,7 @@ public class StackFrameDumpTest1 {
 
     LocationDto location = stackFrame.getLocation();
     assertEquals(location.getLineNumber(), 25);
-    assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
+    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest1.java");
 
     MethodDto method = location.getMethod();
     assertEquals(method.getName(), "do2");
@@ -132,7 +134,7 @@ public class StackFrameDumpTest1 {
 
     LocationDto location = stackFrame.getLocation();
     assertEquals(location.getLineNumber(), 21);
-    assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
+    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest1.java");
 
     MethodDto method = location.getMethod();
     assertEquals(method.getName(), "do1");
@@ -186,7 +188,7 @@ public class StackFrameDumpTest1 {
 
     LocationDto location = stackFrame.getLocation();
     assertEquals(location.getLineNumber(), 16);
-    assertEquals(location.getTarget(), "org.eclipse.StackFrameDumpTest1");
+    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest1.java");
 
     MethodDto method = location.getMethod();
     assertEquals(method.getName(), "main");

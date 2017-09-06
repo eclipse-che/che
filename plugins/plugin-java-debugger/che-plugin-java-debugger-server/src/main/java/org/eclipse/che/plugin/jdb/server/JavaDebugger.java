@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.jdb.server;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.debugger.server.DtoConverter.asDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.sun.jdi.AbsentInformationException;
@@ -46,7 +47,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
-import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
@@ -210,12 +210,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
-    final String className = findFQN(breakpoint);
+    final String className = findFQN(breakpoint.getLocation());
     final int lineNumber = breakpoint.getLocation().getLineNumber();
     List<ReferenceType> classes = vm.classesByName(className);
     // it may mean that class doesn't loaded by a target JVM yet
     if (classes.isEmpty()) {
-      deferBreakpoint(breakpoint);
+      deferBreakpoint(className, breakpoint);
       throw new DebuggerException("Class not loaded");
     }
 
@@ -267,8 +267,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
     LOG.debug("Add breakpoint: {}", location);
   }
 
-  private String findFQN(Breakpoint breakpoint) throws DebuggerException {
-    Location location = breakpoint.getLocation();
+  private String findFQN(Location location) throws DebuggerException {
     final String parentFqn = location.getTarget();
     final String projectPath = location.getResourceProjectPath();
     int lineNumber = location.getLineNumber();
@@ -276,8 +275,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
     return debuggerUtil.findFqnByPosition(projectPath, parentFqn, lineNumber);
   }
 
-  private void deferBreakpoint(Breakpoint breakpoint) throws DebuggerException {
-    final String className = breakpoint.getLocation().getTarget();
+  private void deferBreakpoint(String className, Breakpoint breakpoint) throws DebuggerException {
     List<Breakpoint> newList = new ArrayList<>();
     List<Breakpoint> list = deferredBreakpoints.putIfAbsent(className, newList);
     if (list == null) {
@@ -317,10 +315,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
       breakPoints.add(
           newDto(BreakpointDto.class)
               .withEnabled(true)
-              .withLocation(
-                  newDto(LocationDto.class)
-                      .withTarget(location.declaringType().name())
-                      .withLineNumber(location.lineNumber())));
+              .withLocation(asDto(new JdbLocation(location))));
     }
     breakPoints.sort(BREAKPOINT_COMPARATOR);
     return breakPoints;
@@ -330,7 +325,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void deleteBreakpoint(Location location) throws DebuggerException {
-    final String className = location.getTarget();
+    final String className = findFQN(location);
     final int lineNumber = location.getLineNumber();
     EventRequestManager requestManager = getEventManager();
     List<BreakpointRequest> snapshot = new ArrayList<>(requestManager.breakpointRequests());
@@ -418,8 +413,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
    * <ol>
    *   <li>If need to get field of this object of current frame then first element in array always
    *       should be 'this'.
-   *   <li>If need to get static field in current frame then first element in array always should
-   *       be 'static'.
+   *   <li>If need to get static field in current frame then first element in array always should be
+   *       'static'.
    *   <li>If need to get local variable in current frame then first element should be the name of
    *       local variable.
    * </ol>

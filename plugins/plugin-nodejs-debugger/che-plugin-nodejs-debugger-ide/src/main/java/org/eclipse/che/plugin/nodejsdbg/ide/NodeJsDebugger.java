@@ -13,15 +13,12 @@ package org.eclipse.che.plugin.nodejsdbg.ide;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Map;
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -65,16 +62,6 @@ public class NodeJsDebugger extends AbstractDebugger {
         requestHandlerManager,
         debuggerResourceHandlerFactory,
         ID);
-  }
-
-  @Override
-  protected String fqnToPath(@NotNull Location location) {
-    return location.getResourcePath() == null ? location.getTarget() : location.getResourcePath();
-  }
-
-  @Override
-  protected String pathToFqn(VirtualFile file) {
-    return file.getLocation().toString();
   }
 
   @Override

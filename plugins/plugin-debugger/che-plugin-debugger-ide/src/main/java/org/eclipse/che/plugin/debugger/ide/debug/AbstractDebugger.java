@@ -10,10 +10,16 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
-import com.google.common.base.Optional;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -34,6 +40,7 @@ import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DebuggerEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DisconnectEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
@@ -49,7 +56,6 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
@@ -67,15 +73,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * The common debugger.
@@ -246,9 +243,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
    * <li>etc
    */
   private void onBreakpointActivated(LocationDto locationDto) {
-    String filePath = fqnToPath(locationDto);
     for (DebuggerObserver observer : observers) {
-      observer.onBreakpointActivated(filePath, locationDto.getLineNumber() - 1);
+      observer.onBreakpointActivated(locationDto.getTarget(), locationDto.getLineNumber() - 1);
     }
   }
 
@@ -341,20 +337,13 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
-  public void addBreakpoint(final VirtualFile file, final int lineNumber) {
+  public void addBreakpoint(final VirtualFile file, final Breakpoint breakpoint) {
     if (isConnected()) {
-      String fqn = pathToFqn(file);
-      if (fqn == null) {
-        return;
-      }
-
-      final String filePath = file.getLocation().toString();
       LocationDto locationDto =
           dtoFactory
               .createDto(LocationDto.class)
-              .withLineNumber(lineNumber + 1)
-              .withTarget(fqn)
-              .withResourcePath(filePath)
+              .withLineNumber(breakpoint.getLocation().getLineNumber() + 1)
+              .withTarget(breakpoint.getLocation().getTarget())
               .withResourceProjectPath(getProject(file).getPath());
 
       BreakpointDto breakpointDto =
@@ -364,8 +353,6 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       promise
           .then(
               it -> {
-                Breakpoint breakpoint =
-                    new Breakpoint(Breakpoint.Type.BREAKPOINT, lineNumber, filePath, file, true);
                 for (DebuggerObserver observer : observers) {
                   observer.onBreakpointAdded(breakpoint);
                 }
@@ -374,42 +361,23 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
               error -> {
                 Log.error(AbstractDebugger.class, error.getMessage());
               });
-    } else {
-      Breakpoint breakpoint =
-          new Breakpoint(
-              Breakpoint.Type.BREAKPOINT, lineNumber, file.getLocation().toString(), file, false);
-      for (DebuggerObserver observer : observers) {
-        observer.onBreakpointAdded(breakpoint);
-      }
     }
   }
 
   @Override
-  public void deleteBreakpoint(final VirtualFile file, final int lineNumber) {
+  public void deleteBreakpoint(final VirtualFile file, final Breakpoint breakpoint) {
     if (!isConnected()) {
       return;
     }
     LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
-    locationDto.setLineNumber(lineNumber + 1);
-
-    String fqn = pathToFqn(file);
-    if (fqn == null) {
-      return;
-    }
-    locationDto.setTarget(fqn);
+    locationDto.setLineNumber(breakpoint.getLocation().getLineNumber() + 1);
+    locationDto.setTarget(breakpoint.getLocation().getTarget());
 
     Promise<Void> promise = service.deleteBreakpoint(debugSessionDto.getId(), locationDto);
     promise
         .then(
             it -> {
               for (DebuggerObserver observer : observers) {
-                Breakpoint breakpoint =
-                    new Breakpoint(
-                        Breakpoint.Type.BREAKPOINT,
-                        lineNumber,
-                        file.getLocation().toString(),
-                        file,
-                        false);
                 observer.onBreakpointDeleted(breakpoint);
               }
             })
@@ -437,6 +405,15 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             error -> {
               Log.error(AbstractDebugger.class, error.getMessage());
             });
+  }
+
+  @Override
+  public Promise<List<BreakpointDto>> getAllBreakpoints() {
+    if (!isConnected()) {
+      return Promises.reject(JsPromiseError.create("Debugger is not connected"));
+    }
+
+    return service.getAllBreakpoints(debugSessionDto.getId());
   }
 
   @Override
@@ -487,20 +464,13 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       LocationDto locationDto =
           dtoFactory
               .createDto(LocationDto.class)
-              .withLineNumber(breakpoint.getLineNumber() + 1)
-              .withResourcePath(breakpoint.getPath())
-              .withResourceProjectPath(getProject(breakpoint.getFile()).getPath());
+              .withTarget(breakpoint.getLocation().getTarget())
+              .withLineNumber(breakpoint.getLocation().getLineNumber() + 1);
 
-      String target = pathToFqn(breakpoint.getFile());
-      if (target != null) {
-        locationDto.setTarget(target);
-
-        BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
-        breakpointDto.setLocation(locationDto);
-        breakpointDto.setEnabled(true);
-
-        breakpoints.add(breakpointDto);
-      }
+      BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
+      breakpointDto.setLocation(locationDto);
+      breakpointDto.setEnabled(true);
+      breakpoints.add(breakpointDto);
     }
 
     StartActionDto action = dtoFactory.createDto(StartActionDto.class);
@@ -782,22 +752,12 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Nullable
-  private Project getProject(VirtualFile virtualFile) {
+  protected Project getProject(VirtualFile virtualFile) {
     if (virtualFile instanceof Resource) {
-      Optional<Project> projectOptional = ((Resource) virtualFile).getRelatedProject();
-      if (projectOptional.isPresent()) {
-        return projectOptional.get();
-      }
+      return ((Resource) virtualFile).getProject();
     }
     return null;
   }
-
-  /** Transforms FQN to file path. */
-  protected abstract String fqnToPath(@NotNull Location location);
-
-  /** Transforms file path to FQN> */
-  @Nullable
-  protected abstract String pathToFqn(VirtualFile file);
 
   protected abstract DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties);
 }

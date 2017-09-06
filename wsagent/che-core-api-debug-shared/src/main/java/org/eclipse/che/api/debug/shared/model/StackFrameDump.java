@@ -11,7 +11,6 @@
 package org.eclipse.che.api.debug.shared.model;
 
 import java.util.List;
-import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author Anatoliy Bazko */
 public interface StackFrameDump {

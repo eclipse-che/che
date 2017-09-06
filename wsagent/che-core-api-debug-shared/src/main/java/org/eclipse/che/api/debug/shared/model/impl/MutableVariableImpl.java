@@ -11,7 +11,6 @@
 package org.eclipse.che.api.debug.shared.model.impl;
 
 import com.google.common.base.Objects;
-
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.Variable;

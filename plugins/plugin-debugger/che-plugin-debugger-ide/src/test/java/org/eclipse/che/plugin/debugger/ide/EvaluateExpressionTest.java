@@ -42,7 +42,6 @@ import org.mockito.Mock;
 public class EvaluateExpressionTest extends BaseTest {
   private static final String EXPRESSION = "expression";
   private static final String EMPTY_EXPRESSION = "";
-  private static final String EVALUATION_RESULT = "result";
   private static final String FAIL_REASON = "reason";
   private static final long THREAD_ID = 1;
   private static final int FRAME_INDEX = 0;
