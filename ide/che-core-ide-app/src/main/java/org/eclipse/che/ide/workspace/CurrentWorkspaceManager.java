@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.workspace;
 
 import static java.lang.Boolean.parseBoolean;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 
@@ -20,6 +22,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
@@ -62,7 +65,14 @@ class CurrentWorkspaceManager {
         .then(
             ws -> {
               ((AppContextImpl) appContext).setWorkspace(ws);
-              eventBus.fireEvent(new WorkspaceStartingEvent());
+
+              if (ws.getStatus() == STARTING) {
+                eventBus.fireEvent(new WorkspaceStartingEvent());
+                // rarely possible case when workspace starts "immediately" in some infrastructures
+              } else if (ws.getStatus() == RUNNING) {
+                eventBus.fireEvent(new WorkspaceStartingEvent());
+                eventBus.fireEvent(new WorkspaceRunningEvent());
+              }
             })
         .then((Function<WorkspaceImpl, Void>) arg -> null);
   }
