@@ -124,5 +124,4 @@ public class FontAwesome {
 
   /** http://fontawesome.io/icon/arrow-down/ */
   public static final String ARROW_DOWN = "<i class=\"fa fa-arrow-down\"></i>";
-
 }
