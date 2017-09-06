@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
+import org.eclipse.che.ide.projectimport.InitialProjectImporter;
 import org.eclipse.che.ide.projectimport.ProjectImportNotificationSubscriber;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardFactory;
 import org.eclipse.che.ide.projectimport.wizard.ProjectImportOutputJsonRpcNotifier;
@@ -62,6 +63,7 @@ public class ProjectApiModule extends AbstractGinModule {
         .to(ResolvingProjectStateHolderRegistryImpl.class);
 
     // project import
+    bind(InitialProjectImporter.class).asEagerSingleton();
     GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class)
         .addBinding()
         .to(ZipImportWizardRegistrar.class);

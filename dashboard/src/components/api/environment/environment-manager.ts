@@ -177,7 +177,6 @@ export abstract class EnvironmentManager {
     if (!machine.runtime) {
       return servers;
     }
-
     Object.keys(machine.runtime.servers).forEach((runtimeServerName: string) => {
       let runtimeServer: che.IWorkspaceRuntimeMachineServer = machine.runtime.servers[runtimeServerName],
           runtimeServerReference = runtimeServer.ref;

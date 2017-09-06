@@ -16,6 +16,7 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
+import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.composer.server.executor.ComposerJsonRpcMessenger;
 import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectGenerator;
 import org.eclipse.che.plugin.composer.server.projecttype.ComposerProjectInitializer;
@@ -27,8 +28,7 @@ import org.eclipse.che.plugin.composer.server.projecttype.ComposerValueProviderF
  *
  * @author Kaloyan Raev
  */
-// FIXME: spi
-//@DynaModule
+@DynaModule
 public class ComposerModule extends AbstractModule {
 
   /** {@inheritDoc} */

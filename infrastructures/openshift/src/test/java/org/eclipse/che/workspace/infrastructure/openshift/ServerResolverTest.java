@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -103,6 +104,63 @@ public class ServerResolverTest {
     assertEquals(resolved.size(), 2);
     assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost/api"));
     assertEquals(resolved.get("ws-server"), new ServerImpl("ws://localhost/connect"));
+  }
+
+  @Test
+  public void testResolvingServersWhenThereIsMatchedServiceForContainerAndServerPathIsNull() {
+    Container container = createContainer();
+    Pod pod = createPod(singletonMap("kind", "web-app"));
+    Service nonMatchedByPodService =
+        createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
+    Route route =
+        createRoute(
+            "matched", singletonMap("http-server", new ServerConfigImpl("3054", "http", null)));
+
+    ServerResolver serverResolver =
+        ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
+
+    Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
+
+    assertEquals(resolved.size(), 1);
+    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost"));
+  }
+
+  @Test
+  public void testResolvingServersWhenThereIsMatchedServiceForContainerAndServerPathIsEmpty() {
+    Container container = createContainer();
+    Pod pod = createPod(singletonMap("kind", "web-app"));
+    Service nonMatchedByPodService =
+        createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
+    Route route =
+        createRoute(
+            "matched", singletonMap("http-server", new ServerConfigImpl("3054", "http", "")));
+
+    ServerResolver serverResolver =
+        ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
+
+    Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
+
+    assertEquals(resolved.size(), 1);
+    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost"));
+  }
+
+  @Test
+  public void testResolvingServersWhenThereIsMatchedServiceForContainerAndServerPathIsRelative() {
+    Container container = createContainer();
+    Pod pod = createPod(singletonMap("kind", "web-app"));
+    Service nonMatchedByPodService =
+        createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
+    Route route =
+        createRoute(
+            "matched", singletonMap("http-server", new ServerConfigImpl("3054", "http", "api")));
+
+    ServerResolver serverResolver =
+        ServerResolver.of(singletonList(nonMatchedByPodService), singletonList(route));
+
+    Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
+
+    assertEquals(resolved.size(), 1);
+    assertEquals(resolved.get("http-server"), new ServerImpl("http://localhost/api"));
   }
 
   private Pod createPod(Map<String, String> labels) {

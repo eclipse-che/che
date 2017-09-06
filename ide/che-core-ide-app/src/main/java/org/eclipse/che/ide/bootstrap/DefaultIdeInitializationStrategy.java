@@ -11,23 +11,21 @@
 package org.eclipse.che.ide.bootstrap;
 
 import static org.eclipse.che.ide.actions.StartUpActionsParser.getStartUpActions;
+import static org.eclipse.che.ide.api.WindowActionEvent.createWindowClosedEvent;
+import static org.eclipse.che.ide.api.WindowActionEvent.createWindowClosingEvent;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.WindowActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
@@ -41,7 +39,6 @@ import org.eclipse.che.ide.theme.ThemeAgentImpl;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 
 /**
  * Represents the default strategy for initializing Basic IDE. Performs the minimum required
@@ -66,7 +63,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
   protected final AppStateManager appStateManager;
   protected final Provider<WorkspacePresenter> workspacePresenterProvider;
   protected final EventBus eventBus;
-  protected final Provider<CreateWorkspacePresenter> createWsPresenter;
   protected final DialogFactory dialogFactory;
 
   @Inject
@@ -81,7 +77,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
       AppStateManager appStateManager,
       Provider<WorkspacePresenter> workspacePresenterProvider,
       EventBus eventBus,
-      Provider<CreateWorkspacePresenter> createWsPresenter,
       DialogFactory dialogFactory) {
     this.workspaceServiceClient = workspaceServiceClient;
     this.appContext = appContext;
@@ -93,7 +88,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     this.appStateManager = appStateManager;
     this.workspacePresenterProvider = workspacePresenterProvider;
     this.eventBus = eventBus;
-    this.createWsPresenter = createWsPresenter;
     this.dialogFactory = dialogFactory;
   }
 
@@ -151,8 +145,6 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
         .catchError(
             (Operation<PromiseError>)
                 err -> {
-                  createWs(); // temporary solution while dashboard doesn't work
-
                   throw new OperationException("Can not get workspace: " + err.getCause());
                 });
   }
@@ -162,11 +154,10 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
       standardComponentsInitializerProvider.get().initialize();
       appStateManager.readStateFromPreferences();
       showRootPresenter();
+
       // Bind browser's window events
-      Window.addWindowClosingHandler(
-          event -> eventBus.fireEvent(WindowActionEvent.createWindowClosingEvent(event)));
-      Window.addCloseHandler(
-          event -> eventBus.fireEvent(WindowActionEvent.createWindowClosedEvent()));
+      Window.addWindowClosingHandler(event -> eventBus.fireEvent(createWindowClosingEvent(event)));
+      Window.addCloseHandler(event -> eventBus.fireEvent(createWindowClosedEvent()));
     };
   }
 
@@ -176,25 +167,5 @@ class DefaultIdeInitializationStrategy implements IdeInitializationStrategy {
     RootLayoutPanel.get().getElement().getStyle().setZIndex(0);
 
     workspacePresenterProvider.get().go(mainPanel);
-  }
-
-  // TODO: remove after fix dashboard
-  private void createWs() {
-    createWsPresenter
-        .get()
-        .show(
-            new Callback<Workspace, Exception>() {
-              @Override
-              public void onSuccess(Workspace result) {
-                dialogFactory
-                    .createMessageDialog("create WS", "created successfully", Location::reload)
-                    .show();
-              }
-
-              @Override
-              public void onFailure(Exception reason) {
-                dialogFactory.createMessageDialog("create WS", "failed to create", null).show();
-              }
-            });
   }
 }
