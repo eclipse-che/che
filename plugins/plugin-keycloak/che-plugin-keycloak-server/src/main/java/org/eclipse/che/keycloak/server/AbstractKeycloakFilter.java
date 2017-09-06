@@ -17,10 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Base abstract class for the Keycloak-related servlet filters.
- * 
- * In particular it defines commnon use-cases when the
- * authentication / multi-user logic should be skipped
  *
+ * <p>In particular it defines commnon use-cases when the authentication / multi-user logic should
+ * be skipped
  */
 public abstract class AbstractKeycloakFilter implements Filter {
 
