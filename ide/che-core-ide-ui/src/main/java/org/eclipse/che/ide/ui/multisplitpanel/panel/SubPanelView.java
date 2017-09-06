@@ -71,7 +71,5 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
 
     /** Called when the `Add Tab` button has been clicked. */
     void onAddTabButtonClicked(int mouseX, int mouseY);
-
   }
-
 }

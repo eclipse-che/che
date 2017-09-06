@@ -35,7 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
-
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.parts.PartPresenter;
@@ -52,9 +51,7 @@ public class EditorPartStackView extends ResizeComposite
 
   interface PartStackUiBinder extends UiBinder<Widget, EditorPartStackView> {}
 
-  /**
-   * Listener to handle clicking on Add tab button.
-   */
+  /** Listener to handle clicking on Add tab button. */
   interface AddTabButtonClickListener {
 
     /**
@@ -64,7 +61,6 @@ public class EditorPartStackView extends ResizeComposite
      * @param mouseY absolute mouse top
      */
     void onAddTabButtonClicked(int mouseX, int mouseY);
-
   }
 
   private static final PartStackUiBinder UI_BINDER = GWT.create(PartStackUiBinder.class);
@@ -97,16 +93,18 @@ public class EditorPartStackView extends ResizeComposite
     initWidget(UI_BINDER.createAndBindUi(this));
 
     plusPanel.getElement().setInnerHTML(FontAwesome.PLUS);
-    plusPanel.addDomHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        if (addTabButtonClickListener != null) {
-          addTabButtonClickListener.onAddTabButtonClicked(
-              getAbsoluteLeft(plusPanel.getElement()) + 15,
-              getAbsoluteTop(plusPanel.getElement()) + 15);
-        }
-      }
-    }, ClickEvent.getType());
+    plusPanel.addDomHandler(
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent clickEvent) {
+            if (addTabButtonClickListener != null) {
+              addTabButtonClickListener.onAddTabButtonClicked(
+                  getAbsoluteLeft(plusPanel.getElement()) + 15,
+                  getAbsoluteTop(plusPanel.getElement()) + 15);
+            }
+          }
+        },
+        ClickEvent.getType());
 
     partViewContainer =
         new AcceptsOneWidget() {
@@ -194,9 +192,7 @@ public class EditorPartStackView extends ResizeComposite
     partPresenter.go(partViewContainer);
   }
 
-  /**
-   * Ensures active tab and plus button are visible.
-   */
+  /** Ensures active tab and plus button are visible. */
   private void ensureActiveTabVisible() {
     // do nothing if selected tab is null
     if (activeTab == null) {
@@ -204,9 +200,10 @@ public class EditorPartStackView extends ResizeComposite
     }
 
     // do nothing if selected tab is visible and plus button is visible
-    if (getAbsoluteTop(activeTab.getView().asWidget().getElement()) == getAbsoluteTop(tabsPanel.getElement()) &&
-      getAbsoluteTop(plusPanel.getElement()) == getAbsoluteTop(tabsPanel.getElement()) &&
-        tabsPanelWidth == tabsPanel.getOffsetWidth()) {
+    if (getAbsoluteTop(activeTab.getView().asWidget().getElement())
+            == getAbsoluteTop(tabsPanel.getElement())
+        && getAbsoluteTop(plusPanel.getElement()) == getAbsoluteTop(tabsPanel.getElement())
+        && tabsPanelWidth == tabsPanel.getOffsetWidth()) {
       return;
     }
 
@@ -403,14 +400,14 @@ public class EditorPartStackView extends ResizeComposite
   }
 
   /**
-   * Timer to prevent updating tabs visibility while resizing.
-   * It needs to update tabs once when resizing has stopped.
+   * Timer to prevent updating tabs visibility while resizing. It needs to update tabs once when
+   * resizing has stopped.
    */
-  private Timer ensureActiveTabVisibleTimer = new Timer() {
-    @Override
-    public void run() {
-      ensureActiveTabVisible();
-    }
-  };
-
+  private Timer ensureActiveTabVisibleTimer =
+      new Timer() {
+        @Override
+        public void run() {
+          ensureActiveTabVisible();
+        }
+      };
 }

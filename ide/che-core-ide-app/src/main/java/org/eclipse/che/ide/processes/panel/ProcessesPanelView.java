@@ -168,7 +168,5 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
      * @param mouseY absolute mouse top position
      */
     void onAddTabButtonClicked(int mouseX, int mouseY);
-
   }
-
 }

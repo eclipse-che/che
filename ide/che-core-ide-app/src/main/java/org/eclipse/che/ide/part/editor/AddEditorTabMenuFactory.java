@@ -10,9 +10,7 @@
  */
 package org.eclipse.che.ide.part.editor;
 
-/**
- * Factory for creating instances of AddEditorTabMenu
- */
+/** Factory for creating instances of AddEditorTabMenu */
 public interface AddEditorTabMenuFactory {
 
   /**
@@ -21,5 +19,4 @@ public interface AddEditorTabMenuFactory {
    * @return editor tab menu
    */
   AddEditorTabMenu newAddEditorTabMenu();
-
 }

@@ -119,14 +119,16 @@ public class SubPanelViewImpl extends Composite
     menuPanel.add(menu);
 
     plusPanel.getElement().setInnerHTML(FontAwesome.PLUS);
-    plusPanel.addDomHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        delegate.onAddTabButtonClicked(
-            getAbsoluteLeft(plusPanel.getElement()) + 15,
-            getAbsoluteTop(plusPanel.getElement()) + 15);
-      }
-    }, ClickEvent.getType());
+    plusPanel.addDomHandler(
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent clickEvent) {
+            delegate.onAddTabButtonClicked(
+                getAbsoluteLeft(plusPanel.getElement()) + 15,
+                getAbsoluteTop(plusPanel.getElement()) + 15);
+          }
+        },
+        ClickEvent.getType());
 
     widgetsPanel.ensureDebugId("process-output-panel-holder");
     widgetsPanel.addDomHandler(
@@ -392,19 +394,18 @@ public class SubPanelViewImpl extends Composite
   }
 
   /**
-   * Timer to prevent updating tabs visibility while resizing.
-   * It needs to update tabs once when resizing has stopped.
+   * Timer to prevent updating tabs visibility while resizing. It needs to update tabs once when
+   * resizing has stopped.
    */
-  private Timer ensureActiveTabVisibleTimer = new Timer() {
-    @Override
-    public void run() {
-      ensureActiveTabVisible();
-    }
-  };
+  private Timer ensureActiveTabVisibleTimer =
+      new Timer() {
+        @Override
+        public void run() {
+          ensureActiveTabVisible();
+        }
+      };
 
-  /**
-   * Ensures active tab and plus button are visible
-   */
+  /** Ensures active tab and plus button are visible */
   private void ensureActiveTabVisible() {
     // do nothing if selected tab is null
     if (selectedTab == null) {
@@ -412,9 +413,10 @@ public class SubPanelViewImpl extends Composite
     }
 
     // do nothing if selected tab is visible and plus button is visible
-    if (selectedTab.asWidget().getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop() &&
-        plusPanel.getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop() &&
-        tabsPanelWidth == tabsPanel.getOffsetWidth()) {
+    if (selectedTab.asWidget().getElement().getAbsoluteTop()
+            == tabsPanel.getElement().getAbsoluteTop()
+        && plusPanel.getElement().getAbsoluteTop() == tabsPanel.getElement().getAbsoluteTop()
+        && tabsPanelWidth == tabsPanel.getOffsetWidth()) {
       return;
     }
 
@@ -477,5 +479,4 @@ public class SubPanelViewImpl extends Composite
       break;
     }
   }
-
 }

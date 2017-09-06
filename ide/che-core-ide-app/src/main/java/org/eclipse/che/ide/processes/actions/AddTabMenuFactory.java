@@ -10,9 +10,7 @@
  */
 package org.eclipse.che.ide.processes.actions;
 
-/**
- * Factory to create menu for adding new tab
- */
+/** Factory to create menu for adding new tab */
 public interface AddTabMenuFactory {
 
   /**
@@ -21,5 +19,4 @@ public interface AddTabMenuFactory {
    * @return menu
    */
   AddTabMenu newAddTabMenu();
-
 }

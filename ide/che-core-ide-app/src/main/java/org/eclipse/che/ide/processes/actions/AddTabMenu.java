@@ -10,8 +10,12 @@
  */
 package org.eclipse.che.ide.processes.actions;
 
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_SSH_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import java.util.Map;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.action.*;
@@ -22,11 +26,6 @@ import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
-
-import java.util.Map;
-
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_SSH_REFERENCE;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
 
 /**
  * Menu for adding new tab in processes panel.
@@ -49,10 +48,8 @@ public class AddTabMenu extends ContextMenu {
       Provider<PerspectiveManager> managerProvider,
       AppContext appContext,
       ProcessesPanelPresenter processesPanelPresenter,
-
       CoreLocalizationConstant coreLocalizationConstant,
-      MachineResources machineResources
-  ) {
+      MachineResources machineResources) {
     super(actionManager, keyBindingAgent, managerProvider);
 
     this.appContext = appContext;
@@ -77,7 +74,9 @@ public class AddTabMenu extends ContextMenu {
       actionGroup.add(separ);
 
       if (machine.getServerByName(SERVER_TERMINAL_REFERENCE).isPresent()) {
-        NewTerminalMenuAction newTerminalMenuAction = new NewTerminalMenuAction(coreLocalizationConstant, machineResources, machine.getName());
+        NewTerminalMenuAction newTerminalMenuAction =
+            new NewTerminalMenuAction(
+                coreLocalizationConstant, machineResources, machine.getName());
         actionGroup.add(newTerminalMenuAction);
       }
 
@@ -90,18 +89,15 @@ public class AddTabMenu extends ContextMenu {
     return actionGroup;
   }
 
-  /**
-   * Action to add new Terminal tab.
-   */
+  /** Action to add new Terminal tab. */
   public class NewTerminalMenuAction extends Action {
 
     private String machineName;
 
     public NewTerminalMenuAction(
-        CoreLocalizationConstant locale,
-        MachineResources machineResources,
-        String machineName) {
-      super(locale.newTerminal(),
+        CoreLocalizationConstant locale, MachineResources machineResources, String machineName) {
+      super(
+          locale.newTerminal(),
           locale.newTerminalDescription(),
           null,
           machineResources.addTerminalIcon());
@@ -112,12 +108,9 @@ public class AddTabMenu extends ContextMenu {
     public void actionPerformed(ActionEvent e) {
       processesPanelPresenter.onAddTerminal(machineName, this);
     }
-    
   }
 
-  /**
-   * Action to add new SSH tab.
-   */
+  /** Action to add new SSH tab. */
   public class AddSSHMenuAction extends Action {
 
     private String machineName;
@@ -131,7 +124,5 @@ public class AddTabMenu extends ContextMenu {
     public void actionPerformed(ActionEvent e) {
       processesPanelPresenter.onPreviewSsh(machineName);
     }
-
   }
-
 }

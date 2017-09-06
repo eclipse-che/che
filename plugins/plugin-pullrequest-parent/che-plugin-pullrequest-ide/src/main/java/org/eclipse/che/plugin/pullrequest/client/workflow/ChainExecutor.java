@@ -57,5 +57,4 @@ public final class ChainExecutor {
   public Optional<Step> getCurrentStep() {
     return fromNullable(currentStep);
   }
-
 }

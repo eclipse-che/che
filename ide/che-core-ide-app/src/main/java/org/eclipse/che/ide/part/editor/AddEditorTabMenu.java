@@ -17,9 +17,7 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.menu.ContextMenu;
 
-/**
- * Menu appeared after clicking on Add editor tab button.
- */
+/** Menu appeared after clicking on Add editor tab button. */
 public class AddEditorTabMenu extends ContextMenu {
 
   @Inject
@@ -33,7 +31,8 @@ public class AddEditorTabMenu extends ContextMenu {
   protected ActionGroup updateActions() {
     DefaultActionGroup defaultGroup = new DefaultActionGroup(actionManager);
 
-    final ActionGroup actionGroup = (ActionGroup) actionManager.getAction(IdeActions.GROUP_FILE_NEW);
+    final ActionGroup actionGroup =
+        (ActionGroup) actionManager.getAction(IdeActions.GROUP_FILE_NEW);
 
     for (Action action : actionGroup.getChildren(null)) {
       defaultGroup.add(action);
@@ -41,5 +40,4 @@ public class AddEditorTabMenu extends ContextMenu {
 
     return defaultGroup;
   }
-
 }

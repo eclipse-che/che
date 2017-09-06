@@ -125,5 +125,4 @@ public class EditorApiModule extends AbstractGinModule {
         .to(EditorWorkingCopySynchronizerImpl.class)
         .in(Singleton.class);
   }
-
 }

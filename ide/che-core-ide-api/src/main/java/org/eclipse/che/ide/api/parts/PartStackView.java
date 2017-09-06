@@ -84,7 +84,5 @@ public interface PartStackView extends View<PartStackView.ActionDelegate> {
 
     /** Display Part Stack menu */
     void onPartStackMenu(int mouseX, int mouseY);
-
   }
-
 }

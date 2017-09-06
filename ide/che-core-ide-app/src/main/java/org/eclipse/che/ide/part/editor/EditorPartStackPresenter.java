@@ -564,5 +564,4 @@ public class EditorPartStackPresenter extends PartStackPresenter
       }
     }
   }
-
 }

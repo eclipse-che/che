@@ -1351,5 +1351,4 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     $doc.body.removeChild(element);
   }-*/;
-
 }

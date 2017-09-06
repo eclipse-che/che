@@ -133,12 +133,10 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     processTree.setTreeEventHandler(
         new Tree.Listener<ProcessTreeNode>() {
           @Override
-          public void onNodeAction(TreeNodeElement<ProcessTreeNode> node) {
-          }
+          public void onNodeAction(TreeNodeElement<ProcessTreeNode> node) {}
 
           @Override
-          public void onNodeClosed(TreeNodeElement<ProcessTreeNode> node) {
-          }
+          public void onNodeClosed(TreeNodeElement<ProcessTreeNode> node) {}
 
           @Override
           public void onNodeContextMenu(
@@ -147,16 +145,13 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
           }
 
           @Override
-          public void onNodeDragStart(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {
-          }
+          public void onNodeDragStart(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {}
 
           @Override
-          public void onNodeDragDrop(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {
-          }
+          public void onNodeDragDrop(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {}
 
           @Override
-          public void onNodeExpanded(TreeNodeElement<ProcessTreeNode> node) {
-          }
+          public void onNodeExpanded(TreeNodeElement<ProcessTreeNode> node) {}
 
           @Override
           public void onNodeSelected(TreeNodeElement<ProcessTreeNode> node, SignalEvent event) {
@@ -164,16 +159,13 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
           }
 
           @Override
-          public void onRootContextMenu(int mouseX, int mouseY) {
-          }
+          public void onRootContextMenu(int mouseX, int mouseY) {}
 
           @Override
-          public void onRootDragDrop(MouseEvent event) {
-          }
+          public void onRootDragDrop(MouseEvent event) {}
 
           @Override
-          public void onKeyboard(KeyboardEvent event) {
-          }
+          public void onKeyboard(KeyboardEvent event) {}
         });
     processTree.asWidget().ensureDebugId("process-tree");
 
@@ -518,7 +510,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     for (SubPanel panel : widget2Panels.values()) {
       if (panel.getView() instanceof RequiresResize) {
-        ((RequiresResize)panel.getView()).onResize();
+        ((RequiresResize) panel.getView()).onResize();
       }
     }
   }
@@ -540,5 +532,4 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
   }
 
   interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {}
-
 }

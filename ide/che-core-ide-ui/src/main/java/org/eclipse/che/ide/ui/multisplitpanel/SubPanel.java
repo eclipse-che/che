@@ -78,9 +78,7 @@ public interface SubPanel {
    */
   void setDoubleClickListener(DoubleClickListener listener);
 
-  /**
-   * Set the listener to be notified when Add Tab button has been clicked.
-   */
+  /** Set the listener to be notified when Add Tab button has been clicked. */
   void setAddTabButtonClickListener(AddTabButtonClickListener listener);
 
   interface WidgetRemovingListener {
@@ -108,5 +106,4 @@ public interface SubPanel {
     /** Invoked when `Add Tab` button has been clicked. */
     void onAddTabButtonClicked(int mouseX, int mouseY);
   }
-
 }

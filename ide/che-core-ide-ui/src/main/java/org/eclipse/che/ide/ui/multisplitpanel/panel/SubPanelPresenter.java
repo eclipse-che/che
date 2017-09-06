@@ -177,5 +177,4 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
       addTabButtonClickListener.onAddTabButtonClicked(mouseX, mouseY);
     }
   }
-
 }
