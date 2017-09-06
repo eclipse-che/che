@@ -296,18 +296,22 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
   @Override
   public void onNextDiffClicked() {
-    onSaveChangesClicked();
+    if (currentFileIndex < alteredFiles.getFilesQuantity() - 1) {
+      onSaveChangesClicked();
 
-    currentFileIndex++;
-    showCompareForCurrentFile();
+      currentFileIndex++;
+      showCompareForCurrentFile();
+    }
   }
 
   @Override
   public void onPreviousDiffClicked() {
-    onSaveChangesClicked();
+    if (currentFileIndex > 0) {
+      onSaveChangesClicked();
 
-    currentFileIndex--;
-    showCompareForCurrentFile();
+      currentFileIndex--;
+      showCompareForCurrentFile();
+    }
   }
 
   private void showCompare(final String remoteContent) {
