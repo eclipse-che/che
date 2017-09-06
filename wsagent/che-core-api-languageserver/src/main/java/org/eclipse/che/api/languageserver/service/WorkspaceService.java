@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.languageserver.service;
 
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.truish;
 
@@ -63,7 +64,7 @@ public class WorkspaceService {
     List<SymbolInformationDto> result = new ArrayList<>();
     List<InitializedLanguageServer> servers =
         registry
-            .getApplicableLanguageServers(workspaceSymbolParams.getFileUri())
+            .getApplicableLanguageServers(prefixURI(workspaceSymbolParams.getFileUri()))
             .stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList());

@@ -169,6 +169,37 @@ public class SendConfiguratorFromMany<P> {
         endpointId, requestId, Boolean.class, timeoutInMillis);
   }
 
+  public JsonRpcPromise<Double> sendAndReceiveResultAsDouble() {
+    return sendAndReceiveResultAsDouble(0);
+  }
+
+  public JsonRpcPromise<Double> sendAndReceiveResultAsDouble(int timeoutInMillis) {
+    final String requestId = transmitRequest();
+
+    LOGGER.debug(
+        "Transmitting request: "
+            + "endpoint ID: "
+            + endpointId
+            + ", "
+            + "request ID: "
+            + requestId
+            + ", "
+            + "method: "
+            + method
+            + ", "
+            + "params list items class: "
+            + pListValue.iterator().next().getClass()
+            + ", "
+            + "params list value"
+            + pListValue
+            + ", "
+            + "result object class: "
+            + Double.class);
+
+    return dispatcher.registerPromiseForSingleObject(
+        endpointId, requestId, Double.class, timeoutInMillis);
+  }
+
   public <R> JsonRpcPromise<List<R>> sendAndReceiveResultAsListOfDto(Class<R> rClass) {
     return sendAndReceiveResultAsListOfDto(rClass, 0);
   }
@@ -265,11 +296,11 @@ public class SendConfiguratorFromMany<P> {
         endpointId, requestId, Boolean.class, timeoutInMillis);
   }
 
-  public JsonRpcPromise<Void> sendAndReceiveResultAsEmpty() {
-    return sendAndReceiveResultAsEmpty(0);
+  public JsonRpcPromise<List<Double>> sendAndReceiveResultAsListOfDouble() {
+    return sendAndReceiveResultAsListOfDouble(0);
   }
 
-  public JsonRpcPromise<Void> sendAndReceiveResultAsEmpty(int timeoutInMillis) {
+  public JsonRpcPromise<List<Double>> sendAndReceiveResultAsListOfDouble(int timeoutInMillis) {
     final String requestId = transmitRequest();
 
     LOGGER.debug(
@@ -289,11 +320,11 @@ public class SendConfiguratorFromMany<P> {
             + "params list value"
             + pListValue
             + ", "
-            + "result object class: "
-            + Void.class);
+            + "result list items class: "
+            + Double.class);
 
-    return dispatcher.registerPromiseForSingleObject(
-        endpointId, requestId, Void.class, timeoutInMillis);
+    return dispatcher.registerPromiseForListOfObjects(
+        endpointId, requestId, Double.class, timeoutInMillis);
   }
 
   private void transmitNotification() {
