@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ImageStream
+metadata:
+  name: postgres
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: latest

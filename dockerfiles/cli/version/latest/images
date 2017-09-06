@@ -3,5 +3,5 @@ IMAGE_CHE=eclipse/che-server:latest
 IMAGE_CHE_MULTIUSER=eclipse/che-server-multiuser:latest
 IMAGE_COMPOSE=docker/compose:1.10.1
 IMAGE_TRAEFIK=traefik:v1.3.0-rc3
-IMAGE_POSTGRES=postgres:9.6
-IMAGE_KEYCLOACK=jboss/keycloak-postgres:3.2.1.Final
+IMAGE_POSTGRES=centos/postgresql-95-centos7
+IMAGE_KEYCLOACK=dfestal/keycloak-postgres-openshift:3.2.1.Final

@@ -33,6 +33,7 @@ RUN apk --update add openssh \
 COPY manifests /etc/puppet/manifests
 COPY modules /etc/puppet/modules
 COPY docs /files/docs
+COPY s2i /files/s2i
 COPY entrypoint.sh /
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

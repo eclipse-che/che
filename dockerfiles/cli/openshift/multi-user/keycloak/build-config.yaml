@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  name: keycloak-for-che
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'keycloak:latest'
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    images:
+      - from:
+          kind: ImageStreamTag
+          name: 'che-init:latest'
+        paths:
+          - destinationDir: ./themes/
+            sourcePath: /etc/puppet/modules/keycloak/files/che/
+          - destinationDir: ./realms/
+            sourcePath: /etc/puppet/modules/keycloak/templates/.
+          - destinationDir: .s2i/bin/
+            sourcePath: /files/s2i/keycloak/assemble
+          - destinationDir: .s2i/bin/
+            sourcePath: /files/s2i/keycloak/run
+    type: Image
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: 'keycloak-source:latest'
+    type: Source
+  triggers:
+  - type: "ConfigChange"
+  - type: "ImageChange" 
+    imageChange: {}
+  - type: "ImageChange" 
+    imageChange:
+      from:
+        kind: "ImageStreamTag"
+        name: "che-init:latest"
+status:

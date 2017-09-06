@@ -102,20 +102,27 @@ services:
   ########################
   postgres:
     image: <%= ENV["IMAGE_POSTGRES"] %>
+    command: [ "/var/lib/pgsql/init-che-user-and-run.sh" ]
     environment:
-      - POSTGRES_USER=keycloak
-      - POSTGRES_PASSWORD=keycloak
-      - POSTGRES_DB=keycloak
+      - POSTGRESQL_USER=keycloak
+      - POSTGRESQL_PASSWORD=keycloak
+      - POSTGRESQL_DATABASE=keycloak
+      - CHE_POSTGRES_USERNAME=<%= scope.lookupvar('postgres::che_pg_username') %>
+      - CHE_POSTGRES_PASSWORD=<%= scope.lookupvar('postgres::che_pg_password') %>
+      - CHE_POSTGRES_DATABASE=<%= scope.lookupvar('postgres::che_pg_database') %>
+ 
+  
     volumes:
-      - '<%= scope.lookupvar('che::che_instance') -%>/data/postgres:/var/lib/postgresql/data'
-      - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user.sh:/docker-entrypoint-initdb.d/init-che-user.sh'
+      - '<%= scope.lookupvar('che::che_instance') -%>/data/postgres:/var/lib/pgsql/data'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user.sh:/var/lib/pgsql/init-che-user.sh'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user-and-run.sh:/var/lib/pgsql/init-che-user-and-run.sh'
     ports:
       - '5432:5432'
     restart: always
     healthcheck:
-        test: "pg_isready -h localhost -p 5432 -U postgres"
+        test: [ "CMD", "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U keycloak -q -d keycloak -c 'SELECT 1'" ]
         interval: 10s
-        timeout: 10s
+        timeout: 20s
         retries: 10
 
   ########################
@@ -133,7 +140,7 @@ services:
       - -Dkeycloak.migration.action=import
       - -Dkeycloak.migration.provider=dir
       - -Dkeycloak.migration.strategy=IGNORE_EXISTING
-      - -Dkeycloak.migration.dir=/export
+      - -Dkeycloak.migration.dir=/opt/jboss/keycloak/realms/
       - -Djboss.bind.address=0.0.0.0
     environment:
       - POSTGRES_PORT_5432_TCP_ADDR=postgres
@@ -145,7 +152,7 @@ services:
       - postgres:postgres
     volumes:
       - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/che:/opt/jboss/keycloak/themes/che'
-      - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/:/export'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/:/opt/jboss/keycloak/realms/'
       - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak:/opt/jboss/keycloak/standalone/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/logs/keycloak:/opt/jboss/keycloak/standalone/log'
     restart: always

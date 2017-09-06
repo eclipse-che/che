@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "Directory contents of /tmp/src:"
+ls -a /tmp/src
+echo ""
+
+echo "Directory contents of /tmp/s2i:"
+ls -a /tmp/scripts
+echo ""
+
+echo "Adding the user initialization script into directory: /var/lib/pgsql/data/userdata/ ..."
+cp -v /tmp/src/init-che-user.sh.erb /var/run/postgresql/init-che-user.sh
+

@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: keycloak
+  name: keycloak
+spec:
+  replicas: 1
+  selector:
+    io.kompose.service: keycloak
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: keycloak
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_PORT_5432_TCP_ADDR
+          value: postgres
+        - name: POSTGRES_PORT_5432_TCP_PORT
+          value: "5432"
+        - name: POSTGRES_DATABASE
+          value: keycloak
+        - name: POSTGRES_USER
+          value: keycloak
+        - name: POSTGRES_PASSWORD
+          value: keycloak
+        image: ' '
+        name: keycloak
+        livenessProbe:
+          failureThreshold: 4
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 30
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: auth/js/keycloak.js
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 60
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: 700Mi
+          requests:
+            memory: 256Mi
+        volumeMounts:
+        - mountPath: /opt/jboss/keycloak/standalone/data
+          name: keycloak-data
+        - mountPath: /opt/jboss/keycloak/standalone/log
+          name: keycloak-log
+      restartPolicy: Always
+      volumes:
+      - name: keycloak-data
+        persistentVolumeClaim:
+          claimName: keycloak-data
+      - name: keycloak-log
+        persistentVolumeClaim:
+          claimName: keycloak-log
+  test: false
+  triggers:
+  - type: ConfigChange
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - keycloak
+      from:
+        kind: ImageStreamTag
+        name: keycloak:latest
+    type: ImageChange
+status: {}

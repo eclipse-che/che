@@ -1,0 +1,5 @@
+#!/bin/bash -x
+
+/bin/sh /var/run/postgresql/init-che-user.sh
+run-postgresql "$@"
+
