@@ -53,9 +53,9 @@ public class Consoles {
       "//span[text()='Terminal']/preceding::span[2]";
   public static final String PROCESSES_TAB = "gwt-debug-partButton-Processes";
   public static final String MAXIMIZE_PANEL_ICON =
-      "//div[@id='gwt-debug-infoPanel']//div[text()='Processes']/parent::div/following-sibling::div//*[local-name() = 'svg' and @name='workBenchIconMaximize']";
+      "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-maximizeButton']";
   public static final String HIDE_CONSOLES_ICON =
-      "//div[@id='gwt-debug-infoPanel']//div[text()='Processes']/parent::div/following-sibling::div//*[local-name() = 'svg' and @name='workBenchIconMinimize']";
+      "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-hideButton']";
   public static final String PREVIEW_URL = "//div[@active]//a[@href]";
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";

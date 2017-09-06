@@ -576,12 +576,6 @@
             <class name="org.eclipse.che.selenium.projectexplorer.CreateNewNotJavaFilesTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateNewPackageFromContextMenuTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateNewPackagesWithHelpCreationJavaClassTest"/>
-            <class name="org.eclipse.che.selenium.projectexplorer.CreatePackagesAndFilesWithHelpIconCreateTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="createWithHelpCreateIcon"/>
-                </methods>
-            </class>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectInSelectedFolderTest">
                 <methods>
                     <!-- unstable -->
@@ -591,7 +585,6 @@
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectsForArtikPluginTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.DeleteFilesFromContextMenuTest"/>
-            <class name="org.eclipse.che.selenium.projectexplorer.DeleteFilesPackagesAndProjectWithHelpDeleteIconTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.DeleteFilesTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.DeletePackageFromContextMenuTest">
                 <methods>

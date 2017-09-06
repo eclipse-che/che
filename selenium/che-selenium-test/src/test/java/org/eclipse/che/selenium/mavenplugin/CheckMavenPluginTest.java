@@ -72,8 +72,7 @@ public class CheckMavenPluginTest {
     git.importJavaAppAndCheckMavenPluginBar(
         "https://github.com/" + gitHubUsername + "/pushChangesTest.git",
         PROJECT_NAME,
-        Wizard.TypeProject.MAVEN,
-        "Resolving project: SpringDemo");
+        Wizard.TypeProject.MAVEN);
     mavenPluginStatusBar.waitClosingInfoPanel(100);
     projectExplorer.waitItem(PROJECT_NAME);
   }
@@ -91,7 +90,7 @@ public class CheckMavenPluginTest {
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + "/my-lib/src/main/java/hello");
     createNewFileFromMenuFile("TestClass", AskForValueDialog.JavaFiles.CLASS, ".java");
 
-    projectExplorer.clickCollapseAllButton();
+    projectExplorer.collapseProjectTreeByOptionsButton();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/my-webapp/src/main/java/helloworld", "GreetingController.java");
     editor.waitActiveEditor();
@@ -103,7 +102,7 @@ public class CheckMavenPluginTest {
 
   @Test(priority = 3)
   public void excludeIncludeModules() {
-    projectExplorer.clickCollapseAllButton();
+    projectExplorer.collapseProjectTreeByOptionsButton();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(PROJECT_NAME, "pom.xml");
     editor.waitActiveEditor();
     editor.setCursorToDefinedLineAndChar(13, 8);
@@ -130,7 +129,7 @@ public class CheckMavenPluginTest {
 
   @Test(priority = 4)
   public void shouldAccessClassCreatedInAnotherModuleAfterIncludingModule() {
-    projectExplorer.clickCollapseAllButton();
+    projectExplorer.collapseProjectTreeByOptionsButton();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/my-webapp/src/main/java/helloworld", "GreetingController.java");
     editor.waitActiveEditor();

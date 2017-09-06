@@ -14,23 +14,24 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.File;
-import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
@@ -148,18 +149,18 @@ public class TestWorkspaceServiceClient {
 
   /** Creates a new workspace. */
   public Workspace createWorkspace(
-      String workspaceName, int memory, MemoryMeasure memoryUnit, String pathToPattern)
+      String workspaceName, int memory, MemoryMeasure memoryUnit, WorkspaceConfigDto workspace)
       throws Exception {
-    String json = FileUtils.readFileToString(new File(pathToPattern), Charset.forName("UTF-8"));
-    WorkspaceConfigDto workspace =
-        DtoFactory.getInstance().createDtoFromJson(json, WorkspaceConfigDto.class);
-
     EnvironmentDto environment = workspace.getEnvironments().get("replaced_name");
     environment
         .getMachines()
-        .get("dev-machine")
-        .getAttributes()
-        .put("memoryLimitBytes", Long.toString(convertToByte(memory, memoryUnit)));
+        .values()
+        .stream()
+        .filter(WsAgentMachineFinderUtil::containsWsAgentServerOrInstaller)
+        .forEach(
+            m ->
+                m.getAttributes()
+                    .put("memoryLimitBytes", Long.toString(convertToByte(memory, memoryUnit))));
     workspace.getEnvironments().remove("replaced_name");
     workspace.getEnvironments().put(workspaceName, environment);
     workspace.setName(workspaceName);
@@ -194,35 +195,49 @@ public class TestWorkspaceServiceClient {
     return requestFactory.fromUrl(getIdBasedUrl(workspaceId)).request().asDto(WorkspaceDto.class);
   }
 
-  /** Return server URL related with defined port */
+  /**
+   * Return server URL related with defined port
+   *
+   * @deprecated use {@link #getServerFromDevMachineBySymbolicName(String, String)} to retrieve
+   *     server URL from instead
+   */
+  @Deprecated
+  @Nullable
   public String getServerAddressByPort(String workspaceId, int port) throws Exception {
     Workspace workspace = getById(workspaceId);
     ensureRunningStatus(workspace);
 
-    return getById(workspaceId)
-        .getRuntime()
-        .getMachines()
-        .get(0)
-        .getRuntime()
-        .getServers()
-        .get(valueOf(port) + "/tcp")
-        .getAddress();
+    Map<String, ? extends Machine> machines = workspace.getRuntime().getMachines();
+    for (Machine machine : machines.values()) {
+      if (containsWsAgentServer(machine)) {
+        return machine.getServers().get(valueOf(port) + "/tcp").getUrl();
+      }
+    }
+    return null;
   }
 
   /**
-   * Return ServerDto object by exposed port
+   * Return ServerDto object from runtime by it's symbolic name
    *
    * @param workspaceId workspace id of current user
-   * @param exposedPort exposed port of server
+   * @param serverName server name
    * @return ServerDto object
    */
-  public Server getServerByExposedPort(String workspaceId, String exposedPort) throws Exception {
+  @Nullable
+  public Server getServerFromDevMachineBySymbolicName(String workspaceId, String serverName)
+      throws Exception {
     Workspace workspace =
         requestFactory.fromUrl(getIdBasedUrl(workspaceId)).request().asDto(WorkspaceDto.class);
 
     ensureRunningStatus(workspace);
 
-    return workspace.getRuntime().getDevMachine().getRuntime().getServers().get(exposedPort);
+    Map<String, ? extends Machine> machines = workspace.getRuntime().getMachines();
+    for (Machine machine : machines.values()) {
+      if (containsWsAgentServer(machine)) {
+        return machine.getServers().get(serverName);
+      }
+    }
+    return null;
   }
 
   /**

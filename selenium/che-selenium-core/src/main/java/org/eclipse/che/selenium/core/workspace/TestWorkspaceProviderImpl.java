@@ -25,6 +25,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.configuration.ConfigurationException;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,16 +44,19 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   private final DefaultTestUser defaultUser;
   private final int defaultMemoryGb;
   private final TestWorkspaceServiceClient workspaceServiceClient;
+  private final WorkspaceDtoDeserializer workspaceDtoDeserializer;
 
   @Inject
   public TestWorkspaceProviderImpl(
       @Named("sys.threads") int threads,
       @Named("workspace.default_memory_gb") int defaultMemoryGb,
       DefaultTestUser defaultUser,
-      TestWorkspaceServiceClient workspaceServiceClient) {
+      TestWorkspaceServiceClient workspaceServiceClient,
+      WorkspaceDtoDeserializer workspaceDtoDeserializer) {
     this.defaultUser = defaultUser;
     this.defaultMemoryGb = defaultMemoryGb;
     this.workspaceServiceClient = workspaceServiceClient;
+    this.workspaceDtoDeserializer = workspaceDtoDeserializer;
 
     if (threads == 0) {
       throw new ConfigurationException("Threads number is 0");
@@ -77,7 +81,12 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
       return doGetWorkspaceFromPool();
     }
 
-    return new TestWorkspaceImpl(generateName(), owner, memoryGB, template, workspaceServiceClient);
+    return new TestWorkspaceImpl(
+        generateName(),
+        owner,
+        memoryGB,
+        workspaceDtoDeserializer.deserializeWorkspaceTemplate(template),
+        workspaceServiceClient);
   }
 
   private boolean hasDefaultValues(TestUser testUser, int memoryGB, String template) {
@@ -150,7 +159,8 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
                     name,
                     defaultUser,
                     defaultMemoryGb,
-                    WorkspaceTemplate.DEFAULT,
+                    workspaceDtoDeserializer.deserializeWorkspaceTemplate(
+                        WorkspaceTemplate.DEFAULT),
                     workspaceServiceClient);
 
             try {

@@ -13,12 +13,12 @@ package org.eclipse.che.selenium.core.workspace;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.workspace.MemoryMeasure.GB;
 
-import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
       String name,
       TestUser owner,
       int memoryInGB,
-      String template,
+      WorkspaceConfigDto template,
       TestWorkspaceServiceClient workspaceServiceClient) {
     this.name = name;
     this.owner = owner;
@@ -48,17 +48,13 @@ public class TestWorkspaceImpl implements TestWorkspace {
     this.future =
         CompletableFuture.runAsync(
             () -> {
-              URL resource =
-                  TestWorkspaceImpl.class.getResource("/templates/workspace/" + template);
-              if (resource == null) {
-                throw new IllegalStateException(
-                    format("Workspace template '%s' not found", template));
+              if (template == null) {
+                throw new IllegalStateException("Workspace template cannot be null");
               }
 
               try {
                 final Workspace ws =
-                    workspaceServiceClient.createWorkspace(
-                        name, memoryInGB, GB, resource.getPath());
+                    workspaceServiceClient.createWorkspace(name, memoryInGB, GB, template);
                 workspaceServiceClient.start(id.updateAndGet((s) -> ws.getId()), name, owner);
 
                 LOG.info("Workspace name='{}' id='{}' has been created.", name, ws.getId());

@@ -14,7 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
+import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 

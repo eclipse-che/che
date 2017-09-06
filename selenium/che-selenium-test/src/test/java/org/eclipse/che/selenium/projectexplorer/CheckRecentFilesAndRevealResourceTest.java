@@ -73,7 +73,7 @@ public class CheckRecentFilesAndRevealResourceTest {
     loader.waitOnClosed();
     editor.waitActiveEditor();
     editor.setCursorToDefinedLineAndChar(5, 1);
-    projectExplorer.clickCollapseAllButton();
+    projectExplorer.collapseProjectTreeByOptionsButton();
     projectExplorer.waitDisappearItemByPath(PATH_TO_FILE_FIRST_PROJECT);
     menu.runCommand(
         TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.REVEAL_RESOURCE);

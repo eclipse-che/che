@@ -7,7 +7,7 @@
           "attributes": {
             "memoryLimitBytes": "desired_memory_value"
           },
-          "agents": [
+          "installers": [
             "org.eclipse.che.terminal",
             "org.eclipse.che.ws-agent",
             "org.eclipse.che.ssh"

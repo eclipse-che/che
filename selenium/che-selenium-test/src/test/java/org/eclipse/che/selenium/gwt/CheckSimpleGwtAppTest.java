@@ -10,22 +10,28 @@
  */
 package org.eclipse.che.selenium.gwt;
 
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.CODENVY_UBUNTU_JDK8;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.COMMON;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
+import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceImpl;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -33,6 +39,7 @@ import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -40,24 +47,46 @@ import org.testng.annotations.Test;
 public class CheckSimpleGwtAppTest {
   private static final String BUILD_COMMAND = "build";
   private static final String RUN_GWT_COMMAND = "runGwt";
+  private static final String GWT_CODESERVER_NAME = "gwt-codeserver";
 
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private ToastLoader toastLoader;
   @Inject private Consoles consoles;
 
-  @InjectTestWorkspace(memoryGb = 4)
   private TestWorkspace testWorkspace;
 
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-
+  @Inject private WorkspaceDtoDeserializer workspaceDtoDeserializer;
+  @Inject private TestUser testUser;
   private String projectName;
 
   @BeforeClass
   public void prepare() throws Exception {
     projectName = NameGenerator.generate("project", 4);
+
+    WorkspaceConfigDto workspace =
+        workspaceDtoDeserializer.deserializeWorkspaceTemplate(CODENVY_UBUNTU_JDK8);
+
+    workspace
+        .getEnvironments()
+        .get("replaced_name")
+        .getMachines()
+        .get("dev-machine")
+        .getServers()
+        .put(
+            GWT_CODESERVER_NAME,
+            newDto(ServerConfigDto.class).withProtocol("http").withPort("9876"));
+
+    testWorkspace =
+        new TestWorkspaceImpl(
+            NameGenerator.generate("check-gwt-test", 4),
+            testUser,
+            4,
+            workspace,
+            workspaceServiceClient);
 
     URL resource = getClass().getResource("/projects/web-gwt-java-simple");
     testProjectServiceClient.importProject(
@@ -76,6 +105,11 @@ public class CheckSimpleGwtAppTest {
         RUN_GWT_COMMAND,
         CUSTOM,
         testWorkspace.getId());
+  }
+
+  @AfterClass
+  public void tearDown() {
+    testWorkspace.delete();
   }
 
   @Test
@@ -99,7 +133,9 @@ public class CheckSimpleGwtAppTest {
     consoles.waitExpectedTextIntoConsole("The code server is ready", APPLICATION_START_TIMEOUT_SEC);
 
     String url =
-        workspaceServiceClient.getServerByExposedPort(testWorkspace.getId(), "9876/tcp").getUrl();
+        workspaceServiceClient
+            .getServerFromDevMachineBySymbolicName(testWorkspace.getId(), GWT_CODESERVER_NAME)
+            .getUrl();
     ide.driver().get(url);
 
     new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
