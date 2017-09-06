@@ -202,17 +202,18 @@ public class TestWorkspaceServiceClient {
    *     server URL from instead
    */
   @Deprecated
+  @Nullable
   public String getServerAddressByPort(String workspaceId, int port) throws Exception {
     Workspace workspace = getById(workspaceId);
     ensureRunningStatus(workspace);
 
-    return getById(workspaceId)
-        .getRuntime()
-        .getMachines()
-        .get(0)
-        .getServers()
-        .get(valueOf(port) + "/tcp")
-        .getUrl();
+    Map<String, ? extends Machine> machines = workspace.getRuntime().getMachines();
+    for (Machine machine : machines.values()) {
+      if (containsWsAgentServer(machine)) {
+        return machine.getServers().get(valueOf(port) + "/tcp").getUrl();
+      }
+    }
+    return null;
   }
 
   /**
