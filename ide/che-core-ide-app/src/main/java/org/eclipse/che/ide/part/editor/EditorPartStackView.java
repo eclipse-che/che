@@ -55,7 +55,7 @@ public class EditorPartStackView extends ResizeComposite
   interface AddTabButtonClickListener {
 
     /**
-     * Is called when Add tab button clicked.
+     * Called when Add tab button clicked.
      *
      * @param mouseX absolute mouse left
      * @param mouseY absolute mouse top
