@@ -10,15 +10,6 @@
  */
 package org.eclipse.che.api.project.server;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -36,6 +27,16 @@ import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Stores internal representation of Projects registered in the Workspace Agent.
@@ -342,7 +343,7 @@ public class ProjectRegistry {
     try {
       for (FolderEntry folder : root.getChildFolders()) {
         if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
-          putProject(null, folder, true, false);
+          putProject(null, folder, true, true);
         }
       }
     } catch (ServerException e) {
