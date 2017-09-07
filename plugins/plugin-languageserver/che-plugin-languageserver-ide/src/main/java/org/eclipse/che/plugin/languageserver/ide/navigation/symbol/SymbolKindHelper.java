@@ -95,7 +95,8 @@ public class SymbolKindHelper {
         return "number";
       case Boolean:
         return "boolean";
+      default:
+        return "property";
     }
-    return "property";
   }
 }

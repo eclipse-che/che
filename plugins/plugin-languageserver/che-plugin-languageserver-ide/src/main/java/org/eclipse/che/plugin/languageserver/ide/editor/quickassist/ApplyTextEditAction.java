@@ -10,10 +10,11 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.editor.quickassist;
 
-import com.google.gwt.json.client.JSONValue;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Comparator;
 import java.util.List;
+import org.eclipse.che.api.languageserver.shared.util.RangeComparator;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -21,7 +22,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
@@ -33,39 +33,44 @@ import org.eclipse.lsp4j.TextEdit;
  */
 @Singleton
 public class ApplyTextEditAction extends Action {
+  private static final Comparator<TextEdit> COMPARATOR =
+      RangeComparator.transform(new RangeComparator().reversed(), TextEdit::getRange);
+
   private EditorAgent editorAgent;
   private DtoFactory dtoFactory;
 
   @Inject
-  public ApplyTextEditAction(
-      EditorAgent editorAgent, DtoFactory dtoFactory, DtoBuildHelper dtoBuildHelper) {
+  public ApplyTextEditAction(EditorAgent editorAgent, DtoFactory dtoFactory) {
     super("Apply Text Edit");
     this.editorAgent = editorAgent;
     this.dtoFactory = dtoFactory;
   }
 
   @Override
-  public void actionPerformed(ActionEvent e) {
+  public void actionPerformed(ActionEvent evt) {
     EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
     if (!(activeEditor instanceof TextEditor)) {
       return;
     }
     Document document = ((TextEditor) activeEditor).getDocument();
-    // We expect the arguments to be of the correct type: static misconfiguration is a programming error.
-    List<Object> arguments = ((QuickassistActionEvent) e).getArguments();
-    for (Object arg : arguments) {
-      if ((arg instanceof JSONValue)) {
-        TextEdit edit = dtoFactory.createDtoFromJson(arg.toString(), TextEdit.class);
-        Range range = edit.getRange();
-        Position start = range.getStart();
-        Position end = range.getEnd();
-        document.replace(
-            start.getLine(),
-            start.getCharacter(),
-            end.getLine(),
-            end.getCharacter(),
-            edit.getNewText());
-      }
-    }
+    // We expect the arguments to be of the correct type: static misconfiguration is
+    // a programming error.
+    List<Object> arguments = ((QuickassistActionEvent) evt).getArguments();
+    arguments
+        .stream()
+        .map(arg -> dtoFactory.createDtoFromJson(arg.toString(), TextEdit.class))
+        .sorted(COMPARATOR)
+        .forEach(
+            e -> {
+              Range r = e.getRange();
+              Position start = r.getStart();
+              Position end = r.getEnd();
+              document.replace(
+                  start.getLine(),
+                  start.getCharacter(),
+                  end.getLine(),
+                  end.getCharacter(),
+                  e.getNewText());
+            });
   }
 }
