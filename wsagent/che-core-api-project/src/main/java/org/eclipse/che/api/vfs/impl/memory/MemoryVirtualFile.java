@@ -20,12 +20,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -383,6 +385,40 @@ public class MemoryVirtualFile implements VirtualFile {
           String.format(
               "We were unable to update the content. Item '%s' is not a file", getPath()));
     }
+  }
+
+  @Override
+  public VirtualFile modifyContent(BiConsumer<InputStream, OutputStream> modifier)
+      throws ForbiddenException, ServerException {
+    return modifyContent(modifier, null);
+  }
+
+  @Override
+  public VirtualFile modifyContent(BiConsumer<InputStream, OutputStream> modifier, String lockToken)
+      throws ForbiddenException, ServerException {
+    checkExistence();
+
+    if (isFile()) {
+      if (fileIsLockedAndLockTokenIsInvalid(lockToken)) {
+        throw new ForbiddenException(
+            String.format(
+                "We were unable to update the content of file '%s'. The file is locked",
+                getPath()));
+      }
+
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      ByteArrayInputStream in = new ByteArrayInputStream(this.content);
+      modifier.accept(in, out);
+      this.content = out.toByteArray();
+      lastModificationDate = System.currentTimeMillis();
+
+      updateInSearcher();
+    } else {
+      throw new ForbiddenException(
+          String.format(
+              "We were unable to update the content. Item '%s' is not a file", getPath()));
+    }
+    return this;
   }
 
   @Override

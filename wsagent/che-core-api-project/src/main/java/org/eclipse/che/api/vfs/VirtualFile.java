@@ -12,8 +12,10 @@ package org.eclipse.che.api.vfs;
 
 import com.google.common.annotations.Beta;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
@@ -223,6 +225,35 @@ public interface VirtualFile extends Comparable<VirtualFile> {
    */
   VirtualFile updateContent(String content) throws ForbiddenException, ServerException;
 
+  /**
+   * Replaces the content read from the input stream parameter to the modifier with the bytes
+   * written to the output stream passed to the modifier.
+   *
+   * @param modifier
+   * @param lockToken lock token. This parameter is required if the file is locked otherwise might
+   *     be {@code null}
+   * @return VirtualFile after updating content
+   * @throws ForbiddenException if any of following conditions are met:
+   *     <ul>
+   *       <li>this item is not a file
+   *       <li>this item is locked file and {@code lockToken} is {@code null} or does not match
+   *     </ul>
+   *
+   * @throws ServerException if other error occurs
+   * @see #isFile()
+   */
+  VirtualFile modifyContent(BiConsumer<InputStream, OutputStream> modifier, String lockToken)
+      throws ForbiddenException, ServerException;
+
+  /**
+   * Equivalent to {@link #modifyContent(BiConsumer, null)
+   * @param modifier
+   * @return
+   * @throws ForbiddenException
+   * @throws ServerException
+   */
+  VirtualFile modifyContent(BiConsumer<InputStream, OutputStream> modifier)
+      throws ForbiddenException, ServerException;
   /**
    * Get length of content of the file. Always returns {@code 0} for folders.
    *
