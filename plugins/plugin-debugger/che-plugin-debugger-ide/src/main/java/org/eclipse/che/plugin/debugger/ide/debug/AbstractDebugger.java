@@ -369,9 +369,12 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     if (!isConnected()) {
       return;
     }
+    Location location = breakpoint.getLocation();
+
     LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
-    locationDto.setLineNumber(breakpoint.getLocation().getLineNumber() + 1);
-    locationDto.setTarget(breakpoint.getLocation().getTarget());
+    locationDto.setLineNumber(location.getLineNumber() + 1);
+    locationDto.setTarget(location.getTarget());
+    locationDto.setResourceProjectPath(getProject(file).getPath());
 
     Promise<Void> promise = service.deleteBreakpoint(debugSessionDto.getId(), locationDto);
     promise
