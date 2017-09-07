@@ -96,6 +96,11 @@
     background-color: editorGutterLineNumberBackgroundColor;
 }
 
+.orionCodenvy .ruler.vcs {
+    width: 8px;
+    background-color: editorGutterLineNumberBackgroundColor;
+}
+
 .orionCodenvy .ruler.folding {
     background-color: editorBackgroundColor;
     width: 10px;

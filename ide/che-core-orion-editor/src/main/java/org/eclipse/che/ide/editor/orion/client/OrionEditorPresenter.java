@@ -132,7 +132,6 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.vcs.HasVcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
-import org.eclipse.che.ide.editor.orion.client.jso.OrionAttributesOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionExtRulerOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
@@ -1178,13 +1177,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
 
     OrionStyleOverlay style = OrionStyleOverlay.create();
     style.setStyleClass("ruler vcs");
-
-    OrionAttributesOverlay attributesOverlay = OrionAttributesOverlay.create();
-    attributesOverlay.setAttribute(
-        "style",
-        "width: 8px; position: relative; float: left; background-color: "
-            + org.eclipse.che.ide.api.theme.Style.theme.editorGutterLineNumberBackgroundColor());
-    style.setAttributes(attributesOverlay);
 
     return Promises.create(
         (resolve, reject) ->
