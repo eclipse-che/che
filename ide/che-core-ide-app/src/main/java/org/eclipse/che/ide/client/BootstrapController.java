@@ -16,6 +16,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
@@ -245,19 +246,33 @@ public class BootstrapController {
     }-*/;
 
   /**
+   * Schedules calling of initializationFailedNative function to not freeze the browser when leaving the IDE.
+   *
+   * @param reason failure encountered
+   */
+  private void initializationFailed(String reason) {
+    new Timer() {
+      @Override
+      public void run() {
+        initializationFailedNative(reason);
+      }
+    }.schedule(500);
+  }
+
+  /**
    * Handles any of initialization errors. Tries to call predefined
    * IDE.eventHandlers.ideInitializationFailed function.
    *
    * @param reason failure encountered
    */
-  private native void initializationFailed(String reason) /*-{
-        try {
-            $wnd.IDE.eventHandlers.initializationFailed(reason);
-            this.@org.eclipse.che.ide.client.BootstrapController::notifyShowIDE()();
-        } catch (e) {
-            console.log(e.message);
-        }
-    }-*/;
+  private native void initializationFailedNative(String reason) /*-{
+    try {
+      $wnd.IDE.eventHandlers.initializationFailed(reason);
+      this.@org.eclipse.che.ide.client.BootstrapController::notifyShowIDE()();
+    } catch (e) {
+      console.log(e.message);
+    }
+  }-*/;
 
   /**
    * When we change browser tab and IDE executes into inactive tab, browser set code execution
@@ -267,12 +282,12 @@ public class BootstrapController {
    * launch factory.
    */
   private native void setCustomInterval() /*-{
-        var customInterval = 10;
-        var setInterval = function () {
-            clearInterval(interval);
-            customInterval *= 10;
-        };
+    var customInterval = 10;
+    var setInterval = function () {
+      clearInterval(interval);
+      customInterval *= 10;
+    };
 
-        var interval = setInterval(setInterval, customInterval);
-    }-*/;
+    var interval = setInterval(setInterval, customInterval);
+  }-*/;
 }
