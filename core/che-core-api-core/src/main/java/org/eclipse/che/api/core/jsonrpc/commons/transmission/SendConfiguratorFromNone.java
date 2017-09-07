@@ -235,11 +235,11 @@ public class SendConfiguratorFromNone {
         endpointId, requestId, Boolean.class, timeInMillis);
   }
 
-  public JsonRpcPromise<Void> sendAndReceiveResultAsEmpty() {
-    return sendAndReceiveResultAsEmpty(0);
+  public JsonRpcPromise<List<Double>> sendAndReceiveResultAsListOfDouble() {
+    return sendAndReceiveResultAsListOfDouble(0);
   }
 
-  public JsonRpcPromise<Void> sendAndReceiveResultAsEmpty(int timeInMillis) {
+  public JsonRpcPromise<List<Double>> sendAndReceiveResultAsListOfDouble(int timeInMillis) {
     final String requestId = transmitRequest();
 
     LOGGER.debug(
@@ -254,10 +254,10 @@ public class SendConfiguratorFromNone {
             + method
             + ", "
             + "result list items class: "
-            + Void.class);
+            + Double.class);
 
-    return dispatcher.registerPromiseForSingleObject(
-        endpointId, requestId, Void.class, timeInMillis);
+    return dispatcher.registerPromiseForListOfObjects(
+        endpointId, requestId, Double.class, timeInMillis);
   }
 
   private void transmitNotification() {

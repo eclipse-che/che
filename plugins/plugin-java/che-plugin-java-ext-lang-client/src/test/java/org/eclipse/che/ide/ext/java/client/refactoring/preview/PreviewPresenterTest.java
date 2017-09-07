@@ -78,7 +78,7 @@ public class PreviewPresenterTest {
   @Mock private Promise<RefactoringResult> refactoringStatusPromise;
   @Mock private Promise<ChangePreview> changePreviewPromise;
   @Mock private Promise<Void> updateAfterRefactoringPromise;
-  @Mock private Promise<Void> fileTrackingSuspendEventPromise;
+  @Mock private Promise<Boolean> fileTrackingSuspendEventPromise;
   @Mock private Promise<Void> handleMovingFilesPromise;
   @Mock private Promise<Void> changeEnableStatePromise;
   @Mock private ClientServerEventService clientServerEventService;
@@ -87,7 +87,7 @@ public class PreviewPresenterTest {
   @Captor private ArgumentCaptor<Operation<RefactoringResult>> refactoringStatusOperation;
   @Captor private ArgumentCaptor<Operation<ChangePreview>> changePreviewOperation;
   @Captor private ArgumentCaptor<Operation<Void>> changeEnableStateOperation;
-  @Captor private ArgumentCaptor<Operation<Void>> clientServerSuspendOperation;
+  @Captor private ArgumentCaptor<Operation<Boolean>> clientServerSuspendOperation;
 
   private PreviewPresenter presenter;
 

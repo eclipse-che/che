@@ -57,7 +57,7 @@ public class EditorWorkingCopySynchronizerImpl implements EditorWorkingCopySynch
         .withConsumer(this::onError);
   }
 
-  public JsonRpcPromise<Void> synchronize(
+  public JsonRpcPromise<Boolean> synchronize(
       String filePath, String projectPath, DirtyRegion dirtyRegion) {
     Type type = dirtyRegion.getType().equals(DirtyRegion.INSERT) ? INSERT : REMOVE;
     EditorChangesDto changes =
@@ -81,7 +81,7 @@ public class EditorWorkingCopySynchronizerImpl implements EditorWorkingCopySynch
         .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName(EDITOR_CONTENT_CHANGES_METHOD)
         .paramsAsDto(changes)
-        .sendAndReceiveResultAsEmpty();
+        .sendAndReceiveResultAsBoolean();
   }
 
   private void onError(ServerError error) {

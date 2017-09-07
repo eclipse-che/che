@@ -66,8 +66,10 @@ public class OrionContentTypeRegistrant {
                     "orion.core.contenttype",
                     JavaScriptObject.createObject(),
                     contentType.toServiceObject());
-                serviceRegistry.doRegisterService(
-                    "orion.edit.highlighter", JavaScriptObject.createObject(), config);
+                if (config.getPatterns() != null || config.getPatterns().length() != 0) {
+                  serviceRegistry.doRegisterService(
+                      "orion.edit.highlighter", JavaScriptObject.createObject(), config);
+                }
               }
             });
   }

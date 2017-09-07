@@ -242,7 +242,7 @@ public class AutoSaveModeImpl
     editorWorkingCopySynchronizer
         .synchronize(filePath, projectPath, region)
         .onSuccess(
-            aVoid -> {
+            () -> {
               syncLock = false;
               synchronizeWorkingCopy(filePath, projectPath);
             })

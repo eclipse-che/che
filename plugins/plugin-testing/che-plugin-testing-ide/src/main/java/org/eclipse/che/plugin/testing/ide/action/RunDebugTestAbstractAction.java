@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.testing.ide.action;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.CURSOR_POSITION;
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.PROJECT;
@@ -18,7 +19,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
-import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaFile;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
 import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
@@ -43,12 +44,12 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.editor.JavaReconsilerEvent;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
@@ -115,7 +116,8 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
             isEditorInFocus = true;
             contextType = CURSOR_POSITION;
             TextEditor activeEditor = (TextEditor) activePart;
-            if (activeEditor.getEditorInput().getFile().getName().endsWith(".java")) {
+            String fileName = activeEditor.getEditorInput().getFile().getName();
+            if (fileName.endsWith(".java") || fileName.endsWith(".xml")) {
               detectTests(activeEditor);
             } else {
               isEnable = false;
@@ -170,7 +172,7 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
    * @param frameworkAndTestName name of the test framework
    * @return test execution context
    */
-  protected TestExecutionContext createTestExecutionContext(
+  private TestExecutionContext createTestExecutionContext(
       Pair<String, String> frameworkAndTestName,
       TestExecutionContext.ContextType contextType,
       String selectedNodePath) {
@@ -238,7 +240,7 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
   }
 
   /** Analyzes project tree selection. Needs for detecting context type for the test runner. */
-  protected void analyzeProjectTreeSelection() {
+  private void analyzeProjectTreeSelection() {
     Resource[] resources = appContext.getResources();
     if (resources == null || resources.length > 1) {
       isEnable = false;
@@ -246,31 +248,30 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
     }
 
     Resource resource = resources[0];
-    if (resource.isProject() && JavaUtil.isJavaProject((Project) resource)) {
+    if (resource.isProject() && isJavaProject((Project) resource)) {
       contextType = PROJECT;
       isEnable = true;
       return;
     }
 
     Project project = resource.getProject();
-    if (!JavaUtil.isJavaProject(project)) {
+    if (!isJavaProject(project)) {
       isEnable = false;
       return;
     }
 
-    Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
-    if (!srcFolder.isPresent() || resource.getLocation().equals(srcFolder.get().getLocation())) {
-      isEnable = false;
-      return;
-    }
-
-    if (resource.getResourceType() == FILE && isJavaFile(resource)) {
+    if (isJavaTestFile(resource)) {
       contextType = TestExecutionContext.ContextType.FILE;
     } else if (resource instanceof Container) {
+      Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
+      if (!srcFolder.isPresent() || resource.getLocation().equals(srcFolder.get().getLocation())) {
+        isEnable = false;
+        return;
+      }
       contextType = TestExecutionContext.ContextType.FOLDER;
     }
-    selectedNodePath = resource.getLocation().toString();
     isEnable = true;
+    selectedNodePath = resource.getLocation().toString();
   }
 
   private void onTestRanSuccessfully(
@@ -306,5 +307,14 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
     eventsProcessor.setDebuggerConfiguration(debugger, debugConfigurationsManager);
 
     debugConfigurationsManager.apply(debugger);
+  }
+
+  private boolean isJavaTestFile(Resource resource) {
+    if (resource.getResourceType() != FILE) {
+      return false;
+    }
+    final String ext = ((File) resource).getExtension();
+
+    return newHashSet("java", "class", "xml").contains(ext);
   }
 }

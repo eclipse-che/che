@@ -118,7 +118,7 @@ public class RenamePresenterTest {
   @Mock private Promise<ChangeCreationResult> changeCreationResultPromise;
   @Mock private Promise<RefactoringResult> refactoringStatusPromise;
   @Mock private Promise<Void> updateAfterRefactoringPromise;
-  @Mock private Promise<Void> fileTrackingSuspendEventPromise;
+  @Mock private Promise<Boolean> fileTrackingSuspendEventPromise;
   @Mock private Promise<Void> handleMovingFilesPromise;
 
   @Captor
@@ -131,7 +131,7 @@ public class RenamePresenterTest {
 
   @Captor private ArgumentCaptor<Operation<ChangeCreationResult>> changeCreationResultCaptor;
   @Captor private ArgumentCaptor<Operation<RefactoringResult>> refactoringStatusCaptor;
-  @Captor private ArgumentCaptor<Operation<Void>> clientServerSuspendOperation;
+  @Captor private ArgumentCaptor<Operation<Boolean>> clientServerSuspendOperation;
   @Captor private ArgumentCaptor<Operation<Void>> updateAfterRefactoringOperation;
 
   private RenamePresenter renamePresenter;
