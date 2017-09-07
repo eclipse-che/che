@@ -246,7 +246,8 @@ public class BootstrapController {
     }-*/;
 
   /**
-   * Schedules calling of initializationFailedNative function to not freeze the browser when leaving the IDE.
+   * Schedules calling of initializationFailedNative function to not freeze the browser when leaving
+   * the IDE.
    *
    * @param reason failure encountered
    */
