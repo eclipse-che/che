@@ -32,7 +32,6 @@ import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -191,8 +190,8 @@ public class CommitTest {
     connection.commit(CommitParams.create("commit").withFiles(singletonList("File1.txt")));
 
     //then
-    assertTrue(connection.status(StatusFormat.LONG).getAdded().contains("File2.txt"));
-    assertTrue(connection.status(StatusFormat.LONG).getAdded().size() == 1);
+    assertTrue(connection.status(null).getAdded().contains("File2.txt"));
+    assertTrue(connection.status(null).getAdded().size() == 1);
   }
 
   @Test(

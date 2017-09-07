@@ -132,7 +132,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                         if (getErrorCode(error.getCause())
                             == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
                           service
-                              .getStatus(project.getLocation())
+                              .getStatus(project.getLocation(), null)
                               .then(
                                   status -> {
                                     view.setEnableAmendCheckBox(false);

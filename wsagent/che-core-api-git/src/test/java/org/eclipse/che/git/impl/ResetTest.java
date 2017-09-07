@@ -32,7 +32,6 @@ import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.params.ResetParams;
 import org.eclipse.che.api.git.shared.ResetRequest;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -72,7 +71,7 @@ public class ResetTest {
     //then
     assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), initMessage);
     assertFalse(aaa.exists());
-    assertTrue(connection.status(StatusFormat.SHORT).isClean());
+    assertTrue(connection.status(null).isClean());
     assertEquals(
         CONTENT,
         Files.toString(new File(connection.getWorkingDir(), "README.txt"), Charsets.UTF_8));
@@ -98,8 +97,8 @@ public class ResetTest {
     //then
     assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), initMessage);
     assertTrue(aaa.exists());
-    assertEquals(connection.status(StatusFormat.SHORT).getAdded().get(0), "aaa");
-    assertEquals(connection.status(StatusFormat.SHORT).getChanged().get(0), "README.txt");
+    assertEquals(connection.status(null).getAdded().get(0), "aaa");
+    assertEquals(connection.status(null).getChanged().get(0), "README.txt");
     assertEquals(
         Files.toString(new File(connection.getWorkingDir(), "README.txt"), Charsets.UTF_8),
         "MODIFIED\n");
@@ -126,8 +125,8 @@ public class ResetTest {
     //then
     assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), initMessage);
     assertTrue(aaa.exists());
-    assertEquals(connection.status(StatusFormat.SHORT).getUntracked().get(0), "aaa");
-    assertEquals(connection.status(StatusFormat.SHORT).getModified().get(0), "README.txt");
+    assertEquals(connection.status(null).getUntracked().get(0), "aaa");
+    assertEquals(connection.status(null).getModified().get(0), "README.txt");
     assertEquals(
         Files.toString(new File(connection.getWorkingDir(), "README.txt"), Charsets.UTF_8),
         "MODIFIED\n");

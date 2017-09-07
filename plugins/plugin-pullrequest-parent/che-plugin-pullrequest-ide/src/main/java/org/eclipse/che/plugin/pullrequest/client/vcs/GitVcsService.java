@@ -137,7 +137,7 @@ public class GitVcsService implements VcsService {
   @Override
   public Promise<String> getBranchName(ProjectConfig project) {
     return service
-        .getStatus(Path.valueOf(project.getPath()))
+        .getStatus(Path.valueOf(project.getPath()), null)
         .then((Function<Status, String>) status -> status.getBranchName());
   }
 
@@ -145,7 +145,7 @@ public class GitVcsService implements VcsService {
   public void hasUncommittedChanges(
       @NotNull final ProjectConfig project, @NotNull final AsyncCallback<Boolean> callback) {
     service
-        .getStatus(Path.valueOf(project.getPath()))
+        .getStatus(Path.valueOf(project.getPath()), null)
         .then(
             status -> {
               callback.onSuccess(!status.isClean());

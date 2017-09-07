@@ -30,7 +30,6 @@ import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.params.LsFilesParams;
 import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -124,7 +123,7 @@ public class AddTest {
 
     // then
     // the deleted file is added to index, so it becomes removed for git
-    List<String> stagedDeletedFiles = connection.status(StatusFormat.SHORT).getRemoved();
+    List<String> stagedDeletedFiles = connection.status(null).getRemoved();
     assertEquals(stagedDeletedFiles.size(), 1);
     assertEquals(stagedDeletedFiles.get(0), "CHANGELOG.txt");
   }

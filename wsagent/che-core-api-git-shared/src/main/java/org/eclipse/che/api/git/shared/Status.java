@@ -20,10 +20,6 @@ public interface Status {
 
   void setClean(boolean isClean);
 
-  StatusFormat getFormat();
-
-  void setFormat(StatusFormat format);
-
   String getBranchName();
 
   void setBranchName(String branchName);

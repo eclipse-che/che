@@ -26,7 +26,6 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
 
@@ -108,7 +107,7 @@ public class GitIndexChangedDetector {
     return id -> {
       String project = (path.startsWith("/") ? path.substring(1) : path).split("/")[0];
       try {
-        Status status = gitConnectionFactory.getConnection(project).status(StatusFormat.SHORT);
+        Status status = gitConnectionFactory.getConnection(project).status(null);
         Status statusDto = newDto(Status.class);
         statusDto.setAdded(status.getAdded());
         statusDto.setUntracked(status.getUntracked());
