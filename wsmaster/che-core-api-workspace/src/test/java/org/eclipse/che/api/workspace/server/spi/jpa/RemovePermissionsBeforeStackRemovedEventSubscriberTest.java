@@ -11,14 +11,10 @@
 package org.eclipse.che.api.workspace.server.spi.jpa;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 import static org.testng.AssertJUnit.assertEquals;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
-import com.google.inject.persist.jpa.JpaPersistModule;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
@@ -31,9 +27,6 @@ import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.jpa.JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.stack.StackPermissionsImpl;
 import org.eclipse.che.commons.test.db.H2TestHelper;
-import org.eclipse.che.core.db.DBInitializer;
-import org.eclipse.che.core.db.schema.SchemaInitializer;
-import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -127,18 +120,6 @@ public class RemovePermissionsBeforeStackRemovedEventSubscriberTest {
     subscriber.removeStackPermissions(stack.getId(), 1);
 
     assertEquals(stackPermissionsDao.getByInstance(stack.getId(), 1, 0).getTotalItemsCount(), 0);
-  }
-
-  private static class TestModule extends AbstractModule {
-    @Override
-    protected void configure() {
-      install(new JpaPersistModule("main"));
-      bind(SchemaInitializer.class)
-          .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
-      bind(DBInitializer.class).asEagerSingleton();
-      bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {})
-          .to(TestDomain.class);
-    }
   }
 
   public static class TestDomain extends AbstractPermissionsDomain<StackPermissionsImpl> {

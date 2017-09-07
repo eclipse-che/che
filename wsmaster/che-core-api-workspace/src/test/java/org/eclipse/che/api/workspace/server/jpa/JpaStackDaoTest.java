@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.stack.StackPermissionsImpl;
@@ -91,7 +90,7 @@ public class JpaStackDaoTest {
           new StackImpl("stack4", "st4", null, null, null, null, null, null, null, null)
         };
 
-    Injector injector = Guice.createInjector(new TestModule(), new MachineJpaModule());
+    Injector injector = Guice.createInjector(new WorkspaceTckModule());
     manager = injector.getInstance(EntityManager.class);
     dao = injector.getInstance(JpaStackDao.class);
   }

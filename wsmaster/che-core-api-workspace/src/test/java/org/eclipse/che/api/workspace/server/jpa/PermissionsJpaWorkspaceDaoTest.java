@@ -73,7 +73,7 @@ public class PermissionsJpaWorkspaceDaoTest {
           new WorkspaceImpl(
               "ws3", account, new WorkspaceConfigImpl("wrksp3", "", "cfg3", null, null, null))
         };
-    Injector injector = Guice.createInjector(new TestModule());
+    Injector injector = Guice.createInjector(new WorkspaceTckModule());
     manager = injector.getInstance(EntityManager.class);
     dao = injector.getInstance(JpaWorkspaceDao.class);
   }

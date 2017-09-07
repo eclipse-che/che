@@ -73,7 +73,7 @@ public class JpaStackPermissionsDaoTest {
           new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null)
         };
 
-    Injector injector = Guice.createInjector(new TestModule());
+    Injector injector = Guice.createInjector(new WorkspaceTckModule());
     manager = injector.getInstance(EntityManager.class);
     dao = injector.getInstance(JpaStackPermissionsDao.class);
     removePermissionsSubscriber =
