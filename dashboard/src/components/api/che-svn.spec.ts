@@ -66,12 +66,14 @@ describe('CheSvn', function () {
    */
   it('Fetch remote svn url', function () {
       // setup tests objects
-      var agentUrl = 'localhost:3232/wsagent/ext';
-      var workspaceId = 'workspace456test';
-      var projectPath = '/testSvnProject';
-      var remoteSvnUrl = 'https://svn.apache.org' + projectPath;
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
+      let agentUrl = 'localhost:3232/wsagent/ext';
+      let workspaceId = 'workspace456test';
+      let projectPath = '/testSvnProject';
+      let remoteSvnUrl = 'https://svn.apache.org' + projectPath;
+      let agentWsUrl = 'ws://localhost:3232/wsagent/ws';
+      let devMachine = {'links': [{'href': agentWsUrl, 'rel': 'wsagent.websocket'}]};
+      let runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}], 'devMachine': devMachine};
+      let workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
 
       cheBackend.addWorkspaces([workspace1]);
 

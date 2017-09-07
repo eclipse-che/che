@@ -73,6 +73,7 @@
     "postinstall": "npm run bower && npm run typings && npm run build",
     "bower": "bower update",
     "typings": "typings install",
-    "build": "gulp build"
+    "build": "gulp build",
+    "test": "gulp test"
   }
 }
