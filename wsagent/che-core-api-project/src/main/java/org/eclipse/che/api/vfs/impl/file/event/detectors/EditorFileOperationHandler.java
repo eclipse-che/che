@@ -45,16 +45,20 @@ public class EditorFileOperationHandler {
         .newConfiguration()
         .methodName(INCOMING_METHOD)
         .paramsAsDto(FileTrackingOperationDto.class)
-        .resultAsEmpty()
-        .withBiFunction(this::handleFileTrackingOperation);
+        .resultAsBoolean()
+        .withBiFunction(
+            (endpointId, operation) -> {
+              handleFileTrackingOperation(endpointId, operation);
+              return true;
+            });
   }
 
-  private Void handleFileTrackingOperation(String endpointId, FileTrackingOperationDto operation) {
+  private void handleFileTrackingOperation(String endpointId, FileTrackingOperationDto operation) {
     try {
       Type operationType = operation.getType();
       if (operationType == SUSPEND || operationType == RESUME) {
         eventService.publish(new FileTrackingOperationEvent(endpointId, operation));
-        return null;
+        return;
       }
 
       String filePath = operation.getPath();
@@ -68,7 +72,6 @@ public class EditorFileOperationHandler {
       }
 
       eventService.publish(new FileTrackingOperationEvent(endpointId, operation));
-      return null;
     } catch (Exception e) {
       throw new JsonRpcException(500, "Can not handle file operation: " + e.getLocalizedMessage());
     }
