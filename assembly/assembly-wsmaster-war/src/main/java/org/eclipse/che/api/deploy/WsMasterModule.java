@@ -41,14 +41,14 @@ import org.eclipse.che.api.workspace.server.RemoveWorkspaceFilesAfterRemoveWorks
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
+import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactoryImpl;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.JpaSnapshotDao;
-import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
@@ -62,10 +62,7 @@ public class WsMasterModule extends AbstractModule {
     install(new org.eclipse.che.account.api.AccountModule());
     install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
     install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
-    //        install(new org.eclipse.che.api.machine.server.jpa.MachineJpaModule());
     bind(RecipeDao.class).to(JpaRecipeDao.class);
-    // TODO spi move into docker infra impl
-    bind(SnapshotDao.class).to(JpaSnapshotDao.class);
     install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
     install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
     install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
@@ -135,7 +132,6 @@ public class WsMasterModule extends AbstractModule {
         .asEagerSingleton();
     bind(org.eclipse.che.api.workspace.server.event.MachineLogJsonRpcMessenger.class)
         .asEagerSingleton();
-    //
 
     bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
@@ -153,7 +149,6 @@ public class WsMasterModule extends AbstractModule {
 
     // installers
     install(new InstallerModule());
-
     binder().bind(new TypeLiteral<Set<Installer>>() {}).toProvider(InstallersProvider.class);
 
     bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
@@ -184,10 +179,14 @@ public class WsMasterModule extends AbstractModule {
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
 
-    // FIXME: spi
-    install(new DockerInfraModule());
-    install(new LocalDockerModule());
-    install(new OpenShiftInfraModule());
+    String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
+    if ("openshift".equals(infrastructure)) {
+      install(new OpenShiftInfraModule());
+    } else {
+      install(new LocalDockerModule());
+      install(new DockerInfraModule());
+    }
     bind(RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class).asEagerSingleton();
+    bind(ServerCheckerFactory.class).to(ServerCheckerFactoryImpl.class);
   }
 }

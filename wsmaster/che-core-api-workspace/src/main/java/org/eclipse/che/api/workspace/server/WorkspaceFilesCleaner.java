@@ -28,4 +28,10 @@ public interface WorkspaceFilesCleaner {
    * @param workspace workspace to clean up files
    */
   void clear(Workspace workspace) throws IOException, ServerException;
+
+  /** An implementation which do nothing on workspace cleanup call. */
+  class NoOpCleaner implements WorkspaceFilesCleaner {
+    @Override
+    public void clear(Workspace workspace) throws IOException, ServerException {}
+  }
 }
