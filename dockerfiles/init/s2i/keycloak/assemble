@@ -1,9 +1,15 @@
 #!/bin/bash
 
+set -e
+
 echo "Current directory: $(pwd)"
 
 echo "Directory contents of /tmp/src:"
 ls -a /tmp/src
+echo ""
+
+echo "Directory contents of /tmp/src/themes:"
+ls -al /tmp/src/themes
 echo ""
 
 echo "Directory contents of /tmp/s2i:"
@@ -13,11 +19,7 @@ echo ""
 echo "Adding the Che Keycloak theme files in the following directory: $(pwd)/keycloak/themes/che ..."
 
 cp -Rv /tmp/src/themes/che/ $(pwd)/keycloak/themes/
-
-if [ $? -ne 0 ]
-then
-  exit 1
-fi
+chmod -R 755 $(pwd)/keycloak/themes/che
 
 echo ""
 echo "Adding the Che configuration to import into directory: $(pwd)/keycloak/realms ..."
@@ -26,8 +28,3 @@ cp -v /tmp/src/realms/che-realm.json.erb $(pwd)/keycloak/realms/che-realm.json &
 cp -v /tmp/src/realms/che-users-0.json.erb $(pwd)/keycloak/realms/che-users-0.json && \
 cp -v /tmp/src/realms/master-realm.json.erb $(pwd)/keycloak/realms/master-realm.json && \
 cp -v /tmp/src/realms/master-users-0.json.erb $(pwd)/keycloak/realms/master-users-0.json
-
-if [ $? -ne 0 ]
-then
-  exit 1
-fi
