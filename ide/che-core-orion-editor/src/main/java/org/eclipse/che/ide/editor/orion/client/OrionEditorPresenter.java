@@ -1177,7 +1177,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     List<OrionExtRulerOverlay> rulers = Arrays.asList(textView.getRulers());
 
     OrionStyleOverlay style = OrionStyleOverlay.create();
-    style.setStyleClass("vcsChangeMarker");
+    style.setStyleClass("ruler vcs");
 
     OrionAttributesOverlay attributesOverlay = OrionAttributesOverlay.create();
     attributesOverlay.setAttribute(
@@ -1216,10 +1216,10 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                 }));
   }
 
-  private OrionExtRulerOverlay getRuler(List<OrionExtRulerOverlay> rulers, String name) {
+  private OrionExtRulerOverlay getRuler(List<OrionExtRulerOverlay> rulers, String className) {
     return rulers
         .stream()
-        .filter(ruler -> name.equals(ruler.getStyle().getStyleClass()))
+        .filter(ruler -> className.equals(ruler.getStyle().getStyleClass()))
         .findAny()
         .orElse(null);
   }
