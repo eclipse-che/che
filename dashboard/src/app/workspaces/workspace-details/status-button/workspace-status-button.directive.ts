@@ -94,11 +94,12 @@ export class CheWorkspaceStatusButton {
 
     $scope.onSelect = (dropDownItem: number) => {
       $scope.dropDownSelectPos = dropDownItem;
+      $scope.onStopWorkspace({isCreateSnapshot: $scope.dropDownItems.indexOf(STOP_WITH_SNAPSHOT) === dropDownItem});
     };
 
     $scope.changeWorkspaceStatus = () => {
       if ($scope.isStopButton) {
-        const isCreateSnapshot = !$scope.isStarting ? $scope.dropDownItems.indexOf(STOP_WITH_SNAPSHOT) === $scope.dropDownSelectPos : false;
+        const isCreateSnapshot = !$scope.isStarting ? $scope.dropDownItems.indexOf(STOP_WITH_SNAPSHOT) === preselectItem : false;
         $scope.onStopWorkspace({isCreateSnapshot: isCreateSnapshot});
       } else {
         $scope.onRunWorkspace();
@@ -109,7 +110,7 @@ export class CheWorkspaceStatusButton {
       return $scope.workspaceStatus;
     }, (workspaceStatus: string) => {
       updateButton(workspaceStatus);
-    });
+    }, true);
     $scope.$on('$destroy', () => {
       watcher();
     });

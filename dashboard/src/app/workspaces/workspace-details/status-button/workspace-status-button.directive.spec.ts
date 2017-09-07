@@ -224,15 +224,12 @@ describe('WorkspaceStatusButton >', () => {
       // open popup menu
       jqDropDownButton.click();
       $rootScope.$digest();
-      // select item
-      jqMenuItems.find(`span:contains(${STOP_WITH_SNAPSHOT})`).mousedown();
-
       spyOn($rootScope.model, 'onStopWorkspace');
 
-      // click Stop button
-      jqstatusButton.click();
-      $rootScope.$digest();
+      // click Stop With Snapshot button
+      jqMenuItems.find(`span:contains(${STOP_WITH_SNAPSHOT})`).mousedown();
 
+      $rootScope.$digest();
       // timeout should be flashed to get callback called and content visible
       $timeout.flush();
 
@@ -244,15 +241,12 @@ describe('WorkspaceStatusButton >', () => {
       // open popup menu
       jqDropDownButton.click();
       $rootScope.$digest();
-      // select item
-      jqMenuItems.find(`span:contains(${STOP_WITHOUT_SNAPSHOT})`).mousedown();
-
       spyOn($rootScope.model, 'onStopWorkspace');
 
-      // click Stop button
-      jqstatusButton.click();
-      $rootScope.$digest();
+      // click Stop Without Snapshot button
+      jqMenuItems.find(`span:contains(${STOP_WITHOUT_SNAPSHOT})`).mousedown();
 
+      $rootScope.$digest();
       // timeout should be flashed to get callback called and content visible
       $timeout.flush();
 

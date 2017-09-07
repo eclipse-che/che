@@ -280,9 +280,7 @@ export class WorkspaceDetailsController {
     }, (error: any) => {
       this.$scope.$broadcast('edit-workspace-details', {status: 'failed'});
       this.cheNotification.showError('Update workspace failed.', error);
-
       this.checkEditMode();
-
       this.saving = false;
       this.loading = false;
     });

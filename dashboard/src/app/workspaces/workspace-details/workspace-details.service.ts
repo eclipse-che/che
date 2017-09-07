@@ -237,7 +237,7 @@ export class WorkspaceDetailsService {
         const status = this.getWorkspaceStatus(newWorkspace.id);
 
         if (WorkspaceStatus[status] === WorkspaceStatus.STARTING || WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
-          this.stopWorkspace(newWorkspace.id);
+          this.stopWorkspace(newWorkspace.id, false);
           return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
         }
 
@@ -298,7 +298,7 @@ export class WorkspaceDetailsService {
           const status = this.getWorkspaceStatus(newWorkspace.id);
 
           if (WorkspaceStatus[status] === WorkspaceStatus.STARTING || WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
-            this.stopWorkspace(newWorkspace.id);
+            this.stopWorkspace(newWorkspace.id, false);
             return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
           }
 
