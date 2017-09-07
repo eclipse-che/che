@@ -16,6 +16,7 @@ import static java.util.Optional.ofNullable;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
@@ -26,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -96,6 +98,7 @@ public abstract class SeleniumTestHandler
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
 
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
+  private Module childModules;
 
   @Override
   public void onTestStart(ITestResult result) {}
@@ -192,7 +195,10 @@ public abstract class SeleniumTestHandler
   private void injectDependencies(ITestContext testContext, Object testInstance) throws Exception {
     Injector injector = testContext.getSuite().getParentInjector();
 
-    Injector classInjector = injector.createChildInjector(new SeleniumClassModule());
+    List<Module> childModules = getChildModules();
+    childModules.add(new SeleniumClassModule());
+
+    Injector classInjector = injector.createChildInjector(childModules);
     classInjector.injectMembers(testInstance);
 
     pageObjectsInjector.injectMembers(testInstance);
@@ -335,4 +341,6 @@ public abstract class SeleniumTestHandler
 
   /** Returns parent injector. */
   public abstract Injector createParentInjector();
+
+  public abstract List<Module> getChildModules();
 }

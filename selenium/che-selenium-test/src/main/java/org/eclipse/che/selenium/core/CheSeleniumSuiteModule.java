@@ -30,6 +30,8 @@ import org.eclipse.che.selenium.core.configuration.TestConfiguration;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestIdeUrlProvider;
+import org.eclipse.che.selenium.core.provider.CheTestKeycloakProvider;
+import org.eclipse.che.selenium.core.provider.CheTestRealmProvider;
 import org.eclipse.che.selenium.core.provider.CheTestSvnPasswordProvider;
 import org.eclipse.che.selenium.core.provider.CheTestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.CheTestSvnRepo2Provider;
@@ -37,6 +39,8 @@ import org.eclipse.che.selenium.core.provider.CheTestSvnUsernameProvider;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
+import org.eclipse.che.selenium.core.provider.TestKeycloakProvider;
+import org.eclipse.che.selenium.core.provider.TestRealmProvider;
 import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
@@ -83,6 +87,8 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(HttpJsonRequestFactory.class).to(TestDefaultUserHttpJsonRequestFactory.class);
 
     bind(AdminTestUser.class).to(CheAdminTestUser.class);
+    bind(TestKeycloakProvider.class).to(CheTestKeycloakProvider.class);
+    bind(TestRealmProvider.class).to(CheTestRealmProvider.class);
 
     bind(TestAuthServiceClient.class).to(CheTestAuthServiceClient.class);
     bind(TestMachineServiceClient.class).to(CheTestMachineServiceClient.class);

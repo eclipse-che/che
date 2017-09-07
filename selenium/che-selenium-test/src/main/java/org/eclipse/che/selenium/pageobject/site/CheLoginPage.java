@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
+import org.eclipse.che.selenium.core.login.Login;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -24,11 +25,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Dmytro Nochevnov */
 @Singleton
-public class LoginPage {
+public class CheLoginPage implements Login {
 
   private final SeleniumWebDriver seleniumWebDriver;
-
-  private final WebDriverWait loadPageTimeout;
+  private final WebDriverWait webDriverWait;
 
   @FindBy(name = "username")
   private WebElement usernameInput;
@@ -40,29 +40,32 @@ public class LoginPage {
   private WebElement loginButton;
 
   @Inject
-  public LoginPage(SeleniumWebDriver seleniumWebDriver) {
+  public CheLoginPage(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
     PageFactory.initElements(seleniumWebDriver, this);
-    loadPageTimeout =
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC);
+
+    webDriverWait =
+        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void login(String username, String password) {
-    waitOnOpen();
-    usernameInput.clear();
-    usernameInput.sendKeys(username);
-    passwordInput.clear();
-    passwordInput.sendKeys(password);
-    loginButton.click();
-    waitOnClose();
+    if (isOpened()) {
+      waitOnOpen();
+      usernameInput.clear();
+      usernameInput.sendKeys(username);
+      passwordInput.clear();
+      passwordInput.sendKeys(password);
+      loginButton.click();
+      waitOnClose();
+    }
   }
 
   public void waitOnOpen() {
-    loadPageTimeout.until(ExpectedConditions.visibilityOf(loginButton));
+    webDriverWait.until(ExpectedConditions.visibilityOf(loginButton));
   }
 
   public void waitOnClose() {
-    loadPageTimeout.until(
+    webDriverWait.until(
         ExpectedConditions.invisibilityOfAllElements(ImmutableList.of(loginButton)));
   }
 

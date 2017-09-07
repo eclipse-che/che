@@ -34,11 +34,11 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.login.Login;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.pageobject.site.LoginPage;
 
 /** @author Anatolii Bazko */
 @Singleton
@@ -51,7 +51,7 @@ public class TestFactoryInitializer {
   @Inject private HttpJsonRequestFactory requestFactory;
   @Inject private TestFactoryServiceClient testFactoryServiceClient;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private LoginPage loginPage;
+  @Inject private Login login;
 
   /**
    * Initialize {@link TestFactory} base upon template.
@@ -92,7 +92,7 @@ public class TestFactoryInitializer {
         dashboardUrlProvider,
         testFactoryServiceClient,
         workspaceServiceClient,
-        loginPage);
+        login);
   }
 
   /** Builder for {@link TestFactory}. */
@@ -112,7 +112,7 @@ public class TestFactoryInitializer {
           dashboardUrlProvider,
           testFactoryServiceClient,
           workspaceServiceClient,
-          loginPage);
+          login);
     }
 
     @Override

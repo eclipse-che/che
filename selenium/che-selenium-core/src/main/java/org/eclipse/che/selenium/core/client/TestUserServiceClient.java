@@ -10,16 +10,15 @@
  */
 package org.eclipse.che.selenium.core.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import javax.inject.Named;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.eclipse.che.keycloak.shared.KeycloakConstants;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
+import org.eclipse.che.selenium.core.provider.TestKeycloakProvider;
+import org.eclipse.che.selenium.core.provider.TestRealmProvider;
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
@@ -38,20 +37,9 @@ public class TestUserServiceClient {
 
   @Inject
   public TestUserServiceClient(
-      AdminTestUser adminTestUser,
-      @Named(KeycloakConstants.AUTH_SERVER_URL_SETTING) String authServerUrl,
-      @Named(KeycloakConstants.REALM_SETTING) String realm,
-      @Named(KeycloakConstants.PRIVATE_CLIENT_ID_SETTING) String clientId,
-      @Named(KeycloakConstants.PRIVATE_CLIENT_SECRET_SETTING) String clientSecret) {
-    this.realm = realm;
-    this.keycloak =
-        KeycloakBuilder.builder()
-            .serverUrl(authServerUrl)
-            .realm("master")
-            .username(adminTestUser.getName())
-            .password(adminTestUser.getPassword())
-            .clientId("admin-cli")
-            .build();
+      TestRealmProvider realmProvider, TestKeycloakProvider keycloakProvider) {
+    this.realm = realmProvider.get();
+    this.keycloak = keycloakProvider.get();
   }
 
   public void delete(String id) throws IOException {
@@ -61,19 +49,19 @@ public class TestUserServiceClient {
   /**
    * Creates user.
    *
-   * @param name
-   * @param email
-   * @param password
    * @return id of user
-   * @throws Exception
    */
   public String create(String name, String email, String password) throws IOException {
-    String userId;
+    CredentialRepresentation credential = new CredentialRepresentation();
+    credential.setType(CredentialRepresentation.PASSWORD);
+    credential.setValue(password);
+    credential.setTemporary(false);
 
     UserRepresentation user = new UserRepresentation();
     user.setUsername(name);
     user.setEmail(email);
     user.setEnabled(true);
+    user.setCredentials(ImmutableList.of(credential));
 
     try {
       Response res = keycloak.realm(realm).users().create(user);
@@ -83,20 +71,10 @@ public class TestUserServiceClient {
                 "Server status '%s'. Error message: '%s'", res.getStatus(), res.getEntity()));
       }
 
-      userId = res.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
-
-      // set password
-      CredentialRepresentation credential = new CredentialRepresentation();
-      credential.setType(CredentialRepresentation.PASSWORD);
-      credential.setValue(password);
-      credential.setTemporary(false);
-
-      keycloak.realm(realm).users().get(userId).resetPassword(credential);
+      return res.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
     } catch (RuntimeException e) {
       throw new IOException(
           String.format("Error of creation of user with name '%s' occurred.", name), e);
     }
-
-    return userId;
   }
 }

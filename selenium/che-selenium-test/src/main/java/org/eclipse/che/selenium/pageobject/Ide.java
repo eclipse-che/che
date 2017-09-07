@@ -17,46 +17,40 @@ import com.google.inject.Singleton;
 import java.net.URL;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
+import org.eclipse.che.selenium.core.login.Login;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
-import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Vitaliy Gulyy */
 @Singleton
 public class Ide {
+
   private final SeleniumWebDriver seleniumWebDriver;
-  private final TestIdeUrlProvider testIdeUrlProvider;
   private final TestWorkspaceUrlResolver testWorkspaceUrlResolver;
-  private final LoginPage loginPage;
+  private final Login login;
 
   @Inject
   public Ide(
       SeleniumWebDriver seleniumWebDriver,
-      TestIdeUrlProvider testIdeUrlProvider,
       TestWorkspaceUrlResolver testWorkspaceUrlResolver,
-      LoginPage loginPage) {
+      Login login) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.testIdeUrlProvider = testIdeUrlProvider;
     this.testWorkspaceUrlResolver = testWorkspaceUrlResolver;
-    this.loginPage = loginPage;
+    this.login = login;
   }
 
   @Deprecated
-  public WebDriver driver() {
+  public SeleniumWebDriver driver() {
     return seleniumWebDriver;
   }
 
   public void open(TestWorkspace testWorkspace) throws Exception {
     URL workspaceUrl = testWorkspaceUrlResolver.resolve(testWorkspace);
     seleniumWebDriver.get(workspaceUrl.toString());
-    if (loginPage.isOpened()) {
-      loginPage.login(testWorkspace.getOwner().getName(), testWorkspace.getOwner().getPassword());
-    }
+    login.login(testWorkspace.getOwner().getName(), testWorkspace.getOwner().getPassword());
   }
 
   public void switchFromDashboard() {

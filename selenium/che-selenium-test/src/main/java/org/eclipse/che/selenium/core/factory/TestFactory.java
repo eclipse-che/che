@@ -11,12 +11,13 @@
 package org.eclipse.che.selenium.core.factory;
 
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.login.Login;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.WebDriver;
 
 /** @author Anatolii Bazko */
@@ -26,7 +27,7 @@ public class TestFactory {
   private final TestDashboardUrlProvider dashboardUrl;
   private final TestFactoryServiceClient testFactoryServiceClient;
   private final TestWorkspaceServiceClient workspaceServiceClient;
-  private final LoginPage loginPage;
+  private final Login login;
 
   private final String factoryUrl;
 
@@ -37,23 +38,20 @@ public class TestFactory {
       TestDashboardUrlProvider dashboardUrl,
       TestFactoryServiceClient factoryServiceClient,
       TestWorkspaceServiceClient workspaceServiceClient,
-      LoginPage loginPage) {
+      Login login) {
     this.factoryDto = factoryDto;
     this.owner = owner;
     this.factoryUrl = factoryUrl;
     this.dashboardUrl = dashboardUrl;
     this.testFactoryServiceClient = factoryServiceClient;
     this.workspaceServiceClient = workspaceServiceClient;
-    this.loginPage = loginPage;
+    this.login = login;
   }
 
-  /** Adds authentication token into the browser and opens factory url. */
-  public void authenticateAndOpen(WebDriver driver) throws Exception {
+  /** Login, if needed, and opens factory url. */
+  public void authenticateAndOpen(SeleniumWebDriver driver) throws Exception {
     driver.get(dashboardUrl.get().toString());
-    if (loginPage.isOpened()) {
-      loginPage.login(owner.getName(), owner.getPassword());
-    }
-
+    login.login(owner.getName(), owner.getPassword());
     driver.get(factoryUrl);
   }
 
