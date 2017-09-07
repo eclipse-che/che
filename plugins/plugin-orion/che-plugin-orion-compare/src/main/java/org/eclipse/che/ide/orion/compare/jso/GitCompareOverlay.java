@@ -8,10 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.ext.git.client.compare;
+package org.eclipse.che.ide.orion.compare.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import org.eclipse.che.ide.orion.compare.CompareConfig;
+import org.eclipse.che.ide.orion.compare.FileOptions;
 
 /** @author Mykola Morhun */
 public class GitCompareOverlay extends JavaScriptObject {
@@ -19,8 +20,8 @@ public class GitCompareOverlay extends JavaScriptObject {
   protected GitCompareOverlay() {}
 
   public static native GitCompareOverlay create(
-      JavaScriptObject gitCompareJso, CompareConfig compareConfig) /*-{
-    compareConfig.parentDivId = "gwt-debug-compareParentDiv";
+      JavaScriptObject gitCompareJso, CompareConfig compareConfig, String parentId) /*-{
+    compareConfig.parentDivId = parentId;
 
     var compare = new gitCompareJso(compareConfig);
     this.widget = compare.getCompareView().getWidget();
@@ -28,9 +29,11 @@ public class GitCompareOverlay extends JavaScriptObject {
     return compare;
   }-*/;
 
-  public final native void setConfig(CompareConfig compareConfig) /*-{
-    this.options = compareConfig;
-    this.@org.eclipse.che.ide.ext.git.client.compare.GitCompareOverlay::refresh()();
+  public final native void update(FileOptions newFile, FileOptions oldFile) /*-{
+    var widget = this.getCompareView().getWidget();
+    widget.options.newFile = newFile;
+    widget.options.oldFile = oldFile;
+    widget.refresh();
   }-*/;
 
   public final native void refresh() /*-{
