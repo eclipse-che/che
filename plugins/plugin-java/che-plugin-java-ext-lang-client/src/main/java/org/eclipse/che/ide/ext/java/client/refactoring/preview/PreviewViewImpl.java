@@ -58,7 +58,6 @@ import org.eclipse.che.ide.orion.compare.CompareFactory;
 import org.eclipse.che.ide.orion.compare.CompareInitializer;
 import org.eclipse.che.ide.orion.compare.FileOptions;
 import org.eclipse.che.ide.orion.compare.jso.GitCompareOverlay;
-import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.requirejs.ModuleHolder;
 
@@ -88,7 +87,6 @@ final class PreviewViewImpl extends Window implements PreviewView {
   private FileOptions oldFile;
   private GitCompareOverlay compare;
 
-  private final LoaderFactory loaderFactory;
   private final CompareFactory compareFactory;
   private final CompareInitializer compareInitializer;
   private final ModuleHolder moduleHolder;
@@ -99,12 +97,10 @@ final class PreviewViewImpl extends Window implements PreviewView {
   @Inject
   public PreviewViewImpl(
       JavaLocalizationConstant locale,
-      LoaderFactory loaderFactory,
       CompareFactory compareFactory,
       CompareInitializer compareInitializer,
       ModuleHolder moduleHolder) {
     this.locale = locale;
-    this.loaderFactory = loaderFactory;
     this.compareFactory = compareFactory;
     this.compareInitializer = compareInitializer;
     this.moduleHolder = moduleHolder;
