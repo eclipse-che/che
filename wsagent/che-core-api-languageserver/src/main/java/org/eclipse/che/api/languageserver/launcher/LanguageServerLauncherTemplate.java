@@ -43,10 +43,14 @@ public abstract class LanguageServerLauncherTemplate implements LanguageServerLa
    * @throws LanguageServerException
    */
   private void waitCheckProcess(Process languageServerProcess) throws LanguageServerException {
+    long endTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(20);
+
     try {
-      TimeUnit.SECONDS.sleep(5);
+      while (!languageServerProcess.isAlive() && System.currentTimeMillis() < endTime) {
+        TimeUnit.MILLISECONDS.sleep(10);
+      }
     } catch (InterruptedException e) {
-      //ignore
+      Thread.currentThread().interrupt();
     }
     if (!languageServerProcess.isAlive()) {
       final String error;
