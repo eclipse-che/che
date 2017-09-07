@@ -147,21 +147,13 @@ public class JavaDebuggerUtils {
    * Return nested class fqn if line with number {@code lineNumber} contains such element, otherwise
    * return outer class fqn.
    *
-   * @param projectPath project path which contains class with {@code outerClassFqn}
    * @param filePath path to the file
    * @param lineNumber line position to search
    * @throws DebuggerException
    */
-  public String findFqnByPosition(String projectPath, String filePath, int lineNumber)
-      throws DebuggerException {
-
-    if (projectPath == null) {
-      return filePath;
-    }
-
-    IJavaProject project = MODEL.getJavaProject(projectPath);
-
+  public String findFqnByPosition(String filePath, int lineNumber) throws DebuggerException {
     IPath path = Path.fromOSString(filePath);
+    IJavaProject project = getJavaProject(path);
 
     String fqn = null;
     for (int i = path.segmentCount(); i > 0; i--) {
@@ -228,6 +220,25 @@ public class JavaDebuggerUtils {
     }
 
     return filePath;
+  }
+
+  private IJavaProject getJavaProject(IPath path) throws DebuggerException {
+    IJavaProject project = null;
+    outer:
+    for (int i = 1; i < path.segmentCount(); i++) {
+      IPath projectPath = path.removeLastSegments(i);
+      try {
+        for (IJavaProject p : MODEL.getJavaProjects()) {
+          if (p.getPath().equals(projectPath)) {
+            project = p;
+            break outer;
+          }
+        }
+      } catch (JavaModelException e) {
+        throw new DebuggerException(e.getMessage(), e);
+      }
+    }
+    return project;
   }
 
   /**

@@ -53,7 +53,7 @@ public class BreakpointItemRender extends SimpleList.ListItemRenderer<Breakpoint
     sb.appendEscaped(
         path.substring(path.lastIndexOf("/") + 1)
             + ":"
-            + String.valueOf(itemData.getLocation().getLineNumber() + 1));
+            + String.valueOf(itemData.getLocation().getLineNumber()));
     sb.appendHtmlConstant("</td></tr></table>");
 
     label.setInnerHTML(sb.toSafeHtml().asString());

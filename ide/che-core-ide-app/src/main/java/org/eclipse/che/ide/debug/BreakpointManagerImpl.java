@@ -12,6 +12,7 @@ package org.eclipse.che.ide.debug;
 
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +56,7 @@ import org.eclipse.che.ide.resource.Path;
  * @author Valeriy Svydenko
  * @author Dmytro Nochevnov
  */
+@Singleton
 public class BreakpointManagerImpl
     implements BreakpointManager,
         LineChangeAction,
@@ -94,7 +96,7 @@ public class BreakpointManagerImpl
 
     final VirtualFile activeFile = editor.getEditorInput().getFile();
     Optional<Breakpoint> existedBreakpoint =
-        breakpointStorage.get(activeFile.getLocation().toString(), lineNumber);
+        breakpointStorage.get(activeFile.getLocation().toString(), lineNumber + 1);
 
     if (existedBreakpoint.isPresent()) {
       deleteBreakpoint(activeFile, existedBreakpoint.get());
@@ -102,7 +104,8 @@ public class BreakpointManagerImpl
       if (isLineNotEmpty(activeFile, lineNumber)) {
         addBreakpoint(
             activeFile,
-            new BreakpointImpl(new LocationImpl(activeFile.getLocation().toString(), lineNumber)));
+            new BreakpointImpl(
+                new LocationImpl(activeFile.getLocation().toString(), lineNumber + 1)));
       }
     }
   }
@@ -113,7 +116,7 @@ public class BreakpointManagerImpl
 
     BreakpointRenderer renderer = getBreakpointRendererForFile(activeFile.getLocation().toString());
     if (renderer != null) {
-      renderer.removeBreakpointMark(breakpoint.getLocation().getLineNumber());
+      renderer.removeBreakpointMark(breakpoint.getLocation().getLineNumber() - 1);
     }
 
     for (BreakpointManagerObserver observer : observers) {
@@ -133,7 +136,7 @@ public class BreakpointManagerImpl
 
     if (renderer != null) {
       renderer.addBreakpointMark(
-          breakpoint.getLocation().getLineNumber(), BreakpointManagerImpl.this::onLineChange);
+          breakpoint.getLocation().getLineNumber() - 1, BreakpointManagerImpl.this::onLineChange);
     }
 
     for (BreakpointManagerObserver observer : observers) {
@@ -173,7 +176,7 @@ public class BreakpointManagerImpl
       BreakpointRenderer renderer =
           getBreakpointRendererForFile(activeFile.getLocation().toString());
       if (renderer != null) {
-        renderer.setLineActive(location.getLineNumber(), true);
+        renderer.setLineActive(location.getLineNumber() - 1, true);
       }
     }
   }
@@ -187,7 +190,7 @@ public class BreakpointManagerImpl
               BreakpointRenderer renderer =
                   getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
               if (renderer != null) {
-                renderer.removeBreakpointMark(breakpoint.getLocation().getLineNumber());
+                renderer.removeBreakpointMark(breakpoint.getLocation().getLineNumber() - 1);
               }
             });
 
@@ -218,7 +221,7 @@ public class BreakpointManagerImpl
     if (suspendedLocation != null) {
       BreakpointRenderer renderer = getBreakpointRendererForFile(suspendedLocation.getTarget());
       if (renderer != null) {
-        renderer.setLineActive(suspendedLocation.getLineNumber(), false);
+        renderer.setLineActive(suspendedLocation.getLineNumber() - 1, false);
       }
 
       suspendedLocation = null;
@@ -402,7 +405,7 @@ public class BreakpointManagerImpl
           .forEach(
               breakpoint ->
                   renderer.addBreakpointMark(
-                      breakpoint.getLocation().getLineNumber(),
+                      breakpoint.getLocation().getLineNumber() - 1,
                       BreakpointManagerImpl.this::onLineChange));
 
       Debugger debugger = debuggerManager.getActiveDebugger();
@@ -412,13 +415,14 @@ public class BreakpointManagerImpl
             .then(
                 breakpoints -> {
                   for (Breakpoint breakpoint : breakpoints) {
-                    renderer.setBreakpointActive(breakpoint.getLocation().getLineNumber(), true);
+                    renderer.setBreakpointActive(
+                        breakpoint.getLocation().getLineNumber() - 1, true);
                   }
                 });
       }
 
       if (suspendedLocation != null && suspendedLocation.getTarget().equals(filePath)) {
-        renderer.setLineActive(suspendedLocation.getLineNumber(), true);
+        renderer.setLineActive(suspendedLocation.getLineNumber() - 1, true);
       }
     }
   }
@@ -440,7 +444,7 @@ public class BreakpointManagerImpl
               BreakpointRenderer renderer =
                   getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
               if (renderer != null) {
-                renderer.setBreakpointActive(breakpoint.getLocation().getLineNumber(), false);
+                renderer.setBreakpointActive(breakpoint.getLocation().getLineNumber() - 1, false);
               }
             });
 
@@ -459,7 +463,7 @@ public class BreakpointManagerImpl
               BreakpointRenderer renderer =
                   getBreakpointRendererForFile(breakpoint.getLocation().getTarget());
               if (renderer != null) {
-                renderer.setBreakpointActive(breakpoint.getLocation().getLineNumber(), true);
+                renderer.setBreakpointActive(breakpoint.getLocation().getLineNumber() - 1, true);
               }
             });
   }

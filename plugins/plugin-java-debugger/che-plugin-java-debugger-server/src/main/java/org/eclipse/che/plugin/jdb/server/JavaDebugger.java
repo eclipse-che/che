@@ -269,10 +269,9 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   private String findFQN(Location location) throws DebuggerException {
     final String parentFqn = location.getTarget();
-    final String projectPath = location.getResourceProjectPath();
     int lineNumber = location.getLineNumber();
 
-    return debuggerUtil.findFqnByPosition(projectPath, parentFqn, lineNumber);
+    return debuggerUtil.findFqnByPosition(parentFqn, lineNumber);
   }
 
   private void deferBreakpoint(String className, Breakpoint breakpoint) throws DebuggerException {

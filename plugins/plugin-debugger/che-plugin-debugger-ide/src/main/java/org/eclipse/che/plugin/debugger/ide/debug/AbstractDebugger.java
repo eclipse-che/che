@@ -244,7 +244,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
    */
   private void onBreakpointActivated(LocationDto locationDto) {
     for (DebuggerObserver observer : observers) {
-      observer.onBreakpointActivated(locationDto.getTarget(), locationDto.getLineNumber() - 1);
+      observer.onBreakpointActivated(locationDto.getTarget(), locationDto.getLineNumber());
     }
   }
 
@@ -342,7 +342,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       LocationDto locationDto =
           dtoFactory
               .createDto(LocationDto.class)
-              .withLineNumber(breakpoint.getLocation().getLineNumber() + 1)
+              .withLineNumber(breakpoint.getLocation().getLineNumber())
               .withTarget(breakpoint.getLocation().getTarget())
               .withResourceProjectPath(getProject(file).getPath());
 
@@ -372,9 +372,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     Location location = breakpoint.getLocation();
 
     LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
-    locationDto.setLineNumber(location.getLineNumber() + 1);
+    locationDto.setLineNumber(location.getLineNumber());
     locationDto.setTarget(location.getTarget());
-    locationDto.setResourceProjectPath(getProject(file).getPath());
 
     Promise<Void> promise = service.deleteBreakpoint(debugSessionDto.getId(), locationDto);
     promise
@@ -468,7 +467,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
           dtoFactory
               .createDto(LocationDto.class)
               .withTarget(breakpoint.getLocation().getTarget())
-              .withLineNumber(breakpoint.getLocation().getLineNumber() + 1);
+              .withLineNumber(breakpoint.getLocation().getLineNumber());
 
       BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
       breakpointDto.setLocation(locationDto);
