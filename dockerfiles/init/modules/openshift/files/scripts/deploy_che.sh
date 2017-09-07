@@ -76,9 +76,19 @@ done
 # Set configuration common to both minishift and openshift
 # --------------------------------------------------------
 
+CHE_MULTIUSER=${CHE_MULTIUSER:-"false"}
 DEFAULT_COMMAND="deploy"
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
-DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
+
+if [ "$CHE_MULTI_USER" == "true" ]
+then
+  CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"false"}
+  DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server-multiuser"
+else 
+  CHE_DEDICATED_KEYCLOAK="false"
+  DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
+fi
+
 CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 DEFAULT_CHE_IMAGE_TAG="nightly"
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
@@ -96,6 +106,8 @@ KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_E
 DEFAULT_OPENSHIFT_FLAVOR=minishift
 OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
 
+#TODO will probably go to the main config map at then end
+CHE_WORKSPACE_LOGS="/data/logs/machine/logs" \
 
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   # ---------------------------
@@ -115,7 +127,12 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
   DEFAULT_OPENSHIFT_NAMESPACE_URL="${CHE_OPENSHIFT_PROJECT}.$(minishift ip).nip.io"
   OPENSHIFT_NAMESPACE_URL=${OPENSHIFT_NAMESPACE_URL:-${DEFAULT_OPENSHIFT_NAMESPACE_URL}}
-  DEFAULT_CHE_KEYCLOAK_DISABLED="true"
+  if [ "$CHE_MULTI_USER" == "true" ]
+  then
+    DEFAULT_CHE_KEYCLOAK_DISABLED="false"
+  else 
+    DEFAULT_CHE_KEYCLOAK_DISABLED="true"
+  fi
   CHE_KEYCLOAK_DISABLED=${CHE_KEYCLOAK_DISABLED:-${DEFAULT_CHE_KEYCLOAK_DISABLED}}
   DEFAULT_CHE_DEBUGGING_ENABLED="true"
   CHE_DEBUGGING_ENABLED=${CHE_DEBUGGING_ENABLED:-${DEFAULT_CHE_DEBUGGING_ENABLED}}
@@ -145,7 +162,12 @@ elif [ "${OPENSHIFT_FLAVOR}" == "ocp" ]; then
   # ----------------------
   DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
   CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
-  DEFAULT_CHE_KEYCLOAK_DISABLED="true"
+  if [ "$CHE_MULTI_USER" == "true" ]
+  then
+    DEFAULT_CHE_KEYCLOAK_DISABLED="false"
+  else 
+    DEFAULT_CHE_KEYCLOAK_DISABLED="true"
+  fi
   CHE_KEYCLOAK_DISABLED=${CHE_KEYCLOAK_DISABLED:-${DEFAULT_CHE_KEYCLOAK_DISABLED}}
   DEFAULT_CHE_DEBUGGING_ENABLED="false"
   CHE_DEBUGGING_ENABLED=${CHE_DEBUGGING_ENABLED:-${DEFAULT_CHE_DEBUGGING_ENABLED}}
@@ -192,6 +214,50 @@ echo "done!"
 echo -n "[CHE] Switching to \"${CHE_OPENSHIFT_PROJECT}\"..."
 oc project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
 echo "done!"
+
+# -------------------------------------------------------------
+# Setting Keycloak-related environment variables
+# Done here since the Openshift project should be available
+# TODO Maybe this should go into a config map, but I don't know
+# How we would manage the retrieval of the Keycloak route
+# external URL.
+# -------------------------------------------------------------
+
+if [ "$CHE_DEDICATED_KEYCLOAK" == "true" ]
+then
+  set +e
+  CHE_KEYCLOAK_SERVER_ROUTE=$(oc get route keycloak -o jsonpath='{.spec.host}')
+  set -e
+  if [ "CHE_KEYCLOAK_SERVER_ROUTE" == "" ]
+  then
+    echo "The dedicated Keycloak server should be started and available through a route before starting the Che server"
+    exit 1
+  fi
+
+  set +e
+  oc get service postgres
+  if [ $? -ne 0 ]
+  then
+    echo "The dedicated Postgres server should be started in Openshift project ${CHE_OPENSHIFT_PROJECT} before starting the Che server"
+    exit 1
+  fi
+  set -e
+    
+  CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"http://${CHE_KEYCLOAK_SERVER_ROUTE}/auth"}
+  CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"che"}
+  CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"che-public"}
+  CHE_KEYCLOAK_PRIVATE_REALM=che
+  CHE_KEYCLOAK_PRIVATE_CLIENT__ID=che
+  CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET=2c1b2621-d251-4701-82c4-a7dd447faa97
+else
+  CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"https://sso.openshift.io/auth"}
+  CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"fabric8"}
+  CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"openshiftio-public"}
+  CHE_KEYCLOAK_PRIVATE_REALM=NULL
+  CHE_KEYCLOAK_PRIVATE_CLIENT__ID=NULL
+  CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET=NULL
+fi
+
 
 # -------------------------------------------------------------
 # If command == clean up then delete all openshift objects
@@ -282,6 +348,21 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
+    sed "s+- env:+- env:\\n\
+          - name: \"CHE_WORKSPACE_LOGS\"\\n\
+            value: \"${CHE_WORKSPACE_LOGS}\"\\n\
+          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"\\n\
+            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"\\n\
+          - name: \"CHE_KEYCLOAK_REALM\"\\n\
+            value: \"${CHE_KEYCLOAK_REALM}\"\\n\
+          - name: \"CHE_KEYCLOAK_CLIENT__ID\"\\n\
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_REALM\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_REALM}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__ID\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__ID}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+" | tee commandLog.txt | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
