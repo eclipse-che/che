@@ -14,7 +14,6 @@ import static java.lang.String.format;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
@@ -31,12 +30,12 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
 
 /**
- * Provides path to workspace folder on host.
+ * Provides path to workspace projects folder on host.
  *
  * @author Alexander Garagatyi
  */
 @Singleton
-public class LocalWorkspaceFolderPathProvider {
+public class LocalProjectsFolderPathProvider {
 
   public static final String ALLOW_FOLDERS_CREATION_ENV_VARIABLE =
       "CHE_WORKSPACE_STORAGE_CREATE_FOLDERS";
@@ -78,7 +77,7 @@ public class LocalWorkspaceFolderPathProvider {
   private String oldWorkspacesMountPoint;
 
   @Inject
-  public LocalWorkspaceFolderPathProvider(
+  public LocalProjectsFolderPathProvider(
       @Named("che.workspace.storage") String workspacesMountPoint, WorkspaceDao workspaceDao)
       throws IOException {
     this.workspacesMountPoint = workspacesMountPoint;
@@ -87,7 +86,7 @@ public class LocalWorkspaceFolderPathProvider {
   }
 
   @VisibleForTesting
-  protected LocalWorkspaceFolderPathProvider(
+  protected LocalProjectsFolderPathProvider(
       String workspacesMountPoint,
       String oldWorkspacesMountPoint,
       String projectsFolder,
@@ -103,7 +102,7 @@ public class LocalWorkspaceFolderPathProvider {
     this.isWindows = isWindows;
   }
 
-  public String getPath(@Assisted("workspace") String workspaceId) throws IOException {
+  public String getPath(String workspaceId) throws IOException {
     if (!isWindows && hostProjectsFolder != null) {
       return hostProjectsFolder;
     }

@@ -37,7 +37,6 @@ import org.eclipse.che.api.recipe.RecipeService;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.server.SystemModule;
 import org.eclipse.che.api.user.server.TokenValidator;
-import org.eclipse.che.api.workspace.server.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber;
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
@@ -186,7 +185,6 @@ public class WsMasterModule extends AbstractModule {
       install(new LocalDockerModule());
       install(new DockerInfraModule());
     }
-    bind(RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class).asEagerSingleton();
     bind(ServerCheckerFactory.class).to(ServerCheckerFactoryImpl.class);
   }
 }

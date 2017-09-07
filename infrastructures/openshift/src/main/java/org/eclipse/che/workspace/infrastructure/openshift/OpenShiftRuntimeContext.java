@@ -20,7 +20,6 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -44,7 +43,6 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
       @Assisted RuntimeIdentity identity,
       @Assisted RuntimeInfrastructure infrastructure,
       OpenShiftClientFactory clientFactory,
-      InstallerRegistry installerRegistry,
       OpenShiftRuntimeFactory runtimeFactory,
       @Named("che.websocket.endpoint.base") String websocketEndpointBase)
       throws ValidationException, InfrastructureException {
