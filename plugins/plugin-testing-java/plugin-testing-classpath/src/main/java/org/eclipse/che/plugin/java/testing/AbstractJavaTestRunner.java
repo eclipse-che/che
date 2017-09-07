@@ -48,8 +48,6 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractJavaTestRunner.class);
   private static final String TEST_OUTPUT_FOLDER = "/test-output";
 
-  protected static final String JAVA_EXECUTABLE = "java";
-
   private int debugPort = -1;
   private String workspacePath;
   private JavaTestFinder javaTestFinder;
@@ -67,9 +65,19 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
     }
 
     List<TestPosition> result = new ArrayList<>();
+
+    String filePath = context.getFilePath();
+    if (filePath.endsWith(".xml")) {
+      if (isTestSuite(filePath, javaProject)) {
+        TestPosition testPosition =
+            DtoFactory.newDto(TestPosition.class).withFrameworkName(getName());
+        result.add(testPosition);
+      }
+      return result;
+    }
+
     try {
-      ICompilationUnit compilationUnit =
-          findCompilationUnitByPath(javaProject, context.getFilePath());
+      ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, filePath);
       if (context.getOffset() == -1) {
         addAllTestsMethod(result, compilationUnit);
       } else {
@@ -120,6 +128,15 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
    * @return {@code true} if the method is test method otherwise returns {@code false}
    */
   protected abstract boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit);
+
+  /**
+   * Verify if the file is test suite.
+   *
+   * @param filePath path to the file
+   * @param project parent project
+   * @return {@code true} if the file is test suite otherwise returns {@code false}
+   */
+  protected abstract boolean isTestSuite(String filePath, IJavaProject project);
 
   /** Returns {@link IJavaProject} by path */
   protected IJavaProject getJavaProject(String projectPath) {
@@ -179,7 +196,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
   }
 
   /**
-   * Creates test suite which should be ran.
+   * Finds tests which should be ran.
    *
    * @param context information about test runner
    * @param javaProject current project
@@ -188,7 +205,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
    * @return list of full qualified names of test classes. If it is the declaration of a test method
    *     it should be: parent fqn + '#' + method name (a.b.c.ClassName#methodName)
    */
-  protected List<String> createTestSuite(
+  protected List<String> findTests(
       TestExecutionContext context,
       IJavaProject javaProject,
       String methodAnnotation,

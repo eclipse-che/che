@@ -76,6 +76,11 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
   }
 
   @Override
+  protected boolean isTestSuite(String filePath, IJavaProject project) {
+    return false;
+  }
+
+  @Override
   public boolean isTestMethod(IMethod method, ICompilationUnit compilationUnit) {
     try {
       int flags = method.getFlags();
@@ -95,7 +100,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
 
   private ProcessHandler startTestProcess(IJavaProject javaProject, TestExecutionContext context) {
     JavaParameters parameters = new JavaParameters();
-    parameters.setJavaExecutable(JAVA_EXECUTABLE);
+    parameters.setJavaExecutable(System.getProperty("java.home") + "/bin/java");
     parameters.setMainClassName(MAIN_CLASS_NAME);
     parameters.setWorkingDirectory(workspacePath + javaProject.getPath());
 
@@ -106,7 +111,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
     parameters.getClassPath().addAll(classPath);
 
     List<String> suite =
-        createTestSuite(
+        findTests(
             context,
             javaProject,
             JavaTestAnnotations.JUNIT4X_TEST.getName(),

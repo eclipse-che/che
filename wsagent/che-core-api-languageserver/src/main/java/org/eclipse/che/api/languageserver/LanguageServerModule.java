@@ -35,9 +35,9 @@ public class LanguageServerModule extends AbstractModule {
     bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);
     bind(ServerInitializer.class).to(ServerInitializerImpl.class);
     bind(LanguageRegistryService.class);
-    bind(WorkspaceService.class);
     Multibinder.newSetBinder(binder(), LanguageServerLauncher.class);
 
+    bind(WorkspaceService.class).asEagerSingleton();
     bind(TextDocumentService.class).asEagerSingleton();
     bind(PublishDiagnosticsParamsJsonRpcTransmitter.class).asEagerSingleton();
     bind(ShowMessageJsonRpcTransmitter.class).asEagerSingleton();

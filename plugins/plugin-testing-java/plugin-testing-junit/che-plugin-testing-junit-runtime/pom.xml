@@ -19,6 +19,7 @@
         <version>5.18.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-testing-junit-runtime</artifactId>
+    <name>Che Plugin :: Java Testing :: JUnit Runtime</name>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
