@@ -29,9 +29,8 @@ import java.util.Base64;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.Filter;
+import javax.inject.Singleton;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -42,7 +41,8 @@ import org.eclipse.che.keycloak.shared.KeycloakConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KeycloakAuthenticationFilter implements Filter {
+@Singleton
+public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
 
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakAuthenticationFilter.class);
 
@@ -62,53 +62,51 @@ public class KeycloakAuthenticationFilter implements Filter {
   }
 
   @Override
-  public void init(FilterConfig filterConfig) throws ServletException {}
-
-  @Override
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
       throws IOException, ServletException {
     HttpServletRequest request = (HttpServletRequest) req;
+
     final String token = tokenExtractor.getToken(request);
-    if (request.getScheme().startsWith("ws") || (token != null && token.startsWith("machine"))) {
+    if (shouldSkipAuthentication(request, token)) {
       chain.doFilter(req, res);
       return;
-    } else {
-      final String requestURI = request.getRequestURI();
-      if (token == null) {
-        LOG.debug("No 'Authorization' header for {}", requestURI);
-        send403(res);
-        return;
-      }
+    }
 
-      Jws<Claims> jwt;
+    final String requestURI = request.getRequestURI();
+    if (token == null) {
+      LOG.debug("No 'Authorization' header for {}", requestURI);
+      send403(res);
+      return;
+    }
+
+    Jws<Claims> jwt;
+    try {
+      jwt = Jwts.parser().setSigningKey(getJwtPublicKey(false)).parseClaimsJws(token);
+      LOG.debug("JWT = ", jwt);
+      //OK, we can trust this JWT
+    } catch (SignatureException
+        | NoSuchAlgorithmException
+        | InvalidKeySpecException
+        | IllegalArgumentException e) {
+      //don't trust the JWT!
+      LOG.error("Failed verifying the JWT token", e);
       try {
-        jwt = Jwts.parser().setSigningKey(getJwtPublicKey(false)).parseClaimsJws(token);
-        LOG.debug("JWT = " + jwt.toString());
+        LOG.info("Retrying after updating the public key", e);
+        jwt = Jwts.parser().setSigningKey(getJwtPublicKey(true)).parseClaimsJws(token);
+        LOG.debug("JWT = ", jwt);
         //OK, we can trust this JWT
       } catch (SignatureException
           | NoSuchAlgorithmException
           | InvalidKeySpecException
-          | IllegalArgumentException e) {
+          | IllegalArgumentException ee) {
         //don't trust the JWT!
-        LOG.error("Failed verifying the JWT token", e);
-        try {
-          LOG.info("Retrying after updating the public key", e);
-          jwt = Jwts.parser().setSigningKey(getJwtPublicKey(true)).parseClaimsJws(token);
-          LOG.debug("JWT = " + jwt.toString());
-          //OK, we can trust this JWT
-        } catch (SignatureException
-            | NoSuchAlgorithmException
-            | InvalidKeySpecException
-            | IllegalArgumentException ee) {
-          //don't trust the JWT!
-          LOG.error("Failed verifying the JWT token after public key update", e);
-          send403(res);
-          return;
-        }
+        LOG.error("Failed verifying the JWT token after public key update", e);
+        send403(res);
+        return;
       }
-      request.setAttribute("token", jwt);
-      chain.doFilter(req, res);
     }
+    request.setAttribute("token", jwt);
+    chain.doFilter(req, res);
   }
 
   private synchronized PublicKey getJwtPublicKey(boolean reset)
@@ -146,7 +144,4 @@ public class KeycloakAuthenticationFilter implements Filter {
     HttpServletResponse response = (HttpServletResponse) res;
     response.sendError(403);
   }
-
-  @Override
-  public void destroy() {}
 }
