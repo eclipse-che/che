@@ -135,7 +135,7 @@ public class GitPullTest {
     projectExplorer.selectItem(FIRST_PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
 
     //Commit and push changes
@@ -153,7 +153,7 @@ public class GitPullTest {
     git.waitGitStatusBarWithMess("Successfully pushed");
     git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/gitPullTest.git");
 
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
     projectExplorer.openItemByPath(FIRST_PROJECT_NAME);
 
@@ -173,7 +173,7 @@ public class GitPullTest {
     git.waitGitStatusBarWithMess("Successfully pulled");
     git.waitGitStatusBarWithMess("from git@github.com:" + gitHubUsername + "/gitPullTest");
 
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage("Pulled from git@github.com:" + gitHubUsername + "/gitPullTest.git");
 
     // check changes in the second project

@@ -17,7 +17,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -37,28 +36,27 @@ public class GitStatusBar {
   }
 
   interface Locators {
-    String GIT_STATUS_BAR_TAB_ID = "gwt-debug-partButton-Processes";
-    String GIT_STATUS_BAR_INFO_PANEL = "(//div[@id='gwt-debug-gitOutputConsoleLines'])[last()]";
-    String GIT_STATUS_BAR_NAVIGATE_BTN = "//div[@id='gwt-debug-consolePart']/preceding::div[6]";
-    String GIT_STATUS_BAR_REMOVE_BUTTON = "//div[@id='gwt-debug-consolePart']/preceding::div[2]";
-    String GIT_STATUS_BAR_MINIMIZE_BTN =
-        "(//div[text()='Processes'])[position()=2]/following::div[3]";
+    String GIT_BAR_TAB_ID = "gwt-debug-partButton-Processes";
+    String GIT_BAR_INFO_PANEL = "(//div[@id='gwt-debug-gitOutputConsoleLines'])[last()]";
+    String GIT_BAR_NAVIGATE_BTN = "//div[@id='gwt-debug-consolePart']/preceding::div[6]";
+    String GIT_BAR_REMOVE_BUTTON = "//div[@id='gwt-debug-consolePart']/preceding::div[2]";
+    String GIT_BAR_HIDE_BTN = "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-hideButton']";
   }
 
-  @FindBy(id = Locators.GIT_STATUS_BAR_TAB_ID)
+  @FindBy(id = Locators.GIT_BAR_TAB_ID)
   WebElement statusBarTab;
 
-  @FindBy(xpath = Locators.GIT_STATUS_BAR_INFO_PANEL)
+  @FindBy(xpath = Locators.GIT_BAR_INFO_PANEL)
   WebElement gitStatusBarInfoPanel;
 
-  @FindBy(xpath = Locators.GIT_STATUS_BAR_NAVIGATE_BTN)
+  @FindBy(xpath = Locators.GIT_BAR_NAVIGATE_BTN)
   WebElement gitStatusBarNaviBtn;
 
-  @FindBy(xpath = Locators.GIT_STATUS_BAR_REMOVE_BUTTON)
+  @FindBy(xpath = Locators.GIT_BAR_REMOVE_BUTTON)
   WebElement gitStatusBarRemoveBtn;
 
-  @FindBy(xpath = Locators.GIT_STATUS_BAR_MINIMIZE_BTN)
-  WebElement gitStatusBarMinimizeBtn;
+  @FindBy(xpath = Locators.GIT_BAR_HIDE_BTN)
+  WebElement gitBarHideBtn;
 
   /** wait appears git statusbar tab */
   public void waitGitStatusBarOpenedTab() {
@@ -72,23 +70,13 @@ public class GitStatusBar {
         .until(ExpectedConditions.visibilityOf(gitStatusBarInfoPanel));
   }
 
-  /** wait the git status Bar information panel is closed */
-  public void waitGitStatusBarPanelIsClosed() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.id(Locators.GIT_STATUS_BAR_INFO_PANEL)));
-  }
-
   public String getTextStatus() {
     return gitStatusBarInfoPanel.getText();
   }
 
   public void waitCloseGitStatusBarInfoPanel() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.id(Locators.GIT_STATUS_BAR_INFO_PANEL)));
+        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.GIT_BAR_INFO_PANEL)));
   }
 
   /** click on statusbar tab */
@@ -101,13 +89,7 @@ public class GitStatusBar {
   public void waitMesageIntoGitInfoPAnel(final String message) {
     waitGitStatusBarInfoPanel();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            new ExpectedCondition<Boolean>() {
-              @Override
-              public Boolean apply(WebDriver webDriver) {
-                return getTextStatus().contains(message);
-              }
-            });
+        .until((ExpectedCondition<Boolean>) webDriver -> getTextStatus().contains(message));
   }
 
   /** wait and click on navigate button in the 'git console' */
@@ -127,7 +109,7 @@ public class GitStatusBar {
   /** click on the 'minimize 'button */
   public void clickOnStatusBarMinimizeBtn() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(gitStatusBarMinimizeBtn))
+        .until(ExpectedConditions.visibilityOf(gitBarHideBtn))
         .click();
   }
 }

@@ -130,8 +130,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     projectExplorer.selectItem(PROJECT_1);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
 
     // Remove file css from index
@@ -143,8 +142,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     git.waitRemoveFromIndexFileName("Remove file newFile.css from index?");
     git.confirmRemoveFromIndexForm();
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_REMOVE_FROM_INDEX_SUCCESS);
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_REMOVE_FROM_INDEX_SUCCESS);
     projectExplorer.waitItemIsDisappeared(PROJECT_1 + "/" + NEW_FILE_NAME);
 
@@ -153,8 +151,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(COMMIT_MESSAGE);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
     projectExplorer.selectItem(PROJECT_1);
 
@@ -169,11 +166,9 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     git.clickPush();
     git.waitPushFormToClose();
     consoles.waitProcessInProcessConsoleTree("Git push");
-
     git.waitGitStatusBarWithMess("Successfully pushed");
     git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/testRepo-1.git");
-
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
 
     // Open second project and fetch changes from master remote branch of test remote repository to master local branch.
@@ -187,11 +182,8 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     git.waitFetchFormOpened();
     git.clickOnFetchButton();
     git.waitFetchFormClosed();
-
     git.waitGitStatusBarWithMess("Fetched from " + cloneUri);
-    git.closeGitInfoPanel();
-
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage("Fetched from " + cloneUri);
 
     // Open changed in first project files file_1, file_2 and removed file
@@ -208,13 +200,13 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     mergeRemoteBranch(ORIGIN_MASTER);
     git.waitGitStatusBarWithMess(MERGE_MESSAGE_1);
     git.waitGitStatusBarWithMess(MERGE_MESSAGE_2);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(MERGE_MESSAGE_1);
     events.waitExpectedMessage(MERGE_MESSAGE_2);
     editor.closeAllTabs(); //TODO clarify the behaviour of the 'git merge'
 
     // Checking merging
-    events.clickMinimizeButtonEventsPanel();
+    consoles.closeProcessesArea();
     projectExplorer.openItemByPath(PROJECT_2 + "/" + FILE_FOR_CHANGE);
     editor.waitActiveEditor();
     editor.waitTextIntoEditor(MESSAGE_FOR_CHANGE_CONTENT);
@@ -227,12 +219,11 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.MERGE);
     mergeRemoteBranch(ORIGIN_MASTER);
     git.waitGitStatusBarWithMess(MERGE_MESSAGE_3);
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(MERGE_MESSAGE_3);
 
     // View and check git history
-    events.clickMinimizeButtonEventsPanel();
+    consoles.closeProcessesArea();
     projectExplorer.selectItem(PROJECT_2);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
     git.waitTextInHistoryForm(COMMIT_MESSAGE);

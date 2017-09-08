@@ -118,12 +118,9 @@ public class PushingChangesTest {
     //Create new file and push it.
     git.createNewFileAndPushItToGitHub(PROJECT_NAME, "new.html");
     consoles.waitProcessInProcessConsoleTree("Git push", LOADER_TIMEOUT_SEC);
-
     git.waitGitStatusBarWithMess("Successfully pushed");
     git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/pushChangesTest.git");
-
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     loader.waitOnClosed();
     events.waitExpectedMessage(PUSH_MSG);
 
@@ -154,7 +151,7 @@ public class PushingChangesTest {
     git.waitAndRunCommit(COMMIT_MESSAGE);
     loader.waitOnClosed();
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
 
     //Push changes
@@ -166,7 +163,7 @@ public class PushingChangesTest {
     consoles.waitProcessInProcessConsoleTree("Git push", LOADER_TIMEOUT_SEC);
     git.waitGitStatusBarWithMess("Successfully pushed");
     git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/pushChangesTest.git");
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
 
     //Call Push again
@@ -177,7 +174,7 @@ public class PushingChangesTest {
     git.waitPushFormToClose();
     notifications.waitExpectedMessageOnProgressPanelAndClosed(PUSH_NOTHING);
     git.waitGitStatusBarWithMess(PUSH_NOTHING);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
     events.clearAllMessages();
 
@@ -197,8 +194,7 @@ public class PushingChangesTest {
     git.waitAndRunCommitWithPush(COMMIT_MESSAGE, "origin/master");
     loader.waitOnClosed();
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickProjectEventsTab();
-    events.clearAllMessages();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
     events.waitExpectedMessage(PUSH_MSG);
 
@@ -208,7 +204,7 @@ public class PushingChangesTest {
     git.waitAndRunAmendCommitMessage(COMMIT_MESSAGE);
     loader.waitOnClosed();
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
 
     //Force push
@@ -221,7 +217,7 @@ public class PushingChangesTest {
     consoles.waitProcessInProcessConsoleTree("Git push", LOADER_TIMEOUT_SEC);
     git.waitGitStatusBarWithMess("Successfully pushed");
     git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/pushChangesTest.git");
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
   }
 }

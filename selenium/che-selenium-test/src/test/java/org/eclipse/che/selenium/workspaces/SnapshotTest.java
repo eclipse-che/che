@@ -15,7 +15,6 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -23,7 +22,6 @@ import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
@@ -49,7 +47,6 @@ public class SnapshotTest {
   @Inject private Consoles consoles;
   @Inject private ToastLoader toastLoader;
   @Inject private Menu menu;
-  @Inject private NotificationsPopupPanel notificationsPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
@@ -80,12 +77,10 @@ public class SnapshotTest {
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.STOP_WORKSPACE);
-    toastLoader.waitExpectedTextInToastLoader("Snapshotting the workspace");
+    toastLoader.waitExpectedTextInToastLoader("Stopping the workspace");
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running", 60);
 
     toastLoader.clickOnStartButton();
-    notificationsPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS, 240);
     terminal.waitTerminalConsole();
     consoles.selectProcessByTabName("Terminal");
     terminal.typeIntoTerminal(USER_DIRECTORY);

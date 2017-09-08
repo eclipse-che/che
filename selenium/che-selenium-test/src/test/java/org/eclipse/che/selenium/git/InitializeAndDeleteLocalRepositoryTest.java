@@ -84,7 +84,7 @@ public class InitializeAndDeleteLocalRepositoryTest {
     askDialog.acceptDialogWithText(ASK_DIALOG_TEXT);
     loader.waitOnClosed();
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_INITIALIZED_SUCCESS);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_FOR_EXPAND + "AppController.java");
@@ -110,7 +110,7 @@ public class InitializeAndDeleteLocalRepositoryTest {
     askDialog.acceptDialogWithText(DELETE_REPO_TEXT);
     loader.waitOnClosed();
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_REPO_DELETE);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_REPO_DELETE);
   }
 }

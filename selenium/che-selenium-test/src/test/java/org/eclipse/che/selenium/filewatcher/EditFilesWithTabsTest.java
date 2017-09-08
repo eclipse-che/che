@@ -111,8 +111,8 @@ public class EditFilesWithTabsTest {
   private void prepareFiles() {
     expandFoldersToClass(projectExplorer1, editor1);
     expandFoldersToClass(projectExplorer2, editor2);
-    eventsTab1.clickProjectEventsTab();
-    eventsTab2.clickProjectEventsTab();
+    eventsTab1.clickEventLogBtn();
+    eventsTab2.clickEventLogBtn();
   }
 
   /** Expands project for a defined browser instance ('user') */

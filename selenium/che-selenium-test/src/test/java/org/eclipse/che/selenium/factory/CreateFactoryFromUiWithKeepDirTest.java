@@ -115,7 +115,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
       projectExplorer.openItemByPath(PROJECT_NAME + "/" + KEEPED_DIR);
     }
 
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     createFactoryAndSwitchToWs();
   }
 
@@ -137,7 +137,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
       ide.driver().switchTo().defaultContent();
       projectExplorer.waitProjectExplorer(50);
     }
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
     events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
