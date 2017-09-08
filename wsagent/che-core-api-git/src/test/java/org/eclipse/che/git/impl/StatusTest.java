@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.git.impl;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
@@ -55,7 +56,7 @@ public class StatusTest {
     //given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     //when
-    final Status status = connection.status(null);
+    final Status status = connection.status(emptyList());
     //then
     assertTrue(status.getAdded().isEmpty());
     assertTrue(status.getChanged().isEmpty());
@@ -76,7 +77,7 @@ public class StatusTest {
     addFile(connection, "a", "a content");
     addFile(connection, "b", "b content");
     //when
-    final Status status = connection.status(null);
+    final Status status = connection.status(emptyList());
     //then
     assertEquals(status.getUntracked(), ImmutableList.of("a", "b"));
     assertTrue(status.getAdded().isEmpty());
@@ -96,7 +97,7 @@ public class StatusTest {
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     addFile(connection.getWorkingDir().toPath().resolve("new_directory"), "a", "content of a");
     //when
-    final Status status = connection.status(null);
+    final Status status = connection.status(emptyList());
     //then
     assertEquals(status.getUntrackedFolders(), ImmutableList.of("new_directory"));
     assertTrue(status.getAdded().isEmpty());
@@ -119,7 +120,7 @@ public class StatusTest {
     //add "a" and "b" files
     connection.add(AddParams.create(ImmutableList.of("a", "b")));
     //when
-    final Status status = connection.status(null);
+    final Status status = connection.status(emptyList());
     //then
     assertEquals(status.getAdded(), ImmutableList.of("a", "b"));
     assertEquals(status.getUntracked(), ImmutableList.of("c"));
@@ -144,7 +145,7 @@ public class StatusTest {
     //modify "a"
     addFile(connection, "a", "new content of a");
     //when
-    final Status status = connection.status(null);
+    final Status status = connection.status(emptyList());
     //then
     assertEquals(status.getModified(), ImmutableList.of("a"));
     assertTrue(status.getUntracked().isEmpty());
@@ -175,7 +176,7 @@ public class StatusTest {
     //change "a"
     addFile(connection, "a", "changed content of a");
     //when
-    final Status status = connection.status(null);
+    final Status status = connection.status(emptyList());
     //then
     assertEquals(status.getChanged(), ImmutableList.of("a"));
     assertTrue(status.getAdded().isEmpty());
@@ -212,7 +213,7 @@ public class StatusTest {
     //merge with "new_branch" to get conflict
     connection.merge("new_branch");
     //when
-    final Status status = connection.status(null);
+    final Status status = connection.status(emptyList());
     //then
     assertEquals(status.getConflicting(), ImmutableList.of("a"));
     assertTrue(status.getModified().isEmpty());
@@ -236,7 +237,7 @@ public class StatusTest {
     //delete "a"
     deleteFile(connection, "a");
     //when
-    final Status status = connection.status(null);
+    final Status status = connection.status(emptyList());
     //then
     assertEquals(status.getMissing(), ImmutableList.of("a"));
     assertEquals(status.getAdded(), ImmutableList.of("a"));
@@ -263,7 +264,7 @@ public class StatusTest {
     //delete "a"
     deleteFile(connection, "a");
     //when
-    final Status status = connection.status(null);
+    final Status status = connection.status(emptyList());
     //then
     assertTrue(status.getRemoved().isEmpty());
     assertTrue(status.getAdded().isEmpty());
@@ -290,7 +291,7 @@ public class StatusTest {
     //remove "a" from index
     connection.rm(RmParams.create(ImmutableList.of("a")));
     //when
-    final Status status = connection.status(null);
+    final Status status = connection.status(emptyList());
     //then
     assertEquals(status.getRemoved(), ImmutableList.of("a"));
     assertTrue(status.getAdded().isEmpty());

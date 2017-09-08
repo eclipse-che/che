@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.git.impl;
 
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.git.impl.GitTestUtil.CONTENT;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
@@ -123,7 +124,7 @@ public class AddTest {
 
     // then
     // the deleted file is added to index, so it becomes removed for git
-    List<String> stagedDeletedFiles = connection.status(null).getRemoved();
+    List<String> stagedDeletedFiles = connection.status(emptyList()).getRemoved();
     assertEquals(stagedDeletedFiles.size(), 1);
     assertEquals(stagedDeletedFiles.get(0), "CHANGELOG.txt");
   }

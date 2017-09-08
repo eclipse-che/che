@@ -12,6 +12,7 @@ package org.eclipse.che.git.impl;
 
 import static java.nio.file.Files.write;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
@@ -190,8 +191,8 @@ public class CommitTest {
     connection.commit(CommitParams.create("commit").withFiles(singletonList("File1.txt")));
 
     //then
-    assertTrue(connection.status(null).getAdded().contains("File2.txt"));
-    assertTrue(connection.status(null).getAdded().size() == 1);
+    assertTrue(connection.status(emptyList()).getAdded().contains("File2.txt"));
+    assertTrue(connection.status(emptyList()).getAdded().size() == 1);
   }
 
   @Test(

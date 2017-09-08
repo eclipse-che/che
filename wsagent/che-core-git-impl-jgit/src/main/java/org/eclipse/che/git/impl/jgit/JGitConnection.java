@@ -1687,7 +1687,7 @@ class JGitConnection implements GitConnection {
   }
 
   @Override
-  public Status status(@Nullable List<String> filter) throws GitException {
+  public Status status(List<String> filter) throws GitException {
     if (!RepositoryCache.FileKey.isGitRepository(getRepository().getDirectory(), FS.DETECTED)) {
       throw new GitException("Not a git repository");
     }

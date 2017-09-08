@@ -46,7 +46,6 @@ import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.Tag;
-import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Connection to Git repository.
@@ -335,11 +334,11 @@ public interface GitConnection extends Closeable {
    * @param filter list of paths to filter the status. Status result will include only files witch
    *     paths are contained in the filter list, or are children of the folder paths that are
    *     mentioned in the filter list. Unfiltered status of working tree will be returned, if the
-   *     filter list is {@code null} or empty
+   *     filter list is empty
    * @return status.
    * @throws GitException if any error occurs
    */
-  Status status(@Nullable List<String> filter) throws GitException;
+  Status status(List<String> filter) throws GitException;
 
   /**
    * Create new tag.

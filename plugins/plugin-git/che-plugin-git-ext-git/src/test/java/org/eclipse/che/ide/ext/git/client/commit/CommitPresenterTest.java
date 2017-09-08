@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -124,7 +125,7 @@ public class CommitPresenterTest extends BaseTest {
         .thenReturn(pushPromise);
     when(service.log(any(Path.class), eq(null), anyInt(), anyInt(), anyBoolean()))
         .thenReturn(logPromise);
-    when(service.getStatus(any(Path.class), null)).thenReturn(statusPromise);
+    when(service.getStatus(any(Path.class), emptyList())).thenReturn(statusPromise);
   }
 
   @Test

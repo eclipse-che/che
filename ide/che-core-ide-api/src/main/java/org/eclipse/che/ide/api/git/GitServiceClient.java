@@ -354,10 +354,10 @@ public interface GitServiceClient {
    * @param filter list of paths to filter the status. Status result will include only files witch
    *     paths are contained in the filter list, or are children of the folder paths that are
    *     mentioned in the filter list. Unfiltered status of working tree will be returned, if the
-   *     filter list is {@code null} or empty
+   *     filter list is empty
    * @return the promise which either resolves working tree status or rejects with an error
    */
-  Promise<Status> getStatus(Path project, @Nullable List<String> filter);
+  Promise<Status> getStatus(Path project, List<String> filter);
 
   /**
    * Remove the git repository from given path.

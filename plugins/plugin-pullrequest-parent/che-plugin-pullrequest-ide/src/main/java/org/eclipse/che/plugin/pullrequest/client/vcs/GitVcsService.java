@@ -34,6 +34,8 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
+import static java.util.Collections.emptyList;
+
 /** Git backed implementation for {@link VcsService}. */
 @Singleton
 public class GitVcsService implements VcsService {
@@ -137,7 +139,7 @@ public class GitVcsService implements VcsService {
   @Override
   public Promise<String> getBranchName(ProjectConfig project) {
     return service
-        .getStatus(Path.valueOf(project.getPath()), null)
+        .getStatus(Path.valueOf(project.getPath()), emptyList())
         .then((Function<Status, String>) status -> status.getBranchName());
   }
 
@@ -145,7 +147,7 @@ public class GitVcsService implements VcsService {
   public void hasUncommittedChanges(
       @NotNull final ProjectConfig project, @NotNull final AsyncCallback<Boolean> callback) {
     service
-        .getStatus(Path.valueOf(project.getPath()), null)
+        .getStatus(Path.valueOf(project.getPath()), emptyList())
         .then(
             status -> {
               callback.onSuccess(!status.isClean());

@@ -45,7 +45,6 @@ import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -248,7 +247,7 @@ public class GitServiceClientImpl implements GitServiceClient {
   }
 
   @Override
-  public Promise<Status> getStatus(Path project, @Nullable List<String> filter) {
+  public Promise<Status> getStatus(Path project, List<String> filter) {
     StringBuilder params = new StringBuilder("?projectPath=" + project);
     if (filter != null) {
       for (String path : filter) {
