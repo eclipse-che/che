@@ -98,8 +98,26 @@ import org.eclipse.che.api.git.params.RemoteUpdateParams;
 import org.eclipse.che.api.git.params.ResetParams;
 import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.params.TagCreateParams;
-import org.eclipse.che.api.git.shared.*;
+import org.eclipse.che.api.git.shared.AddRequest;
+import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.BranchListMode;
+import org.eclipse.che.api.git.shared.DiffCommitFile;
+import org.eclipse.che.api.git.shared.EditedRegion;
+import org.eclipse.che.api.git.shared.EditedRegionType;
+import org.eclipse.che.api.git.shared.GitUser;
+import org.eclipse.che.api.git.shared.MergeResult;
+import org.eclipse.che.api.git.shared.ProviderInfo;
+import org.eclipse.che.api.git.shared.PullResponse;
+import org.eclipse.che.api.git.shared.PushResponse;
+import org.eclipse.che.api.git.shared.RebaseResponse;
 import org.eclipse.che.api.git.shared.RebaseResponse.RebaseStatus;
+import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.api.git.shared.RemoteReference;
+import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.git.shared.ShowFileContentResponse;
+import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.git.shared.StatusFormat;
+import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
@@ -2144,14 +2162,16 @@ class JGitConnection implements GitConnection {
   private String generateExceptionMessage(Throwable error) {
     String message = error.getMessage();
     while (error.getCause() != null) {
-      //if e caused by an SSLHandshakeException - replace thrown message with a hardcoded message
+      // if e caused by an SSLHandshakeException - replace thrown message with a hardcoded message
       if (error.getCause() instanceof SSLHandshakeException) {
         message =
             "The system is not configured to trust the security certificate provided by the Git server";
         break;
       } else if (error.getCause() instanceof IOException) {
-        // Security fix - error message should not include complete local file path on the target system
-        // Error message for example - File name too long (path /xx/xx/xx/xx/xx/xx/xx/xx /, working dir /xx/xx/xx)
+        // Security fix - error message should not include complete local file path on the target
+        // system
+        // Error message for example - File name too long (path /xx/xx/xx/xx/xx/xx/xx/xx /, working
+        // dir /xx/xx/xx)
         if (message != null && message.startsWith(FILE_NAME_TOO_LONG_ERROR_PREFIX)) {
           try {
             String repoPath = repository.getWorkTree().getCanonicalPath();
@@ -2165,7 +2185,7 @@ class JGitConnection implements GitConnection {
             }
             break;
           } catch (IOException e) {
-            //Hide exception as it is only needed for this message generation
+            // Hide exception as it is only needed for this message generation
           }
         }
       }

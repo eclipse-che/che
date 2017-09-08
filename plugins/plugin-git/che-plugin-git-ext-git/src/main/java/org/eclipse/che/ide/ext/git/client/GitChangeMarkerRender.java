@@ -34,7 +34,7 @@ public class GitChangeMarkerRender implements VcsChangeMarkerRender {
 
   @Override
   public void addChangeMarker(int lineStart, int lineEnd, EditedRegionType type) {
-    DivElement element = null;
+    DivElement element;
     switch (type) {
       case INSERTION:
         {
@@ -50,6 +50,10 @@ public class GitChangeMarkerRender implements VcsChangeMarkerRender {
         {
           element = Elements.createDivElement(resources.changeMarkersCSS().markerDeletion());
           break;
+        }
+      default:
+        {
+          return;
         }
     }
     hasGutter.addGutterItem(lineStart, lineEnd, VCS_CHANGE_MARKERS_GUTTER, element);
