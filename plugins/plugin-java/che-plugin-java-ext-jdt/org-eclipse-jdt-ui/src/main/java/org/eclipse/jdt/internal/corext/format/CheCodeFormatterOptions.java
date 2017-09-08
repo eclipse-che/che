@@ -9,6 +9,8 @@
  */
 package org.eclipse.jdt.internal.corext.format;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,6 +37,24 @@ public class CheCodeFormatterOptions {
       return formatSettings;
     }
     return DefaultCodeFormatterConstants.getEclipseDefaultSettings();
+  }
+
+  /**
+   * Parses code formatter file.
+   *
+   * @param file file which describes formatting settings
+   * @return map with formatting settings
+   */
+  public static Map<String, String> getFormatSettingsFromFile(File file) {
+    SAXParserFactory factory = SAXParserFactory.newInstance();
+    XMLParser parserXML = new XMLParser();
+    try (FileInputStream fis = new FileInputStream(file)) {
+      SAXParser parser = factory.newSAXParser();
+      parser.parse(fis, parserXML);
+    } catch (ParserConfigurationException | SAXException | IOException e) {
+      LOG.error("It is not possible to parse file " + file.getName(), e);
+    }
+    return parserXML.getSettings();
   }
 
   private Map<String, String> getCheDefaultSettings() {
