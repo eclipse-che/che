@@ -76,8 +76,8 @@ public class UpdateFilesWithoutIDE {
     ide1.open(ws);
     ide2.open(ws);
 
-    events1.clickProjectEventsTab();
-    events2.clickProjectEventsTab();
+    events1.clickEventLogBtn();
+    events2.clickEventLogBtn();
   }
 
   @Test

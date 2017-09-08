@@ -15,6 +15,7 @@ import com.google.inject.name.Named;
 import java.util.Date;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestSshServiceClient;
@@ -81,6 +82,7 @@ public class CheckoutToRemoteBranchTest {
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestGitHubServiceClient gitHubClientService;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -133,7 +135,7 @@ public class CheckoutToRemoteBranchTest {
     makePullSecondRemoteBranch();
     notifications.waitProgressPopupPanelClose();
     git.waitGitStatusBarWithMess(PULL_MSG);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PULL_MSG);
 
     // Make some change in java file
@@ -165,13 +167,13 @@ public class CheckoutToRemoteBranchTest {
     projectExplorer.selectItem(PROJECT_NAME + "/src/main");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     COMMIT_MESS = COMMIT_MESS + new Date().toString();
     git.waitAndRunCommit(COMMIT_MESS);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
 
     // Make push
@@ -190,7 +192,7 @@ public class CheckoutToRemoteBranchTest {
             + "/springProjectWithSeveralBranches.git";
     git.waitGitStatusBarWithMess(pushedMessage);
 
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
 
     // import from hosted git repository the second project
@@ -237,7 +239,7 @@ public class CheckoutToRemoteBranchTest {
     git.waitGroupGitCompareIsOpen();
     git.selectFileInChangedFilesTreePanel("GreetingController.java");
     checkChangesIntoCompareForm(uniqueValue);
-    ide.driver().switchTo().parentFrame();
+    seleniumWebDriver.switchTo().parentFrame();
     git.closeGitCompareForm();
     git.waitGroupGitCompareIsOpen();
     git.selectFileInChangedFilesTreePanel("index.jsp");

@@ -91,7 +91,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
     projectExplorer.waitItem(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
     editor.waitTabIsPresent("index.jsp");
     editor.waitTabIsPresent("AppController");

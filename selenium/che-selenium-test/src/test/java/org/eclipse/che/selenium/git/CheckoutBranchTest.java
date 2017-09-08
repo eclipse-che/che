@@ -112,7 +112,7 @@ public class CheckoutBranchTest {
     loader.waitOnClosed();
     askDialog.confirmAndWaitClosed();
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_INITIALIZED_SUCCESS);
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
@@ -177,7 +177,7 @@ public class CheckoutBranchTest {
     git.waitAddToIndexFormToOpen();
     git.confirmAddToIndexForm();
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     git.waitGitStatusBarWithMess(STATUS_MESSAGE_AFTER_ADD);
@@ -186,7 +186,7 @@ public class CheckoutBranchTest {
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("first commit");
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
     loader.waitOnClosed();
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
@@ -247,7 +247,7 @@ public class CheckoutBranchTest {
     projectExplorer.selectItem(PROJECT_NAME + "/src/main");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     checkShwithConflict();
   }

@@ -83,7 +83,7 @@ public class CheckWsAgentAfterStopProcessTest {
         .until(ExpectedConditions.visibilityOfElementLocated(By.id("ask-dialog-first")))
         .click();
     projectExplorer.waitItem(PROJECT_NAME);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
   }
 }

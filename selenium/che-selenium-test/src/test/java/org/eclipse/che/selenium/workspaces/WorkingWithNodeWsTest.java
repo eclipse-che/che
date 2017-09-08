@@ -17,13 +17,11 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -56,7 +54,6 @@ public class WorkingWithNodeWsTest {
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private Dashboard dashboard;
   @Inject private DashboardWorkspace dashboardWorkspace;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private AskDialog askDialog;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -74,16 +71,13 @@ public class WorkingWithNodeWsTest {
     navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
     dashboardWorkspace.waitToolbarTitleName("Workspaces");
     dashboardWorkspace.clickOnNewWorkspaceBtn();
-
     createWorkspace.waitToolbar();
     createWorkspace.selectStack(TestStacksConstants.NODE.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
     projectSourcePage.clickAddOrImportProjectButton();
     projectSourcePage.selectSample(NODE_JS_PROJECT_NAME);
     projectSourcePage.clickAdd();
-
     createWorkspace.clickCreate();
-
     loader.waitOnClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
@@ -117,8 +111,6 @@ public class WorkingWithNodeWsTest {
     consoles.waitPreviewUrlIsPresent();
     seleniumWebDriver.navigate().refresh();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
     consoles.waitPreviewUrlIsPresent();
     projectExplorer.selectItem(NODE_JS_PROJECT_NAME);
     consoles.selectProcessInProcessConsoleTreeByName("web-nodejs-simple:run");

@@ -129,14 +129,12 @@ public class WorkingWithPullConflictsTest {
     projectExplorer.selectItem(PROJECT_2);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(COMMIT_MSG);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT,
@@ -149,8 +147,7 @@ public class WorkingWithPullConflictsTest {
     consoles.waitProcessInProcessConsoleTree("Git push", LOADER_TIMEOUT_SEC);
     git.waitGitStatusBarWithMess("Successfully pushed");
     git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/testRepo-3.git");
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
 
     // Open first project and change the same files
@@ -169,22 +166,19 @@ public class WorkingWithPullConflictsTest {
     git.clickPull();
     git.waitPullFormToClose();
     consoles.waitProcessInProcessConsoleTree("Git pull", LOADER_TIMEOUT_SEC);
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(firstMergeConflictMessage);
 
     // Add to index and commit
     projectExplorer.selectItem(PROJECT_1);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(COMMIT_MSG);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
 
     // Make pull again and get second conflict
@@ -196,8 +190,7 @@ public class WorkingWithPullConflictsTest {
     git.clickPull();
     git.waitPullFormToClose();
     consoles.waitProcessInProcessConsoleTree("Git pull", LOADER_TIMEOUT_SEC);
-    git.closeGitInfoPanel();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(secondMergeConflictMessage);
     loader.waitOnClosed();
 

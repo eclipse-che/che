@@ -100,12 +100,6 @@ public class Git {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
-  /** click on git-info panel tab, wait while info panel will open */
-  public void openGitInfoPanel() {
-    gitStatusBar.clickOnGitStatusBarTab();
-    gitStatusBar.waitGitStatusBarInfoPanel();
-  }
-
   /** click on git-info panel tab, wait while info panel will close */
   public void closeGitInfoPanel() {
     gitStatusBar.clickOnStatusBarMinimizeBtn();

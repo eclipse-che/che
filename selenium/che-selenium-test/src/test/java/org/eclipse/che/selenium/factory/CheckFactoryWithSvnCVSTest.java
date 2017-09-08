@@ -111,7 +111,7 @@ public class CheckFactoryWithSvnCVSTest {
       notifications.waitExpectedMessageOnProgressPanelAndClosed(
           "Project " + expectedProject + " imported");
     } catch (org.openqa.selenium.TimeoutException e) {
-      events.clickProjectEventsTab();
+      events.clickEventLogBtn();
       events.waitExpectedMessage("Project " + expectedProject + " imported");
     }
 

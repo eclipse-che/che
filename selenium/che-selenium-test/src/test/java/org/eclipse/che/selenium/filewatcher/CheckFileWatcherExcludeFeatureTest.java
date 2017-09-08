@@ -173,7 +173,7 @@ public class CheckFileWatcherExcludeFeatureTest {
 
   @Test(priority = 5)
   public void checkIsNotExcludeOperationEventAboutIgnoreFile() {
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.clearAllMessages();
 
     doFileWatcherExcludeOperation(

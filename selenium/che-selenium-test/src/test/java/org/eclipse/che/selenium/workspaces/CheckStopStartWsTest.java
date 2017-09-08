@@ -12,12 +12,10 @@ package org.eclipse.che.selenium.workspaces;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
@@ -33,7 +31,6 @@ public class CheckStopStartWsTest {
   @Inject private MachineTerminal terminal;
   @Inject private ToastLoader toastLoader;
   @Inject private Menu menu;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -47,14 +44,13 @@ public class CheckStopStartWsTest {
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.STOP_WORKSPACE);
-    toastLoader.waitExpectedTextInToastLoader("Snapshotting the workspace");
+    toastLoader.waitExpectedTextInToastLoader("Stopping the workspace");
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running", 60);
     toastLoader.clickOnStartButton();
     loader.waitOnClosed();
     toastLoader.waitExpectedTextInToastLoader("Starting workspace runtime.", 20);
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS, 120);
     loader.waitOnClosed();
-    terminal.waitTerminalConsole(20);
+    projectExplorer.waitProjectExplorer();
+    terminal.waitTerminalTab(20);
   }
 }

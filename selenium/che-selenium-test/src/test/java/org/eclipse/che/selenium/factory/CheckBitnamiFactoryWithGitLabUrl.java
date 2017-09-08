@@ -47,7 +47,7 @@ public class CheckBitnamiFactoryWithGitLabUrl {
     ide.switchFromDashboard();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
         RUNNING_WORKSPACE_MESS, UPDATING_PROJECT_TIMEOUT_SEC);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(
         "Successfully configured and cloned source code of spring-petclinic.");
   }
