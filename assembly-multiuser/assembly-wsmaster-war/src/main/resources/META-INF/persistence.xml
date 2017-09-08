@@ -60,11 +60,6 @@
         <class>org.eclipse.che.api.workspace.server.stack.StackPermissionsImpl</class>
         <class>org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl</class>
 
-        <!--class>com.codenvy.resource.spi.impl.ResourceImpl</class>
-        <class>com.codenvy.resource.spi.impl.FreeResourcesLimitImpl</class>
-        <class>com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl</class>
-        <class>com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl</class>
-        <class>com.codenvy.api.invite.InviteImpl</class-->
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.exception-handler" value="org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler"/>
