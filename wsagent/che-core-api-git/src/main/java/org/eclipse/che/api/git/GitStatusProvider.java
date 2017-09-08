@@ -11,10 +11,12 @@
 package org.eclipse.che.api.git;
 
 import javax.inject.Inject;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusFormat;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VcsStatusProvider;
 
 /**
@@ -24,10 +26,13 @@ import org.eclipse.che.api.project.server.VcsStatusProvider;
  */
 public class GitStatusProvider implements VcsStatusProvider {
   private final GitConnectionFactory gitConnectionFactory;
+  private final ProjectManager projectManager;
 
   @Inject
-  public GitStatusProvider(GitConnectionFactory gitConnectionFactory) {
+  public GitStatusProvider(
+      GitConnectionFactory gitConnectionFactory, ProjectManager projectManager) {
     this.gitConnectionFactory = gitConnectionFactory;
+    this.projectManager = projectManager;
   }
 
   @Override
@@ -39,10 +44,14 @@ public class GitStatusProvider implements VcsStatusProvider {
   public VcsStatus getStatus(String path) throws ServerException {
     try {
       String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
-      Status status =
-          gitConnectionFactory
-              .getConnection(normalizedPath.split("/")[0])
-              .status(StatusFormat.SHORT);
+      String projectPath =
+          projectManager
+              .getProject(normalizedPath.split("/")[0])
+              .getBaseFolder()
+              .getVirtualFile()
+              .toIoFile()
+              .getAbsolutePath();
+      Status status = gitConnectionFactory.getConnection(projectPath).status(StatusFormat.SHORT);
       String itemPath = normalizedPath.substring(normalizedPath.indexOf("/") + 1);
       if (status.getUntracked().contains(itemPath)) {
         return VcsStatus.UNTRACKED;
@@ -54,7 +63,7 @@ public class GitStatusProvider implements VcsStatusProvider {
       } else {
         return VcsStatus.NOT_MODIFIED;
       }
-    } catch (GitException e) {
+    } catch (GitException | NotFoundException e) {
       throw new ServerException(e.getMessage());
     }
   }
