@@ -22,6 +22,8 @@ import java.util.function.Consumer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Provider;
+
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
@@ -47,7 +49,7 @@ public class GitIndexChangedDetector {
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
-  private final ProjectManager projectManager;
+  private final Provider<ProjectManager> projectManagerProvider;
   private final GitConnectionFactory gitConnectionFactory;
 
   private final Set<String> endpointIds = newConcurrentHashSet();
@@ -58,11 +60,11 @@ public class GitIndexChangedDetector {
   public GitIndexChangedDetector(
       RequestTransmitter transmitter,
       FileWatcherManager manager,
-      ProjectManager projectManager,
+      Provider<ProjectManager> projectManagerProvider,
       GitConnectionFactory gitConnectionFactory) {
     this.transmitter = transmitter;
     this.manager = manager;
-    this.projectManager = projectManager;
+    this.projectManagerProvider = projectManagerProvider;
     this.gitConnectionFactory = gitConnectionFactory;
   }
 
@@ -113,7 +115,8 @@ public class GitIndexChangedDetector {
     return id -> {
       try {
         String projectPath =
-            projectManager
+            projectManagerProvider
+                .get()
                 .getProject((path.startsWith("/") ? path.substring(1) : path).split("/")[0])
                 .getBaseFolder()
                 .getVirtualFile()

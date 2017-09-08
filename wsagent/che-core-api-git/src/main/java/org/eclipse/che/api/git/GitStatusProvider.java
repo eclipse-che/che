@@ -11,6 +11,8 @@
 package org.eclipse.che.api.git;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
+
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.git.exception.GitException;
@@ -26,13 +28,13 @@ import org.eclipse.che.api.project.server.VcsStatusProvider;
  */
 public class GitStatusProvider implements VcsStatusProvider {
   private final GitConnectionFactory gitConnectionFactory;
-  private final ProjectManager projectManager;
+  private final Provider<ProjectManager> projectManagerProvider;
 
   @Inject
   public GitStatusProvider(
-      GitConnectionFactory gitConnectionFactory, ProjectManager projectManager) {
+      GitConnectionFactory gitConnectionFactory, Provider<ProjectManager> projectManagerProvider) {
     this.gitConnectionFactory = gitConnectionFactory;
-    this.projectManager = projectManager;
+    this.projectManagerProvider = projectManagerProvider;
   }
 
   @Override
@@ -45,7 +47,8 @@ public class GitStatusProvider implements VcsStatusProvider {
     try {
       String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
       String projectPath =
-          projectManager
+          projectManagerProvider
+              .get()
               .getProject(normalizedPath.split("/")[0])
               .getBaseFolder()
               .getVirtualFile()
