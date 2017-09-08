@@ -262,8 +262,8 @@ public abstract class Window implements IsWidget {
         button.addStyleName(resources.windowCss().buttonAlignLeft());
         break;
       case RIGHT:
+      default:
         button.addStyleName(resources.windowCss().buttonAlignRight());
-        break;
     }
   }
 
