@@ -24,7 +24,7 @@ import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunDebugTestAbstractAction;
 import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
-import org.eclipse.che.plugin.testing.ide.view2.TestResultPresenter;
+import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.testng.ide.TestNgLocalizationConstant;
 import org.eclipse.che.plugin.testing.testng.ide.TestNgResources;
 

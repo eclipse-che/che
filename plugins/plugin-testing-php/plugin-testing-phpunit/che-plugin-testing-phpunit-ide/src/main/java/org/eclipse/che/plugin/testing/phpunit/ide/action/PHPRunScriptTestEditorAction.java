@@ -10,8 +10,7 @@
 package org.eclipse.che.plugin.testing.phpunit.ide.action;
 
 import com.google.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -21,7 +20,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.testing.ide.TestActionRunner;
 import org.eclipse.che.plugin.testing.phpunit.ide.PHPUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.phpunit.ide.PHPUnitTestResources;
@@ -34,6 +33,7 @@ import org.eclipse.che.plugin.testing.phpunit.ide.PHPUnitTestResources;
 public class PHPRunScriptTestEditorAction extends ProjectAction {
 
   private final TestActionRunner runner;
+  private DtoFactory dtoFactory;
   private final AppContext appContext;
   private final EditorAgent editorAgent;
   private final FileTypeRegistry fileTypeRegistry;
@@ -41,17 +41,18 @@ public class PHPRunScriptTestEditorAction extends ProjectAction {
   @Inject
   public PHPRunScriptTestEditorAction(
       TestActionRunner runner,
+      DtoFactory dtoFactory,
       EditorAgent editorAgent,
       FileTypeRegistry fileTypeRegistry,
       PHPUnitTestResources resources,
       AppContext appContext,
-      SelectionAgent selectionAgent,
       PHPUnitTestLocalizationConstant localization) {
     super(
         localization.actionRunScriptTitle(),
         localization.actionRunScriptDescription(),
         resources.testIcon());
     this.runner = runner;
+    this.dtoFactory = dtoFactory;
     this.appContext = appContext;
     this.editorAgent = editorAgent;
     this.fileTypeRegistry = fileTypeRegistry;
@@ -62,9 +63,14 @@ public class PHPRunScriptTestEditorAction extends ProjectAction {
     final Project project = appContext.getRootProject();
     EditorPartPresenter editorPart = editorAgent.getActiveEditor();
     final VirtualFile file = editorPart.getEditorInput().getFile();
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("testTarget", file.getLocation().toString());
-    runner.run("PHPUnit", project.getPath(), parameters);
+
+    TestExecutionContext executionContext = dtoFactory.createDto(TestExecutionContext.class);
+    executionContext.setFrameworkName("PHPUnit");
+    executionContext.setFilePath(file.getLocation().toString());
+    executionContext.setProjectPath(project.getPath());
+    executionContext.setDebugModeEnable(false);
+
+    runner.run(executionContext);
   }
 
   @Override

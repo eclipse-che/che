@@ -12,10 +12,9 @@ package org.eclipse.che.plugin.testing.phpunit.ide.action;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -24,6 +23,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resources.tree.FileNode;
 import org.eclipse.che.plugin.testing.ide.TestActionRunner;
 import org.eclipse.che.plugin.testing.phpunit.ide.PHPUnitTestLocalizationConstant;
@@ -38,6 +38,7 @@ public class PHPRunScriptTestAction extends AbstractPerspectiveAction {
 
   private final TestActionRunner runner;
   private final AppContext appContext;
+  private DtoFactory dtoFactory;
   private final SelectionAgent selectionAgent;
 
   @Inject
@@ -45,16 +46,18 @@ public class PHPRunScriptTestAction extends AbstractPerspectiveAction {
       TestActionRunner runner,
       PHPUnitTestResources resources,
       AppContext appContext,
+      DtoFactory dtoFactory,
       SelectionAgent selectionAgent,
       PHPUnitTestLocalizationConstant localization) {
     super(
-        Arrays.asList(PROJECT_PERSPECTIVE_ID),
+        Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         localization.actionRunScriptTitle(),
         localization.actionRunScriptDescription(),
         null,
         resources.testIcon());
     this.runner = runner;
     this.appContext = appContext;
+    this.dtoFactory = dtoFactory;
     this.selectionAgent = selectionAgent;
   }
 
@@ -65,9 +68,14 @@ public class PHPRunScriptTestAction extends AbstractPerspectiveAction {
     if (possibleNode instanceof FileNode) {
       VirtualFile file = ((FileNode) possibleNode).getData();
       final Project project = appContext.getRootProject();
-      Map<String, String> parameters = new HashMap<>();
-      parameters.put("testTarget", file.getLocation().toString());
-      runner.run("PHPUnit", project.getPath(), parameters);
+
+      TestExecutionContext executionContext = dtoFactory.createDto(TestExecutionContext.class);
+      executionContext.setFrameworkName("PHPUnit");
+      executionContext.setFilePath(file.getLocation().toString());
+      executionContext.setProjectPath(project.getPath());
+      executionContext.setDebugModeEnable(false);
+
+      runner.run(executionContext);
     }
   }
 

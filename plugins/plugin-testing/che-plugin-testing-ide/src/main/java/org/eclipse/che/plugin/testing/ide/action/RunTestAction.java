@@ -27,7 +27,7 @@ import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
-import org.eclipse.che.plugin.testing.ide.view2.TestResultPresenter;
+import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 
 /** Action that allows to run tests from current editor. */
 @Singleton

@@ -56,7 +56,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.model.GeneralTestingEventsProcessor;
-import org.eclipse.che.plugin.testing.ide.view2.TestResultPresenter;
+import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -117,7 +117,10 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
             contextType = CURSOR_POSITION;
             TextEditor activeEditor = (TextEditor) activePart;
             String fileName = activeEditor.getEditorInput().getFile().getName();
-            if (fileName.endsWith(".java") || fileName.endsWith(".xml")) {
+            if (fileName.endsWith(".java")
+                || fileName.endsWith(".xml")
+                || fileName.endsWith(".php")
+                || fileName.endsWith(".phtml")) {
               detectTests(activeEditor);
             } else {
               isEnable = false;

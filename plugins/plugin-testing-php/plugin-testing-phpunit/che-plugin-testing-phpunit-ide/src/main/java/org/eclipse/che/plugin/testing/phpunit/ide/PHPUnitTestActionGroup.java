@@ -47,7 +47,7 @@ public class PHPUnitTestActionGroup implements TestAction {
 
   @Override
   public void addMainMenuItems(DefaultActionGroup testMainMenu) {
-    testMainMenu.add(runScriptTestEditorAction);
+    //testMainMenu.add(runScriptTestEditorAction);
     testMainMenu.add(runContainerTestAction);
   }
 

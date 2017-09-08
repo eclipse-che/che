@@ -60,7 +60,7 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
   @Override
   public List<TestPosition> detectTests(TestDetectionContext context) {
     IJavaProject javaProject = getJavaProject(context.getProjectPath());
-    if (!javaProject.exists()) {
+    if (javaProject == null || !javaProject.exists()) {
       return Collections.emptyList();
     }
 

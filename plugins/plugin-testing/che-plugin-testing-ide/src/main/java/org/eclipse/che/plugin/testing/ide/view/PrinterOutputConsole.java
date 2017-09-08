@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.testing.ide.view2;
+package org.eclipse.che.plugin.testing.ide.view;
 
 import javax.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
