@@ -38,3 +38,5 @@ COPY entrypoint.sh /entrypoint.sh
 COPY open-jdk-source-file-location /open-jdk-source-file-location
 ENTRYPOINT ["/entrypoint.sh"]
 ADD eclipse-che.tar.gz /home/user/
+RUN mkdir /logs /data
+RUN chmod -R 0777 /logs /data /home/user
