@@ -787,6 +787,10 @@ class JGitConnection implements GitConnection {
                         type = DELETION;
                         break;
                       }
+                    case EMPTY:
+                      {
+                        break;
+                      }
                   }
                   return newDto(EditedRegion.class)
                       .withBeginLine(
