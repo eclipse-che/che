@@ -25,7 +25,8 @@ describe('CheTypeResolver', () => {
   let workspaceId = 'workspaceTest';
 
   let agentUrl = 'localhost:3232/wsagent/ext';
-
+  let agentWsUrl = 'ws://localhost:3232/wsagent/ws';
+  let devMachine = {'links': [{'href': agentWsUrl, 'rel': 'wsagent.websocket'}]};
 
   /**
    * API builder.
@@ -59,7 +60,7 @@ describe('CheTypeResolver', () => {
     cheBackend = cheHttpBackend;
     httpBackend = cheHttpBackend.getHttpBackend();
     // setup tests workspace
-    let runtime = {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
+    let runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}], 'devMachine': devMachine};
     let test_workspace = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
     cheBackend.addWorkspaces([test_workspace]);
     // setup backend
