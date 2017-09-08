@@ -341,7 +341,9 @@ public class ProjectRegistry {
   private void initUnconfiguredFolders() {
     try {
       for (FolderEntry folder : root.getChildFolders()) {
-        if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
+        //.che folder is reserved for internal use
+        if (!".che".equals(folder.getName())
+            && !projects.containsKey(folder.getVirtualFile().getPath().toString())) {
           putProject(null, folder, true, false);
         }
       }
