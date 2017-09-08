@@ -40,15 +40,15 @@ spec:
             port: 8080
           timeoutSeconds: 30
         readinessProbe:
-          failureThreshold: 5
+          failureThreshold: 10
           httpGet:
             path: auth/js/keycloak.js
             port: 8080
             scheme: HTTP
           initialDelaySeconds: 10
-          periodSeconds: 10
+          periodSeconds: 3
           successThreshold: 1
-          timeoutSeconds: 60
+          timeoutSeconds: 1
         ports:
         - containerPort: 8080
         resources:

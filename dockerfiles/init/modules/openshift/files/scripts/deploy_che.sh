@@ -76,13 +76,13 @@ done
 # Set configuration common to both minishift and openshift
 # --------------------------------------------------------
 
-CHE_MULTIUSER=${CHE_MULTIUSER:-"false"}
+CHE_MULTI_USER=${CHE_MULTI_USER:-"false"}
 DEFAULT_COMMAND="deploy"
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
 
 if [ "$CHE_MULTI_USER" == "true" ]
 then
-  CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"false"}
+  CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
   DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server-multiuser"
 else 
   CHE_DEDICATED_KEYCLOAK="false"
@@ -90,7 +90,7 @@ else
 fi
 
 CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
-DEFAULT_CHE_IMAGE_TAG="nightly"
+DEFAULT_CHE_IMAGE_TAG="nightly-centos"
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 DEFAULT_CHE_LOG_LEVEL="INFO"
 CHE_LOG_LEVEL=${CHE_LOG_LEVEL:-${DEFAULT_CHE_LOG_LEVEL}}
@@ -216,6 +216,47 @@ oc project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
 echo "done!"
 
 # -------------------------------------------------------------
+# If command == clean up then delete all openshift objects
+# -------------------------------------------------------------
+if [ "${COMMAND}" == "cleanup" ]; then
+  echo "[CHE] Deleting all OpenShift objects..."
+  oc delete all --all 
+  echo "[CHE] Cleanup successfully started. Use \"oc get all\" to verify that all resources have been deleted."
+  exit 0
+# -------------------------------------------------------------
+# If command == clean up then delete all openshift objects
+# -------------------------------------------------------------
+elif [ "${COMMAND}" == "rollupdate" ]; then 
+  echo "[CHE] Rollout latest version of Che..."
+  oc rollout latest che 
+  echo "[CHE] Rollaout successfully started"
+  exit 0
+# ----------------------------------------------------------------
+# At this point command should be "deploy" otherwise it's an error 
+# ----------------------------------------------------------------
+elif [ "${COMMAND}" != "deploy" ]; then 
+  echo "[CHE] **ERROR**: Command \"${COMMAND}\" is not a valid command. Aborting."
+  exit 1
+fi
+
+# -------------------------------------------------------------
+# Starting secondary servers
+# for postgres and optionally Keycloak
+# -------------------------------------------------------------
+
+if [ "$CHE_MULTI_USER" == "true" ]
+then
+    if [ "$CHE_DEDICATED_KEYCLOAK" == "true" ]
+    then
+        $(dirname "$0")/multi-user/deployPostgresAndKeycloak.sh
+    else
+        $(dirname "$0")/multi-user/deployPostgresOnly.sh
+    fi
+fi
+
+$(dirname "$0")/multi-user/wait_until_postgres_is_available.sh
+
+# -------------------------------------------------------------
 # Setting Keycloak-related environment variables
 # Done here since the Openshift project should be available
 # TODO Maybe this should go into a config map, but I don't know
@@ -258,30 +299,6 @@ else
   CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET=NULL
 fi
 
-
-# -------------------------------------------------------------
-# If command == clean up then delete all openshift objects
-# -------------------------------------------------------------
-if [ "${COMMAND}" == "cleanup" ]; then
-  echo "[CHE] Deleting all OpenShift objects..."
-  oc delete all --all 
-  echo "[CHE] Cleanup successfully started. Use \"oc get all\" to verify that all resources have been deleted."
-  exit 0
-# -------------------------------------------------------------
-# If command == clean up then delete all openshift objects
-# -------------------------------------------------------------
-elif [ "${COMMAND}" == "rollupdate" ]; then 
-  echo "[CHE] Rollout latest version of Che..."
-  oc rollout latest che 
-  echo "[CHE] Rollaout successfully started"
-  exit 0
-# ----------------------------------------------------------------
-# At this point command should be "deploy" otherwise it's an error 
-# ----------------------------------------------------------------
-elif [ "${COMMAND}" != "deploy" ]; then 
-  echo "[CHE] **ERROR**: Command \"${COMMAND}\" is not a valid command. Aborting."
-  exit 1
-fi
 
 # -------------------------------------------------------------
 # Verify that Che ServiceAccount has admin rights at project level
@@ -362,7 +379,7 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
           - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__ID\"\\n\
             value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__ID}\"\\n\
           - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+" | tee commandLog.txt | \
+            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
@@ -372,6 +389,21 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
+    sed "s+- env:+- env:\\n\
+          - name: \"CHE_WORKSPACE_LOGS\"\\n\
+            value: \"${CHE_WORKSPACE_LOGS}\"\\n\
+          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"\\n\
+            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"\\n\
+          - name: \"CHE_KEYCLOAK_REALM\"\\n\
+            value: \"${CHE_KEYCLOAK_REALM}\"\\n\
+          - name: \"CHE_KEYCLOAK_CLIENT__ID\"\\n\
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_REALM\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_REALM}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__ID\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__ID}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
@@ -382,6 +414,21 @@ else
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     sed "s/    keycloak-disabled:.*/    keycloak-disabled: \"${CHE_KEYCLOAK_DISABLED}\"/" | \
     if [ "${CHE_LOG_LEVEL}" == "DEBUG" ]; then sed "s/    log-level: \"INFO\"/    log-level: \"DEBUG\"/" ; else cat -; fi | \
+    sed "s+- env:+- env:\\n\
+          - name: \"CHE_WORKSPACE_LOGS\"\\n\
+            value: \"${CHE_WORKSPACE_LOGS}\"\\n\
+          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"\\n\
+            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"\\n\
+          - name: \"CHE_KEYCLOAK_REALM\"\\n\
+            value: \"${CHE_KEYCLOAK_REALM}\"\\n\
+          - name: \"CHE_KEYCLOAK_CLIENT__ID\"\\n\
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_REALM\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_REALM}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__ID\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__ID}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+" | \
     oc apply --force=true -f -
 fi
 echo

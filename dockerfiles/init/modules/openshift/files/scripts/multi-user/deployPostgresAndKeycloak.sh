@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 /bin/sh $(dirname "$0")/deployPostgresOnly.sh
 
