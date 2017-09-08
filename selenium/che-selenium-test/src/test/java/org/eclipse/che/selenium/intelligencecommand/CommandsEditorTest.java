@@ -40,7 +40,7 @@ public class CommandsEditorTest {
   private static final String NAME_COMMAND = "runApp";
   private static final String COMMAND =
       "cd ${current.project.path}\n"
-          + "javac -classpath ${project.java.classpath} -sourcepath ${project.java.sourcepath} -d ${project.java.output.dir} src/com/company/nba/MainClass.java\n"
+          + "javac -classpath ${project.java.classpath} -sourcepath ${project.java.sourcepath} -d ${current.project.path} src/com/company/nba/MainClass.java\n"
           + "java -classpath ${project.java.classpath}${project.java.output.dir} com.company.nba.MainClass";
 
   @Inject private TestWorkspace testWorkspace;

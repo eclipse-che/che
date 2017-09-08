@@ -51,6 +51,6 @@ public class CheckStopStartWsTest {
     toastLoader.waitExpectedTextInToastLoader("Starting workspace runtime.", 20);
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(20);
+    terminal.waitTerminalTab();
   }
 }
