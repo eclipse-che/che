@@ -1,6 +1,7 @@
 #!/bin/bash
 
-/bin/sh $(dirname "$0")/deployPostgresOnly.sh
+$(dirname "$0")/deployPostgresOnly.sh
+$(dirname "$0")/wait_until_postgres_is_available.sh
 
 oc create -f $(dirname "$0")/keycloak/
 
