@@ -122,7 +122,7 @@ services:
     healthcheck:
         test: [ "CMD", "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U keycloak -q -d keycloak -c 'SELECT 1'" ]
         interval: 10s
-        timeout: 20s
+        timeout: 10s
         retries: 10
 
   ########################
