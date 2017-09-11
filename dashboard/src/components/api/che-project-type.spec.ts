@@ -71,14 +71,15 @@ describe('CheProjectType', function(){
   it('Fetch project types', function() {
 
       // setup tests objects
-      var attributeLanguageJava = apiBuilder.getProjectTypeAttributeDescriptorBuilder().withValues(['java']).withRequired(true).withDescription('language').withName('language').build();
-      var mavenType = apiBuilder.getProjectTypeBuilder().withId('maven').withDisplayname('Maven project').withAttributeDescriptors([attributeLanguageJava]).build();
-      var antType = apiBuilder.getProjectTypeBuilder().withId('ant').withDisplayname('Ant project').withAttributeDescriptors([attributeLanguageJava]).build();
+      let attributeLanguageJava = apiBuilder.getProjectTypeAttributeDescriptorBuilder().withValues(['java']).withRequired(true).withDescription('language').withName('language').build();
+      let mavenType = apiBuilder.getProjectTypeBuilder().withId('maven').withDisplayname('Maven project').withAttributeDescriptors([attributeLanguageJava]).build();
+      let antType = apiBuilder.getProjectTypeBuilder().withId('ant').withDisplayname('Ant project').withAttributeDescriptors([attributeLanguageJava]).build();
       let workspaceId = 'florentWorkspace';
       let agentUrl = 'localhost:3232/wsagent/ext';
-
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
+      let agentWsUrl = 'ws://localhost:3232/wsagent/ws';
+      let devMachine = {'links': [{'href': agentWsUrl, 'rel': 'wsagent.websocket'}]};
+      let runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}], 'devMachine': devMachine};
+      let workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
 
       cheBackend.addWorkspaces([workspace1]);
 

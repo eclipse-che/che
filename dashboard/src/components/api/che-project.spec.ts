@@ -73,7 +73,9 @@ describe('CheProject', function () {
         workspaceId: 'workspace12345'
       };
       let agentUrl = 'localhost:3232/wsagent/ext';
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
+      var agentWsUrl = 'ws://localhost:3232/wsagent/ws';
+      var devMachine = {'links': [{'href': agentWsUrl, 'rel': 'wsagent.websocket'}]};
+      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}], 'devMachine': devMachine};
       var workspace1 = apiBuilder.getWorkspaceBuilder().withId(testProjectDetails.workspaceId).withRuntime(runtime).build();
 
       cheBackend.addWorkspaces([workspace1]);
