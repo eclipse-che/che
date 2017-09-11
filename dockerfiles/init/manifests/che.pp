@@ -61,6 +61,8 @@ node default {
   $che_pg_password = getValue("CHE_POSTGRES_PASSWORD", "pgchepassword")
   $che_pg_database = getValue("CHE_POSTGRES_DATABASE", "dbche")
 
+  $system.super_privileged_mode=getValue("SYSTEM_SUPER_PRIVILEGED_MODE", "false")
+
   ###############################
   # Include base module
   include base

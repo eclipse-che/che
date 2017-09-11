@@ -12,7 +12,6 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Names;
 import javax.sql.DataSource;
 import org.eclipse.che.api.permission.server.account.AccountPermissionsChecker;
 import org.eclipse.che.inject.DynaModule;
@@ -31,7 +30,6 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.permissions.UserServicePermissionsFilter.class);
     bind(org.eclipse.che.api.factory.server.permissions.FactoryPermissionsFilter.class);
     bind(org.eclipse.che.plugin.activity.ActivityPermissionsFilter.class);
-    bindConstant().annotatedWith(Names.named("system.super_privileged_mode")).to(false);
     Multibinder.newSetBinder(binder(), AccountPermissionsChecker.class)
         .addBinding()
         .to(org.eclipse.che.account.permission.PersonalAccountPermissionsChecker.class);
