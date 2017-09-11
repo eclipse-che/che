@@ -14,28 +14,15 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
-import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.machine.server.jpa.JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl;
-import org.eclipse.che.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.db.H2DBTestServer;
-import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.H2TestHelper;
-import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
-import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
-import org.eclipse.che.core.db.DBInitializer;
-import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
-import org.eclipse.che.core.db.schema.SchemaInitializer;
-import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
-import org.h2.Driver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -79,7 +66,7 @@ public class RemovePermissionsBeforeRecipeRemovedEventSubscriberTest {
           new RecipePermissionsImpl(users[i].getId(), recipe.getId(), asList("read", "update"));
     }
 
-    Injector injector = Guice.createInjector(new MachineJpaModule(), new TestModule());
+    Injector injector = Guice.createInjector(new MachineJpaModule(), new JpaTestModule());
 
     manager = injector.getInstance(EntityManager.class);
     recipeDao = injector.getInstance(JpaRecipeDao.class);
@@ -137,31 +124,5 @@ public class RemovePermissionsBeforeRecipeRemovedEventSubscriberTest {
     subscriber.removeRecipePermissions(recipe.getId(), 1);
 
     assertEquals(recipePermissionsDao.getByInstance(recipe.getId(), 1, 0).getTotalItemsCount(), 0);
-  }
-
-  private static class TestModule extends AbstractModule {
-    @Override
-    protected void configure() {
-      H2DBTestServer server = H2DBTestServer.startDefault();
-      install(
-          new PersistTestModuleBuilder()
-              .setDriver(Driver.class)
-              .runningOn(server)
-              .addEntityClasses(
-                  UserImpl.class,
-                  RecipeImpl.class,
-                  SnapshotImpl.class,
-                  AccountImpl.class,
-                  AbstractPermissions.class,
-                  RecipePermissionsImpl.class,
-                  TestWorkspaceEntity.class)
-              .setExceptionHandler(H2ExceptionHandler.class)
-              .build());
-      bind(DBInitializer.class).asEagerSingleton();
-      bind(SchemaInitializer.class)
-          .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
-      bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
-      bind(DBInitializer.class).asEagerSingleton();
-    }
   }
 }

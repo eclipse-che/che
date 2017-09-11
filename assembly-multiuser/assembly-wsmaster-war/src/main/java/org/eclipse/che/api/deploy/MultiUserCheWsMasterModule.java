@@ -14,14 +14,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import javax.sql.DataSource;
-import org.eclipse.che.account.permission.PersonalAccountPermissionsChecker;
-import org.eclipse.che.api.factory.server.permissions.FactoryPermissionsFilter;
 import org.eclipse.che.api.permission.server.account.AccountPermissionsChecker;
-import org.eclipse.che.api.permission.server.jpa.SystemPermissionsJpaModule;
-import org.eclipse.che.api.user.server.permissions.UserProfileServicePermissionsFilter;
-import org.eclipse.che.api.user.server.permissions.UserServicePermissionsFilter;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.activity.ActivityPermissionsFilter;
 
 @DynaModule
 public class MultiUserCheWsMasterModule extends AbstractModule {
@@ -30,16 +24,16 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
   protected void configure() {
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
     bind(org.eclipse.che.api.system.server.SystemServicePermissionsFilter.class);
-    install(new SystemPermissionsJpaModule());
+    install(new org.eclipse.che.api.permission.server.jpa.SystemPermissionsJpaModule());
     install(new org.eclipse.che.api.permission.server.PermissionsModule());
     install(new org.eclipse.che.api.workspace.server.WorkspaceApiPermissionsModule());
-    bind(UserProfileServicePermissionsFilter.class);
-    bind(UserServicePermissionsFilter.class);
-    bind(FactoryPermissionsFilter.class);
-    bind(ActivityPermissionsFilter.class);
+    bind(org.eclipse.che.api.user.server.permissions.UserProfileServicePermissionsFilter.class);
+    bind(org.eclipse.che.api.user.server.permissions.UserServicePermissionsFilter.class);
+    bind(org.eclipse.che.api.factory.server.permissions.FactoryPermissionsFilter.class);
+    bind(org.eclipse.che.plugin.activity.ActivityPermissionsFilter.class);
     bindConstant().annotatedWith(Names.named("system.super_privileged_mode")).to(false);
     Multibinder.newSetBinder(binder(), AccountPermissionsChecker.class)
         .addBinding()
-        .to(PersonalAccountPermissionsChecker.class);
+        .to(org.eclipse.che.account.permission.PersonalAccountPermissionsChecker.class);
   }
 }

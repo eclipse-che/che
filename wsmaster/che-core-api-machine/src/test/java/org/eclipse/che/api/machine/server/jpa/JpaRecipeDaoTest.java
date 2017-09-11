@@ -15,29 +15,16 @@ import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.EntityManager;
-import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl;
-import org.eclipse.che.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.db.H2DBTestServer;
-import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.H2TestHelper;
-import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
-import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
-import org.eclipse.che.core.db.DBInitializer;
-import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
-import org.eclipse.che.core.db.schema.SchemaInitializer;
-import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
-import org.h2.Driver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -84,7 +71,7 @@ public class JpaRecipeDaoTest {
               "recipe_ubuntu", "DEBIAN_JDK8", "test", "test", null, asList("ubuntu", "tag1"), null)
         };
 
-    Injector injector = Guice.createInjector(new TestModule(), new MachineJpaModule());
+    Injector injector = Guice.createInjector(new JpaTestModule(), new MachineJpaModule());
     manager = injector.getInstance(EntityManager.class);
     dao = injector.getInstance(JpaRecipeDao.class);
   }
@@ -167,32 +154,5 @@ public class JpaRecipeDaoTest {
     List<RecipeImpl> results =
         dao.search(users[0].getId(), singletonList("unexisted_tag2"), null, 0, 0);
     assertTrue(results.isEmpty());
-  }
-
-  private class TestModule extends AbstractModule {
-
-    @Override
-    protected void configure() {
-      H2DBTestServer server = H2DBTestServer.startDefault();
-      install(
-          new PersistTestModuleBuilder()
-              .setDriver(Driver.class)
-              .runningOn(server)
-              .addEntityClasses(
-                  UserImpl.class,
-                  RecipeImpl.class,
-                  SnapshotImpl.class,
-                  AccountImpl.class,
-                  AbstractPermissions.class,
-                  RecipePermissionsImpl.class,
-                  TestWorkspaceEntity.class)
-              .setExceptionHandler(H2ExceptionHandler.class)
-              .build());
-      bind(DBInitializer.class).asEagerSingleton();
-      bind(SchemaInitializer.class)
-          .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
-      bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
-      bind(DBInitializer.class).asEagerSingleton();
-    }
   }
 }
