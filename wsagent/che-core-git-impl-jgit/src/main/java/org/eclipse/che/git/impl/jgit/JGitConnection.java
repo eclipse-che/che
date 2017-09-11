@@ -58,6 +58,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.net.ssl.SSLHandshakeException;
+import javax.validation.constraints.NotNull;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -1692,44 +1693,32 @@ class JGitConnection implements GitConnection {
       throw new GitException(exception.getMessage(), exception);
     }
 
-    Map<String, RevertResult.RevertStatus> conflicts =
-        new HashMap<String, RevertResult.RevertStatus>();
+    Map<String, RevertResult.RevertStatus> conflicts = new HashMap<>();
     if (revertCommand.getFailingResult() != null) {
       Map<String, MergeFailureReason> failingPaths =
           revertCommand.getFailingResult().getFailingPaths();
       if (failingPaths != null && !failingPaths.isEmpty()) {
-        for (Map.Entry<String, MergeFailureReason> failingPathEntry : failingPaths.entrySet()) {
-          RevertResult.RevertStatus revertStatus = RevertResult.RevertStatus.FAILED;
-          switch (failingPathEntry.getValue()) {
-            case COULD_NOT_DELETE:
-              revertStatus = RevertResult.RevertStatus.COULD_NOT_DELETE;
-              break;
-            case DIRTY_INDEX:
-              revertStatus = RevertResult.RevertStatus.DIRTY_INDEX;
-              break;
-            case DIRTY_WORKTREE:
-              revertStatus = RevertResult.RevertStatus.DIRTY_WORKTREE;
-              break;
-          }
-          conflicts.put(failingPathEntry.getKey(), revertStatus);
-        }
+        failingPaths
+            .entrySet()
+            .forEach(
+                failure ->
+                    conflicts.put(
+                        failure.getKey(),
+                        getRevertStatusFromMergeFailureReason(failure.getValue())));
       }
     }
     List<String> unmergedPaths = revertCommand.getUnmergedPaths();
     if (unmergedPaths != null && !unmergedPaths.isEmpty()) {
-      for (String unmergedPath : unmergedPaths) {
-        if (!conflicts.containsKey(unmergedPath)) {
-          conflicts.put(unmergedPath, RevertResult.RevertStatus.FAILED);
-        }
-      }
+      unmergedPaths
+          .stream()
+          .filter(unmergedPath -> !conflicts.containsKey(unmergedPath))
+          .forEach(unmergedPath -> conflicts.put(unmergedPath, RevertResult.RevertStatus.FAILED));
     }
 
     List<Ref> jGitRevertedCommits = revertCommand.getRevertedRefs();
     List<String> revertedCommits = new ArrayList<String>();
     if (jGitRevertedCommits != null) {
-      for (Ref ref : jGitRevertedCommits) {
-        revertedCommits.add(ref.getObjectId().name());
-      }
+      jGitRevertedCommits.forEach(ref -> revertedCommits.add(ref.getObjectId().name()));
     }
     String newHead = null;
     if (revCommit != null) {
@@ -1739,6 +1728,20 @@ class JGitConnection implements GitConnection {
         .withRevertedCommits(revertedCommits)
         .withConflicts(conflicts)
         .withNewHead(newHead);
+  }
+
+  private RevertResult.RevertStatus getRevertStatusFromMergeFailureReason(
+      @NotNull MergeFailureReason mergeFailureReason) {
+    switch (mergeFailureReason) {
+      case COULD_NOT_DELETE:
+        return RevertResult.RevertStatus.COULD_NOT_DELETE;
+      case DIRTY_INDEX:
+        return RevertResult.RevertStatus.DIRTY_INDEX;
+      case DIRTY_WORKTREE:
+        return RevertResult.RevertStatus.DIRTY_WORKTREE;
+      default:
+        return RevertResult.RevertStatus.FAILED;
+    }
   }
 
   @Override

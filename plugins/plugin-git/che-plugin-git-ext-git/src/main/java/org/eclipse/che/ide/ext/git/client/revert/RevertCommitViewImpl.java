@@ -12,8 +12,6 @@ package org.eclipse.che.ide.ext.git.client.revert;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -23,7 +21,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -143,7 +140,7 @@ public class RevertCommitViewImpl extends Window implements RevertCommitView {
             return revision.getMessage().substring(0, 50);
           }
         };
-    revisions = new CellTable<Revision>(15, coreRes);
+    revisions = new CellTable<>(15, coreRes);
     revisions.setWidth("100%");
     revisions.addColumn(idColumn, locale.viewRevertRevisionTableIdTitle());
     revisions.setColumnWidth(idColumn, "10%");
@@ -154,14 +151,11 @@ public class RevertCommitViewImpl extends Window implements RevertCommitView {
     revisions.addColumn(commentColumn, locale.viewRevertRevisionTableCommentTitle());
     revisions.setColumnWidth(commentColumn, "50%");
 
-    this.selectionModel = new SingleSelectionModel<Revision>();
+    this.selectionModel = new SingleSelectionModel<>();
     this.selectionModel.addSelectionChangeHandler(
-        new SelectionChangeEvent.Handler() {
-          @Override
-          public void onSelectionChange(SelectionChangeEvent event) {
-            Revision selectedObject = selectionModel.getSelectedObject();
-            delegate.onRevisionSelected(selectedObject);
-          }
+        event -> {
+          Revision selectedObject = selectionModel.getSelectedObject();
+          delegate.onRevisionSelected(selectedObject);
         });
     revisions.setSelectionModel(this.selectionModel);
     this.revisionsPanel.add(revisions);
@@ -172,12 +166,8 @@ public class RevertCommitViewImpl extends Window implements RevertCommitView {
         createButton(
             locale.buttonCancel(),
             "git-revert-cancel",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-                ;
-              }
+            event -> {
+              delegate.onCancelClicked();
             });
     addButtonToFooter(btnCancel);
 
@@ -185,18 +175,15 @@ public class RevertCommitViewImpl extends Window implements RevertCommitView {
         createButton(
             locale.buttonRevert(),
             "git-revert",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onRevertClicked();
-              }
+            event -> {
+              delegate.onRevertClicked();
             });
     addButtonToFooter(btnRevert);
   }
 
   @UiHandler("revisionsPanel")
   public void onPanelScrolled(ScrollEvent ignored) {
-    // We cannot rely on exact equality of scroll positions because GWT sometimes ound such values
+    // We cannot rely on exact equality of scroll positions because GWT sometimes round such values
     // and it is possible that the actual max scroll position is a pixel less then declared.
     if (revisionsPanel.getMaximumVerticalScrollPosition()
             - revisionsPanel.getVerticalScrollPosition()

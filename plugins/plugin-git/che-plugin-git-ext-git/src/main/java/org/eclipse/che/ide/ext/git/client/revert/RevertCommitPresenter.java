@@ -154,7 +154,7 @@ public class RevertCommitPresenter implements ActionDelegate {
               console.print(formRevertMessage(result));
 
               String conflictsMessage = formConflictsMessage(result.getConflicts());
-              if (conflictsMessage != null && !conflictsMessage.isEmpty()) {
+              if (!conflictsMessage.isEmpty()) {
                 console.printError(conflictsMessage);
               }
 

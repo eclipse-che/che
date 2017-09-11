@@ -35,7 +35,10 @@ public interface RevertResult {
     }
   }
 
-  /** @return the conflicted files with revert status (reason of failure) */
+  /**
+   * @return a map containing paths to the conflicting files as keys and their {@link RevertStatus}
+   *     as values
+   */
   Map<String, RevertStatus> getConflicts();
 
   void setConflicts(Map<String, RevertStatus> conflicts);
