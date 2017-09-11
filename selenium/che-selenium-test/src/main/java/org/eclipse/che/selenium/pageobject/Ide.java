@@ -17,29 +17,32 @@ import com.google.inject.Singleton;
 import java.net.URL;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.login.Login;
+import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-/** @author Vitaliy Gulyy */
+/**
+ * @author Vitaliy Gulyy
+ * @author Dmytro Nochevnov
+ */
 @Singleton
 public class Ide {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final TestWorkspaceUrlResolver testWorkspaceUrlResolver;
-  private final Login login;
+  private final Entrance entrance;
 
   @Inject
   public Ide(
       SeleniumWebDriver seleniumWebDriver,
       TestWorkspaceUrlResolver testWorkspaceUrlResolver,
-      Login login) {
+      Entrance entrance) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.testWorkspaceUrlResolver = testWorkspaceUrlResolver;
-    this.login = login;
+    this.entrance = entrance;
   }
 
   @Deprecated
@@ -50,7 +53,7 @@ public class Ide {
   public void open(TestWorkspace testWorkspace) throws Exception {
     URL workspaceUrl = testWorkspaceUrlResolver.resolve(testWorkspace);
     seleniumWebDriver.get(workspaceUrl.toString());
-    login.login(testWorkspace.getOwner().getName(), testWorkspace.getOwner().getPassword());
+    entrance.login(testWorkspace.getOwner());
   }
 
   public void switchFromDashboard() {

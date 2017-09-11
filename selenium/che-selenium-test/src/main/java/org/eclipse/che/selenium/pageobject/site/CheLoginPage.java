@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
-import org.eclipse.che.selenium.core.login.Login;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -25,7 +24,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Dmytro Nochevnov */
 @Singleton
-public class CheLoginPage implements Login {
+public class CheLoginPage implements LoginPage {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final WebDriverWait webDriverWait;
@@ -49,15 +48,13 @@ public class CheLoginPage implements Login {
   }
 
   public void login(String username, String password) {
-    if (isOpened()) {
-      waitOnOpen();
-      usernameInput.clear();
-      usernameInput.sendKeys(username);
-      passwordInput.clear();
-      passwordInput.sendKeys(password);
-      loginButton.click();
-      waitOnClose();
-    }
+    waitOnOpen();
+    usernameInput.clear();
+    usernameInput.sendKeys(username);
+    passwordInput.clear();
+    passwordInput.sendKeys(password);
+    loginButton.click();
+    waitOnClose();
   }
 
   public void waitOnOpen() {

@@ -41,6 +41,7 @@ public class CheTestKeycloakProvider implements TestKeycloakProvider {
     } catch (MalformedURLException e) {
       throw new RuntimeException("There is an error of construction of url to auth service.", e);
     }
+
     return KeycloakBuilder.builder()
         .serverUrl(authServerUrl)
         .realm("master")

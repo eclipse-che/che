@@ -26,6 +26,8 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -195,7 +197,7 @@ public abstract class SeleniumTestHandler
   private void injectDependencies(ITestContext testContext, Object testInstance) throws Exception {
     Injector injector = testContext.getSuite().getParentInjector();
 
-    List<Module> childModules = getChildModules();
+    List<Module> childModules = new ArrayList<>(getChildModules());
     childModules.add(new SeleniumClassModule());
 
     Injector classInjector = injector.createChildInjector(childModules);
@@ -342,5 +344,8 @@ public abstract class SeleniumTestHandler
   /** Returns parent injector. */
   public abstract Injector createParentInjector();
 
-  public abstract List<Module> getChildModules();
+  /** Returns list of child modules */
+  public List<Module> getChildModules() {
+    return Collections.emptyList();
+  }
 }

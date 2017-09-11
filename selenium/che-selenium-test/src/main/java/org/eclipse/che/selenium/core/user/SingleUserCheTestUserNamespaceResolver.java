@@ -11,10 +11,10 @@
 package org.eclipse.che.selenium.core.user;
 
 /** @author Anatolii Bazko */
-public class CheTestUserNamespaceResolver implements TestUserNamespaceResolver {
+public class SingleUserCheTestUserNamespaceResolver implements TestUserNamespaceResolver {
 
   @Override
   public String resolve(String username) {
-    return username.split("@")[0];
+    return "che";
   }
 }

@@ -8,19 +8,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.client;
-
-import com.google.inject.Singleton;
+package org.eclipse.che.selenium.core.user;
 
 /** @author Anatolii Bazko */
-@Singleton
-public class CheTestAuthServiceClient implements TestAuthServiceClient {
+public class MultiUserCheTestUserNamespaceResolver implements TestUserNamespaceResolver {
 
   @Override
-  public String login(String username, String password) throws Exception {
-    return username;
+  public String resolve(String username) {
+    return username.split("@")[0];
   }
-
-  @Override
-  public void logout(String token) throws Exception {}
 }

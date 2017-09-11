@@ -14,7 +14,7 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.login.Login;
+import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -27,7 +27,7 @@ public class TestFactory {
   private final TestDashboardUrlProvider dashboardUrl;
   private final TestFactoryServiceClient testFactoryServiceClient;
   private final TestWorkspaceServiceClient workspaceServiceClient;
-  private final Login login;
+  private final Entrance entrance;
 
   private final String factoryUrl;
 
@@ -38,20 +38,20 @@ public class TestFactory {
       TestDashboardUrlProvider dashboardUrl,
       TestFactoryServiceClient factoryServiceClient,
       TestWorkspaceServiceClient workspaceServiceClient,
-      Login login) {
+      Entrance entrance) {
     this.factoryDto = factoryDto;
     this.owner = owner;
     this.factoryUrl = factoryUrl;
     this.dashboardUrl = dashboardUrl;
     this.testFactoryServiceClient = factoryServiceClient;
     this.workspaceServiceClient = workspaceServiceClient;
-    this.login = login;
+    this.entrance = entrance;
   }
 
   /** Login, if needed, and opens factory url. */
   public void authenticateAndOpen(SeleniumWebDriver driver) throws Exception {
     driver.get(dashboardUrl.get().toString());
-    login.login(owner.getName(), owner.getPassword());
+    entrance.login(owner);
     driver.get(factoryUrl);
   }
 

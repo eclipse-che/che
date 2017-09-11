@@ -10,71 +10,27 @@
  */
 package org.eclipse.che.selenium.core.client;
 
-import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.io.IOException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import org.eclipse.che.selenium.core.provider.TestKeycloakProvider;
-import org.eclipse.che.selenium.core.provider.TestRealmProvider;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- * @author Musienko Maxim
- * @author Dmytro Nochevnov
- */
-@Singleton
-public class TestUserServiceClient {
-  private static final Logger LOG = LoggerFactory.getLogger(TestUserServiceClient.class);
-
-  private final Keycloak keycloak;
-  private final String realm;
-
-  @Inject
-  public TestUserServiceClient(
-      TestRealmProvider realmProvider, TestKeycloakProvider keycloakProvider) {
-    this.realm = realmProvider.get();
-    this.keycloak = keycloakProvider.get();
-  }
-
-  public void delete(String id) throws IOException {
-    keycloak.realm(realm).users().delete(id);
-  }
+/** @author Dmytro Nochevnov */
+public interface TestUserServiceClient {
 
   /**
    * Creates user.
    *
+   * @param name name of user
+   * @param email email of user
+   * @param password user's password
    * @return id of user
+   * @throws IOException
    */
-  public String create(String name, String email, String password) throws IOException {
-    CredentialRepresentation credential = new CredentialRepresentation();
-    credential.setType(CredentialRepresentation.PASSWORD);
-    credential.setValue(password);
-    credential.setTemporary(false);
+  String create(String name, String email, String password) throws IOException;
 
-    UserRepresentation user = new UserRepresentation();
-    user.setUsername(name);
-    user.setEmail(email);
-    user.setEnabled(true);
-    user.setCredentials(ImmutableList.of(credential));
-
-    try {
-      Response res = keycloak.realm(realm).users().create(user);
-      if (res.getStatus() != Status.CREATED.getStatusCode()) {
-        throw new IOException(
-            String.format(
-                "Server status '%s'. Error message: '%s'", res.getStatus(), res.getEntity()));
-      }
-
-      return res.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
-    } catch (RuntimeException e) {
-      throw new IOException(
-          String.format("Error of creation of user with name '%s' occurred.", name), e);
-    }
-  }
+  /**
+   * Deletes user by its id.
+   *
+   * @param id user's id
+   * @throws IOException
+   */
+  void delete(String id) throws IOException;
 }
