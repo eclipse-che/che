@@ -40,14 +40,14 @@ import org.slf4j.Logger;
 public class ProjectsVolumeProvisioner implements ConfigurationProvisioner {
   private static final Logger LOG = getLogger(ProjectsVolumeProvisioner.class);
 
-  private final LocalWorkspaceFolderPathProvider workspaceFolderPathProvider;
+  private final LocalProjectsFolderPathProvider workspaceFolderPathProvider;
   private final WindowsPathEscaper pathEscaper;
   private final String projectFolderPath;
   private final String projectsVolumeOptions;
 
   @Inject
   public ProjectsVolumeProvisioner(
-      LocalWorkspaceFolderPathProvider workspaceFolderPathProvider,
+      LocalProjectsFolderPathProvider workspaceFolderPathProvider,
       WindowsPathEscaper pathEscaper,
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Nullable @Named("che.docker.volumes_projects_options") String projectsVolumeOptions) {

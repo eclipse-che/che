@@ -46,7 +46,7 @@ public class ProjectsVolumeProvisionerTest {
   private static final String PATH_IN_CONTAINER = "/projects1";
   private static final String PATH_ON_HOST = "/test/path";
 
-  @Mock private LocalWorkspaceFolderPathProvider workspaceFolderPathProvider;
+  @Mock private LocalProjectsFolderPathProvider workspaceFolderPathProvider;
   @Mock private WindowsPathEscaper pathEscaper;
 
   private ProjectsVolumeProvisioner provisioner;

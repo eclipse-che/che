@@ -15,14 +15,13 @@ import static org.eclipse.che.workspace.infrastructure.docker.local.installer.Lo
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.workspace.infrastructure.docker.InfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.ExecInstallerInfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.TerminalInstallerInfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.installer.WsAgentBinariesInfrastructureProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.network.CheMasterExtraHostProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.local.network.CheMasterNetworkProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.local.projects.LocalWorkspaceFilesCleaner;
+import org.eclipse.che.workspace.infrastructure.docker.local.projects.RemoveLocalProjectsFolderOnWorkspaceRemove;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisioner;
 
@@ -30,7 +29,8 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSyst
 public class LocalDockerModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(WorkspaceFilesCleaner.class).to(LocalWorkspaceFilesCleaner.class);
+    bind(RemoveLocalProjectsFolderOnWorkspaceRemove.class).asEagerSingleton();
+
     bind(org.eclipse.che.plugin.docker.client.DockerRegistryChecker.class).asEagerSingleton();
 
     bind(InfrastructureProvisioner.class).to(LocalCheInfrastructureProvisioner.class);
