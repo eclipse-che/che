@@ -334,6 +334,22 @@ CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
 # e.g. docker.io/rhchestage => docker.io\/rhchestage
 CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 
+MULTI_USER_REPLACEMENT_STRING="s+- env:+- env:\\n\
+          - name: \"CHE_WORKSPACE_LOGS\"\\n\
+            value: \"${CHE_WORKSPACE_LOGS}\"\\n\
+          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"\\n\
+            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"\\n\
+          - name: \"CHE_KEYCLOAK_REALM\"\\n\
+            value: \"${CHE_KEYCLOAK_REALM}\"\\n\
+          - name: \"CHE_KEYCLOAK_CLIENT__ID\"\\n\
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_REALM\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_REALM}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__ID\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__ID}\"\\n\
+          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET\"\\n\
+            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+"
+
 echo
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   echo "[CHE] Deploying Che on minishift (image ${CHE_IMAGE})"
@@ -351,21 +367,7 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
-    sed "s+- env:+- env:\\n\
-          - name: \"CHE_WORKSPACE_LOGS\"\\n\
-            value: \"${CHE_WORKSPACE_LOGS}\"\\n\
-          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"\\n\
-            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"\\n\
-          - name: \"CHE_KEYCLOAK_REALM\"\\n\
-            value: \"${CHE_KEYCLOAK_REALM}\"\\n\
-          - name: \"CHE_KEYCLOAK_CLIENT__ID\"\\n\
-            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_REALM\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_REALM}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__ID\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__ID}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+" | \
+    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
@@ -375,21 +377,7 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
-    sed "s+- env:+- env:\\n\
-          - name: \"CHE_WORKSPACE_LOGS\"\\n\
-            value: \"${CHE_WORKSPACE_LOGS}\"\\n\
-          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"\\n\
-            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"\\n\
-          - name: \"CHE_KEYCLOAK_REALM\"\\n\
-            value: \"${CHE_KEYCLOAK_REALM}\"\\n\
-          - name: \"CHE_KEYCLOAK_CLIENT__ID\"\\n\
-            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_REALM\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_REALM}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__ID\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__ID}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+" | \
+    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
@@ -400,21 +388,7 @@ else
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     sed "s/    keycloak-disabled:.*/    keycloak-disabled: \"${CHE_KEYCLOAK_DISABLED}\"/" | \
     if [ "${CHE_LOG_LEVEL}" == "DEBUG" ]; then sed "s/    log-level: \"INFO\"/    log-level: \"DEBUG\"/" ; else cat -; fi | \
-    sed "s+- env:+- env:\\n\
-          - name: \"CHE_WORKSPACE_LOGS\"\\n\
-            value: \"${CHE_WORKSPACE_LOGS}\"\\n\
-          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"\\n\
-            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"\\n\
-          - name: \"CHE_KEYCLOAK_REALM\"\\n\
-            value: \"${CHE_KEYCLOAK_REALM}\"\\n\
-          - name: \"CHE_KEYCLOAK_CLIENT__ID\"\\n\
-            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_REALM\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_REALM}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__ID\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__ID}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+" | \
+    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     oc apply --force=true -f -
 fi
 echo
