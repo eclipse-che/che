@@ -145,11 +145,11 @@ public class CodenvyEditor {
         "//div[@class='annotationLine currentLine' and @role='presentation']";
     public static final String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
     public static final String TAB_FILE_NAME_XPATH =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s']";
+        "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']";
     public static final String TAB_FILE_CLOSE_ICON =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()='%s']/following::div[1]";
+        "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']/following::div[1]";
     public static final String ALL_TABS_XPATH =
-        "//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[string-length(text())>0]";
+        "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[string-length(text())>0]";
     public static final String SELECTED_ITEM_IN_EDITOR =
         "//div[@contenteditable='true']//span[contains(text(), '%s')]";
 
