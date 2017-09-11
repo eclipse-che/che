@@ -107,14 +107,28 @@ public class JpaRecipeDao implements RecipeDao {
   /**
    * Translated query should look like:
    *
-   * <p>SELECT recipe.ID, recipe.CREATOR, recipe.DESCRIPTION, recipe.NAME, recipe.SCRIPT,
-   * recipe.TYPE FROM {oj RECIPEPERMISSIONS permission LEFT OUTER JOIN RECIPE recipe ON (recipe.ID =
-   * permission.RECIPEID) LEFT OUTER JOIN Recipe_TAGS tag ON (tag.Recipe_ID = recipe.ID)},
-   * RECIPEPERMISSIONS_ACTIONS permissionActions WHERE ((tag.tag IN (?)) AND ((? IS NULL) OR
-   * (recipe.TYPE IS NULL) OR (recipe.TYPE = ?)) AND ((permission.USERID IS NULL) OR
-   * (permission.USERID = ?)) AND (permissionActions.actions = ?) AND
-   * (permissionActions.RECIPEPERMISSIONS_ID = permission.ID)) GROUP BY recipe.ID HAVING
-   * (COUNT(tag.tag) = ?)
+   * <pre>
+   * SELECT recipe.ID,
+   *        recipe.CREATOR,
+   *        recipe.DESCRIPTION,
+   *        recipe.NAME,
+   *        recipe.SCRIPT,
+   *        recipe.TYPE
+   * FROM {oj RECIPEPERMISSIONS permission
+   * LEFT OUTER JOIN RECIPE recipe ON (recipe.ID = permission.RECIPEID)
+   * LEFT OUTER JOIN Recipe_TAGS tag ON (tag.Recipe_ID = recipe.ID)},
+   *     RECIPEPERMISSIONS_ACTIONS permissionActions
+   * WHERE ((tag.tag IN (?))
+   *     AND ((? IS NULL)
+   *           OR (recipe.TYPE IS NULL)
+   *           OR (recipe.TYPE = ?))
+   *     AND ((permission.USERID IS NULL)
+   *           OR (permission.USERID = ?))
+   *     AND (permissionActions.actions = ?)
+   *     AND (permissionActions.RECIPEPERMISSIONS_ID = permission.ID))
+   * GROUP BY recipe.ID
+   * HAVING (COUNT(tag.tag) = ?)
+   * </pre>
    */
   @Override
   @Transactional
