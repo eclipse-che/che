@@ -461,4 +461,29 @@ public interface JavaLocalizationConstant extends Messages {
 
   @Key("macro.project.java.classpath.description")
   String macroProjectJavaClasspathDescription();
+
+  //Formatter
+  @Key("formatter.preferences.group.title")
+  String formatterPreferencesGroupTitle();
+
+  @Key("formatter.preferences.java.title")
+  String formatterPreferencesJavaTitle();
+
+  @Key("formatter.preferences.project.label")
+  String formatterPreferencesProjectLabel();
+
+  @Key("formatter.preferences.project.description")
+  String formatterPreferencesProjectDescription();
+
+  @Key("formatter.preferences.workspace.label")
+  String formatterPreferencesWorkspaceLabel();
+
+  @Key("formatter.preferences.workspace.description")
+  String formatterPreferencesWorkspaceDescription();
+
+  @Key("formatter.preferences.label")
+  String formatterPreferencesLabel();
+
+  @Key("formatter.preferences.import.button")
+  String formatterPreferencesImportButton();
 }

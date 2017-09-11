@@ -17,9 +17,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -142,37 +139,6 @@ public class JavaCodeAssistClient {
             + sessionId
             + "&index="
             + id);
-  }
-
-  /**
-   * Creates edits that describe how to format the given string. Returns the changes required to
-   * format source. Note: Java code formatting is supported only.
-   *
-   * @param offset The given offset to start recording the edits (inclusive).
-   * @param length the given length to stop recording the edits (exclusive).
-   * @param content the content to format
-   */
-  public Promise<List<Change>> format(final int offset, final int length, final String content) {
-    return getFormatChanges(offset, length, content)
-        .then(
-            new Function<List<Change>, List<Change>>() {
-              @Override
-              public List<Change> apply(List<Change> arg) throws FunctionException {
-                return arg.stream().collect(Collectors.toList());
-              }
-            });
-  }
-
-  private Promise<List<Change>> getFormatChanges(
-      final int offset, final int length, final String content) {
-    final String baseUrl = appContext.getDevMachine().getWsAgentBaseUrl();
-    final String url =
-        baseUrl + CODE_ASSIST_URL_PREFIX + "/format?offset=" + offset + "&length=" + length;
-    return asyncRequestFactory
-        .createPostRequest(url, null)
-        .header(CONTENT_TYPE, MimeType.TEXT_PLAIN)
-        .data(content)
-        .send(unmarshallerFactory.newListUnmarshaller(Change.class));
   }
 
   /**

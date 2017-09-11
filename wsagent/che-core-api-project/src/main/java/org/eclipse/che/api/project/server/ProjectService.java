@@ -113,7 +113,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class ProjectService extends Service {
   private static final Logger LOG = LoggerFactory.getLogger(ProjectService.class);
-  private static final Tika TIKA = new Tika();
+  private static Tika TIKA;
 
   private final ProjectManager projectManager;
   private final EventService eventService;
@@ -564,7 +564,10 @@ public class ProjectService extends Service {
     if (file == null) {
       throw new NotFoundException("File not found for " + path);
     }
-    return Response.ok().entity(file.getInputStream()).type(TIKA.detect(file.getName())).build();
+    return Response.ok()
+        .entity(file.getInputStream())
+        .type(getTIKA().detect(file.getName()))
+        .build();
   }
 
   @PUT
@@ -849,7 +852,7 @@ public class ProjectService extends Service {
 
     final VirtualFile virtualFile = file.getVirtualFile();
 
-    return Response.ok(virtualFile.getContent(), TIKA.detect(virtualFile.getName()))
+    return Response.ok(virtualFile.getContent(), getTIKA().detect(virtualFile.getName()))
         .lastModified(new Date(virtualFile.getLastModificationDate()))
         .header(HttpHeaders.CONTENT_LENGTH, Long.toString(virtualFile.getLength()))
         .header(
@@ -1263,5 +1266,13 @@ public class ProjectService extends Service {
 
   private ProjectConfigDto injectProjectLinks(ProjectConfigDto projectConfig) {
     return projectServiceLinksInjector.injectProjectLinks(projectConfig, getServiceContext());
+  }
+
+  /** Lazy init of Tika. */
+  private synchronized Tika getTIKA() {
+    if (TIKA == null) {
+      TIKA = new Tika();
+    }
+    return TIKA;
   }
 }
