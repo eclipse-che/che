@@ -121,48 +121,48 @@ public class InnerClassAndLambdaDebuggingTest {
   public void shouldDebugAnonymousClass() {
     // when
     editor.setCursorToLine(37);
-    editor.setBreakPointAndWaitActiveState(37);
+    editor.setBreakpoint(37);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
 
     // then
     editor.waitBreakPointWithActiveState(37);
-    debugPanel.waitTextInVariablesPanel("anonym: \"App anonym\"");
+    debugPanel.waitTextInVariablesPanel("anonym=\"App anonym\"");
   }
 
   @Test(priority = 1)
   public void shouldDebugMethodLocalInnerClass() {
     // when
     editor.setCursorToLine(53);
-    editor.setBreakPointAndWaitActiveState(53);
+    editor.setBreakpoint(53);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
 
     // then
     editor.waitBreakPointWithActiveState(53);
-    debugPanel.waitTextInVariablesPanel("methodValue: \"App method local inner test\"");
+    debugPanel.waitTextInVariablesPanel("methodValue=\"App method local inner test\"");
   }
 
   @Test(priority = 2)
   public void shouldDebugInnerClass() {
     // when
     editor.setCursorToLine(64);
-    editor.setBreakPointAndWaitActiveState(64);
+    editor.setBreakpoint(64);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
 
     // then
     editor.waitBreakPointWithActiveState(64);
-    debugPanel.waitTextInVariablesPanel("innerValue: \"App inner value\"");
+    debugPanel.waitTextInVariablesPanel("innerValue=\"App inner value\"");
   }
 
   @Test(priority = 3)
   public void shouldDebugStaticInnerClass() {
     // when
     editor.setCursorToLine(72);
-    editor.setBreakPointAndWaitActiveState(72);
+    editor.setBreakpoint(72);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
 
     // then
     editor.waitBreakPointWithActiveState(72);
-    debugPanel.waitTextInVariablesPanel("staticInnerValue: \"App static inner value\"");
+    debugPanel.waitTextInVariablesPanel("staticInnerValue=\"App static inner value\"");
   }
 
   @Test(priority = 4)
@@ -175,20 +175,20 @@ public class InnerClassAndLambdaDebuggingTest {
 
     // then
     editor.waitBreakPointWithActiveState(79);
-    debugPanel.waitTextInVariablesPanel("j: 1");
+    debugPanel.waitTextInVariablesPanel("j=1");
 
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
 
     // then
     editor.waitBreakPointWithActiveState(79);
-    debugPanel.waitTextInVariablesPanel("j: 2");
+    debugPanel.waitTextInVariablesPanel("j=2");
 
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
 
     // then
     editor.waitBreakPointWithActiveState(87);
-    debugPanel.waitTextInVariablesPanel("j: 2");
+    debugPanel.waitTextInVariablesPanel("j=2");
   }
 }

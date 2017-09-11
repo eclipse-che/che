@@ -44,6 +44,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
@@ -170,7 +171,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
     if (location != null) {
       labelText
           .append("{")
-          .append(location.getTarget())
+          .append(Path.valueOf(location.getTarget()).lastSegment())
           .append(":")
           .append(location.getLineNumber())
           .append("} ");

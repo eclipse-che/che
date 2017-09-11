@@ -163,12 +163,13 @@ public class DebuggerService {
   public void deleteBreakpoint(
       @PathParam("id") String sessionId,
       @QueryParam("target") String target,
-      @QueryParam("line") @DefaultValue("0") int lineNumber)
+      @QueryParam("line") @DefaultValue("0") int lineNumber,
+      @QueryParam("project") String project)
       throws DebuggerException {
     if (target == null) {
       debuggerManager.getDebugger(sessionId).deleteAllBreakpoints();
     } else {
-      Location location = new LocationImpl(target, lineNumber);
+      Location location = new LocationImpl(target, lineNumber, project);
       debuggerManager.getDebugger(sessionId).deleteBreakpoint(location);
     }
   }

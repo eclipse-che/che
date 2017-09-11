@@ -1040,6 +1040,14 @@ public class CodenvyEditor {
     waitBreakPointWithActiveState(position);
   }
 
+  public void setBreakpoint(int position) {
+    waitActiveEditor();
+    waitDebugerLineIsVisible(position);
+    seleniumWebDriver
+        .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
+        .click();
+  }
+
   /**
    * wait breakpoint with active state in defined position
    *

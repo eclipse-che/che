@@ -16,6 +16,7 @@ import elemental.html.TableCellElement;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
 
@@ -49,13 +50,16 @@ public class FrameItemRender extends SimpleList.ListItemRenderer<StackFrameDump>
     sb.append(itemData.getLocation().getLineNumber());
     sb.appendEscaped(", ");
 
-    String target = itemData.getLocation().getTarget();
-    int classNameIndex = target.lastIndexOf(".");
+    Path path = Path.valueOf(itemData.getLocation().getTarget());
 
-    sb.appendEscaped(target.substring(classNameIndex + 1));
-    sb.appendEscaped(" (");
-    sb.appendEscaped(target.substring(0, classNameIndex));
-    sb.appendEscaped(") ");
+    String className;
+    if (path.isAbsolute()) {
+      className = path.removeFileExtension().lastSegment();
+    } else {
+      className = path.lastSegment();
+    }
+
+    sb.appendEscaped(className);
 
     label.setInnerHTML(sb.toSafeHtml().asString());
     itemElement.appendChild(label);

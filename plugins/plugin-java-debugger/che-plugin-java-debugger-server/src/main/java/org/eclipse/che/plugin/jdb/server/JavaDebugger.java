@@ -210,7 +210,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
-    final String className = findFQN(breakpoint.getLocation());
+    final String className = debuggerUtil.findFqnByPosition(breakpoint.getLocation());
     final int lineNumber = breakpoint.getLocation().getLineNumber();
     List<ReferenceType> classes = vm.classesByName(className);
     // it may mean that class doesn't loaded by a target JVM yet
@@ -267,13 +267,6 @@ public class JavaDebugger implements EventsHandler, Debugger {
     LOG.debug("Add breakpoint: {}", location);
   }
 
-  private String findFQN(Location location) throws DebuggerException {
-    final String parentFqn = location.getTarget();
-    int lineNumber = location.getLineNumber();
-
-    return debuggerUtil.findFqnByPosition(parentFqn, lineNumber);
-  }
-
   private void deferBreakpoint(String className, Breakpoint breakpoint) throws DebuggerException {
     List<Breakpoint> newList = new ArrayList<>();
     List<Breakpoint> list = deferredBreakpoints.putIfAbsent(className, newList);
@@ -324,7 +317,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void deleteBreakpoint(Location location) throws DebuggerException {
-    final String className = findFQN(location);
+    final String className = debuggerUtil.findFqnByPosition(location);
     final int lineNumber = location.getLineNumber();
     EventRequestManager requestManager = getEventManager();
     List<BreakpointRequest> snapshot = new ArrayList<>(requestManager.breakpointRequests());

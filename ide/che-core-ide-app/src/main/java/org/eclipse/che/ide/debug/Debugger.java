@@ -33,6 +33,9 @@ public interface Debugger extends DebuggerObservable {
   /** Returns debugger type */
   String getDebuggerType();
 
+  /** Creates breakpoint. */
+  Breakpoint createBreakpoint(VirtualFile file, int lineNumber);
+
   /**
    * Adds new breakpoint.
    *

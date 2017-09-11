@@ -389,7 +389,6 @@ public class DebuggerTest extends BaseTest {
     MockSettings mockSettings =
         new MockSettingsImpl<>().defaultAnswer(RETURNS_SMART_NULLS).extraInterfaces(Resource.class);
     Project project = mock(Project.class);
-    doReturn(project).when(debugger).getProject(any());
     when(optional.isPresent()).thenReturn(true);
     when(optional.get()).thenReturn(project);
     when(project.getPath()).thenReturn(PATH);
@@ -404,8 +403,7 @@ public class DebuggerTest extends BaseTest {
     when(resource.getRelatedProject()).thenReturn(optional);
     doReturn(promiseVoid).when(service).addBreakpoint(SESSION_ID, breakpointDto);
     doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>) any());
-    when(locationDto.withLineNumber(LINE_NUMBER + 1)).thenReturn(locationDto);
-    when(locationDto.withResourceProjectPath(PATH)).thenReturn(locationDto);
+    when(locationDto.withLineNumber(LINE_NUMBER)).thenReturn(locationDto);
     when(locationDto.withTarget(anyString())).thenReturn(locationDto);
     when(breakpointDto.getLocation().getLineNumber()).thenReturn(LINE_NUMBER);
     when(breakpointDto.withLocation(locationDto)).thenReturn(breakpointDto);

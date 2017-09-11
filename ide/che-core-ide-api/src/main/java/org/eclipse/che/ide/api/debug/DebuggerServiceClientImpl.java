@@ -120,7 +120,12 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
   public Promise<Void> deleteBreakpoint(String id, LocationDto locationDto) {
     final String requestUrl = getBaseUrl(id) + "/breakpoint";
     final String params =
-        "?target=" + locationDto.getTarget() + "&line=" + locationDto.getLineNumber();
+        "?target="
+            + locationDto.getTarget()
+            + "&line="
+            + locationDto.getLineNumber()
+            + "&project="
+            + locationDto.getResourceProjectPath();
     return asyncRequestFactory.createDeleteRequest(requestUrl + params).send();
   }
 

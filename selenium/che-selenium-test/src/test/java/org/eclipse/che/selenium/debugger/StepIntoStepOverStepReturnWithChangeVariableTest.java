@@ -137,13 +137,13 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     debugPanel.waitDebugHighlightedText(" someStr.toLowerCase();");
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OVER);
     debugPanel.waitDebugHighlightedText("Operation.valueOf(\"SUBTRACT\").toString();");
-    debugPanel.waitTextInVariablesPanel("someStr: \"hello Cdenvy\"");
+    debugPanel.waitTextInVariablesPanel("someStr=\"hello Cdenvy\"");
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
-    debugPanel.waitTextInVariablesPanel("secretNum:");
-    debugPanel.selectVarInVariablePanel("numGuessByUser: \"6\"");
+    debugPanel.waitTextInVariablesPanel("secretNum=");
+    debugPanel.selectVarInVariablePanel("numGuessByUser=\"6\"");
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.CHANGE_VARIABLE);
     debugPanel.typeAndChangeVariable("\"7\"");
-    debugPanel.waitTextInVariablesPanel("numGuessByUser: \"7\"");
+    debugPanel.waitTextInVariablesPanel("numGuessByUser=\"7\"");
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
     assertTrue(instToRequestThread.get().contains("<html>"));
   }

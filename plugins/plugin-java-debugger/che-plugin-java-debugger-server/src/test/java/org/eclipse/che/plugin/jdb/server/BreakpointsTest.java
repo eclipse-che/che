@@ -93,6 +93,38 @@ public class BreakpointsTest {
   }
 
   @Test(priority = 1)
+  public void shouldAddBreakpointByFqn() throws Exception {
+    Location location =
+        new LocationImpl("org.eclipse.BreakpointsTest", 20, false, -1, "/test", null, -1);
+
+    try {
+      debugger.addBreakpoint(new BreakpointImpl(location, false, null));
+    } catch (DebuggerException e) {
+      // class might not be loaded yet
+    }
+
+    debugger.resume(new ResumeActionImpl());
+
+    DebuggerEvent debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
+
+    Breakpoint actualBreakpoint = ((BreakpointActivatedEvent) debuggerEvent).getBreakpoint();
+    Location actualLocation = actualBreakpoint.getLocation();
+    assertEquals(actualLocation.getLineNumber(), 20);
+    assertEquals(actualLocation.getTarget(), "org.eclipse.BreakpointsTest");
+    assertEquals(actualLocation.getResourceProjectPath(), "/test");
+    assertTrue(actualBreakpoint.isEnabled());
+
+    debuggerEvent = events.take();
+    assertTrue(debuggerEvent instanceof SuspendEvent);
+
+    Location suspendLocation = ((SuspendEvent) debuggerEvent).getLocation();
+    assertEquals(suspendLocation.getLineNumber(), 20);
+    assertEquals(actualLocation.getTarget(), "org.eclipse.BreakpointsTest");
+    assertEquals(actualLocation.getResourceProjectPath(), "/test");
+  }
+
+  @Test(priority = 2)
   public void shouldAddBreakpointInsideInnerClass() throws Exception {
     Location location =
         new LocationImpl(
@@ -123,7 +155,7 @@ public class BreakpointsTest {
     assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
   }
 
-  @Test(priority = 2)
+  @Test(priority = 3)
   public void shouldAddBreakpointInsideAnonymousClass() throws Exception {
     Location location =
         new LocationImpl(
@@ -154,7 +186,7 @@ public class BreakpointsTest {
     assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
   }
 
-  @Test(priority = 2)
+  @Test(priority = 4)
   public void shouldAddBreakpointInsideLambdaFunction() throws Exception {
     Location location =
         new LocationImpl(
@@ -185,7 +217,7 @@ public class BreakpointsTest {
     assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
   }
 
-  @Test(priority = 3)
+  @Test(priority = 4)
   public void shouldRemoveAllBreakpoints() throws Exception {
     assertFalse(debugger.getAllBreakpoints().isEmpty());
 

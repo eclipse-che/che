@@ -66,12 +66,10 @@ public class CheckBreakPointStateTest {
   @Test
   public void checkStateAfterDeletionFileAndFolder() throws Exception {
     String expectedBreakpointsForAdditionalClass =
-        "AdditonalClass.java - [line: 7]\n" + "AdditonalClass.java - [line: 9]";
+        "AdditonalClass.java:7\n" + "AdditonalClass.java:9";
 
     String expectedBreakpointsForGreetingClass =
-        "AppController.java - [line: 29]\n"
-            + "AppController.java - [line: 30]\n"
-            + "AppController.java - [line: 31]";
+        "AppController.java:29\n" + "AppController.java:30\n" + "AppController.java:31";
 
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.quickExpandWithJavaScript();
@@ -79,6 +77,7 @@ public class CheckBreakPointStateTest {
     editor.waitActiveEditor();
     editor.setBreakPointAndWaitInactiveState(7);
     editor.setBreakPointAndWaitInactiveState(9);
+    debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForAdditionalClass);
     projectExplorer.selectItem(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
@@ -91,6 +90,7 @@ public class CheckBreakPointStateTest {
     editor.setBreakPointAndWaitInactiveState(29);
     editor.setBreakPointAndWaitInactiveState(30);
     editor.setBreakPointAndWaitInactiveState(31);
+    debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForGreetingClass);
     projectExplorer.selectItem(PROJECT_NAME_2 + "/src/main/java");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
@@ -105,14 +105,13 @@ public class CheckBreakPointStateTest {
   @Test(priority = 1)
   public void checkStateAfterDeletionProject() {
     String expectedBreakpointsForGreetingClass =
-        "AppController.java - [line: 29]\n"
-            + "AppController.java - [line: 31]\n"
-            + "AppController.java - [line: 34]";
+        "AppController.java:29\n" + "AppController.java:31\n" + "AppController.java:34";
     projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_ONE_CLASS + "AppController.java");
     editor.setCursorToLine(35);
     editor.setBreakPointAndWaitInactiveState(29);
     editor.setBreakPointAndWaitInactiveState(31);
     editor.setBreakPointAndWaitInactiveState(34);
+    debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForGreetingClass);
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);

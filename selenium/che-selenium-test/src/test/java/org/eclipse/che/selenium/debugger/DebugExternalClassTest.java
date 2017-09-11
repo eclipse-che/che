@@ -137,7 +137,7 @@ public class DebugExternalClassTest {
     debugPanel.waitDebugHighlightedText(
         "    "); // we can't rely on concrete code of external library which can be changed in future
     debugPanel.waitTextInVariablesPanel(
-        ": \"Info from java logger\""); // there should be at least parameter with value "Info from java logger"
+        "=\"Info from java logger\""); // there should be at least parameter with value "Info from java logger"
 
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
@@ -167,7 +167,7 @@ public class DebugExternalClassTest {
     debugPanel.waitDebugHighlightedText(
         "filterAndLog_1(FQCN, null, Level.INFO, format, arg, null);");
     debugPanel.waitTextInVariablesPanel(
-        ": \"Info from {}\""); // there should be at least parameter with value "Info from {}"
+        "=\"Info from {}\""); // there should be at least parameter with value "Info from {}"
 
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OVER);

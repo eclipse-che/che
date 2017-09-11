@@ -332,7 +332,9 @@ public class DebugPanel {
 
   /** Open debug panel by clicking on "Debug" tab. */
   public void openDebugPanel() {
-    debuggerTab.click();
+    if (!isDebuggerBtnPanelPresent()) {
+      debuggerTab.click();
+    }
   }
 
   /**

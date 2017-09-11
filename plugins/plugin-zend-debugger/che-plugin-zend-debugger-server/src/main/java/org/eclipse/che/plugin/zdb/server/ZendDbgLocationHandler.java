@@ -65,8 +65,13 @@ public class ZendDbgLocationHandler {
    * @return DBG specific location.
    */
   public Location convertToDBG(Location vfsLocation) {
-    int lineNumber = vfsLocation.getLineNumber();
     return new LocationImpl(
-        null, lineNumber, false, 0, null, vfsLocation.getMethod(), vfsLocation.getThreadId());
+        vfsLocation.getTarget(),
+        vfsLocation.getLineNumber(),
+        false,
+        0,
+        vfsLocation.getResourceProjectPath(),
+        null,
+        -1);
   }
 }

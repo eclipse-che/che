@@ -147,13 +147,18 @@ public class JavaDebuggerUtils {
    * Return nested class fqn if line with number {@code lineNumber} contains such element, otherwise
    * return outer class fqn.
    *
-   * @param filePath path to the file
-   * @param lineNumber line position to search
    * @throws DebuggerException
    */
-  public String findFqnByPosition(String filePath, int lineNumber) throws DebuggerException {
-    IPath path = Path.fromOSString(filePath);
+  public String findFqnByPosition(Location location) throws DebuggerException {
+    IPath path = Path.fromOSString(location.getTarget());
     IJavaProject project = getJavaProject(path);
+    if (project == null) {
+      if (location.getResourceProjectPath() != null) {
+        project = MODEL.getJavaProject(location.getResourceProjectPath());
+      } else {
+        return location.getTarget();
+      }
+    }
 
     String fqn = null;
     for (int i = path.segmentCount(); i > 0; i--) {
@@ -170,12 +175,12 @@ public class JavaDebuggerUtils {
           break;
         }
       } catch (JavaModelException e) {
-        return filePath;
+        return location.getTarget();
       }
     }
 
     if (fqn == null) {
-      return filePath;
+      return location.getTarget();
     }
 
     IType outerClass;
@@ -184,7 +189,7 @@ public class JavaDebuggerUtils {
       outerClass = project.findType(fqn);
 
       if (outerClass == null) {
-        return filePath;
+        return location.getTarget();
       }
 
       String source;
@@ -197,7 +202,7 @@ public class JavaDebuggerUtils {
       }
 
       Document document = new Document(source);
-      IRegion region = document.getLineInformation(lineNumber);
+      IRegion region = document.getLineInformation(location.getLineNumber());
       int start = region.getOffset();
       int end = start + region.getLength();
 
@@ -206,7 +211,7 @@ public class JavaDebuggerUtils {
       throw new DebuggerException(
           format(
               "Unable to find source for class with fqn '%s' in the project '%s'",
-              filePath, project),
+              location.getTarget(), project),
           e);
     } catch (BadLocationException e) {
       throw new DebuggerException("Unable to calculate breakpoint location", e);
@@ -219,7 +224,7 @@ public class JavaDebuggerUtils {
       return iMember.getDeclaringType().getFullyQualifiedName();
     }
 
-    return filePath;
+    return location.getTarget();
   }
 
   private IJavaProject getJavaProject(IPath path) throws DebuggerException {

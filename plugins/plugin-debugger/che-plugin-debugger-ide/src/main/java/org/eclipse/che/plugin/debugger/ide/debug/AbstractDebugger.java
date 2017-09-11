@@ -48,6 +48,8 @@ import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.Action;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -55,14 +57,11 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
@@ -99,7 +98,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   private final DebuggerServiceClient service;
   private final LocalStorageProvider localStorageProvider;
   private final EventBus eventBus;
-  private final DebuggerResourceHandler debuggerResourceHandler;
+  private final DebuggerResourceHandlerFactory debuggerResourceHandlerFactory;
   private final DebuggerManager debuggerManager;
   private final BreakpointManager breakpointManager;
   private final String debuggerType;
@@ -127,7 +126,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     this.dtoFactory = dtoFactory;
     this.localStorageProvider = localStorageProvider;
     this.eventBus = eventBus;
-    this.debuggerResourceHandler = debuggerResourceHandlerFactory.getOrDefault(getDebuggerType());
+    this.debuggerResourceHandlerFactory = debuggerResourceHandlerFactory;
     this.debuggerManager = debuggerManager;
     this.notificationManager = notificationManager;
     this.breakpointManager = breakpointManager;
@@ -212,23 +211,25 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
 
   private void open(Location location) {
     try {
-      debuggerResourceHandler.open(
-          location,
-          new AsyncCallback<VirtualFile>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              for (DebuggerObserver observer : observers) {
-                observer.onBreakpointStopped(location.getTarget(), location);
-              }
-            }
+      debuggerResourceHandlerFactory
+          .getOrDefault(getDebuggerType())
+          .open(
+              location,
+              new AsyncCallback<VirtualFile>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                  for (DebuggerObserver observer : observers) {
+                    observer.onBreakpointStopped(location.getTarget(), location);
+                  }
+                }
 
-            @Override
-            public void onSuccess(VirtualFile result) {
-              for (DebuggerObserver observer : observers) {
-                observer.onBreakpointStopped(result.getLocation().toString(), location);
-              }
-            }
-          });
+                @Override
+                public void onSuccess(VirtualFile result) {
+                  for (DebuggerObserver observer : observers) {
+                    observer.onBreakpointStopped(result.getLocation().toString(), location);
+                  }
+                }
+              });
     } catch (Exception e) {
       for (DebuggerObserver observer : observers) {
         observer.onBreakpointStopped(location.getTarget(), location);
@@ -337,14 +338,19 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   @Override
+  public Breakpoint createBreakpoint(VirtualFile file, int lineNumber) {
+    return new BreakpointImpl(new LocationImpl(file.getLocation().toString(), lineNumber));
+  }
+
+  @Override
   public void addBreakpoint(final VirtualFile file, final Breakpoint breakpoint) {
     if (isConnected()) {
-      LocationDto locationDto =
-          dtoFactory
-              .createDto(LocationDto.class)
-              .withLineNumber(breakpoint.getLocation().getLineNumber())
-              .withTarget(breakpoint.getLocation().getTarget())
-              .withResourceProjectPath(getProject(file).getPath());
+      Location location = breakpoint.getLocation();
+
+      LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
+      locationDto.setLineNumber(location.getLineNumber());
+      locationDto.setTarget(location.getTarget());
+      locationDto.setResourceProjectPath(location.getResourceProjectPath());
 
       BreakpointDto breakpointDto =
           dtoFactory.createDto(BreakpointDto.class).withLocation(locationDto).withEnabled(true);
@@ -374,6 +380,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
     locationDto.setLineNumber(location.getLineNumber());
     locationDto.setTarget(location.getTarget());
+    locationDto.setResourceProjectPath(location.getResourceProjectPath());
 
     Promise<Void> promise = service.deleteBreakpoint(debugSessionDto.getId(), locationDto);
     promise
@@ -463,15 +470,17 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   protected void startDebugger(final DebugSessionDto debugSessionDto) {
     List<BreakpointDto> breakpoints = new ArrayList<>();
     for (Breakpoint breakpoint : breakpointManager.getBreakpointList()) {
-      LocationDto locationDto =
-          dtoFactory
-              .createDto(LocationDto.class)
-              .withTarget(breakpoint.getLocation().getTarget())
-              .withLineNumber(breakpoint.getLocation().getLineNumber());
+      Location location = breakpoint.getLocation();
+
+      LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
+      locationDto.setLineNumber(location.getLineNumber());
+      locationDto.setTarget(location.getTarget());
+      locationDto.setResourceProjectPath(location.getResourceProjectPath());
 
       BreakpointDto breakpointDto = dtoFactory.createDto(BreakpointDto.class);
       breakpointDto.setLocation(locationDto);
       breakpointDto.setEnabled(true);
+
       breakpoints.add(breakpointDto);
     }
 
@@ -751,14 +760,6 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     dto.withName(variable.getName());
 
     return dto;
-  }
-
-  @Nullable
-  protected Project getProject(VirtualFile virtualFile) {
-    if (virtualFile instanceof Resource) {
-      return ((Resource) virtualFile).getProject();
-    }
-    return null;
   }
 
   protected abstract DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties);
