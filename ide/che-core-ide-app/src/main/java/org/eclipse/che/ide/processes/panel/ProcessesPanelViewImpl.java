@@ -43,6 +43,7 @@ import org.eclipse.che.ide.processes.ProcessDataAdapter;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeRenderer;
 import org.eclipse.che.ide.processes.StopProcessHandler;
+import org.eclipse.che.ide.terminal.TerminalOptionsJso;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
@@ -107,7 +108,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     processWidgets = new HashMap<>();
     widget2TreeNodes = new HashMap<>();
 
-    renderer.addAddTerminalClickHandler(machineId -> delegate.onAddTerminal(machineId, this));
+    renderer.addAddTerminalClickHandler(
+        machineId -> delegate.onAddTerminal(machineId, TerminalOptionsJso.createDefault()));
     renderer.addPreviewSshClickHandler(machineId -> delegate.onPreviewSsh(machineId));
     renderer.addStopProcessHandler(
         new StopProcessHandler() {
@@ -158,6 +160,12 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
           @Override
           public void onNodeSelected(TreeNodeElement<ProcessTreeNode> node, SignalEvent event) {
             delegate.onTreeNodeSelected(node.getData());
+
+            WidgetToShow widgetToFocus = processWidgets.get(node.getData().getId());
+            if (widgetToFocus != null) {
+              SubPanel panelToFocus = widget2Panels.get(widgetToFocus);
+              focusGained(panelToFocus, widgetToFocus.getWidget());
+            }
           }
 
           @Override

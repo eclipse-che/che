@@ -27,18 +27,12 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.websocket.WebSocket;
-import org.eclipse.che.ide.websocket.events.ConnectionClosedHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
-import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
-import org.eclipse.che.ide.websocket.events.MessageReceivedEvent;
-import org.eclipse.che.ide.websocket.events.MessageReceivedHandler;
-import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 import org.eclipse.che.requirejs.ModuleHolder;
 
 /**
@@ -53,7 +47,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
   private static final int TIME_BETWEEN_CONNECTIONS = 2_000;
 
   private final TerminalView view;
-  private final Object source;
+  private final TerminalOptionsJso options;
   private final NotificationManager notificationManager;
   private final CoreLocalizationConstant locale;
   private final MachineEntity machine;
@@ -73,12 +67,12 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
       TerminalView view,
       NotificationManager notificationManager,
       CoreLocalizationConstant locale,
-      @Assisted MachineEntity machine,
-      @Assisted Object source,
+      @NotNull @Assisted MachineEntity machine,
+      @Assisted TerminalOptionsJso options,
       final TerminalInitializePromiseHolder terminalHolder,
       final ModuleHolder moduleHolder) {
     this.view = view;
-    this.source = source;
+    this.options = options != null ? options : TerminalOptionsJso.createDefault();
     view.setDelegate(this);
     this.notificationManager = notificationManager;
     this.locale = locale;
@@ -143,52 +137,32 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
 
     socket = WebSocket.create(wsUrl);
 
-    socket.setOnMessageHandler(
-        new MessageReceivedHandler() {
-          @Override
-          public void onMessageReceived(MessageReceivedEvent event) {
-            terminal.write(event.getMessage());
-          }
-        });
+    socket.setOnMessageHandler(event -> terminal.write(event.getMessage()));
 
     socket.setOnCloseHandler(
-        new ConnectionClosedHandler() {
-          @Override
-          public void onClose(WebSocketClosedEvent event) {
-            if (CLOSE_NORMAL == event.getCode()) {
-              connected = false;
-              terminalStateListener.onExit();
-            }
+        event -> {
+          if (CLOSE_NORMAL == event.getCode()) {
+            connected = false;
+            terminalStateListener.onExit();
           }
         });
 
     socket.setOnOpenHandler(
-        new ConnectionOpenedHandler() {
-          @Override
-          public void onOpen() {
-            JavaScriptObject terminalJso = moduleHolder.getModule("Xterm");
-            // if terminal was created programmatically then we don't set focus on it
-            TerminalOptionsJso terminalOptionsJso = TerminalOptionsJso.createDefault();
-            if (source instanceof AddTerminalClickHandler || source instanceof Action) {
-              terminalOptionsJso.withFocusOnOpen(true);
-            }
-            terminal = TerminalJso.create(terminalJso, terminalOptionsJso);
-            connected = true;
+        () -> {
+          JavaScriptObject terminalJso = moduleHolder.getModule("Xterm");
+          terminal = TerminalJso.create(terminalJso, options);
+          connected = true;
 
-            view.openTerminal(terminal);
+          view.openTerminal(terminal);
 
-            terminal.on(
-                DATA_EVENT_NAME,
-                new Operation<String>() {
-                  @Override
-                  public void apply(String arg) throws OperationException {
-                    Jso jso = Jso.create();
-                    jso.addField("type", "data");
-                    jso.addField("data", arg);
-                    socket.send(jso.serialize());
-                  }
-                });
-          }
+          terminal.on(
+              DATA_EVENT_NAME,
+              data -> {
+                Jso jso = Jso.create();
+                jso.addField("type", "data");
+                jso.addField("data", data);
+                socket.send(jso.serialize());
+              });
         });
 
     socket.setOnErrorHandler(
