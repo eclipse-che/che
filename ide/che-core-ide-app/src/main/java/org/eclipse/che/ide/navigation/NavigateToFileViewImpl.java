@@ -17,6 +17,7 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -54,6 +55,15 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
   interface NavigateToFileViewImplUiBinder extends UiBinder<Widget, NavigateToFileViewImpl> {}
 
+  interface Styles extends CssResource {
+
+    String labelMargin();
+
+    String suggestionsPanel();
+
+    String noborder();
+  }
+
   @UiField TextBox fileName;
 
   @UiField(provided = true)
@@ -69,7 +79,9 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
   @UiField FlowPanel suggestionsPanel;
 
-  @UiField HTML suggestionsContainer;
+  private HTML suggestionsContainer;
+
+  @UiField Styles style;
 
   private HandlerRegistration resizeHandler;
 
@@ -167,7 +179,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
   @Override
   public void hidePopup() {
-    suggestionsContainer.getElement().setInnerHTML("");
+    suggestionsContainer.removeFromParent();
     suggestionsPanel.setVisible(false);
 
     suggestionsPanel.getElement().getStyle().setWidth(400, Style.Unit.PX);
@@ -186,6 +198,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
     // Hide popup if it is nothing to show
     if (items.isEmpty()) {
       suggestionsContainer.getElement().setInnerHTML("");
+      suggestionsContainer.removeFromParent();
       suggestionsPanel.setVisible(false);
 
       suggestionsPanel.getElement().getStyle().setWidth(400, Style.Unit.PX);
@@ -196,7 +209,9 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
     // Show popup
     suggestionsPanel.setVisible(true);
-    suggestionsContainer.getElement().setInnerHTML("");
+    suggestionsContainer = new HTML();
+    suggestionsContainer.addStyleName(style.noborder());
+    suggestionsPanel.add(suggestionsContainer);
 
     // Create and show list of items
     final TableElement itemHolder = Elements.createTableElement();

@@ -33,7 +33,6 @@ import org.testng.annotations.Test;
 /** @author Andrey Chizhikov */
 public class SnapshotTest {
   private static final String PROJECT_NAME = SnapshotTest.class.getSimpleName();
-  private static final String PROJECT_PATH = "src/test/resources/projects/guess-project";
   private static final String USER_DIRECTORY = "cd ~/";
   private static final String CREATE_TEXT_FILE = ">" + PROJECT_NAME + ".txt";
   private static final String FILE_NAME = PROJECT_NAME + ".txt";
@@ -79,9 +78,10 @@ public class SnapshotTest {
         TestMenuCommandsConstants.Workspace.STOP_WORKSPACE);
     toastLoader.waitExpectedTextInToastLoader("Stopping the workspace");
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running", 60);
-
     toastLoader.clickOnStartButton();
-    terminal.waitTerminalConsole();
+    toastLoader.waitExpectedTextInToastLoader("Starting workspace runtime.", 20);
+    projectExplorer.waitProjectExplorer();
+    terminal.waitTerminalTab();
     consoles.selectProcessByTabName("Terminal");
     terminal.typeIntoTerminal(USER_DIRECTORY);
     terminal.waitExpectedTextIntoTerminal(USER_DIRECTORY);

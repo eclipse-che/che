@@ -33,8 +33,7 @@ public class WorkspaceFromOfficialUbuntuImageStartTest {
   @Test
   public void ensureWorkspaceStartsFromOfficialUbuntuImage() throws Exception {
     ide.open(testWorkspace);
-    toastLoader.waitExpectedTextInToastLoader("Starting workspace runtime.", 200);
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(20);
+    terminal.waitTerminalTab();
   }
 }

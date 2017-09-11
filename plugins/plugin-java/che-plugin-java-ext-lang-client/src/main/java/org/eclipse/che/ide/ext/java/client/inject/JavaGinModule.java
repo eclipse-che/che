@@ -77,6 +77,8 @@ public class JavaGinModule extends AbstractGinModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
+    install(new FormatterGinModule());
+
     GinMapBinder<String, ProposalAction> proposalActionMapBinder =
         GinMapBinder.newMapBinder(binder(), String.class, ProposalAction.class);
     proposalActionMapBinder.addBinding(JAVA_ORGANIZE_IMPORT_ID).to(OrganizeImportsAction.class);

@@ -16,7 +16,7 @@
     <ui:with field='res' type='org.eclipse.che.ide.Resources'/>
     <ui:with field='locale' type='org.eclipse.che.ide.CoreLocalizationConstant'/>
 
-    <ui:style>
+    <ui:style type='org.eclipse.che.ide.navigation.NavigateToFileViewImpl.Styles'>
         .labelMargin {
             margin: 5px 0;
         }
@@ -71,9 +71,7 @@
                 <g:TextBox ui:field="fileName" width="387px" height="18px" />
                 <g:Label width="100%" addStyleNames="{style.labelMargin} {res.coreCss.greyFontColor}" text="{locale.navigateToFileViewFileFieldPrompt}"/>
 
-                <g:FlowPanel ui:field="suggestionsPanel" styleName="{style.suggestionsPanel}" visible="false">
-                    <g:HTML ui:field="suggestionsContainer" styleName="{style.noborder}"></g:HTML>
-                </g:FlowPanel>
+                <g:FlowPanel ui:field="suggestionsPanel" styleName="{style.suggestionsPanel}" visible="false" />
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>
