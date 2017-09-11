@@ -234,17 +234,19 @@ fi
 # for postgres and optionally Keycloak
 # -------------------------------------------------------------
 
+COMMAND_DIR=$(dirname "$0") 
+
 if [ "$CHE_MULTI_USER" == "true" ]
 then
     if [ "$CHE_DEDICATED_KEYCLOAK" == "true" ]
     then
-        $(dirname "$0")/multi-user/deployPostgresAndKeycloak.sh
+        "${COMMAND_DIR}"/multi-user/deployPostgresAndKeycloak.sh
     else
-        $(dirname "$0")/multi-user/deployPostgresOnly.sh
+        "${COMMAND_DIR}"/multi-user/deployPostgresOnly.sh
     fi
 fi
 
-$(dirname "$0")/multi-user/wait_until_postgres_is_available.sh
+"${COMMAND_DIR}"/multi-user/wait_until_postgres_is_available.sh
 
 # -------------------------------------------------------------
 # Setting Keycloak-related environment variables
@@ -257,7 +259,7 @@ $(dirname "$0")/multi-user/wait_until_postgres_is_available.sh
 if [ "$CHE_DEDICATED_KEYCLOAK" == "true" ]
 then
   CHE_KEYCLOAK_SERVER_ROUTE=$(oc get route keycloak -o jsonpath='{.spec.host}' || echo "")
-  if [ "$CHE_KEYCLOAK_SERVER_ROUTE" == "sdfsf" ]
+  if [ "$CHE_KEYCLOAK_SERVER_ROUTE" == "" ]
   then
     echo "The dedicated Keycloak server should be started and available through a route before starting the Che server"
     exit 1

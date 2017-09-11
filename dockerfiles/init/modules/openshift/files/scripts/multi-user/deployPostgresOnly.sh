@@ -1,8 +1,16 @@
 #!/bin/bash
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
 
-oc create -f $(dirname "$0")/che-init-image-stream.yaml
+COMMAND_DIR=$(dirname "$0") 
 
-oc create -f $(dirname "$0")/postgres/
+oc create -f "$COMMAND_DIR"/che-init-image-stream.yaml
+
+oc create -f "$COMMAND_DIR"/postgres/
 
 IMAGE_INIT=${IMAGE_INIT:-"eclipse/che-init:nightly"}
 
