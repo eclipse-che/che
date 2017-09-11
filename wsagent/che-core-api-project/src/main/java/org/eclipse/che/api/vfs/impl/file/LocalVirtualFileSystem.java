@@ -616,8 +616,8 @@ public class LocalVirtualFileSystem implements VirtualFileSystem {
 
   private void doUpdateContent(LocalVirtualFile virtualFile, InputStream content)
       throws ServerException {
-    try (FileOutputStream fileOut = new FileOutputStream(virtualFile.toIoFile())) {
-      ByteStreams.copy(content, fileOut);
+    try {
+      Files.write(ByteStreams.toByteArray(content), virtualFile.toIoFile());
     } catch (IOException e) {
       String errorMessage = String.format("Unable set content of '%s'", virtualFile.getPath());
       LOG.error(errorMessage + "\n" + e.getMessage(), e);
