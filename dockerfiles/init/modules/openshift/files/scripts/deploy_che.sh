@@ -256,23 +256,19 @@ $(dirname "$0")/multi-user/wait_until_postgres_is_available.sh
 
 if [ "$CHE_DEDICATED_KEYCLOAK" == "true" ]
 then
-  set +e
-  CHE_KEYCLOAK_SERVER_ROUTE=$(oc get route keycloak -o jsonpath='{.spec.host}')
-  set -e
-  if [ "CHE_KEYCLOAK_SERVER_ROUTE" == "" ]
+  CHE_KEYCLOAK_SERVER_ROUTE=$(oc get route keycloak -o jsonpath='{.spec.host}' || echo "")
+  if [ "$CHE_KEYCLOAK_SERVER_ROUTE" == "sdfsf" ]
   then
     echo "The dedicated Keycloak server should be started and available through a route before starting the Che server"
     exit 1
   fi
 
-  set +e
-  oc get service postgres
-  if [ $? -ne 0 ]
+  CHE_POSTRES_SERVICE=$(oc get service postgres || echo "")
+  if [ "$CHE_POSTRES_SERVICE" == "" ]
   then
     echo "The dedicated Postgres server should be started in Openshift project ${CHE_OPENSHIFT_PROJECT} before starting the Che server"
     exit 1
   fi
-  set -e
     
   CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"http://${CHE_KEYCLOAK_SERVER_ROUTE}/auth"}
   CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"che"}
