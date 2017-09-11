@@ -59,6 +59,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     projectExplorer.waitProjectExplorer();
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.selectProjectAndCreate(Wizard.SamplesName.WEB_JAVA_SPRING, PROJECT_NAME);
+    wizard.waitCreateProjectWizardFormIsClosed();
     projectExplorer.waitItem(PROJECT_NAME);
     commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
