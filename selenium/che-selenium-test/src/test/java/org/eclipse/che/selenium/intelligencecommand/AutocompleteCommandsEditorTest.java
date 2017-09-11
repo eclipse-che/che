@@ -109,15 +109,13 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.typeTextIntoEditor("server.80");
     commandsEditor.launchAutocompleteAndWaitContainer();
     String[] autocompleteItems = {
-      "${server.8000/tcp}",
-      "${server.8080/tcp}",
+      "${server.8000/tcp}", "${server.8080/tcp}",
     };
     for (String autocompleteItem : autocompleteItems) {
       commandsEditor.waitTextIntoAutocompleteContainer(autocompleteItem);
     }
     commandsEditor.selectAutocompleteProposal("80/tcp}");
-    commandsEditor.waitTextIntoDescriptionMacrosForm(
-        "Returns address of the 8080/tcp server");
+    commandsEditor.waitTextIntoDescriptionMacrosForm("Returns address of the 8080/tcp server");
     commandsEditor.closeAutocomplete();
     commandsEditor.waitActiveEditor();
     commandsEditor.deleteAllContent();
