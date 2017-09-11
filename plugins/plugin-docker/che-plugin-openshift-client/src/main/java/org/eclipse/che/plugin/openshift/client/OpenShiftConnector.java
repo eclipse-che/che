@@ -21,6 +21,8 @@ import io.fabric8.kubernetes.api.model.ContainerStateWaiting;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.DoneableEndpoints;
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.Node;
+import io.fabric8.kubernetes.api.model.NodeSystemInfo;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
@@ -110,6 +112,7 @@ import org.eclipse.che.plugin.docker.client.json.ImageInfo;
 import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.eclipse.che.plugin.docker.client.json.SystemInfo;
 import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
 import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
 import org.eclipse.che.plugin.docker.client.json.network.Ipam;
@@ -1106,6 +1109,38 @@ public class OpenShiftConnector extends DockerConnector {
       execMap.remove(execId);
       executor.shutdown();
       openShiftClient.close();
+    }
+  }
+
+  @Override
+  public SystemInfo getSystemInfo() throws IOException {
+    OpenShiftClient openShiftClient = new DefaultOpenShiftClient();
+    PodList chePods = openShiftClient.pods().inNamespace(this.openShiftCheProjectName).list();
+    if (chePods.getItems().size() > 0) {
+      Pod pod = chePods.getItems().get(0);
+      Node node = openShiftClient.nodes().withName(pod.getSpec().getNodeName()).get();
+      NodeSystemInfo nodeInfo = node.getStatus().getNodeInfo();
+      SystemInfo systemInfo = new SystemInfo();
+      systemInfo.setKernelVersion(nodeInfo.getKernelVersion());
+      systemInfo.setOperatingSystem(nodeInfo.getOperatingSystem());
+      systemInfo.setID(node.getMetadata().getUid());
+      int containers =
+          openShiftClient.pods().inNamespace(this.openShiftCheProjectName).list().getItems().size();
+      int images = node.getStatus().getImages().size();
+      systemInfo.setContainers(containers);
+      systemInfo.setImages(images);
+      systemInfo.setName(node.getMetadata().getName());
+      String[] labels =
+          node.getMetadata()
+              .getLabels()
+              .entrySet()
+              .stream()
+              .map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+              .toArray(String[]::new);
+      systemInfo.setLabels(labels);
+      return systemInfo;
+    } else {
+      throw new OpenShiftException("No pod found");
     }
   }
 
