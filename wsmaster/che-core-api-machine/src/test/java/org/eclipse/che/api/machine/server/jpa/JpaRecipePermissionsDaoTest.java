@@ -11,23 +11,30 @@
 package org.eclipse.che.api.machine.server.jpa;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.persist.jpa.JpaPersistModule;
 import java.util.List;
 import javax.persistence.EntityManager;
+import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl;
+import org.eclipse.che.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.commons.test.db.H2DBTestServer;
+import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.H2TestHelper;
+import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
+import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
+import org.h2.Driver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -183,9 +190,25 @@ public class JpaRecipePermissionsDaoTest {
   private class TestModule extends AbstractModule {
     @Override
     protected void configure() {
-      install(new JpaPersistModule("main"));
+      H2DBTestServer server = H2DBTestServer.startDefault();
+      install(
+          new PersistTestModuleBuilder()
+              .setDriver(Driver.class)
+              .runningOn(server)
+              .addEntityClasses(
+                  UserImpl.class,
+                  RecipeImpl.class,
+                  SnapshotImpl.class,
+                  AccountImpl.class,
+                  AbstractPermissions.class,
+                  RecipePermissionsImpl.class,
+                  TestWorkspaceEntity.class)
+              .setExceptionHandler(H2ExceptionHandler.class)
+              .build());
+      bind(DBInitializer.class).asEagerSingleton();
       bind(SchemaInitializer.class)
-          .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
+          .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
+      bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
       bind(DBInitializer.class).asEagerSingleton();
     }
   }
