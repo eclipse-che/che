@@ -67,7 +67,7 @@ public class ResetFilesPresenterTest extends BaseTest {
     when(indexFile.withIndexed(anyBoolean())).thenReturn(indexFile);
     when(indexFile.withPath(anyString())).thenReturn(indexFile);
     when(indexFile.getPath()).thenReturn("foo");
-    when(service.getStatus(any(Path.class), emptyList())).thenReturn(statusPromise);
+    when(service.getStatus(any(Path.class), eq(emptyList()))).thenReturn(statusPromise);
     when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
     when(statusPromise.catchError(any(Operation.class))).thenReturn(statusPromise);
     when(appContext.getResources()).thenReturn(new Resource[] {});

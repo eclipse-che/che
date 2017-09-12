@@ -123,7 +123,7 @@ public class CommitPresenterTest extends BaseTest {
         .thenReturn(pushPromise);
     when(service.log(any(Path.class), eq(null), anyInt(), anyInt(), anyBoolean()))
         .thenReturn(logPromise);
-    when(service.getStatus(any(Path.class), emptyList())).thenReturn(statusPromise);
+    when(service.getStatus(any(Path.class), eq(emptyList()))).thenReturn(statusPromise);
   }
 
   @Test
