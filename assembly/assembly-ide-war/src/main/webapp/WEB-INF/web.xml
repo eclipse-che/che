@@ -19,7 +19,7 @@
 
     <servlet>
         <servlet-name>IDE</servlet-name>
-        <jsp-file>/IDE.jsp</jsp-file>
+        <servlet-class>org.eclipse.che.IDEController</servlet-class>
     </servlet>
 
     <filter>

@@ -13,7 +13,7 @@ package org.eclipse.che.ide.terminal;
 import org.eclipse.che.ide.collections.Jso;
 
 /** @author Evgen Vidolob */
-class TerminalOptionsJso extends Jso {
+public class TerminalOptionsJso extends Jso {
   protected TerminalOptionsJso() {}
 
   public static native TerminalOptionsJso createDefault() /*-{
@@ -21,11 +21,12 @@ class TerminalOptionsJso extends Jso {
             cols: 80,
             rows: 24,
             screenKeys: true,
-            focusOnOpen: false
+            focusOnOpen: true
         }
     }-*/;
 
   public final native TerminalOptionsJso withFocusOnOpen(boolean focusOnOpen) /*-{
         this.focusOnOpen = focusOnOpen;
+        return this;
     }-*/;
 }
