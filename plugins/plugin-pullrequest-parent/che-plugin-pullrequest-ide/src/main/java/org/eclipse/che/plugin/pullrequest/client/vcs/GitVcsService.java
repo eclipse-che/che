@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.pullrequest.client.vcs;
 
+import static java.util.Collections.emptyList;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,8 +35,6 @@ import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-
-import static java.util.Collections.emptyList;
 
 /** Git backed implementation for {@link VcsService}. */
 @Singleton
