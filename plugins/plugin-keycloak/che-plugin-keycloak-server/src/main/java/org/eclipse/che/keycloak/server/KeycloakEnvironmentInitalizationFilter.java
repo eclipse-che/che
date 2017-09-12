@@ -18,9 +18,7 @@ import java.io.IOException;
 import java.security.Principal;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -47,7 +45,7 @@ import org.eclipse.che.commons.subject.SubjectImpl;
  * @author Max Shaposhnik (mshaposhnik@redhat.com)
  */
 @Singleton
-public class KeycloakEnvironmentInitalizationFilter implements Filter {
+public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilter {
 
   private final UserManager userManager;
   private final AccountManager accountManager;
@@ -64,15 +62,12 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
   }
 
   @Override
-  public void init(FilterConfig filterConfig) throws ServletException {}
-
-  @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
 
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     final String token = tokenExtractor.getToken(httpRequest);
-    if (request.getScheme().startsWith("ws") || (token != null && token.startsWith("machine"))) {
+    if (shouldSkipAuthentication(httpRequest, token)) {
       filterChain.doFilter(request, response);
       return;
     }
@@ -153,7 +148,4 @@ public class KeycloakEnvironmentInitalizationFilter implements Filter {
       }
     };
   }
-
-  @Override
-  public void destroy() {}
 }

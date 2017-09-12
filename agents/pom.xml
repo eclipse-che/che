@@ -37,5 +37,6 @@
         <module>ls-python</module>
         <module>ls-typescript</module>
         <module>ls-csharp</module>
+        <module>test-ls</module>
     </modules>
 </project>

@@ -64,7 +64,9 @@ describe('CheGit', function () {
       var workspaceId = 'workspace123test';
       var projectPath = '/testProject';
       var localUrl = 'https://eclipse.org/che/git/f1/' + workspaceId + projectPath;
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
+      var agentWsUrl = 'ws://localhost:3232/wsagent/ws';
+      var devMachine = {'links': [{'href': agentWsUrl, 'rel': 'wsagent.websocket'}]};
+      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}], 'devMachine': devMachine};
       var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
 
       cheBackend.addWorkspaces([workspace1]);
@@ -122,7 +124,9 @@ describe('CheGit', function () {
         'url': 'https://github.com/test3',
         'name': 'test2'
       }];
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
+      var agentWsUrl = 'ws://localhost:3232/wsagent/ws';
+      var devMachine = {'links': [{'href': agentWsUrl, 'rel': 'wsagent.websocket'}]};
+      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}], 'devMachine': devMachine};
       var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
       cheBackend.addWorkspaces([workspace1]);
 

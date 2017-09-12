@@ -58,6 +58,8 @@ public class LanguageServerRegistryImplTest {
   @Mock private Provider<ProjectManager> pmp;
   @Mock private ProjectManager pm;
   @Mock private FolderEntry projectsRoot;
+  @Mock private CheLanguageClientFactory clientFactory;
+  @Mock private CheLanguageClient languageClient;
 
   private LanguageServerRegistryImpl registry;
   private LanguageServerDescription serverDescription;
@@ -88,6 +90,8 @@ public class LanguageServerRegistryImplTest {
     when(projectsRoot.getPath()).thenReturn(Path.of(PROJECTS_ROOT));
     when(pm.getProjectsRoot()).thenReturn(projectsRoot);
 
+    when(clientFactory.create(anyString())).thenReturn(languageClient);
+
     registry =
         spy(
             new LanguageServerRegistryImpl(
@@ -95,7 +99,8 @@ public class LanguageServerRegistryImplTest {
                 Collections.singleton(languageDescription),
                 pmp,
                 initializer,
-                null) {
+                null,
+                clientFactory) {
               @Override
               protected String extractProjectPath(String filePath) throws LanguageServerException {
                 return PROJECT_PATH;

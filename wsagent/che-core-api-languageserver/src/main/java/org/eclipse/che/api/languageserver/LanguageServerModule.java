@@ -11,10 +11,12 @@
 package org.eclipse.che.api.languageserver;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
+import org.eclipse.che.api.languageserver.registry.CheLanguageClientFactory;
 import org.eclipse.che.api.languageserver.registry.LanguageServerFileWatcher;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
@@ -33,9 +35,9 @@ public class LanguageServerModule extends AbstractModule {
     bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);
     bind(ServerInitializer.class).to(ServerInitializerImpl.class);
     bind(LanguageRegistryService.class);
-    bind(WorkspaceService.class);
     Multibinder.newSetBinder(binder(), LanguageServerLauncher.class);
 
+    bind(WorkspaceService.class).asEagerSingleton();
     bind(TextDocumentService.class).asEagerSingleton();
     bind(PublishDiagnosticsParamsJsonRpcTransmitter.class).asEagerSingleton();
     bind(ShowMessageJsonRpcTransmitter.class).asEagerSingleton();
@@ -43,5 +45,7 @@ public class LanguageServerModule extends AbstractModule {
 
     bind(LanguageServerInitializationHandler.class).asEagerSingleton();
     bind(LanguageServerFileWatcher.class).asEagerSingleton();
+    bind(LanguageServerInitializationHandler.class).asEagerSingleton();
+    install(new FactoryModuleBuilder().build(CheLanguageClientFactory.class));
   }
 }

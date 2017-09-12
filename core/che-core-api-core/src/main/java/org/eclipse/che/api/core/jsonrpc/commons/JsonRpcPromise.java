@@ -28,11 +28,11 @@ public class JsonRpcPromise<R> {
   private BiConsumer<String, JsonRpcError> failureConsumer;
   private Runnable timeoutRunnable;
 
-  Optional<BiConsumer<String, R>> getSuccessConsumer() {
+  public Optional<BiConsumer<String, R>> getSuccessConsumer() {
     return Optional.ofNullable(successConsumer);
   }
 
-  Optional<BiConsumer<String, JsonRpcError>> getFailureConsumer() {
+  public Optional<BiConsumer<String, JsonRpcError>> getFailureConsumer() {
     return Optional.ofNullable(failureConsumer);
   }
 

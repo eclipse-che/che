@@ -17,9 +17,11 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
@@ -154,6 +156,19 @@ public class LocalVirtualFile implements VirtualFile {
   @Override
   public VirtualFile updateContent(String content) throws ForbiddenException, ServerException {
     return updateContent(content, null);
+  }
+
+  @Override
+  public VirtualFile modifyContent(BiConsumer<InputStream, OutputStream> modifier)
+      throws ForbiddenException, ServerException {
+    return modifyContent(modifier, null);
+  }
+
+  @Override
+  public VirtualFile modifyContent(BiConsumer<InputStream, OutputStream> modifier, String lockToken)
+      throws ForbiddenException, ServerException {
+    fileSystem.modifyContent(this, modifier, lockToken);
+    return this;
   }
 
   @Override

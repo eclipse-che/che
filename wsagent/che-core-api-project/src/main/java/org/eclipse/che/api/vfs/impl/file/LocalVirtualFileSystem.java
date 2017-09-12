@@ -39,11 +39,14 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
@@ -558,6 +561,57 @@ public class LocalVirtualFileSystem implements VirtualFileSystem {
       throw new ForbiddenException(
           String.format("Unable update content. Item '%s' is not file", virtualFile.getPath()));
     }
+  }
+
+  void modifyContent(
+      LocalVirtualFile virtualFile,
+      BiConsumer<InputStream, OutputStream> modifier,
+      String lockToken)
+      throws ForbiddenException, ServerException {
+    if (virtualFile.isFile()) {
+      if (fileIsLockedAndLockTokenIsInvalid(virtualFile, lockToken)) {
+        throw new ForbiddenException(
+            String.format(
+                "Unable update content of file '%s'. File is locked", virtualFile.getPath()));
+      }
+      final PathLockFactory.PathLock lock =
+          pathLockFactory.getLock(virtualFile.getPath(), true).acquire(WAIT_FOR_FILE_LOCK_TIMEOUT);
+      try {
+        File tempFile = createTempIoFile(virtualFile.getParent(), "edit", "tmp");
+        try {
+          File ioFile = virtualFile.toIoFile();
+          try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(ioFile));
+              BufferedOutputStream output =
+                  new BufferedOutputStream(new FileOutputStream(tempFile)); ) {
+            modifier.accept(input, output);
+          }
+
+          java.nio.file.Files.move(
+              tempFile.toPath(),
+              ioFile.toPath(),
+              StandardCopyOption.REPLACE_EXISTING,
+              StandardCopyOption.ATOMIC_MOVE);
+        } finally {
+          tempFile.delete();
+        }
+      } catch (IOException e) {
+        throw new ServerException(e);
+      } finally {
+        lock.release();
+      }
+      updateInSearcher(virtualFile);
+    } else {
+      throw new ForbiddenException(
+          String.format("Unable update content. Item '%s' is not file", virtualFile.getPath()));
+    }
+  }
+
+  private File createTempIoFile(VirtualFile parent, String prefix, String suffix)
+      throws IOException {
+    File vfsDir = new File(ioRoot, toIoPath(parent.getPath().newPath(VFS_SERVICE_DIR)));
+    vfsDir.mkdirs();
+
+    return File.createTempFile(prefix, suffix, vfsDir);
   }
 
   private void doUpdateContent(LocalVirtualFile virtualFile, InputStream content)
