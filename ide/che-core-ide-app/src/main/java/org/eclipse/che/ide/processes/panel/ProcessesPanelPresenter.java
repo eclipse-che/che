@@ -98,6 +98,7 @@ import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenu;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenuFactory;
 import org.eclipse.che.ide.terminal.TerminalFactory;
+import org.eclipse.che.ide.terminal.TerminalOptionsJso;
 import org.eclipse.che.ide.terminal.TerminalPresenter;
 import org.eclipse.che.ide.ui.loaders.DownloadWorkspaceOutputEvent;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
@@ -363,11 +364,11 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   /** Opens new terminal for the selected machine. */
-  public void newTerminal(Object source) {
+  public void newTerminal(TerminalOptionsJso options) {
     final ProcessTreeNode selectedTreeNode = view.getSelectedTreeNode();
     final MachineEntity devMachine = appContext.getDevMachine();
     if (selectedTreeNode == null && devMachine != null) {
-      onAddTerminal(devMachine.getId(), source);
+      onAddTerminal(devMachine.getId(), options);
       return;
     }
 
@@ -380,14 +381,14 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     if (selectedTreeNode.getType() == MACHINE_NODE) {
       MachineEntity machine = (MachineEntity) selectedTreeNode.getData();
-      onAddTerminal(machine.getId(), source);
+      onAddTerminal(machine.getId(), options);
       return;
     }
 
     ProcessTreeNode parent = selectedTreeNode.getParent();
     if (parent != null && parent.getType() == MACHINE_NODE) {
       MachineEntity machine = (MachineEntity) parent.getData();
-      onAddTerminal(machine.getId(), source);
+      onAddTerminal(machine.getId(), options);
     }
   }
 
@@ -429,7 +430,7 @@ public class ProcessesPanelPresenter extends BasePresenter
    * @param machineId id of machine in which the terminal will be added
    */
   @Override
-  public void onAddTerminal(final String machineId, Object source) {
+  public void onAddTerminal(final String machineId, TerminalOptionsJso options) {
     final MachineEntity machine = getMachine(machineId);
     if (machine == null) {
       notificationManager.notify(
@@ -442,7 +443,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     final ProcessTreeNode machineTreeNode = provideMachineNode(machine, false);
-    final TerminalPresenter newTerminal = terminalFactory.create(machine, source);
+    final TerminalPresenter newTerminal = terminalFactory.create(machine, options);
     final IsWidget terminalWidget = newTerminal.getView();
     final String terminalName = getUniqueTerminalName(machineTreeNode);
     final ProcessTreeNode terminalNode =
@@ -1057,7 +1058,8 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     selectDevMachine();
-    newTerminal(this);
+    TerminalOptionsJso options = TerminalOptionsJso.createDefault().withFocusOnOpen(false);
+    newTerminal(options);
   }
 
   private void restoreState(final MachineEntity machine) {

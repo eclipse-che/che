@@ -26,17 +26,13 @@ public class CustomKeyDownTerminalHandler extends JavaScriptObject {
             var V = 86;
             if (ev.ctrlKey && !(ev.shiftKey || ev.metaKey || ev.altKey)) {
 
-                //handle Ctrl + V
+                // handle Ctrl + V
                 if (ev.keyCode === V) {
                     return false;
                 }
 
-                var selection = this.document.getSelection(),
-                    collapsed = selection.isCollapsed,
-                    isRange = typeof collapsed === 'boolean' ? !collapsed : selection.type === 'Range';
-
-                //handle Ctrl + C
-                if (ev.keyCode === C && isRange) {
+                // handle Ctrl + C. Notice: scope "this" it's a terminal scope.
+                if (ev.keyCode === C && this.hasSelection()) {
                     return false;
                 }
             }

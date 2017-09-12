@@ -12,6 +12,7 @@ package org.eclipse.che.api.git;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -23,13 +24,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
@@ -122,7 +121,7 @@ public class GitIndexChangedDetector {
                 .getVirtualFile()
                 .toIoFile()
                 .getAbsolutePath();
-        Status status = gitConnectionFactory.getConnection(projectPath).status(StatusFormat.SHORT);
+        Status status = gitConnectionFactory.getConnection(projectPath).status(emptyList());
         Status statusDto = newDto(Status.class);
         statusDto.setAdded(status.getAdded());
         statusDto.setUntracked(status.getUntracked());

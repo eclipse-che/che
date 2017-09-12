@@ -8,15 +8,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.git.shared;
+package org.eclipse.che.ide.ui.button;
 
-/** Format for the status output. */
-public enum StatusFormat {
-
-  /** Short format, to show the user (has colors) but harder to understand than long format. */
-  SHORT,
-  /** Long format, to show the user. */
-  LONG,
-  /** Porcelain format, made to be fed to scripts and guaranteed to not change. */
-  PORCELAIN
+/**
+ * Describes button alignment in a horizontal container.
+ *
+ * @author Mykola Morhun
+ */
+public enum ButtonAlignment {
+  LEFT,
+  RIGHT
 }
