@@ -35,6 +35,7 @@ public class MachineAuthModule extends AbstractModule {
     bind(org.eclipse.che.machine.authentication.server.MachineTokenPermissionsFilter.class);
     bind(org.eclipse.che.machine.authentication.server.MachineTokenService.class);
     bind(org.eclipse.che.machine.authentication.server.MachineTokenRegistry.class);
+    bind(org.eclipse.che.machine.authentication.server.MachineSessionInvalidator.class);
     bind(RequestTokenExtractor.class).to(HeaderRequestTokenExtractor.class);
     bind(WorkspaceServiceLinksInjector.class)
         .to(org.eclipse.che.machine.authentication.server.WorkspaceServiceAuthLinksInjector.class);
