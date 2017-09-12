@@ -127,8 +127,8 @@ public class AppStateManager {
         Log.error(getClass(), e);
       }
     }
-    JsonObject olsSettings = allWsState.getObject(wsId);
-    if (olsSettings == null || !olsSettings.toJson().equals(settings.toJson())) {
+    JsonObject oldSettings = allWsState.getObject(wsId);
+    if (oldSettings == null || !oldSettings.toJson().equals(settings.toJson())) {
       allWsState.put(wsId, settings);
       return writeStateToPreferences(allWsState);
     } else {
