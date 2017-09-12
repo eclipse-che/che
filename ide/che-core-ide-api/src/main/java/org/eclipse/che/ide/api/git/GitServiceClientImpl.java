@@ -251,7 +251,9 @@ public class GitServiceClientImpl implements GitServiceClient {
     StringBuilder params = new StringBuilder("?projectPath=" + project);
     if (filter != null) {
       for (String path : filter) {
-        params.append("&filter=").append(path);
+        if (!path.isEmpty()) {
+          params.append("&filter=").append(path);
+        }
       }
     }
     String url = getWsAgentBaseUrl() + STATUS + params;
