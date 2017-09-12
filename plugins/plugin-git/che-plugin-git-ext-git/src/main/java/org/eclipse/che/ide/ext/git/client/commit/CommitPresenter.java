@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.git.client.commit;
 
 import static com.google.common.collect.Iterables.getFirst;
 import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
@@ -127,7 +128,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                         if (getErrorCode(error.getCause())
                             == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
                           service
-                              .getStatus(project.getLocation())
+                              .getStatus(project.getLocation(), emptyList())
                               .then(
                                   status -> {
                                     view.setEnableAmendCheckBox(false);
