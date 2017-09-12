@@ -221,13 +221,13 @@
                             <artifactId>assembly-ide-war</artifactId>
                             <type>war</type>
                             <includes>
+                                <include>_app/IDE.html</include>
                                 <include>_app/browserNotSupported.js</include>
                                 <include>_app/favicon.ico</include>
                                 <include>META-INF/context.xml</include>
                                 <include>WEB-INF/rewrite.config</include>
                                 <include>WEB-INF/web.xml</include>
                                 <include>WEB-INF/classes/org/eclipse/che/*.class</include>
-                                <include>IDE.html</include>
                             </includes>
                         </overlay>
                         <overlay />
