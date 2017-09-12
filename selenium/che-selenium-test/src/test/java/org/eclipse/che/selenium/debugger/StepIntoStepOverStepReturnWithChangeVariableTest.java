@@ -111,7 +111,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     commandsPalette.startCommandByDoubleClick(START_DEBUG);
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     editor.setCursorToLine(34);
-    editor.setBreakPointAndWaitInactiveState(34);
+    editor.setInactiveBreakpoint(34);
     menu.runCommand(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
@@ -120,7 +120,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT);
-    editor.waitBreakPointWithActiveState(34);
+    editor.waitAcitveBreakpoint(34);
     String appUrl =
         "http"
             + "://"
@@ -129,7 +129,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     String requestMess = "6";
     CompletableFuture<String> instToRequestThread =
         debugUtils.gotoDebugAppAndSendRequest(appUrl, requestMess);
-    editor.waitBreakPointWithActiveState(34);
+    editor.waitAcitveBreakpoint(34);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OVER);
     debugPanel.waitDebugHighlightedText("AdditonalClass.check();");
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
@@ -154,12 +154,12 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(START_DEBUG);
     consoles.waitExpectedTextIntoConsole(" Server startup in");
-    editor.setBreakPointAndWaitInactiveState(26);
+    editor.setInactiveBreakpoint(26);
     seleniumWebDriver
         .switchTo()
         .activeElement()
         .sendKeys(Keys.SHIFT.toString() + Keys.F9.toString());
-    editor.waitBreakPointWithActiveState(26);
+    editor.waitAcitveBreakpoint(26);
   }
 
   private void buildProjectAndOpenMainClass() {

@@ -116,7 +116,7 @@ public class ChangeVariableWithEvaluatingTest {
     commandsPalette.startCommandByDoubleClick(START_DEBUG_COMMAND_NAME);
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     editor.setCursorToLine(34);
-    editor.setBreakPointAndWaitInactiveState(34);
+    editor.setInactiveBreakpoint(34);
     menu.runCommand(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
@@ -131,7 +131,7 @@ public class ChangeVariableWithEvaluatingTest {
             + workspaceServiceClient.getServerAddressByPort(ws.getId(), 8080)
             + "/spring/guess";
     String requestMess = "11";
-    editor.waitBreakPointWithActiveState(34);
+    editor.waitAcitveBreakpoint(34);
     CompletableFuture<String> instToRequestThread =
         debuggerUtils.gotoDebugAppAndSendRequest(appUrl, requestMess);
     debugPanel.openDebugPanel();
@@ -167,7 +167,7 @@ public class ChangeVariableWithEvaluatingTest {
 
   private String getValueOfSecretNumFromVarWidget() {
     Pattern compile = Pattern.compile("secretNum=(.*)\n");
-    Matcher matcher = compile.matcher(debugPanel.getTextFromVariablePanel());
+    Matcher matcher = compile.matcher(debugPanel.getVariables());
     return matcher.find() ? matcher.group(1) : null;
   }
 }

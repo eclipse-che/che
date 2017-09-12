@@ -75,8 +75,8 @@ public class CheckBreakPointStateTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
     editor.waitActiveEditor();
-    editor.setBreakPointAndWaitInactiveState(7);
-    editor.setBreakPointAndWaitInactiveState(9);
+    editor.setInactiveBreakpoint(7);
+    editor.setInactiveBreakpoint(9);
     debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForAdditionalClass);
     projectExplorer.selectItem(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
@@ -87,9 +87,9 @@ public class CheckBreakPointStateTest {
         PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
     debugPanel.waitBreakPointsPanelIsEmpty();
     projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AppController.java");
-    editor.setBreakPointAndWaitInactiveState(29);
-    editor.setBreakPointAndWaitInactiveState(30);
-    editor.setBreakPointAndWaitInactiveState(31);
+    editor.setInactiveBreakpoint(29);
+    editor.setInactiveBreakpoint(30);
+    editor.setInactiveBreakpoint(31);
     debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForGreetingClass);
     projectExplorer.selectItem(PROJECT_NAME_2 + "/src/main/java");
@@ -108,9 +108,9 @@ public class CheckBreakPointStateTest {
         "AppController.java:29\n" + "AppController.java:31\n" + "AppController.java:34";
     projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_ONE_CLASS + "AppController.java");
     editor.setCursorToLine(35);
-    editor.setBreakPointAndWaitInactiveState(29);
-    editor.setBreakPointAndWaitInactiveState(31);
-    editor.setBreakPointAndWaitInactiveState(34);
+    editor.setInactiveBreakpoint(29);
+    editor.setInactiveBreakpoint(31);
+    editor.setInactiveBreakpoint(34);
     debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForGreetingClass);
     projectExplorer.selectItem(PROJECT_NAME);

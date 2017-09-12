@@ -163,7 +163,7 @@ public class DebuggerPresenter extends BasePresenter
   @Override
   public void onSelectedThread(long threadId) {
     updateStackFrameDump(threadId);
-    updateVariables(threadId, 0);
+    onSelectedFrame(0);
   }
 
   @Override
