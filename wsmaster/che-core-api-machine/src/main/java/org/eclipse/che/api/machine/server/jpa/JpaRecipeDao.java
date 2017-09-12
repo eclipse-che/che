@@ -114,9 +114,9 @@ public class JpaRecipeDao implements RecipeDao {
    *        recipe.NAME,
    *        recipe.SCRIPT,
    *        recipe.TYPE
-   * FROM {oj RECIPEPERMISSIONS permission
+   * FROM  RECIPEPERMISSIONS permission
    * LEFT OUTER JOIN RECIPE recipe ON (recipe.ID = permission.RECIPEID)
-   * LEFT OUTER JOIN Recipe_TAGS tag ON (tag.Recipe_ID = recipe.ID)},
+   * LEFT OUTER JOIN Recipe_TAGS tag ON (tag.Recipe_ID = recipe.ID),
    *     RECIPEPERMISSIONS_ACTIONS permissionActions
    * WHERE ((tag.tag IN (?))
    *     AND ((? IS NULL)
