@@ -10,63 +10,43 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.changespanel;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.LIST;
 import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
 
 import com.google.inject.Inject;
-import java.util.Map;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 
 /**
- * Presenter for displaying window with list of changed files.
+ * Presenter for displaying list of changed files.
  *
  * @author Igor Vinokur
  * @author Vlad Zhukovskyi
  */
 public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
 
+  private static final String REVISION = "HEAD";
   private final ChangesPanelView view;
   private final GitLocalizationConstant locale;
 
-  private Map<String, Status> changedFiles;
+  private AlteredFiles changedFiles;
   private ViewMode viewMode;
 
   private FileNodeDoubleClickHandler fileNodeDoubleClickHandler;
 
   @Inject
   public ChangesPanelPresenter(
-      GitLocalizationConstant locale,
-      ChangesPanelView view,
-      AppContext appContext,
-      NotificationManager notificationManager,
-      ComparePresenter comparePresenter) {
+      GitLocalizationConstant locale, ChangesPanelView view, ComparePresenter comparePresenter) {
+
     this.locale = locale;
     this.view = view;
     this.view.setDelegate(this);
     this.viewMode = TREE;
 
     this.fileNodeDoubleClickHandler =
-        (path, status) -> {
-          appContext
-              .getRootProject()
-              .getFile(path)
-              .then(
-                  file -> {
-                    if (file.isPresent()) {
-                      comparePresenter.showCompareWithLatest(file.get(), status, "HEAD");
-                    }
-                  })
-              .catchError(
-                  error -> {
-                    notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-                  });
-        };
+        (path, status) -> comparePresenter.showCompareWithLatest(changedFiles, path, REVISION);
   }
 
   /**
@@ -75,7 +55,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
    *
    * @param changedFiles Map with files and their status
    */
-  public void show(Map<String, Status> changedFiles) {
+  public void show(AlteredFiles changedFiles) {
     this.changedFiles = changedFiles;
     if (changedFiles.isEmpty()) {
       view.setTextToChangeViewModeButton(locale.changeListRowListViewButtonText());
