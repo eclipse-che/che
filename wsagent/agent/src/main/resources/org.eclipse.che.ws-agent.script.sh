@@ -55,7 +55,7 @@ MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
 ${SUDO} mkdir -p /projects
-${SUDO} sh -c "chown -R $(id -u -n) /projects"
+${SUDO} sh -c "find /projects -not -uid $(id -u) -print0 | xargs -0 -P3 --no-run-if-empty chown $(id -u)"
 ${SUDO} chmod 755 /projects
 
 
