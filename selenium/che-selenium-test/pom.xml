@@ -46,6 +46,10 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
         </dependency>
@@ -60,6 +64,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-user-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -86,6 +94,14 @@
             <artifactId>everrest-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-api</artifactId>
         </dependency>
@@ -108,6 +124,16 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-github-server</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson2-provider</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -145,7 +171,7 @@
                                 </property>
                                 <property>
                                     <name>listener</name>
-                                    <value>org.eclipse.che.selenium.core.CheSeleniumTesHandler</value>
+                                    <value>org.eclipse.che.selenium.core.CheSeleniumTestHandler</value>
                                 </property>
                             </properties>
                         </configuration>

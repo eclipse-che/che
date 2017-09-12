@@ -8,16 +8,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.eclipse.che.selenium.core.inject.SeleniumTestHandler;
+package org.eclipse.che.selenium.core.user;
 
 /** @author Anatolii Bazko */
-public class CheSeleniumTesHandler extends SeleniumTestHandler {
+public class SingleUserCheTestUserNamespaceResolver implements TestUserNamespaceResolver {
+
   @Override
-  public Injector createParentInjector() {
-    return Guice.createInjector(new CheSeleniumSuiteModule());
+  public String resolve(String username) {
+    return "che";
   }
 }

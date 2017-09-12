@@ -34,6 +34,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
@@ -50,6 +51,7 @@ public class TestFactoryInitializer {
   @Inject private HttpJsonRequestFactory requestFactory;
   @Inject private TestFactoryServiceClient testFactoryServiceClient;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private Entrance entrance;
 
   /**
    * Initialize {@link TestFactory} base upon template.
@@ -89,7 +91,8 @@ public class TestFactoryInitializer {
         factoryDto,
         dashboardUrlProvider,
         testFactoryServiceClient,
-        workspaceServiceClient);
+        workspaceServiceClient,
+        entrance);
   }
 
   /** Builder for {@link TestFactory}. */
@@ -108,7 +111,8 @@ public class TestFactoryInitializer {
           factoryDto,
           dashboardUrlProvider,
           testFactoryServiceClient,
-          workspaceServiceClient);
+          workspaceServiceClient,
+          entrance);
     }
 
     @Override

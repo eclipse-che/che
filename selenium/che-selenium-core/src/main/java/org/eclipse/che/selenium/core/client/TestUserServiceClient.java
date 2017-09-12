@@ -10,65 +10,27 @@
  */
 package org.eclipse.che.selenium.core.client;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import java.io.IOException;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import java.net.URLEncoder;
-import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.api.user.shared.dto.UserDto;
-import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestAdminHttpJsonRequestFactory;
+/** @author Dmytro Nochevnov */
+public interface TestUserServiceClient {
 
-/** @author Musienko Maxim */
-@Singleton
-public class TestUserServiceClient {
-  private final String apiEndpoint;
-  private final HttpJsonRequestFactory requestFactory;
+  /**
+   * Creates user.
+   *
+   * @param name name of user
+   * @param email email of user
+   * @param password user's password
+   * @return id of user
+   * @throws IOException
+   */
+  String create(String name, String email, String password) throws IOException;
 
-  @Inject
-  public TestUserServiceClient(
-      TestApiEndpointUrlProvider apiEndpointProvider,
-      TestAdminHttpJsonRequestFactory requestFactory) {
-    this.apiEndpoint = apiEndpointProvider.get().toString();
-    this.requestFactory = requestFactory;
-  }
-
-  public User getByEmail(String email) throws Exception {
-    String url = apiEndpoint + "user/find?email=" + URLEncoder.encode(email, "UTF-8");
-    HttpJsonResponse response = requestFactory.fromUrl(url).useGetMethod().request();
-
-    return response.asDto(UserDto.class);
-  }
-
-  public void deleteByEmail(String email) throws Exception {
-    String url = apiEndpoint + "user/" + getByEmail(email).getId();
-    requestFactory.fromUrl(url).useDeleteMethod().request();
-  }
-
-  public User create(String email, String password) throws Exception {
-    String url = apiEndpoint + "user";
-    return requestFactory
-        .fromUrl(url)
-        .usePostMethod()
-        .setBody(
-            newDto(UserDto.class)
-                .withName(email.split("@")[0])
-                .withPassword(password)
-                .withEmail(email))
-        .request()
-        .asDto(UserDto.class);
-  }
-
-  public UserDto getUser(String auth) throws Exception {
-    String url = apiEndpoint + "user";
-    return requestFactory
-        .fromUrl(url)
-        .useGetMethod()
-        .setAuthorizationHeader(auth)
-        .request()
-        .asDto(UserDto.class);
-  }
+  /**
+   * Deletes user by its id.
+   *
+   * @param id user's id
+   * @throws IOException
+   */
+  void delete(String id) throws IOException;
 }

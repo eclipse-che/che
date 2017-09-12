@@ -8,13 +8,18 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.user;
+package org.eclipse.che.selenium.pageobject.site;
 
-/** @author Anatolii Bazko */
-public class CheTestUserNamespaceResolver implements TestUserNamespaceResolver {
+/** @author Dmytro Nochevnov */
+public interface LoginPage {
 
-  @Override
-  public String resolve(String username) {
-    return "che";
-  }
+  /**
+   * Login Page of product.
+   *
+   * @param username login username
+   * @param password login password
+   */
+  void login(String username, String password);
+
+  boolean isOpened();
 }

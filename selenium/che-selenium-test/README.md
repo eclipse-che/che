@@ -49,6 +49,7 @@ Options:
     --http                              Use 'http' protocol to connect to product
     --https                             Use 'https' protocol to connect to product
     --host=<PRODUCT_HOST>               Set host where product is deployed
+    --multiuser                         Run tests of Multi User Che
 
 Modes (defines environment to run tests):
     local                               All tests will be run in a Web browser on the developer machine.
@@ -85,11 +86,14 @@ Other options:
     --debug                             Run tests in debug mode
 
 HOW TO of usage:
-    Test Eclipse Che assembly:
-        ./selenium-tests.sh -Mgrid
+    Test Eclipse Che single user assembly:
+        ./selenium-tests.sh
+
+    Test Eclipse Che multi user assembly:
+        ./selenium-tests.sh --multiuser
 
     Test Eclipse Che assembly and automatically rerun failing tests:
-        ./selenium-tests.sh -Mgrid --rerun
+        ./selenium-tests.sh --rerun
 
     Run single test or package of tests:
         ./selenium-tests.sh <...> --test=<TEST>

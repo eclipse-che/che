@@ -47,6 +47,7 @@
         <che.docs.version>5.18.0-SNAPSHOT</che.docs.version>
         <che.lib.version>5.18.0-SNAPSHOT</che.lib.version>
         <che.version>5.18.0-SNAPSHOT</che.version>
+        <org.jboss.resteasy.version>3.1.4.Final</org.jboss.resteasy.version>
         <org.keycloak.version>3.2.0.Final</org.keycloak.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
@@ -1325,6 +1326,21 @@
                 <groupId>org.eclipse.che.selenium</groupId>
                 <artifactId>che-selenium-test</artifactId>
                 <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-client</artifactId>
+                <version>${org.jboss.resteasy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jackson2-provider</artifactId>
+                <version>${org.jboss.resteasy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-admin-client</artifactId>
+                <version>${org.keycloak.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.keycloak</groupId>

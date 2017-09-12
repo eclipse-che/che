@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.core.workspace;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,9 +18,13 @@ import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 
 /** @author Anatolii Bazko */
 @Singleton
-public class CheTestWorkspaceUrlResolver implements TestWorkspaceUrlResolver {
+public class SingleUserCheTestWorkspaceUrlResolver implements TestWorkspaceUrlResolver {
 
-  @Inject private TestIdeUrlProvider testIdeUrlProvider;
+  private final TestIdeUrlProvider testIdeUrlProvider;
+
+  public SingleUserCheTestWorkspaceUrlResolver(TestIdeUrlProvider testIdeUrlProvider) {
+    this.testIdeUrlProvider = testIdeUrlProvider;
+  }
 
   @Override
   public URL resolve(TestWorkspace testWorkspace) throws MalformedURLException {
