@@ -120,7 +120,6 @@ public class JpaRecipeDao implements RecipeDao {
    *     RECIPEPERMISSIONS_ACTIONS permissionActions
    * WHERE ((tag.tag IN (?))
    *     AND ((? IS NULL)
-   *           OR (recipe.TYPE IS NULL)
    *           OR (recipe.TYPE = ?))
    *     AND ((permission.USERID IS NULL)
    *           OR (permission.USERID = ?))
@@ -146,7 +145,6 @@ public class JpaRecipeDao implements RecipeDao {
       final Predicate checkType =
           cb.or(
               cb.isNull(typeParam),
-              cb.isNull(rwp.get("type")),
               cb.equal(rwp.get("type"), typeParam));
       final Predicate userIdCheck =
           cb.or(

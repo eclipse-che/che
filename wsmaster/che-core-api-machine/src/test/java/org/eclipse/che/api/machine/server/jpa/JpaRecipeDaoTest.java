@@ -124,10 +124,8 @@ public class JpaRecipeDaoTest {
   @Test
   public void shouldFindRecipeByPermissionsAndType() throws Exception {
     List<RecipeImpl> results = dao.search(users[0].getId(), null, "testType", 0, 0);
-    assertEquals(results.size(), 3);
-    assertTrue(results.contains(recipes[0]));
+    assertEquals(results.size(), 1);
     assertTrue(results.contains(recipes[1]));
-    assertTrue(results.contains(recipes[2]));
   }
 
   @Test
