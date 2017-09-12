@@ -142,10 +142,7 @@ public class JpaRecipeDao implements RecipeDao {
       final Join<RecipeImpl, RecipePermissionsImpl> rwp = perm.join("recipe", JoinType.LEFT);
       final Expression<List<String>> acts = perm.get("actions");
       final ParameterExpression<String> typeParam = cb.parameter(String.class, "recipeType");
-      final Predicate checkType =
-          cb.or(
-              cb.isNull(typeParam),
-              cb.equal(rwp.get("type"), typeParam));
+      final Predicate checkType = cb.or(cb.isNull(typeParam), cb.equal(rwp.get("type"), typeParam));
       final Predicate userIdCheck =
           cb.or(
               cb.isNull(perm.get("userId")),
