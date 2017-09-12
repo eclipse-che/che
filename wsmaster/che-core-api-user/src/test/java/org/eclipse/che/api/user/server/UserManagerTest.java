@@ -25,6 +25,8 @@ import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collections;
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -58,6 +60,7 @@ public class UserManagerTest {
   @Mock private UserDao userDao;
   @Mock private ProfileDao profileDao;
   @Mock private PreferenceDao preferencesDao;
+  @Mock private AccountManager accountManager;
   @Mock private EventService eventService;
   @Mock private PostUserPersistedEvent postUserPersistedEvent;
   @Mock private BeforeUserRemovedEvent beforeUserRemovedEvent;
@@ -69,7 +72,12 @@ public class UserManagerTest {
     initMocks(this);
     manager =
         new UserManager(
-            userDao, profileDao, preferencesDao, eventService, new String[] {"reserved"});
+            userDao,
+            profileDao,
+            preferencesDao,
+            eventService,
+            accountManager,
+            new String[] {"reserved"});
 
     when(eventService.publish(any()))
         .thenAnswer(
@@ -84,13 +92,14 @@ public class UserManagerTest {
   }
 
   @Test
-  public void shouldCreateProfileAndPreferencesOnUserCreation() throws Exception {
+  public void shouldCreateAccountAndProfileAndPreferencesOnUserCreation() throws Exception {
     final UserImpl user = new UserImpl(null, "test@email.com", "testName", null, null);
 
     manager.create(user, false);
 
     verify(userDao).create(any(UserImpl.class));
     verify(profileDao).create(any(ProfileImpl.class));
+    verify(accountManager).create(any(Account.class));
     verify(preferencesDao).setPreferences(anyString(), anyMapOf(String.class, String.class));
   }
 
@@ -137,13 +146,16 @@ public class UserManagerTest {
 
   @Test
   public void shouldUpdateUser() throws Exception {
-    final User user =
+    final UserImpl user =
         new UserImpl(
             "identifier", "test@email.com", "testName", "password", Collections.emptyList());
+    when(manager.getById(user.getId())).thenReturn(user);
+    UserImpl user2 = new UserImpl(user);
+    user2.setName("testName2");
+    manager.update(user2);
 
-    manager.update(user);
-
-    verify(userDao).update(new UserImpl(user));
+    verify(userDao).update(new UserImpl(user2));
+    verify(accountManager).update(any(Account.class));
   }
 
   @Test(expectedExceptions = NullPointerException.class)

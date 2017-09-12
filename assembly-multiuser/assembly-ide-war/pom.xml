@@ -25,7 +25,7 @@
     </parent>
     <artifactId>assembly-ide-war</artifactId>
     <packaging>war</packaging>
-    <name>Fabric8 IDE :: Compiling GWT Application</name>
+    <name>Che IDE Assembly Multiuser :: Compiling GWT Application</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

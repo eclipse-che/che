@@ -153,14 +153,19 @@ public class JpaWorkspaceDao implements WorkspaceDao {
   @Override
   @Transactional
   public List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException {
+
+    final String query =
+        "SELECT ws FROM Worker worker  "
+            + "          LEFT JOIN worker.workspace ws "
+            + "          WHERE worker.userId = :userId "
+            + "          AND 'read' MEMBER OF worker.actions";
+
     try {
       return managerProvider
           .get()
-          .createNamedQuery("Workspace.getAll", WorkspaceImpl.class)
-          .getResultList()
-          .stream()
-          .map(WorkspaceImpl::new)
-          .collect(Collectors.toList());
+          .createQuery(query, WorkspaceImpl.class)
+          .setParameter("userId", userId)
+          .getResultList();
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);
     }

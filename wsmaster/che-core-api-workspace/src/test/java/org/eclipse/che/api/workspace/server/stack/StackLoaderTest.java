@@ -28,11 +28,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
+import org.eclipse.che.api.workspace.server.spi.jpa.JpaStackPermissionsDao;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
@@ -63,6 +63,8 @@ public class StackLoaderTest {
 
   @Mock private DBInitializer dbInitializer;
 
+  @Mock private JpaStackPermissionsDao permissionsDao;
+
   private StackLoader stackLoader;
 
   @BeforeMethod
@@ -70,7 +72,11 @@ public class StackLoaderTest {
     when(dbInitializer.isBareInit()).thenReturn(true);
     stackLoader =
         new StackLoader(
-            false, ImmutableMap.of("stacks.json", "stack_img"), stackDao, dbInitializer);
+            false,
+            ImmutableMap.of("stacks.json", "stack_img"),
+            stackDao,
+            permissionsDao,
+            dbInitializer);
   }
 
   @Test
@@ -84,16 +90,6 @@ public class StackLoaderTest {
   @Test
   public void predefinedStackWithValidJsonShouldBeCreated() throws Exception {
     doThrow(new NotFoundException("Stack is already exist")).when(stackDao).update(any());
-
-    stackLoader.start();
-
-    verify(stackDao, times(5)).update(any());
-    verify(stackDao, times(5)).create(any());
-  }
-
-  @Test
-  public void predefinedStackWithValidJsonShouldBeCreated2() throws Exception {
-    doThrow(new ServerException("Internal server error")).when(stackDao).update(any());
 
     stackLoader.start();
 

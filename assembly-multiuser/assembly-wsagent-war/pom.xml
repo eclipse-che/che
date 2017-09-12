@@ -25,7 +25,7 @@
     </parent>
     <artifactId>assembly-wsagent-war</artifactId>
     <packaging>war</packaging>
-    <name>Fabric8 IDE Workspace Agent War Packaging</name>
+    <name>Che IDE Assembly Multiuser :: Agent War Packaging</name>
     <dependencies>
         <dependency>
             <groupId>com.google.inject</groupId>

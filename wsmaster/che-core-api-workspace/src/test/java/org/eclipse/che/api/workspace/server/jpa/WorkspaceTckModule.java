@@ -16,17 +16,28 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl;
+import org.eclipse.che.api.permission.server.AbstractPermissionsDomain;
+import org.eclipse.che.api.permission.server.spi.PermissionsDao;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
+import org.eclipse.che.api.workspace.server.spi.WorkerDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.server.spi.jpa.JpaStackPermissionsDao;
+import org.eclipse.che.api.workspace.server.spi.jpa.JpaWorkerDao;
+import org.eclipse.che.api.workspace.server.spi.tck.StackPermissionsDaoTest;
+import org.eclipse.che.api.workspace.server.spi.tck.WorkerDaoTest;
+import org.eclipse.che.api.workspace.server.stack.StackPermissionsImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
@@ -53,11 +64,15 @@ public class WorkspaceTckModule extends TckModule {
             .runningOn(server)
             .addEntityClasses(
                 AccountImpl.class,
+                UserImpl.class,
                 WorkspaceImpl.class,
                 WorkspaceConfigImpl.class,
                 ProjectConfigImpl.class,
                 EnvironmentImpl.class,
                 EnvironmentRecipeImpl.class,
+                RecipePermissionsImpl.class,
+                StackPermissionsImpl.class,
+                WorkerImpl.class,
                 ExtendedMachineImpl.class,
                 SourceStorageImpl.class,
                 ServerConf2Impl.class,
@@ -78,7 +93,24 @@ public class WorkspaceTckModule extends TckModule {
         .toInstance(new JpaTckRepository<>(AccountImpl.class));
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
     bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
+    bind(new TypeLiteral<TckRepository<UserImpl>>() {})
+        .toInstance(new JpaTckRepository<>(UserImpl.class));
+    bind(new TypeLiteral<TckRepository<WorkerImpl>>() {})
+        .toInstance(new JpaTckRepository<>(WorkerImpl.class));
+    bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {})
+        .toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
+    bind(new TypeLiteral<TckRepository<StackPermissionsImpl>>() {})
+        .toInstance(new JpaTckRepository<>(StackPermissionsImpl.class));
 
+    bind(new TypeLiteral<PermissionsDao<StackPermissionsImpl>>() {})
+        .to(JpaStackPermissionsDao.class);
+
+    bind(new TypeLiteral<AbstractPermissionsDomain<WorkerImpl>>() {})
+        .to(WorkerDaoTest.TestDomain.class);
+    bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {})
+        .to(StackPermissionsDaoTest.TestDomain.class);
+
+    bind(WorkerDao.class).to(JpaWorkerDao.class);
     bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
     bind(StackDao.class).to(JpaStackDao.class);
   }

@@ -11,6 +11,8 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
+import org.eclipse.che.api.permission.server.PermissionChecker;
+import org.eclipse.che.api.permission.server.PermissionCheckerImpl;
 import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
@@ -31,5 +33,6 @@ public class KeycloakApiModule extends AbstractModule {
     bind(PasswordEncryptor.class).to(PBKDF2PasswordEncryptor.class);
     bind(UserDao.class).to(JpaUserDao.class);
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);
+    bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
   }
 }

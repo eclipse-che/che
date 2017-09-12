@@ -25,13 +25,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
-import org.eclipse.che.account.api.AccountManager;
-import org.eclipse.che.account.shared.model.Account;
-import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.permission.server.AuthorizedSubject;
+import org.eclipse.che.api.permission.server.PermissionChecker;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
@@ -48,17 +47,17 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilter {
 
   private final UserManager userManager;
-  private final AccountManager accountManager;
   private final RequestTokenExtractor tokenExtractor;
+  private final PermissionChecker permissionChecker;
 
   @Inject
   public KeycloakEnvironmentInitalizationFilter(
       UserManager userManager,
-      AccountManager accountManager,
-      RequestTokenExtractor tokenExtractor) {
+      RequestTokenExtractor tokenExtractor,
+      PermissionChecker permissionChecker) {
     this.userManager = userManager;
-    this.accountManager = accountManager;
     this.tokenExtractor = tokenExtractor;
+    this.permissionChecker = permissionChecker;
   }
 
   @Override
@@ -85,11 +84,9 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
               claims.getSubject(),
               claims.get("email", String.class),
               claims.get("preferred_username", String.class));
-      getOrCreateAccount(
-          claims.get("preferred_username", String.class),
-          claims.get("preferred_username", String.class));
-
-      subject = new SubjectImpl(user.getName(), user.getId(), token, false);
+      subject =
+          new AuthorizedSubject(
+              new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
       session.setAttribute("che_subject", subject);
     }
 
@@ -114,23 +111,6 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
       }
     } catch (ServerException e) {
       throw new ServletException("Unable to get user", e);
-    }
-  }
-
-  private synchronized Account getOrCreateAccount(String id, String namespace)
-      throws ServletException {
-    try {
-      return accountManager.getById(id);
-    } catch (NotFoundException e) {
-      try {
-        Account account = new AccountImpl(id, namespace, "personal");
-        accountManager.create(account);
-        return account;
-      } catch (ServerException | ConflictException ex) {
-        throw new ServletException("Unable to create new account", ex);
-      }
-    } catch (ServerException e) {
-      throw new ServletException("Unable to get account", e);
     }
   }
 
