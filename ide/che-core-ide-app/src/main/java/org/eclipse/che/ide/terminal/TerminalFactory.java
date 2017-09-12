@@ -18,6 +18,7 @@ import org.eclipse.che.ide.api.machine.MachineEntity;
  * Special factory for creating {@link TerminalPresenter} instances.
  *
  * @author Dmitry Shnurenko
+ * @author Alexander Andrienko
  */
 public interface TerminalFactory {
 
@@ -25,7 +26,9 @@ public interface TerminalFactory {
    * Creates terminal for current machine.
    *
    * @param machine machine for which terminal will be created
+   * @param options options for new terminal
    * @return an instance of {@link TerminalPresenter}
    */
-  TerminalPresenter create(@NotNull @Assisted MachineEntity machine, Object source);
+  TerminalPresenter create(
+      @NotNull @Assisted MachineEntity machine, @Assisted TerminalOptionsJso options);
 }
