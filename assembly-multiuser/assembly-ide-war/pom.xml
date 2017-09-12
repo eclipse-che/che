@@ -227,7 +227,7 @@
                                 <include>WEB-INF/rewrite.config</include>
                                 <include>WEB-INF/web.xml</include>
                                 <include>WEB-INF/classes/org/eclipse/che/*.class</include>
-                                <include>IDE.jsp</include>
+                                <include>IDE.html</include>
                             </includes>
                         </overlay>
                         <overlay />
