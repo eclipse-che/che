@@ -40,7 +40,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
   private final ServerCapabilities serverCapabilities;
   private final TextDocumentServiceClient documentServiceClient;
   private final FuzzyMatches fuzzyMatches;
-  private final LatestCompletionResult latestCompletionResult;
+  private LatestCompletionResult latestCompletionResult;
   private String lastErrorMessage;
 
   @Inject
@@ -57,7 +57,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     this.imageProvider = imageProvider;
     this.serverCapabilities = serverCapabilities;
     this.fuzzyMatches = fuzzyMatches;
-    this.latestCompletionResult = new LatestCompletionResult();
+    this.latestCompletionResult = LatestCompletionResult.NO_RESULT;
   }
 
   @Override
@@ -84,7 +84,8 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
           .completion(documentPosition)
           .then(
               list -> {
-                latestCompletionResult.update(documentId, offset, currentWord, list);
+                latestCompletionResult =
+                    new LatestCompletionResult(documentId, offset, currentWord, list);
                 computeProposals(currentWord, 0, callback);
               })
           .catchError(

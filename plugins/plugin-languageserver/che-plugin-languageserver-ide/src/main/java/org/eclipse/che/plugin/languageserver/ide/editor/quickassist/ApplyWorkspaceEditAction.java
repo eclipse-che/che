@@ -149,23 +149,9 @@ public class ApplyWorkspaceEditAction extends Action {
         TextEditor textEditor = (TextEditor) editor;
         HandlesUndoRedo undoRedo = textEditor.getEditorWidget().getUndoRedo();
         undoRedo.beginCompoundChange();
-        Document document = textEditor.getDocument();
-        edits
-            .stream()
-            .sorted(COMPARATOR)
-            .forEach(
-                e -> {
-                  Range r = e.getRange();
-                  Position start = r.getStart();
-                  Position end = r.getEnd();
-                  document.replace(
-                      start.getLine(),
-                      start.getCharacter(),
-                      end.getLine(),
-                      end.getCharacter(),
-                      e.getNewText());
-                });
+        applyTextEdits(textEditor.getDocument(), edits);
         undoRedo.endCompoundChange();
+
         Supplier<Promise<Void>> value =
             () -> {
               return promiseProvider.create(
@@ -205,6 +191,24 @@ public class ApplyWorkspaceEditAction extends Action {
                       return null;
                     });
               };
+            });
+  }
+
+  public static void applyTextEdits(Document document, List<TextEdit> edits) {
+    edits
+        .stream()
+        .sorted(COMPARATOR)
+        .forEach(
+            e -> {
+              Range r = e.getRange();
+              Position start = r.getStart();
+              Position end = r.getEnd();
+              document.replace(
+                  start.getLine(),
+                  start.getCharacter(),
+                  end.getLine(),
+                  end.getCharacter(),
+                  e.getNewText());
             });
   }
 }

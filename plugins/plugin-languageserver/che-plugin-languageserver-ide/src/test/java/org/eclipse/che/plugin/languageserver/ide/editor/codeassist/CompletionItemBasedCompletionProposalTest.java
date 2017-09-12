@@ -13,11 +13,12 @@ package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
@@ -26,6 +27,7 @@ import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.ide.api.editor.codeassist.Completion;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
@@ -86,7 +88,7 @@ public class CompletionItemBasedCompletionProposalTest {
     when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
     when(completionOptions.getResolveProvider()).thenReturn(false);
 
-    when(document.getCursorOffset()).thenReturn(5);
+    when(document.getCursorPosition()).thenReturn(new TextPosition(0, 5));
     when(completion.getInsertText()).thenReturn("foo");
 
     Completion[] completions = new Completion[1];
@@ -94,9 +96,9 @@ public class CompletionItemBasedCompletionProposalTest {
 
     completions[0].apply(document);
 
-    verify(document).getCursorOffset();
-    verify(document, times(1)).replace(eq(5), eq(0), eq("foo"));
-    verifyNoMoreInteractions(document);
+    verify(document).getCursorPosition();
+    verify(document, times(1)).replace(eq(0), eq(5), eq(0), eq(5), eq("foo"));
+    verify(document, times(1)).replace(anyInt(), anyInt(), anyInt(), anyInt(), anyString());
   }
 
   @Test
@@ -104,7 +106,7 @@ public class CompletionItemBasedCompletionProposalTest {
     when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
     when(completionOptions.getResolveProvider()).thenReturn(false);
 
-    when(document.getCursorOffset()).thenReturn(5);
+    when(document.getCursorPosition()).thenReturn(new TextPosition(0, 5));
     when(completion.getInsertText()).thenReturn(null);
     when(completion.getLabel()).thenReturn("bar");
 
@@ -113,9 +115,9 @@ public class CompletionItemBasedCompletionProposalTest {
 
     completions[0].apply(document);
 
-    verify(document).getCursorOffset();
-    verify(document, times(1)).replace(eq(5), eq(0), eq("bar"));
-    verifyNoMoreInteractions(document);
+    verify(document).getCursorPosition();
+    verify(document, times(1)).replace(eq(0), eq(5), eq(0), eq(5), eq("bar"));
+    verify(document, times(1)).replace(anyInt(), anyInt(), anyInt(), anyInt(), anyString());
   }
 
   @Test
@@ -128,7 +130,7 @@ public class CompletionItemBasedCompletionProposalTest {
     when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
     when(completionOptions.getResolveProvider()).thenReturn(false);
 
-    when(document.getCursorOffset()).thenReturn(5);
+    when(document.getCursorPosition()).thenReturn(new TextPosition(0, 5));
     when(completion.getInsertText()).thenReturn("foo");
     when(completion.getLabel()).thenReturn("bar");
     when(completion.getTextEdit()).thenReturn(textEdit);
@@ -145,16 +147,13 @@ public class CompletionItemBasedCompletionProposalTest {
     when(endPosition.getLine()).thenReturn(1);
     when(endPosition.getCharacter()).thenReturn(5);
 
-    when(document.getIndexFromPosition(any())).thenReturn(5);
-
     Completion[] completions = new Completion[1];
     proposal.getCompletion(completion -> completions[0] = completion);
 
     completions[0].apply(document);
 
-    verify(document, times(2)).getIndexFromPosition(any());
-    verify(document, times(1)).replace(eq(5), eq(0), eq("fooBar"));
-    verifyNoMoreInteractions(document);
+    verify(document, times(1)).replace(eq(1), eq(5), eq(1), eq(5), eq("fooBar"));
+    verify(document, times(1)).replace(anyInt(), anyInt(), anyInt(), anyInt(), anyString());
   }
 
   @Test
@@ -167,7 +166,7 @@ public class CompletionItemBasedCompletionProposalTest {
     when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
     when(completionOptions.getResolveProvider()).thenReturn(false);
 
-    when(document.getCursorOffset()).thenReturn(5);
+    when(document.getCursorPosition()).thenReturn(new TextPosition(0, 5));
     when(completion.getInsertText()).thenReturn("foo");
     when(completion.getLabel()).thenReturn("bar");
     when(completion.getTextEdit()).thenReturn(textEdit);
@@ -202,7 +201,7 @@ public class CompletionItemBasedCompletionProposalTest {
     when(serverCapabilities.getCompletionProvider()).thenReturn(completionOptions);
     when(completionOptions.getResolveProvider()).thenReturn(false);
 
-    when(document.getCursorOffset()).thenReturn(5);
+    when(document.getCursorPosition()).thenReturn(new TextPosition(0, 5));
     when(completion.getInsertText()).thenReturn("foo");
 
     when(document.getIndexFromPosition(any())).thenReturn(5);
