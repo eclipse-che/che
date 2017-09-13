@@ -25,10 +25,13 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.git.shared.GitCheckoutEvent;
+import org.eclipse.che.api.git.shared.IndexChangedEvent;
+import org.eclipse.che.api.git.shared.GitEvent;
 
 @Singleton
-public class GitJsonRpcMessenger implements EventSubscriber<GitCheckoutEvent> {
-  private final Map<String, Set<String>> endpointIds = new ConcurrentHashMap<>();
+public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
+  private final Map<String, Set<String>> endpointIdsWithWorkspaceIdAndProjectName = new ConcurrentHashMap<>();
+  private final Set<String> endpointIds = newConcurrentHashSet();
 
   private final EventService eventService;
   private final RequestTransmitter transmitter;
@@ -50,21 +53,34 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitCheckoutEvent> {
   }
 
   @Override
-  public void onEvent(GitCheckoutEvent event) {
-    String workspaceIdAndProjectName = event.getWorkspaceId() + event.getProjectName();
-    endpointIds
-        .entrySet()
-        .stream()
-        .filter(it -> it.getValue().contains(workspaceIdAndProjectName))
-        .map(Entry::getKey)
-        .forEach(
-            it ->
-                transmitter
-                    .newRequest()
-                    .endpointId(it)
-                    .methodName("git/checkoutOutput")
-                    .paramsAsDto(event)
-                    .sendAndSkipResult());
+  public void onEvent(GitEvent event) {
+    if (event instanceof GitCheckoutEvent) {
+      GitCheckoutEvent checkoutEvent = (GitCheckoutEvent) event;
+      String workspaceIdAndProjectName =
+          checkoutEvent.getWorkspaceId() + checkoutEvent.getProjectName();
+      endpointIdsWithWorkspaceIdAndProjectName
+          .entrySet()
+          .stream()
+          .filter(it -> it.getValue().contains(workspaceIdAndProjectName))
+          .map(Entry::getKey)
+          .forEach(
+              it ->
+                  transmitter
+                      .newRequest()
+                      .endpointId(it)
+                      .methodName("git/checkoutOutput")
+                      .paramsAsDto(event)
+                      .sendAndSkipResult());
+    } else if (event instanceof IndexChangedEvent) {
+      endpointIds.forEach(
+          id ->
+              transmitter
+                  .newRequest()
+                  .endpointId(id)
+                  .methodName("event/git-index")
+                  .paramsAsDto(((IndexChangedEvent) event).getStatus())
+                  .sendAndSkipResult());
+    }
   }
 
   @Inject
@@ -76,9 +92,19 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitCheckoutEvent> {
         .noResult()
         .withBiConsumer(
             (endpointId, workspaceIdAndProjectName) -> {
-              endpointIds.putIfAbsent(endpointId, newConcurrentHashSet());
-              endpointIds.get(endpointId).add(workspaceIdAndProjectName);
+              endpointIdsWithWorkspaceIdAndProjectName.putIfAbsent(
+                  endpointId, newConcurrentHashSet());
+              endpointIdsWithWorkspaceIdAndProjectName
+                  .get(endpointId)
+                  .add(workspaceIdAndProjectName);
             });
+
+    configurator
+        .newConfiguration()
+        .methodName("event/git/subscribe")
+        .noParams()
+        .noResult()
+        .withConsumer(endpointIds::add);
   }
 
   @Inject
@@ -90,10 +116,10 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitCheckoutEvent> {
         .noResult()
         .withBiConsumer(
             (endpointId, workspaceIdAndProjectName) -> {
-              endpointIds
+              endpointIdsWithWorkspaceIdAndProjectName
                   .getOrDefault(endpointId, newConcurrentHashSet())
                   .remove(workspaceIdAndProjectName);
-              endpointIds.computeIfPresent(
+              endpointIdsWithWorkspaceIdAndProjectName.computeIfPresent(
                   endpointId, (key, value) -> value.isEmpty() ? null : value);
             });
   }
