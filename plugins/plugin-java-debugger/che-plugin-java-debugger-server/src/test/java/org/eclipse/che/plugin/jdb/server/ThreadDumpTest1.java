@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -148,7 +149,7 @@ public class ThreadDumpTest1 {
     assertEquals(threadState.getStatus(), ThreadStatus.RUNNING);
 
     List<? extends StackFrameDump> frames = threadState.getFrames();
-    assertEquals(frames.size(), 1);
+    assertFalse(frames.isEmpty());
 
     StackFrameDump stackFrameDump = frames.get(0);
     assertTrue(stackFrameDump.getVariables().isEmpty());

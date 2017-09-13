@@ -129,7 +129,7 @@ public class InnerClassAndLambdaDebuggingTest {
     debugPanel.waitTextInVariablesPanel("anonym=\"App anonym\"");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, enabled = false)
   public void shouldDebugMethodLocalInnerClass() {
     // when
     editor.setCursorToLine(53);
