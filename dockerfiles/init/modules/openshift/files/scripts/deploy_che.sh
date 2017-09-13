@@ -352,6 +352,10 @@ MULTI_USER_REPLACEMENT_STRING="s+- env:+- env:\\n\
           - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET\"\\n\
             value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+"
 
+# TODO When merging the multi-user work to master, this replacement string should
+# be replaced by the corresponding change in the fabric8 deployment descriptor
+MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING="s|            path: /api/system/state|            path: /api|"
+
 echo
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   echo "[CHE] Deploying Che on minishift (image ${CHE_IMAGE})"
@@ -370,6 +374,7 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     sed "$MULTI_USER_REPLACEMENT_STRING" | \
+    sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
@@ -380,6 +385,7 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     sed "$MULTI_USER_REPLACEMENT_STRING" | \
+    sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
@@ -391,6 +397,7 @@ else
     sed "s/    keycloak-disabled:.*/    keycloak-disabled: \"${CHE_KEYCLOAK_DISABLED}\"/" | \
     if [ "${CHE_LOG_LEVEL}" == "DEBUG" ]; then sed "s/    log-level: \"INFO\"/    log-level: \"DEBUG\"/" ; else cat -; fi | \
     sed "$MULTI_USER_REPLACEMENT_STRING" | \
+    sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
     oc apply --force=true -f -
 fi
 echo
