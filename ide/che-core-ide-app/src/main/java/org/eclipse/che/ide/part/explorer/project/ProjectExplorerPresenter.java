@@ -10,6 +10,15 @@
  */
 package org.eclipse.che.ide.part.explorer.project;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
+import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
+
 import com.google.common.collect.Sets;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -17,7 +26,9 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-
+import java.util.HashSet;
+import java.util.Set;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -55,19 +66,6 @@ import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
-import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 /**
  * Project explorer presenter. Handle basic logic to control project tree display.

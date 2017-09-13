@@ -10,8 +10,25 @@
  */
 package org.eclipse.che.api.project.server;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
+import static org.eclipse.che.api.core.ErrorCodes.NOT_UPDATED_PROJECT;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.io.IOException;
+import java.nio.file.PathMatcher;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -47,25 +64,6 @@ import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.nio.file.PathMatcher;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
-import static org.eclipse.che.api.core.ErrorCodes.NOT_UPDATED_PROJECT;
-import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 
 /**
  * Facade for all project related operations.
@@ -311,8 +309,8 @@ public class ProjectManager {
    *     {@link BaseProjectType} type
    * <li>- a project will be created as project of {@link BaseProjectType} type with {@link
    *     ProjectProblem#getCode()} code} = 12 when declared primary project type is not registered,
-   * <li>- a project will be created with {@link ProjectProblem#getCode()} code} = 12 and without mixin project type
-   *     when declared mixin project type is not registered
+   * <li>- a project will be created with {@link ProjectProblem#getCode()} code} = 12 and without
+   *     mixin project type when declared mixin project type is not registered
    * <li>- for creating a project by generator {@link NewProjectConfig#getOptions()} should be
    *     specified.
    *

@@ -10,11 +10,10 @@
  */
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.project.ProjectProblem;
-import org.eclipse.che.api.core.model.project.type.Attribute;
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.String.format;
+import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
+import static org.eclipse.che.api.core.ErrorCodes.PROJECT_TYPE_IS_NOT_REGISTERED;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,22 +21,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.String.format;
-import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
-import static org.eclipse.che.api.core.ErrorCodes.PROJECT_TYPE_IS_NOT_REGISTERED;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
+import org.eclipse.che.api.core.model.project.type.Attribute;
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
+import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 
 /** @author gazarenkov */
 public class ProjectTypes {
 
-  private final String                      projectPath;
-  private final ProjectTypeRegistry         projectTypeRegistry;
-  private ProjectTypeDef                    primary;
+  private final String projectPath;
+  private final ProjectTypeRegistry projectTypeRegistry;
+  private ProjectTypeDef primary;
   private final Map<String, ProjectTypeDef> mixins;
   private final Map<String, ProjectTypeDef> all;
-  private final Map<String, Attribute>      attributeDefs;
-  private final List<ProjectProblem>        problems;
+  private final Map<String, Attribute> attributeDefs;
+  private final List<ProjectProblem> problems;
 
   ProjectTypes(
       String projectPath,

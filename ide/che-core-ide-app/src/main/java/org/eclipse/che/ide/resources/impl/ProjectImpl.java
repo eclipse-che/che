@@ -10,12 +10,16 @@
  */
 package org.eclipse.che.ide.resources.impl;
 
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
+import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
@@ -25,12 +29,6 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.resource.Path;
-
-import java.util.List;
-import java.util.Map;
-
-import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableMap;
 
 /**
  * Default implementation of the {@code Project}.
@@ -99,12 +97,12 @@ class ProjectImpl extends ContainerImpl implements Project {
     return reference.getSource();
   }
 
-    @Override
-    public List<ProjectProblem> getProblems() {
-        return null;
-    }
+  @Override
+  public List<ProjectProblem> getProblems() {
+    return null;
+  }
 
-    /** {@inheritDoc} */
+  /** {@inheritDoc} */
   @Override
   public ProjectRequest update() {
     return new ProjectRequest() {

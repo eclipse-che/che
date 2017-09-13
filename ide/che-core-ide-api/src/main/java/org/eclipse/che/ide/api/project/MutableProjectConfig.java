@@ -10,37 +10,35 @@
  */
 package org.eclipse.che.ide.api.project;
 
-import com.google.common.annotations.Beta;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 
+import com.google.common.annotations.Beta;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 
-import java.util.List;
-import java.util.Map;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-
 /** @author Vlad Zhukovskiy */
 @Beta
 public class MutableProjectConfig implements ProjectConfig {
 
-  private String                         name;
-  private String                         path;
-  private String                         description;
-  private String                         type;
-  private List<String>                   mixins;
-  private Map<String, List<String>>      attributes;
-  private MutableSourceStorage           sourceStorage;
-  private Map<String, String>            options;
-  private List<NewProjectConfig>         projects;
-  private List<CommandDto>               commands;
+  private String name;
+  private String path;
+  private String description;
+  private String type;
+  private List<String> mixins;
+  private Map<String, List<String>> attributes;
+  private MutableSourceStorage sourceStorage;
+  private Map<String, String> options;
+  private List<NewProjectConfig> projects;
+  private List<CommandDto> commands;
   private List<? extends ProjectProblem> problems;
 
-    public MutableProjectConfig(ProjectConfig source) {
+  public MutableProjectConfig(ProjectConfig source) {
     name = source.getName();
     path = source.getPath();
     description = source.getDescription();
@@ -49,7 +47,7 @@ public class MutableProjectConfig implements ProjectConfig {
     attributes = newHashMap(source.getAttributes());
     sourceStorage = new MutableSourceStorage(source.getSource());
     problems = source.getProblems();
-    }
+  }
 
   public MutableProjectConfig() {}
 
@@ -124,12 +122,12 @@ public class MutableProjectConfig implements ProjectConfig {
     return sourceStorage;
   }
 
-    @Override
-    public List<? extends ProjectProblem> getProblems() {
-        return problems;
-    }
+  @Override
+  public List<? extends ProjectProblem> getProblems() {
+    return problems;
+  }
 
-    public void setSource(SourceStorage sourceStorage) {
+  public void setSource(SourceStorage sourceStorage) {
     this.sourceStorage = new MutableSourceStorage(sourceStorage);
   }
 

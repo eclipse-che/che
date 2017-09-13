@@ -10,6 +10,16 @@
  */
 package org.eclipse.che.api.project.server;
 
+import static java.lang.String.format;
+import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
+import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_CONFIGURED_IN_WS;
+import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_ON_FILE_SYSTEM;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
@@ -23,17 +33,6 @@ import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.Variable;
 import org.eclipse.che.api.vfs.Path;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static java.lang.String.format;
-import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
-import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_CONFIGURED_IN_WS;
-import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_ON_FILE_SYSTEM;
 
 /**
  * Internal Project implementation. It is supposed that it is object always consistent.
@@ -86,7 +85,8 @@ public class RegisteredProject implements ProjectConfig {
     this.detected = detected;
 
     if (folder == null || folder.isFile()) {
-      problems.add(new ProjectProblemImpl(
+      problems.add(
+          new ProjectProblemImpl(
               NO_PROJECT_ON_FILE_SYSTEM,
               "No project folder on file system " + this.config.getPath()));
     }
@@ -115,8 +115,8 @@ public class RegisteredProject implements ProjectConfig {
   }
 
   /**
-   * Initialize project attributes. Note: the problem with {@link ProjectProblem#getCode()} code} = 13 will be added
-   * when a value for some attribute is not initialized
+   * Initialize project attributes. Note: the problem with {@link ProjectProblem#getCode()} code} =
+   * 13 will be added when a value for some attribute is not initialized
    */
   private void initAttributes() {
 
@@ -301,5 +301,4 @@ public class RegisteredProject implements ProjectConfig {
     }
     return attrs;
   }
-
 }

@@ -10,6 +10,14 @@
  */
 package org.eclipse.che.api.project.server;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
@@ -18,15 +26,6 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 /** @author gazarenkov */
 public class ProjectManagerReadTest extends WsAgentTestBase {

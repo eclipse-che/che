@@ -90,7 +90,7 @@ public class ProjectConfigImpl implements ProjectConfig {
 
   @Transient private List<? extends ProjectProblem> problems;
 
-    public ProjectConfigImpl() {}
+  public ProjectConfigImpl() {}
 
   public ProjectConfigImpl(ProjectConfig projectConfig) {
     name = projectConfig.getName();
@@ -113,7 +113,7 @@ public class ProjectConfigImpl implements ProjectConfig {
               sourceStorage.getType(), sourceStorage.getLocation(), sourceStorage.getParameters());
     }
 
-      problems = projectConfig.getProblems();
+    problems = projectConfig.getProblems();
   }
 
   @Override
@@ -181,12 +181,12 @@ public class ProjectConfigImpl implements ProjectConfig {
     return source;
   }
 
-    @Override
-    public List<? extends ProjectProblem> getProblems() {
-        return problems;
-    }
+  @Override
+  public List<? extends ProjectProblem> getProblems() {
+    return problems;
+  }
 
-    public void setSource(SourceStorageImpl sourceStorage) {
+  public void setSource(SourceStorageImpl sourceStorage) {
     this.source = sourceStorage;
   }
 

@@ -1,12 +1,9 @@
 package org.eclipse.che.api.core.model.project;
 
-/**
- * @author Vitalii Parfonov
- */
-
+/** @author Vitalii Parfonov */
 public interface ProjectProblem {
 
-    int getCode();
+  int getCode();
 
-    String getMessage();
+  String getMessage();
 }

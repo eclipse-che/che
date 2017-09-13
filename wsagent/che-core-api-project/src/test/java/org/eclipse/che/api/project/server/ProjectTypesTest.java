@@ -10,10 +10,11 @@
  */
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.model.project.ProjectProblem;
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.testng.annotations.Test;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,12 +22,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
+import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.testng.annotations.Test;
 
 public class ProjectTypesTest extends BaseProjectTypeTest {
 
