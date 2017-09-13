@@ -14,12 +14,16 @@ import com.google.inject.Module;
 import java.util.List;
 
 /**
- * Interface used for ServiceLoader mechanism. Implementations will have to implement this interface to provide list of modules at runtime
- * @author Florent Benoit */
+ * Interface used for ServiceLoader mechanism. Implementations will have to implement this interface
+ * to provide list of modules at runtime
+ *
+ * @author Florent Benoit
+ */
 public interface ModuleFinder {
 
   /**
    * Provides the list of additional modules
+   *
    * @return the list of modules to add.
    */
   List<Module> getModules();
