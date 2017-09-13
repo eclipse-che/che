@@ -13,6 +13,7 @@ package org.eclipse.che.ide.context;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.addAll;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -31,7 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -55,6 +58,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
@@ -76,9 +80,6 @@ public class AppContextImpl
     implements AppContext,
         SelectionChangedHandler,
         ResourceChangedHandler,
-        WindowActionHandler,
-        WorkspaceStartedEvent.Handler,
-        WorkspaceStoppedEvent.Handler,
         ResourceManagerInitializer {
   private final QueryParameters queryParameters;
   private final List<String> projectsInImport;
@@ -121,10 +122,13 @@ public class AppContextImpl
 
     projectsInImport = new ArrayList<>();
 
+    WorkspaceStateHandler workspaceStateHandler = new WorkspaceStateHandler();
+
     eventBus.addHandler(SelectionChangedEvent.TYPE, this);
     eventBus.addHandler(ResourceChangedEvent.getType(), this);
-    eventBus.addHandler(WindowActionEvent.TYPE, this);
-    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+    eventBus.addHandler(WindowActionEvent.TYPE, workspaceStateHandler);
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, workspaceStateHandler);
+    eventBus.addHandler(WorkspaceStatusChangedEvent.TYPE, workspaceStateHandler);
 
     //in some cases IDE doesn't save preferences on window close
     //so try to save if window lost focus
@@ -224,12 +228,7 @@ public class AppContextImpl
       callback.onFailure(new NullPointerException("Dev machine is not initialized"));
     }
 
-    if (!rootProjects.isEmpty()) {
-      for (Project project : rootProjects) {
-        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
-      }
-      rootProjects.clear();
-    }
+    clearProjects();
 
     resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
     resourceManager
@@ -421,41 +420,19 @@ public class AppContextImpl
     }
   }
 
-  @Override
-  public void onWindowClosing(WindowActionEvent event) {
-    appStateManager.get().persistWorkspaceState(getWorkspaceId());
-  }
-
-  @Override
-  public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-    setWorkspace(event.getWorkspace());
-  }
-
-  @Override
-  public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-    appStateManager
-        .get()
-        .persistWorkspaceState(getWorkspaceId())
-        .then(
-            ignored -> {
-              for (Project project : rootProjects) {
-                eventBus.fireEvent(
-                    new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
-              }
-
-              rootProjects.clear();
-              resourceManager = null;
-            });
-
-    clearRuntime();
-  }
-
   private void clearRuntime() {
     runtime = null;
   }
 
-  @Override
-  public void onWindowClosed(WindowActionEvent event) {}
+  private void clearProjects() {
+    if (!rootProjects.isEmpty()) {
+      rootProjects.forEach(
+          project ->
+              eventBus.fireEvent(
+                  new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED))));
+      rootProjects.clear();
+    }
+  }
 
   @Override
   public String getMasterEndpoint() {
@@ -492,5 +469,52 @@ public class AppContextImpl
       properties = new HashMap<>();
     }
     return properties;
+  }
+
+  private class WorkspaceStateHandler
+      implements WindowActionHandler,
+          WorkspaceStartedEvent.Handler,
+          WorkspaceStoppedEvent.Handler,
+          WorkspaceStatusChangedEvent.Handler {
+
+    Promise<Void> persistWorkspaceStatePromise;
+
+    @Override
+    public void onWindowClosing(WindowActionEvent event) {
+      appStateManager.get().persistWorkspaceState(getWorkspaceId());
+    }
+
+    @Override
+    public void onWindowClosed(WindowActionEvent event) {}
+
+    @Override
+    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+      setWorkspace(event.getWorkspace());
+    }
+
+    @Override
+    public void onWorkspaceStatusChangedEvent(WorkspaceStatusChangedEvent event) {
+      WorkspaceStatus workspaceStatus = event.getWorkspaceStatusEvent().getStatus();
+      if (STOPPING == workspaceStatus) {
+        persistWorkspaceStatePromise =
+            appStateManager.get().persistWorkspaceState(getWorkspaceId());
+      }
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+      if (persistWorkspaceStatePromise != null) {
+        persistWorkspaceStatePromise.then(
+            arg -> {
+              clearProjects();
+              resourceManager = null;
+              clearRuntime();
+            });
+      } else {
+        clearProjects();
+        resourceManager = null;
+        clearRuntime();
+      }
+    }
   }
 }
