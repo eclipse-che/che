@@ -17,7 +17,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
@@ -53,7 +52,7 @@ public class StatusCommandPresenterTest extends BaseTest {
             constant,
             notificationManager);
 
-    when(service.statusText(any(Path.class), any(StatusFormat.class))).thenReturn(stringPromise);
+    when(service.statusText(any(Path.class))).thenReturn(stringPromise);
     when(stringPromise.then(any(Operation.class))).thenReturn(stringPromise);
     when(stringPromise.catchError(any(Operation.class))).thenReturn(stringPromise);
   }

@@ -11,53 +11,44 @@
 package org.eclipse.che.ide.ext.git.client.compare.changeslist;
 
 import static com.google.common.collect.Iterables.getFirst;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
-import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
-import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFileNode;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangedFolderNode;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 
 /**
- * Presenter for displaying list of changed files.
+ * Presenter for displaying window with list of changed files.
  *
  * @author Igor Vinokur
  * @author Vlad Zhukovskyi
+ * @author Mykola Morhun
  */
 @Singleton
 public class ChangesListPresenter implements ChangesListView.ActionDelegate {
   private final ChangesListView view;
-  private final NotificationManager notificationManager;
   private final ChangesPanelPresenter changesPanelPresenter;
   private final ComparePresenter comparePresenter;
 
-  private Project project;
+  private AlteredFiles alteredFiles;
   private String file;
   private String revisionA;
   private String revisionB;
-  private Status status;
 
   @Inject
   public ChangesListPresenter(
       ChangesListView view,
       ComparePresenter comparePresenter,
-      NotificationManager notificationManager,
       ChangesPanelPresenter changesPanelPresenter) {
     this.comparePresenter = comparePresenter;
     this.view = view;
-    this.notificationManager = notificationManager;
+
     this.changesPanelPresenter = changesPanelPresenter;
     this.changesPanelPresenter.setFileNodeDoubleClickHandler(
         (path, status) -> this.onCompareClicked());
@@ -75,7 +66,6 @@ public class ChangesListPresenter implements ChangesListView.ActionDelegate {
           }
           ChangesListPresenter.this.view.setEnableCompareButton(true);
           ChangesListPresenter.this.file = node.getName();
-          ChangesListPresenter.this.status = ((ChangedFileNode) node).getStatus();
         };
 
     ChangesPanelView changesPanelView = changesPanelPresenter.getView();
@@ -84,27 +74,24 @@ public class ChangesListPresenter implements ChangesListView.ActionDelegate {
   }
 
   /**
-   * Show window with changed files.
+   * Shows window with changed files.
    *
-   * @param changedFiles Map with files and their status
+   * @param alteredFiles files and their status
    * @param revisionA hash of the first revision or branch. If it is set to {@code null}, compare
    *     with empty repository state will be performed
    * @param revisionB hash of the second revision or branch. If it is set to {@code null}, compare
    *     with latest repository state will be performed
    */
   public void show(
-      Map<String, Status> changedFiles,
-      @Nullable String revisionA,
-      @Nullable String revisionB,
-      Project project) {
-    this.project = project;
+      AlteredFiles alteredFiles, @Nullable String revisionA, @Nullable String revisionB) {
+    this.alteredFiles = alteredFiles;
     this.revisionA = revisionA;
     this.revisionB = revisionB;
 
     view.setEnableCompareButton(false);
     view.showDialog();
 
-    changesPanelPresenter.show(changedFiles);
+    changesPanelPresenter.show(alteredFiles);
   }
 
   @Override
@@ -115,21 +102,10 @@ public class ChangesListPresenter implements ChangesListView.ActionDelegate {
   @Override
   public void onCompareClicked() {
     if (revisionB == null) {
-      project
-          .getFile(file)
-          .then(
-              file -> {
-                if (file.isPresent()) {
-                  comparePresenter.showCompareWithLatest(file.get(), status, revisionA);
-                }
-              })
-          .catchError(
-              error -> {
-                notificationManager.notify(error.getMessage(), FAIL, NOT_EMERGE_MODE);
-              });
+
+      comparePresenter.showCompareWithLatest(alteredFiles, file, revisionA);
     } else {
-      comparePresenter.showCompareBetweenRevisions(
-          Path.valueOf(file), status, revisionA, revisionB);
+      comparePresenter.showCompareBetweenRevisions(alteredFiles, file, revisionA, revisionB);
     }
   }
 }

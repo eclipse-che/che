@@ -15,12 +15,9 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -28,8 +25,8 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
-import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
@@ -106,25 +103,13 @@ public class CompareWithLatestAction extends GitAction {
                         null)
                     .show();
               } else {
-                final String[] changedFiles = diff.split("\n");
-                if (changedFiles.length == 1) {
-                  project
-                      .getFile(changedFiles[0].substring(2))
-                      .then(
-                          file -> {
-                            if (file.isPresent()) {
-                              comparePresenter.showCompareWithLatest(
-                                  file.get(),
-                                  defineStatus(changedFiles[0].substring(0, 1)),
-                                  REVISION);
-                            }
-                          });
+                AlteredFiles alteredFiles = new AlteredFiles(project, diff);
+                if (alteredFiles.getFilesQuantity() == 1) {
+
+                  comparePresenter.showCompareWithLatest(alteredFiles, null, REVISION);
                 } else {
-                  Map<String, Status> items = new HashMap<>();
-                  for (String item : changedFiles) {
-                    items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
-                  }
-                  changesListPresenter.show(items, REVISION, null, project);
+
+                  changesListPresenter.show(alteredFiles, REVISION, null);
                 }
               }
             })

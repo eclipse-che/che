@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import elemental.js.dom.JsElement;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.ui.button.ButtonAlignment;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -150,11 +151,17 @@ public abstract class Window implements IsWidget {
   }
 
   protected Button createButton(String title, String debugId, ClickHandler clickHandler) {
+    return createButton(title, debugId, clickHandler, ButtonAlignment.RIGHT);
+  }
+
+  protected Button createButton(
+      String title, String debugId, ClickHandler clickHandler, ButtonAlignment alignment) {
     Button button = new Button();
     button.setText(title);
     button.ensureDebugId(debugId);
     button.getElement().setId(debugId);
     button.addStyleName(resources.windowCss().button());
+    addButtonAlignment(button, alignment);
     button.addClickHandler(clickHandler);
     //set default tab index
     button.setTabIndex(0);
@@ -162,8 +169,14 @@ public abstract class Window implements IsWidget {
   }
 
   protected Button createPrimaryButton(String title, String debugId, ClickHandler clickHandler) {
+    return createPrimaryButton(title, debugId, clickHandler, ButtonAlignment.RIGHT);
+  }
+
+  protected Button createPrimaryButton(
+      String title, String debugId, ClickHandler clickHandler, ButtonAlignment alignment) {
     Button button = createButton(title, debugId, clickHandler);
     button.addStyleName(resources.windowCss().primaryButton());
+    addButtonAlignment(button, alignment);
     //set default tab index
     button.setTabIndex(0);
     return button;
@@ -236,6 +249,17 @@ public abstract class Window implements IsWidget {
                   setFocusOn(selectAndFocusElement);
                 }
               });
+    }
+  }
+
+  private void addButtonAlignment(Button button, ButtonAlignment alignment) {
+    switch (alignment) {
+      case LEFT:
+        button.addStyleName(resources.windowCss().buttonAlignLeft());
+        break;
+      case RIGHT:
+      default:
+        button.addStyleName(resources.windowCss().buttonAlignRight());
     }
   }
 
@@ -338,6 +362,10 @@ public abstract class Window implements IsWidget {
     String primaryButton();
 
     String button();
+
+    String buttonAlignLeft();
+
+    String buttonAlignRight();
 
     String image();
   }

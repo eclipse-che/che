@@ -45,7 +45,6 @@ import org.eclipse.che.api.git.shared.RemoteReference;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.git.shared.Tag;
 
 /**
@@ -330,13 +329,16 @@ public interface GitConnection extends Closeable {
   void rm(RmParams params) throws GitException;
 
   /**
-   * Get status of working tree.
+   * Get status.
    *
-   * @param format the format of the ouput
+   * @param filter list of paths to filter the status. Status result will include only files witch
+   *     paths are contained in the filter list, or are children of the folder paths that are
+   *     mentioned in the filter list. Unfiltered status of working tree will be returned, if the
+   *     filter list is empty
    * @return status.
    * @throws GitException if any error occurs
    */
-  Status status(StatusFormat format) throws GitException;
+  Status status(List<String> filter) throws GitException;
 
   /**
    * Create new tag.

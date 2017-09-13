@@ -113,8 +113,8 @@
 }
 
 .alignBtn {
-    float: right;
-    margin-left: buttonSpacing;
+    margin-left: buttonSideSpacing;
+    margin-right: buttonSideSpacing;
 }
 
 .headerTitleWrapper {
@@ -151,7 +151,6 @@
 }
 
 .button, .primaryButton {
-    float: right;
     height: buttonHeight;
     line-height: buttonLineHeight;
     min-width: buttonMinWidth;
@@ -192,6 +191,14 @@
 
 .button[disabled] svg, .button[disabled]:HOVER svg {
     opacity: 0.5;
+}
+
+.buttonAlignLeft {
+    float: left;
+}
+
+.buttonAlignRight {
+    float: right;
 }
 
 /* Blue button styles */

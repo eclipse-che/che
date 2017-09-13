@@ -12,6 +12,7 @@ package org.eclipse.che.api.git;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.ADDED;
 import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.MODIFIED;
 import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.UNTRACKED;
@@ -29,7 +30,6 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
 import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
@@ -111,7 +111,7 @@ public class GitChangesDetector {
       String project = normalizedPath.split("/")[0];
       String itemPath = normalizedPath.substring(normalizedPath.indexOf("/") + 1);
       try {
-        Status status = gitConnectionFactory.getConnection(project).status(StatusFormat.SHORT);
+        Status status = gitConnectionFactory.getConnection(project).status(singletonList(itemPath));
         GitChangeEventDto.Type type;
         if (status.getAdded().contains(itemPath)) {
           type = ADDED;

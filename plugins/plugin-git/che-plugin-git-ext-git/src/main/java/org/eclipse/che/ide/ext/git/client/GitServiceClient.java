@@ -25,7 +25,6 @@ import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.resource.Path;
@@ -345,17 +344,20 @@ public interface GitServiceClient {
    * </pre>
    *
    * @param project project (root of GIT repository)
-   * @param format to show in short format or not
    */
-  Promise<String> statusText(Path project, StatusFormat format);
+  Promise<String> statusText(Path project);
 
   /**
-   * Returns the current working tree status.
+   * Returns the current status.
    *
    * @param project the project.
+   * @param filter list of paths to filter the status. Status result will include only files witch
+   *     paths are contained in the filter list, or are children of the folder paths that are
+   *     mentioned in the filter list. Unfiltered status of working tree will be returned, if the
+   *     filter list is empty
    * @return the promise which either resolves working tree status or rejects with an error
    */
-  Promise<Status> getStatus(Path project);
+  Promise<Status> getStatus(Path project, List<String> filter);
 
   /**
    * Remove the git repository from given path.

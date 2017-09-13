@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.git.client;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.git.shared.AddRequest.DEFAULT_PATTERN;
-import static org.eclipse.che.api.git.shared.StatusFormat.PORCELAIN;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.MimeType.TEXT_PLAIN;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
@@ -45,7 +44,6 @@ import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -131,8 +129,8 @@ public class GitServiceClientImpl implements GitServiceClient {
   }
 
   @Override
-  public Promise<String> statusText(Path project, StatusFormat format) {
-    String params = "?projectPath=" + project + "&format=" + format;
+  public Promise<String> statusText(Path project) {
+    String params = "?projectPath=" + project;
     String url = getWsAgentBaseUrl() + STATUS + params;
 
     return asyncRequestFactory
@@ -249,8 +247,15 @@ public class GitServiceClientImpl implements GitServiceClient {
   }
 
   @Override
-  public Promise<Status> getStatus(Path project) {
-    String params = "?projectPath=" + project + "&format=" + PORCELAIN;
+  public Promise<Status> getStatus(Path project, List<String> filter) {
+    StringBuilder params = new StringBuilder("?projectPath=" + project);
+    if (filter != null) {
+      for (String path : filter) {
+        if (!path.isEmpty()) {
+          params.append("&filter=").append(path);
+        }
+      }
+    }
     String url = getWsAgentBaseUrl() + STATUS + params;
     return asyncRequestFactory
         .createGetRequest(url)

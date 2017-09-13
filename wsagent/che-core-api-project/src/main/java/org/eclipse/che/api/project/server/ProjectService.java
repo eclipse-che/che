@@ -889,13 +889,13 @@ public class ProjectService extends Service {
     final ArrayList<ItemReference> result = new ArrayList<>(children.size());
     for (VirtualFileEntry child : children) {
       if (child.isFile()) {
-        result.add(injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto((FileEntry) child))));
+        result.add(injectFileLinks(asDto((FileEntry) child)));
       } else {
         result.add(injectFolderLinks(asDto((FolderEntry) child)));
       }
     }
 
-    return result;
+    return vcsStatusInjector.injectVcsStatus(result);
   }
 
   @GET
@@ -1145,14 +1145,11 @@ public class ProjectService extends Service {
                 .withNode(injectFolderLinks(asDto((FolderEntry) child)))
                 .withChildren(getTree((FolderEntry) child, depth - 1, includeFiles)));
       } else {
-        nodes.add(
-            newDto(TreeElement.class)
-                .withNode(
-                    injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto((FileEntry) child)))));
+        nodes.add(newDto(TreeElement.class).withNode(injectFileLinks(asDto((FileEntry) child))));
       }
     }
 
-    return nodes;
+    return vcsStatusInjector.injectVcsStatusTreeElements(nodes);
   }
 
   /* --------------------------------------------------------------------------- */
