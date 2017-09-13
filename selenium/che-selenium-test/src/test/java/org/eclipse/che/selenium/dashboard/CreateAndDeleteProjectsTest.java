@@ -19,7 +19,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
@@ -34,9 +33,9 @@ import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class CreateAndDeleteProjectsTest {
+
   private final String WORKSPACE = NameGenerator.generate("workspace", 4);
 
-  @Inject private Ide ide;
   @Inject private Dashboard dashboard;
   @Inject private DashboardProject dashboardProject;
   @Inject private DashboardWorkspace dashboardWorkspace;
@@ -88,7 +87,6 @@ public class CreateAndDeleteProjectsTest {
         DashboardProject.Template.WEB_JAVA_SPRING.value(), PROJECT_FOLDER);
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
-    //    WaitUtils.sleepQuietly(10);
 
     dashboardWorkspace.selectWorkspaceItemName(WORKSPACE);
     dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.PROJECTS);
@@ -107,6 +105,6 @@ public class CreateAndDeleteProjectsTest {
   }
 
   private void switchToWindow(String windowHandle) {
-    ide.driver().switchTo().window(windowHandle);
+    seleniumWebDriver.switchTo().window(windowHandle);
   }
 }
