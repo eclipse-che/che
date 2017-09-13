@@ -27,6 +27,18 @@ export abstract class EnvironmentManager {
     this.$log = $log;
   }
 
+  get SSH_AGENT_NAME(): string {
+    return SSH_AGENT_NAME;
+  }
+
+  get TERMINAL_AGENT_NAME(): string {
+    return TERMINAL_AGENT_NAME;
+  }
+
+  get type(): string {
+    return '';
+  }
+
   get editorMode(): string {
     return '';
   }
@@ -36,6 +48,10 @@ export abstract class EnvironmentManager {
   abstract setEnvVariables(machine: IEnvironmentManagerMachine, envVariables: any): void;
 
   abstract setSource(machine: IEnvironmentManagerMachine, image: string): void;
+
+  abstract createNewDefaultMachine(environment: che.IWorkspaceEnvironment): IEnvironmentManagerMachine
+
+  abstract addMachine(environment: che.IWorkspaceEnvironment, machine: IEnvironmentManagerMachine): che.IWorkspaceEnvironment
 
   canEditEnvVariables(machine: IEnvironmentManagerMachine): boolean {
     return false;
@@ -117,7 +133,7 @@ export abstract class EnvironmentManager {
       if (angular.isUndefined(newEnvironment.machines[machineName])) {
         newEnvironment.machines[machineName] = {attributes: {}};
       }
-      newEnvironment.machines[machineName].attributes.memoryLimitBytes = machine.attributes.memoryLimitBytes;
+      newEnvironment.machines[machineName].attributes.memoryLimitBytes = machine.attributes ? machine.attributes.memoryLimitBytes : '1073741824';
       newEnvironment.machines[machineName].agents = angular.copy(machine.agents);
       newEnvironment.machines[machineName].servers = angular.copy(machine.servers);
     });
@@ -238,9 +254,9 @@ export abstract class EnvironmentManager {
   getMemoryLimit(machine: IEnvironmentManagerMachine): number {
     if (machine && machine.attributes && machine.attributes.memoryLimitBytes) {
       if (angular.isString(machine.attributes.memoryLimitBytes)) {
-        return parseInt(machine.attributes.memoryLimitBytes, 10);
+        return parseInt(<string>machine.attributes.memoryLimitBytes, 10);
       }
-      return machine.attributes.memoryLimitBytes;
+      return <number>machine.attributes.memoryLimitBytes;
     }
 
     return -1;
@@ -255,7 +271,9 @@ export abstract class EnvironmentManager {
    */
   setMemoryLimit(machine: IEnvironmentManagerMachine, limit: number): void {
     machine.attributes = machine.attributes ? machine.attributes : {};
-    machine.attributes.memoryLimitBytes = limit;
+    if (limit) {
+      machine.attributes.memoryLimitBytes = limit.toString();
+    }
   }
 
   getEnvVariables(machine: IEnvironmentManagerMachine): any {

@@ -11,8 +11,8 @@
 'use strict';
 import {CheStack} from '../../../components/api/che-stack.factory';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
-import {CheUIElementsInjectorService} from '../../../components/injector/che-ui-elements-injector.service';
-import {CheWorkspace} from '../../../components/api/che-workspace.factory';
+import {CheUIElementsInjectorService} from '../../../components/service/injector/che-ui-elements-injector.service';
+import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import {ImportStackService} from './import-stack.service';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 

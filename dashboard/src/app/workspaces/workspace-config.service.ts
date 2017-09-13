@@ -10,12 +10,12 @@
  */
 'use strict';
 
-import {CheWorkspace} from '../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 import {NamespaceSelectorSvc} from './create-workspace/namespace-selector/namespace-selector.service';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
 import {StackSelectorSvc} from './create-workspace/stack-selector/stack-selector.service';
-import {TemplateSelectorSvc} from './create-workspace/project-source-selector/template-selector/template-selector.service';
-import {ImportGithubProjectService} from './create-workspace/project-source-selector/import-github-project/import-github-project.service';
+import {TemplateSelectorSvc} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector.service';
+import {ImportGithubProjectService} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.service';
 
 /**
  * This class is handling the service for routes resolving.
@@ -75,7 +75,7 @@ export class WorkspaceConfigService {
    *
    * @return {ng.IPromise<any>}
    */
-  resolveCreateWorkspaceRoute(): ng.IPromise<any> {
+  resolveWorkspaceRoute(): ng.IPromise<any> {
     const namespaceIdDefer = this.$q.defer(),
           workspacesDefer = this.$q.defer();
 
