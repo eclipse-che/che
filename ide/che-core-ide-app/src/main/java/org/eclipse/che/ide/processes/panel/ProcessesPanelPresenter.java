@@ -28,6 +28,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -86,6 +87,7 @@ import org.eclipse.che.ide.command.toolbar.processes.ProcessOutputClosedEvent;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.CommandOutputConsole;
 import org.eclipse.che.ide.console.CommandOutputConsolePresenter;
+import org.eclipse.che.ide.console.CompositeOutputConsole;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
@@ -93,6 +95,10 @@ import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
 import org.eclipse.che.ide.processes.actions.AddTabMenuFactory;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenu;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenuFactory;
+import org.eclipse.che.ide.processes.runtime.RuntimeInfo;
+import org.eclipse.che.ide.processes.runtime.RuntimeInfoLocalization;
+import org.eclipse.che.ide.processes.runtime.RuntimeInfoProvider;
+import org.eclipse.che.ide.processes.runtime.RuntimeInfoWidgetFactory;
 import org.eclipse.che.ide.terminal.TerminalFactory;
 import org.eclipse.che.ide.terminal.TerminalOptionsJso;
 import org.eclipse.che.ide.terminal.TerminalPresenter;
@@ -142,6 +148,9 @@ public class ProcessesPanelPresenter extends BasePresenter
   private final CommandTypeRegistry commandTypeRegistry;
   private final ExecAgentCommandManager execAgentCommandManager;
   private final Provider<MacroProcessor> macroProcessorProvider;
+  private final RuntimeInfoWidgetFactory runtimeInfoWidgetFactory;
+  private final RuntimeInfoProvider runtimeInfoProvider;
+  private final RuntimeInfoLocalization runtimeInfoLocalization;
   private final EventBus eventBus;
   private final Map<String, ProcessTreeNode> machineNodes;
   ProcessTreeNode rootNode;
@@ -166,7 +175,10 @@ public class ProcessesPanelPresenter extends BasePresenter
       CommandTypeRegistry commandTypeRegistry,
       SshServiceClient sshServiceClient,
       ExecAgentCommandManager execAgentCommandManager,
-      Provider<MacroProcessor> macroProcessorProvider) {
+      Provider<MacroProcessor> macroProcessorProvider,
+      RuntimeInfoWidgetFactory runtimeInfoWidgetFactory,
+      RuntimeInfoProvider runtimeInfoProvider,
+      RuntimeInfoLocalization runtimeInfoLocalization) {
     this.view = view;
     this.localizationConstant = localizationConstant;
     this.resources = resources;
@@ -184,6 +196,9 @@ public class ProcessesPanelPresenter extends BasePresenter
     this.commandTypeRegistry = commandTypeRegistry;
     this.execAgentCommandManager = execAgentCommandManager;
     this.macroProcessorProvider = macroProcessorProvider;
+    this.runtimeInfoWidgetFactory = runtimeInfoWidgetFactory;
+    this.runtimeInfoProvider = runtimeInfoProvider;
+    this.runtimeInfoLocalization = runtimeInfoLocalization;
 
     machineNodes = new HashMap<>();
     machines = new HashMap<>();
@@ -240,20 +255,12 @@ public class ProcessesPanelPresenter extends BasePresenter
     notifyTreeNodeSelected(machineToSelect);
   }
 
-  /**
-   * determines whether process tree is visible.
-   *
-   * @return
-   */
+  /** determines whether process tree is visible. */
   public boolean isProcessesTreeVisible() {
     return view.isProcessesTreeVisible();
   }
 
-  /**
-   * Sets visibility for processes tree
-   *
-   * @param visible
-   */
+  /** Sets visibility for processes tree */
   public void setProcessesTreeVisible(boolean visible) {
     view.setProcessesTreeVisible(visible);
   }
@@ -518,6 +525,33 @@ public class ProcessesPanelPresenter extends BasePresenter
                 }
               }
             });
+  }
+
+  @Override
+  public void onPreviewServers(String machineId) {
+    ProcessTreeNode machineTreeNode = findTreeNodeById(machineId);
+    if (machineTreeNode == null || machineTreeNode.getType() != MACHINE_NODE) {
+      return;
+    }
+
+    String machineName = (String) machineTreeNode.getData();
+    RuntimeImpl runtime = appContext.getWorkspace().getRuntime();
+    if (runtime == null) {
+      return;
+    }
+
+    Optional<MachineImpl> machine = runtime.getMachineByName(machineName);
+    if (!machine.isPresent()) {
+      return;
+    }
+
+    List<RuntimeInfo> serverBindings = runtimeInfoProvider.get(machineName);
+    Widget widget = runtimeInfoWidgetFactory.create(machineName, serverBindings);
+
+    CompositeOutputConsole servers =
+        commandConsoleFactory.create(
+            widget, runtimeInfoLocalization.infoTabTitle(), resources.remote());
+    addCommandOutput(machineId, servers);
   }
 
   @Override

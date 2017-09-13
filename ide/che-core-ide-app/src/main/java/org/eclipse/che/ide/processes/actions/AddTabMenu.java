@@ -32,6 +32,7 @@ import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.processes.runtime.RuntimeInfoLocalization;
 import org.eclipse.che.ide.terminal.TerminalOptionsJso;
 
 /**
@@ -41,12 +42,11 @@ import org.eclipse.che.ide.terminal.TerminalOptionsJso;
  */
 public class AddTabMenu extends ContextMenu {
 
-  private AppContext appContext;
-
-  private ProcessesPanelPresenter processesPanelPresenter;
-
-  private CoreLocalizationConstant coreLocalizationConstant;
-  private MachineResources machineResources;
+  private final AppContext appContext;
+  private final ProcessesPanelPresenter processesPanelPresenter;
+  private final CoreLocalizationConstant coreLocalizationConstant;
+  private final MachineResources machineResources;
+  private final RuntimeInfoLocalization runtimeInfoLocalization;
 
   @Inject
   public AddTabMenu(
@@ -56,13 +56,15 @@ public class AddTabMenu extends ContextMenu {
       AppContext appContext,
       ProcessesPanelPresenter processesPanelPresenter,
       CoreLocalizationConstant coreLocalizationConstant,
-      MachineResources machineResources) {
+      MachineResources machineResources,
+      RuntimeInfoLocalization runtimeInfoLocalization) {
     super(actionManager, keyBindingAgent, managerProvider);
 
     this.appContext = appContext;
     this.processesPanelPresenter = processesPanelPresenter;
     this.coreLocalizationConstant = coreLocalizationConstant;
     this.machineResources = machineResources;
+    this.runtimeInfoLocalization = runtimeInfoLocalization;
   }
 
   /** {@inheritDoc} */
@@ -91,6 +93,9 @@ public class AddTabMenu extends ContextMenu {
         AddSSHMenuAction addSSHMenuAction = new AddSSHMenuAction(machine.getName());
         actionGroup.add(addSSHMenuAction);
       }
+
+      ShowServersAction showServersAction = new ShowServersAction(machine.getName());
+      actionGroup.add(showServersAction);
     }
 
     return actionGroup;
@@ -130,6 +135,26 @@ public class AddTabMenu extends ContextMenu {
     @Override
     public void actionPerformed(ActionEvent e) {
       processesPanelPresenter.onPreviewSsh(machineName);
+    }
+  }
+
+  /** Action to display bound servers. */
+  public class ShowServersAction extends Action {
+
+    private String machineName;
+
+    public ShowServersAction(String machineName) {
+      super(
+          runtimeInfoLocalization.showInfoActionTitle(),
+          runtimeInfoLocalization.showInfoActionDescription(),
+          null,
+          machineResources.remote());
+      this.machineName = machineName;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      processesPanelPresenter.onPreviewServers(machineName);
     }
   }
 }
