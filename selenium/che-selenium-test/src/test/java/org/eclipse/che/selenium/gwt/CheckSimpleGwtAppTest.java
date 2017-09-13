@@ -135,7 +135,8 @@ public class CheckSimpleGwtAppTest {
     String url =
         workspaceServiceClient
             .getServerFromDevMachineBySymbolicName(testWorkspace.getId(), GWT_CODESERVER_NAME)
-            .getUrl();
+            .getUrl()
+            .replace("tcp", "http");
     ide.driver().get(url);
 
     new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
