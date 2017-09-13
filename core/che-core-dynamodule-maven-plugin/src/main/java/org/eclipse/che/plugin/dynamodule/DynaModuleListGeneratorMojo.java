@@ -59,7 +59,7 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
   /** Directory used to generate the code */
   private File generatedDirectory;
 
-  /** Path to the generated  file */
+  /** Path to the generated file */
   private File guiceGeneratedModuleFile;
 
   /** Use of classpath instead of dependencies */
