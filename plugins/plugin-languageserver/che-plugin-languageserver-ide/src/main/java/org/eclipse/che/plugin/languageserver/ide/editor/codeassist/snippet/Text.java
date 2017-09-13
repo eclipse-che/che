@@ -6,10 +6,15 @@ public class Text extends SimpleExpression {
 
   public Text(int startChar, int endChar, String value) {
     super(startChar, endChar);
-    this.value= value;
+    this.value = value;
   }
-  
+
   public String getValue() {
     return value;
-  } 
+  }
+
+  @Override
+  public void accept(ExpressionVisitor v) {
+    v.visit(this);
+  }
 }

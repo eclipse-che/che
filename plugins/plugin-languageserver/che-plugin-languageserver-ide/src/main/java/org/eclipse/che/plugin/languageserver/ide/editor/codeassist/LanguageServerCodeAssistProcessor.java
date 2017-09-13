@@ -20,6 +20,7 @@ import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
+import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.filters.FuzzyMatches;
 import org.eclipse.che.ide.filters.Match;
@@ -78,7 +79,11 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
 
     if (!triggered && latestCompletionResult.isGoodFor(documentId, offset, currentWord)) {
       // no need to send new completion request
-      computeProposals(currentWord, offset - latestCompletionResult.getOffset(), callback);
+      computeProposals(
+          (HasLinkedMode) editor,
+          currentWord,
+          offset - latestCompletionResult.getOffset(),
+          callback);
     } else {
       documentServiceClient
           .completion(documentPosition)
@@ -86,7 +91,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
               list -> {
                 latestCompletionResult =
                     new LatestCompletionResult(documentId, offset, currentWord, list);
-                computeProposals(currentWord, 0, callback);
+                computeProposals((HasLinkedMode) editor, currentWord, 0, callback);
               })
           .catchError(
               error -> {
@@ -138,13 +143,15 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     return null;
   }
 
-  private void computeProposals(String currentWord, int offset, CodeAssistCallback callback) {
+  private void computeProposals(
+      HasLinkedMode editor, String currentWord, int offset, CodeAssistCallback callback) {
     List<CompletionProposal> proposals = newArrayList();
     for (ExtendedCompletionItem item : latestCompletionResult.getCompletionList().getItems()) {
       List<Match> highlights = filter(currentWord, item.getItem());
       if (highlights != null) {
         proposals.add(
             new CompletionItemBasedCompletionProposal(
+                editor,
                 item,
                 currentWord,
                 documentServiceClient,

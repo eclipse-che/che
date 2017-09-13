@@ -7,11 +7,16 @@ public class Choice extends SimpleExpression {
   private List<String> choices;
 
   public Choice(int startChar, int endChar, List<String> choices) {
-    super(startChar,endChar);
+    super(startChar, endChar);
     this.choices = choices;
   }
-  
+
   public List<String> getChoices() {
     return choices;
+  }
+
+  @Override
+  public void accept(ExpressionVisitor v) {
+    v.visit(this);
   }
 }

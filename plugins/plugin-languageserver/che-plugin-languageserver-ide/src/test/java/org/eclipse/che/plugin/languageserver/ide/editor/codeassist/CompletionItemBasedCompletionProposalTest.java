@@ -26,6 +26,7 @@ import java.util.Collections;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.ide.api.editor.codeassist.Completion;
 import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
@@ -46,6 +47,7 @@ import org.mockito.Mock;
 @RunWith(GwtMockitoTestRunner.class)
 public class CompletionItemBasedCompletionProposalTest {
 
+  @Mock private HasLinkedMode editor;
   @Mock private TextDocumentServiceClient documentServiceClient;
   @Mock private LanguageServerResources resources;
   @Mock private Icon icon;
@@ -61,6 +63,7 @@ public class CompletionItemBasedCompletionProposalTest {
   public void setUp() throws Exception {
     proposal =
         new CompletionItemBasedCompletionProposal(
+            editor,
             completionItem,
             "",
             documentServiceClient,

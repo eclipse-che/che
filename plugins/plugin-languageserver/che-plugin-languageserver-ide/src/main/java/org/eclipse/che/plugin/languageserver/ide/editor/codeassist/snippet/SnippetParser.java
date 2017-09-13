@@ -2,6 +2,7 @@ package org.eclipse.che.plugin.languageserver.ide.editor.codeassist.snippet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class SnippetParser {
   private enum Token {
@@ -32,33 +33,30 @@ public class SnippetParser {
 
   public Snippet parse() {
     nextToken();
-    return snippet();
+    return snippet((t) -> false);
   }
 
-  private Snippet snippet() {
+  private Snippet snippet(Function<Token, Boolean> stopOnToken) {
     int start = pos;
     List<Expression> expressions = new ArrayList<>();
-    while (token != Token.EOF && token !=  Token.CLOSE_BRACE) {
-      expressions.add(any());
+    while (token != Token.EOF && token != Token.CLOSE_BRACE) {
+      expressions.add(any(stopOnToken));
     }
     return new Snippet(start, pos, expressions);
   }
 
-  private Expression any() {
+  private Expression any(Function<Token, Boolean> stopOnToken) {
     if (token == Token.DOLLAR) {
       nextToken();
       return dollarExpression();
     } else {
       int start2 = pos;
       StringBuilder b = new StringBuilder();
-      while (token != Token.EOF
-          && token != Token.DOLLAR
-          && token != Token.CLOSE_BRACE
-          && token != Token.OPEN_BRACE) {
+      while (token != Token.EOF && token != Token.DOLLAR && !stopOnToken.apply(token)) {
         // text
         b.append(value);
         nextToken();
-      } 
+      }
       return new Text(start2, pos, b.toString());
     }
   }
@@ -118,11 +116,11 @@ public class SnippetParser {
       }
       if (token == Token.COLON) {
         nextToken();
-        Expression value= null;
+        Expression value = null;
         if (token == Token.PIPE) {
           value = parseChoice();
         } else {
-         value = snippet();
+          value = snippet(t -> t == Token.CLOSE_BRACE);
         }
         return new Placeholder(start, pos, Integer.valueOf(b.toString()), value);
       } else {
@@ -141,7 +139,7 @@ public class SnippetParser {
       Expression value = null;
       if (token == Token.COLON) {
         nextToken();
-        value = snippet();
+        value = snippet(t -> t == Token.CLOSE_BRACE);
       }
       return new Variable(start, pos, b.toString(), value);
     } else {
@@ -156,9 +154,9 @@ public class SnippetParser {
     nextToken(); // consume pipe token
     StringBuilder b = new StringBuilder();
     while (token != Token.EOF && token != Token.PIPE) {
-      if ( token == Token.COMMA || token == Token.PIPE) {
+      if (token == Token.COMMA || token == Token.PIPE) {
         choices.add(b.toString());
-        b= new StringBuilder();
+        b = new StringBuilder();
         nextToken();
       } else if (token != Token.EOF) {
         b.append(value);
@@ -166,7 +164,7 @@ public class SnippetParser {
       }
     }
     choices.add(b.toString());
-    inChoice = false; 
+    inChoice = false;
     return new Choice(start, pos, choices);
   }
 

@@ -18,4 +18,9 @@ public class Placeholder extends SimpleExpression {
   public Expression getValue() {
     return value;
   }
+
+  @Override
+  public void accept(ExpressionVisitor v) {
+    v.visit(this);
+  }
 }

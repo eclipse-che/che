@@ -1,6 +1,6 @@
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist.snippet;
 
-public class Variable extends SimpleExpression{
+public class Variable extends SimpleExpression {
   private String name;
   private Expression value;
 
@@ -24,5 +24,10 @@ public class Variable extends SimpleExpression{
 
   public void setValue(Expression value) {
     this.value = value;
+  }
+
+  @Override
+  public void accept(ExpressionVisitor v) {
+    v.visit(this);
   }
 }

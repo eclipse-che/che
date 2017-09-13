@@ -14,4 +14,9 @@ public class Snippet extends Expression {
   public List<Expression> getExpressions() {
     return expressions;
   }
+
+  @Override
+  public void accept(ExpressionVisitor v) {
+    v.visit(this);
+  }
 }
