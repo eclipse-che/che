@@ -11,9 +11,6 @@
 package org.eclipse.che.ide.workspace;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.STARTING_WORKSPACE_RUNTIME;
 import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.WORKSPACE_STOPPED;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -28,9 +25,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 
@@ -46,8 +41,6 @@ class StartWorkspaceNotification {
   private final StartWorkspaceNotificationUiBinder uiBinder;
   private final WorkspaceStatusNotification wsStatusNotification;
   private final Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider;
-  private final Provider<NotificationManager> notificationManagerProvider;
-  private final CoreLocalizationConstant messages;
 
   @UiField Button button;
   @UiField CheckBox restore;
@@ -57,15 +50,11 @@ class StartWorkspaceNotification {
       WorkspaceStatusNotification wsStatusNotification,
       StartWorkspaceNotificationUiBinder uiBinder,
       Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider,
-      Provider<NotificationManager> notificationManagerProvider,
-      CoreLocalizationConstant messages,
       EventBus eventBus,
       AppContext appContext) {
     this.wsStatusNotification = wsStatusNotification;
     this.uiBinder = uiBinder;
     this.currentWorkspaceManagerProvider = currentWorkspaceManagerProvider;
-    this.notificationManagerProvider = notificationManagerProvider;
-    this.messages = messages;
 
     eventBus.addHandler(
         BasicIDEInitializedEvent.TYPE,
@@ -81,7 +70,7 @@ class StartWorkspaceNotification {
   }
 
   /** Displays a notification with a proposal to start the current workspace. */
-  private void show() {
+  void show() {
     Widget widget = uiBinder.createAndBindUi(StartWorkspaceNotification.this);
     wsStatusNotification.show(WORKSPACE_STOPPED, widget);
   }
@@ -95,17 +84,7 @@ class StartWorkspaceNotification {
   void startClicked(ClickEvent e) {
     hide();
 
-    currentWorkspaceManagerProvider
-        .get()
-        .startWorkspace(restore.getValue())
-        .catchError(
-            error -> {
-              notificationManagerProvider
-                  .get()
-                  .notify(messages.startWsErrorTitle(), error.getMessage(), FAIL, FLOAT_MODE);
-              wsStatusNotification.setError(STARTING_WORKSPACE_RUNTIME);
-              wsStatusNotification.show(WORKSPACE_STOPPED);
-            });
+    currentWorkspaceManagerProvider.get().startWorkspace(restore.getValue());
   }
 
   interface StartWorkspaceNotificationUiBinder

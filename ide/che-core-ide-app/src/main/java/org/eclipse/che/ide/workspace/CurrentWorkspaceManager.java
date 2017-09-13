@@ -13,18 +13,21 @@ package org.eclipse.che.ide.workspace;
 import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
+import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.STARTING_WORKSPACE_RUNTIME;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Performs the routines required to start/stop the current workspace.
@@ -38,13 +41,27 @@ class CurrentWorkspaceManager {
   private final WorkspaceServiceClient workspaceServiceClient;
   private final AppContext appContext;
   private final EventBus eventBus;
+  private final DialogFactory dialogFactory;
+  private final CoreLocalizationConstant messages;
+  private final WorkspaceStatusNotification wsStatusNotification;
+  private final StartWorkspaceNotification startWorkspaceNotification;
 
   @Inject
   CurrentWorkspaceManager(
-      WorkspaceServiceClient workspaceServiceClient, AppContext appContext, EventBus eventBus) {
+      WorkspaceServiceClient workspaceServiceClient,
+      AppContext appContext,
+      EventBus eventBus,
+      DialogFactory dialogFactory,
+      CoreLocalizationConstant messages,
+      WorkspaceStatusNotification wsStatusNotification,
+      StartWorkspaceNotification startWorkspaceNotification) {
     this.workspaceServiceClient = workspaceServiceClient;
     this.appContext = appContext;
     this.eventBus = eventBus;
+    this.dialogFactory = dialogFactory;
+    this.messages = messages;
+    this.wsStatusNotification = wsStatusNotification;
+    this.startWorkspaceNotification = startWorkspaceNotification;
 
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> handleWorkspaceStatus());
 
@@ -64,7 +81,16 @@ class CurrentWorkspaceManager {
               ((AppContextImpl) appContext).setWorkspace(ws);
               eventBus.fireEvent(new WorkspaceStartingEvent());
             })
-        .then((Function<WorkspaceImpl, Void>) arg -> null);
+        .then((Function<WorkspaceImpl, Void>) arg -> null)
+        .catchError(
+            error -> {
+              dialogFactory
+                  .createMessageDialog(messages.startWsErrorTitle(), error.getMessage(), null)
+                  .show();
+
+              wsStatusNotification.setError(STARTING_WORKSPACE_RUNTIME);
+              startWorkspaceNotification.show();
+            });
   }
 
   /** Stop the current workspace. */
