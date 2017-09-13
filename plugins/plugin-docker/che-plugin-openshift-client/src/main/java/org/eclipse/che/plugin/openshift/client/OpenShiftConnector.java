@@ -281,14 +281,13 @@ public class OpenShiftConnector extends DockerConnector {
 
   @Override
   public Version getVersion() throws IOException {
-    @SuppressWarnings("resource")
     OpenShiftClient openShiftClient = new DefaultOpenShiftClient();
     final OpenShiftClientExtension client =
         new OpenShiftClientExtension(
             openShiftClient.adapt(OkHttpClient.class),
             OpenShiftConfig.wrap(openShiftClient.getConfiguration()));
     String versionString = client.getVersion();
-    if (versionString == null || versionString.isEmpty()) {
+    if (isNullOrEmpty(versionString)) {
       return null;
     }
     final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
