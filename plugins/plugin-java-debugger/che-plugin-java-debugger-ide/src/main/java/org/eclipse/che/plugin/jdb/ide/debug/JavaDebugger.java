@@ -16,23 +16,18 @@ import static org.eclipse.che.plugin.jdb.ide.debug.JavaDebugger.ConnectionProper
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Map;
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
-import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerFactory;
 
 /**
  * The java debugger.
@@ -43,9 +38,6 @@ public class JavaDebugger extends AbstractDebugger {
 
   public static final String ID = "jdb";
 
-  public final FqnResolverFactory fqnResolverFactory;
-  public final FileTypeRegistry fileTypeRegistry;
-
   @Inject
   public JavaDebugger(
       DebuggerServiceClient service,
@@ -54,11 +46,9 @@ public class JavaDebugger extends AbstractDebugger {
       RequestHandlerConfigurator configurator,
       LocalStorageProvider localStorageProvider,
       EventBus eventBus,
-      FqnResolverFactory fqnResolverFactory,
-      JavaDebuggerFileHandler javaDebuggerFileHandler,
+      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
       DebuggerManager debuggerManager,
       NotificationManager notificationManager,
-      FileTypeRegistry fileTypeRegistry,
       BreakpointManager breakpointManager,
       RequestHandlerManager requestHandlerManager) {
     super(
@@ -68,32 +58,12 @@ public class JavaDebugger extends AbstractDebugger {
         dtoFactory,
         localStorageProvider,
         eventBus,
-        javaDebuggerFileHandler,
         debuggerManager,
         notificationManager,
         breakpointManager,
-        ID,
-        requestHandlerManager);
-    this.fqnResolverFactory = fqnResolverFactory;
-    this.fileTypeRegistry = fileTypeRegistry;
-  }
-
-  @Override
-  protected String fqnToPath(@NotNull Location location) {
-    String resourcePath = location.getResourcePath();
-    return resourcePath != null ? resourcePath : location.getTarget();
-  }
-
-  @Override
-  protected String pathToFqn(VirtualFile file) {
-    String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
-
-    FqnResolver resolver = fqnResolverFactory.getResolver(fileExtension);
-    if (resolver != null) {
-      return resolver.resolveFqn(file);
-    }
-
-    return null;
+        requestHandlerManager,
+        debuggerResourceHandlerFactory,
+        ID);
   }
 
   @Override

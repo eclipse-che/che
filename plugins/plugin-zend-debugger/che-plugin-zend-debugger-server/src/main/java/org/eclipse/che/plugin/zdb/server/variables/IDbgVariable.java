@@ -9,7 +9,6 @@
  */
 package org.eclipse.che.plugin.zdb.server.variables;
 
-import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Variable;
 
 /**
@@ -19,16 +18,13 @@ import org.eclipse.che.api.debug.shared.model.Variable;
  */
 public interface IDbgVariable extends Variable {
 
-  @Override
-  List<IDbgVariable> getVariables();
-
   /** Requests child variables computation. */
-  public void makeComplete();
+  void makeComplete();
 
   /**
    * Assigns new value to this variable.
    *
    * @param newValue
    */
-  public void setValue(String newValue);
+  void setValue(String newValue);
 }

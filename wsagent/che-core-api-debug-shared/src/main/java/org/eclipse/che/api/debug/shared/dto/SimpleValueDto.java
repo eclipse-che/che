@@ -17,15 +17,17 @@ import org.eclipse.che.dto.shared.DTO;
 /** @author andrew00x */
 @DTO
 public interface SimpleValueDto extends SimpleValue {
+  @Override
   List<VariableDto> getVariables();
 
   void setVariables(List<VariableDto> variables);
 
   SimpleValueDto withVariables(List<VariableDto> variables);
 
-  String getValue();
+  @Override
+  String getString();
 
-  void setValue(String value);
+  void setString(String value);
 
-  SimpleValueDto withValue(String value);
+  SimpleValueDto withString(String value);
 }
