@@ -24,6 +24,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import elemental.events.Event;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +62,7 @@ import org.eclipse.che.ide.resources.ResourceManagerInitializer;
 import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
+import org.eclipse.che.ide.util.dom.Elements;
 
 /**
  * Implementation of {@link AppContext}.
@@ -123,6 +125,12 @@ public class AppContextImpl
     eventBus.addHandler(ResourceChangedEvent.getType(), this);
     eventBus.addHandler(WindowActionEvent.TYPE, this);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+
+    //in some cases IDE doesn't save preferences on window close
+    //so try to save if window lost focus
+    Elements.getWindow()
+        .addEventListener(
+            Event.BLUR, evt -> appStateManager.get().persistWorkspaceState(getWorkspaceId()));
   }
 
   private static native String masterFromIDEConfig() /*-{
