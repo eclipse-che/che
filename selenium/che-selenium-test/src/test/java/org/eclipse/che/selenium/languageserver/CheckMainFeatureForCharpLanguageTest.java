@@ -29,11 +29,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-public class CheckMainFeatureForLanguageTest {
+public class CheckMainFeatureForCharpLanguageTest {
 
   private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
 
-  @InjectTestWorkspace(template = WorkspaceTemplate.CODENVY_DEBIAN_JRE)
+  @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)
   private TestWorkspace workspace;
 
   @Inject private Ide ide;
