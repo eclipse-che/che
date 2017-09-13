@@ -11,10 +11,11 @@
 package org.eclipse.che.ide.processes.runtime;
 
 import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import java.util.HashMap;
