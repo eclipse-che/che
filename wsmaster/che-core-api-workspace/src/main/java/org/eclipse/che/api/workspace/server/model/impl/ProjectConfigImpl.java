@@ -37,6 +37,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 
 /**
@@ -87,7 +88,9 @@ public class ProjectConfigImpl implements ProjectConfig {
   // as it is impossible to map nested list directly
   @Transient private Map<String, List<String>> attributes;
 
-  public ProjectConfigImpl() {}
+  @Transient private List<? extends ProjectProblem> problems;
+
+    public ProjectConfigImpl() {}
 
   public ProjectConfigImpl(ProjectConfig projectConfig) {
     name = projectConfig.getName();
@@ -109,6 +112,8 @@ public class ProjectConfigImpl implements ProjectConfig {
           new SourceStorageImpl(
               sourceStorage.getType(), sourceStorage.getLocation(), sourceStorage.getParameters());
     }
+
+      problems = projectConfig.getProblems();
   }
 
   @Override
@@ -176,7 +181,12 @@ public class ProjectConfigImpl implements ProjectConfig {
     return source;
   }
 
-  public void setSource(SourceStorageImpl sourceStorage) {
+    @Override
+    public List<? extends ProjectProblem> getProblems() {
+        return problems;
+    }
+
+    public void setSource(SourceStorageImpl sourceStorage) {
     this.source = sourceStorage;
   }
 

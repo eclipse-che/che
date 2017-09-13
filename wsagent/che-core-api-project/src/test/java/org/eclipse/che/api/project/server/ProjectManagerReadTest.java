@@ -10,14 +10,6 @@
  */
 package org.eclipse.che.api.project.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
@@ -26,6 +18,15 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /** @author gazarenkov */
 public class ProjectManagerReadTest extends WsAgentTestBase {
@@ -129,12 +130,12 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
 
     assertEquals(6, projectRegistry.getProjects().size());
     assertEquals(1, projectRegistry.getProject("/foo").getProblems().size());
-    assertEquals(12, projectRegistry.getProject("/foo").getProblems().get(0).code);
+    assertEquals(12, projectRegistry.getProject("/foo").getProblems().get(0).getCode());
 
     //Value for required attribute is not initialized pt3:pt2-var2
     //Value for required attribute is not initialized pt3:pt2-provided1
     assertEquals(2, projectRegistry.getProject("/bar").getProblems().size());
-    assertEquals(13, projectRegistry.getProject("/bar").getProblems().get(0).code);
+    assertEquals(13, projectRegistry.getProject("/bar").getProblems().get(0).getCode());
   }
 
   @Test
@@ -160,7 +161,7 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     assertEquals("fromFolder", pm.getProject("/fromFolder").getName());
     assertEquals(1, pm.getProject("/fromFolder").getProblems().size());
     assertEquals(BaseProjectType.ID, pm.getProject("/fromFolder").getProjectType().getId());
-    assertEquals(11, pm.getProject("/fromFolder").getProblems().get(0).code);
+    assertEquals(11, pm.getProject("/fromFolder").getProblems().get(0).getCode());
   }
 
   @Test
@@ -169,7 +170,7 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     assertEquals("/fromConfig", pm.getProject("/fromConfig").getPath());
     assertEquals(1, pm.getProject("/fromConfig").getProblems().size());
     assertEquals("primary1", pm.getProject("/fromConfig").getProjectType().getId());
-    assertEquals(10, pm.getProject("/fromConfig").getProblems().get(0).code);
+    assertEquals(10, pm.getProject("/fromConfig").getProblems().get(0).getCode());
   }
 
   @Test

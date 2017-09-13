@@ -10,18 +10,9 @@
  */
 package org.eclipse.che.api.project.server;
 
-import static java.lang.String.format;
-import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
-import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_CONFIGURED_IN_WS;
-import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_ON_FILE_SYSTEM;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.Value;
@@ -33,6 +24,17 @@ import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.Variable;
 import org.eclipse.che.api.vfs.Path;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
+import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_CONFIGURED_IN_WS;
+import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_ON_FILE_SYSTEM;
+
 /**
  * Internal Project implementation. It is supposed that it is object always consistent.
  *
@@ -40,7 +42,7 @@ import org.eclipse.che.api.vfs.Path;
  */
 public class RegisteredProject implements ProjectConfig {
 
-  private final List<Problem> problems;
+  private final List<ProjectProblem> problems;
   private final Map<String, Value> attributes;
 
   private final FolderEntry folder;
@@ -84,15 +86,14 @@ public class RegisteredProject implements ProjectConfig {
     this.detected = detected;
 
     if (folder == null || folder.isFile()) {
-      problems.add(
-          new Problem(
+      problems.add(new ProjectProblemImpl(
               NO_PROJECT_ON_FILE_SYSTEM,
               "No project folder on file system " + this.config.getPath()));
     }
 
     if (config == null) {
       problems.add(
-          new Problem(
+          new ProjectProblemImpl(
               NO_PROJECT_CONFIGURED_IN_WS,
               "No project configured in workspace " + this.config.getPath()));
     }
@@ -114,7 +115,7 @@ public class RegisteredProject implements ProjectConfig {
   }
 
   /**
-   * Initialize project attributes. Note: the problem with {@link Problem#code} = 13 will be added
+   * Initialize project attributes. Note: the problem with {@link ProjectProblem#getCode()} code} = 13 will be added
    * when a value for some attribute is not initialized
    */
   private void initAttributes() {
@@ -149,8 +150,8 @@ public class RegisteredProject implements ProjectConfig {
                 valueProvider.setValues(name, value.getList());
               }
             } catch (ValueStorageException e) {
-              final Problem problem =
-                  new Problem(
+              final ProjectProblem problem =
+                  new ProjectProblemImpl(
                       ATTRIBUTE_NAME_PROBLEM,
                       format(
                           "Value for attribute %s is not initialized, caused by: %s",
@@ -164,8 +165,8 @@ public class RegisteredProject implements ProjectConfig {
         }
 
         if (value.isEmpty() && variable.isRequired()) {
-          final Problem problem =
-              new Problem(
+          final ProjectProblem problem =
+              new ProjectProblemImpl(
                   ATTRIBUTE_NAME_PROBLEM,
                   "Value for required attribute is not initialized " + variable.getId());
           this.problems.add(problem);
@@ -226,7 +227,7 @@ public class RegisteredProject implements ProjectConfig {
   }
 
   /** @return problems in case if root or config is null (project is not synced) */
-  public List<Problem> getProblems() {
+  public List<ProjectProblem> getProblems() {
     return problems;
   }
 
@@ -234,8 +235,8 @@ public class RegisteredProject implements ProjectConfig {
   public String getProblemsStr() {
     StringBuilder builder = new StringBuilder();
     int i = 0;
-    for (RegisteredProject.Problem prb : problems) {
-      builder.append("[").append(i++).append("] : ").append(prb.message).append("\n");
+    for (ProjectProblem prb : problems) {
+      builder.append("[").append(i++).append("] : ").append(prb.getMessage()).append("\n");
     }
     return builder.toString();
   }
@@ -301,13 +302,4 @@ public class RegisteredProject implements ProjectConfig {
     return attrs;
   }
 
-  public static class Problem {
-    Problem(int code, String message) {
-      this.code = code;
-      this.message = message;
-    }
-
-    int code;
-    String message;
-  }
 }

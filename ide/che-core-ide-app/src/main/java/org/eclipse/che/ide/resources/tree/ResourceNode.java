@@ -10,24 +10,12 @@
  */
 package org.eclipse.che.ide.resources.tree;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Lists.newArrayListWithExpectedSize;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.unmodifiableList;
-import static org.eclipse.che.ide.api.resources.Resource.FILE;
-import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
-import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
-import static org.eclipse.che.ide.api.vcs.VcsStatus.NOT_MODIFIED;
-
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
-import java.util.List;
-import java.util.Set;
-import javax.validation.constraints.NotNull;
+
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -49,7 +37,22 @@ import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newArrayListWithExpectedSize;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
+import static org.eclipse.che.ide.api.resources.Resource.FILE;
+import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
+import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
+import static org.eclipse.che.ide.api.vcs.VcsStatus.NOT_MODIFIED;
 
 /**
  * Abstract based implementation for all resource based nodes in the IDE.
@@ -153,7 +156,7 @@ public abstract class ResourceNode<R extends Resource> extends AbstractTreeNode
 
   @Override
   public void updatePresentation(@NotNull NodePresentation presentation) {
-
+    Log.info(getClass(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + System.currentTimeMillis());
     final StringBuilder cssBuilder = new StringBuilder();
 
     final Optional<Marker> presentableTextMarker = getData().getMarker(PresentableTextMarker.ID);
@@ -189,6 +192,7 @@ public abstract class ResourceNode<R extends Resource> extends AbstractTreeNode
                 ? nodesResources.hiddenSimpleFolder()
                 : nodesResources.simpleFolder());
       } else if (getData().getResourceType() == PROJECT) {
+          Log.info(getClass(),  ((Project) getData()).isProblem());
         presentation.setPresentableIcon(
             ((Project) getData()).isProblem()
                 ? nodesResources.notValidProjectFolder()

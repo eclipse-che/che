@@ -10,14 +10,17 @@
  */
 package org.eclipse.che.ide.api.project;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.eclipse.che.api.core.model.project.NewProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of {@link NewProjectConfig} for creating project
@@ -170,4 +173,9 @@ public class NewProjectConfigImpl implements NewProjectConfig {
   public SourceStorage getSource() {
     return sourceStorage;
   }
+
+    @Override
+    public List<ProjectProblem> getProblems() {
+        return Collections.emptyList();
+    }
 }

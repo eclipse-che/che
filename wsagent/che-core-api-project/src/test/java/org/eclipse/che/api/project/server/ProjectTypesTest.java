@@ -10,11 +10,10 @@
  */
 package org.eclipse.che.api.project.server;
 
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
+import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,9 +21,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.testng.annotations.Test;
+
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class ProjectTypesTest extends BaseProjectTypeTest {
 
@@ -36,7 +38,7 @@ public class ProjectTypesTest extends BaseProjectTypeTest {
     pts.add(new PersistedMixin());
     pts.add(new NotPersistedMixin());
     ProjectTypeRegistry reg = new ProjectTypeRegistry(pts);
-    List<RegisteredProject.Problem> problems = new ArrayList<>();
+    List<ProjectProblem> problems = new ArrayList<>();
     new ProjectTypes(
         generate("projectPath-", 5),
         PrimaryType.PRIMARY_ID,
@@ -47,7 +49,7 @@ public class ProjectTypesTest extends BaseProjectTypeTest {
         reg,
         problems);
     assertEquals(problems.size(), 1);
-    assertEquals(problems.get(0).code, 12);
+    assertEquals(problems.get(0).getCode(), 12);
   }
 
   //@Test(expectedExceptions = ProjectTypeConstraintException.class)
@@ -58,7 +60,7 @@ public class ProjectTypesTest extends BaseProjectTypeTest {
     pts.add(new PrimaryType(otherPrimaryId, generate("projectType-", 5)));
     pts.add(new PersistedMixin());
     ProjectTypeRegistry reg = new ProjectTypeRegistry(pts);
-    List<RegisteredProject.Problem> problems = new ArrayList<>();
+    List<ProjectProblem> problems = new ArrayList<>();
     new ProjectTypes(
         generate("projectPath-", 5),
         PrimaryType.PRIMARY_ID,
@@ -66,7 +68,7 @@ public class ProjectTypesTest extends BaseProjectTypeTest {
         reg,
         problems);
     assertEquals(problems.size(), 1);
-    assertEquals(problems.get(0).code, 12);
+    assertEquals(problems.get(0).getCode(), 12);
   }
 
   @Test
@@ -76,7 +78,7 @@ public class ProjectTypesTest extends BaseProjectTypeTest {
     pts.add(new PersistedMixin());
     pts.add(new NotPersistedMixin());
     ProjectTypeRegistry reg = new ProjectTypeRegistry(pts);
-    List<RegisteredProject.Problem> problems = new ArrayList<>();
+    List<ProjectProblem> problems = new ArrayList<>();
     ProjectTypes projectTypes =
         new ProjectTypes(
             generate("projectPath-", 5),
@@ -96,7 +98,7 @@ public class ProjectTypesTest extends BaseProjectTypeTest {
     pts.add(new PrimaryType());
     pts.add(new PersistedMixin());
     ProjectTypeRegistry reg = new ProjectTypeRegistry(pts);
-    List<RegisteredProject.Problem> problems = new ArrayList<>();
+    List<ProjectProblem> problems = new ArrayList<>();
     ProjectTypes projectTypes =
         new ProjectTypes(
             generate("projectPath-", 5),

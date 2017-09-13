@@ -10,16 +10,19 @@
  */
 package org.eclipse.che.api.project.server;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.eclipse.che.api.core.model.project.NewProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.vfs.Path;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * Implementation of {@link NewProjectConfig} for creating project
@@ -154,7 +157,12 @@ public class NewProjectConfigImpl implements NewProjectConfig {
     return origin;
   }
 
-  @Override
+    @Override
+    public List<ProjectProblem> getProblems() {
+        return Collections.emptyList();
+    }
+
+    @Override
   public void setOptions(Map<String, String> options) {
     this.options = options;
   }

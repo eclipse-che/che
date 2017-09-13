@@ -10,25 +10,8 @@
  */
 package org.eclipse.che.api.project.server;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
-import static org.eclipse.che.api.core.ErrorCodes.NOT_UPDATED_PROJECT;
-import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import java.io.IOException;
-import java.nio.file.PathMatcher;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -37,10 +20,10 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
-import org.eclipse.che.api.project.server.RegisteredProject.Problem;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -64,6 +47,25 @@ import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.IOException;
+import java.nio.file.PathMatcher;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
+import static org.eclipse.che.api.core.ErrorCodes.NOT_UPDATED_PROJECT;
+import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 
 /**
  * Facade for all project related operations.
@@ -308,8 +310,8 @@ public class ProjectManager {
    *     NewProjectConfig#setPath(String)} field. In this case Project will be created as project of
    *     {@link BaseProjectType} type
    * <li>- a project will be created as project of {@link BaseProjectType} type with {@link
-   *     Problem#code} = 12 when declared primary project type is not registered,
-   * <li>- a project will be created with {@link Problem#code} = 12 and without mixin project type
+   *     ProjectProblem#getCode()} code} = 12 when declared primary project type is not registered,
+   * <li>- a project will be created with {@link ProjectProblem#getCode()} code} = 12 and without mixin project type
    *     when declared mixin project type is not registered
    * <li>- for creating a project by generator {@link NewProjectConfig#getOptions()} should be
    *     specified.
@@ -377,8 +379,8 @@ public class ProjectManager {
           } catch (Exception e) {
             registeredProject =
                 projectRegistry.putProject(projectConfig, asFolder(pathToProject), true, false);
-            final Problem problem =
-                new Problem(
+            final ProjectProblem problem =
+                new ProjectProblemImpl(
                     NOT_UPDATED_PROJECT,
                     "The project is not updated, caused by " + e.getLocalizedMessage());
             registeredProject.getProblems().add(problem);

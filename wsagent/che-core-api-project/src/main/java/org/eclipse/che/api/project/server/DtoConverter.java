@@ -10,13 +10,9 @@
  */
 package org.eclipse.che.api.project.server;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -29,6 +25,12 @@ import org.eclipse.che.api.project.shared.dto.ValueDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Helper methods for convert server essentials to DTO and back.
@@ -146,7 +148,7 @@ public class DtoConverter {
     return storageDto;
   }
 
-  public static ProjectProblemDto asDto(RegisteredProject.Problem problem) {
-    return newDto(ProjectProblemDto.class).withCode(problem.code).withMessage(problem.message);
+  public static ProjectProblemDto asDto(ProjectProblem problem) {
+    return newDto(ProjectProblemDto.class).withCode(problem.getCode()).withMessage(problem.getMessage());
   }
 }

@@ -13,6 +13,9 @@ package org.eclipse.che.ide.oauth;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
+import org.eclipse.che.ide.api.auth.OAuthServiceClientImpl;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 
@@ -33,5 +36,7 @@ public class OAuthApiModule extends AbstractGinModule {
     bind(OAuth2AuthenticatorRegistry.class)
         .to(OAuth2AuthenticatorRegistryImpl.class)
         .in(Singleton.class);
+
+    bind(OAuthServiceClient.class).to(OAuthServiceClientImpl.class).in(Singleton.class);
   }
 }
