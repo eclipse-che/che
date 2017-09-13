@@ -170,7 +170,27 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                       }
 
                       if (currentLocation != null) {
-                        open(currentLocation);
+                        debuggerResourceHandlerFactory
+                            .getOrDefault(getDebuggerType())
+                            .find(
+                                currentLocation,
+                                new AsyncCallback<VirtualFile>() {
+                                  @Override
+                                  public void onFailure(Throwable caught) {
+                                    for (DebuggerObserver observer : observers) {
+                                      observer.onBreakpointStopped(
+                                          currentLocation.getTarget(), currentLocation);
+                                    }
+                                  }
+
+                                  @Override
+                                  public void onSuccess(VirtualFile result) {
+                                    for (DebuggerObserver observer : observers) {
+                                      observer.onBreakpointStopped(
+                                          result.getLocation().toString(), currentLocation);
+                                    }
+                                  }
+                                });
                       }
 
                       startCheckingEvents();
@@ -210,31 +230,25 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   private void open(Location location) {
-    try {
-      debuggerResourceHandlerFactory
-          .getOrDefault(getDebuggerType())
-          .open(
-              location,
-              new AsyncCallback<VirtualFile>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                  for (DebuggerObserver observer : observers) {
-                    observer.onBreakpointStopped(location.getTarget(), location);
-                  }
+    debuggerResourceHandlerFactory
+        .getOrDefault(getDebuggerType())
+        .open(
+            location,
+            new AsyncCallback<VirtualFile>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                for (DebuggerObserver observer : observers) {
+                  observer.onBreakpointStopped(location.getTarget(), location);
                 }
+              }
 
-                @Override
-                public void onSuccess(VirtualFile result) {
-                  for (DebuggerObserver observer : observers) {
-                    observer.onBreakpointStopped(result.getLocation().toString(), location);
-                  }
+              @Override
+              public void onSuccess(VirtualFile result) {
+                for (DebuggerObserver observer : observers) {
+                  observer.onBreakpointStopped(result.getLocation().toString(), location);
                 }
-              });
-    } catch (Exception e) {
-      for (DebuggerObserver observer : observers) {
-        observer.onBreakpointStopped(location.getTarget(), location);
-      }
-    }
+              }
+            });
   }
 
   /**

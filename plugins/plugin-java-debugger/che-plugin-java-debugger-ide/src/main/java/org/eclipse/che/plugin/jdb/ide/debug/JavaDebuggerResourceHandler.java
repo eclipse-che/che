@@ -47,27 +47,27 @@ public class JavaDebuggerResourceHandler extends DefaultDebuggerResourceHandler 
   }
 
   @Override
-  public void open(Location location, AsyncCallback<VirtualFile> callback) {
+  public void find(Location location, AsyncCallback<VirtualFile> callback) {
     findInOpenedEditors(
         location,
         new AsyncCallback<VirtualFile>() {
           @Override
-          public void onSuccess(VirtualFile result) {
-            callback.onSuccess(result);
+          public void onFailure(Throwable caught) {
+            if (location.isExternalResource()) {
+              findExternalResource(location, callback);
+            } else {
+              JavaDebuggerResourceHandler.super.find(location, callback);
+            }
           }
 
           @Override
-          public void onFailure(Throwable caught) {
-            if (location.isExternalResource()) {
-              openExternalResource(location, callback);
-            } else {
-              findSourceToOpen(location, callback);
-            }
+          public void onSuccess(VirtualFile result) {
+            callback.onSuccess(result);
           }
         });
   }
 
-  private void openExternalResource(
+  private void findExternalResource(
       final Location location, final AsyncCallback<VirtualFile> callback) {
     final String className = extractOuterClassFqn(location.getTarget());
     final int libId = location.getExternalResourceId();
@@ -79,7 +79,7 @@ public class JavaDebuggerResourceHandler extends DefaultDebuggerResourceHandler 
             jarEntry -> {
               final JarFileNode file =
                   nodeFactory.newJarFileNode(jarEntry, libId, projectPath, null);
-              openFileAndScrollToLine(file, location.getLineNumber(), callback);
+              callback.onSuccess(file);
             })
         .catchError(
             error -> {

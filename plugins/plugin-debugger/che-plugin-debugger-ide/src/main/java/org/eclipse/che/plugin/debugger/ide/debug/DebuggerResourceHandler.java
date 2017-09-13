@@ -32,4 +32,14 @@ public interface DebuggerResourceHandler {
    * @param callback the callback
    */
   void open(Location location, AsyncCallback<VirtualFile> callback);
+
+  /**
+   * Finds resource denoted by {@code #location}. If resource has been found then {@link
+   * AsyncCallback#onSuccess(Object)} must be invoked and {@link AsyncCallback#onFailure(Throwable)}
+   * otherwise.
+   *
+   * @param location the location of the resource
+   * @param callback the callback
+   */
+  void find(Location location, AsyncCallback<VirtualFile> callback);
 }

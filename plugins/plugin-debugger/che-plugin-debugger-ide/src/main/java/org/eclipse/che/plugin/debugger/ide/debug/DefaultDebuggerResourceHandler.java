@@ -15,19 +15,14 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /** @author Anatoliy Bazko */
@@ -56,6 +51,31 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
    */
   @Override
   public void open(final Location location, final AsyncCallback<VirtualFile> callback) {
+    find(
+        location,
+        new AsyncCallback<VirtualFile>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            callback.onFailure(caught);
+          }
+
+          @Override
+          public void onSuccess(VirtualFile result) {
+            openFileAndScrollToLine(result, location.getLineNumber(), callback);
+          }
+        });
+  }
+
+  @Override
+  public void find(Location location, AsyncCallback<VirtualFile> callback) {
+    try {
+      doFind(location, callback);
+    } catch (Exception e) {
+      callback.onFailure(e);
+    }
+  }
+
+  private void doFind(Location location, AsyncCallback<VirtualFile> callback) {
     findInOpenedEditors(
         location,
         new AsyncCallback<VirtualFile>() {
@@ -66,23 +86,7 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
 
           @Override
           public void onFailure(Throwable caught) {
-            findSourceToOpen(location, callback);
-          }
-        });
-  }
-
-  protected void findSourceToOpen(Location location, AsyncCallback<VirtualFile> callback) {
-    findInProject(
-        location,
-        new AsyncCallback<VirtualFile>() {
-          @Override
-          public void onSuccess(VirtualFile virtualFile) {
-            callback.onSuccess(virtualFile);
-          }
-
-          @Override
-          public void onFailure(Throwable caught) {
-            findInWorkspace(
+            findInProject(
                 location,
                 new AsyncCallback<VirtualFile>() {
                   @Override
@@ -92,17 +96,29 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
 
                   @Override
                   public void onFailure(Throwable caught) {
-                    searchSource(
+                    findInWorkspace(
                         location,
                         new AsyncCallback<VirtualFile>() {
                           @Override
-                          public void onSuccess(VirtualFile result) {
-                            callback.onSuccess(result);
+                          public void onSuccess(VirtualFile virtualFile) {
+                            callback.onSuccess(virtualFile);
                           }
 
                           @Override
-                          public void onFailure(Throwable error) {
-                            callback.onFailure(error);
+                          public void onFailure(Throwable caught) {
+                            searchSource(
+                                location,
+                                new AsyncCallback<VirtualFile>() {
+                                  @Override
+                                  public void onSuccess(VirtualFile result) {
+                                    callback.onSuccess(result);
+                                  }
+
+                                  @Override
+                                  public void onFailure(Throwable error) {
+                                    callback.onFailure(error);
+                                  }
+                                });
                           }
                         });
                   }
@@ -118,7 +134,7 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
       String filePath = file.getLocation().toString();
 
       if (filePath.equals(location.getTarget())) {
-        openFileAndScrollToLine(file, location.getLineNumber(), callback);
+        callback.onSuccess(file);
         return;
       }
     }
@@ -145,7 +161,7 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
         .then(
             file -> {
               if (file.isPresent()) {
-                openFileAndScrollToLine(file.get(), location.getLineNumber(), callback);
+                callback.onSuccess(file.get());
               } else {
                 callback.onFailure(new IllegalArgumentException(location + " not found."));
               }
@@ -165,7 +181,7 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
         .then(
             file -> {
               if (file.isPresent()) {
-                openFileAndScrollToLine(file.get(), location.getLineNumber(), callback);
+                callback.onSuccess(file.get());
               } else {
                 callback.onFailure(new IllegalArgumentException(location + " not found."));
               }
@@ -181,37 +197,29 @@ public class DefaultDebuggerResourceHandler implements DebuggerResourceHandler {
         .getWorkspaceRoot()
         .search(location.getTarget(), "")
         .then(
-            new Operation<List<SearchResult>>() {
-              @Override
-              public void apply(List<SearchResult> resources) throws OperationException {
-                if (resources.isEmpty()) {
-                  callback.onFailure(
-                      new IllegalArgumentException(location.getTarget() + " not found."));
-                  return;
-                }
+            resources -> {
+              if (resources.isEmpty()) {
+                callback.onFailure(
+                    new IllegalArgumentException(location.getTarget() + " not found."));
+                return;
+              }
 
-                appContext
-                    .getWorkspaceRoot()
-                    .getFile(resources.get(0).getPath())
-                    .then(
-                        new Operation<Optional<File>>() {
-                          @Override
-                          public void apply(Optional<File> file) throws OperationException {
-                            if (file.isPresent()) {
-                              openFileAndScrollToLine(
-                                  file.get(), location.getLineNumber(), callback);
-                            } else {
-                              callback.onFailure(
-                                  new IllegalArgumentException(location + " not found."));
-                            }
-                          }
-                        })
-                    .catchError(
-                        error -> {
+              appContext
+                  .getWorkspaceRoot()
+                  .getFile(resources.get(0).getPath())
+                  .then(
+                      file -> {
+                        if (file.isPresent()) {
+                          callback.onSuccess(file.get());
+                        } else {
                           callback.onFailure(
                               new IllegalArgumentException(location + " not found."));
-                        });
-              }
+                        }
+                      })
+                  .catchError(
+                      error -> {
+                        callback.onFailure(new IllegalArgumentException(location + " not found."));
+                      });
             })
         .catchError(
             error -> {
