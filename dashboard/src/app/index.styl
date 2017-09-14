@@ -53,7 +53,6 @@ md-sidenav > *
   min-width 200px
 
 html
-
 body
   font-size 13px
   font-family 'Open Sans'
@@ -68,7 +67,7 @@ input
   font-family 'Open Sans'
 
 label
- margin-bottom 0
+  margin-bottom 0
 
 .h1 .small, .h1 small, .h2 .small, .h2 small, .h3 .small, .h3 small, h1 .small, h1 small, h2 .small, h2 small, h3 .small, h3 small, h4 .small, h4 small, h5 .small, .h5 small, h6 small, h6 .small
   font-size 65%
@@ -102,12 +101,9 @@ md-option:hover
   min-width 320px
 
 .progress-line
-  top 0
-  left 0
-  right 0
-  height 5px
   position absolute
-  z-index 2147483647
+  height 5px
+  z-index 80
 
 .main-page-loader
   position absolute
@@ -130,10 +126,9 @@ md-option:hover
 
 .not-visible
   visibility hidden
+
 // injector
 // endinjector
-
-
 
 .che-logo
   width 137px
@@ -160,9 +155,12 @@ md-option:hover
   opacity 1
 
 @keyframes popInEffect
-  0% { opacity: 0}
-  100% { opacity: 1}
-
+  0% {
+    opacity: 0
+  }
+  100% {
+    opacity: 1
+  }
 
 /*
 .ide-show.ng-hide-remove
@@ -179,20 +177,17 @@ md-option:hover
 
 ::-webkit-scrollbar-track
   border-radius 5px
-  background rgba(0,0,0,0.1)
-
+  background rgba(0, 0, 0, 0.1)
 
 ::-webkit-scrollbar-thumb
   border-radius 5px
-  background rgba(0,0,0,0.2)
-
+  background rgba(0, 0, 0, 0.2)
 
 ::-webkit-scrollbar-thumb:hover
-  background rgba(0,0,0,0.4)
+  background rgba(0, 0, 0, 0.4)
 
 ::-webkit-scrollbar-thumb:window-inactive
-  background rgba(0,0,0,0.05)
-
+  background rgba(0, 0, 0, 0.05)
 
 .spinner
   width 120px
@@ -212,17 +207,14 @@ md-option:hover
 .spinner .rect2
   animation-delay -1.1s
 
-
 .spinner .rect3
   animation-delay -1.0s
-
 
 @-webkit-keyframes sk-stretchdelay
   0%, 40%, 100%
     -webkit-transform scaleY(0.4)
   20%
     -webkit-transform scaleY(1.0)
-
 
 @keyframes sk-stretchdelay
   0%, 40%, 100%
@@ -237,6 +229,23 @@ md-option:hover
 
 .noselect
   user-select none
+
+md-tabs-canvas md-tab-item.md-tab.md-active
+  border-bottom 5px solid #fdb940
+  height 100%
+
+.error
+  color $error-color
+
+md-tab-item
+  background-color inherit !important
+  .error-state
+    color $error-color !important
+    position absolute
+    display inline-block
+    font-size 14px
+    margin-top 5px
+    margin-left -15px
 
 .popover
   font-family 'Open Sans'

@@ -43,7 +43,7 @@ export class ComposeParser {
    */
 
   dump(recipe: IComposeRecipe): string {
-    return jsyaml.dump(recipe);
+    return jsyaml.dump(recipe, {'indent': 1});
   }
 
   /**

@@ -101,7 +101,7 @@ public class AmendCommitTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_FILE);
     editor.waitActiveEditor();
-    editor.setCursorToLine(16);
+    editor.setCursorToLine(12);
     editor.typeTextIntoEditor("//" + CHANGE_CONTENT);
     editor.waitTextIntoEditor("//" + CHANGE_CONTENT);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
@@ -130,7 +130,7 @@ public class AmendCommitTest {
     // perform amend previous commit
     projectExplorer.openItemByPath(PATH_TO_FILE);
     editor.waitActiveEditor();
-    editor.setCursorToLine(16);
+    editor.setCursorToLine(12);
     editor.selectLineAndDelete();
     editor.typeTextIntoEditor("//" + AMEND_CONTENT);
     editor.waitTextIntoEditor("//" + AMEND_CONTENT);
@@ -156,7 +156,6 @@ public class AmendCommitTest {
 
   private void checkChangesIntoCompareForm(String expText) {
     git.waitGitCompareFormIsOpen();
-    git.toSwitchFrameGitCompareForm();
     git.waitExpTextIntoCompareLeftEditor(expText);
     git.waitTextNotPresentIntoCompareRightEditor(expText);
   }

@@ -5,13 +5,10 @@
                   ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 }, allowInvalid: true }"
                   ng-model="cheEditorController.editorContent"
                   name="editor"
-                  custom-validator="cheEditorController.isEditorValid()"
                   required></textarea>
-    <div ng-messages="codemirrorForm.editor.$error">
+    <div ng-messages="codemirrorForm.editor.$error || !cheEditorController.isEditorValid()">
       <div ng-message="required">Editor's content is required.</div>
-      <div ng-message="customValidator">
-        <div ng-repeat="error in cheEditorController.editorState.errors">{{error}}</div>
-      </div>
+      <div ng-repeat="error in cheEditorController.editorState.errors">{{error}}</div>
     </div>
   </ng-form>
 </div>

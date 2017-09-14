@@ -10,7 +10,6 @@
  */
 'use strict';
 import {ProjectSourceSelectorService} from './project-source-selector.service';
-import {ProjectSource} from './project-source.enum';
 import {IProjectSourceSelectorScope} from './project-source-selector.directive';
 import {ActionType} from './project-source-selector-action-type.enum';
 
@@ -30,14 +29,6 @@ export class ProjectSourceSelectorController {
    */
   private projectSourceSelectorService: ProjectSourceSelectorService;
   /**
-   * Available project sources.
-   */
-  private projectSource: Object;
-  /**
-   * Active project's source.
-   */
-  private activeProjectSource: ProjectSource;
-  /**
    * State of a button.
    */
   private buttonState: { [buttonId: string]: boolean } = {};
@@ -52,7 +43,7 @@ export class ProjectSourceSelectorController {
   /**
    * Selected template.
    */
-  private projectTemplate: che.IProjectTemplate;
+  private selectedProjectTemplate: che.IProjectTemplate;
   /**
    * Defines which content should be shown in popover in project's section.
    */
@@ -71,47 +62,37 @@ export class ProjectSourceSelectorController {
     this.projectSourceSelectorService = projectSourceSelectorService;
 
     this.actionType = ActionType;
-    this.projectSource = ProjectSource;
+  }
 
-    this.activeProjectSource = ProjectSource.SAMPLES;
-    this.sourceChanged();
+  /**
+   * Add project templates from selected source to the list.
+   *
+   * @param {Array<che.IProjectTemplate>} projectTemplates list of templates
+   */
+  projectTemplateOnAdd(projectTemplates: Array<che.IProjectTemplate>): void {
+    if (!projectTemplates || !projectTemplates.length) {
+      return;
+    }
 
-    this.$scope.$on('$destroy', () => {
-      this.projectSourceSelectorService.clearAllSources();
+    let projectTemplate: che.IProjectTemplate;
+    projectTemplates.forEach((_projectTemplate: che.IProjectTemplate) => {
+      projectTemplate = _projectTemplate;
+      this.projectSourceSelectorService.addProjectTemplate(_projectTemplate);
     });
-  }
 
-  /**
-   * Set source of project which is going to be added.
-   */
-  sourceChanged(): void {
-    this.projectSourceSelectorService.setProjectSource(this.activeProjectSource);
-  }
-
-  /**
-   * Add project template from selected source to the list.
-   */
-  addProjectTemplate(): void {
-    const projectTemplate = this.projectSourceSelectorService.addProjectTemplateFromSource(this.activeProjectSource);
-
+    // update list of templates to redraw the projects section
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
     this.updateData({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: projectTemplate});
   }
 
   /**
-   * Resets input fields and checkboxes for selected source.
-   */
-  cancelProjectTemplate(): void {
-    this.projectSourceSelectorService.clearSource(this.activeProjectSource);
-  }
-
-  /**
    * Removes selected template from ready-to-import templates.
    */
-  removeTemplate(): void {
-    this.projectSourceSelectorService.removeProjectTemplate(this.projectTemplate.name);
+  projectTemplateOnRemove(): void {
+    this.projectSourceSelectorService.removeProjectTemplate(this.selectedProjectTemplate.name);
 
+    // update list of templates to redraw the projects section
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
     this.updateData({buttonState: true, actionType: ActionType.ADD_PROJECT});
@@ -120,29 +101,13 @@ export class ProjectSourceSelectorController {
   /**
    * Updates selected template's metadata.
    */
-  saveMetadata(): void {
-    const projectTemplateName = this.projectTemplate.name;
-    const projectTemplate = this.projectSourceSelectorService.updateProjectTemplateMetadata(projectTemplateName);
+  projectTemplateOnEdit(projectTemplate: che.IProjectTemplate): void {
+    this.projectSourceSelectorService.updateProjectTemplate(this.selectedProjectTemplate.name, projectTemplate);
 
+    // update list of templates to redraw the projects section
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
     this.updateData({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: projectTemplate});
-  }
-
-  /**
-   * Restores template's metadata.
-   */
-  restoreMetadata(): void {
-    this.projectSourceSelectorService.clearSource(null);
-  }
-
-  /**
-   * Returns <code>true</code> if "Save" button should be disabled.
-   *
-   * @return {boolean}
-   */
-  disableSaveAndCancelButtons(): boolean {
-    return !this.projectSourceSelectorService.getEditingProgress();
   }
 
   /**
@@ -171,9 +136,19 @@ export class ProjectSourceSelectorController {
     };
 
     this.activeActionType = actionType;
-    this.projectTemplate = angular.copy(template);
+    this.selectedProjectTemplate = angular.copy(template);
 
     this.$scope.updateWidget(this.activeButtonId);
+  }
+
+  /**
+   * Returns <code>true</code> if project project name is unique.
+   *
+   * @param {string} name the project template name.
+   * @return {boolean}
+   */
+  isProjectNameUnique(name: string): boolean {
+    return this.projectSourceSelectorService.isProjectTemplateNameUnique(name);
   }
 
 }

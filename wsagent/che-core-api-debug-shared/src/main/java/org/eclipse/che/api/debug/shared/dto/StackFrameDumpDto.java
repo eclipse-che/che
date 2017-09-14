@@ -17,15 +17,24 @@ import org.eclipse.che.dto.shared.DTO;
 /** @author andrew00x */
 @DTO
 public interface StackFrameDumpDto extends StackFrameDump {
+  @Override
   List<FieldDto> getFields();
 
   void setFields(List<FieldDto> fields);
 
   StackFrameDumpDto withFields(List<FieldDto> fields);
 
+  @Override
   List<VariableDto> getVariables();
 
   void setVariables(List<VariableDto> variables);
 
   StackFrameDumpDto withVariables(List<VariableDto> variables);
+
+  @Override
+  LocationDto getLocation();
+
+  void setLocation(LocationDto location);
+
+  StackFrameDumpDto withLocation(LocationDto location);
 }

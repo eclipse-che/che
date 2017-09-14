@@ -2372,7 +2372,7 @@
           "goal": "Run"
         }
       }, {
-        "commandLine": "scl enable rh-maven33 'mvn vertx:debug -f ${current.project.path}'",
+        "commandLine": "scl enable rh-maven33 'mvn compile vertx:debug -f ${current.project.path}'",
         "name": "debug",
         "type": "custom",
         "attributes": {

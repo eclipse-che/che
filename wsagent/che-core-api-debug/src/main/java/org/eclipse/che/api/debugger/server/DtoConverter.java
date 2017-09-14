@@ -10,18 +10,20 @@
  */
 package org.eclipse.che.api.debugger.server;
 
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.DebuggerInfoDto;
 import org.eclipse.che.api.debug.shared.dto.FieldDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.MethodDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
@@ -33,8 +35,10 @@ import org.eclipse.che.api.debug.shared.model.DebugSession;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.Method;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
@@ -72,61 +76,53 @@ public final class DtoConverter {
         .withLocation(asDto(breakpoint.getLocation()));
   }
 
-  public static List<BreakpointDto> asBreakpointsDto(List<Breakpoint> breakpoints) {
-    return breakpoints.stream().map(DtoConverter::asDto).collect(Collectors.toList());
+  public static MethodDto asDto(Method method) {
+    List<VariableDto> variablesDto =
+        method.getArguments().stream().map(DtoConverter::asDto).collect(toList());
+    return newDto(MethodDto.class).withName(method.getName()).withArguments(variablesDto);
   }
 
   public static LocationDto asDto(Location location) {
     return newDto(LocationDto.class)
         .withTarget(location.getTarget())
+        .withThreadId(location.getThreadId())
         .withLineNumber(location.getLineNumber())
         .withExternalResourceId(location.getExternalResourceId())
-        .withResourcePath(location.getResourcePath())
         .withResourceProjectPath(location.getResourceProjectPath())
-        .withExternalResource(location.isExternalResource());
+        .withExternalResource(location.isExternalResource())
+        .withMethod(location.getMethod() == null ? null : asDto(location.getMethod()));
   }
 
   public static SimpleValueDto asDto(SimpleValue value) {
-    return newDto(SimpleValueDto.class)
-        .withValue(value.getValue())
-        .withVariables(asVariablesDto(value.getVariables()));
+    List<VariableDto> variablesDto =
+        value.getVariables().stream().map(DtoConverter::asDto).collect(toList());
+    return newDto(SimpleValueDto.class).withString(value.getString()).withVariables(variablesDto);
+  }
+
+  public static SimpleValueDto asSimplifiedDto(SimpleValue value) {
+    return newDto(SimpleValueDto.class).withString(value.getString());
   }
 
   public static FieldDto asDto(Field field) {
     return newDto(FieldDto.class)
         .withType(field.getType())
-        .withExistInformation(field.isExistInformation())
         .withName(field.getName())
         .withPrimitive(field.isPrimitive())
-        .withValue(field.getValue())
+        .withValue(asSimplifiedDto(field.getValue()))
         .withVariablePath(asDto(field.getVariablePath()))
-        .withVariables(asVariablesDto(field.getVariables()))
         .withIsFinal(field.isIsFinal())
         .withIsStatic(field.isIsStatic())
         .withIsTransient(field.isIsTransient())
         .withIsVolatile(field.isIsVolatile());
   }
 
-  public static List<FieldDto> asFieldsDto(List<? extends Field> fields) {
-    return fields.stream().map(DtoConverter::asDto).collect(Collectors.toList());
-  }
-
-  public static List<VariableDto> asVariablesDto(List<? extends Variable> variables) {
-    return variables.stream().map(DtoConverter::asDto).collect(Collectors.toList());
-  }
-
   public static VariableDto asDto(Variable variable) {
     return newDto(VariableDto.class)
         .withType(variable.getType())
-        .withExistInformation(variable.isExistInformation())
         .withName(variable.getName())
         .withPrimitive(variable.isPrimitive())
-        .withValue(variable.getValue())
-        .withVariablePath(asDto(variable.getVariablePath()))
-        .withVariables(
-            variable.getVariables().isEmpty()
-                ? Collections.emptyList()
-                : asVariablesDto(variable.getVariables()));
+        .withValue(variable.getValue() == null ? null : asSimplifiedDto(variable.getValue()))
+        .withVariablePath(asDto(variable.getVariablePath()));
   }
 
   public static VariablePathDto asDto(VariablePath variablePath) {
@@ -134,9 +130,39 @@ public final class DtoConverter {
   }
 
   public static StackFrameDumpDto asDto(StackFrameDump stackFrameDump) {
+    List<FieldDto> fieldsDto =
+        stackFrameDump
+            .getFields()
+            .stream()
+            .map(
+                f -> {
+                  try {
+                    return asDto(f);
+                  } catch (Exception e) {
+                    return null;
+                  }
+                })
+            .filter(Objects::nonNull)
+            .collect(toList());
+
+    List<VariableDto> variablesDto =
+        stackFrameDump
+            .getVariables()
+            .stream()
+            .map(
+                v -> {
+                  try {
+                    return asDto(v);
+                  } catch (Exception e) {
+                    return null;
+                  }
+                })
+            .filter(Objects::nonNull)
+            .collect(toList());
     return newDto(StackFrameDumpDto.class)
-        .withVariables(asVariablesDto(stackFrameDump.getVariables()))
-        .withFields(asFieldsDto(stackFrameDump.getFields()));
+        .withVariables(variablesDto)
+        .withFields(fieldsDto)
+        .withLocation(asDto(stackFrameDump.getLocation()));
   }
 
   public static DebuggerEventDto asDto(DebuggerEvent debuggerEvent) {
@@ -155,6 +181,19 @@ public final class DtoConverter {
         throw new IllegalArgumentException(
             "Illegal event type " + debuggerEvent.getType().toString());
     }
+  }
+
+  public static ThreadStateDto asDto(ThreadState threadState) {
+    List<StackFrameDumpDto> threads =
+        threadState.getFrames().stream().map(DtoConverter::asDto).collect(toList());
+
+    return newDto(ThreadStateDto.class)
+        .withId(threadState.getId())
+        .withName(threadState.getName())
+        .withGroupName(threadState.getGroupName())
+        .withSuspended(threadState.isSuspended())
+        .withStatus(threadState.getStatus())
+        .withFrames(threads);
   }
 
   private DtoConverter() {}

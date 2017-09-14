@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.api.debug.shared.dto;
 
-import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Field;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -47,17 +46,11 @@ public interface FieldDto extends Field {
 
   FieldDto withName(String name);
 
-  boolean isExistInformation();
+  SimpleValueDto getValue();
 
-  void setExistInformation(boolean existInformation);
+  void setValue(SimpleValueDto value);
 
-  FieldDto withExistInformation(boolean existInformation);
-
-  String getValue();
-
-  void setValue(String value);
-
-  FieldDto withValue(String value);
+  FieldDto withValue(SimpleValueDto value);
 
   String getType();
 
@@ -76,10 +69,4 @@ public interface FieldDto extends Field {
   void setPrimitive(boolean primitive);
 
   FieldDto withPrimitive(boolean primitive);
-
-  List<VariableDto> getVariables();
-
-  void setVariables(List<VariableDto> variables);
-
-  FieldDto withVariables(List<VariableDto> variables);
 }

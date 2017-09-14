@@ -15,7 +15,7 @@
       &:last-child
         margin-bottom 0
 
-    .add-project
+    .add-import-project-toggle-button
 
       .md-button
         border-color $primary-color
@@ -36,7 +36,7 @@
       .toggle-single-button-multiline
         width 90px
 
-    .project-metadata .md-button
+    .edit-project-toggle-button .md-button
       height 50px
 
     button
@@ -76,42 +76,5 @@
     & > div.arrow
       top: 24px
 
-  md-divider
-    border-top-color $box-border-color !important
-    margin 0
-    margin-top 21px
-
   .toggle-single-button-title
     font-size 13px
-
-  .project-source-selector-popover-content
-
-    .project-source-selector-popover-toggle-buttons, .project-source-selector-popover-sources
-      margin 1px 35px 17px 35px
-
-    .project-source-selector-popover-toggle-buttons
-      .che-toggle-button .che-toggle-title
-        font-size 12px
-
-    .project-source-selector-button
-
-      che-button-primary button.md-button.che-button.md-accent,
-      che-button-cancel-flat button.md-button.che-button.md-accent,
-      che-button-danger button.md-button.md-danger-theme.md-accent
-        padding-top 2px
-        margin 6px !important
-
-      che-button-cancel-flat button.md-button.che-button.md-accent,
-      che-button-danger button.md-button.md-danger-theme.md-accent
-        background-color $che-white-color !important
-        border none !important
-        box-shadow none !important
-
-        &[disabled] span
-          color $disabled-color !important
-
-      che-button-cancel-flat button.md-button.che-button.md-accent span
-        color $grey-input-label-color !important
-
-      che-button-danger button.md-button.md-danger-theme.md-accent span
-        color $error-color !important

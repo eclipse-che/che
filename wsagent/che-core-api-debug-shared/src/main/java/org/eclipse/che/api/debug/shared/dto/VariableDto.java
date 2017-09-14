@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.api.debug.shared.dto;
 
-import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -23,17 +22,11 @@ public interface VariableDto extends Variable {
 
   VariableDto withName(String name);
 
-  boolean isExistInformation();
+  SimpleValueDto getValue();
 
-  void setExistInformation(boolean existInformation);
+  void setValue(SimpleValueDto value);
 
-  VariableDto withExistInformation(boolean existInformation);
-
-  String getValue();
-
-  void setValue(String value);
-
-  VariableDto withValue(String value);
+  VariableDto withValue(SimpleValueDto value);
 
   String getType();
 
@@ -52,10 +45,4 @@ public interface VariableDto extends Variable {
   void setPrimitive(boolean primitive);
 
   VariableDto withPrimitive(boolean primitive);
-
-  List<VariableDto> getVariables();
-
-  void setVariables(List<VariableDto> variables);
-
-  VariableDto withVariables(List<VariableDto> variables);
 }
