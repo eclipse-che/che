@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import static org.eclipse.che.api.workspace.server.OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE;
-
 import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -19,8 +17,6 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Named;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriBuilderException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -45,7 +41,7 @@ public class DockerRuntimeContext extends RuntimeContext {
 
   private final DockerEnvironment dockerEnvironment;
   private final List<String> orderedContainers;
-  private final String websocketEndpointBase;
+  private final String websocketOutputEndpoint;
   private final DockerRuntimeFactory runtimeFactory;
   private final DockerContainers containers;
   private final RuntimeConsistencyChecker consistencyChecker;
@@ -62,13 +58,13 @@ public class DockerRuntimeContext extends RuntimeContext {
       DockerContainers containers,
       DockerSharedPool sharedPool,
       RuntimeConsistencyChecker consistencyChecker,
-      @Named("che.websocket.endpoint.base") String websocketEndpointBase)
+      @Named("che.websocket.endpoint") String cheWebsocketEndpoint)
       throws InfrastructureException, ValidationException {
 
     super(environment, identity, infrastructure);
     this.dockerEnvironment = dockerEnv;
     this.orderedContainers = ImmutableList.copyOf(containersOrder);
-    this.websocketEndpointBase = websocketEndpointBase;
+    this.websocketOutputEndpoint = cheWebsocketEndpoint;
     this.runtimeFactory = runtimeFactory;
     this.containers = containers;
     this.sharedPool = sharedPool;
@@ -88,8 +84,8 @@ public class DockerRuntimeContext extends RuntimeContext {
   @Override
   public URI getOutputChannel() throws InfrastructureException {
     try {
-      return UriBuilder.fromUri(websocketEndpointBase).path(OUTPUT_WEBSOCKET_ENDPOINT_BASE).build();
-    } catch (UriBuilderException | IllegalArgumentException ex) {
+      return URI.create(websocketOutputEndpoint);
+    } catch (IllegalArgumentException ex) {
       throw new InternalInfrastructureException(
           "Failed to get the output channel because: " + ex.getLocalizedMessage());
     }

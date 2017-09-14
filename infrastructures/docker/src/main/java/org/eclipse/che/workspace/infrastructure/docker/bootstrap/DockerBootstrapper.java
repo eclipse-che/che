@@ -59,7 +59,7 @@ public class DockerBootstrapper extends AbstractBootstrapper {
       @Assisted DockerMachine dockerMachine,
       @Assisted List<InstallerImpl> installers,
       EventService eventService,
-      @Named("che.workspace.che_server_websocket_endpoint_base") String websocketBaseEndpoint,
+      @Named("che.infra.docker.master_websocket_endpoint") String cheWebsocketEndpoint,
       @Named("che.infra.docker.bootstrapper.timeout_min") int bootstrappingTimeoutMinutes,
       @Named("che.infra.docker.bootstrapper.installer_timeout_sec") int installerTimeoutSeconds,
       @Named("che.infra.docker.bootstrapper.server_check_period_sec")
@@ -68,7 +68,8 @@ public class DockerBootstrapper extends AbstractBootstrapper {
         machineName,
         runtimeIdentity,
         bootstrappingTimeoutMinutes,
-        websocketBaseEndpoint,
+        cheWebsocketEndpoint,
+        cheWebsocketEndpoint,
         eventService);
     this.machineName = machineName;
     this.runtimeIdentity = runtimeIdentity;
