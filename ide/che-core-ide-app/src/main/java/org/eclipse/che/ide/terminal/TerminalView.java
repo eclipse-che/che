@@ -23,6 +23,13 @@ import org.eclipse.che.ide.api.mvp.View;
 interface TerminalView extends View<TerminalView.ActionDelegate> {
 
   interface ActionDelegate {
+
+    /**
+     * Set terminal size
+     *
+     * @param x amount of terminal columns
+     * @param y amount of terminal rows
+     */
     void setTerminalSize(int x, int y);
   }
 

@@ -51,10 +51,11 @@ public class GitCompare {
     String ID_PREFIX_BRANCH = "gwt-debug-git-compare-branch-";
     String BRANCH_COMPARE_BUTTON = "git-compare-branch-compare";
     String COMPARE_BRANCH_CLOSE_BTN = "git-compare-branch-close";
-    String MAIN_FORM_COMPARE = "//button[@id='git-compare-close-btn']/preceding::div[1]";
-    String LEFT_COMPARE_EDITOR = "compareParentDiv_left_editor_id";
-    String LEFT_COMPARE_STATUS = "//div[@id='compareParentDiv_left_status_id' and text()='%s']";
-    String RIGHT_COMPARE_EDITOR = "compareParentDiv_right_editor_id";
+    String MAIN_FORM_COMPARE = "//button[@id='git-compare-close-btn']/ancestor::div[2]";
+    String LEFT_COMPARE_EDITOR = "gwt-debug-compareParentDiv_left_editor_id";
+    String LEFT_COMPARE_STATUS =
+        "//div[@id='gwt-debug-compareParentDiv_left_status_id' and text()='%s']";
+    String RIGHT_COMPARE_EDITOR = "gwt-debug-compareParentDiv_right_editor_id";
     String COMPARE_CLOSE_BUTTON = "git-compare-close-btn";
     String COMPARE_REVISION_FORM = "gwt-debug-git-compare-revision-window";
     String REVISION_ITEM =
@@ -103,14 +104,6 @@ public class GitCompare {
   public void waitGitCompareFormIsOpen() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(mainFormCompare));
-  }
-
-  /** switch to the frame 'git compare' form */
-  public void toSwitchFrameGitCompareForm() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.frameToBeAvailableAndSwitchToIt(
-                By.xpath("//iframe[contains(@src, 'app//Compare.html')]")));
   }
 
   /** wait the main form 'Git Compare' is closed */

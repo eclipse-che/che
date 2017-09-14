@@ -13,8 +13,10 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.impl.MutableVariableImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.ui.tree.NodeDataAdapter;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
@@ -57,7 +59,11 @@ public class VariableNodeDataAdapter implements NodeDataAdapter<MutableVariable>
   @Override
   @NotNull
   public List<MutableVariable> getChildren(@NotNull MutableVariable data) {
-    return data.getVariables();
+    return data.getValue()
+        .getVariables()
+        .stream()
+        .map(MutableVariableImpl::new)
+        .collect(Collectors.toList());
   }
 
   /** {@inheritDoc} */
@@ -71,7 +77,7 @@ public class VariableNodeDataAdapter implements NodeDataAdapter<MutableVariable>
   @Override
   @NotNull
   public String getNodeName(@NotNull MutableVariable data) {
-    return data.getName() + ": " + data.getValue();
+    return data.getName() + ": " + data.getValue().getString();
   }
 
   /** {@inheritDoc} */
@@ -124,7 +130,13 @@ public class VariableNodeDataAdapter implements NodeDataAdapter<MutableVariable>
     for (int i = 0; i < relativeNodePath.size(); i++) {
       String path = relativeNodePath.get(i);
       if (localRoot != null) {
-        List<MutableVariable> variables = new ArrayList<>(localRoot.getVariables());
+        List<MutableVariable> variables =
+            localRoot
+                .getValue()
+                .getVariables()
+                .stream()
+                .map(MutableVariableImpl::new)
+                .collect(Collectors.toList());
         localRoot = null;
         for (int j = 0; j < variables.size(); j++) {
           MutableVariable variable = variables.get(j);

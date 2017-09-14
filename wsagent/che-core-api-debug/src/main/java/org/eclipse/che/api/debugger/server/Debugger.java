@@ -10,12 +10,14 @@
  */
 package org.eclipse.che.api.debugger.server;
 
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
@@ -106,29 +108,78 @@ public interface Debugger {
   /**
    * Gets the current value of the given variable.
    *
+   * @deprecated
+   * @see #getValue(VariablePath, long, int)
    * @param variablePath the path to the variable
    * @return {@link SimpleValue}
    * @throws DebuggerException if any error occur
    */
+  @Deprecated
   SimpleValue getValue(VariablePath variablePath) throws DebuggerException;
+
+  /**
+   * Gets the value of the given variable.
+   *
+   * @param variablePath the path to the variable
+   * @param threadId the unique thread id
+   * @param frameIndex the frame index inside thread
+   * @return {@link SimpleValue}
+   * @throws DebuggerException if any error occur
+   */
+  default SimpleValue getValue(VariablePath variablePath, long threadId, int frameIndex)
+      throws DebuggerException {
+    throw new DebuggerException("Unsupported operation for current debugger implementation.");
+  }
+  /**
+   * Sets the new value {@link Variable#getValue()} of the variable {@link
+   * Variable#getVariablePath()}.
+   *
+   * @deprecated
+   * @see #setValue(Variable, long, int)
+   * @param variable the variable to update
+   * @throws DebuggerException if any error occur
+   */
+  @Deprecated
+  void setValue(Variable variable) throws DebuggerException;
 
   /**
    * Sets the new value {@link Variable#getValue()} of the variable {@link
    * Variable#getVariablePath()}.
    *
    * @param variable the variable to update
+   * @param threadId the unique thread id
+   * @param frameIndex the frame index inside thread
    * @throws DebuggerException if any error occur
    */
-  void setValue(Variable variable) throws DebuggerException;
+  default void setValue(Variable variable, long threadId, int frameIndex) throws DebuggerException {
+    throw new DebuggerException("Unsupported operation for current debugger implementation.");
+  }
+
+  /**
+   * Evaluates the given expression.
+   *
+   * @deprecated
+   * @see #evaluate(String, long, int)
+   * @param expression the expression to evaluate
+   * @return the result
+   * @throws DebuggerException if any error occur
+   */
+  @Deprecated
+  String evaluate(String expression) throws DebuggerException;
 
   /**
    * Evaluates the given expression.
    *
    * @param expression the expression to evaluate
+   * @param threadId the unique thread id
+   * @param frameIndex the frame index inside thread
    * @return the result
    * @throws DebuggerException if any error occur
    */
-  String evaluate(String expression) throws DebuggerException;
+  default String evaluate(String expression, long threadId, int frameIndex)
+      throws DebuggerException {
+    throw new DebuggerException("Unsupported operation for current debugger implementation.");
+  }
 
   /**
    * Performs step over action. When process stops then {@link SuspendEvent} must be fired.
@@ -166,10 +217,32 @@ public interface Debugger {
   /**
    * Dump values of local variables, fields and method arguments of the current frame.
    *
+   * @deprecated Use {@link #getStackFrameDump(long, int)}
    * @return {@link StackFrameDump}
    * @throws DebuggerException if any error occur
    */
+  @Deprecated
   StackFrameDump dumpStackFrame() throws DebuggerException;
+
+  /**
+   * Dump values of local variables, fields and method arguments of the current frame.
+   *
+   * @return {@link StackFrameDump}
+   * @throws DebuggerException if any error occur
+   */
+  default StackFrameDump getStackFrameDump(long threadId, int frameIndex) throws DebuggerException {
+    throw new DebuggerException("Unsupported operation for current debugger implementation.");
+  }
+
+  /**
+   * Gets a thread dump.
+   *
+   * @return snapshot of the state of all threads
+   * @throws DebuggerException if any error occur
+   */
+  default List<ThreadState> getThreadDump() throws DebuggerException {
+    return Collections.emptyList();
+  }
 
   /** Is used to send back any events to client. */
   interface DebuggerCallback {

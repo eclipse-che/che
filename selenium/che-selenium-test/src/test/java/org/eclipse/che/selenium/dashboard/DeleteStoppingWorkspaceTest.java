@@ -38,7 +38,7 @@ public class DeleteStoppingWorkspaceTest {
     dashboardWorkspace.waitToolbarTitleName("Workspaces");
     dashboardWorkspace.selectWorkspaceItemName(workspaceName);
     dashboardWorkspace.waitToolbarTitleName(workspaceName);
-    dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.SETTINGS);
+    dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.OVERVIEW);
     dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.RUNNING);
     dashboardWorkspace.clickOnStopWorkspace();
     dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.STOPPED);

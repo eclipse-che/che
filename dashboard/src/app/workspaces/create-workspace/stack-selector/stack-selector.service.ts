@@ -18,7 +18,7 @@ import {Observable} from '../../../../components/utils/observable';
  *
  * @author Oleksii Kurinnyi
  */
-export class StackSelectorSvc extends Observable {
+export class StackSelectorSvc extends Observable<any> {
   /**
    * Log service.
    */
@@ -70,6 +70,15 @@ export class StackSelectorSvc extends Observable {
       const stacks = this.getStacks();
       return this.$q.when(stacks);
     });
+  }
+
+  /**
+   * Sets stackId.
+   *
+   * @param {string} stackId
+   */
+  setStackId(stackId: string): void {
+    this.onStackSelected(stackId);
   }
 
   /**

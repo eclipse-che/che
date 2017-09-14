@@ -194,8 +194,10 @@ public class RequestHandlerManager {
         break;
       case NONE_TO_NONE:
         noneToNoneHandlers.remove(method);
+        break;
       case ONE_TO_PROMISE_ONE:
         oneToPromiseOneHandlers.remove(method);
+        break;
     }
 
     return true;

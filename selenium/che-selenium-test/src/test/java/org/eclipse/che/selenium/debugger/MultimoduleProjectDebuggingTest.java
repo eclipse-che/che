@@ -117,27 +117,36 @@ public class MultimoduleProjectDebuggingTest {
   public void shouldGoIntoConstructor() {
     // when
     projectExplorer.openItemByPath(PATH_TO_APP_CLASS);
-    editor.setBreakPointAndWaitInactiveState(19);
+    editor.setInactiveBreakpoint(19);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         getXpathForDebugConfigurationMenuItem());
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitBreakPointWithActiveState(19);
+    editor.waitAcitveBreakpoint(19);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
 
     // then
-    editor.waitTabFileWithSavedStatus("BookImpl");
-    debugPanel.waitDebugHighlightedText("this.title = title;");
+    try {
+      editor.waitTabFileWithSavedStatus("ClassLoader");
+      debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
+      debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
+      debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
+    } catch (Exception e) {
+    }
 
-    debugPanel.waitTextInVariablesPanel("title: \"java\"\n" + "author: \"oracle\"");
+    editor.waitTabFileWithSavedStatus("BookImpl");
+    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OVER);
+    debugPanel.waitDebugHighlightedText("this.title = title;");
+    debugPanel.waitTextInVariablesPanel("title=\"java\"");
+    debugPanel.waitTextInVariablesPanel("author=\"oracle\"");
   }
 
   @Test
   public void shouldStopInsideConstructor() {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_IMPL_CLASS);
-    editor.setBreakPointAndWaitInactiveState(18);
+    editor.setInactiveBreakpoint(18);
 
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
@@ -145,15 +154,16 @@ public class MultimoduleProjectDebuggingTest {
         getXpathForDebugConfigurationMenuItem());
     // then
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitBreakPointWithActiveState(18);
-    debugPanel.waitTextInVariablesPanel("title: \"java\"\n" + "author: \"oracle\"");
+    editor.waitAcitveBreakpoint(18);
+    debugPanel.waitTextInVariablesPanel("title=\"java\"");
+    debugPanel.waitTextInVariablesPanel("author=\"oracle\"");
   }
 
   @Test
   public void shouldDebugInstanceMethod() {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_IMPL_CLASS);
-    editor.setBreakPointAndWaitInactiveState(23);
+    editor.setInactiveBreakpoint(23);
 
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
@@ -161,8 +171,9 @@ public class MultimoduleProjectDebuggingTest {
         getXpathForDebugConfigurationMenuItem());
     // then
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitBreakPointWithActiveState(23);
-    debugPanel.waitTextInVariablesPanel("author: \"google\"\n" + "title: \"go\"");
+    editor.waitAcitveBreakpoint(23);
+    debugPanel.waitTextInVariablesPanel("author=\"google\"");
+    debugPanel.waitTextInVariablesPanel("title=\"go\"");
   }
 
   @Test
@@ -170,7 +181,7 @@ public class MultimoduleProjectDebuggingTest {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_IMPL_CLASS);
     editor.setCursorToLine(41);
-    editor.setBreakPointAndWaitInactiveState(41);
+    editor.setInactiveBreakpoint(41);
 
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
@@ -178,23 +189,24 @@ public class MultimoduleProjectDebuggingTest {
         getXpathForDebugConfigurationMenuItem());
     // then
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitBreakPointWithActiveState(41);
-    debugPanel.waitTextInVariablesPanel("author: \"google\"\n" + "title: \"go\"");
+    editor.waitAcitveBreakpoint(41);
+    debugPanel.waitTextInVariablesPanel("author=\"google\"");
+    debugPanel.waitTextInVariablesPanel("title=\"go\"");
   }
 
   @Test
   public void shouldDebugDefaultMethod() {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_INTERFACE);
-    editor.setBreakPointAndWaitInactiveState(30);
+    editor.setInactiveBreakpoint(30);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         getXpathForDebugConfigurationMenuItem());
     // then
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitBreakPointWithActiveState(30);
-    debugPanel.waitTextInVariablesPanel("o: instance of multimodule.model.BookImpl");
+    editor.waitAcitveBreakpoint(30);
+    debugPanel.waitTextInVariablesPanel("o=instance of multimodule.model.BookImpl");
   }
 
   @Test
@@ -202,15 +214,15 @@ public class MultimoduleProjectDebuggingTest {
     // when
     projectExplorer.openItemByPath(PATH_TO_BOOK_INTERFACE);
     editor.setCursorToLine(43);
-    editor.setBreakPointAndWaitInactiveState(43);
+    editor.setInactiveBreakpoint(43);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         getXpathForDebugConfigurationMenuItem());
     // then
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitBreakPointWithActiveState(43);
-    debugPanel.waitTextInVariablesPanel("book: instance of multimodule.model.BookImpl");
+    editor.waitAcitveBreakpoint(43);
+    debugPanel.waitTextInVariablesPanel("book=instance of multimodule.model.BookImpl");
   }
 
   private String getXpathForDebugConfigurationMenuItem() {

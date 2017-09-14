@@ -23,8 +23,10 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
+import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
 import org.eclipse.che.plugin.debugger.ide.debug.expression.EvaluateExpressionPresenter;
 import org.eclipse.che.plugin.debugger.ide.debug.expression.EvaluateExpressionView;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -40,16 +42,25 @@ import org.mockito.Mock;
 public class EvaluateExpressionTest extends BaseTest {
   private static final String EXPRESSION = "expression";
   private static final String EMPTY_EXPRESSION = "";
-  private static final String EVALUATION_RESULT = "result";
   private static final String FAIL_REASON = "reason";
+  private static final long THREAD_ID = 1;
+  private static final int FRAME_INDEX = 0;
   @Mock private EvaluateExpressionView view;
   @Mock private DebuggerManager debuggerManager;
   @Mock private Debugger debugger;
   @Mock private Promise<String> promise;
   @Mock private PromiseError promiseError;
+  @Mock private DebuggerPresenter debuggerPresenter;
 
   @Captor private ArgumentCaptor<Operation<PromiseError>> errorCaptor;
   @InjectMocks private EvaluateExpressionPresenter presenter;
+
+  @Override
+  @Before
+  public void setUp() {
+    when(debuggerPresenter.getSelectedThreadId()).thenReturn(THREAD_ID);
+    when(debuggerPresenter.getSelectedFrameIndex()).thenReturn(FRAME_INDEX);
+  }
 
   @Test
   public void shouldShowDialog() throws Exception {
@@ -95,7 +106,7 @@ public class EvaluateExpressionTest extends BaseTest {
 
   @Test
   public void testEvaluateExpressionRequestIsSuccessful() throws Exception {
-    when(debugger.evaluate(anyString())).thenReturn(promise);
+    when(debugger.evaluate(anyString(), eq(THREAD_ID), eq(FRAME_INDEX))).thenReturn(promise);
     when(view.getExpression()).thenReturn(EXPRESSION);
     when(promise.then(any(Operation.class))).thenReturn(promise);
 
@@ -105,13 +116,13 @@ public class EvaluateExpressionTest extends BaseTest {
     presenter.onEvaluateClicked();
 
     verify(view, atLeastOnce()).setEnableEvaluateButton(eq(DISABLE_BUTTON));
-    verify(debugger).evaluate(eq(EXPRESSION));
+    verify(debugger).evaluate(EXPRESSION, THREAD_ID, FRAME_INDEX);
   }
 
   @Test
   public void testEvaluateExpressionRequestIsFailed() throws Exception {
     when(view.getExpression()).thenReturn(EXPRESSION);
-    when(debugger.evaluate(view.getExpression())).thenReturn(promise);
+    when(debugger.evaluate(view.getExpression(), THREAD_ID, FRAME_INDEX)).thenReturn(promise);
     when(promise.then((Operation) anyObject())).thenReturn(promise);
     when(promise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(promise);
     when(debuggerManager.getActiveDebugger()).thenReturn(debugger);
@@ -121,7 +132,7 @@ public class EvaluateExpressionTest extends BaseTest {
     presenter.onEvaluateClicked();
 
     verify(view, atLeastOnce()).setEnableEvaluateButton(eq(DISABLE_BUTTON));
-    verify(debugger).evaluate(eq(EXPRESSION));
+    verify(debugger).evaluate(EXPRESSION, THREAD_ID, FRAME_INDEX);
     verify(promise).catchError(errorCaptor.capture());
 
     errorCaptor.getValue().apply(promiseError);

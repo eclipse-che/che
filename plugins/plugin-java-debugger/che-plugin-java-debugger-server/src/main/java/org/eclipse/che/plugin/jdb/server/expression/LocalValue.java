@@ -11,21 +11,20 @@
 package org.eclipse.che.plugin.jdb.server.expression;
 
 import com.sun.jdi.ClassNotLoadedException;
-import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.InvalidStackFrameException;
 import com.sun.jdi.InvalidTypeException;
 import com.sun.jdi.LocalVariable;
-import com.sun.jdi.ThreadReference;
+import com.sun.jdi.StackFrame;
 import com.sun.jdi.Value;
 
 /** @author andrew00x */
 public class LocalValue implements ExpressionValue {
-  private final ThreadReference thread;
+  private final StackFrame jdiStackFrame;
   private final LocalVariable variable;
   private Value value;
 
-  public LocalValue(ThreadReference thread, LocalVariable variable) {
-    this.thread = thread;
+  public LocalValue(StackFrame jdiStackFrame, LocalVariable variable) {
+    this.jdiStackFrame = jdiStackFrame;
     this.variable = variable;
   }
 
@@ -33,10 +32,8 @@ public class LocalValue implements ExpressionValue {
   public Value getValue() {
     if (value == null) {
       try {
-        value = thread.frame(0).getValue(variable);
-      } catch (IncompatibleThreadStateException
-          | IllegalArgumentException
-          | InvalidStackFrameException e) {
+        value = jdiStackFrame.getValue(variable);
+      } catch (IllegalArgumentException | InvalidStackFrameException e) {
         throw new ExpressionException(e.getMessage(), e);
       }
     }
@@ -46,8 +43,8 @@ public class LocalValue implements ExpressionValue {
   @Override
   public void setValue(Value value) {
     try {
-      thread.frame(0).setValue(variable, value);
-    } catch (IncompatibleThreadStateException | InvalidTypeException | ClassNotLoadedException e) {
+      jdiStackFrame.setValue(variable, value);
+    } catch (InvalidTypeException | ClassNotLoadedException e) {
       throw new ExpressionException(e.getMessage(), e);
     }
     this.value = value;

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.git.impl;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
@@ -24,7 +25,6 @@ import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.RmParams;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -56,8 +56,8 @@ public class RemoveTest {
     connection.rm(RmParams.create(singletonList("README.txt")).withCached(false));
     //then
     assertFalse(new File(connection.getWorkingDir(), "README.txt").exists());
-    assertEquals(connection.status(StatusFormat.SHORT).getRemoved().get(0), "README.txt");
-    assertTrue(connection.status(StatusFormat.SHORT).getUntracked().isEmpty());
+    assertEquals(connection.status(emptyList()).getRemoved().get(0), "README.txt");
+    assertTrue(connection.status(emptyList()).getUntracked().isEmpty());
   }
 
   @Test(
@@ -72,7 +72,7 @@ public class RemoveTest {
     connection.rm(RmParams.create(singletonList("README.txt")).withCached(true));
     //then
     assertTrue(new File(connection.getWorkingDir(), "README.txt").exists());
-    assertEquals(connection.status(StatusFormat.SHORT).getRemoved().get(0), "README.txt");
-    assertEquals(connection.status(StatusFormat.SHORT).getUntracked().get(0), "README.txt");
+    assertEquals(connection.status(emptyList()).getRemoved().get(0), "README.txt");
+    assertEquals(connection.status(emptyList()).getUntracked().get(0), "README.txt");
   }
 }
