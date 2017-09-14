@@ -77,7 +77,7 @@ initVariables() {
     [[ -z ${CALLER+x} ]] && { CALLER=$(basename $0); }
     [[ -z ${CUR_DIR+x} ]] && { CUR_DIR=$(cd "$(dirname "$0")"; pwd); }
 
-    [[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX=":8080/api/"; }
+    [[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX="/api/"; }
     [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/che-integration-tests/"; }
 
     MODE="grid"
@@ -95,6 +95,7 @@ initVariables() {
 
     PRODUCT_PROTOCOL="http"
     PRODUCT_HOST=$(detectDockerInterfaceIp)
+    PRODUCT_PORT=8080
 
     unset TEST_INCLUSION
     unset DEBUG_OPTIONS
@@ -119,6 +120,7 @@ checkParameters() {
         elif [[ "$var" == "--https" ]]; then :
         elif [[ "$var" == "--che" ]]; then :
         elif [[ "$var" =~ --host=.* ]]; then :
+        elif [[ "$var" =~ --port=.* ]]; then :
         elif [[ "$var" =~ --threads=[0-9]+$ ]]; then :
         elif [[ "$var" == "--rerun" ]]; then :
         elif [[ "$var" == "--debug" ]]; then :
@@ -180,6 +182,9 @@ applyCustomOptions() {
 
         elif [[ "$var" =~ --host=.* ]]; then
             PRODUCT_HOST=$(echo "$var" | sed -e "s/--host=//g")
+
+        elif [[ "$var" =~ --port=.* ]]; then
+            PRODUCT_PORT=$(echo "$var" | sed -e "s/--port=//g")
 
         elif [[ "$var" =~ --threads=.* ]]; then
             THREADS=$(echo "$var" | sed -e "s/--threads=//g")
@@ -324,7 +329,7 @@ checkDockerComposeRequirements() {
 }
 
 checkIfProductIsRun() {
-    local url=${PRODUCT_PROTOCOL}"://"${PRODUCT_HOST}${API_SUFFIX};
+    local url=${PRODUCT_PROTOCOL}"://"${PRODUCT_HOST}:${PRODUCT_PORT}${API_SUFFIX};
 
     curl -s -X OPTIONS ${url} > /dev/null
     if [[ $? != 0 ]]; then
@@ -378,6 +383,7 @@ Options:
     --http                              Use 'http' protocol to connect to product
     --https                             Use 'https' protocol to connect to product
     --host=<PRODUCT_HOST>               Set host where product is deployed
+    --port=<PRODUCT_PORT>               Set port of the product
 
 Modes (defines environment to run tests):
     local                               All tests will be run in a Web browser on the developer machine.
@@ -450,6 +456,7 @@ printRunOptions() {
     echo "[TEST] ==================================================="
     echo "[TEST] Product Protocol : "${PRODUCT_PROTOCOL}
     echo "[TEST] Product Host     : "${PRODUCT_HOST}
+    echo "[TEST] Product Port     : "${PRODUCT_PORT}
     echo "[TEST] Tests            : "${TESTS_SCOPE}
     echo "[TEST] Threads          : "${THREADS}
     echo "[TEST] Web browser      : "${BROWSER}
@@ -692,6 +699,7 @@ runTests() {
     mvn clean verify -Pselenium-test \
                 ${TESTS_SCOPE} \
                 -Dhost=${PRODUCT_HOST} \
+                -Dche.port=${PRODUCT_PORT} \
                 -Dprotocol=${PRODUCT_PROTOCOL} \
                 -Ddocker.interface.ip=$(detectDockerInterfaceIp) \
                 -Ddriver.port=${WEBDRIVER_PORT} \
