@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
 import static java.lang.String.format;
+import static java.util.Arrays.*;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.DEFAULT_RESTART_POLICY;
 import static org.mockito.Matchers.any;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import io.fabric8.kubernetes.api.model.Container;
@@ -32,6 +34,7 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
 import io.fabric8.kubernetes.client.dsl.RecreateFromServerGettable;
+import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -102,6 +105,20 @@ public class OpenShiftEnvironmentParserTest {
             format(
                 "Restart policy '%s' for pod '%s' is rewritten with %s",
                 ALWAYS_RESTART_POLICY, TEST_POD_NAME, DEFAULT_RESTART_POLICY)));
+  }
+
+  @Test
+  public void ignoreRoutesWhenRecipeContainsThem() throws Exception {
+    final List<HasMetadata> objects = asList(new Route(), new Route());
+    when(validatedObjects.getItems()).thenReturn(objects);
+
+    final OpenShiftEnvironment parsed = osEnvironmentParser.parse(internalEnvironment);
+
+    assertTrue(parsed.getRoutes().isEmpty());
+    verifyWarnings(
+        new WarningImpl(
+            OpenShiftEnvironmentParser.ROUTE_IGNORED_WARNING_CODE,
+            OpenShiftEnvironmentParser.ROUTES_IGNORED_WARNING_MESSAGE));
   }
 
   private void verifyWarnings(Warning... expectedWarnings) {

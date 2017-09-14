@@ -17,77 +17,83 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
 import java.util.Map;
 
-/** @author Sergii Leshchenko */
+/**
+ * Holds objects of OpenShift environment.
+ *
+ * @author Sergii Leshchenko
+ */
 public class OpenShiftEnvironment {
-  private Map<String, Pod> pods;
-  private Map<String, Service> services;
-  private Map<String, Route> routes;
-  private Map<String, PersistentVolumeClaim> persistentVolumeClaims;
 
-  public OpenShiftEnvironment() {}
+  private final Map<String, Pod> pods;
+  private final Map<String, Service> services;
+  private final Map<String, Route> routes;
+  private final Map<String, PersistentVolumeClaim> persistentVolumeClaims;
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  private OpenShiftEnvironment(
+      Map<String, Pod> pods,
+      Map<String, Service> services,
+      Map<String, Route> routes,
+      Map<String, PersistentVolumeClaim> persistentVolumeClaims) {
+    this.pods = pods;
+    this.services = services;
+    this.routes = routes;
+    this.persistentVolumeClaims = persistentVolumeClaims;
+  }
+
+  /** Returns pods that should be created when environment starts. */
   public Map<String, Pod> getPods() {
-    if (pods == null) {
-      pods = new HashMap<>();
-    }
     return pods;
   }
 
-  public void setPods(Map<String, Pod> pods) {
-    this.pods = pods;
-  }
-
-  public OpenShiftEnvironment withPods(Map<String, Pod> pods) {
-    this.pods = pods;
-    return this;
-  }
-
+  /** Returns services that should be created when environment starts. */
   public Map<String, Service> getServices() {
-    if (services == null) {
-      services = new HashMap<>();
-    }
     return services;
   }
 
-  public void setServices(Map<String, Service> services) {
-    this.services = services;
-  }
-
-  public OpenShiftEnvironment withServices(Map<String, Service> services) {
-    this.services = services;
-    return this;
-  }
-
+  /** Returns services that should be created when environment starts. */
   public Map<String, Route> getRoutes() {
-    if (routes == null) {
-      routes = new HashMap<>();
-    }
     return routes;
   }
 
-  public void setRoutes(Map<String, Route> routes) {
-    this.routes = routes;
-  }
-
-  public OpenShiftEnvironment withRoutes(Map<String, Route> routes) {
-    this.routes = routes;
-    return this;
-  }
-
+  /** Returns PVCs that should be created when environment starts. */
   public Map<String, PersistentVolumeClaim> getPersistentVolumeClaims() {
-    if (persistentVolumeClaims == null) {
-      persistentVolumeClaims = new HashMap<>();
-    }
     return persistentVolumeClaims;
   }
 
-  public void setPersistentVolumeClaims(Map<String, PersistentVolumeClaim> persistentVolumeClaims) {
-    this.persistentVolumeClaims = persistentVolumeClaims;
-  }
+  public static class Builder {
+    private final Map<String, Pod> pods = new HashMap<>();
+    private final Map<String, Service> services = new HashMap<>();
+    private final Map<String, Route> routes = new HashMap<>();
+    private final Map<String, PersistentVolumeClaim> persistentVolumeClaims = new HashMap<>();
 
-  public OpenShiftEnvironment withPersistentVolumeClaims(
-      Map<String, PersistentVolumeClaim> persistentVolumeClaims) {
-    this.persistentVolumeClaims = persistentVolumeClaims;
-    return this;
+    private Builder() {}
+
+    public Builder setPods(Map<String, Pod> pods) {
+      this.pods.putAll(pods);
+      return this;
+    }
+
+    public Builder setServices(Map<String, Service> services) {
+      this.services.putAll(services);
+      return this;
+    }
+
+    public Builder setRoutes(Map<String, Route> route) {
+      this.routes.putAll(route);
+      return this;
+    }
+
+    public Builder setPersistentVolumeClaims(Map<String, PersistentVolumeClaim> pvcs) {
+      this.persistentVolumeClaims.putAll(pvcs);
+      return this;
+    }
+
+    public OpenShiftEnvironment build() {
+      return new OpenShiftEnvironment(pods, services, routes, persistentVolumeClaims);
+    }
   }
 }
