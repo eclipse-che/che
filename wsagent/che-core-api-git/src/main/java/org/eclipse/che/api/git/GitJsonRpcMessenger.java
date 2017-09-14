@@ -11,6 +11,7 @@
 package org.eclipse.che.api.git;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,9 +25,13 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.git.shared.GitCheckoutEvent;
-import org.eclipse.che.api.git.shared.GitEvent;
-import org.eclipse.che.api.git.shared.IndexChangedEvent;
+import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
+import org.eclipse.che.api.git.shared.event.GitCommitEvent;
+import org.eclipse.che.api.git.shared.event.GitEvent;
+import org.eclipse.che.api.git.shared.event.GitResetEvent;
+import org.eclipse.che.api.git.shared.event.GitRepositoryDeletedEvent;
+import org.eclipse.che.api.git.shared.event.GitRepositoryInitializedEvent;
 
 @Singleton
 public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
@@ -57,8 +62,11 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
   public void onEvent(GitEvent event) {
     if (event instanceof GitCheckoutEvent) {
       handleCheckoutEvent((GitCheckoutEvent) event);
-    } else if (event instanceof IndexChangedEvent) {
-      handleIndexChangedEvent((IndexChangedEvent) event);
+    } else if (event instanceof GitCommitEvent
+        || event instanceof GitResetEvent
+        || event instanceof GitRepositoryInitializedEvent
+        || event instanceof GitRepositoryDeletedEvent) {
+      handleIndexChangedEvent(event);
     }
   }
 
@@ -78,15 +86,24 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
                     .sendAndSkipResult());
   }
 
-  private void handleIndexChangedEvent(IndexChangedEvent event) {
-    endpointIds.forEach(
-        id ->
-            transmitter
-                .newRequest()
-                .endpointId(id)
-                .methodName("event/git-index")
-                .paramsAsDto(event.getStatus())
-                .sendAndSkipResult());
+  private void handleIndexChangedEvent(GitEvent event) {
+    Status status = newDto(Status.class);
+    if (event instanceof GitCommitEvent) {
+      status = ((GitCommitEvent) event).getStatus();
+    } else if (event instanceof GitResetEvent) {
+      status = ((GitResetEvent) event).getStatus();
+    } else if (event instanceof GitRepositoryInitializedEvent) {
+      status = ((GitRepositoryInitializedEvent) event).getStatus();
+    }
+
+    for (String endpointId : endpointIds) {
+      transmitter
+          .newRequest()
+          .endpointId(endpointId)
+          .methodName("event/git-index")
+          .paramsAsDto(status)
+          .sendAndSkipResult();
+    }
   }
 
   @Inject

@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.git.shared;
+package org.eclipse.che.api.git.shared.event;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.dto.shared.DTO;

@@ -8,6 +8,6 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.git.shared;
+package org.eclipse.che.api.git.shared.event;
 
 public interface GitEvent {}

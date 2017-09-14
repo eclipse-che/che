@@ -97,6 +97,9 @@ import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.params.TagCreateParams;
 import org.eclipse.che.api.git.shared.*;
 import org.eclipse.che.api.git.shared.RebaseResponse.RebaseStatus;
+import org.eclipse.che.api.git.shared.event.GitCommitEvent;
+import org.eclipse.che.api.git.shared.event.GitRepositoryInitializedEvent;
+import org.eclipse.che.api.git.shared.event.GitResetEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
@@ -711,7 +714,7 @@ class JGitConnection implements GitConnection {
           gerritSupportConfigValue != null ? Boolean.valueOf(gerritSupportConfigValue) : false;
       commitCommand.setInsertChangeId(isGerritSupportConfigured);
       RevCommit result = commitCommand.call();
-      eventService.publish(newDto(IndexChangedEvent.class).withStatus(status(emptyList())));
+      eventService.publish(newDto(GitCommitEvent.class).withStatus(status(emptyList())));
       GitUser gitUser = newDto(GitUser.class).withName(committerName).withEmail(committerEmail);
 
       return newDto(Revision.class)
@@ -849,7 +852,7 @@ class JGitConnection implements GitConnection {
 
     try {
       repository.create(isBare);
-      eventService.publish(newDto(IndexChangedEvent.class).withStatus(status(emptyList())));
+      eventService.publish(newDto(GitRepositoryInitializedEvent.class).withStatus(status(emptyList())));
     } catch (IOException exception) {
       if (removeIfFailed) {
         deleteRepositoryFolder();
@@ -1661,7 +1664,7 @@ class JGitConnection implements GitConnection {
       }
 
       resetCommand.call();
-      eventService.publish(newDto(IndexChangedEvent.class).withStatus(status(emptyList())));
+      eventService.publish(newDto(GitResetEvent.class).withStatus(status(emptyList())));
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
     }

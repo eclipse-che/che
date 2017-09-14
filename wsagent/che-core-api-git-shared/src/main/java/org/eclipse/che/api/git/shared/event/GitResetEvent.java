@@ -8,21 +8,23 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.git.shared;
+package org.eclipse.che.api.git.shared.event;
 
+import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Event for indicating that Git operation that can cause Git Status changes is called.
+ * Event for indicating that Git reset operation is executed.
  *
  * @author Igor Vinokur.
  */
 @DTO
-public interface IndexChangedEvent extends GitEvent {
-  /** Returns actual Git status */
+public interface GitResetEvent extends GitEvent {
+
+  /** Returns Git status */
   Status getStatus();
 
   void setStatus(Status status);
 
-  IndexChangedEvent withStatus(Status status);
+  GitResetEvent withStatus(Status status);
 }
