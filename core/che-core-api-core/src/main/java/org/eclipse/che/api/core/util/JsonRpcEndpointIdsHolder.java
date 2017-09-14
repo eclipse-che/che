@@ -10,16 +10,17 @@
  */
 package org.eclipse.che.api.core.util;
 
-import static com.google.common.collect.Sets.newConcurrentHashSet;
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toSet;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+
+import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toSet;
 
 @Singleton
 public class JsonRpcEndpointIdsHolder {
@@ -39,6 +40,7 @@ public class JsonRpcEndpointIdsHolder {
             });
   }
 
+  @Inject
   private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
     configurator
         .newConfiguration()
