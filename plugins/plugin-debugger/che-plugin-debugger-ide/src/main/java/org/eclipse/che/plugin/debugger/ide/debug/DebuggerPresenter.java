@@ -10,31 +10,30 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
-import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointManagerObserver;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -42,6 +41,7 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -76,11 +76,12 @@ public class DebuggerPresenter extends BasePresenter
   private final DebuggerView view;
   private final DebuggerManager debuggerManager;
   private final WorkspaceAgent workspaceAgent;
+  private final DebuggerResourceHandlerFactory resourceHandlerManager;
 
-  private MutableVariable selectedVariable;
   private List<Variable> variables;
-  private DebuggerDescriptor debuggerDescriptor;
+  private List<? extends ThreadState> threadDump;
   private Location executionPoint;
+  private DebuggerDescriptor debuggerDescriptor;
 
   @Inject
   public DebuggerPresenter(
@@ -91,26 +92,27 @@ public class DebuggerPresenter extends BasePresenter
       final DebuggerResources debuggerResources,
       final @DebuggerToolbar ToolbarPresenter debuggerToolbar,
       final DebuggerManager debuggerManager,
-      final WorkspaceAgent workspaceAgent) {
+      final WorkspaceAgent workspaceAgent,
+      final DebuggerResourceHandlerFactory resourceHandlerManager) {
     this.view = view;
     this.debuggerResources = debuggerResources;
     this.debuggerToolbar = debuggerToolbar;
     this.debuggerManager = debuggerManager;
     this.workspaceAgent = workspaceAgent;
+    this.resourceHandlerManager = resourceHandlerManager;
     this.view.setDelegate(this);
     this.view.setTitle(TITLE);
     this.constant = constant;
     this.breakpointManager = breakpointManager;
-    this.variables = new ArrayList<>();
+
     this.notificationManager = notificationManager;
     this.addRule(ProjectPerspective.PROJECT_PERSPECTIVE_ID);
 
     this.debuggerManager.addObserver(this);
     this.breakpointManager.addObserver(this);
 
-    if (!breakpointManager.getBreakpointList().isEmpty()) {
-      updateBreakpoints();
-    }
+    resetView();
+    addDebuggerPanel();
   }
 
   @Override
@@ -135,134 +137,132 @@ public class DebuggerPresenter extends BasePresenter
 
   @Override
   public void go(AcceptsOneWidget container) {
-    view.setBreakpoints(breakpointManager.getBreakpointList());
-    view.setVariables(variables);
     container.setWidget(view);
     debuggerToolbar.go(view.getDebuggerToolbarPanel());
   }
 
   @Override
-  public void onExpandVariablesTree() {
-    List<? extends Variable> rootVariables = selectedVariable.getVariables();
-    if (rootVariables.isEmpty()) {
-      Debugger debugger = debuggerManager.getActiveDebugger();
-      if (debugger != null) {
-        Promise<SimpleValue> promise = debugger.getValue(selectedVariable);
-
-        promise
-            .then(
-                new Operation<SimpleValue>() {
-                  @Override
-                  public void apply(SimpleValue arg) throws OperationException {
-                    selectedVariable.setValue(arg.getValue());
-                    view.setVariablesIntoSelectedVariable(arg.getVariables());
-                    view.updateSelectedVariable();
-                  }
-                })
-            .catchError(
-                new Operation<PromiseError>() {
-                  @Override
-                  public void apply(PromiseError arg) throws OperationException {
-                    notificationManager.notify(
-                        constant.failedToGetVariableValueTitle(),
-                        arg.getMessage(),
-                        FAIL,
-                        FLOAT_MODE);
-                  }
-                });
-      }
-    }
-  }
-
-  @Override
-  public void onSelectedVariableElement(@NotNull MutableVariable variable) {
-    this.selectedVariable = variable;
-  }
-
-  public void showDebuggerPanel() {
-    partStack.setActivePart(this);
-  }
-
-  public void hideDebuggerPanel() {
-    partStack.hide();
-  }
-
-  public boolean isDebuggerPanelOpened() {
-    return partStack.getActivePart() == this;
-  }
-
-  public boolean isDebuggerPanelPresent() {
-    return partStack != null && partStack.containsPart(this);
-  }
-
-  private void resetStates() {
-    variables.clear();
-    view.setVariables(variables);
-    view.setVMName("");
-    view.setExecutionPoint(null);
-    selectedVariable = null;
-    executionPoint = null;
-  }
-
-  public void showAndUpdateView() {
-    if (debuggerDescriptor == null) {
-      view.setVMName("");
-    } else {
-      view.setVMName(debuggerDescriptor.getInfo());
-    }
-    if (executionPoint != null) {
-      view.setExecutionPoint(executionPoint);
-    }
-    view.setBreakpoints(breakpointManager.getBreakpointList());
-    updateStackFrameDump();
-
-    showView();
-  }
-
-  protected void updateBreakpoints() {
-    view.setBreakpoints(breakpointManager.getBreakpointList());
-
-    if (!isDebuggerPanelPresent()) {
-      showView();
-      showDebuggerPanel();
-    }
-  }
-
-  public void showView() {
-    if (partStack == null || !partStack.containsPart(this)) {
-      workspaceAgent.openPart(this, PartStackType.INFORMATION);
-    }
-  }
-
-  private void updateStackFrameDump() {
+  public void onExpandVariablesTree(MutableVariable variable) {
     Debugger debugger = debuggerManager.getActiveDebugger();
-    if (debugger != null && executionPoint != null) {
-      Promise<StackFrameDump> promise = debugger.dumpStackFrame();
+    if (debugger != null && debugger.isSuspended()) {
+      Promise<? extends SimpleValue> promise =
+          debugger.getValue(variable, view.getSelectedThreadId(), view.getSelectedFrameIndex());
+
       promise
           .then(
-              new Operation<StackFrameDump>() {
-                @Override
-                public void apply(StackFrameDump arg) throws OperationException {
-                  variables = new ArrayList<>();
-                  variables.addAll(arg.getFields());
-                  variables.addAll(arg.getVariables());
-
-                  view.setVariables(variables);
-                }
+              value -> {
+                view.setVariableValue(variable, value);
               })
           .catchError(
-              new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError arg) throws OperationException {
-                  Log.error(DebuggerPresenter.class, arg.getCause());
-                }
+              error -> {
+                Log.error(DebuggerPresenter.class, error.getCause());
               });
     }
   }
 
-  /** @return selected variable in variables tree or null if no selected variables */
+  @Override
+  public void onSelectedThread(long threadId) {
+    updateStackFrameDump(threadId);
+    onSelectedFrame(0);
+  }
+
+  @Override
+  public void onSelectedFrame(int frameIndex) {
+    long selectedThreadId = view.getSelectedThreadId();
+    updateVariables(selectedThreadId, frameIndex);
+
+    for (ThreadState ts : threadDump) {
+      if (ts.getId() == selectedThreadId) {
+        StackFrameDump stackFrameDump = ts.getFrames().get(frameIndex);
+        open(stackFrameDump.getLocation());
+      }
+    }
+  }
+
+  protected void open(Location location) {
+    Debugger debugger = debuggerManager.getActiveDebugger();
+    if (debugger != null) {
+      DebuggerResourceHandler handler =
+          resourceHandlerManager.getOrDefault(debugger.getDebuggerType());
+
+      handler.open(
+          location,
+          new AsyncCallback<VirtualFile>() {
+            @Override
+            public void onFailure(Throwable caught) {}
+
+            @Override
+            public void onSuccess(VirtualFile result) {}
+          });
+    }
+  }
+
+  public long getSelectedThreadId() {
+    return view.getSelectedThreadId();
+  }
+
+  public int getSelectedFrameIndex() {
+    return view.getSelectedFrameIndex();
+  }
+
+  protected void updateBreakpoints() {
+    view.setBreakpoints(breakpointManager.getBreakpointList());
+  }
+
+  protected void updateThreadDump() {
+    Debugger debugger = debuggerManager.getActiveDebugger();
+    if (debugger != null && debugger.isSuspended()) {
+      debugger
+          .getThreadDump()
+          .then(
+              threadDump -> {
+                DebuggerPresenter.this.threadDump = threadDump;
+                if (executionPoint != null) {
+                  view.setThreadDump(threadDump, executionPoint.getThreadId());
+                  updateStackFrameDump(executionPoint.getThreadId());
+                  updateVariables(executionPoint.getThreadId(), 0);
+                }
+              })
+          .catchError(
+              error -> {
+                Log.error(DebuggerPresenter.class, error.getCause());
+              });
+    }
+  }
+
+  protected void updateStackFrameDump(long threadId) {
+    for (ThreadState ts : threadDump) {
+      if (ts.getId() == threadId) {
+        view.setFrames(ts.getFrames());
+      }
+    }
+  }
+
+  protected void updateVariables(long threadId, int frameIndex) {
+    Debugger debugger = debuggerManager.getActiveDebugger();
+    if (debugger != null && debugger.isSuspended()) {
+      Promise<? extends StackFrameDump> promise = debugger.getStackFrameDump(threadId, frameIndex);
+      promise
+          .then(
+              stackFrameDump -> {
+                if (threadId == view.getSelectedThreadId()
+                    && frameIndex == view.getSelectedFrameIndex()) {
+
+                  variables = new LinkedList<>();
+                  variables.addAll(stackFrameDump.getFields());
+                  variables.addAll(stackFrameDump.getVariables());
+                  view.setVariables(variables);
+                }
+              })
+          .catchError(
+              error -> {
+                Log.error(DebuggerPresenter.class, error.getCause());
+              });
+    }
+  }
+
   public Variable getSelectedVariable() {
-    return selectedVariable;
+    return view.getSelectedDebuggerVariable();
   }
 
   public ToolbarPresenter getDebuggerToolbar() {
@@ -272,34 +272,29 @@ public class DebuggerPresenter extends BasePresenter
   @Override
   public void onDebuggerAttached(
       final DebuggerDescriptor debuggerDescriptor, Promise<Void> connect) {
+
     final String address = debuggerDescriptor.getAddress();
     final StatusNotification notification =
         notificationManager.notify(constant.debuggerConnectingTitle(address), PROGRESS, FLOAT_MODE);
 
     connect
         .then(
-            new Operation<Void>() {
-              @Override
-              public void apply(Void arg) throws OperationException {
-                DebuggerPresenter.this.debuggerDescriptor = debuggerDescriptor;
+            aVoid -> {
+              DebuggerPresenter.this.debuggerDescriptor = debuggerDescriptor;
 
-                notification.setTitle(constant.debuggerConnectedTitle());
-                notification.setContent(constant.debuggerConnectedDescription(address));
-                notification.setStatus(SUCCESS);
+              notification.setTitle(constant.debuggerConnectedTitle());
+              notification.setContent(constant.debuggerConnectedDescription(address));
+              notification.setStatus(SUCCESS);
 
-                showAndUpdateView();
-                showDebuggerPanel();
-              }
+              view.setVMName(debuggerDescriptor.getInfo());
+              showDebuggerPanel();
             })
         .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                notification.setTitle(
-                    constant.failedToConnectToRemoteDebuggerDescription(address, arg.getMessage()));
-                notification.setStatus(FAIL);
-                notification.setDisplayMode(FLOAT_MODE);
-              }
+            error -> {
+              notification.setTitle(
+                  constant.failedToConnectToRemoteDebuggerDescription(address, error.getMessage()));
+              notification.setStatus(FAIL);
+              notification.setDisplayMode(FLOAT_MODE);
             });
   }
 
@@ -307,14 +302,11 @@ public class DebuggerPresenter extends BasePresenter
   public void onDebuggerDisconnected() {
     String address = debuggerDescriptor != null ? debuggerDescriptor.getAddress() : "";
     String content = constant.debuggerDisconnectedDescription(address);
+
     notificationManager.notify(
         constant.debuggerDisconnectedTitle(), content, SUCCESS, NOT_EMERGE_MODE);
 
-    executionPoint = null;
-    debuggerDescriptor = null;
-
-    resetStates();
-    showAndUpdateView();
+    resetView();
   }
 
   @Override
@@ -337,35 +329,91 @@ public class DebuggerPresenter extends BasePresenter
 
   @Override
   public void onPreStepInto() {
-    resetStates();
+    clearExecutionPoint();
   }
 
   @Override
   public void onPreStepOut() {
-    resetStates();
+    clearExecutionPoint();
   }
 
   @Override
   public void onPreStepOver() {
-    resetStates();
+    clearExecutionPoint();
   }
 
   @Override
   public void onPreResume() {
-    resetStates();
+    clearExecutionPoint();
+  }
+
+  private void clearExecutionPoint() {
+    executionPoint = null;
+    variables = new ArrayList<>();
+    threadDump = new ArrayList<>();
+    view.setExecutionPoint(null);
+    view.setThreadDump(emptyList(), -1);
+    view.setFrames(emptyList());
+    view.setVariables(emptyList());
+  }
+
+  private void resetView() {
+    variables = new ArrayList<>();
+    threadDump = new ArrayList<>();
+    executionPoint = null;
+    debuggerDescriptor = null;
+    updateBreakpoints();
+    view.setVMName("");
+    view.setExecutionPoint(null);
+    view.setThreadDump(emptyList(), -1);
+    view.setFrames(emptyList());
+    view.setVariables(emptyList());
   }
 
   @Override
-  public void onBreakpointStopped(String filePath, String className, int lineNumber) {
-    executionPoint = new LocationImpl(className, lineNumber);
-    showAndUpdateView();
+  public void onBreakpointStopped(String filePath, Location location) {
+    executionPoint = location;
+    view.setExecutionPoint(executionPoint);
+    updateThreadDump();
   }
 
   @Override
-  public void onValueChanged(List<String> path, String newValue) {
-    updateStackFrameDump();
+  public void onValueChanged(Variable variable, long threadId, int frameIndex) {
+    if (view.getSelectedThreadId() == threadId && view.getSelectedFrameIndex() == frameIndex) {
+      Debugger debugger = debuggerManager.getActiveDebugger();
+      if (debugger != null && debugger.isSuspended()) {
+        Promise<? extends SimpleValue> promise = debugger.getValue(variable, threadId, frameIndex);
+        promise
+            .then(
+                value -> {
+                  view.setVariableValue(variable, value);
+                })
+            .catchError(
+                error -> {
+                  Log.error(DebuggerPresenter.class, error.getCause());
+                });
+      }
+    }
   }
 
   @Override
   public void onActiveDebuggerChanged(@Nullable Debugger activeDebugger) {}
+
+  public void addDebuggerPanel() {
+    if (partStack == null || !partStack.containsPart(this)) {
+      workspaceAgent.openPart(this, PartStackType.INFORMATION);
+    }
+  }
+
+  public void showDebuggerPanel() {
+    partStack.setActivePart(this);
+  }
+
+  public void hideDebuggerPanel() {
+    partStack.minimize();
+  }
+
+  public boolean isDebuggerPanelOpened() {
+    return partStack.getActivePart() == this;
+  }
 }

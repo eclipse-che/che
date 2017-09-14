@@ -195,7 +195,7 @@ public class CommitFilesByMultiSelectTest {
     // check changes in git compare form
     git.clickCompareBtnGitHistory();
     checkChangesIntoCompareForm(CHANGE_CONTENT);
-    closeGitCompareForm();
+    git.closeGitCompareForm();
     git.waitHistoryFormToOpen();
     git.closeGitHistoryForm();
     projectExplorer.selectItem(PROJECT_NAME);
@@ -209,7 +209,7 @@ public class CommitFilesByMultiSelectTest {
     git.selectFileInChangedFilesTreePanel("AppController.java");
     git.clickOnGroupCompareButton();
     checkChangesIntoCompareForm(CHANGE_CONTENT);
-    closeGitCompareForm();
+    git.closeGitCompareForm();
     git.closeGroupGitCompareForm();
     git.closeGitHistoryForm();
 
@@ -268,7 +268,7 @@ public class CommitFilesByMultiSelectTest {
     git.selectFileInChangedFilesTreePanel("file.css");
     git.clickOnGroupCompareButton();
     checkChangesIntoCompareForm(CHANGE_CONTENT);
-    closeGitCompareForm();
+    git.closeGitCompareForm();
     git.waitGroupGitCompareIsOpen();
     git.selectFileInChangedFilesTreePanel("file.js");
     git.clickOnGroupCompareButton();
@@ -277,13 +277,7 @@ public class CommitFilesByMultiSelectTest {
 
   private void checkChangesIntoCompareForm(String expText) {
     git.waitGitCompareFormIsOpen();
-    git.toSwitchFrameGitCompareForm();
     git.waitExpTextIntoCompareLeftEditor(expText);
     git.waitTextNotPresentIntoCompareRightEditor(expText);
-  }
-
-  private void closeGitCompareForm() {
-    ide.driver().switchTo().parentFrame();
-    git.closeGitCompareForm();
   }
 }

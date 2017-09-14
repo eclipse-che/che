@@ -17,14 +17,11 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class DeleteRunningWorkspaceTest {
-  private static final Logger LOG = LoggerFactory.getLogger(DeleteRunningWorkspaceTest.class);
 
   @Inject private Dashboard dashboard;
   @Inject private DashboardWorkspace dashboardWorkspace;
@@ -46,7 +43,7 @@ public class DeleteRunningWorkspaceTest {
     dashboard.selectWorkspacesItemOnDashboard();
     dashboardWorkspace.selectWorkspaceItemName(workspaceName);
     dashboardWorkspace.waitToolbarTitleName(workspaceName);
-    dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.SETTINGS);
+    dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.OVERVIEW);
     dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.RUNNING);
     dashboardWorkspace.clickOnDeleteWorkspace();
     dashboardWorkspace.clickOnDeleteItInDialogWindow();

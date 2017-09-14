@@ -53,7 +53,9 @@ export class CheWorkspaceAgent {
     this.projectType = new CheProjectType($resource, $q, this.workspaceAgentData.path);
     this.typeResolver = new CheTypeResolver($q, this.project, this.projectType);
     this.wsagentApi = new CheJsonRpcWsagentApi(new WebsocketClient($websocket, $q));
-    this.wsagentApi.connect(this.workspaceAgentData.websocket, this.workspaceAgentData.clientId);
+    if (this.workspaceAgentData.clientId) {
+      this.wsagentApi.connect(this.workspaceAgentData.websocket, this.workspaceAgentData.clientId);
+    }
   }
 
   getProject(): CheProject {

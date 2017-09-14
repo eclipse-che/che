@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
 
 /**
  * This class is handling the controller for the add secret key error notification

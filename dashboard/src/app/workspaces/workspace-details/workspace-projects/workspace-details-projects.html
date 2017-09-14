@@ -12,17 +12,25 @@
 -->
 <md-content flex class="workspace-projects-content">
 
-  <che-list-header che-input-placeholder="Search"
-                   che-search-model="workspaceDetailsProjectsCtrl.projectFilter.name"
-                   che-on-search-change="workspaceDetailsProjectsCtrl.onSearchChanged(str)"
-                   che-add-button-title="Add Project"
-                   che-add-button-href="#/create-project?workspaceId={{workspaceDetailsProjectsCtrl.workspaceId}}"
-                   che-delete-button-title="Delete"
-                   che-delete-button-disable="workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING'"
-                   che-delete-button-disable-message="Workspace must be started to delete project(s)."
-                   che-on-delete="workspaceDetailsProjectsCtrl.deleteSelectedProjects()"
-                   che-hide-delete="workspaceDetailsProjectsCtrl.cheListHelper.isNoItemSelected"
-                   che-hide-header="workspaceDetailsProjectsCtrl.cheListHelper.visibleItemsNumber === 0">
+  <che-list-header-additional-parts>
+    <div che-multi-transclude-part="che-list-add-button">
+      <add-project-popover is-project-name-unique="workspaceDetailsProjectsCtrl.isProjectNameUnique(name)"
+                           project-on-add="workspaceDetailsProjectsCtrl.projectTemplateOnAdd(templates)"></add-project-popover>
+    </div>
+    <div che-multi-transclude-part="che-list-delete-button">
+      <che-list-header-delete-button ng-if="workspaceDetailsProjectsCtrl.cheListHelper.isNoItemSelected === false"
+                                     title="Delete"
+                                     on-delete="workspaceDetailsProjectsCtrl.deleteSelectedProjects()"></che-list-header-delete-button>
+    </div>
+    <div che-multi-transclude-part="che-list-search">
+      <che-list-header-search placeholder="Search"
+                              query="workspaceDetailsProjectsCtrl.projectFilter.name"
+                              on-change="workspaceDetailsProjectsCtrl.onSearchChanged(query)"></che-list-header-search>
+    </div>
+  </che-list-header-additional-parts>
+
+  <che-list-header
+    che-hide-header="workspaceDetailsProjectsCtrl.cheListHelper.visibleItemsNumber === 0">
     <div flex="100"
          layout="row"
          layout-align="start stretch"
@@ -31,7 +39,7 @@
            layout-align="start center"
            class="che-checkbox-area">
         <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
-          <md-checkbox class="che-list-item-checkbox md-default-theme"
+          <md-checkbox class="che-list-item-checkbox"
                        aria-label="Project list"
                        ng-checked="workspaceDetailsProjectsCtrl.cheListHelper.areAllItemsSelected"
                        ng-click="workspaceDetailsProjectsCtrl.cheListHelper.changeBulkSelection()"></md-checkbox>
@@ -53,14 +61,16 @@
       </div>
     </div>
   </che-list-header>
-  <che-list flex ng-show="workspaceDetailsProjectsCtrl.cheListHelper.visibleItemsNumber > 0">
+
+  <che-list class="workspace-details-projects-list" flex ng-show="workspaceDetailsProjectsCtrl.cheListHelper.visibleItemsNumber > 0">
     <che-project-item
             ng-repeat="project in workspaceDetailsProjectsCtrl.cheListHelper.getVisibleItems() | orderBy:workspaceDetailsProjectsCtrl.projectOrderBy"
-            che-project-item-workspace="workspaceDetailsProjectsCtrl.workspace"
+            che-project-item-workspace="workspaceDetailsProjectsCtrl.workspaceDetails"
             che-on-checkbox-click="workspaceDetailsProjectsCtrl.cheListHelper.updateBulkSelectionStatus()"
             ng-model="workspaceDetailsProjectsCtrl.cheListHelper.itemsSelectionStatus[project.name]"
             che-project-item-project="project"
             che-profile-creation-date="workspaceDetailsProjectsCtrl.profileCreationDate"
+            che-has-action="false === workspaceDetailsProjectsCtrl.isNewProject(project.name)"
             flex-gt-sm="100" flex="33"></che-project-item>
   </che-list>
   <div class="che-list-empty">
