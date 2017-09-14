@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-import {CheWorkspace} from '../../../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
 import {CheSsh} from '../../../../components/api/che-ssh.factory';
 'use strict';

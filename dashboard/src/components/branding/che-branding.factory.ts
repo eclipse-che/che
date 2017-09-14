@@ -206,7 +206,6 @@ export class CheBranding {
    * @returns {string}
    */
   getWebsocketContext(): string {
-    debugger;
     return this.brandingData.websocketContext ? this.brandingData.websocketContext : DEFAULT_WEBSOCKET_CONTEXT;
   }
 

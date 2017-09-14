@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from '../che-workspace.factory';
+import {CheWorkspace} from '../workspace/che-workspace.factory';
 import {CheAPIBuilder} from '../builder/che-api-builder.factory';
 import {CheHttpBackend} from '../test/che-http-backend';
 
