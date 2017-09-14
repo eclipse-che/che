@@ -25,12 +25,13 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.git.shared.GitCheckoutEvent;
-import org.eclipse.che.api.git.shared.IndexChangedEvent;
 import org.eclipse.che.api.git.shared.GitEvent;
+import org.eclipse.che.api.git.shared.IndexChangedEvent;
 
 @Singleton
 public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
-  private final Map<String, Set<String>> endpointIdsWithWorkspaceIdAndProjectName = new ConcurrentHashMap<>();
+  private final Map<String, Set<String>> endpointIdsWithWorkspaceIdAndProjectName =
+      new ConcurrentHashMap<>();
   private final Set<String> endpointIds = newConcurrentHashSet();
 
   private final EventService eventService;
@@ -55,32 +56,37 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
   @Override
   public void onEvent(GitEvent event) {
     if (event instanceof GitCheckoutEvent) {
-      GitCheckoutEvent checkoutEvent = (GitCheckoutEvent) event;
-      String workspaceIdAndProjectName =
-          checkoutEvent.getWorkspaceId() + checkoutEvent.getProjectName();
-      endpointIdsWithWorkspaceIdAndProjectName
-          .entrySet()
-          .stream()
-          .filter(it -> it.getValue().contains(workspaceIdAndProjectName))
-          .map(Entry::getKey)
-          .forEach(
-              it ->
-                  transmitter
-                      .newRequest()
-                      .endpointId(it)
-                      .methodName("git/checkoutOutput")
-                      .paramsAsDto(event)
-                      .sendAndSkipResult());
+      handleCheckoutEvent((GitCheckoutEvent) event);
     } else if (event instanceof IndexChangedEvent) {
-      endpointIds.forEach(
-          id ->
-              transmitter
-                  .newRequest()
-                  .endpointId(id)
-                  .methodName("event/git-index")
-                  .paramsAsDto(((IndexChangedEvent) event).getStatus())
-                  .sendAndSkipResult());
+      handleIndexChangedEvent((IndexChangedEvent) event);
     }
+  }
+
+  private void handleCheckoutEvent(GitCheckoutEvent event) {
+    endpointIdsWithWorkspaceIdAndProjectName
+        .entrySet()
+        .stream()
+        .filter(it -> it.getValue().contains(event.getWorkspaceId() + event.getProjectName()))
+        .map(Entry::getKey)
+        .forEach(
+            it ->
+                transmitter
+                    .newRequest()
+                    .endpointId(it)
+                    .methodName("git/checkoutOutput")
+                    .paramsAsDto(event)
+                    .sendAndSkipResult());
+  }
+
+  private void handleIndexChangedEvent(IndexChangedEvent event) {
+    endpointIds.forEach(
+        id ->
+            transmitter
+                .newRequest()
+                .endpointId(id)
+                .methodName("event/git-index")
+                .paramsAsDto(event.getStatus())
+                .sendAndSkipResult());
   }
 
   @Inject

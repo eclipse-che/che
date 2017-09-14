@@ -27,7 +27,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.lang.reflect.Field;
-
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.git.CredentialsLoader;
@@ -79,7 +78,9 @@ public class JGitConnectionTest {
   @BeforeMethod
   public void setup() {
     jGitConnection =
-        spy(new JGitConnection(repository, credentialsLoader, sshKeyProvider, eventService, userResolver));
+        spy(
+            new JGitConnection(
+                repository, credentialsLoader, sshKeyProvider, eventService, userResolver));
 
     RepositoryState repositoryState = mock(RepositoryState.class);
     GitUser gitUser = mock(GitUser.class);

@@ -16,7 +16,7 @@ import org.eclipse.che.dto.shared.DTO;
 /** @author Anton Korneta. */
 @EventOrigin("gitcheckout")
 @DTO
-public interface GitCheckoutEvent extends GitEvent{
+public interface GitCheckoutEvent extends GitEvent {
 
   boolean isCheckoutOnly();
 

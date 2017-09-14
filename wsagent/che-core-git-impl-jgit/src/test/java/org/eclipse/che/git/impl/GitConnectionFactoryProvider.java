@@ -33,7 +33,10 @@ public class GitConnectionFactoryProvider {
     return new Object[][] {
       new Object[] {
         new JGitConnectionFactory(
-            mock(CredentialsLoader.class), mock(SshKeyProvider.class), mock(EventService.class), resolver)
+            mock(CredentialsLoader.class),
+            mock(SshKeyProvider.class),
+            mock(EventService.class),
+            resolver)
       }
     };
   }
