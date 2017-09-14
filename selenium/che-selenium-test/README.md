@@ -5,9 +5,9 @@ How to run Selenium tests
 
 Go to [OAuth application page](https://github.com/settings/applications/new) and register a new application:
 * `Application name` : `Che`
-* `Homepage URL` : `http://<YOUR_IP_ADDRESS>:8080`
+* `Homepage URL` : `http://<YOUR_IP_ADDRESS><:YOUR_CHE_PORT>`
 * `Application description` : `Che`
-* `Authorization callback URL` : `http://<YOUR_IP_ADDRESS>:8080/api/oauth/callback`
+* `Authorization callback URL` : `http://<YOUR_IP_ADDRESS><:YOUR_CHE_PORT>/api/oauth/callback`
 
 Substitute `CHE_OAUTH_GITHUB_CLIENTID` and `CHE_OAUTH_GITHUB_CLIENTSECRET` properties in `che.env` with `Client ID` and `Client Secret` taken from 
 newly created [OAuth application](https://github.com/settings/developers).
@@ -49,6 +49,7 @@ Options:
     --http                              Use 'http' protocol to connect to product
     --https                             Use 'https' protocol to connect to product
     --host=<PRODUCT_HOST>               Set host where product is deployed
+    --port=<PRODUCT_PORT>               Set port of the product, default is 8080
 
 Modes (defines environment to run tests):
     local                               All tests will be run in a Web browser on the developer machine.
