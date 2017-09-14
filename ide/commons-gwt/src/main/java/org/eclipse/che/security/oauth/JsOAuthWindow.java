@@ -11,6 +11,10 @@
 package org.eclipse.che.security.oauth;
 
 import com.google.gwt.user.client.Window;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 
 /** @author Vladislav Zhukovskii */
 public class JsOAuthWindow {
@@ -22,9 +26,15 @@ public class JsOAuthWindow {
   private int clientHeight;
   private int clientWidth;
   private OAuthCallback callback;
+  private Promise<String> keycloakTokenPromise;
 
   public JsOAuthWindow(
-      String authUrl, String errUrl, int popupHeight, int popupWidth, OAuthCallback callback) {
+      String authUrl,
+      String errUrl,
+      int popupHeight,
+      int popupWidth,
+      OAuthCallback callback,
+      Promise<String> keycloakTokenPromise) {
     this.authUrl = authUrl;
     this.errUrl = errUrl;
     this.popupHeight = popupHeight;
@@ -32,6 +42,12 @@ public class JsOAuthWindow {
     this.clientHeight = Window.getClientHeight();
     this.clientWidth = Window.getClientWidth();
     this.callback = callback;
+    this.keycloakTokenPromise = keycloakTokenPromise;
+  }
+
+  public JsOAuthWindow(
+      String authUrl, String errUrl, int popupHeight, int popupWidth, OAuthCallback callback) {
+    this(authUrl, errUrl, popupHeight, popupWidth, callback, null);
   }
 
   public void setAuthenticationStatus(int value) {
@@ -46,10 +62,35 @@ public class JsOAuthWindow {
   }
 
   public void loginWithOAuth() {
-    loginWithOAuth(authUrl, errUrl, popupHeight, popupWidth, clientHeight, clientWidth);
+    if (keycloakTokenPromise != null) {
+      keycloakTokenPromise.then(
+          new Operation<String>() {
+
+            @Override
+            public void apply(String keycloakToken) throws OperationException {
+              loginWithOAuth(
+                  keycloakToken,
+                  authUrl,
+                  errUrl,
+                  popupHeight,
+                  popupWidth,
+                  clientHeight,
+                  clientWidth);
+            }
+          },
+          new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError keycloakToken) throws OperationException {
+              // do something in case of error ???
+            }
+          });
+    } else {
+      loginWithOAuth(null, authUrl, errUrl, popupHeight, popupWidth, clientHeight, clientWidth);
+    }
   }
 
   private native void loginWithOAuth(
+      String keycloakToken,
       String authUrl,
       String errUrl,
       int popupHeight,

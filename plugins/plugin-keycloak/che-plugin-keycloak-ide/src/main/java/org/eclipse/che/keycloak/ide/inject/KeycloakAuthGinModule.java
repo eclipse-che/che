@@ -13,6 +13,7 @@ package org.eclipse.che.keycloak.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.keycloak.ide.KeycloakProvider;
 
 /** KeycloakAuthGinModule */
 @ExtensionGinModule
@@ -20,6 +21,7 @@ public class KeycloakAuthGinModule extends AbstractGinModule {
 
   @Override
   public void configure() {
+    bind(KeycloakProvider.class);
     bind(AsyncRequestFactory.class)
         .to(org.eclipse.che.keycloak.ide.KeycloakAsyncRequestFactory.class);
   }
