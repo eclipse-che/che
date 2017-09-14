@@ -46,11 +46,11 @@ public class NavigateToFile {
   private interface Locators {
     String NAVI_TO_FILE_FORM = "gwt-debug-file-navigateToFile-mainPanel";
     String FILE_NAME_FIELD = "//div[text()='Enter file name:']/following::input[1]";
-    String FILE_NAME_POPUP = "//div[text()='Enter file name:']/following::table[1]";
+    String FILE_NAME_POPUP = "//div[text()='Enter file name:']/following::table[last()]";
     String FILE_NAME_LIST_SELECT_WITH_PATH =
-        "//div[text()='Enter file name:']//following::tr[contains(., '%s')]";
+        "//div[text()='Enter file name:']//following::tr[contains(., '%s')][last()]";
     String FILE_NAME_LIST_SELECT =
-        "//div[text()='Enter file name:']/following::table[1]//td[text()='%s']";
+        "//div[text()='Enter file name:']/following::table[last()]//td[text()='%s']";
   }
 
   @FindBy(id = Locators.NAVI_TO_FILE_FORM)
