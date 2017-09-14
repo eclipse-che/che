@@ -24,7 +24,7 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
-import org.eclipse.che.machine.authentication.server.MachineTokenRegistry;
+import org.eclipse.che.multiuser.machine.authentication.server.MachineTokenRegistry;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 

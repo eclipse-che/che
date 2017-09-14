@@ -33,8 +33,12 @@ public class CheWsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
         .to(org.eclipse.che.plugin.docker.machine.MachineProviderImpl.class);
 
+    bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
+
     install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
+    install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
+
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
   }
 }

@@ -12,7 +12,7 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.keycloak.server.deploy.KeycloakServletModule;
+import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
 
 /** @author Max Shaposhnik (mshaposhnik@codenvy.com) */
 @DynaModule
