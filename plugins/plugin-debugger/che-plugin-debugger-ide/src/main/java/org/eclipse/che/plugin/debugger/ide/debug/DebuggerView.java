@@ -13,10 +13,14 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
-import org.eclipse.che.ide.api.debug.Breakpoint;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 
@@ -35,15 +39,17 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
      * Performs any actions appropriate in response to the user having pressed the expand button in
      * variables tree.
      */
-    void onExpandVariablesTree();
+    void onExpandVariablesTree(MutableVariable variable);
+
+    /** Is invoked when a new thread is selected. */
+    void onSelectedThread(long threadId);
 
     /**
-     * Performs any actions appropriate in response to the user having selected variable in
-     * variables tree.
+     * Is invoked when a new frame is selected.
      *
-     * @param variable variable that is selected
+     * @param frameIndex the frame index inside a thread
      */
-    void onSelectedVariableElement(@NotNull MutableVariable variable);
+    void onSelectedFrame(int frameIndex);
   }
 
   /**
@@ -60,6 +66,9 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
    */
   void setVariables(@NotNull List<? extends Variable> variables);
 
+  /** Updates variable in the list */
+  void setVariableValue(@NotNull Variable variable, @NotNull SimpleValue value);
+
   /**
    * Sets breakpoints.
    *
@@ -68,11 +77,20 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
   void setBreakpoints(@NotNull List<Breakpoint> breakPoints);
 
   /**
+   * Sets thread dump and select the thread with {@link ThreadState#getId()} equal to {@code
+   * activeThreadId}.
+   */
+  void setThreadDump(@NotNull List<? extends ThreadState> threadDump, long threadIdToSelect);
+
+  /** Sets the list of frames for selected thread. */
+  void setFrames(@NotNull List<? extends StackFrameDump> stackFrameDumps);
+
+  /**
    * Sets java virtual machine name and version.
    *
    * @param name virtual machine name
    */
-  void setVMName(@NotNull String name);
+  void setVMName(@Nullable String name);
 
   /**
    * Sets title.
@@ -81,22 +99,11 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
    */
   void setTitle(@NotNull String title);
 
-  /** Update contents for selected variable. */
-  void updateSelectedVariable();
+  /** Returns selected thread id {@link ThreadState#getId()} or -1 if there is no selection. */
+  long getSelectedThreadId();
 
-  /**
-   * Add elements into selected variable.
-   *
-   * @param variables variable what need to add into
-   */
-  void setVariablesIntoSelectedVariable(@NotNull List<? extends Variable> variables);
-
-  /**
-   * Sets whether this object is visible.
-   *
-   * @param visible <code>true</code> to show the tab, <code>false</code> to hide it
-   */
-  void setVisible(boolean visible);
+  /** Returns selected frame index inside thread or -1 if there is no selection. */
+  int getSelectedFrameIndex();
 
   /**
    * Returns selected variable in the variables list on debugger panel or null if no selection.

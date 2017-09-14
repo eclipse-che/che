@@ -10,7 +10,7 @@
  */
 import {CheSsh} from './che-ssh.factory';
 'use strict';
-import {CheWorkspace} from './che-workspace.factory';
+import {CheWorkspace} from './workspace/che-workspace.factory';
 import {CheProfile} from './che-profile.factory';
 import {CheFactory} from './che-factory.factory';
 import {CheFactoryTemplate} from './che-factory-template.factory';

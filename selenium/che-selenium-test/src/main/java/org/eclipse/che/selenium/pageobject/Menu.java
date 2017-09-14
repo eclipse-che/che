@@ -159,7 +159,6 @@ public class Menu {
       new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
           .until(ExpectedConditions.visibilityOfElementLocated(By.id(idSubCommandName)));
     } catch (TimeoutException e) {
-      LOG.error(e.getLocalizedMessage(), e);
       WaitUtils.sleepQuietly(1);
       seleniumWebDriver.findElement(By.id(idCommandName)).click();
       new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)

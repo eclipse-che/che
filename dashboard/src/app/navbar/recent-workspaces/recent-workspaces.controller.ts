@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from '../../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import IdeSvc from '../../../app/ide/ide.service';
 import {CheBranding} from '../../../components/branding/che-branding.factory';
 

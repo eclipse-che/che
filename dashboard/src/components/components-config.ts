@@ -18,7 +18,6 @@ import {CheBrandingConfig} from './branding/che-branding-config';
 import {CodeMirrorConstant} from './codemirror/codemirror';
 import {GitHubService} from './github/github-service';
 import {CheIdeFetcherConfig} from './ide-fetcher/che-ide-fetcher-config';
-import {CheUIElementsInjectorConfig} from './injector/che-ui-elements-injector-config';
 import {CheNotificationConfig} from './notification/che-notification-config';
 import {RoutingConfig} from './routing/routing-config';
 import {ValidatorConfig} from './validator/validator-config';
@@ -39,7 +38,6 @@ export class ComponentsConfig {
     new CodeMirrorConstant(register);
     new GitHubService(register);
     new CheIdeFetcherConfig(register);
-    new CheUIElementsInjectorConfig(register);
     new CheNotificationConfig(register);
     new RoutingConfig(register);
     new ValidatorConfig(register);
