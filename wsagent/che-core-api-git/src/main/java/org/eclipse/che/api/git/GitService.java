@@ -78,7 +78,6 @@ import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.project.server.FolderEntry;
@@ -452,9 +451,9 @@ public class GitService {
   @GET
   @Path("status")
   @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-  public Status status(@QueryParam("format") StatusFormat format) throws ApiException {
+  public Status status(@QueryParam("filter") List<String> filter) throws ApiException {
     try (GitConnection gitConnection = getGitConnection()) {
-      return gitConnection.status(format);
+      return gitConnection.status(filter);
     }
   }
 

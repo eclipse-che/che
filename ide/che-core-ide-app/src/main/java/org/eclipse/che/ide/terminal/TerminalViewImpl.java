@@ -16,6 +16,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -26,7 +27,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Dmitry Shnurenko
  */
-final class TerminalViewImpl extends Composite implements TerminalView {
+final class TerminalViewImpl extends Composite implements TerminalView, Focusable {
 
   interface TerminalViewImplUiBinder extends UiBinder<Widget, TerminalViewImpl> {}
 
@@ -106,4 +107,34 @@ final class TerminalViewImpl extends Composite implements TerminalView {
 
     delegate.setTerminalSize(x, y);
   }
+
+  @Override
+  public int getTabIndex() {
+    return 0;
+  }
+
+  @Override
+  public void setAccessKey(char key) {}
+
+  private Timer focusTimer =
+      new Timer() {
+        @Override
+        public void run() {
+          terminal.focus();
+        }
+      };
+
+  @Override
+  public void setFocus(boolean focused) {
+    if (terminal == null || terminal.getElement() == null) {
+      return;
+    }
+
+    if (focused && !terminal.hasSelection()) {
+      focusTimer.schedule(10);
+    }
+  }
+
+  @Override
+  public void setTabIndex(int index) {}
 }

@@ -49,7 +49,7 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
     void setAmendCommitMessage();
 
     /** Get list of changed files paths. */
-    Set<String> getChangedFiles();
+    List<String> getChangedFiles();
   }
 
   /** @return entered message */

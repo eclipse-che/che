@@ -21,8 +21,11 @@ import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -37,6 +40,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
@@ -78,12 +82,13 @@ public class JavaDebuggerUtils {
     if (type.isBinary()) {
       IClassFile classFile = type.getClassFile();
       int libId = classFile.getAncestor(IPackageFragmentRoot.PACKAGE_FRAGMENT_ROOT).hashCode();
-      return new LocationImpl(fqn, location.lineNumber(), null, true, libId, typeProjectPath);
+      return new LocationImpl(fqn, location.lineNumber(), true, libId, typeProjectPath, null, -1);
     } else {
       ICompilationUnit compilationUnit = type.getCompilationUnit();
       typeProjectPath = type.getJavaProject().getPath().toOSString();
       String resourcePath = compilationUnit.getPath().toOSString();
-      return new LocationImpl(fqn, location.lineNumber(), resourcePath, false, -1, typeProjectPath);
+      return new LocationImpl(
+          resourcePath, location.lineNumber(), false, -1, typeProjectPath, null, -1);
     }
   }
 
@@ -142,26 +147,49 @@ public class JavaDebuggerUtils {
    * Return nested class fqn if line with number {@code lineNumber} contains such element, otherwise
    * return outer class fqn.
    *
-   * @param projectPath project path which contains class with {@code outerClassFqn}
-   * @param outerClassFqn fqn outer class
-   * @param lineNumber line position to search
    * @throws DebuggerException
    */
-  public String findFqnByPosition(String projectPath, String outerClassFqn, int lineNumber)
-      throws DebuggerException {
-    if (projectPath == null) {
-      return outerClassFqn;
+  public String findFqnByPosition(Location location) throws DebuggerException {
+    IPath path = Path.fromOSString(location.getTarget());
+    IJavaProject project = getJavaProject(path);
+    if (project == null) {
+      if (location.getResourceProjectPath() != null) {
+        project = MODEL.getJavaProject(location.getResourceProjectPath());
+      } else {
+        return location.getTarget();
+      }
     }
 
-    IJavaProject project = MODEL.getJavaProject(projectPath);
+    String fqn = null;
+    for (int i = path.segmentCount(); i > 0; i--) {
+      try {
+        IClasspathEntry classpathEntry =
+            ((JavaProject) project).getClasspathEntryFor(path.removeLastSegments(i));
+
+        if (classpathEntry != null) {
+          fqn =
+              path.removeFirstSegments(path.segmentCount() - i)
+                  .removeFileExtension()
+                  .toString()
+                  .replace("/", ".");
+          break;
+        }
+      } catch (JavaModelException e) {
+        return location.getTarget();
+      }
+    }
+
+    if (fqn == null) {
+      return location.getTarget();
+    }
 
     IType outerClass;
     IMember iMember;
     try {
-      outerClass = project.findType(outerClassFqn);
+      outerClass = project.findType(fqn);
 
       if (outerClass == null) {
-        return outerClassFqn;
+        return location.getTarget();
       }
 
       String source;
@@ -174,7 +202,7 @@ public class JavaDebuggerUtils {
       }
 
       Document document = new Document(source);
-      IRegion region = document.getLineInformation(lineNumber);
+      IRegion region = document.getLineInformation(location.getLineNumber());
       int start = region.getOffset();
       int end = start + region.getLength();
 
@@ -183,7 +211,7 @@ public class JavaDebuggerUtils {
       throw new DebuggerException(
           format(
               "Unable to find source for class with fqn '%s' in the project '%s'",
-              outerClassFqn, project),
+              location.getTarget(), project),
           e);
     } catch (BadLocationException e) {
       throw new DebuggerException("Unable to calculate breakpoint location", e);
@@ -196,7 +224,26 @@ public class JavaDebuggerUtils {
       return iMember.getDeclaringType().getFullyQualifiedName();
     }
 
-    return outerClassFqn;
+    return location.getTarget();
+  }
+
+  private IJavaProject getJavaProject(IPath path) throws DebuggerException {
+    IJavaProject project = null;
+    outer:
+    for (int i = 1; i < path.segmentCount(); i++) {
+      IPath projectPath = path.removeLastSegments(i);
+      try {
+        for (IJavaProject p : MODEL.getJavaProjects()) {
+          if (p.getPath().equals(projectPath)) {
+            project = p;
+            break outer;
+          }
+        }
+      } catch (JavaModelException e) {
+        throw new DebuggerException(e.getMessage(), e);
+      }
+    }
+    return project;
   }
 
   /**

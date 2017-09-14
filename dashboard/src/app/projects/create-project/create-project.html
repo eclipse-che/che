@@ -70,10 +70,12 @@
       </md-radio-group>
 
       <div ng-show="createProjectCtrl.selectSourceOption === 'select-source-existing'">
-        <md-tabs md-stretch-tabs="auto" md-dynamic-height md-selected="createProjectCtrl.selectedTabIndex">
+        <md-tabs md-stretch-tabs="auto"
+                 md-dynamic-height
+                 md-no-ink-bar
+                 md-selected="createProjectCtrl.selectedTabIndex">
           <md-tab md-on-select="createProjectCtrl.setCurrentTab('git')">
             <md-tab-label>
-              <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Git Repository</span>
             </md-tab-label>
             <md-tab-body>
@@ -82,7 +84,6 @@
           </md-tab>
           <md-tab md-on-select="createProjectCtrl.setCurrentTab('github')">
             <md-tab-label>
-              <md-icon md-font-icon="fa-github" class="fa che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">GitHub</span>
             </md-tab-label>
             <md-tab-body>
@@ -100,7 +101,6 @@
           </md-tab>
           <md-tab md-on-select="createProjectCtrl.setCurrentTab('zip')">
             <md-tab-label>
-              <md-icon md-font-icon="fa-file-archive-o" class="fa che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Zip</span>
             </md-tab-label>
             <md-tab-body>

@@ -35,14 +35,9 @@ public class ShowHideDebuggerPanelAction extends Action {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (debuggerPresenter.isDebuggerPanelPresent()) {
-      if (debuggerPresenter.isDebuggerPanelOpened()) {
-        debuggerPresenter.hideDebuggerPanel();
-      } else {
-        debuggerPresenter.showDebuggerPanel();
-      }
+    if (debuggerPresenter.isDebuggerPanelOpened()) {
+      debuggerPresenter.hideDebuggerPanel();
     } else {
-      debuggerPresenter.showAndUpdateView();
       debuggerPresenter.showDebuggerPanel();
     }
   }

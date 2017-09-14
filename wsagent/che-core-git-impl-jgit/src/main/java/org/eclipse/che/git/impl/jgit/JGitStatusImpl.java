@@ -20,7 +20,6 @@ import java.util.List;
 import org.eclipse.che.api.git.InfoPage;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
@@ -32,7 +31,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 public class JGitStatusImpl implements Status, InfoPage {
 
   private String branchName;
-  private StatusFormat format;
   private boolean clean;
   private List<String> added;
   private List<String> changed;
@@ -47,13 +45,10 @@ public class JGitStatusImpl implements Status, InfoPage {
   /**
    * @param branchName current repository branch name
    * @param statusCommand Jgit status command
-   * @param format the output format for the status
    * @throws GitException when any error occurs
    */
-  public JGitStatusImpl(String branchName, StatusCommand statusCommand, StatusFormat format)
-      throws GitException {
+  public JGitStatusImpl(String branchName, StatusCommand statusCommand) throws GitException {
     this.branchName = branchName;
-    this.format = format;
 
     org.eclipse.jgit.api.Status gitStatus;
     try {
@@ -121,16 +116,6 @@ public class JGitStatusImpl implements Status, InfoPage {
   @Override
   public void setClean(boolean clean) {
     this.clean = clean;
-  }
-
-  @Override
-  public StatusFormat getFormat() {
-    return this.format;
-  }
-
-  @Override
-  public void setFormat(final StatusFormat format) {
-    this.format = format;
   }
 
   @Override

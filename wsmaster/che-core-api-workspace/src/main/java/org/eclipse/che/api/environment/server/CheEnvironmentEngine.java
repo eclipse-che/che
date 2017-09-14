@@ -927,7 +927,8 @@ public class CheEnvironmentEngine {
             try {
               machineLogger.writeLine(
                   format(
-                      "Failed to boot machine %s of workspace %s, because snapshot not found. "
+                      "Failed to boot machine %s of workspace %s, "
+                          + "because information about snapshot is not found in database. "
                           + "The machine will be created from origin source.",
                       machine.getConfig().getName(), machine.getWorkspaceId()));
             } catch (IOException ignore) {
@@ -941,8 +942,8 @@ public class CheEnvironmentEngine {
           LOG.error(
               format(
                   "The snapshot of the image for the machine %s of the workspace %s not found. "
-                      + "The machine will be created from origin source.",
-                  machine.getConfig().getName(), machine.getWorkspaceId()));
+                      + "The machine will be created from origin source. Details: %s",
+                  machine.getConfig().getName(), machine.getWorkspaceId(), e.getMessage()));
           machine = originMachine;
           instance = machineStarter.startMachine(machineLogger, null);
         } else {

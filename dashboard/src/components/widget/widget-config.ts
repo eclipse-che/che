@@ -51,6 +51,12 @@ import {CheListHeaderColumn} from './list/che-list-header-column.directive';
 import {CheListTitle} from './list/che-list-title.directive';
 import {CheListItemChecked} from './list/che-list-item-checked.directive';
 import {CheListHelperFactory} from './list/che-list-helper.factory';
+import {CheListHeaderAdditionalParts} from './list/list-header/additional-parts/che-list-header-additional-parts.directive';
+import {CheListHeaderAddButton} from './list/list-header/additional-parts/parts/che-list-header-add-button.directive';
+import {CheListHeaderImportButton} from './list/list-header/additional-parts/parts/che-list-header-import-button.directive';
+import {CheListHeaderSearch} from './list/list-header/additional-parts/parts/che-list-header-search.directive';
+import {CheListHeaderFilter} from './list/list-header/additional-parts/parts/che-list-header-filter.directive';
+import {CheListHeaderDeleteButton} from './list/list-header/additional-parts/parts/che-list-header-delete-button.directive';
 import {CheLoader} from './loader/che-loader.directive';
 import {CheLoaderCrane} from './loader/che-loader-crane.directive';
 import {ChePanelCtrl} from './panel/che-panel.controller';
@@ -78,9 +84,11 @@ import {CheToggleJoinedButton} from './toggle-button/che-toggle-joined-button.di
 import {CheToggleJoined} from './toggle-button/che-toggle-joined.directive';
 import {CheChipsList} from './chips-list/chips-list.directive';
 import {CheToggleButtonPopover} from './popover/che-toggle-button-popover.directive';
+import {CheTogglePopover} from './popover/che-toggle-popover.directive';
 import {CheEditor} from './editor/che-editor.directive';
 import {CheEditorController} from './editor/che-editor.controller';
 import {PagingButtons} from './paging-button/paging-button.directive';
+import {CheRowToolbar} from './toolbar/che-row-toolbar.directive';
 
 export class WidgetConfig {
 
@@ -140,6 +148,13 @@ export class WidgetConfig {
       .directive('cheListHeaderColumn', CheListHeaderColumn)
       .factory('cheListHelperFactory', CheListHelperFactory)
 
+      .directive('cheListHeaderAdditionalParts', CheListHeaderAdditionalParts)
+      .directive('cheListHeaderAddButton', CheListHeaderAddButton)
+      .directive('cheListHeaderImportButton', CheListHeaderImportButton)
+      .directive('cheListHeaderDeleteButton', CheListHeaderDeleteButton)
+      .directive('cheListHeaderSearch', CheListHeaderSearch)
+      .directive('cheListHeaderFilter', CheListHeaderFilter)
+
       .directive('cheLoader', CheLoader)
       .directive('cheLoaderCrane', CheLoaderCrane)
 
@@ -181,7 +196,10 @@ export class WidgetConfig {
       // editor
       .controller('CheEditorController', CheEditorController)
       .directive('cheEditor', CheEditor)
+      // row toolbar
+      .directive('cheRowToolbar', CheRowToolbar)
       // popover
+      .directive('cheTogglePopover', CheTogglePopover)
       .directive('toggleButtonPopover', CheToggleButtonPopover);
   }
 }

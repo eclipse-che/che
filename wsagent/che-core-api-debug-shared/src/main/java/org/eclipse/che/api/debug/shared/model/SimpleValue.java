@@ -17,6 +17,6 @@ public interface SimpleValue {
   /** The nested variables. */
   List<? extends Variable> getVariables();
 
-  /** The value. */
-  String getValue();
+  /** Returns string representation of the value. */
+  String getString();
 }

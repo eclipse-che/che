@@ -15,7 +15,6 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
@@ -23,6 +22,7 @@ import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
@@ -147,20 +147,20 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
     StackFrameDump stackFrameDump = debugger.dumpStackFrame();
     assertEquals(stackFrameDump.getVariables().size(), 1);
     assertEquals(stackFrameDump.getVariables().get(0).getName(), "$this");
-    assertEquals(stackFrameDump.getVariables().get(0).getValue(), "A");
+    assertEquals(stackFrameDump.getVariables().get(0).getValue().getString(), "A");
     assertEquals(stackFrameDump.getVariables().get(0).getType(), "object");
     debugger.resume(new ResumeActionImpl());
     awaitSuspend(dbgClassesFile, 25);
     stackFrameDump = debugger.dumpStackFrame();
     assertEquals(stackFrameDump.getVariables().size(), 3);
     assertEquals(stackFrameDump.getVariables().get(0).getName(), "$this");
-    assertEquals(stackFrameDump.getVariables().get(0).getValue(), "B");
+    assertEquals(stackFrameDump.getVariables().get(0).getValue().getString(), "B");
     assertEquals(stackFrameDump.getVariables().get(0).getType(), "object");
     assertEquals(stackFrameDump.getVariables().get(1).getName(), "$p");
-    assertEquals(stackFrameDump.getVariables().get(1).getValue(), "123");
+    assertEquals(stackFrameDump.getVariables().get(1).getValue().getString(), "123");
     assertEquals(stackFrameDump.getVariables().get(1).getType(), "int");
     assertEquals(stackFrameDump.getVariables().get(2).getName(), "$v");
-    assertEquals(stackFrameDump.getVariables().get(2).getValue(), "\"B\"");
+    assertEquals(stackFrameDump.getVariables().get(2).getValue().getString(), "\"B\"");
     assertEquals(stackFrameDump.getVariables().get(2).getType(), "string");
   }
 
@@ -182,15 +182,15 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
     List<String> path = Arrays.asList("0", "0");
     variablePath = new VariablePathImpl(path);
     simpleValue = debugger.getValue(variablePath);
-    assertEquals(simpleValue.getValue(), "\"A\"");
+    assertEquals(simpleValue.getString(), "\"A\"");
     path = Arrays.asList("0", "1");
     variablePath = new VariablePathImpl(path);
     simpleValue = debugger.getValue(variablePath);
-    assertEquals(simpleValue.getValue(), "123");
+    assertEquals(simpleValue.getString(), "123");
     path = Arrays.asList("0", "2");
     variablePath = new VariablePathImpl(path);
     simpleValue = debugger.getValue(variablePath);
-    assertEquals(simpleValue.getValue(), "array [3]");
+    assertEquals(simpleValue.getString(), "array [3]");
   }
 
   @Test(
@@ -210,23 +210,19 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
         new VariableImpl(
             null,
             null,
-            "123",
+            new SimpleValueImpl("123"),
             false,
-            new VariablePathImpl(String.valueOf(lastVar)),
-            Collections.emptyList(),
-            false);
+            new VariablePathImpl(String.valueOf(lastVar)));
     debugger.setValue(variableToFind);
-    assertEquals(stackFrameDump.getVariables().get(lastVar).getValue(), "123");
+    assertEquals(stackFrameDump.getVariables().get(lastVar).getValue().getString(), "123");
     variableToFind =
         new VariableImpl(
             null,
             null,
-            "\"ABC\"",
+            new SimpleValueImpl("\"ABC\""),
             false,
-            new VariablePathImpl(String.valueOf(lastVar)),
-            Collections.emptyList(),
-            false);
+            new VariablePathImpl(String.valueOf(lastVar)));
     debugger.setValue(variableToFind);
-    assertEquals(stackFrameDump.getVariables().get(lastVar).getValue(), "\"ABC\"");
+    assertEquals(stackFrameDump.getVariables().get(lastVar).getValue().getString(), "\"ABC\"");
   }
 }
