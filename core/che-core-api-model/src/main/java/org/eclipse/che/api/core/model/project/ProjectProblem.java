@@ -10,27 +10,10 @@
  */
 package org.eclipse.che.api.core.model.project;
 
-import java.util.List;
-import java.util.Map;
+/** @author Vitalii Parfonov */
+public interface ProjectProblem {
 
-/**
- * @author gazarenkov
- * @author Dmitry Shnurenko
- */
-public interface ProjectConfig {
-  String getName();
+  int getCode();
 
-  String getPath();
-
-  String getDescription();
-
-  String getType();
-
-  List<String> getMixins();
-
-  Map<String, List<String>> getAttributes();
-
-  SourceStorage getSource();
-
-  List<? extends ProjectProblem> getProblems();
+  String getMessage();
 }
