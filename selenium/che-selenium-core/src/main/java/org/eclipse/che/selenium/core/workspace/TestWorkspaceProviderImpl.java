@@ -154,15 +154,21 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         () -> {
           while (testWorkspaceQueue.remainingCapacity() != 0) {
             String name = generateName();
-            TestWorkspace testWorkspace =
-                new TestWorkspaceImpl(
-                    name,
-                    defaultUser,
-                    defaultMemoryGb,
-                    workspaceDtoDeserializer.deserializeWorkspaceTemplate(
-                        WorkspaceTemplate.DEFAULT),
-                    workspaceServiceClient);
-
+            TestWorkspace testWorkspace;
+            try {
+              testWorkspace =
+                  new TestWorkspaceImpl(
+                      name,
+                      defaultUser,
+                      defaultMemoryGb,
+                      workspaceDtoDeserializer.deserializeWorkspaceTemplate(
+                          WorkspaceTemplate.DEFAULT),
+                      workspaceServiceClient);
+            } catch (Exception e) {
+              // scheduled executor service doesn't log any exceptions, so log possible exception here
+              LOG.error(e.getLocalizedMessage(), e);
+              throw e;
+            }
             try {
               if (!testWorkspaceQueue.offer(testWorkspace)) {
                 LOG.warn("Workspace {} can't be added into the pool and will be destroyed.", name);
