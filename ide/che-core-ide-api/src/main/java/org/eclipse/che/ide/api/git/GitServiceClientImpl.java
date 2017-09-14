@@ -380,8 +380,7 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Void> remoteDelete(Path project, String name) {
-    String url =
-        getWsAgentBaseUrl() + REMOTE + '/' + name + "?projectPath=" + encodePath(project);
+    String url = getWsAgentBaseUrl() + REMOTE + '/' + name + "?projectPath=" + encodePath(project);
     return asyncRequestFactory.createDeleteRequest(url).loader(loader).send();
   }
 
@@ -479,12 +478,7 @@ public class GitServiceClientImpl implements GitServiceClient {
   @Override
   public Promise<ShowFileContentResponse> showFileContent(Path project, Path file, String version) {
     String params =
-        "?projectPath="
-            + encodePath(project)
-            + "&file="
-            + encodePath(file)
-            + "&version="
-            + version;
+        "?projectPath=" + encodePath(project) + "&file=" + encodePath(file) + "&version=" + version;
     String url = getWsAgentBaseUrl() + SHOW + params;
     return asyncRequestFactory
         .createGetRequest(url)

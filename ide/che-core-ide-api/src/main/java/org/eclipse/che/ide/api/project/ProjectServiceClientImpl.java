@@ -262,8 +262,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
   /** {@inheritDoc} */
   @Override
   public Promise<Void> copy(Path source, Path target, String newName, boolean overwrite) {
-    final String url =
-        getBaseUrl() + COPY + encodePath(source) + "?to=" + encodePath(target);
+    final String url = getBaseUrl() + COPY + encodePath(source) + "?to=" + encodePath(target);
 
     final CopyOptions copyOptions = dtoFactory.createDto(CopyOptions.class);
     copyOptions.setName(newName);
@@ -278,8 +277,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
   /** {@inheritDoc} */
   @Override
   public Promise<Void> move(Path source, Path target, String newName, boolean overwrite) {
-    final String url =
-        getBaseUrl() + MOVE + encodePath(source) + "?to=" + encodePath(target);
+    final String url = getBaseUrl() + MOVE + encodePath(source) + "?to=" + encodePath(target);
 
     final MoveOptions moveOptions = dtoFactory.createDto(MoveOptions.class);
     moveOptions.setName(newName);
