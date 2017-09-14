@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.model.impl;
+package org.eclipse.che.api.workspace.shared;
 
 import org.eclipse.che.api.core.model.project.ProjectProblem;
 

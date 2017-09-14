@@ -26,7 +26,7 @@ import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectProblemImpl;
+import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 
 /** @author gazarenkov */
 public class ProjectTypes {

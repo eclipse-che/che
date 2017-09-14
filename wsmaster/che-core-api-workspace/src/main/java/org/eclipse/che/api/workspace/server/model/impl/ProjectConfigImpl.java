@@ -40,6 +40,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 
 /**
  * Data object for {@link ProjectConfig}.
