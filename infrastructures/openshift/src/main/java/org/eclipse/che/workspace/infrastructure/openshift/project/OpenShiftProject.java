@@ -68,6 +68,7 @@ public class OpenShiftProject {
   /** Removes all object except persistent volume claim inside project. */
   public void cleanUp() throws InfrastructureException {
     pods.delete();
+    pods.stopWatch();
     services.delete();
     routes.delete();
   }

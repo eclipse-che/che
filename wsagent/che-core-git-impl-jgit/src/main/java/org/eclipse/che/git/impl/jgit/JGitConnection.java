@@ -109,7 +109,6 @@ import org.eclipse.che.api.git.shared.RemoteReference;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
@@ -132,6 +131,7 @@ import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.RmCommand;
+import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
@@ -636,8 +636,9 @@ class JGitConnection implements GitConnection {
         throw new GitException("Message wasn't set");
       }
 
-      Status status = status(StatusFormat.SHORT);
-      List<String> specified = params.getFiles();
+      List<String> files = params.getFiles();
+      Status status = status(files);
+      List<String> specified = files;
 
       List<String> staged = new ArrayList<>();
       staged.addAll(status.getAdded());
@@ -1686,12 +1687,16 @@ class JGitConnection implements GitConnection {
   }
 
   @Override
-  public Status status(StatusFormat format) throws GitException {
+  public Status status(List<String> filter) throws GitException {
     if (!RepositoryCache.FileKey.isGitRepository(getRepository().getDirectory(), FS.DETECTED)) {
       throw new GitException("Not a git repository");
     }
     String branchName = getCurrentBranch();
-    return new JGitStatusImpl(branchName, getGit().status(), format);
+    StatusCommand statusCommand = getGit().status();
+    if (filter != null) {
+      filter.forEach(statusCommand::addPath);
+    }
+    return new JGitStatusImpl(branchName, statusCommand);
   }
 
   @Override

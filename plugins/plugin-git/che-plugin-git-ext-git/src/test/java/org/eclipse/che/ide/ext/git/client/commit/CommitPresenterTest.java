@@ -10,13 +10,11 @@
  */
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.MODIFIED;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -42,6 +40,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
@@ -122,7 +121,7 @@ public class CommitPresenterTest extends BaseTest {
         .thenReturn(pushPromise);
     when(service.log(any(Path.class), eq(null), anyInt(), anyInt(), anyBoolean()))
         .thenReturn(logPromise);
-    when(service.getStatus(any(Path.class))).thenReturn(statusPromise);
+    when(service.getStatus(any(Path.class), eq(emptyList()))).thenReturn(statusPromise);
   }
 
   @Test
@@ -148,6 +147,8 @@ public class CommitPresenterTest extends BaseTest {
 
   @Test
   public void shouldShowDialog() throws Exception {
+    final String diff = "M\tfile";
+    final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
     ConfirmDialog dialog = mock(ConfirmDialog.class);
     when(dialogFactory.createConfirmDialog(
             anyString(),
@@ -160,13 +161,13 @@ public class CommitPresenterTest extends BaseTest {
 
     presenter.showDialog(project);
     verify(stringPromise).then(stringCaptor.capture());
-    stringCaptor.getValue().apply("M file");
+    stringCaptor.getValue().apply("M\tfile");
     verify(logPromise).then(logCaptor.capture());
     logCaptor.getValue().apply(null);
 
     verify(view).setEnableAmendCheckBox(true);
     verify(view).setEnablePushAfterCommitCheckBox(true);
-    verify(changesPanelPresenter).show(eq(singletonMap("file", MODIFIED)));
+    verify(changesPanelPresenter).show(eq(alteredFiles));
     verify(view).focusInMessageField();
     verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
     verify(view).getMessage();
@@ -176,6 +177,8 @@ public class CommitPresenterTest extends BaseTest {
 
   @Test
   public void shouldShowUntrackedFilesOnInitialCommit() throws Exception {
+    final String diff = "A\tfile";
+    final AlteredFiles alteredFiles = new AlteredFiles(project, diff);
     PromiseError error = mock(PromiseError.class);
     ServerException exception = mock(ServerException.class);
     when(exception.getErrorCode()).thenReturn(ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED);
@@ -193,7 +196,7 @@ public class CommitPresenterTest extends BaseTest {
 
     verify(view).setEnableAmendCheckBox(false);
     verify(view).setEnablePushAfterCommitCheckBox(false);
-    verify(changesPanelPresenter).show(eq(singletonMap("file", ADDED)));
+    verify(changesPanelPresenter).show(eq(alteredFiles));
     verify(view).focusInMessageField();
     verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
     verify(view).getMessage();
@@ -207,7 +210,7 @@ public class CommitPresenterTest extends BaseTest {
 
     presenter.showDialog(project);
     verify(stringPromise).then(stringCaptor.capture());
-    stringCaptor.getValue().apply("M file");
+    stringCaptor.getValue().apply("M\tfile");
     verify(logPromise).then(logCaptor.capture());
     logCaptor.getValue().apply(null);
 

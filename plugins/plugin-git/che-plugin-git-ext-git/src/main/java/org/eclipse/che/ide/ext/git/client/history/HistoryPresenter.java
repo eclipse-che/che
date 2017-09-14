@@ -15,15 +15,12 @@ import static org.eclipse.che.api.git.shared.Constants.DEFAULT_PAGE_SIZE;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Revision;
@@ -32,8 +29,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
-import org.eclipse.che.ide.ext.git.client.compare.FileStatus;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -187,19 +184,13 @@ public class HistoryPresenter implements HistoryView.ActionDelegate {
                     .show();
                 return;
               }
-              final String[] changedFiles = diff.split("\n");
-              if (changedFiles.length == 1) {
+              AlteredFiles alteredFiles = new AlteredFiles(project, diff);
+              if (alteredFiles.getFilesQuantity() == 1) {
                 comparePresenter.showCompareBetweenRevisions(
-                    Path.valueOf(diff.substring(2)),
-                    defineStatus(diff.substring(0, 1)),
-                    revisionA,
-                    revisionB);
+                    alteredFiles, null, revisionA, revisionB);
               } else {
-                Map<String, FileStatus.Status> items = new HashMap<>();
-                for (String item : changedFiles) {
-                  items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
-                }
-                changesListPresenter.show(items, revisionA, revisionB, project);
+
+                changesListPresenter.show(alteredFiles, revisionA, revisionB);
               }
             })
         .catchError(

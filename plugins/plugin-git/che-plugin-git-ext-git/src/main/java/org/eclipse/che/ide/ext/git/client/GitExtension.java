@@ -32,6 +32,8 @@ import org.eclipse.che.ide.ext.git.client.action.DeleteRepositoryAction;
 import org.eclipse.che.ide.ext.git.client.action.FetchAction;
 import org.eclipse.che.ide.ext.git.client.action.HistoryAction;
 import org.eclipse.che.ide.ext.git.client.action.InitRepositoryAction;
+import org.eclipse.che.ide.ext.git.client.action.NextDiffAction;
+import org.eclipse.che.ide.ext.git.client.action.PreviousDiffAction;
 import org.eclipse.che.ide.ext.git.client.action.PullAction;
 import org.eclipse.che.ide.ext.git.client.action.PushAction;
 import org.eclipse.che.ide.ext.git.client.action.RemoveFromIndexAction;
@@ -55,6 +57,9 @@ public class GitExtension {
   public static final String COMMAND_GROUP_MAIN_MENU = "GitCommandGroup";
   public static final String HISTORY_GROUP_MAIN_MENU = "GitHistoryGroup";
   public static final String GIT_COMPARE_WITH_LATEST = "gitCompareWithLatest";
+
+  public static final String NEXT_DIFF_ACTION_ID = "nextDiff";
+  public static final String PREV_DIFF_ACTION_ID = "prevDiff";
 
   @Inject
   public GitExtension(
@@ -80,6 +85,8 @@ public class GitExtension {
       CompareWithLatestAction compareWithLatestAction,
       CompareWithBranchAction compareWithBranchAction,
       CompareWithRevisionAction compareWithRevisionAction,
+      NextDiffAction nextDiffAction,
+      PreviousDiffAction previousDiffAction,
       KeyBindingAgent keyBinding,
       GitNotificationsSubscriber gitNotificationsSubscriber) {
     gitNotificationsSubscriber.subscribe();
@@ -180,8 +187,18 @@ public class GitExtension {
     editorContextMenuGroup.addSeparator();
     editorContextMenuGroup.add(gitContextMenuGroup);
 
+    actionManager.registerAction(NEXT_DIFF_ACTION_ID, nextDiffAction);
+    actionManager.registerAction(PREV_DIFF_ACTION_ID, previousDiffAction);
+
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().action().alt().charCode('d').build(), GIT_COMPARE_WITH_LATEST);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('.').build(), NEXT_DIFF_ACTION_ID);
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode(',').build(), PREV_DIFF_ACTION_ID);
   }
 }

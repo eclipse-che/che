@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
 
@@ -37,8 +38,10 @@ import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.ServersReadinessChecker;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
@@ -52,6 +55,10 @@ import org.slf4j.LoggerFactory;
  */
 public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeContext> {
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftInternalRuntime.class);
+
+  private static final String RUNTIME_STOPPED_STATE = "STOPPED";
+  private static final String RUNTIME_RUNNING_STATE = "RUNNING";
+  private static final String POD_FAILED_STATUS = "Failed";
 
   private final EventService eventService;
   private final ServerCheckerFactory serverCheckerFactory;
@@ -95,43 +102,39 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         createdRoutes.add(project.routes().create(route));
       }
 
-      ServerResolver serverResolver = ServerResolver.of(createdServices, createdRoutes);
+      registerAbnormalStopHandler();
 
-      for (Pod toCreate : getContext().getOpenShiftEnvironment().getPods().values()) {
-        Pod createdPod = project.pods().create(toCreate);
-        for (Container container : createdPod.getSpec().getContainers()) {
-          OpenShiftMachine machine =
-              new OpenShiftMachine(
-                  createdPod.getMetadata().getName(),
-                  container.getName(),
-                  serverResolver.resolve(createdPod, container),
-                  project);
-          machines.put(machine.getName(), machine);
-          sendStartingEvent(machine.getName());
+      createPods(createdServices, createdRoutes);
+
+      // TODO Rework it to parallel waiting
+      for (OpenShiftMachine machine : machines.values()) {
+        try {
+          machine.waitRunning(machineStartTimeoutMin);
+          bootstrapMachine(machine);
+          checkMachineServers(machine);
+          sendRunningEvent(machine.getName());
+        } catch (InfrastructureException rethrow) {
+          sendFailedEvent(machine.getName(), rethrow.getMessage());
+          throw rethrow;
         }
       }
-
-      //TODO Rework it to parallel waiting
-      for (OpenShiftMachine machine : machines.values()) {
-        machine.waitRunning(machineStartTimeoutMin);
-        final String machineName = machine.getName();
-        bootstrapperFactory
-            .create(
-                getContext().getIdentity(),
-                getContext().getEnvironment().getMachines().get(machineName).getInstallers(),
-                machine)
-            .bootstrap();
-
-        ServersReadinessChecker check =
-            new ServersReadinessChecker(machineName, machine.getServers(), serverCheckerFactory);
-        check.startAsync(new ServerReadinessHandler(machineName));
-        check.await();
-        sendRunningEvent(machine.getName());
+    } catch (InfrastructureException | RuntimeException | InterruptedException e) {
+      LOG.error("Failed to start of OpenShift runtime. " + e.getMessage());
+      boolean interrupted = Thread.interrupted() || e instanceof InterruptedException;
+      try {
+        project.cleanUp();
+      } catch (InfrastructureException ignored) {
       }
-    } catch (RuntimeException | InterruptedException e) {
-      LOG.error("Failed to start of OpenShift runtime. " + e.getMessage(), e);
-      project.cleanUp();
-      throw new InfrastructureException(e.getMessage(), e);
+      if (interrupted) {
+        throw new InfrastructureException("OpenShift environment start was interrupted");
+      }
+      try {
+        throw e;
+      } catch (InfrastructureException rethrow) {
+        throw rethrow;
+      } catch (Exception wrap) {
+        throw new InternalInfrastructureException(e.getMessage(), wrap);
+      }
     }
   }
 
@@ -148,6 +151,81 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   @Override
   public Map<String, String> getProperties() {
     return emptyMap();
+  }
+
+  private void registerAbnormalStopHandler() throws InfrastructureException {
+    project
+        .pods()
+        .watch(
+            (action, pod) -> {
+              if (pod.getStatus() != null && POD_FAILED_STATUS.equals(pod.getStatus().getPhase())) {
+                try {
+                  internalStop(emptyMap());
+                } catch (InfrastructureException ex) {
+                  LOG.error("OpenShift environment stop failed cause '{}'", ex.getMessage());
+                } finally {
+                  sendRuntimeStoppedEvent(
+                      format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()));
+                }
+              }
+            });
+  }
+
+  /**
+   * Bootstraps machine.
+   *
+   * @param machine the OpenShift machine instance to bootstrap
+   * @throws InfrastructureException when any error occurs while bootstrapping machine
+   * @throws InterruptedException when machine bootstrapping was interrupted
+   */
+  private void bootstrapMachine(OpenShiftMachine machine)
+      throws InfrastructureException, InterruptedException {
+    bootstrapperFactory
+        .create(
+            getContext().getIdentity(),
+            getContext().getEnvironment().getMachines().get(machine.getName()).getInstallers(),
+            machine)
+        .bootstrap();
+  }
+
+  /**
+   * Checks whether machine servers are ready.
+   *
+   * @param machine the OpenShift machine instance
+   * @throws InfrastructureException when any error while server checks occur
+   * @throws InterruptedException when process of server check was interrupted
+   */
+  private void checkMachineServers(OpenShiftMachine machine)
+      throws InfrastructureException, InterruptedException {
+    final ServersReadinessChecker check =
+        new ServersReadinessChecker(machine.getName(), machine.getServers(), serverCheckerFactory);
+    check.startAsync(new ServerReadinessHandler(machine.getName()));
+    check.await();
+  }
+
+  /**
+   * Creates OpenShift pods and resolves machine servers based on routes and services.
+   *
+   * @param services created OpenShift services
+   * @param routes created OpenShift routes
+   * @throws InfrastructureException when any error occurs while creating OpenShift pods
+   */
+  private void createPods(List<Service> services, List<Route> routes)
+      throws InfrastructureException {
+    final ServerResolver serverResolver = ServerResolver.of(services, routes);
+    for (Pod toCreate : getContext().getOpenShiftEnvironment().getPods().values()) {
+      Pod createdPod = project.pods().create(toCreate);
+      for (Container container : createdPod.getSpec().getContainers()) {
+        OpenShiftMachine machine =
+            new OpenShiftMachine(
+                createdPod.getMetadata().getName(),
+                container.getName(),
+                serverResolver.resolve(createdPod, container),
+                project);
+        machines.put(machine.getName(), machine);
+        sendStartingEvent(machine.getName());
+      }
+    }
   }
 
   private void prepareOpenShiftPVCs(Map<String, PersistentVolumeClaim> pvcs)
@@ -208,5 +286,24 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
             .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
             .withEventType(MachineStatus.RUNNING)
             .withMachineName(machineName));
+  }
+
+  private void sendFailedEvent(String machineName, String message) {
+    eventService.publish(
+        DtoFactory.newDto(MachineStatusEvent.class)
+            .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
+            .withEventType(MachineStatus.FAILED)
+            .withMachineName(machineName)
+            .withError(message));
+  }
+
+  private void sendRuntimeStoppedEvent(String errorMsg) {
+    eventService.publish(
+        DtoFactory.newDto(RuntimeStatusEvent.class)
+            .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
+            .withStatus(RUNTIME_STOPPED_STATE)
+            .withPrevStatus(RUNTIME_RUNNING_STATE)
+            .withFailed(true)
+            .withError(errorMsg));
   }
 }

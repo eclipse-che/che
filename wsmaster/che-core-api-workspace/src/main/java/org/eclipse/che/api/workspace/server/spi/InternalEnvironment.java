@@ -32,7 +32,7 @@ import org.eclipse.che.api.workspace.server.RecipeRetriever;
 public class InternalEnvironment {
   private final InternalRecipe recipe;
   private final Map<String, InternalMachineConfig> machines;
-  private final List<? extends Warning> warnings;
+  private final List<Warning> warnings;
 
   private final InstallerRegistry registry;
 
@@ -74,6 +74,11 @@ public class InternalEnvironment {
    */
   public void addMachine(String name, MachineConfig machineConfig) throws InfrastructureException {
     machines.put(name, new InternalMachineConfig(machineConfig, registry));
+  }
+
+  /** Adds an {@link Warning}. */
+  public void addWarning(Warning warning) {
+    warnings.add(warning);
   }
 
   /**

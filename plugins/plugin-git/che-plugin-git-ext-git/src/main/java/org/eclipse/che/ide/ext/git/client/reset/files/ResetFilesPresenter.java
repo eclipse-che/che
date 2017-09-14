@@ -16,6 +16,9 @@ import static org.eclipse.che.ide.util.Arrays.add;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.git.shared.IndexFile;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -85,8 +88,13 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
   public void showDialog(Project project) {
     this.project = project;
 
+    List<String> selected =
+        Arrays.stream(appContext.getResources())
+            .map(path -> path.getLocation().removeFirstSegments(1).toString())
+            .collect(Collectors.toList());
+
     service
-        .getStatus(project.getLocation())
+        .getStatus(project.getLocation(), selected)
         .then(
             status -> {
               if (status.isClean()) {

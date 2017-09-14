@@ -10,11 +10,15 @@
  */
 package org.eclipse.che.api.git;
 
+import static java.util.Collections.singletonList;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.project.server.VcsStatusProvider;
 
 /**
@@ -42,7 +46,7 @@ public class GitStatusProvider implements VcsStatusProvider {
       Status status =
           gitConnectionFactory
               .getConnection(normalizedPath.split("/")[0])
-              .status(StatusFormat.SHORT);
+              .status(singletonList(normalizedPath.substring(normalizedPath.indexOf("/") + 1)));
       String itemPath = normalizedPath.substring(normalizedPath.indexOf("/") + 1);
       if (status.getUntracked().contains(itemPath)) {
         return VcsStatus.UNTRACKED;
@@ -57,5 +61,30 @@ public class GitStatusProvider implements VcsStatusProvider {
     } catch (GitException e) {
       throw new ServerException(e.getMessage());
     }
+  }
+
+  @Override
+  public Map<String, VcsStatus> getStatus(String project, List<String> paths)
+      throws ServerException {
+    Map<String, VcsStatus> statusMap = new HashMap<>();
+    try {
+      Status status = gitConnectionFactory.getConnection(project).status(paths);
+      paths.forEach(
+          path -> {
+            if (status.getUntracked().contains(path)) {
+              statusMap.put("/" + project + "/" + path, VcsStatus.UNTRACKED);
+            } else if (status.getAdded().contains(path)) {
+              statusMap.put("/" + project + "/" + path, VcsStatus.ADDED);
+            } else if (status.getModified().contains(path) || status.getChanged().contains(path)) {
+              statusMap.put("/" + project + "/" + path, VcsStatus.MODIFIED);
+            } else {
+              statusMap.put("/" + project + "/" + path, VcsStatus.NOT_MODIFIED);
+            }
+          });
+
+    } catch (GitException e) {
+      throw new ServerException(e.getMessage());
+    }
+    return statusMap;
   }
 }

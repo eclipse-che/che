@@ -344,7 +344,7 @@ public class ProjectRegistry {
         //.che folder is reserved for internal use
         if (!".che".equals(folder.getName())
             && !projects.containsKey(folder.getVirtualFile().getPath().toString())) {
-          putProject(null, folder, true, false);
+          putProject(null, folder, true, true);
         }
       }
     } catch (ServerException e) {

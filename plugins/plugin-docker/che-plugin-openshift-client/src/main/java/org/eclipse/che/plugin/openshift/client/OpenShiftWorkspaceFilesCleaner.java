@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.openshift.client;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -21,12 +20,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
+import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,38 +37,39 @@ import org.slf4j.LoggerFactory;
  * <p>Since deleting a workspace does not immediately remove its files, re-creating a workspace with
  * a previously used name can result in files from the previous workspace still being present.
  *
- * @see WorkspaceFilesCleaner
  * @author amisevsk
+ * @author Sergii Leshchenko
  */
 @Singleton
-public class OpenShiftWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
+public class OpenShiftWorkspaceFilesCleaner implements EventSubscriber<WorkspaceRemovedEvent> {
 
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftConnector.class);
-  private static final Set<String> deleteQueue = ConcurrentHashMap.newKeySet();
+
+  private final Set<String> deleteQueue;
   private final String projectNamespace;
   private final String workspacesPvcName;
   private final OpenShiftPvcHelper openShiftPvcHelper;
 
   @Inject
   public OpenShiftWorkspaceFilesCleaner(
-      EventService eventService,
       OpenShiftPvcHelper openShiftPvcHelper,
       @Named("che.openshift.project") String projectNamespace,
       @Named("che.openshift.workspaces.pvc.name") String workspacesPvcName) {
     this.projectNamespace = projectNamespace;
     this.workspacesPvcName = workspacesPvcName;
     this.openShiftPvcHelper = openShiftPvcHelper;
-    eventService.subscribe(
-        new EventSubscriber<ServerIdleEvent>() {
-          @Override
-          public void onEvent(ServerIdleEvent event) {
-            deleteWorkspacesInQueue(event);
-          }
-        });
+    this.deleteQueue = ConcurrentHashMap.newKeySet();
+  }
+
+  @Inject
+  public void subscribe(EventService eventService) {
+    eventService.subscribe(this);
+    eventService.subscribe(event -> deleteWorkspacesInQueue(), ServerIdleEvent.class);
   }
 
   @Override
-  public void clear(Workspace workspace) throws IOException, ServerException {
+  public void onEvent(WorkspaceRemovedEvent event) {
+    Workspace workspace = event.getWorkspace();
     String workspaceName = workspace.getConfig().getName();
     if (isNullOrEmpty(workspaceName)) {
       LOG.error("Could not get workspace name for files removal.");
@@ -79,7 +78,8 @@ public class OpenShiftWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
     deleteQueue.add(workspaceName);
   }
 
-  private void deleteWorkspacesInQueue(ServerIdleEvent event) {
+  @VisibleForTesting
+  void deleteWorkspacesInQueue() {
     List<String> deleteQueueCopy = new ArrayList<>(deleteQueue);
     String[] dirsToDelete = deleteQueueCopy.toArray(new String[deleteQueueCopy.size()]);
 
@@ -94,11 +94,5 @@ public class OpenShiftWorkspaceFilesCleaner implements WorkspaceFilesCleaner {
     if (successful) {
       deleteQueue.removeAll(deleteQueueCopy);
     }
-  }
-
-  /** Clears the list of workspace directories to be deleted. Necessary for testing. */
-  @VisibleForTesting
-  protected static void clearDeleteQueue() {
-    deleteQueue.clear();
   }
 }

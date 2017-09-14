@@ -74,17 +74,30 @@ public class ClasspathManager {
     this.projectManager = projectManager;
     this.terminal = terminal;
     this.notifier = notifier;
-    MavenServerWrapper mavenServer =
-        wrapperManager.getMavenServer(MavenWrapperManager.ServerType.DOWNLOAD);
-    try {
-      localRepository = mavenServer.getLocalRepository();
-    } catch (RuntimeException e) {
-      // We can got this exception if maven not install in system
-      // This is temporary solution will be fix more accurate in https://jira.codenvycorp.com/browse/CHE-1120
-      LOG.warn("Maven server not started looks like you don't have Maven in your path");
-    } finally {
-      wrapperManager.release(mavenServer);
+  }
+
+  /**
+   * Lazy init of the local repository.
+   *
+   * @return the local repository
+   */
+  public synchronized File getLocalRepository() {
+    if (localRepository == null) {
+
+      MavenServerWrapper mavenServer =
+          wrapperManager.getMavenServer(MavenWrapperManager.ServerType.DOWNLOAD);
+      try {
+        localRepository = mavenServer.getLocalRepository();
+      } catch (RuntimeException e) {
+        // We can got this exception if maven not install in system
+        // This is temporary solution will be fix more accurate in https://jira.codenvycorp.com/browse/CHE-1120
+        LOG.warn("Maven server not started looks like you don't have Maven in your path");
+      } finally {
+        wrapperManager.release(mavenServer);
+      }
     }
+
+    return localRepository;
   }
 
   public void updateClasspath(MavenProject mavenProject) {
@@ -143,7 +156,7 @@ public class ClasspathManager {
     if (artifactKey != null) {
       File artifact =
           MavenLocalRepositoryUtil.getFileForArtifact(
-              localRepository,
+              getLocalRepository(),
               artifactKey.getGroupId(),
               artifactKey.getArtifactId(),
               artifactKey.getVersion(),

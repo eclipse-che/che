@@ -16,7 +16,9 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -76,8 +78,12 @@ public class AddToIndexAction extends GitAction {
     final GitOutputConsole console =
         gitOutputConsoleFactory.create(constant.addToIndexCommandName());
     consolesPanelPresenter.addCommandOutput(console);
+    List<String> selected =
+        Arrays.stream(appContext.getResources())
+            .map(path -> path.getLocation().removeFirstSegments(1).toString())
+            .collect(Collectors.toList());
     service
-        .getStatus(appContext.getRootProject().getLocation())
+        .getStatus(appContext.getRootProject().getLocation(), selected)
         .then(
             status -> {
               if (containsInSelected(status.getUntracked())) {

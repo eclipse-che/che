@@ -147,7 +147,8 @@ public class CodenvyEditor {
     public static final String TAB_FILE_NAME_XPATH =
         "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']";
     public static final String TAB_FILE_CLOSE_ICON =
-        "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']/following::div[1]";
+        "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']/following::div[1]";
+
     public static final String ALL_TABS_XPATH =
         "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[string-length(text())>0]";
     public static final String SELECTED_ITEM_IN_EDITOR =

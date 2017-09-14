@@ -16,6 +16,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
+import org.eclipse.che.ide.terminal.TerminalOptionsJso;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -109,9 +110,9 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
      * Will be called when user clicks 'Add new terminal' button
      *
      * @param machineId id of machine in which the terminal will be added
-     * @param source source object that called current method
+     * @param options context creation terminal. @see {@link TerminalOptionsJso}
      */
-    void onAddTerminal(String machineId, Object source);
+    void onAddTerminal(String machineId, TerminalOptionsJso options);
 
     /**
      * Will be called when user clicks 'Preview Ssh' button
