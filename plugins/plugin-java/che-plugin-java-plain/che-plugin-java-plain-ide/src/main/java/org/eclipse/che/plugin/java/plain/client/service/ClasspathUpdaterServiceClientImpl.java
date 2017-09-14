@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.java.plain.client.service;
 
 import static org.eclipse.che.ide.resource.Path.valueOf;
+import static org.eclipse.che.ide.util.PathEncoder.encodePath;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -51,7 +52,7 @@ public class ClasspathUpdaterServiceClientImpl implements ClasspathUpdaterServic
         appContext.getDevMachine().getWsAgentBaseUrl()
             + pathToService
             + "update?projectpath="
-            + valueOf(projectPath).getEncodedPath();
+            + encodePath(valueOf(projectPath));
     return asyncRequestFactory.createPostRequest(url, entries).loader(loader).send();
   }
 }

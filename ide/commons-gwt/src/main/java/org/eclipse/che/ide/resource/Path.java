@@ -13,7 +13,6 @@ package org.eclipse.che.ide.resource;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.nullToEmpty;
-import static com.google.gwt.http.client.URL.encodePathSegment;
 
 import com.google.common.base.Objects;
 import java.util.ArrayList;
@@ -1175,25 +1174,5 @@ public final class Path {
     }
 
     return commonPath;
-  }
-
-  /** Returns path encoded by segments without device. */
-  public String getEncodedPath() {
-    StringBuilder encodedPath = new StringBuilder();
-
-    if (hasLeadingSeparator()) {
-      encodedPath.append(SEPARATOR);
-    }
-
-    for (String segment : segments) {
-      encodedPath.append(encodePathSegment(segment));
-      encodedPath.append(SEPARATOR);
-    }
-
-    if (!isEmpty() && !isRoot() && !hasTrailingSeparator()) {
-      encodedPath.deleteCharAt(encodedPath.length() - 1);
-    }
-
-    return encodedPath.toString();
   }
 }
