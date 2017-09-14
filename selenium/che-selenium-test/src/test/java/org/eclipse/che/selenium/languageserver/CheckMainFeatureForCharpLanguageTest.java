@@ -62,17 +62,17 @@ public class CheckMainFeatureForCharpLanguageTest {
     projectExplorer.waitItem(PROJECT_NAME + "/Program.cs", 240);
     projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndChar(16, 34);
-    for (int i = 0; i < 8; i++) {
+    editor.setCursorToDefinedLineAndChar(24, 12);
+    for (int i = 0; i < 9; i++) {
       editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     }
+    editor.waitMarkerInPosition(ERROR_MARKER, 23);
+    editor.waitMarkerInPosition(ERROR_MARKER, 21);
+    editor.setCursorToDefinedLineAndChar(23, 49);
+    editor.typeTextIntoEditor(".");
     editor.launchAutocomplete();
-    editor.waitTextIntoAutocompleteContainer("Build()");
-    editor.closeAutocomplete();
-    editor.waitMarkerInPosition(ERROR_MARKER, 10);
-    editor.waitMarkerInPosition(ERROR_MARKER, 18);
-    editor.setCursorToDefinedLineAndChar(16, 26);
-    editor.typeTextIntoEditor("Build();");
+    editor.enterAutocompleteProposal("Build() ");
+    editor.typeTextIntoEditor(";");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 }
