@@ -57,8 +57,7 @@ public class InstallerConfigProvisioner implements ConfigurationProvisioner {
   private final String cheServerEndpoint;
 
   @Inject
-  public InstallerConfigProvisioner(
-      @Named("che.infra.openshift.che_server_endpoint") String cheServerEndpoint) {
+  public InstallerConfigProvisioner(@Named("che.api") String cheServerEndpoint) {
     this.cheServerEndpoint = cheServerEndpoint;
   }
 

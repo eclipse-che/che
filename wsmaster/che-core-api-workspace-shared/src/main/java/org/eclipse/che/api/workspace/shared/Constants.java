@@ -57,6 +57,8 @@ public final class Constants {
   public static final String SERVER_STATUS_CHANGED_METHOD = "server/statusChanged";
   public static final String MACHINE_LOG_METHOD = "machine/log";
   public static final String INSTALLER_LOG_METHOD = "installer/log";
+  public static final String INSTALLER_STATUS_CHANGED_METHOD = "installer/statusChanged";
+  public static final String BOOTSTRAPPER_STATUS_CHANGED_METHOD = "bootstrapper/statusChanged";
 
   public static final String SERVER_WS_AGENT_HTTP_REFERENCE = "wsagent/http";
   public static final String SERVER_WS_AGENT_WEBSOCKET_REFERENCE = "wsagent/ws";

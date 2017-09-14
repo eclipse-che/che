@@ -18,7 +18,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.BootstrapperStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.workspace.server.OutputEndpoint;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
@@ -41,14 +40,14 @@ public abstract class AbstractBootstrapper {
       String machineName,
       RuntimeIdentity runtimeIdentity,
       int bootstrappingTimeoutMinutes,
-      String websocketBaseEndpoint,
+      String outputEndpoint,
+      String installerEndpoint,
       EventService eventService) {
     this.machineName = machineName;
     this.bootstrappingTimeoutMinutes = bootstrappingTimeoutMinutes;
     this.eventService = eventService;
-    this.installerEndpoint =
-        websocketBaseEndpoint + InstallerEndpoint.INSTALLER_WEBSOCKET_ENDPOINT_BASE;
-    this.outputEndpoint = websocketBaseEndpoint + OutputEndpoint.OUTPUT_WEBSOCKET_ENDPOINT_BASE;
+    this.installerEndpoint = outputEndpoint;
+    this.outputEndpoint = installerEndpoint;
     this.bootstrapperStatusListener =
         event -> {
           BootstrapperStatus status = event.getStatus();

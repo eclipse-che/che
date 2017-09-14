@@ -39,16 +39,16 @@ public class WorkspaceLinksGenerator {
 
   private final WorkspaceRuntimes workspaceRuntimes;
   private final String cheApiEndpoint;
-  private final String envStatusEndpoint;
+  private final String cheWebsocketEndpoint;
 
   @Inject
   public WorkspaceLinksGenerator(
       WorkspaceRuntimes workspaceRuntimes,
       @Named("che.api") String cheApiEndpoint,
-      @Named("che.websocket.endpoint.base") String cheWsEndpointBase) {
+      @Named("che.websocket.endpoint") String cheWebsocketEndpoint) {
     this.workspaceRuntimes = workspaceRuntimes;
     this.cheApiEndpoint = cheApiEndpoint;
-    this.envStatusEndpoint = cheWsEndpointBase + "/wsmaster/websocket";
+    this.cheWebsocketEndpoint = cheWebsocketEndpoint;
   }
 
   /** Returns 'rel -> url' map of links for the given workspace. */
@@ -83,7 +83,7 @@ public class WorkspaceLinksGenerator {
     if (ctxOpt.isPresent()) {
       try {
         links.put(LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL, ctxOpt.get().getOutputChannel().toString());
-        links.put(LINK_REL_ENVIRONMENT_STATUS_CHANNEL, envStatusEndpoint);
+        links.put(LINK_REL_ENVIRONMENT_STATUS_CHANNEL, cheWebsocketEndpoint);
       } catch (InfrastructureException x) {
         throw new ServerException(x.getMessage(), x);
       }

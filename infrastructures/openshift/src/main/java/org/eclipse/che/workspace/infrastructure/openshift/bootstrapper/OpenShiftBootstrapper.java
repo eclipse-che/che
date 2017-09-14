@@ -52,7 +52,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
       @Assisted RuntimeIdentity runtimeIdentity,
       @Assisted List<InstallerImpl> installers,
       @Assisted OpenShiftMachine openShiftMachine,
-      @Named("che.infra.openshift.che_server_websocket_endpoint_base") String websocketBaseEndpoint,
+      @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.infra.openshift.bootstrapper.binary_url") String bootstrapperBinaryUrl,
       @Named("che.infra.openshift.bootstrapper.timeout_min") int bootstrappingTimeoutMinutes,
       @Named("che.infra.openshift.bootstrapper.installer_timeout_sec") int installerTimeoutSeconds,
@@ -63,7 +63,8 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
         openShiftMachine.getName(),
         runtimeIdentity,
         bootstrappingTimeoutMinutes,
-        websocketBaseEndpoint,
+        cheWebsocketEndpoint,
+        cheWebsocketEndpoint,
         eventService);
     this.bootstrapperBinaryUrl = bootstrapperBinaryUrl;
     this.runtimeIdentity = runtimeIdentity;

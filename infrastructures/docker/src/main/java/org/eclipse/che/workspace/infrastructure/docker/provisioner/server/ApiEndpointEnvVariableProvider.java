@@ -30,7 +30,7 @@ public class ApiEndpointEnvVariableProvider implements ServerEnvironmentVariable
 
   @Inject
   public ApiEndpointEnvVariableProvider(
-      @Named("che.workspace.che_server_endpoint") String apiEndpoint) {
+      @Named("che.infra.docker.master_api_endpoint") String apiEndpoint) {
     String apiEndpointEnvVar = System.getenv(API_ENDPOINT_URL_VARIABLE);
     if (Strings.isNullOrEmpty(apiEndpoint) && !Strings.isNullOrEmpty(apiEndpointEnvVar)) {
       apiEndpoint = apiEndpointEnvVar;
