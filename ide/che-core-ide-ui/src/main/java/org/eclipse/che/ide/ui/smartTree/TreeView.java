@@ -211,10 +211,15 @@ public class TreeView {
     }
 
     Element rootContainer = getNodeContainer(node);
+
+    if (rootContainer == null) {
+      return;
+    }
+
     if (loading) {
       rootContainer.addClassName(tree.getTreeStyles().styles().loading());
     } else {
-      rootContainer.removeClassName(tree.getTreeStyles().styles().loading());
+        rootContainer.removeClassName(tree.getTreeStyles().styles().loading());
     }
   }
 
