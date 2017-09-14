@@ -33,6 +33,7 @@ import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.Variable;
 import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectProblemImpl;
 
 /**
  * Internal Project implementation. It is supposed that it is object always consistent.

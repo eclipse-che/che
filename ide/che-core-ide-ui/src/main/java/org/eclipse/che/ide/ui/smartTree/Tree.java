@@ -1137,50 +1137,56 @@ public class Tree extends FocusWidget
   }
 
   private void onExpand(Node node, NodeDescriptor nodeDescriptor, boolean deep) {
-    if (isLeaf(node)) {
-      return;
-    }
+    Scheduler.get()
+        .scheduleDeferred(
+            () -> {
+              if (isLeaf(node)) {
+                return;
+              }
 
-    if (nodeDescriptor.isLoading()) { //node may have been already requested for expanding
-      return;
-    }
+              if (nodeDescriptor.isLoading()) { //node may have been already requested for expanding
+                return;
+              }
 
-    if (!nodeDescriptor.isExpanded() && nodeLoader != null && (!nodeDescriptor.isLoaded())) {
-      nodeStorage.removeChildren(node);
-      nodeDescriptor.setExpand(true);
-      nodeDescriptor.setExpandDeep(deep);
-      nodeDescriptor.setLoading(true);
-      view.onLoadChange(nodeDescriptor, true);
-      nodeLoader.loadChildren(node);
-      return;
-    }
+              if (!nodeDescriptor.isExpanded()
+                  && nodeLoader != null
+                  && (!nodeDescriptor.isLoaded())) {
+                nodeStorage.removeChildren(node);
+                nodeDescriptor.setExpand(true);
+                nodeDescriptor.setExpandDeep(deep);
+                nodeDescriptor.setLoading(true);
+                view.onLoadChange(nodeDescriptor, true);
+                nodeLoader.loadChildren(node);
+                return;
+              }
 
-    if (!fireCancellableEvent(new BeforeExpandNodeEvent(node))) {
-      if (deep) {
-        nodeDescriptor.setExpandDeep(false);
-      }
+              if (!fireCancellableEvent(new BeforeExpandNodeEvent(node))) {
+                if (deep) {
+                  nodeDescriptor.setExpandDeep(false);
+                }
 
-      return;
-    }
+                return;
+              }
 
-    if (!nodeDescriptor.isExpanded()) {
-      nodeDescriptor.setExpanded(true);
+              if (!nodeDescriptor.isExpanded()) {
+                nodeDescriptor.setExpanded(true);
 
-      if (!nodeDescriptor.isChildrenRendered()) {
-        renderChildren(node);
-        nodeDescriptor.setChildrenRendered(true);
-      }
+                if (!nodeDescriptor.isChildrenRendered()) {
+                  renderChildren(node);
+                  nodeDescriptor.setChildrenRendered(true);
+                }
 
-      //direct expand on the view
-      view.expand(nodeDescriptor);
+                //direct expand on the view
+                view.expand(nodeDescriptor);
 
-      update();
-      fireEvent(new ExpandNodeEvent(node));
-    }
+                update();
+                fireEvent(new ExpandNodeEvent(node));
+              }
 
-    if (deep) {
-      setExpandChildren(node, true);
-    }
+              if (deep) {
+                setExpandChildren(node, true);
+              }
+            });
   }
 
   private void setExpandChildren(Node node, boolean expand) {
