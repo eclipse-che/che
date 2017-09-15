@@ -245,20 +245,24 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
       TextEdit firstEdit = edits.get(0);
       if (completionItem.getInsertTextFormat() == InsertTextFormat.Snippet) {
         Position startPos = firstEdit.getRange().getStart();
-        int startOffset =
-            document.getIndexFromPosition(
-                new TextPosition(startPos.getLine(), startPos.getCharacter()));
+        TextPosition startTextPosition =
+            new TextPosition(startPos.getLine(), startPos.getCharacter());
+        int startOffset = document.getIndexFromPosition(startTextPosition);
         Pair<String, LinkedModel> resolved =
-            new SnippetResolver().resolve(firstEdit.getNewText(), editor, startOffset);
+            new SnippetResolver(new DocumentVariableResolver(document, startTextPosition))
+                .resolve(firstEdit.getNewText(), editor, startOffset);
         firstEdit.setNewText(resolved.first);
         ApplyWorkspaceEditAction.applyTextEdits(document, edits);
         if (resolved.second != null) {
           editor.getLinkedMode().enterLinkedMode(resolved.second);
+          lastSelection = null;
+        } else {
+          lastSelection = computeLastSelection(document, firstEdit);
         }
       } else {
         ApplyWorkspaceEditAction.applyTextEdits(document, edits);
+        lastSelection = computeLastSelection(document, firstEdit);
       }
-      lastSelection = computeLastSelection(document, firstEdit);
     }
 
     private LinearRange computeLastSelection(Document document, TextEdit textEdit) {
@@ -301,7 +305,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     @Override
     public LinearRange getSelection(Document document) {
-      return null; //lastSelection;
+      return lastSelection;
     }
   }
 }

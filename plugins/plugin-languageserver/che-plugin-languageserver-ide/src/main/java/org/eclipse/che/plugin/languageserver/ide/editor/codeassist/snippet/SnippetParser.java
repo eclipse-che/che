@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * A parser for VSCode-style snippets as defined in
+ * https://github.com/Microsoft/vscode/blob/0ebd01213a65231f0af8187acaf264243629e4dc/src/vs/editor/contrib/snippet/browser/snippet.md
+ *
+ * @author Thomas Mäder
+ */
 public class SnippetParser {
   private enum Token {
     DOLLAR,
@@ -39,7 +45,7 @@ public class SnippetParser {
   private Snippet snippet(Function<Token, Boolean> stopOnToken) {
     int start = pos;
     List<Expression> expressions = new ArrayList<>();
-    while (token != Token.EOF && token != Token.CLOSE_BRACE) {
+    while (token != Token.EOF && !stopOnToken.apply(token)) {
       expressions.add(any(stopOnToken));
     }
     return new Snippet(start, pos, expressions);
@@ -85,12 +91,12 @@ public class SnippetParser {
         nextToken();
       }
       return new Placeholder(start, pos, Integer.valueOf(b.toString()), null);
-    } else if (Character.isLetter(value)) {
+    } else if (Character.isLetter(value) || value == '_') {
       StringBuilder b = new StringBuilder();
       b.append(value);
       // var
       nextToken();
-      while (token != Token.EOF && Character.isLetterOrDigit(value)) {
+      while (token != Token.EOF && (Character.isLetterOrDigit(value) || value == '_')) {
         b.append(value);
         nextToken();
       }
@@ -126,13 +132,13 @@ public class SnippetParser {
       } else {
         return new Placeholder(start, pos, Integer.valueOf(b.toString()), null);
       }
-    } else if (Character.isLetter(value)) {
+    } else if (Character.isLetterOrDigit(value) || value == '_') {
       // var
       StringBuilder b = new StringBuilder();
       b.append(value);
       // var
       nextToken();
-      while (token != Token.EOF && Character.isLetterOrDigit(value)) {
+      while (token != Token.EOF && (Character.isLetterOrDigit(value) || value == '_')) {
         b.append(value);
         nextToken();
       }
@@ -162,6 +168,9 @@ public class SnippetParser {
         b.append(value);
         nextToken();
       }
+    }
+    if (token == Token.PIPE) {
+      nextToken();
     }
     choices.add(b.toString());
     inChoice = false;

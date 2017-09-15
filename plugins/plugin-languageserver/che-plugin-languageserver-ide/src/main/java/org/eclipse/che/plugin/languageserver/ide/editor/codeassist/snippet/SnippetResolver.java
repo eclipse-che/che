@@ -14,6 +14,12 @@ import org.eclipse.che.ide.util.Pair;
 
 public class SnippetResolver {
 
+  private VariableResolver varResolver;
+
+  public SnippetResolver(VariableResolver varResolver) {
+    this.varResolver = varResolver;
+  }
+
   private static class TabStop {
     List<Position> positions = new ArrayList<>();
     List<String> values = new ArrayList<>();
@@ -47,8 +53,8 @@ public class SnippetResolver {
 
           @Override
           public void visit(Variable e) {
-            if (isVar(e.getName())) {
-              String v = resolveVar(e.getName());
+            if (varResolver.isVar(e.getName())) {
+              String v = varResolver.resolve(e.getName());
               if (v == null) {
                 if (e.getValue() != null) {
                   e.getValue().accept(this);
@@ -60,7 +66,7 @@ public class SnippetResolver {
               }
             } else {
               TabStop group = new TabStop();
-              group.addPosition(new Position(startPosition + b.length() - 1, e.getName().length()));
+              group.addPosition(new Position(startPosition + b.length(), e.getName().length()));
               groups.put(nextArtificialGroup++, group);
               b.append(e.getName());
             }
@@ -132,15 +138,5 @@ public class SnippetResolver {
     } else {
       return Pair.of(b.toString(), null);
     }
-  }
-
-  protected String resolveVar(String name) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  private boolean isVar(String name) {
-    // TODO Auto-generated method stub
-    return false;
   }
 }

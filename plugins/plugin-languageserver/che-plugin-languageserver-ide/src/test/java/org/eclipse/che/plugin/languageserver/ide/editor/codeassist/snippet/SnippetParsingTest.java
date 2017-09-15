@@ -39,9 +39,17 @@ public class SnippetParsingTest {
   }
 
   @Test
-  public void choice() {
+  public void testChoice() {
+    testParseAndRender("${3:|foo,bar,zoz|}", snippet(placeholder(choice())));
     testParseAndRender(
-        "${3:|foo,bar,zoz|}", e(Snippet.class, e(Placeholder.class, e(Choice.class))));
+        "{ ${1:somevalue}    ${2:|first,second,third|} ${3:some text $4}",
+        snippet(
+            text(),
+            placeholder(snippet(text())),
+            text(),
+            placeholder(choice()),
+            text(),
+            placeholder(snippet(text(), placeholder()))));
   }
 
   @Test
@@ -76,8 +84,8 @@ public class SnippetParsingTest {
     StringWriter out = new StringWriter();
     snippet.accept(new ExpressionPrinter(out));
     System.out.println(out.toString());
-    assertEquals(snippetText, out.toString());
     assertSame(testExpression, snippet);
+    assertEquals(snippetText, out.toString());
   }
 
   private static class TestExpression {
@@ -161,5 +169,25 @@ public class SnippetParsingTest {
 
   private TestExpression e(Class<?> type, TestExpression... children) {
     return new TestExpression(type, Arrays.asList(children));
+  }
+
+  private TestExpression snippet(TestExpression... children) {
+    return e(Snippet.class, children);
+  }
+
+  private TestExpression placeholder(TestExpression child) {
+    return e(Placeholder.class, child);
+  }
+
+  private TestExpression placeholder() {
+    return e(Placeholder.class);
+  }
+
+  private TestExpression text() {
+    return e(Text.class);
+  }
+
+  private TestExpression choice() {
+    return e(Choice.class);
   }
 }
