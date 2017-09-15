@@ -24,7 +24,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
@@ -54,7 +53,6 @@ import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent.HasExpandItemHandl
 import org.eclipse.che.ide.ui.smartTree.event.FocusEvent;
 import org.eclipse.che.ide.ui.smartTree.event.NodeAddedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.NodeAddedEvent.HasNodeAddedEventHandlers;
-import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.StoreAddEvent;
 import org.eclipse.che.ide.ui.smartTree.event.StoreAddEvent.StoreAddHandler;
 import org.eclipse.che.ide.ui.smartTree.event.StoreClearEvent;
