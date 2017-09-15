@@ -64,8 +64,7 @@ public class WorkspaceLinksGeneratorTest {
     expectedStoppedLinks.put(LINK_REL_IDE_URL, "http://localhost/my-namespace/my-name");
 
     expectedRunningLinks = new HashMap<>(expectedStoppedLinks);
-    expectedRunningLinks.put(
-        LINK_REL_ENVIRONMENT_STATUS_CHANNEL, "ws://localhost/wsmaster/websocket");
+    expectedRunningLinks.put(LINK_REL_ENVIRONMENT_STATUS_CHANNEL, "ws://localhost");
     expectedRunningLinks.put(
         LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL, "ws://localhost/output/websocket");
   }

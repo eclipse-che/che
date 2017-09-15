@@ -16,6 +16,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import com.google.common.annotations.Beta;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
@@ -35,6 +36,7 @@ public class MutableProjectConfig implements ProjectConfig {
   private Map<String, String> options;
   private List<NewProjectConfig> projects;
   private List<CommandDto> commands;
+  private List<? extends ProjectProblem> problems;
 
   public MutableProjectConfig(ProjectConfig source) {
     name = source.getName();
@@ -44,6 +46,7 @@ public class MutableProjectConfig implements ProjectConfig {
     mixins = newArrayList(source.getMixins());
     attributes = newHashMap(source.getAttributes());
     sourceStorage = new MutableSourceStorage(source.getSource());
+    problems = source.getProblems();
   }
 
   public MutableProjectConfig() {}
@@ -117,6 +120,11 @@ public class MutableProjectConfig implements ProjectConfig {
     }
 
     return sourceStorage;
+  }
+
+  @Override
+  public List<? extends ProjectProblem> getProblems() {
+    return problems;
   }
 
   public void setSource(SourceStorage sourceStorage) {

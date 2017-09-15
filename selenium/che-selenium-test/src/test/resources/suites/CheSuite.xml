@@ -138,6 +138,7 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest"/>
+            <class name="org.eclipse.che.selenium.debugger.ThreadDumpTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteFeaturesInEditorTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteJSFilesTest">
                 <methods>

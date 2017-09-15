@@ -35,6 +35,31 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
   }
 
   /**
+   * Create a new default machine.
+   *
+   * @param {che.IWorkspaceEnvironment} environment
+   *
+   * @return {IEnvironmentManagerMachine}
+   */
+  createNewDefaultMachine(environment: che.IWorkspaceEnvironment): IEnvironmentManagerMachine {
+    this.$log.error('EnvironmentManager: cannot create a new machine.');
+    return null;
+  }
+
+  /**
+   * Add machine.
+   *
+   * @param {che.IWorkspaceEnvironment} environment
+   * @param {IEnvironmentManagerMachine} machine
+   *
+   * @return {che.IWorkspaceEnvironment}
+   */
+  addMachine(environment: che.IWorkspaceEnvironment, machine: IEnvironmentManagerMachine): che.IWorkspaceEnvironment {
+    this.$log.error('EnvironmentManager: cannot add machine.');
+    return environment;
+  }
+
+  /**
    * Retrieves the list of machines.
    *
    * @param {che.IWorkspaceEnvironment} environment environment's configuration

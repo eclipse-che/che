@@ -13,10 +13,11 @@ package org.eclipse.che.ide.project;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
 import static com.google.gwt.http.client.RequestBuilder.PUT;
-import static com.google.gwt.safehtml.shared.UriUtils.encodeAllowEscapes;
+import static com.google.gwt.http.client.URL.encodePathSegment;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
+import static org.eclipse.che.ide.util.PathEncoder.encodePath;
 
 import com.google.inject.Inject;
 import java.util.Collections;
@@ -114,8 +115,7 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<SourceEstimation> estimate(Path path, String pType) {
-    final String url =
-        encodeAllowEscapes(getBaseUrl() + ESTIMATE + path(path.toString()) + "?type=" + pType);
+    final String url = getBaseUrl() + ESTIMATE + encodePath(path) + "?type=" + pType;
 
     return reqFactory
         .createGetRequest(url)
@@ -134,7 +134,7 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<List<SourceEstimation>> resolveSources(Path path) {
-    final String url = encodeAllowEscapes(getBaseUrl() + RESOLVE + path(path.toString()));
+    final String url = getBaseUrl() + RESOLVE + encodePath(path);
 
     return reqFactory
         .createGetRequest(url)
@@ -155,7 +155,7 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<Void> importProject(Path path, SourceStorageDto source) {
-    String url = encodeAllowEscapes(getBaseUrl() + IMPORT + path(path.toString()));
+    String url = getBaseUrl() + IMPORT + encodePath(path);
 
     return reqFactory.createPostRequest(url, source).header(CONTENT_TYPE, APPLICATION_JSON).send();
   }
@@ -170,11 +170,8 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<List<SearchResult>> search(QueryExpression expression) {
-    final String url =
-        encodeAllowEscapes(
-            getBaseUrl()
-                + SEARCH
-                + (isNullOrEmpty(expression.getPath()) ? Path.ROOT : path(expression.getPath())));
+    Path prjPath = isNullOrEmpty(expression.getPath()) ? Path.ROOT : new Path(expression.getPath());
+    final String url = getBaseUrl() + SEARCH + encodePath(prjPath.addLeadingSeparator());
 
     StringBuilder queryParameters = new StringBuilder();
     if (expression.getName() != null && !expression.getName().isEmpty()) {
@@ -254,7 +251,7 @@ public class ProjectServiceClient {
    */
   public Promise<List<ProjectConfigDto>> createBatchProjects(
       List<NewProjectConfigDto> configurations) {
-    final String url = encodeAllowEscapes(getBaseUrl() + BATCH_PROJECTS);
+    final String url = getBaseUrl() + BATCH_PROJECTS;
     final String loaderMessage =
         configurations.size() > 1 ? "Creating the batch of projects..." : "Creating project...";
     return reqFactory
@@ -276,8 +273,11 @@ public class ProjectServiceClient {
    */
   public Promise<ItemReference> createFile(Path path, String content) {
     final String url =
-        encodeAllowEscapes(
-            getBaseUrl() + FILE + path(path.parent().toString()) + "?name=" + path.lastSegment());
+        getBaseUrl()
+            + FILE
+            + encodePath(path.parent())
+            + "?name="
+            + encodePathSegment(path.lastSegment());
 
     return reqFactory
         .createPostRequest(url, null)
@@ -295,7 +295,7 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<String> getFileContent(Path path) {
-    final String url = encodeAllowEscapes(getBaseUrl() + FILE + path(path.toString()));
+    final String url = getBaseUrl() + FILE + encodePath(path);
 
     return reqFactory.createGetRequest(url).send(new StringUnmarshaller());
   }
@@ -310,7 +310,7 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<Void> setFileContent(Path path, String content) {
-    final String url = encodeAllowEscapes(getBaseUrl() + FILE + path(path.toString()));
+    final String url = getBaseUrl() + FILE + encodePath(path);
 
     return reqFactory.createRequest(PUT, url, null, false).data(content).send();
   }
@@ -325,7 +325,7 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<ItemReference> createFolder(Path path) {
-    final String url = encodeAllowEscapes(getBaseUrl() + FOLDER + path(path.toString()));
+    final String url = getBaseUrl() + FOLDER + encodePath(path);
 
     return reqFactory
         .createPostRequest(url, null)
@@ -342,11 +342,11 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<Void> deleteItem(Path path) {
-    final String url = encodeAllowEscapes(getBaseUrl() + path(path.toString()));
+    final String url = getBaseUrl() + encodePath(path);
 
     return reqFactory
         .createRequest(DELETE, url, null, false)
-        .loader(loaderFactory.newLoader("Deleting project..."))
+        .loader(loaderFactory.newLoader("Deleting resource..."))
         .send();
   }
 
@@ -362,9 +362,7 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<Void> copy(Path source, Path target, String newName, boolean overwrite) {
-    final String url =
-        encodeAllowEscapes(
-            getBaseUrl() + COPY + path(source.toString()) + "?to=" + target.toString());
+    final String url = getBaseUrl() + COPY + encodePath(source) + "?to=" + encodePath(target);
 
     final CopyOptions copyOptions = dtoFactory.createDto(CopyOptions.class);
     copyOptions.setName(newName);
@@ -388,9 +386,7 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<Void> move(Path source, Path target, String newName, boolean overwrite) {
-    final String url =
-        encodeAllowEscapes(
-            getBaseUrl() + MOVE + path(source.toString()) + "?to=" + target.toString());
+    final String url = getBaseUrl() + MOVE + encodePath(source) + "?to=" + encodePath(target);
 
     final MoveOptions moveOptions = dtoFactory.createDto(MoveOptions.class);
     moveOptions.setName(newName);
@@ -415,14 +411,13 @@ public class ProjectServiceClient {
    */
   public Promise<TreeElement> getTree(Path path, int depth, boolean includeFiles) {
     final String url =
-        encodeAllowEscapes(
-            getBaseUrl()
-                + TREE
-                + path(path.toString())
-                + "?depth="
-                + depth
-                + "&includeFiles="
-                + includeFiles);
+        getBaseUrl()
+            + TREE
+            + encodePath(path.addLeadingSeparator())
+            + "?depth="
+            + depth
+            + "&includeFiles="
+            + includeFiles;
 
     // temporary workaround for CHE-3467, remove loader for disable UI blocking
     // later this loader should be added with the new mechanism of client-server synchronization
@@ -443,7 +438,7 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<ItemReference> getItem(Path path) {
-    final String url = encodeAllowEscapes(getBaseUrl() + ITEM + path(path.toString()));
+    final String url = getBaseUrl() + ITEM + encodePath(path);
 
     return reqFactory
         .createGetRequest(url)
@@ -462,7 +457,7 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<ProjectConfigDto> getProject(Path path) {
-    final String url = encodeAllowEscapes(getBaseUrl() + path(path.toString()));
+    final String url = getBaseUrl() + encodePath(path);
 
     return reqFactory
         .createGetRequest(url)
@@ -481,7 +476,8 @@ public class ProjectServiceClient {
    * @since 4.4.0
    */
   public Promise<ProjectConfigDto> updateProject(ProjectConfigDto configuration) {
-    final String url = encodeAllowEscapes(getBaseUrl() + path(configuration.getPath()));
+    Path prjPath = new Path(configuration.getPath());
+    final String url = getBaseUrl() + encodePath(prjPath.addLeadingSeparator());
 
     return reqFactory
         .createRequest(PUT, url, configuration, false)
@@ -500,24 +496,5 @@ public class ProjectServiceClient {
    */
   private String getBaseUrl() {
     return appContext.getWsAgentServerApiEndpoint() + PROJECT;
-  }
-
-  /**
-   * Normalizes the path by adding a leading '/' if it doesn't exist. Also escapes some special
-   * characters.
-   *
-   * <p>See following javascript functions for details: escape() will not encode: @ * / +
-   * encodeURI() will not encode: ~ ! @ # $ & * ( ) = : / , ; ? + ' encodeURIComponent() will not
-   * encode: ~ ! * ( ) '
-   *
-   * @param path path to normalize
-   * @return normalized path
-   */
-  private String path(String path) {
-    while (path.indexOf('+') >= 0) {
-      path = path.replace("+", "%2B");
-    }
-
-    return path.startsWith("/") ? path : '/' + path;
   }
 }

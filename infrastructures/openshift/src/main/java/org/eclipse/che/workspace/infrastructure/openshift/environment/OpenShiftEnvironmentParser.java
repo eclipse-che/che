@@ -36,6 +36,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalEnvironment.InternalReci
 import org.eclipse.che.api.workspace.server.spi.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.ServerExposer;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment.Builder;
 
 /**
  * Parses {@link InternalEnvironment} into {@link OpenShiftEnvironment}.
@@ -50,6 +51,11 @@ import org.eclipse.che.workspace.infrastructure.openshift.ServerExposer;
  * @author Sergii Leshchenko
  */
 public class OpenShiftEnvironmentParser {
+
+  static final int ROUTE_IGNORED_WARNING_CODE = 4100;
+  static final String ROUTES_IGNORED_WARNING_MESSAGE =
+      "Routes specified in OpenShift recipe are ignored. "
+          + "To expose ports please define servers in machine configuration.";
 
   static final String DEFAULT_RESTART_POLICY = "Never";
 
@@ -93,8 +99,8 @@ public class OpenShiftEnvironmentParser {
 
     Map<String, Pod> pods = new HashMap<>();
     Map<String, Service> services = new HashMap<>();
-    Map<String, Route> routes = new HashMap<>();
     Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
+    boolean isAnyRoutePresent = false;
     for (HasMetadata object : list.getItems()) {
       if (object instanceof DeploymentConfig) {
         throw new ValidationException("Supporting of deployment configs is not implemented yet.");
@@ -105,26 +111,32 @@ public class OpenShiftEnvironmentParser {
         Service service = (Service) object;
         services.put(service.getMetadata().getName(), service);
       } else if (object instanceof Route) {
-        Route route = (Route) object;
-        routes.put(route.getMetadata().getName(), route);
+        isAnyRoutePresent = true;
       } else if (object instanceof PersistentVolumeClaim) {
         PersistentVolumeClaim pvc = (PersistentVolumeClaim) object;
         pvcs.put(pvc.getMetadata().getName(), pvc);
       } else {
         throw new ValidationException(
-            String.format("Found unknown object type '%s'", object.getMetadata()));
+            format("Found unknown object type '%s'", object.getMetadata()));
       }
     }
 
-    OpenShiftEnvironment openShiftEnvironment =
-        new OpenShiftEnvironment()
-            .withPods(pods)
-            .withServices(services)
-            .withRoutes(routes)
-            .withPersistentVolumeClaims(pvcs);
-    normalizeEnvironment(openShiftEnvironment, environment);
+    Builder openShiftEnvBuilder =
+        OpenShiftEnvironment.builder()
+            .setPods(pods)
+            .setServices(services)
+            .setPersistentVolumeClaims(pvcs);
 
-    return openShiftEnvironment;
+    if (isAnyRoutePresent) {
+      environment.addWarning(
+          new WarningImpl(ROUTE_IGNORED_WARNING_CODE, ROUTES_IGNORED_WARNING_MESSAGE));
+    }
+
+    OpenShiftEnvironment openShiftEnv = openShiftEnvBuilder.build();
+
+    normalizeEnvironment(openShiftEnv, environment);
+
+    return openShiftEnv;
   }
 
   private void normalizeEnvironment(

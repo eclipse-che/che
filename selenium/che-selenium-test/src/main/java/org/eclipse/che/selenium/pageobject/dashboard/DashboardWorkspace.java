@@ -43,14 +43,19 @@ public class DashboardWorkspace {
   private final DashboardProject dashboardProject;
 
   public interface TabNames {
-
-    String SETTINGS = "Settings";
     String WS_CONFIG = "Workspace Config";
     String RUNTIME = "Runtime";
     String STACK_LIBRARY = "Stack library";
     String STACK_IMPORT = "Stack import";
     String STACK_AUTHORING = "Stack authoring";
+    String OVERVIEW = "Overview";
     String PROJECTS = "Projects";
+    String MACHINES = "Machines";
+    String AGENTS = "Agents";
+    String SERVERS = "Servers";
+    String ENV_VARIABLES = "Env Variables";
+    String CONFIG = "Config";
+    String SSH = "Ssh";
     String SHARE = "Share";
   }
 
@@ -93,7 +98,7 @@ public class DashboardWorkspace {
     String NEW_WORKSPACE_BTN =
         "//a[contains(@ng-href, 'create-workspace')]/span[text()='Add Workspace']";
     String TOOLBAR_TITLE_NAME =
-        "//div[contains(@class,'che-toolbar-title')]/span[contains(text(),'%s')]";
+        "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
     String WORKSPACES_LIST = "//ng-transclude[@class='che-list-content']";
     String WORKSPACE_ITEM_NAME =
         "//div[contains(@class, 'che-list-item-name')]/span[contains(text(),'%s')]";
@@ -109,19 +114,18 @@ public class DashboardWorkspace {
     String RECIPE_URL_FIELD = "//input[@placeholder='URL of the Recipe']";
     String OPEN_IN_IDE_WS_BTN = "//che-button-default[@che-button-title='Open']";
     String STACK_NAME_XPATH = "//md-card[contains(@ng-class,'%s')]";
-    String NAME_WORKSPACE_INPUT = "//input[@placeholder='Name of the workspace']";
+    String NAME_WORKSPACE_INPUT = "//input[@placeholder='Name of the workspace *']";
     String RUN_WORKSPACE_BTN = "//button/span[text()='Run']";
     String STOP_WORKSPACE_BTN = "//button/span[contains(text(),'Stop')]";
     String DELETE_WORKSPACE_BTN = "//button/span[text()='Delete']";
-    String STATE_WORKSPACE = "//span[text()='%s']";
-    String WORKSPACE_TITLE = "//span[contains(@class,'che-toolbar-title-label') and text()='%s']";
+    String STATE_WORKSPACE = "//div[contains(@class, 'workspace-status')]/span[text()='%s']";
+    String WORKSPACE_TITLE = "//div[contains(@class,'toolbar-info')]/span[text()='%s']";
     String DELETE_BTN_DIALOG_WIND =
         "//button[@ng-click='cheConfirmDialogController.hide()']//span[text()='Delete']";
-    String RAM_WORKSPACE = "//input[contains(@ng-model, 'cheWorkspaceRamAllocation')]";
     String CREATE_WS_FROM_STACK =
         "//md-radio-button[@aria-label='Create new workspace from stack']";
     String STACK_LIBRARY_ITEM = "//div[text()='%s']";
-    String SAVE_BUTTON = "//md-toolbar//span[text()='Save']";
+    String SAVE_BUTTON = "//che-button-save-flat//span[text()='Save']";
     String RESENT_WS_NAVBAR = "//div[@class='admin-navbar-menu recent-workspaces']";
     String LEFT_SIDE_BAR = "//div[@class='left-sidebar-container']";
     String ADD_DEVLOPER_BTN = "//span[text()='Add Developer']";
@@ -135,11 +139,13 @@ public class DashboardWorkspace {
     String WARNING_MSG = "//div[@class='workspace-environments-input']//div[text()='%s']";
     String CONFIG_MACHINE_SWITCH =
         "//div[text()='%s']//following::div[@class='config-dev-machine-switch ng-scope'][1]";
-    String TAB_NAMES_IN_WS = "//md-tab-item//span[text()='%s']";
+    String TAB_NAMES_IN_WS = "//md-pagination-wrapper//span[text()='%s']";
     String RECIPE_EDITOR =
         "//div[contains(@class, 'recipe-editor')]//div[@class='CodeMirror-code']";
     String WARNING_DIALOG_DELETE = "//div[@class='ng-binding' and text()=\"%s\"]";
     String WS_TIMEOUT_MESSAGE = "//div[@che-label-name='Idle timeout']//div[@ng-transclude]";
+    String RAM_WORKSPACE = "//input[contains(@name, 'memory')]";
+    String CANCEL_BUTTON = "//che-popup[@title='Remove machine']//button";
   }
 
   public enum StateWorkspace {
@@ -392,8 +398,7 @@ public class DashboardWorkspace {
    * @param ram is value of RAM
    */
   public void enterRamWorkspace(int ram) {
-    String ramValue =
-        "//div[@class='che-ram-allocation-slider ng-isolate-scope ng-valid']//div[@class='ng-binding']";
+    String ramValue = "//input[@name='memory']";
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(ramWorkspace))
         .clear();

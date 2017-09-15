@@ -24,12 +24,14 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import elemental.events.Event;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.core.model.factory.Factory;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -50,6 +52,7 @@ import org.eclipse.che.ide.api.selection.SelectionChangedEvent;
 import org.eclipse.che.ide.api.selection.SelectionChangedHandler;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
@@ -60,6 +63,7 @@ import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.ui.smartTree.data.HasDataObject;
+import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -70,11 +74,7 @@ import org.eclipse.che.ide.util.loging.Log;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class AppContextImpl
-    implements AppContext,
-        SelectionChangedHandler,
-        ResourceChangedHandler,
-        WorkspaceStoppedEvent.Handler {
+public class AppContextImpl implements AppContext, SelectionChangedHandler, ResourceChangedHandler {
 
   private final List<String> projectsInImport;
   private final EventBus eventBus;
@@ -115,9 +115,17 @@ public class AppContextImpl
 
     eventBus.addHandler(ProjectTypesLoadedEvent.TYPE, e -> initResourceManager());
 
+    WorkspaceStateHandler workspaceStateHandler = new WorkspaceStateHandler();
+
     eventBus.addHandler(SelectionChangedEvent.TYPE, this);
     eventBus.addHandler(ResourceChangedEvent.getType(), this);
-    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, workspaceStateHandler);
+    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, workspaceStateHandler);
+
+    // in some cases IDE doesn't save preferences on window close
+    // so try to save if window lost focus
+    Elements.getWindow()
+        .addEventListener(Event.BLUR, evt -> appStateManager.get().persistWorkspaceState());
   }
 
   private static native String getMasterApiPathFromIDEConfig() /*-{
@@ -193,12 +201,7 @@ public class AppContextImpl
   }
 
   private void initResourceManager() {
-    if (!rootProjects.isEmpty()) {
-      for (Project project : rootProjects) {
-        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
-      }
-      rootProjects.clear();
-    }
+    clearProjects();
 
     resourceManager = resourceManagerFactory.newResourceManager();
     resourceManager
@@ -391,25 +394,18 @@ public class AppContextImpl
   }
 
   @Override
-  public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-    appStateManager
-        .get()
-        .persistWorkspaceState()
-        .then(
-            ignored -> {
-              for (Project project : rootProjects) {
-                eventBus.fireEvent(
-                    new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED)));
-              }
-
-              rootProjects.clear();
-              resourceManager = null;
-            });
-  }
-
-  @Override
   public String getMasterApiEndpoint() {
     return getMasterApiPathFromIDEConfig();
+  }
+
+  private void clearProjects() {
+    if (!rootProjects.isEmpty()) {
+      rootProjects.forEach(
+          project ->
+              eventBus.fireEvent(
+                  new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED))));
+      rootProjects.clear();
+    }
   }
 
   @Override
@@ -445,5 +441,30 @@ public class AppContextImpl
       properties = new HashMap<>();
     }
     return properties;
+  }
+
+  private class WorkspaceStateHandler
+      implements WorkspaceStoppedEvent.Handler, WorkspaceStoppingEvent.Handler {
+
+    Promise<Void> persistWorkspaceStatePromise;
+
+    @Override
+    public void onWorkspaceStopping(WorkspaceStoppingEvent event) {
+      persistWorkspaceStatePromise = appStateManager.get().persistWorkspaceState();
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+      if (persistWorkspaceStatePromise != null) {
+        persistWorkspaceStatePromise.then(
+            arg -> {
+              clearProjects();
+              resourceManager = null;
+            });
+      } else {
+        clearProjects();
+        resourceManager = null;
+      }
+    }
   }
 }

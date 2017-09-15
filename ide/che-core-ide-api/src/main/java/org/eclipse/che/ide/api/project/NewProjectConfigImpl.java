@@ -13,9 +13,11 @@ package org.eclipse.che.ide.api.project;
 import static java.util.Collections.emptyMap;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
@@ -171,5 +173,10 @@ public class NewProjectConfigImpl implements NewProjectConfig {
   @Override
   public SourceStorage getSource() {
     return sourceStorage;
+  }
+
+  @Override
+  public List<ProjectProblem> getProblems() {
+    return Collections.emptyList();
   }
 }

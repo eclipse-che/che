@@ -283,7 +283,6 @@ public class CheckoutToRemoteBranchTest {
   private void checkChangesIntoCompareForm(String expText) {
     git.clickOnGroupCompareButton();
     git.waitGitCompareFormIsOpen();
-    git.toSwitchFrameGitCompareForm();
     git.waitExpTextIntoCompareLeftEditor(expText);
     git.waitTextNotPresentIntoCompareRightEditor(expText);
   }

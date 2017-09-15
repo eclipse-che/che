@@ -92,7 +92,9 @@ public class EditorMultiPartStackViewImpl extends ResizeComposite
       splitEditorPartView.removeFromParent();
     }
     if (splitEditorParts.size() == 0) {
+      contentPanel.remove(rootView);
       contentPanel.add(emptyEditorsPanel);
+      rootView = null;
     }
   }
 

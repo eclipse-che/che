@@ -95,6 +95,7 @@ public interface ProjectConfigDto extends ProjectConfig {
     value =
         "Optional information about project errors. If project doesn't have any error this field is empty"
   )
+  @Override
   List<ProjectProblemDto> getProblems();
 
   /** @see #getProblems */

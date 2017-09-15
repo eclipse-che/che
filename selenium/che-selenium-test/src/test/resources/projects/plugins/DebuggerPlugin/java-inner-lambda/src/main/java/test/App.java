@@ -39,7 +39,7 @@ public class App {
         };
 
         System.out.println(anonym.getAppValue());
-
+        System.out.println(new App().getAppValue());
         System.out.println(anonym.new Inner().getInnerValue());
 
         System.out.println(new StaticInner().getStaticInnerValue());

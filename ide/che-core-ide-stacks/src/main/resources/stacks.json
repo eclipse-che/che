@@ -2372,7 +2372,7 @@
           "goal": "Run"
         }
       }, {
-        "commandLine": "scl enable rh-maven33 'mvn vertx:debug -f ${current.project.path}'",
+        "commandLine": "scl enable rh-maven33 'mvn compile vertx:debug -f ${current.project.path}'",
         "name": "debug",
         "type": "custom",
         "attributes": {
@@ -3020,7 +3020,7 @@
             }
           },
           "recipe": {
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: web\n  spec:\n    containers:\n      -\n        image: rhche/centos_jdk8:latest\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: db\n    label:\n      type: db\n  spec:\n    containers:\n      -\n        image: centos/mysql-57-centos7\n        name: main\n        ports:\n          -\n            name: mysql\n            containerPort: 3306\n            protocol: TCP\n-\n  apiVersion: v1\n  kind: Service\n  metadata:\n    name: mysql\n  spec:\n    selector:\n      type: db\n    ports:\n      - name: mysql\n        port: 3306\n        protocol: TCP\n        targetPort: mysql",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: web\n  spec:\n    containers:\n      -\n        image: rhche/centos_jdk8:latest\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: db\n    labels:\n      type: db\n  spec:\n    containers:\n      -\n        image: centos/mysql-57-centos7\n        name: main\n        ports:\n          -\n            name: mysql\n            containerPort: 3306\n            protocol: TCP\n        env:\n          - \n            name: MYSQL_USER\n            value: 'petclinic'\n          - \n            name: MYSQL_ROOT_PASSWORD\n            value: 'password'\n          - \n            name: MYSQL_PASSWORD\n            value: 'password'\n          - \n            name: MYSQL_DATABASE\n            value: 'petclinic'\n\n-\n  apiVersion: v1\n  kind: Service\n  metadata:\n    name: db\n  spec:\n    selector:\n      type: db\n    ports:\n      - name: mysql\n        port: 3306\n        protocol: TCP\n        targetPort: mysql",
             "contentType": "application/x-yaml",
             "type": "openshift"
           }

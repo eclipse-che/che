@@ -22,10 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.type.Attribute;
-import org.eclipse.che.api.project.server.RegisteredProject.Problem;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 
 /** @author gazarenkov */
 public class ProjectTypes {
@@ -36,14 +37,14 @@ public class ProjectTypes {
   private final Map<String, ProjectTypeDef> mixins;
   private final Map<String, ProjectTypeDef> all;
   private final Map<String, Attribute> attributeDefs;
-  private final List<Problem> problems;
+  private final List<ProjectProblem> problems;
 
   ProjectTypes(
       String projectPath,
       String type,
       List<String> mixinTypes,
       ProjectTypeRegistry projectTypeRegistry,
-      List<Problem> problems) {
+      List<ProjectProblem> problems) {
     mixins = new HashMap<>();
     all = new HashMap<>();
     attributeDefs = new HashMap<>();
@@ -55,7 +56,7 @@ public class ProjectTypes {
     ProjectTypeDef tmpPrimary;
     if (type == null) {
       this.problems.add(
-          new Problem(
+          new ProjectProblemImpl(
               PROJECT_TYPE_IS_NOT_REGISTERED,
               "No primary type defined for " + projectPath + " Base Project Type assigned."));
       tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
@@ -64,7 +65,7 @@ public class ProjectTypes {
         tmpPrimary = projectTypeRegistry.getProjectType(type);
       } catch (NotFoundException e) {
         this.problems.add(
-            new Problem(
+            new ProjectProblemImpl(
                 PROJECT_TYPE_IS_NOT_REGISTERED,
                 "Primary type "
                     + type
@@ -76,7 +77,7 @@ public class ProjectTypes {
 
       if (!tmpPrimary.isPrimaryable()) {
         this.problems.add(
-            new Problem(
+            new ProjectProblemImpl(
                 PROJECT_TYPE_IS_NOT_REGISTERED,
                 "Project type "
                     + tmpPrimary.getId()
@@ -108,7 +109,7 @@ public class ProjectTypes {
         mixin = projectTypeRegistry.getProjectType(mixinFromConfig);
       } catch (NotFoundException e) {
         this.problems.add(
-            new Problem(
+            new ProjectProblemImpl(
                 PROJECT_TYPE_IS_NOT_REGISTERED,
                 "Project type " + mixinFromConfig + " is not registered. Skipped."));
         continue;
@@ -116,7 +117,7 @@ public class ProjectTypes {
 
       if (!mixin.isMixable()) {
         this.problems.add(
-            new Problem(
+            new ProjectProblemImpl(
                 PROJECT_TYPE_IS_NOT_REGISTERED,
                 "Project type "
                     + mixin
@@ -134,7 +135,7 @@ public class ProjectTypes {
         final Attribute attribute = attributeDefs.get(attrName);
         if (attribute != null && !attribute.getProjectType().equals(attr.getProjectType())) {
           this.problems.add(
-              new Problem(
+              new ProjectProblemImpl(
                   ATTRIBUTE_NAME_PROBLEM,
                   format(
                       "Attribute name conflict. Duplicated attributes detected for %s. "
@@ -219,7 +220,7 @@ public class ProjectTypes {
           // check whether it's the same attribute that comes from the common parent PT, e.g. from Base PT.
           if (attribute != null && !attribute.getProjectType().equals(attr.getProjectType())) {
             problems.add(
-                new Problem(
+                new ProjectProblemImpl(
                     ATTRIBUTE_NAME_PROBLEM,
                     format(
                         "Attribute name conflict. Duplicated attributes detected for %s. "

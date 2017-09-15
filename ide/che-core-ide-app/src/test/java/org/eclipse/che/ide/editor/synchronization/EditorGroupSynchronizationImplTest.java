@@ -158,6 +158,7 @@ public class EditorGroupSynchronizationImplTest {
     reset(documentEventBus);
     when(fileContentUpdateEvent.getFilePath()).thenReturn(FILE_LOCATION);
     when(fileContentUpdateEvent.getModificationStamp()).thenReturn("some stamp");
+    when(((File) virtualFile).getModificationStamp()).thenReturn("current modification stamp");
 
     editorGroupSynchronization.onFileContentUpdate(fileContentUpdateEvent);
 

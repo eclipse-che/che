@@ -13,10 +13,12 @@ package org.eclipse.che.api.workspace.server.model.impl;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -38,6 +40,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
+import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 
 /**
  * Data object for {@link ProjectConfig}.
@@ -87,6 +90,8 @@ public class ProjectConfigImpl implements ProjectConfig {
   // as it is impossible to map nested list directly
   @Transient private Map<String, List<String>> attributes;
 
+  @Transient private List<ProjectProblemImpl> problems;
+
   public ProjectConfigImpl() {}
 
   public ProjectConfigImpl(ProjectConfig projectConfig) {
@@ -108,6 +113,16 @@ public class ProjectConfigImpl implements ProjectConfig {
       source =
           new SourceStorageImpl(
               sourceStorage.getType(), sourceStorage.getLocation(), sourceStorage.getParameters());
+    }
+    if (projectConfig.getProblems() != null) {
+      problems =
+          projectConfig
+              .getProblems()
+              .stream()
+              .map(problem -> new ProjectProblemImpl(problem.getCode(), problem.getMessage()))
+              .collect(Collectors.toList());
+    } else {
+      problems = Collections.emptyList();
     }
   }
 
@@ -174,6 +189,11 @@ public class ProjectConfigImpl implements ProjectConfig {
   @Override
   public SourceStorageImpl getSource() {
     return source;
+  }
+
+  @Override
+  public List<ProjectProblemImpl> getProblems() {
+    return problems;
   }
 
   public void setSource(SourceStorageImpl sourceStorage) {

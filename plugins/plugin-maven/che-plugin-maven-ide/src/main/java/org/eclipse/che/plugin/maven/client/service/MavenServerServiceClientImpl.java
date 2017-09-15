@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.plugin.maven.client.service;
 
+import static org.eclipse.che.ide.resource.Path.valueOf;
+import static org.eclipse.che.ide.util.PathEncoder.encodePath;
+
 import com.google.gwt.http.client.Response;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -50,7 +53,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
         appContext.getWsAgentServerApiEndpoint()
             + servicePath
             + "effective/pom?projectpath="
-            + projectPath;
+            + encodePath(valueOf(projectPath));
 
     return asyncRequestFactory
         .createGetRequest(url)
@@ -64,7 +67,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
         appContext.getWsAgentServerApiEndpoint()
             + servicePath
             + "download/sources?projectpath="
-            + projectPath
+            + encodePath(valueOf(projectPath))
             + "&fqn="
             + fqn;
     return asyncRequestFactory
@@ -90,7 +93,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
   public Promise<Void> reImportProjects(@NotNull List<String> projectsPaths) {
     StringBuilder queryParameters = new StringBuilder();
     for (String path : projectsPaths) {
-      queryParameters.append("&projectPath=").append(path);
+      queryParameters.append("&projectPath=").append(encodePath(valueOf(path)));
     }
     final String url =
         appContext.getWsAgentServerApiEndpoint()
@@ -104,7 +107,10 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
   @Override
   public Promise<Void> reconcilePom(String pomPath) {
     final String url =
-        appContext.getWsAgentServerApiEndpoint() + servicePath + "pom/reconcile?pompath=" + pomPath;
+        appContext.getWsAgentServerApiEndpoint()
+            + servicePath
+            + "pom/reconcile?pompath="
+            + encodePath(valueOf(pomPath));
     return asyncRequestFactory.createGetRequest(url).send();
   }
 }

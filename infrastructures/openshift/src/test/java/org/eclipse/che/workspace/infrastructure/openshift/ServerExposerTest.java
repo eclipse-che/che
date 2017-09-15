@@ -39,6 +39,7 @@ import org.testng.annotations.Test;
  * @author Sergii Leshchenko
  */
 public class ServerExposerTest {
+
   private static final String SERVER_PREFIX = "server";
 
   private ServerExposer serverExposer;
@@ -58,7 +59,8 @@ public class ServerExposerTest {
             .endSpec()
             .build();
 
-    openShiftEnvironment = new OpenShiftEnvironment().withPods(ImmutableMap.of("pod", pod));
+    openShiftEnvironment =
+        OpenShiftEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
     this.serverExposer = new ServerExposer("pod/main", container, openShiftEnvironment);
   }
 

@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.ide.ext.java.client.project.classpath.service;
 
+import static org.eclipse.che.ide.resource.Path.valueOf;
+import static org.eclipse.che.ide.util.PathEncoder.encodePath;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -52,7 +55,10 @@ public class ClasspathServiceClientImpl implements ClasspathServiceClient {
   @Override
   public Promise<List<ClasspathEntryDto>> getClasspath(String projectPath) {
     final String url =
-        appContext.getWsAgentServerApiEndpoint() + pathToService + "?projectpath=" + projectPath;
+        appContext.getWsAgentServerApiEndpoint()
+            + pathToService
+            + "?projectpath="
+            + encodePath(valueOf(projectPath));
 
     return asyncRequestFactory
         .createGetRequest(url)

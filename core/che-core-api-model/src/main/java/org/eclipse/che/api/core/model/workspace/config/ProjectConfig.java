@@ -12,6 +12,7 @@ package org.eclipse.che.api.core.model.workspace.config;
 
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 
 /**
  * @author gazarenkov
@@ -31,4 +32,6 @@ public interface ProjectConfig {
   Map<String, List<String>> getAttributes();
 
   SourceStorage getSource();
+
+  List<? extends ProjectProblem> getProblems();
 }

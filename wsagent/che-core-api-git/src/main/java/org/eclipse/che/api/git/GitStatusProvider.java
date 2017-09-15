@@ -16,9 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Provider;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VcsStatusProvider;
 
 /**
@@ -28,10 +31,13 @@ import org.eclipse.che.api.project.server.VcsStatusProvider;
  */
 public class GitStatusProvider implements VcsStatusProvider {
   private final GitConnectionFactory gitConnectionFactory;
+  private final Provider<ProjectManager> projectManagerProvider;
 
   @Inject
-  public GitStatusProvider(GitConnectionFactory gitConnectionFactory) {
+  public GitStatusProvider(
+      GitConnectionFactory gitConnectionFactory, Provider<ProjectManager> projectManagerProvider) {
     this.gitConnectionFactory = gitConnectionFactory;
+    this.projectManagerProvider = projectManagerProvider;
   }
 
   @Override
@@ -43,9 +49,17 @@ public class GitStatusProvider implements VcsStatusProvider {
   public VcsStatus getStatus(String path) throws ServerException {
     try {
       String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
+      String projectPath =
+          projectManagerProvider
+              .get()
+              .getProject(normalizedPath.split("/")[0])
+              .getBaseFolder()
+              .getVirtualFile()
+              .toIoFile()
+              .getAbsolutePath();
       Status status =
           gitConnectionFactory
-              .getConnection(normalizedPath.split("/")[0])
+              .getConnection(projectPath)
               .status(singletonList(normalizedPath.substring(normalizedPath.indexOf("/") + 1)));
       String itemPath = normalizedPath.substring(normalizedPath.indexOf("/") + 1);
       if (status.getUntracked().contains(itemPath)) {
@@ -58,7 +72,7 @@ public class GitStatusProvider implements VcsStatusProvider {
       } else {
         return VcsStatus.NOT_MODIFIED;
       }
-    } catch (GitException e) {
+    } catch (GitException | NotFoundException e) {
       throw new ServerException(e.getMessage());
     }
   }
@@ -68,7 +82,15 @@ public class GitStatusProvider implements VcsStatusProvider {
       throws ServerException {
     Map<String, VcsStatus> statusMap = new HashMap<>();
     try {
-      Status status = gitConnectionFactory.getConnection(project).status(paths);
+      String projectPath =
+          projectManagerProvider
+              .get()
+              .getProject(project)
+              .getBaseFolder()
+              .getVirtualFile()
+              .toIoFile()
+              .getAbsolutePath();
+      Status status = gitConnectionFactory.getConnection(projectPath).status(paths);
       paths.forEach(
           path -> {
             if (status.getUntracked().contains(path)) {
@@ -82,7 +104,7 @@ public class GitStatusProvider implements VcsStatusProvider {
             }
           });
 
-    } catch (GitException e) {
+    } catch (GitException | NotFoundException e) {
       throw new ServerException(e.getMessage());
     }
     return statusMap;
