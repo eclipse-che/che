@@ -65,6 +65,8 @@ public class FindText {
         "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[3]";
     String ITEM_FIND_PANEL =
         "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[9]//div[text()='%s']";
+    String NEW_ITEM_FIND_PANEL =
+        "//span[contains(@id, '%s')]/../../div[last()]//span/span[text()[contains(., '%s')]]/..//span[text()[contains(., '%s')]]";
   }
 
   @FindBy(id = Locators.WHOLE_WORD_CHECKLBOX_INP)
@@ -418,6 +420,26 @@ public class FindText {
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format(Locators.ITEM_FIND_PANEL, item))))
         .click();
+  }
+
+  public void selectItemInFindInfoPanel(String fileName, String lineNumber, String textToFind) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    String.format(Locators.NEW_ITEM_FIND_PANEL, fileName, lineNumber, textToFind))))
+        .click();
+  }
+
+  public void selectItemInFindInfoPanelByDoubleClick(
+      String fileName, String lineNumber, String textToFind) {
+    WebElement element =
+        seleniumWebDriver.findElement(
+            By.xpath(
+                String.format(Locators.NEW_ITEM_FIND_PANEL, fileName, lineNumber, textToFind)));
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(element));
+    actionsFactory.createAction(seleniumWebDriver).doubleClick(element).perform();
   }
 
   /**
