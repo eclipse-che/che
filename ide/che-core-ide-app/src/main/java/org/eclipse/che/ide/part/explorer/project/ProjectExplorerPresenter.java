@@ -20,6 +20,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 import com.google.common.collect.Sets;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -469,26 +470,30 @@ public class ProjectExplorerPresenter extends BasePresenter
 
     @Override
     public void onExecute() {
-      if (view.getTree().getNodeLoader().isBusy()) {
-        delay(500);
+      Scheduler.get()
+          .scheduleDeferred(
+              () -> {
+                if (view.getTree().getNodeLoader().isBusy()) {
+                  delay(500);
 
-        return;
-      }
+                  return;
+                }
 
-      final Set<Path> updateQueue = Sets.newHashSet(toRefresh);
-      toRefresh.clear();
+                final Set<Path> updateQueue = Sets.newHashSet(toRefresh);
+                toRefresh.clear();
 
-      for (Path path : updateQueue) {
-        final Node node = getNode(path);
+                for (Path path : updateQueue) {
+                  final Node node = getNode(path);
 
-        if (node == null) {
-          continue;
-        }
+                  if (node == null) {
+                    continue;
+                  }
 
-        if (getTree().isExpanded(node)) {
-          view.getTree().getNodeLoader().loadChildren(node, true);
-        }
-      }
+                  if (getTree().isExpanded(node)) {
+                    view.getTree().getNodeLoader().loadChildren(node, true);
+                  }
+                }
+              });
     }
   }
 }

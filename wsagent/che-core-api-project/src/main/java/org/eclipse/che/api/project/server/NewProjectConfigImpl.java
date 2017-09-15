@@ -14,8 +14,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
@@ -152,6 +154,11 @@ public class NewProjectConfigImpl implements NewProjectConfig {
   @Override
   public SourceStorage getSource() {
     return origin;
+  }
+
+  @Override
+  public List<ProjectProblem> getProblems() {
+    return Collections.emptyList();
   }
 
   @Override

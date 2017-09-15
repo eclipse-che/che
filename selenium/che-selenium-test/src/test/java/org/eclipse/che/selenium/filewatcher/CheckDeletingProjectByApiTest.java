@@ -59,7 +59,7 @@ public class CheckDeletingProjectByApiTest {
   }
 
   private void deleteAndWaitProjectNotExistByApi(String projectName) throws Exception {
-    projectServiceClient.deleteResource(projectName, testWorkspace.getName());
+    projectServiceClient.deleteResource(testWorkspace.getId(), projectName);
     projectExplorer.waitItemIsNotPresentVisibleArea(projectName);
     events.waitExpectedMessage(String.format("Project '%s' is removed", projectName));
   }

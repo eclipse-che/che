@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 
@@ -30,6 +31,7 @@ public class ProjectConfigImpl implements ProjectConfig {
   private SourceStorageImpl source;
   private List<String> mixins;
   private Map<String, List<String>> attributes;
+  private List<? extends ProjectProblem> problems;
 
   public ProjectConfigImpl(ProjectConfig projectConfig) {
     name = projectConfig.getName();
@@ -37,6 +39,7 @@ public class ProjectConfigImpl implements ProjectConfig {
     description = projectConfig.getDescription();
     type = projectConfig.getType();
     mixins = new ArrayList<>(projectConfig.getMixins());
+    problems = new ArrayList<>(projectConfig.getProblems());
     attributes =
         projectConfig
             .getAttributes()
@@ -94,6 +97,14 @@ public class ProjectConfigImpl implements ProjectConfig {
   }
 
   @Override
+  public List<? extends ProjectProblem> getProblems() {
+    if (problems == null) {
+      problems = new ArrayList<>();
+    }
+    return problems;
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
@@ -145,6 +156,8 @@ public class ProjectConfigImpl implements ProjectConfig {
         + mixins
         + ", attributes="
         + attributes
+        + ", problems="
+        + problems
         + '}';
   }
 }

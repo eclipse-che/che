@@ -23,6 +23,7 @@ import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
+import org.eclipse.lsp4j.services.WorkspaceService;
 
 /** @author Evgen Vidolob */
 @Singleton
@@ -35,8 +36,7 @@ public class WorkspaceServiceClient {
   }
 
   /**
-   * GWT client implementation of {@link
-   * io.typefox.lsapi.WorkspaceService#symbol(io.typefox.lsapi.WorkspaceSymbolParams)}
+   * GWT client implementation of {@link WorkspaceService#symbol(WorkspaceSymbolParams)}
    *
    * @param params
    * @return

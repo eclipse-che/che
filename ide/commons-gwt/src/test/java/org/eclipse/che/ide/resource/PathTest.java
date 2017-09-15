@@ -12,6 +12,7 @@ package org.eclipse.che.ide.resource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -326,5 +327,73 @@ public class PathTest {
     final Path result = Path.commonPath(path1, path2);
 
     assertEquals(result, common);
+  }
+
+  @Test
+  public void testShouldCheckExistenceOfLeadingSeparator() {
+    assertTrue(Path.valueOf("/foo").hasLeadingSeparator());
+    assertFalse(Path.valueOf("foo").hasLeadingSeparator());
+    assertTrue(Path.valueOf("/").hasLeadingSeparator());
+    assertFalse(Path.valueOf("").hasLeadingSeparator());
+  }
+
+  @Test
+  public void shouldReturnNewPathWithAddedLeadingSeparatorIfPathHasNotIt() {
+    final Path path = Path.valueOf("Test/src/main/java");
+
+    final Path pathWithSeparator = path.addLeadingSeparator();
+
+    assertNotEquals(path, pathWithSeparator);
+
+    assertFalse(path.hasLeadingSeparator());
+    assertTrue(pathWithSeparator.hasLeadingSeparator());
+
+    assertTrue(path.toString().equals("Test/src/main/java"));
+    assertTrue(pathWithSeparator.toString().equals("/Test/src/main/java"));
+  }
+
+  @Test
+  public void shouldReturnTheSamePathIfPathAlreadyHasLeadingSeparator() {
+    final Path path = Path.valueOf("/Test/src/main/java");
+
+    final Path pathWithSeparator = path.addLeadingSeparator();
+
+    assertEquals(path, pathWithSeparator);
+
+    assertTrue(path.hasLeadingSeparator());
+    assertTrue(pathWithSeparator.hasLeadingSeparator());
+
+    assertTrue(path.toString().equals("/Test/src/main/java"));
+    assertTrue(pathWithSeparator.toString().equals("/Test/src/main/java"));
+  }
+
+  @Test
+  public void shouldReturnTheSamePathIfPathIsRoot() {
+    final Path path = Path.valueOf("/");
+
+    final Path pathWithSeparator = path.addLeadingSeparator();
+
+    assertEquals(path, pathWithSeparator);
+
+    assertTrue(path.hasLeadingSeparator());
+    assertTrue(pathWithSeparator.hasLeadingSeparator());
+
+    assertTrue(path.toString().equals("/"));
+    assertTrue(pathWithSeparator.toString().equals("/"));
+  }
+
+  @Test
+  public void shouldReturnNewRootPathIfPathIsEmpty() {
+    final Path path = Path.valueOf("");
+
+    final Path pathWithSeparator = path.addLeadingSeparator();
+
+    assertNotEquals(path, pathWithSeparator);
+
+    assertFalse(path.hasLeadingSeparator());
+    assertTrue(pathWithSeparator.hasLeadingSeparator());
+
+    assertTrue(path.toString().equals(""));
+    assertTrue(pathWithSeparator.toString().equals("/"));
   }
 }

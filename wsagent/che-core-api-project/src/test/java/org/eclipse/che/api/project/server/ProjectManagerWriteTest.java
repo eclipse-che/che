@@ -34,12 +34,12 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.core.util.ValueHolder;
-import org.eclipse.che.api.project.server.RegisteredProject.Problem;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -505,11 +505,11 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
     final RegisteredProject project = projectRegistry.getProject(projectPath);
-    final List<Problem> problems = project.getProblems();
+    final List<ProjectProblem> problems = project.getProblems();
     checkProjectExist(projectPath);
     assertNotEquals(projectType, project.getType());
     assertEquals(1, problems.size());
-    assertEquals(12, problems.get(0).code);
+    assertEquals(12, problems.get(0).getCode());
     assertEquals(1, projectRegistry.getProjects().size());
   }
 
@@ -531,10 +531,10 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     pm.createBatchProjects(configs, false, new ProjectOutputLineConsumerFactory("ws", 300));
 
     final RegisteredProject project = projectRegistry.getProject(projectPath);
-    final List<Problem> problems = project.getProblems();
+    final List<ProjectProblem> problems = project.getProblems();
     checkProjectExist(projectPath);
     assertEquals(1, problems.size());
-    assertEquals(12, problems.get(0).code);
+    assertEquals(12, problems.get(0).getCode());
     assertTrue(project.getMixins().isEmpty());
     assertEquals(1, projectRegistry.getProjects().size());
   }
@@ -580,11 +580,11 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     assertNotNull(pm.getProjectsRoot().getChild(path));
     assertEquals(projectType, project.getType());
 
-    List<Problem> problems = project.getProblems();
+    List<ProjectProblem> problems = project.getProblems();
     assertNotNull(problems);
     assertFalse(problems.isEmpty());
     assertEquals(1, problems.size());
-    assertEquals(13, problems.get(0).code);
+    assertEquals(13, problems.get(0).getCode());
   }
 
   @Test
@@ -623,7 +623,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
     final RegisteredProject project = projectRegistry.getProject(path);
     final List<VirtualFileEntry> children = project.getBaseFolder().getChildren();
-    final List<Problem> problems = project.getProblems();
+    final List<ProjectProblem> problems = project.getProblems();
     assertNotNull(project);
     assertNotNull(pm.getProjectsRoot().getChild(path));
     assertEquals(projectTypeId, project.getType());
@@ -631,7 +631,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     assertTrue(project.getAttributes().isEmpty());
     assertFalse(problems.isEmpty());
     assertEquals(1, problems.size());
-    assertEquals(13, problems.get(0).code);
+    assertEquals(13, problems.get(0).getCode());
   }
 
   @Test
@@ -675,11 +675,11 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     assertNotNull(pm.getProjectsRoot().getChild(path));
     assertEquals(BaseProjectType.ID, project.getType());
 
-    List<Problem> problems = project.getProblems();
+    List<ProjectProblem> problems = project.getProblems();
     assertNotNull(problems);
     assertFalse(problems.isEmpty());
     assertEquals(1, problems.size());
-    assertEquals(12, problems.get(0).code);
+    assertEquals(12, problems.get(0).getCode());
 
     //clean up
     project.getBaseFolder().getVirtualFile().delete();
@@ -705,7 +705,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     assertNotNull(problems);
     assertFalse(problems.isEmpty());
     assertEquals(1, problems.size());
-    assertEquals(12, problems.get(0).code);
+    assertEquals(12, problems.get(0).getCode());
   }
 
   @Test
@@ -732,10 +732,10 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     assertFalse(mixins.isEmpty());
     assertEquals(mixin, mixins.get(0));
 
-    final List<Problem> problems = project.getProblems();
+    final List<ProjectProblem> problems = project.getProblems();
     assertNotNull(problems);
     assertFalse(problems.isEmpty());
-    assertEquals(13, problems.get(0).code);
+    assertEquals(13, problems.get(0).getCode());
   }
 
   @Test
@@ -831,11 +831,11 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
     RegisteredProject project = pm.updateProject(pc);
 
-    final List<Problem> problems = project.getProblems();
+    final List<ProjectProblem> problems = project.getProblems();
     assertNotNull(problems);
     assertFalse(problems.isEmpty());
     assertEquals(1, problems.size());
-    assertEquals(13, problems.get(0).code);
+    assertEquals(13, problems.get(0).getCode());
   }
 
   @Test
