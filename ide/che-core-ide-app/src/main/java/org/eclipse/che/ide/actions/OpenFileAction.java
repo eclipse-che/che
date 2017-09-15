@@ -101,12 +101,7 @@ public class OpenFileAction extends Action implements PromisableAction {
                     new EditorAgent.OpenEditorCallback() {
                       @Override
                       public void onEditorOpened(EditorPartPresenter editor) {
-                        new Timer() {
-                          @Override
-                          public void run() {
-                            scrollToLine(editor, event.getParameters().get(LINE_PARAM_ID));
-                          }
-                        }.schedule(300);
+                        scrollToLine(editor, event.getParameters().get(LINE_PARAM_ID));
                       }
 
                       @Override
@@ -114,12 +109,7 @@ public class OpenFileAction extends Action implements PromisableAction {
 
                       @Override
                       public void onEditorActivated(EditorPartPresenter editor) {
-                        new Timer() {
-                          @Override
-                          public void run() {
-                            scrollToLine(editor, event.getParameters().get(LINE_PARAM_ID));
-                          }
-                        }.schedule(300);
+                        scrollToLine(editor, event.getParameters().get(LINE_PARAM_ID));
                       }
                     });
 
@@ -138,13 +128,18 @@ public class OpenFileAction extends Action implements PromisableAction {
     if (!(editor instanceof TextEditor)) {
       return;
     }
-    try {
-      int lineNumber = parseInt(lineParam);
-      TextEditor textEditor = (TextEditor) editor;
-      textEditor.getDocument().setCursorPosition(new TextPosition(lineNumber - 1, 0));
-    } catch (NumberFormatException e) {
-      Log.error(getClass(), localization.fileToOpenLineIsNotANumber());
-    }
+    new Timer() {
+        @Override
+        public void run() {
+            try {
+                int lineNumber = parseInt(lineParam);
+                TextEditor textEditor = (TextEditor) editor;
+                textEditor.getDocument().setCursorPosition(new TextPosition(lineNumber - 1, 0));
+            } catch (NumberFormatException e) {
+                Log.error(getClass(), localization.fileToOpenLineIsNotANumber());
+            }
+        }
+    }.schedule(300);
   }
 
   @Override
