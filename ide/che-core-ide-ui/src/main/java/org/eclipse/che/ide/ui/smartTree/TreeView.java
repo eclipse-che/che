@@ -219,7 +219,7 @@ public class TreeView {
     if (loading) {
       rootContainer.addClassName(tree.getTreeStyles().styles().loading());
     } else {
-        rootContainer.removeClassName(tree.getTreeStyles().styles().loading());
+      rootContainer.removeClassName(tree.getTreeStyles().styles().loading());
     }
   }
 

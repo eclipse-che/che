@@ -129,16 +129,16 @@ public class OpenFileAction extends Action implements PromisableAction {
       return;
     }
     new Timer() {
-        @Override
-        public void run() {
-            try {
-                int lineNumber = parseInt(lineParam);
-                TextEditor textEditor = (TextEditor) editor;
-                textEditor.getDocument().setCursorPosition(new TextPosition(lineNumber - 1, 0));
-            } catch (NumberFormatException e) {
-                Log.error(getClass(), localization.fileToOpenLineIsNotANumber());
-            }
+      @Override
+      public void run() {
+        try {
+          int lineNumber = parseInt(lineParam);
+          TextEditor textEditor = (TextEditor) editor;
+          textEditor.getDocument().setCursorPosition(new TextPosition(lineNumber - 1, 0));
+        } catch (NumberFormatException e) {
+          Log.error(getClass(), localization.fileToOpenLineIsNotANumber());
         }
+      }
     }.schedule(300);
   }
 
