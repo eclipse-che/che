@@ -38,6 +38,7 @@ import {RouteHistory} from '../components/routing/route-history.service';
 import {CheUIElementsInjectorService} from '../components/service/injector/che-ui-elements-injector.service';
 import {WorkspaceDetailsService} from './workspaces/workspace-details/workspace-details.service';
 import {OrganizationsConfig} from './organizations/organizations-config';
+import {TeamsConfig} from './teams/teams-config';
 
 // init module
 const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
@@ -420,4 +421,5 @@ new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);
 new FactoryConfig(instanceRegister);
 new OrganizationsConfig(instanceRegister);
+new TeamsConfig(instanceRegister);
 /* tslint:enable */

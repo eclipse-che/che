@@ -23,6 +23,7 @@ import {CheUserBuilder} from './che-user-builder';
 import {ChePermissionsBuilder} from './che-permissions-builder';
 import {CheOrganizationsBuilder} from './che-organizations-builder';
 import {CheResourceBuilder} from './che-resource-builder';
+import {CheTeamBuilder} from './che-team-builder';
 
 /**
  * This class is providing the entry point for accessing the builders
@@ -117,6 +118,14 @@ export class CheAPIBuilder {
    */
   getPermissionsBuilder() {
     return new ChePermissionsBuilder();
+  }
+
+  /***
+   * The Che Team builder
+   * @returns {CheTeamBuilder}
+   */
+  getTeamBuilder() {
+    return new CheTeamBuilder();
   }
 
   /**

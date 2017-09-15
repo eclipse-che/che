@@ -38,6 +38,7 @@ export class CheHttpBackend {
   private pageMaxItem: number;
   private pageSkipCount: number;
 
+  private teamsMap: Map<string, che.ITeam>;
   private organizationsMap: Map<string, che.IOrganization>;
   private permissionsMap: Map<string, Array<che.IPermissions>>;
   private resourcesMap: Map<string, Map<string, any>>;
@@ -61,6 +62,7 @@ export class CheHttpBackend {
     this.workspaceAgentMap = new Map();
     this.stacks = [];
 
+    this.teamsMap = new Map();
     this.organizationsMap = new Map();
     this.permissionsMap = new Map();
     this.resourcesMap = new Map();
@@ -546,6 +548,33 @@ export class CheHttpBackend {
    */
   addUserEmail(user: che.IUser): void {
     this.userEmailMap.set(user.email, user);
+  }
+
+  /**
+   * Setup Backend for teams
+   */
+  teamsBackendSetup() {
+    let allTeams = [];
+
+    let teamsKeys = this.teamsMap.keys();
+    for (let key of teamsKeys) {
+      let team = this.teamsMap.get(key);
+      this.httpBackend.when('GET', '/api/organization/' + team.id).respond(team);
+      this.httpBackend.when('DELETE', '/api/organization/' + team.id).respond(() => {
+        return [200, {success: true, errors: []}];
+      });
+      allTeams.push(team);
+    }
+
+    this.httpBackend.when('GET', /\/api\/organization(\?.*$)?/).respond(allTeams);
+  }
+
+  /**
+   * Add the given team to teamsMap
+   * @param {che.ITeam} team
+   */
+  addTeamById(team: che.ITeam) {
+    this.teamsMap.set(team.id, team);
   }
 
   /**
