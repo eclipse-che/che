@@ -17,6 +17,7 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -36,6 +37,11 @@ public class RenameWorkspaceTest {
   public void setUp() throws Exception {
     this.workspaceName = ws.getName();
     dashboard.open();
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    workspaceServiceClient.delete(CHANGE_WORKSPACE_NAME, user.getName());
   }
 
   @Test
