@@ -307,10 +307,6 @@ public class Tree extends FocusWidget
         });
   }
 
-  public void addSelectionHandler(SelectionHandler<Node> handler) {
-    this.getSelectionModel().addSelectionHandler(handler);
-  }
-
   /** {@inheritDoc} */
   @Override
   public HandlerRegistration addBeforeCollapseHandler(
