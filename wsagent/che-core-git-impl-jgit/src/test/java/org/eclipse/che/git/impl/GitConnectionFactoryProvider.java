@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.git.impl.jgit.JGitConnectionFactory;
@@ -32,7 +33,10 @@ public class GitConnectionFactoryProvider {
     return new Object[][] {
       new Object[] {
         new JGitConnectionFactory(
-            mock(CredentialsLoader.class), mock(SshKeyProvider.class), resolver)
+            mock(CredentialsLoader.class),
+            mock(SshKeyProvider.class),
+            mock(EventService.class),
+            resolver)
       }
     };
   }

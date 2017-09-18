@@ -27,6 +27,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitUserResolver;
@@ -70,13 +71,16 @@ public class JGitConnectionTest {
   @Mock private GitUserResolver gitUserResolver;
   @Mock private TransportCommand transportCommand;
   @Mock private GitUserResolver userResolver;
+  @Mock private EventService eventService;
 
   private JGitConnection jGitConnection;
 
   @BeforeMethod
   public void setup() {
     jGitConnection =
-        spy(new JGitConnection(repository, credentialsLoader, sshKeyProvider, userResolver));
+        spy(
+            new JGitConnection(
+                repository, credentialsLoader, sshKeyProvider, eventService, userResolver));
 
     RepositoryState repositoryState = mock(RepositoryState.class);
     GitUser gitUser = mock(GitUser.class);
