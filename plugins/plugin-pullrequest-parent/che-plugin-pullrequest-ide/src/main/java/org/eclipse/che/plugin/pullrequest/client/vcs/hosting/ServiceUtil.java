@@ -22,6 +22,7 @@ import org.eclipse.che.plugin.pullrequest.shared.dto.HostUser;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
 import org.eclipse.che.security.oauth.OAuthStatus;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /**
  * Utils for {@link VcsHostingService} implementations.
@@ -38,7 +39,9 @@ public final class ServiceUtil {
    * @return the promise which resolves authorized user or rejects with an error
    */
   public static Promise<HostUser> performWindowAuth(
-      final VcsHostingService service, final String authUrl) {
+      final VcsHostingService service,
+      final String authUrl,
+      final SecurityTokenProvider securityTokenProvider) {
     final Executor.ExecutorBody<HostUser> exBody =
         new Executor.ExecutorBody<HostUser>() {
           @Override
@@ -69,7 +72,8 @@ public final class ServiceUtil {
                                   }
                                 });
                       }
-                    })
+                    },
+                    securityTokenProvider)
                 .loginWithOAuth();
           }
         };

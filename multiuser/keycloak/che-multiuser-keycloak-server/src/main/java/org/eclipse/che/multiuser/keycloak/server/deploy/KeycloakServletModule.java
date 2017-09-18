@@ -22,10 +22,10 @@ public class KeycloakServletModule extends ServletModule {
 
     // Not contains '/websocket', /docs/ (for swagger) and not ends with '/ws' or '/eventbus' or '/settings/' or '/api/system/state' or '/api/stack/[^/]+/icon/'
     filterRegex(
-            "^(?!.*(/websocket/?|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?|/api/system/state/?|/api/stack/[^/]+/icon/?)$).*")
+            "^(?!.*(/websocket/?|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?|/api/oauth/callback/?|/api/system/state/?|/api/stack/[^/]+/icon/?)$).*")
         .through(KeycloakAuthenticationFilter.class);
     filterRegex(
-            "^(?!.*(/websocket/?|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?|/api/system/state/?|/api/stack/[^/]+/icon/?)$).*")
+            "^(?!.*(/websocket/?|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?|/api/oauth/callback/?|/api/system/state/?|/api/stack/[^/]+/icon/?)$).*")
         .through(KeycloakEnvironmentInitalizationFilter.class);
   }
 }

@@ -38,6 +38,7 @@ public final class Keycloak extends JavaScriptObject {
                         console.log('[Keycloak] Failed to initialize Keycloak');
                         reject();
                     });
+                console.log('[Keycloak] Initializing complete');
             } catch (ex) {
                 console.log('[Keycloak] Failed to initialize Keycloak with exception: ', ex);
                 reject();

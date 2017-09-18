@@ -11,18 +11,10 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
-import org.eclipse.che.api.environment.server.MachineLinksInjector;
 import org.eclipse.che.api.workspace.server.WorkspaceServiceLinksInjector;
-import org.eclipse.che.commons.auth.token.HeaderRequestTokenExtractor;
+import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.multiuser.machine.authentication.server.AuthWsAgentHealthChecker;
-import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthLinksInjector;
-import org.eclipse.che.multiuser.machine.authentication.server.MachineSessionInvalidator;
-import org.eclipse.che.multiuser.machine.authentication.server.MachineTokenPermissionsFilter;
-import org.eclipse.che.multiuser.machine.authentication.server.MachineTokenRegistry;
-import org.eclipse.che.multiuser.machine.authentication.server.MachineTokenService;
-import org.eclipse.che.multiuser.machine.authentication.server.WorkspaceServiceAuthLinksInjector;
 import org.eclipse.che.multiuser.machine.authentication.server.interceptor.InterceptorModule;
 
 /**
@@ -32,18 +24,23 @@ import org.eclipse.che.multiuser.machine.authentication.server.interceptor.Inter
  */
 @DynaModule
 public class MachineAuthModule extends AbstractModule {
+
   @Override
   protected void configure() {
     install(new InterceptorModule());
-    bind(MachineLinksInjector.class).to(MachineAuthLinksInjector.class);
     bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
-        .to(AuthWsAgentHealthChecker.class);
-    bind(MachineTokenPermissionsFilter.class);
-    bind(MachineTokenService.class);
-    bind(MachineTokenRegistry.class);
-    bind(MachineSessionInvalidator.class);
-    bind(RequestTokenExtractor.class).to(HeaderRequestTokenExtractor.class);
-    bind(WorkspaceServiceLinksInjector.class).to(WorkspaceServiceAuthLinksInjector.class);
+        .to(org.eclipse.che.multiuser.machine.authentication.server.AuthWsAgentHealthChecker.class);
+    bind(
+        org.eclipse.che.multiuser.machine.authentication.server.MachineTokenPermissionsFilter
+            .class);
+    bind(org.eclipse.che.multiuser.machine.authentication.server.MachineTokenService.class);
+    bind(org.eclipse.che.multiuser.machine.authentication.server.MachineTokenRegistry.class);
+    bind(org.eclipse.che.multiuser.machine.authentication.server.MachineSessionInvalidator.class);
+    bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
+    bind(WorkspaceServiceLinksInjector.class)
+        .to(
+            org.eclipse.che.multiuser.machine.authentication.server
+                .WorkspaceServiceAuthLinksInjector.class);
     bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
         .to(org.eclipse.che.plugin.docker.machine.AuthMachineProviderImpl.class);
   }
