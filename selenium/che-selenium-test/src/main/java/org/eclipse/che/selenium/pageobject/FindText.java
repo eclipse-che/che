@@ -64,8 +64,6 @@ public class FindText {
     String HIDE_FIND_PANEL =
         "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[3]";
     String ITEM_FIND_PANEL =
-        "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[9]//div[text()='%s']";
-    String NEW_ITEM_FIND_PANEL =
         "//span[contains(@id, '%s')]/../../div[last()]//span/span[text()[contains(., '%s')]]/..//span[text()[contains(., '%s')]]";
   }
 
@@ -409,25 +407,12 @@ public class FindText {
     return findInfoPanel.getText();
   }
 
-  /**
-   * perform 'click' on the item in the 'Find' info panel
-   *
-   * @param item is the name of the item
-   */
-  public void selectItemInFindInfoPanel(String item) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.ITEM_FIND_PANEL, item))))
-        .click();
-  }
-
   public void selectItemInFindInfoPanel(String fileName, String lineNumber, String textToFind) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
-                    String.format(Locators.NEW_ITEM_FIND_PANEL, fileName, lineNumber, textToFind))))
+                    String.format(Locators.ITEM_FIND_PANEL, fileName, lineNumber, textToFind))))
         .click();
   }
 
@@ -435,8 +420,7 @@ public class FindText {
       String fileName, String lineNumber, String textToFind) {
     WebElement element =
         seleniumWebDriver.findElement(
-            By.xpath(
-                String.format(Locators.NEW_ITEM_FIND_PANEL, fileName, lineNumber, textToFind)));
+            By.xpath(String.format(Locators.ITEM_FIND_PANEL, fileName, lineNumber, textToFind)));
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(element));
     actionsFactory.createAction(seleniumWebDriver).doubleClick(element).perform();
@@ -451,18 +435,5 @@ public class FindText {
     loader.waitOnClosed();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(command).perform();
     loader.waitOnClosed();
-  }
-
-  /**
-   * perform 'double click' on item in the 'Find' info panel
-   *
-   * @param item is the name of item into 'Find' info panel
-   */
-  public void selectItemInFindInfoPanelByDoubleClick(String item) {
-    WebElement element =
-        seleniumWebDriver.findElement(By.xpath(String.format(Locators.ITEM_FIND_PANEL, item)));
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(element));
-    actionsFactory.createAction(seleniumWebDriver).doubleClick(element).perform();
   }
 }

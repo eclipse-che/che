@@ -39,12 +39,12 @@ public class FindTextFeatureTest {
 
   private static final String FIND_NOTHING = "Found occurrences of 'dddhhh' (0 occurrence)";
 
-  String PR_1_EXPECTED_TEXT_1 =
+  private static final String PR_1_EXPECTED_TEXT_1 =
       "Found occurrences of 'Filesystem' (1 occurrence)\n"
           + "/FindTextFeature/readme.con\n"
           + "(1 occurrence of 'Filesystem' found)\n"
           + "1:   Filesystem 1K-blocks Used Available Use% Mounted on";
-  String PR_1_EXPECTED_TEXT_2 =
+  private static final String PR_1_EXPECTED_TEXT_2 =
       "Found occurrences of 'Feature' (1 occurrence)\n"
           + "/FindTextFeature/readme.api\n"
           + "(1 occurrence of 'Feature' found)\n"
