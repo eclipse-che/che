@@ -10,30 +10,18 @@
  */
 package org.eclipse.che.multiuser.keycloak.ide;
 
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
-
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
-import java.util.Map;
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.HTTPHeader;
-import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 import org.eclipse.che.multiuser.machine.authentication.ide.MachineAsyncRequestFactory;
 import org.eclipse.che.multiuser.machine.authentication.ide.MachineTokenServiceClient;
 
@@ -42,50 +30,18 @@ import org.eclipse.che.multiuser.machine.authentication.ide.MachineTokenServiceC
 public class KeycloakAsyncRequestFactory extends MachineAsyncRequestFactory {
 
   private final DtoFactory dtoFactory;
-  private Promise<Keycloak> keycloak;
+  private KeycloakProvider keycloakProvider;
 
   @Inject
   public KeycloakAsyncRequestFactory(
+      KeycloakProvider keycloakProvider,
       DtoFactory dtoFactory,
       Provider<MachineTokenServiceClient> machineTokenServiceProvider,
       AppContext appContext,
       EventBus eventBus) {
     super(dtoFactory, machineTokenServiceProvider, appContext, eventBus);
     this.dtoFactory = dtoFactory;
-    String keycloakSettings =
-        getKeycloakSettings(KeycloakConstants.getEndpoint(appContext.getMasterEndpoint()));
-    Map<String, String> settings = JsonHelper.toMap(keycloakSettings);
-    Log.info(getClass(), "Keycloak settings: ", settings);
-
-    keycloak =
-        CallbackPromiseHelper.createFromCallback(
-                new CallbackPromiseHelper.Call<Void, Throwable>() {
-                  @Override
-                  public void makeCall(final Callback<Void, Throwable> callback) {
-                    ScriptInjector.fromUrl(
-                            settings.get(AUTH_SERVER_URL_SETTING) + "/js/keycloak.js")
-                        .setCallback(
-                            new Callback<Void, Exception>() {
-                              @Override
-                              public void onSuccess(Void result) {
-                                callback.onSuccess(null);
-                              }
-
-                              @Override
-                              public void onFailure(Exception reason) {
-                                callback.onFailure(reason);
-                              }
-                            })
-                        .setWindow(getWindow())
-                        .inject();
-                  }
-                })
-            .thenPromise(
-                (v) ->
-                    Keycloak.init(
-                        settings.get(AUTH_SERVER_URL_SETTING),
-                        settings.get(REALM_SETTING),
-                        settings.get(CLIENT_ID_SETTING)));
+    this.keycloakProvider = keycloakProvider;
   }
 
   @Override
@@ -93,7 +49,7 @@ public class KeycloakAsyncRequestFactory extends MachineAsyncRequestFactory {
       RequestBuilder.Method method, String url, Object dtoBody, boolean async) {
     AsyncRequest request = super.doCreateRequest(method, url, dtoBody, async);
     if (!isWsAgentRequest(url)) {
-      AsyncRequest asyncRequest = new KeycloakAsyncRequest(keycloak, method, url, async);
+      AsyncRequest asyncRequest = new KeycloakAsyncRequest(keycloakProvider, method, url, async);
       if (dtoBody != null) {
         if (dtoBody instanceof List<?>) {
           asyncRequest.data(dtoFactory.toJson((List<?>) dtoBody));

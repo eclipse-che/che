@@ -22,16 +22,16 @@ import org.eclipse.che.ide.util.loging.Log;
 /** KeycloakAsyncRequests */
 public class KeycloakAsyncRequest extends AsyncRequest {
 
-  private Promise<Keycloak> keycloakPromise;
+  private KeycloakProvider keycloakProvider;
 
   public KeycloakAsyncRequest(
-      Promise<Keycloak> keycloakPromise, RequestBuilder.Method method, String url, boolean async) {
+      KeycloakProvider keycloakProvider, RequestBuilder.Method method, String url, boolean async) {
     super(method, url, async);
-    this.keycloakPromise = keycloakPromise;
+    this.keycloakProvider = keycloakProvider;
   }
 
-  private void addAuthorizationHeader(Keycloak keycloak) {
-    header(HTTPHeader.AUTHORIZATION, "Bearer " + keycloak.getToken());
+  private void addAuthorizationHeader(String keycloakToken) {
+    header(HTTPHeader.AUTHORIZATION, "Bearer " + keycloakToken);
   }
 
   private static interface Sender<R> {
@@ -39,47 +39,21 @@ public class KeycloakAsyncRequest extends AsyncRequest {
   }
 
   private <R> Promise<R> doAfterKeycloakInitAndUpdate(Sender<R> sender) {
-    return keycloakPromise.thenPromise(
-        new Function<Keycloak, Promise<R>>() {
-          @Override
-          public Promise<R> apply(Keycloak keycloak) {
-            Log.debug(getClass(), "Keycloak initialized with token: ", keycloak.getToken());
-            try {
-              return keycloak
-                  .updateToken(5)
-                  .thenPromise(
-                      new Function<Boolean, Promise<R>>() {
-                        @Override
-                        public Promise<R> apply(Boolean refreshed) {
-                          if (refreshed) {
-                            Log.debug(
-                                getClass(),
-                                "Keycloak updated token before sending the request `",
-                                KeycloakAsyncRequest.this.requestBuilder.getUrl(),
-                                "`. New token is : ",
-                                keycloak.getToken());
-                          } else {
-                            Log.debug(
-                                getClass(),
-                                "Keycloak didn't need to update token before sending the request `",
-                                KeycloakAsyncRequest.this.requestBuilder.getUrl(),
-                                "`");
-                          }
-                          addAuthorizationHeader(keycloak);
-                          try {
-                            return sender.doSend();
-                          } catch (Throwable t) {
-                            Log.error(getClass(), t);
-                            throw t;
-                          }
-                        }
-                      });
-            } catch (Throwable t) {
-              Log.error(getClass(), t);
-              throw t;
-            }
-          }
-        });
+    return keycloakProvider
+        .getUpdatedToken(5)
+        .thenPromise(
+            new Function<String, Promise<R>>() {
+              @Override
+              public Promise<R> apply(String keycloakToken) {
+                addAuthorizationHeader(keycloakToken);
+                try {
+                  return sender.doSend();
+                } catch (Throwable t) {
+                  Log.error(getClass(), t);
+                  throw t;
+                }
+              }
+            });
   }
 
   @Override
