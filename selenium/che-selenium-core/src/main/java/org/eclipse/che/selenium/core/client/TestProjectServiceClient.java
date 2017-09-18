@@ -36,7 +36,7 @@ import org.eclipse.che.commons.lang.ZipUtils;
 
 /**
  * @author Musienko Maxim
- * @author Morhun Mykola
+ * @author Mykola Morhun
  */
 @Singleton
 public class TestProjectServiceClient {

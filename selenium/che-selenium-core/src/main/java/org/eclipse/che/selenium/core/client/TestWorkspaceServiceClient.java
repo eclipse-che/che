@@ -37,10 +37,15 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.MemoryMeasure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Musienko Maxim */
 @Singleton
 public class TestWorkspaceServiceClient {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TestWorkspaceServiceClient.class);
+
   private final TestApiEndpointUrlProvider apiEndpointProvider;
   private final HttpJsonRequestFactory requestFactory;
   private final TestUserNamespaceResolver testUserNamespaceResolver;
@@ -126,6 +131,12 @@ public class TestWorkspaceServiceClient {
     }
 
     requestFactory.fromUrl(getIdBasedUrl(workspace.getId())).useDeleteMethod().request();
+
+    LOG.info(
+        "Workspace name='{}', id='{}' and of user with name='{}' is removed",
+        workspaceName,
+        workspace.getId(),
+        userName);
   }
 
   /** Waits needed status. */
@@ -166,12 +177,17 @@ public class TestWorkspaceServiceClient {
     workspace.setName(workspaceName);
     workspace.setDefaultEnv(workspaceName);
 
-    return requestFactory
-        .fromUrl(getBaseUrl())
-        .usePostMethod()
-        .setBody(workspace)
-        .request()
-        .asDto(WorkspaceDto.class);
+    WorkspaceDto workspaceDto =
+        requestFactory
+            .fromUrl(getBaseUrl())
+            .usePostMethod()
+            .setBody(workspace)
+            .request()
+            .asDto(WorkspaceDto.class);
+
+    LOG.info("Workspace name='{}' and id='{}' created", workspaceName, workspaceDto.getId());
+
+    return workspaceDto;
   }
 
   /** Sends start workspace request. */

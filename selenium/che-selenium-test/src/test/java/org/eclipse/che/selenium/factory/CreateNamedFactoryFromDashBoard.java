@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -32,12 +33,14 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CreateNamedFactoryFromDashBoard {
   private static final String PROJECT_NAME = CreateNamedFactoryFromDashBoard.class.getSimpleName();
+  private static final String NEW_WORKSPACE_SUFFIX = "_1";
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
@@ -53,6 +56,7 @@ public class CreateNamedFactoryFromDashBoard {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Wizard wizard;
   @Inject private Menu menu;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -61,6 +65,12 @@ public class CreateNamedFactoryFromDashBoard {
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
     wizard.selectProjectAndCreate(Wizard.SamplesName.WEB_JAVA_SPRING, PROJECT_NAME);
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    String newWorkspaceName = testWorkspace.getName() + NEW_WORKSPACE_SUFFIX;
+    workspaceServiceClient.delete(newWorkspaceName, user.getName());
   }
 
   @Test

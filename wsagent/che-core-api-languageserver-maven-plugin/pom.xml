@@ -54,7 +54,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/generator/**</exclude>
+                        <exclude>**/generator/EitherUtil.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

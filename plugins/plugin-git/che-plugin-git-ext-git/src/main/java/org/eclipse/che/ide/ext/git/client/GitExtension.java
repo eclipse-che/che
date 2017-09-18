@@ -56,7 +56,12 @@ public class GitExtension {
   public static final String REPOSITORY_GROUP_MAIN_MENU = "GitRepositoryGroup";
   public static final String COMMAND_GROUP_MAIN_MENU = "GitCommandGroup";
   public static final String HISTORY_GROUP_MAIN_MENU = "GitHistoryGroup";
+
   public static final String GIT_COMPARE_WITH_LATEST = "gitCompareWithLatest";
+  public static final String GIT_SHOW_BRANCHES_LIST = "gitBranches";
+  public static final String GIT_SHOW_COMMIT_WINDOW = "gitCommit";
+  public static final String GIT_SHOW_PULL_DIALOG = "gitPull";
+  public static final String GIT_SHOW_PUSH_DIALOG = "gitPush";
 
   public static final String NEXT_DIFF_ACTION_ID = "nextDiff";
   public static final String PREV_DIFF_ACTION_ID = "prevDiff";
@@ -130,9 +135,9 @@ public class GitExtension {
     commandGroup.add(resetToCommitAction);
     actionManager.registerAction("gitRemoveFromIndexCommit", removeFromIndexAction);
     commandGroup.add(removeFromIndexAction);
-    actionManager.registerAction("gitCommit", commitAction);
+    actionManager.registerAction(GIT_SHOW_COMMIT_WINDOW, commitAction);
     commandGroup.add(commitAction);
-    actionManager.registerAction("gitBranches", showBranchesAction);
+    actionManager.registerAction(GIT_SHOW_BRANCHES_LIST, showBranchesAction);
     commandGroup.add(showBranchesAction);
     actionManager.registerAction("gitCheckoutReference", checkoutReferenceAction);
     commandGroup.add(checkoutReferenceAction);
@@ -150,16 +155,16 @@ public class GitExtension {
     historyGroup.add(historyAction);
     actionManager.registerAction("gitStatus", showStatusAction);
     historyGroup.add(showStatusAction);
-    actionManager.registerAction("gitPush", pushAction);
+    actionManager.registerAction(GIT_SHOW_PUSH_DIALOG, pushAction);
     remoteGroup.add(pushAction);
     actionManager.registerAction("gitFetch", fetchAction);
     remoteGroup.add(fetchAction);
-    actionManager.registerAction("gitPull", pullAction);
+    actionManager.registerAction(GIT_SHOW_PULL_DIALOG, pullAction);
     remoteGroup.add(pullAction);
     actionManager.registerAction("gitRemote", showRemoteAction);
     remoteGroup.add(showRemoteAction);
 
-    actionManager.registerAction("gitCompareWithLatest", compareWithLatestAction);
+    actionManager.registerAction(GIT_COMPARE_WITH_LATEST, compareWithLatestAction);
     compareGroup.add(compareWithLatestAction);
     actionManager.registerAction("gitCompareWithBranch", compareWithBranchAction);
     compareGroup.add(compareWithBranchAction);
@@ -193,6 +198,18 @@ public class GitExtension {
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().action().alt().charCode('d').build(), GIT_COMPARE_WITH_LATEST);
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().charCode('b').build(), GIT_SHOW_BRANCHES_LIST);
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('c').build(), GIT_SHOW_COMMIT_WINDOW);
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('C').build(), GIT_SHOW_PUSH_DIALOG);
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('p').build(), GIT_SHOW_PULL_DIALOG);
 
     keyBinding
         .getGlobal()
