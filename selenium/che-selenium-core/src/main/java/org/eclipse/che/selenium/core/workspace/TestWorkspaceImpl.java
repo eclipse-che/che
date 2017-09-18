@@ -20,7 +20,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +41,14 @@ public class TestWorkspaceImpl implements TestWorkspace {
       TestUser owner,
       int memoryInGB,
       String template,
-      TestWorkspaceServiceClient workspaceServiceClient) {
+      TestApiEndpointUrlProvider apiEndpointUrlProvider,
+      TestUserNamespaceResolver testUserNamespaceResolver) {
     this.name = name;
     this.owner = owner;
     this.id = new AtomicReference<>();
-    this.workspaceServiceClient = workspaceServiceClient;
+    this.workspaceServiceClient =
+        TestWorkspaceServiceClient.create(
+            apiEndpointUrlProvider, testUserNamespaceResolver, owner.getAuthToken());
 
     this.future =
         CompletableFuture.runAsync(

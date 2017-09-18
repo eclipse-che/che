@@ -20,6 +20,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,25 +40,27 @@ public class TestUserImpl implements TestUser {
   @Inject
   public TestUserImpl(
       TestUserServiceClient userServiceClient,
-      TestWorkspaceServiceClient workspaceServiceClient,
-      TestAuthServiceClient authServiceClient)
+      TestAuthServiceClient authServiceClient,
+      TestApiEndpointUrlProvider apiEndpointUrlProvider,
+      TestUserNamespaceResolver testUserNamespaceResolver)
       throws Exception {
     this(
         NameGenerator.generate("user", 6) + "@some.mail",
         userServiceClient,
-        workspaceServiceClient,
-        authServiceClient);
+        authServiceClient,
+        apiEndpointUrlProvider,
+        testUserNamespaceResolver);
   }
 
   /** To instantiate user with specific e-mail. */
   public TestUserImpl(
       String email,
       TestUserServiceClient userServiceClient,
-      TestWorkspaceServiceClient workspaceServiceClient,
-      TestAuthServiceClient authServiceClient)
+      TestAuthServiceClient authServiceClient,
+      TestApiEndpointUrlProvider apiEndpointUrlProvider,
+      TestUserNamespaceResolver userNamespaceResolver)
       throws Exception {
     this.userServiceClient = userServiceClient;
-    this.workspaceServiceClient = workspaceServiceClient;
 
     this.email = email;
     this.password = NameGenerator.generate("Pwd1", 6);
@@ -68,6 +71,8 @@ public class TestUserImpl implements TestUser {
     LOG.info("User name='{}', password '{}', id='{}' has been created", name, password, id);
 
     this.authToken = authServiceClient.login(getName(), getPassword());
+    this.workspaceServiceClient =
+        TestWorkspaceServiceClient.create(apiEndpointUrlProvider, userNamespaceResolver, authToken);
   }
 
   @Override

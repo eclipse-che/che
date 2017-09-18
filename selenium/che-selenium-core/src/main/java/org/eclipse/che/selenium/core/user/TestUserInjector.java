@@ -16,7 +16,7 @@ import com.google.inject.Provider;
 import java.lang.reflect.Field;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 
 /**
  * Injector for custom annotation {@link InjectTestUser}.
@@ -44,8 +44,9 @@ public class TestUserInjector<T> implements MembersInjector<T> {
           new TestUserImpl(
               injectTestUser.value(),
               injector.getInstance(TestUserServiceClient.class),
-              injector.getInstance(TestWorkspaceServiceClient.class),
-              injector.getInstance(TestAuthServiceClient.class)));
+              injector.getInstance(TestAuthServiceClient.class),
+              injector.getInstance(TestApiEndpointUrlProvider.class),
+              injector.getInstance(TestUserNamespaceResolver.class)));
     } catch (Exception e) {
       throw new RuntimeException("Failed to instantiate user in " + t.getClass().getName(), e);
     }

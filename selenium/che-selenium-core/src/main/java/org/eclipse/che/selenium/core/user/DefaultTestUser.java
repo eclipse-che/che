@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 
 /**
  * Default {@link TestUser} that will be created before all tests and will be deleted after them.
@@ -32,11 +32,16 @@ public class DefaultTestUser implements TestUser {
   @Inject
   public DefaultTestUser(
       TestUserServiceClient testUserServiceClient,
-      TestWorkspaceServiceClient workspaceServiceClient,
-      TestAuthServiceClient authServiceClient)
+      TestAuthServiceClient authServiceClient,
+      TestApiEndpointUrlProvider apiEndpointUrlProvider,
+      TestUserNamespaceResolver testUserNamespaceResolver)
       throws Exception {
     this.testUser =
-        new TestUserImpl(testUserServiceClient, workspaceServiceClient, authServiceClient);
+        new TestUserImpl(
+            testUserServiceClient,
+            authServiceClient,
+            apiEndpointUrlProvider,
+            testUserNamespaceResolver);
   }
 
   @Override
