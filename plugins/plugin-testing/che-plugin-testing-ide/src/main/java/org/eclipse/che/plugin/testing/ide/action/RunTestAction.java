@@ -14,7 +14,6 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -32,10 +31,12 @@ import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 /** Action that allows to run tests from current editor. */
 @Singleton
 public class RunTestAction extends RunDebugTestAbstractAction {
+  private TestDetector testDetector;
+
   @Inject
   public RunTestAction(
-      EventBus eventBus,
       TestServiceClient client,
+      TestDetector testDetector,
       DtoFactory dtoFactory,
       TestResources testResources,
       AppContext appContext,
@@ -44,7 +45,7 @@ public class RunTestAction extends RunDebugTestAbstractAction {
       TestingHandler testingHandler,
       TestResultPresenter testResultPresenter) {
     super(
-        eventBus,
+        testDetector,
         testResultPresenter,
         testingHandler,
         debugConfigurationsManager,
@@ -56,6 +57,7 @@ public class RunTestAction extends RunDebugTestAbstractAction {
         "Run Test",
         "Run Test",
         testResources.testIcon());
+    this.testDetector = testDetector;
   }
 
   @Override
@@ -67,7 +69,7 @@ public class RunTestAction extends RunDebugTestAbstractAction {
   @Override
   public void updateInPerspective(@NotNull ActionEvent event) {
     Presentation presentation = event.getPresentation();
-    presentation.setVisible(isEditorInFocus);
-    presentation.setEnabled(isEnable);
+    presentation.setVisible(testDetector.isEditorInFocus());
+    presentation.setEnabled(testDetector.isEnable());
   }
 }

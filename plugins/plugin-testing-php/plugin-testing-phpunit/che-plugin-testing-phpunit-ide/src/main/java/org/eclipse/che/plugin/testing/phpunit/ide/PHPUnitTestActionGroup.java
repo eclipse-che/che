@@ -13,11 +13,8 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.plugin.testing.ide.TestAction;
-import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunContainerTestAction;
 import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunScriptTestAction;
-import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunScriptTestEditorAction;
 
 /**
  * PHPUnit test action implementation.
@@ -27,33 +24,21 @@ import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunScriptTestEditorA
 public class PHPUnitTestActionGroup implements TestAction {
 
   private final Action runScriptTestAction;
-  private final Action runScriptTestEditorAction;
-  private final Action runContainerTestAction;
 
   @Inject
   public PHPUnitTestActionGroup(
-      ActionManager actionManager,
-      PHPRunScriptTestAction runScriptTestAction,
-      PHPRunScriptTestEditorAction runScriptTestEditorAction,
-      PHPRunContainerTestAction runContainerTestAction,
-      KeyBindingAgent keyBinding) {
+      ActionManager actionManager, PHPRunScriptTestAction runScriptTestAction) {
     actionManager.registerAction("PHPRunScriptTestAction", runScriptTestAction);
-    actionManager.registerAction("PHPRunScriptTestEditorAction", runScriptTestEditorAction);
-    actionManager.registerAction("PHPRunContainerTestAction", runContainerTestAction);
     this.runScriptTestAction = runScriptTestAction;
-    this.runScriptTestEditorAction = runScriptTestEditorAction;
-    this.runContainerTestAction = runContainerTestAction;
   }
 
   @Override
   public void addMainMenuItems(DefaultActionGroup testMainMenu) {
-    //testMainMenu.add(runScriptTestEditorAction);
-    testMainMenu.add(runContainerTestAction);
+    testMainMenu.add(runScriptTestAction);
   }
 
   @Override
   public void addContextMenuItems(DefaultActionGroup testContextMenu) {
     testContextMenu.add(runScriptTestAction);
-    testContextMenu.add(runContainerTestAction);
   }
 }

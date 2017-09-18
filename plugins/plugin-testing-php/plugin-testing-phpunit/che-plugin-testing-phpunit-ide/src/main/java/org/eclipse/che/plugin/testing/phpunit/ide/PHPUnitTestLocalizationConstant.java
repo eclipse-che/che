@@ -24,10 +24,4 @@ public interface PHPUnitTestLocalizationConstant extends Messages {
 
   @Key("action.runScript.description")
   String actionRunScriptDescription();
-
-  @Key("action.runContainer.title")
-  String actionRunContainerTitle();
-
-  @Key("action.runContainer.description")
-  String actionRunContainerDescription();
 }
