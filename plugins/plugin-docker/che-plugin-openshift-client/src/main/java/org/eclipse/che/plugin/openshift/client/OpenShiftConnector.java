@@ -1105,7 +1105,7 @@ public class OpenShiftConnector extends DockerConnector {
     // Since repository + tag are limited to 63 chars, it's possible that the entire
     // tag name did not fit, so we have to match a substring.
     String imageTagTrimmed =
-        imageStreamTagName.length() > 30 ? imageStreamTagName.substring(0, 30) : imageStreamTagName;
+        imageStreamTagName.length() > 20 ? imageStreamTagName.substring(0, 20) : imageStreamTagName;
 
     // Note: ideally, ImageStreamTags could be identified with a label, but it seems like
     // ImageStreamTags do not support labels.

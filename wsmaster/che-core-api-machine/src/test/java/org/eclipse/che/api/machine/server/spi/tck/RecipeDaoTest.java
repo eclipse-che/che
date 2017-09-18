@@ -11,7 +11,6 @@
 package org.eclipse.che.api.machine.server.spi.tck;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
@@ -33,7 +32,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
 import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -60,32 +58,23 @@ public class RecipeDaoTest {
 
   private List<RecipeImpl> recipes;
 
-  private List<RecipePermissionsImpl> recipePermissions;
-
   @Inject private RecipeDao recipeDao;
 
   @Inject private TckRepository<RecipeImpl> tckRepository;
-
-  @Inject private TckRepository<RecipePermissionsImpl> tckPermissionsRepository;
 
   @Inject private EventService eventService;
 
   @BeforeMethod
   public void setUp() throws Exception {
     recipes = new ArrayList<>(5);
-    recipePermissions = new ArrayList<>(5);
     for (int i = 0; i < ENTRY_COUNT; i++) {
-      RecipeImpl tmp = createRecipe(i);
-      recipes.add(tmp);
-      recipePermissions.add(new RecipePermissionsImpl("*", tmp.getId(), singletonList("search")));
+      recipes.add(createRecipe(i));
     }
     tckRepository.createAll(recipes);
-    tckPermissionsRepository.createAll(recipePermissions);
   }
 
   @AfterMethod
   public void cleanUp() throws Exception {
-    tckPermissionsRepository.removeAll();
     tckRepository.removeAll();
   }
 
@@ -165,7 +154,7 @@ public class RecipeDaoTest {
   )
   public void shouldRemoveRecipe() throws Exception {
     final String existedId = recipes.get(0).getId();
-    tckPermissionsRepository.removeAll(); //to avoid constraint violation
+
     recipeDao.remove(existedId);
     recipeDao.getById(existedId);
   }

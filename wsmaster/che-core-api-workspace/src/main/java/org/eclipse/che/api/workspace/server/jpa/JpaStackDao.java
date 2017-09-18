@@ -46,21 +46,6 @@ public class JpaStackDao implements StackDao {
 
   @Inject private EventService eventService;
 
-  private static final String findByPermissionsQuery =
-      " SELECT stack FROM StackPermissions perm "
-          + "        LEFT JOIN perm.stack stack  "
-          + "        WHERE (perm.userId IS NULL OR perm.userId  = :userId) "
-          + "        AND 'search' MEMBER OF perm.actions";
-
-  private static final String findByPermissionsAndTagsQuery =
-      " SELECT stack FROM StackPermissions perm "
-          + "        LEFT JOIN perm.stack stack  "
-          + "        LEFT JOIN stack.tags tag    "
-          + "        WHERE (perm.userId IS NULL OR perm.userId  = :userId) "
-          + "        AND 'search' MEMBER OF perm.actions"
-          + "        AND tag IN :tags "
-          + "        GROUP BY stack.id HAVING COUNT(tag) = :tagsSize";
-
   @Override
   public void create(StackImpl stack) throws ConflictException, ServerException {
     requireNonNull(stack, "Required non-null stack");
@@ -115,22 +100,21 @@ public class JpaStackDao implements StackDao {
   @Override
   @Transactional
   public List<StackImpl> searchStacks(
-      @Nullable String userId, @Nullable List<String> tags, int skipCount, int maxItems)
+      @Nullable String user, @Nullable List<String> tags, int skipCount, int maxItems)
       throws ServerException {
     final TypedQuery<StackImpl> query;
     if (tags == null || tags.isEmpty()) {
-      query = managerProvider.get().createQuery(findByPermissionsQuery, StackImpl.class);
+      query = managerProvider.get().createNamedQuery("Stack.getAll", StackImpl.class);
     } else {
       query =
           managerProvider
               .get()
-              .createQuery(findByPermissionsAndTagsQuery, StackImpl.class)
+              .createNamedQuery("Stack.getByTags", StackImpl.class)
               .setParameter("tags", tags)
               .setParameter("tagsSize", tags.size());
     }
     try {
       return query
-          .setParameter("userId", userId)
           .setMaxResults(maxItems)
           .setFirstResult(skipCount)
           .getResultList()

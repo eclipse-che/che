@@ -11,7 +11,7 @@
 'use strict';
 
 import {CheAPI} from './che-api.factory';
-import {CheWorkspace} from './che-workspace.factory';
+import {CheWorkspace} from './workspace/che-workspace.factory';
 import {CheProjectTemplate} from './che-project-template.factory';
 import {CheRecipe} from './che-recipe.factory';
 import {CheRecipeTemplate} from './che-recipe-template.factory';

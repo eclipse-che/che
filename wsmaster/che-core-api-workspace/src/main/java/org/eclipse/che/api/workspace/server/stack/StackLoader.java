@@ -12,8 +12,6 @@ package org.eclipse.che.api.workspace.server.stack;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.workspace.server.stack.StackDomain.SEARCH;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -35,7 +33,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
-import org.eclipse.che.api.workspace.server.spi.jpa.JpaStackPermissionsDao;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -64,7 +61,6 @@ public class StackLoader {
   private final Map<String, String> stacks2images;
   private final DBInitializer dbInitializer;
   private final Boolean reloadStacksOnStart;
-  private final JpaStackPermissionsDao permissionsDao;
 
   @Inject
   @SuppressWarnings("unused")
@@ -72,13 +68,11 @@ public class StackLoader {
       @Named("che.predefined.stacks.reload_on_start") boolean reloadStacksOnStart,
       @Named(CHE_PREDEFINED_STACKS) Map<String, String> stacks2images,
       StackDao stackDao,
-      JpaStackPermissionsDao permissionsDao,
       DBInitializer dbInitializer) {
     this.reloadStacksOnStart = reloadStacksOnStart;
     this.stacks2images = stacks2images;
     this.stackDao = stackDao;
     this.dbInitializer = dbInitializer;
-    this.permissionsDao = permissionsDao;
     GSON = new GsonBuilder().create();
   }
 
@@ -112,15 +106,15 @@ public class StackLoader {
 
   protected void loadStack(StackImpl stack, Path imagePath) {
     setIconData(stack, imagePath);
+
     try {
+      stackDao.update(stack);
+    } catch (NotFoundException | ConflictException | ServerException e) {
       try {
-        stackDao.update(stack);
-      } catch (NotFoundException ignored) {
         stackDao.create(stack);
+      } catch (Exception ex) {
+        LOG.error(format("Failed to load stack with id '%s' ", stack.getId()), ex);
       }
-      permissionsDao.store(new StackPermissionsImpl("*", stack.getId(), singletonList(SEARCH)));
-    } catch (ServerException | ConflictException ex) {
-      LOG.warn(format("Failed to load stack with id '%s' ", stack.getId()), ex.getMessage());
     }
   }
 

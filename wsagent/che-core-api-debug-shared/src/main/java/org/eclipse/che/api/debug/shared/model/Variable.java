@@ -10,17 +10,13 @@
  */
 package org.eclipse.che.api.debug.shared.model;
 
-import java.util.List;
-
 /** @author Anatoliy Bazko */
 public interface Variable {
   /** The variable name. */
   String getName();
 
-  boolean isExistInformation();
-
   /** The variable value. */
-  String getValue();
+  SimpleValue getValue();
 
   /** The variable type. E.g.: String, int etc. */
   String getType();
@@ -30,7 +26,4 @@ public interface Variable {
 
   /** Indicates if variable is primitive. */
   boolean isPrimitive();
-
-  /** The nested variables. */
-  List<? extends Variable> getVariables();
 }

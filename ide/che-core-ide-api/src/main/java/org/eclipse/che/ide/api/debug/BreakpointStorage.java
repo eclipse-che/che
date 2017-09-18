@@ -11,7 +11,8 @@
 package org.eclipse.che.ide.api.debug;
 
 import java.util.List;
-import org.eclipse.che.api.promises.client.Promise;
+import java.util.Optional;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 
 /**
  * Preserves and loads breakpoints for the active workspace.
@@ -51,10 +52,16 @@ public interface BreakpointStorage {
   /** Clears storage. */
   void clear();
 
+  /** Gets all breakpoints that are set for given file. */
+  List<Breakpoint> getByPath(String filePath);
+
+  /** Returns breakpoints that is set for given file and at a given line number. */
+  Optional<Breakpoint> get(String filePath, int lineNumber);
+
   /**
    * Loads all breakpoints out of the storage.
    *
    * @return the list of the breakpoints
    */
-  Promise<List<Breakpoint>> readAll();
+  List<Breakpoint> getAll();
 }

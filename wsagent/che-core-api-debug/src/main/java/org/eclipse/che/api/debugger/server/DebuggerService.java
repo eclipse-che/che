@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.api.debugger.server;
 
-import static org.eclipse.che.api.debugger.server.DtoConverter.asBreakpointsDto;
 import static org.eclipse.che.api.debugger.server.DtoConverter.asDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -18,6 +17,7 @@ import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -36,9 +36,11 @@ import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ActionDto;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
 import org.eclipse.che.api.debug.shared.model.action.StartAction;
@@ -95,11 +97,13 @@ public class DebuggerService {
       throws DebuggerException {
     Debugger debugger = debuggerManager.getDebugger(sessionId);
 
+    List<BreakpointDto> breakpointsDto =
+        debugger.getAllBreakpoints().stream().map(DtoConverter::asDto).collect(Collectors.toList());
     DebugSessionDto debugSessionDto = newDto(DebugSessionDto.class);
-    debugSessionDto.setDebuggerInfo(asDto(debugger.getInfo()));
+    debugSessionDto.setDebuggerInfo(DtoConverter.asDto(debugger.getInfo()));
     debugSessionDto.setId(sessionId);
     debugSessionDto.setType(debuggerManager.getDebuggerType(sessionId));
-    debugSessionDto.setBreakpoints(asBreakpointsDto(debugger.getAllBreakpoints()));
+    debugSessionDto.setBreakpoints(breakpointsDto);
 
     return debugSessionDto;
   }
@@ -146,7 +150,12 @@ public class DebuggerService {
   @Produces(MediaType.APPLICATION_JSON)
   public List<BreakpointDto> getBreakpoints(@PathParam("id") String sessionId)
       throws DebuggerException {
-    return asBreakpointsDto(debuggerManager.getDebugger(sessionId).getAllBreakpoints());
+    return debuggerManager
+        .getDebugger(sessionId)
+        .getAllBreakpoints()
+        .stream()
+        .map(DtoConverter::asDto)
+        .collect(Collectors.toList());
   }
 
   @DELETE
@@ -154,28 +163,48 @@ public class DebuggerService {
   public void deleteBreakpoint(
       @PathParam("id") String sessionId,
       @QueryParam("target") String target,
-      @QueryParam("line") @DefaultValue("0") int lineNumber)
+      @QueryParam("line") @DefaultValue("0") int lineNumber,
+      @QueryParam("project") String project)
       throws DebuggerException {
     if (target == null) {
       debuggerManager.getDebugger(sessionId).deleteAllBreakpoints();
     } else {
-      Location location = new LocationImpl(target, lineNumber);
+      Location location = new LocationImpl(target, lineNumber, project);
       debuggerManager.getDebugger(sessionId).deleteBreakpoint(location);
     }
   }
 
   @GET
-  @Path("{id}/dump")
+  @Path("{id}/stackframedump")
   @Produces(MediaType.APPLICATION_JSON)
-  public StackFrameDumpDto getStackFrameDump(@PathParam("id") String sessionId)
+  public StackFrameDumpDto getStackFrameDump(
+      @PathParam("id") String sessionId,
+      @QueryParam("thread") @DefaultValue("-1") long threadId,
+      @QueryParam("frame") @DefaultValue("-1") int frameIndex)
       throws DebuggerException {
-    return asDto(debuggerManager.getDebugger(sessionId).dumpStackFrame());
+    if (threadId == -1) {
+      return asDto(debuggerManager.getDebugger(sessionId).dumpStackFrame());
+    }
+    return asDto(debuggerManager.getDebugger(sessionId).getStackFrameDump(threadId, frameIndex));
+  }
+
+  @GET
+  @Path("{id}/threaddump")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<ThreadStateDto> getThreadDump(@PathParam("id") String sessionId)
+      throws DebuggerException {
+    List<ThreadState> threadStates = debuggerManager.getDebugger(sessionId).getThreadDump();
+    return threadStates.stream().map(DtoConverter::asDto).collect(Collectors.toList());
   }
 
   @GET
   @Path("{id}/value")
   @Produces(MediaType.APPLICATION_JSON)
-  public SimpleValueDto getValue(@PathParam("id") String sessionId, @Context UriInfo uriInfo)
+  public SimpleValueDto getValue(
+      @PathParam("id") String sessionId,
+      @QueryParam("thread") @DefaultValue("-1") long threadId,
+      @QueryParam("frame") @DefaultValue("-1") int frameIndex,
+      @Context UriInfo uriInfo)
       throws DebuggerException {
     List<String> path = new ArrayList<>();
 
@@ -188,23 +217,42 @@ public class DebuggerService {
     }
 
     VariablePath variablePath = new VariablePathImpl(path);
-    return asDto(debuggerManager.getDebugger(sessionId).getValue(variablePath));
+    if (threadId == -1) {
+      return asDto(debuggerManager.getDebugger(sessionId).getValue(variablePath));
+    }
+
+    return asDto(
+        debuggerManager.getDebugger(sessionId).getValue(variablePath, threadId, frameIndex));
   }
 
   @PUT
   @Path("{id}/value")
   @Consumes(MediaType.APPLICATION_JSON)
-  public void setValue(@PathParam("id") String sessionId, VariableDto variable)
+  public void setValue(
+      @PathParam("id") String sessionId,
+      @QueryParam("thread") @DefaultValue("-1") long threadId,
+      @QueryParam("frame") @DefaultValue("-1") int frameIndex,
+      VariableDto variable)
       throws DebuggerException {
-    debuggerManager.getDebugger(sessionId).setValue(variable);
+    if (threadId == -1) {
+      debuggerManager.getDebugger(sessionId).setValue(variable);
+    } else {
+      debuggerManager.getDebugger(sessionId).setValue(variable, threadId, frameIndex);
+    }
   }
 
   @GET
   @Path("{id}/evaluation")
   @Produces(MediaType.TEXT_PLAIN)
   public String expression(
-      @PathParam("id") String sessionId, @QueryParam("expression") String expression)
+      @PathParam("id") String sessionId,
+      @QueryParam("thread") @DefaultValue("-1") long threadId,
+      @QueryParam("frame") @DefaultValue("-1") int frameIndex,
+      @QueryParam("expression") String expression)
       throws DebuggerException {
-    return debuggerManager.getDebugger(sessionId).evaluate(expression);
+    if (threadId == -1) {
+      return debuggerManager.getDebugger(sessionId).evaluate(expression);
+    }
+    return debuggerManager.getDebugger(sessionId).evaluate(expression, threadId, frameIndex);
   }
 }

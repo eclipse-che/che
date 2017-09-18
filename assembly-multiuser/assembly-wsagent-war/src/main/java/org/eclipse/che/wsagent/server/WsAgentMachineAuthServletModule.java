@@ -13,7 +13,7 @@ package org.eclipse.che.wsagent.server;
 import com.google.inject.servlet.ServletModule;
 import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.machine.authentication.agent.MachineLoginFilter;
+import org.eclipse.che.multiuser.machine.authentication.agent.MachineLoginFilter;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 
 @DynaModule

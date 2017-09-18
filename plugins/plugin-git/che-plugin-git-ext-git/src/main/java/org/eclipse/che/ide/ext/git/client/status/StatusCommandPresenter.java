@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.ext.git.client.status;
 
-import static org.eclipse.che.api.git.shared.StatusFormat.LONG;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -65,7 +64,7 @@ public class StatusCommandPresenter {
   /** Show status. */
   public void showStatus(Project project) {
     service
-        .statusText(project.getLocation(), LONG)
+        .statusText(project.getLocation())
         .then(
             status -> {
               printGitStatus(status);

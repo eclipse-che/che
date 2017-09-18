@@ -91,7 +91,7 @@ public class NodeJsDebugTest {
     new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
-                By.xpath("//div[text()='{" + PROJECT_NAME + "/app.js:13} ']")));
+                By.xpath("//div[text()='{/app.js:13} ']")));
     debugPanel.waitBreakPointsPanelIsEmpty();
   }
 
@@ -122,7 +122,7 @@ public class NodeJsDebugTest {
     new WebDriverWait(ide.driver(), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[text()='{" + PROJECT_NAME + "/app.js:13} ']")));
+                By.xpath("//div[text()='{app.js:13} ']")));
     debugPanel.clickOnButton(DebuggerButtonsPanel.STEP_OVER);
   }
 

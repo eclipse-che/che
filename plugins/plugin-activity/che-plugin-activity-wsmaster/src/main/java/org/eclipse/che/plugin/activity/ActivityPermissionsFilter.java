@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.plugin.activity;
 
-import static org.eclipse.che.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
-import static org.eclipse.che.api.workspace.server.WorkspaceDomain.USE;
+import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.DOMAIN_ID;
+import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.USE;
 
 import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ApiException;

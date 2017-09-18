@@ -17,6 +17,7 @@ package org.eclipse.che.selenium.core.workspace;
  */
 public class WorkspaceTemplate {
   public static final String ECLIPSE_CPP_GCC = "eclipse_cpp_gcc.json";
+  public static final String UBUNTU_LSP = "ubuntu_with_c_sharp_lsp.json";
   public static final String ECLIPSE_NODEJS = "eclipse_nodejs.json";
   public static final String ECLIPSE_PHP = "eclipse_php.json";
   public static final String CODENVY_DEBIAN_JRE = "codenvy_debian_jre.json";

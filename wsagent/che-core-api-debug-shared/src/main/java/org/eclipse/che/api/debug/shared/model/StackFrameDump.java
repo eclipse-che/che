@@ -19,4 +19,7 @@ public interface StackFrameDump {
 
   /** The list of local variables. */
   List<? extends Variable> getVariables();
+
+  /** Returns location of the frame. */
+  Location getLocation();
 }

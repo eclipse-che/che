@@ -37,7 +37,6 @@ import com.sun.jdi.PrimitiveValue;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.StringReference;
-import com.sun.jdi.ThreadReference;
 import com.sun.jdi.Type;
 import com.sun.jdi.Value;
 import com.sun.jdi.VirtualMachine;
@@ -66,19 +65,15 @@ public class Evaluator {
   }
 
   private final VirtualMachine vm;
-  private final ThreadReference thread;
+  private final StackFrame stackFrame;
 
-  public Evaluator(VirtualMachine vm, ThreadReference thread) {
+  public Evaluator(VirtualMachine vm, StackFrame stackFrame) {
     this.vm = vm;
-    this.thread = thread;
+    this.stackFrame = stackFrame;
   }
 
   private static boolean isPrimitive(Type type) {
     return PRIMITIVE_TYPES.contains(type.name());
-  }
-
-  public ThreadReference getThread() {
-    return thread;
   }
 
   public ExpressionValue booleanValue(String text) {
@@ -225,11 +220,8 @@ public class Evaluator {
   }
 
   public ExpressionValue getThisObject() {
-    try {
-      return new ReadOnlyValue(thread.frame(0).thisObject());
-    } catch (IncompatibleThreadStateException e) {
-      throw new ExpressionException(e.getMessage(), e);
-    }
+
+    return new ReadOnlyValue(stackFrame.thisObject());
   }
 
   public ExpressionValue getField(Value parent, String name) {
@@ -253,15 +245,12 @@ public class Evaluator {
   public ExpressionValue getLocalVariable(String text) {
     ExpressionValue value = null;
     try {
-      StackFrame frame = thread.frame(0);
-      LocalVariable var = frame.visibleVariableByName(text);
+
+      LocalVariable var = stackFrame.visibleVariableByName(text);
       if (var != null) {
-        value = new LocalValue(thread, var);
+        value = new LocalValue(stackFrame, var);
       }
-    } catch (IncompatibleThreadStateException
-        | AbsentInformationException
-        | InvalidStackFrameException
-        | NativeMethodException e) {
+    } catch (AbsentInformationException | InvalidStackFrameException | NativeMethodException e) {
       throw new ExpressionException(e.getMessage(), e);
     }
     LOG.debug("GET local variable {} {} ", text, value);
@@ -403,7 +392,7 @@ public class Evaluator {
           "No method with name " + name + " matched to specified arguments for " + type.name());
     }
     try {
-      return new ReadOnlyValue(object.invokeMethod(thread, method, arguments, 0));
+      return new ReadOnlyValue(object.invokeMethod(stackFrame.thread(), method, arguments, 0));
     } catch (InvalidTypeException
         | ClassNotLoadedException
         | IncompatibleThreadStateException

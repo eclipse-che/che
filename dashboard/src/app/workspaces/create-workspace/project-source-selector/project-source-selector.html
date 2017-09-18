@@ -2,16 +2,16 @@
 
   <!-- Toggle buttons -->
   <div class="che-template-checker">
-    <toggle-single-button class="add-project"
+    <toggle-single-button class="add-import-project-toggle-button"
                           id="{{projectSourceSelectorController.actionType[projectSourceSelectorController.actionType.ADD_PROJECT]}}"
                           che-title="Add or Import Project"
                           che-multiline-title
                           che-font-icon="material-design icon-ic_add_24px"
                           che-on-change="projectSourceSelectorController.updateData({buttonState: state, actionType: projectSourceSelectorController.actionType.ADD_PROJECT})"
                           che-state="projectSourceSelectorController.buttonState['ADD_PROJECT']"></toggle-single-button>
-    <toggle-single-button class="project-metadata"
-                          id="{{projectTemplate.name}}"
+    <toggle-single-button class="edit-project-toggle-button"
                           ng-repeat="projectTemplate in projectSourceSelectorController.projectTemplates"
+                          id="{{projectTemplate.name}}"
                           che-title="{{projectTemplate.name}}"
                           che-font-icon="chefont cheico-project"
                           che-on-change="projectSourceSelectorController.updateData({buttonState: state, actionType: projectSourceSelectorController.actionType.EDIT_PROJECT, template: projectTemplate})"
@@ -25,83 +25,15 @@
     <div class="arrow"></div>
 
     <div ng-if="projectSourceSelectorController.activeActionType === projectSourceSelectorController.actionType.ADD_PROJECT">
-      <ng-form name="projectSourceSelectorForm">
-        <div class="project-source-selector-popover-content">
-          <!-- Source toggle -->
-          <div class="project-source-selector-popover-toggle-buttons">
-            <che-toggle-joined ng-model="projectSourceSelectorController.activeProjectSource"
-                               ng-change="projectSourceSelectorController.sourceChanged(value)"
-                               md-theme="default"
-                               flex-order="2" flex-order-gt-md="1">
-              <che-toggle-joined-button che-title="Samples"
-                                        che-value="projectSourceSelectorController.projectSource.SAMPLES"></che-toggle-joined-button>
-              <che-toggle-joined-button che-title="Blank"
-                                        che-value="projectSourceSelectorController.projectSource.BLANK"></che-toggle-joined-button>
-              <che-toggle-joined-button che-title="Git"
-                                        che-value="projectSourceSelectorController.projectSource.GIT"></che-toggle-joined-button>
-              <che-toggle-joined-button che-title="GitHub"
-                                        che-value="projectSourceSelectorController.projectSource.GITHUB"></che-toggle-joined-button>
-              <che-toggle-joined-button che-title="Zip"
-                                        che-value="projectSourceSelectorController.projectSource.ZIP"></che-toggle-joined-button>
-            </che-toggle-joined>
-          </div>
-          <div class="project-source-selector-popover-sources">
-            <template-selector
-              ng-if="projectSourceSelectorController.activeProjectSource === projectSourceSelectorController.projectSource.SAMPLES"></template-selector>
-            <import-blank-project
-              ng-if="projectSourceSelectorController.activeProjectSource === projectSourceSelectorController.projectSource.BLANK"></import-blank-project>
-            <import-git-project
-              ng-if="projectSourceSelectorController.activeProjectSource === projectSourceSelectorController.projectSource.GIT"></import-git-project>
-            <import-github-project
-              ng-if="projectSourceSelectorController.activeProjectSource === projectSourceSelectorController.projectSource.GITHUB"></import-github-project>
-            <import-zip-project
-              ng-if="projectSourceSelectorController.activeProjectSource === projectSourceSelectorController.projectSource.ZIP"></import-zip-project>
-          </div>
-
-          <md-divider class="project-source-selector-divider"></md-divider>
-
-          <div class="project-source-selector-button"
-               flex layout="row" layout-align="end center">
-            <che-button-cancel-flat che-button-title="Cancel"
-                                    name="cancelButton"
-                                    ng-disabled="projectSourceSelectorController.disableSaveAndCancelButtons()"
-                                    ng-click="projectSourceSelectorController.cancelProjectTemplate()"></che-button-cancel-flat>
-            <che-button-primary che-button-title="Add"
-                                name="addButton"
-                                ng-disabled="projectSourceSelectorForm.$invalid || projectSourceSelectorController.disableSaveAndCancelButtons()"
-                                ng-click="projectSourceSelectorController.addProjectTemplate()"></che-button-primary>
-          </div>
-        </div>
-      </ng-form>
+      <add-import-project is-project-name-unique="projectSourceSelectorController.isProjectNameUnique(name)"
+                          project-on-add="projectSourceSelectorController.projectTemplateOnAdd(templates)"></add-import-project>
     </div>
-    <div ng-if="projectSourceSelectorController.activeActionType === projectSourceSelectorController.actionType.EDIT_PROJECT" class="project-source-selector-popover-content">
-      <ng-form name="projectTemplateForm"
-               ng-if="projectSourceSelectorController.projectTemplate">
 
-        <project-metadata template="projectSourceSelectorController.projectTemplate"
-                          template-name="{{projectSourceSelectorController.projectTemplate.name}}"></project-metadata>
-
-        <md-divider class="project-metadata-divider"></md-divider>
-
-        <div  flex layout="row" layout-align="center stretch"
-              class="project-source-selector-button">
-          <div flex layout="row" layout-align="start center">
-            <che-button-danger che-button-title="Remove"
-                               name="removeButton"
-                               ng-click="projectSourceSelectorController.removeTemplate()"></che-button-danger>
-          </div>
-          <div flex layout="row" layout-align="end center">
-            <che-button-cancel-flat che-button-title="Cancel"
-                                    name="cancelButton"
-                                    ng-disabled="projectSourceSelectorController.disableSaveAndCancelButtons()"
-                                    ng-click="projectSourceSelectorController.restoreMetadata()"></che-button-cancel-flat>
-            <che-button-primary che-button-title="Save"
-                                name="saveButton"
-                                ng-disabled="projectTemplateForm.$invalid || projectSourceSelectorController.disableSaveAndCancelButtons()"
-                                ng-click="projectSourceSelectorController.saveMetadata()"></che-button-primary>
-          </div>
-        </div>
-      </ng-form>
+    <div ng-if="projectSourceSelectorController.activeActionType === projectSourceSelectorController.actionType.EDIT_PROJECT">
+      <edit-project project-names="projectSourceSelectorController.getProjectTemplateNames()"
+                    project-template="projectSourceSelectorController.selectedProjectTemplate"
+                    project-on-edit="projectSourceSelectorController.projectTemplateOnEdit(template)"
+                    project-on-remove="projectSourceSelectorController.projectTemplateOnRemove()"></edit-project>
     </div>
   </div>
 

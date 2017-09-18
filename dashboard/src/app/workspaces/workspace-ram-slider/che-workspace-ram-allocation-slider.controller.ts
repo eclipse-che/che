@@ -15,11 +15,11 @@
  * @author Florent Benoit
  */
 export class CheWorkspaceRamAllocationSliderController {
-  onChangeTimeoutPromise: ng.IPromise;
+  onChangeTimeoutPromise: ng.IPromise<any>;
   $timeout: ng.ITimeoutService;
   ngModel: number;
   inputVal: number;
-  cheOnChange: any;
+  cheOnChange: Function;
 
   /**
    * Default constructor that is using resource
@@ -32,7 +32,7 @@ export class CheWorkspaceRamAllocationSliderController {
     $scope.$watch(() => {
       return this.ngModel;
     }, () => {
-      this.inputVal = this.init(this.ngModel / Math.pow(1024,3));
+      this.inputVal = this.init(this.ngModel / Math.pow(1024, 3));
     });
   }
 
@@ -42,9 +42,9 @@ export class CheWorkspaceRamAllocationSliderController {
    * @returns {number} rounded value
    */
   init(value: number): number {
-    var factor: number = Math.pow(10, 1);
-    var tempValue: number = value * factor;
-    var roundedTempValue: number = Math.round(tempValue);
+    let factor: number = Math.pow(10, 1);
+    let tempValue: number = value * factor;
+    let roundedTempValue: number = Math.round(tempValue);
     return roundedTempValue / factor;
   }
 

@@ -1016,7 +1016,7 @@ public class CodenvyEditor {
    *
    * @param position position of the breakpoint
    */
-  public void setBreakPointAndWaitInactiveState(int position) {
+  public void setInactiveBreakpoint(int position) {
     waitActiveEditor();
     waitDebugerLineIsVisible(position);
     seleniumWebDriver
@@ -1037,7 +1037,15 @@ public class CodenvyEditor {
     seleniumWebDriver
         .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
         .click();
-    waitBreakPointWithActiveState(position);
+    waitAcitveBreakpoint(position);
+  }
+
+  public void setBreakpoint(int position) {
+    waitActiveEditor();
+    waitDebugerLineIsVisible(position);
+    seleniumWebDriver
+        .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
+        .click();
   }
 
   /**
@@ -1045,7 +1053,7 @@ public class CodenvyEditor {
    *
    * @param position the position in the codenvy - editor
    */
-  public void waitBreakPointWithActiveState(int position) {
+  public void waitAcitveBreakpoint(int position) {
     redrawDriverWait.until(
         visibilityOfElementLocated(
             By.xpath(String.format(Locators.DEBUGGER_BREAK_POINT_ACTIVE, position))));

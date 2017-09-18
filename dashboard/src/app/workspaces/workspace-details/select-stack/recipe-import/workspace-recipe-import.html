@@ -1,21 +1,20 @@
 <div layout="column" flex class="recipe-widget" md-theme="default">
   <ng-form name="workspaceRecipeImportForm">
-
     <div layout="column">
       <che-label-container che-label-name="Recipe URL">
         <div class="recipe-url-input">
-          <che-input che-form="workspaceRecipeImportForm"
-                     che-name="url"
-                     che-place-holder="URL of the Recipe"
-                     aria-label="URL of the Recipe"
-                     che-pattern="^(ftp|https?)://[\w@.\-\_]+(:\d{1,5})?(/[\w#!:.?+=&%@!\_\-/]+)*$"
-                     che-width="auto"
-                     ng-model="workspaceRecipeImportCtrl.recipeUrlCopy"
-                     ng-change="workspaceRecipeImportCtrl.onRecipeChange()"
-                     ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: true }"
-                     minlength="3"
-                     ng-required
-                     ng-maxlength="255">
+          <che-input-box che-form="workspaceRecipeImportForm"
+                         che-name="url"
+                         che-place-holder="URL of the Recipe"
+                         aria-label="URL of the Recipe"
+                         pattern="^(ftp|https?)://[\w@.\-\_]+(:\d{1,5})?(/[\w#!:.?+=&%@!\_\-/]+)*$"
+                         che-width="auto"
+                         ng-model="workspaceRecipeImportCtrl.recipeUrlCopy"
+                         che-on-change="workspaceRecipeImportCtrl.onRecipeChange()"
+                         ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: true }"
+                         minlength="3"
+                         ng-required
+                         ng-maxlength="255">
             <che-error-messages che-message-scope="workspace-details-environment"
                                 che-message-name="Recipe URL">
               <div ng-message></div>
@@ -24,7 +23,7 @@
               <div ng-message="maxlength">URL has to be less than 255 characters long.</div>
               <div ng-message="pattern">URL is not valid.</div>
             </che-error-messages>
-          </che-input>
+          </che-input-box>
         </div>
       </che-label-container>
       <che-label-container che-label-name="Recipe Type">

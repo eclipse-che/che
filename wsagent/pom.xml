@@ -43,6 +43,5 @@
         <module>che-core-api-testing-shared</module>
         <module>wsagent-local</module>
         <module>che-wsagent-core</module>
-        <module>che-machine-authentication-agent</module>
     </modules>
 </project>

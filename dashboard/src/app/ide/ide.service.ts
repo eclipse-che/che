@@ -10,9 +10,9 @@
  */
 'use strict';
 import {CheAPI} from '../../components/api/che-api.factory';
-import {CheWorkspace} from '../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 import {RouteHistory} from '../../components/routing/route-history.service';
-import {CheUIElementsInjectorService} from '../../components/injector/che-ui-elements-injector.service';
+import {CheUIElementsInjectorService} from '../../components/service/injector/che-ui-elements-injector.service';
 
 /**
  * This class is handling the service for viewing the IDE

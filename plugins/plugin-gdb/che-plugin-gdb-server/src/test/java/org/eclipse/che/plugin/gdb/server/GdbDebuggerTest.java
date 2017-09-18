@@ -35,6 +35,7 @@ import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
@@ -151,17 +152,16 @@ public class GdbDebuggerTest {
 
   private void doSetAndGetValues() throws DebuggerException {
     VariablePath variablePath = new VariablePathImpl("i");
-    Variable variable =
-        new VariableImpl("int", "i", "2", true, variablePath, Collections.emptyList(), false);
+    Variable variable = new VariableImpl("int", "i", new SimpleValueImpl("2"), true, variablePath);
 
     SimpleValue value = gdbDebugger.getValue(variablePath);
-    assertEquals(value.getValue(), "0");
+    assertEquals(value.getString(), "0");
 
     gdbDebugger.setValue(variable);
 
     value = gdbDebugger.getValue(variablePath);
 
-    assertEquals(value.getValue(), "2");
+    assertEquals(value.getString(), "2");
 
     String expression = gdbDebugger.evaluate("i");
     assertEquals(expression, "2");
@@ -173,7 +173,7 @@ public class GdbDebuggerTest {
     assertTrue(stackFrameDump.getFields().isEmpty());
     assertEquals(stackFrameDump.getVariables().size(), 1);
     assertEquals(stackFrameDump.getVariables().get(0).getName(), "i");
-    assertEquals(stackFrameDump.getVariables().get(0).getValue(), "2");
+    assertEquals(stackFrameDump.getVariables().get(0).getValue().getString(), "2");
     assertEquals(stackFrameDump.getVariables().get(0).getType(), "int");
   }
 

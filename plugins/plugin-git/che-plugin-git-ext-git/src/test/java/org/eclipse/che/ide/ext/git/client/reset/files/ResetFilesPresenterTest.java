@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.git.client.reset.files;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
@@ -66,7 +67,7 @@ public class ResetFilesPresenterTest extends BaseTest {
     when(indexFile.withIndexed(anyBoolean())).thenReturn(indexFile);
     when(indexFile.withPath(anyString())).thenReturn(indexFile);
     when(indexFile.getPath()).thenReturn("foo");
-    when(service.getStatus(any(Path.class))).thenReturn(statusPromise);
+    when(service.getStatus(any(Path.class), eq(emptyList()))).thenReturn(statusPromise);
     when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
     when(statusPromise.catchError(any(Operation.class))).thenReturn(statusPromise);
     when(appContext.getResources()).thenReturn(new Resource[] {});

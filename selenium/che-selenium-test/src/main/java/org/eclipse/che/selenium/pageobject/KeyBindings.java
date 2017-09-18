@@ -29,7 +29,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
- * @author Morhun Mykola
+ * @author Mykola Morhun
  * @author Andrey Chizhikov
  */
 @Singleton

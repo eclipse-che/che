@@ -283,10 +283,8 @@ public class CommitFilesTest {
   private void checkChangesIntoCompareForm(String expText) {
     git.clickOnGroupCompareButton();
     git.waitGitCompareFormIsOpen();
-    git.toSwitchFrameGitCompareForm();
     git.waitExpTextIntoCompareLeftEditor(expText);
     git.waitTextNotPresentIntoCompareRightEditor(expText);
-    ide.driver().switchTo().parentFrame();
     git.closeGitCompareForm();
   }
 }

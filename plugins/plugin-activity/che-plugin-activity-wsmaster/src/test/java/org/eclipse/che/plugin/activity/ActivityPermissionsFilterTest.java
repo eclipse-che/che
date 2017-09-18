@@ -11,8 +11,8 @@
 package org.eclipse.che.plugin.activity;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.eclipse.che.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
-import static org.eclipse.che.api.workspace.server.WorkspaceDomain.USE;
+import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.DOMAIN_ID;
+import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.USE;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;

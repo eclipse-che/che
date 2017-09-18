@@ -40,4 +40,4 @@ ENTRYPOINT ["/entrypoint.sh"]
 RUN mkdir /logs /data && \
     chmod 0777 /logs /data
 ADD eclipse-che /home/user/eclipse-che
-RUN chmod -R 0777 /home/user
+RUN find /home/user -type d -exec chmod 777 {} \;
