@@ -21,6 +21,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 import com.google.common.collect.Sets;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -158,6 +159,10 @@ public class ProjectExplorerPresenter extends BasePresenter
             partStack.setActivePart(ProjectExplorerPresenter.this);
           }
         });
+  }
+
+  public void addSelectionHandler(SelectionHandler<Node> handler) {
+    getTree().getSelectionModel().addSelectionHandler(handler);
   }
 
   @Inject

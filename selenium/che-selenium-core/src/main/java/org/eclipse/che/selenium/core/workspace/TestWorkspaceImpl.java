@@ -55,9 +55,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
                 final Workspace ws =
                     workspaceServiceClient.createWorkspace(name, memoryInGB, GB, template);
                 workspaceServiceClient.start(id.updateAndGet((s) -> ws.getId()), name, owner);
-
-                LOG.info("Workspace name='{}' id='{}' has been created.", name, ws.getId());
-
+                LOG.info("Workspace name='{}' id='{}' started.", name, ws.getId());
               } catch (Exception e) {
                 String errorMessage = format("Workspace name='%s' start failed.", name);
                 LOG.error(errorMessage, e);
@@ -102,7 +100,6 @@ public class TestWorkspaceImpl implements TestWorkspace {
         aVoid -> {
           try {
             workspaceServiceClient.delete(name, owner.getName());
-            LOG.info("Workspace name='{}', id='{}' removed", name, getId());
           } catch (Exception e) {
             throw new RuntimeException(format("Failed to remove workspace '%s'", this), e);
           }

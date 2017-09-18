@@ -13,10 +13,13 @@ package org.eclipse.che.selenium.core.workspace;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -138,12 +141,26 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
       LOG.info("Workspace threads pool is terminated");
     }
 
-    LOG.info("Destroy remained workspaces: {}.", testWorkspaceQueue.size());
+    LOG.info("Destroy remained workspaces: {}.", extractWorkspaceInfo());
     testWorkspaceQueue.forEach(TestWorkspace::delete);
 
     if (isInterrupted) {
       Thread.currentThread().interrupt();
     }
+  }
+
+  private List<String> extractWorkspaceInfo() {
+    return testWorkspaceQueue
+        .stream()
+        .map(
+            s -> {
+              try {
+                return s.getName();
+              } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException("Error of getting name of workspace.", e);
+              }
+            })
+        .collect(Collectors.toList());
   }
 
   @Inject

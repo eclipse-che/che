@@ -13,16 +13,19 @@ package org.eclipse.che.ide.resources.action;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.resource.Path.valueOf;
 
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
 /**
@@ -34,6 +37,8 @@ import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 @Beta
 @Singleton
 public class RevealResourceAction extends AbstractPerspectiveAction {
+
+  private static final String PATH = "path";
 
   private final AppContext appContext;
   private final EventBus eventBus;
@@ -57,10 +62,21 @@ public class RevealResourceAction extends AbstractPerspectiveAction {
   /** {@inheritDoc} */
   @Override
   public void actionPerformed(ActionEvent e) {
-    final Resource[] resources = appContext.getResources();
+    Map<String, String> params = e.getParameters();
+    String pathToReveal = params.get(PATH);
 
-    checkState(resources != null && resources.length == 1);
+    if (pathToReveal != null) {
+      Path path = valueOf(pathToReveal);
 
-    eventBus.fireEvent(new RevealResourceEvent(resources[0]));
+      checkState(!path.isEmpty());
+
+      eventBus.fireEvent(new RevealResourceEvent(path));
+    } else {
+      final Resource[] resources = appContext.getResources();
+
+      checkState(resources != null && resources.length == 1);
+
+      eventBus.fireEvent(new RevealResourceEvent(resources[0]));
+    }
   }
 }
