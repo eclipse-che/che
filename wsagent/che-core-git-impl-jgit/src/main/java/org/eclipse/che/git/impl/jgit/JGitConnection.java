@@ -852,7 +852,8 @@ class JGitConnection implements GitConnection {
 
     try {
       repository.create(isBare);
-      eventService.publish(newDto(GitRepositoryInitializedEvent.class).withStatus(status(emptyList())));
+      eventService.publish(
+          newDto(GitRepositoryInitializedEvent.class).withStatus(status(emptyList())));
     } catch (IOException exception) {
       if (removeIfFailed) {
         deleteRepositoryFolder();

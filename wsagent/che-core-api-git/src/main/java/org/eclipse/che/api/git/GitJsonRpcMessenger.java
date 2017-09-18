@@ -29,9 +29,9 @@ import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
 import org.eclipse.che.api.git.shared.event.GitCommitEvent;
 import org.eclipse.che.api.git.shared.event.GitEvent;
-import org.eclipse.che.api.git.shared.event.GitResetEvent;
 import org.eclipse.che.api.git.shared.event.GitRepositoryDeletedEvent;
 import org.eclipse.che.api.git.shared.event.GitRepositoryInitializedEvent;
+import org.eclipse.che.api.git.shared.event.GitResetEvent;
 
 @Singleton
 public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
@@ -100,7 +100,7 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
       transmitter
           .newRequest()
           .endpointId(endpointId)
-          .methodName("event/git-index")
+          .methodName("event/git/indexChanged")
           .paramsAsDto(status)
           .sendAndSkipResult();
     }
