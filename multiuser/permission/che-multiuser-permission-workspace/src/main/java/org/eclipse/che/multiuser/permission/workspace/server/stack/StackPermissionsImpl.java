@@ -17,7 +17,6 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -64,9 +63,7 @@ import org.eclipse.che.multiuser.api.permission.shared.model.Permissions;
             + "AND stack.userId IS NULL "
   )
 })
-@Table(
-  name = "che_stack_permissions"
-)
+@Table(name = "che_stack_permissions")
 public class StackPermissionsImpl extends AbstractPermissions {
 
   @Column(name = "stack_id")
@@ -78,8 +75,10 @@ public class StackPermissionsImpl extends AbstractPermissions {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
-  @CollectionTable(name = "che_stack_permissions_actions",
-      joinColumns = @JoinColumn(name = "stack_permissions_id"))
+  @CollectionTable(
+    name = "che_stack_permissions_actions",
+    joinColumns = @JoinColumn(name = "stack_permissions_id")
+  )
   protected List<String> actions;
 
   public StackPermissionsImpl() {}

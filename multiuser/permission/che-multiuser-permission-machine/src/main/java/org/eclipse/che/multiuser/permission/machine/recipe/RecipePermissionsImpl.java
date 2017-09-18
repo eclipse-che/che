@@ -83,8 +83,10 @@ public class RecipePermissionsImpl extends AbstractPermissions {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
-  @CollectionTable(name = "che_recipe_permissions_actions",
-      joinColumns = @JoinColumn(name = "recipe_permissions_id"))
+  @CollectionTable(
+    name = "che_recipe_permissions_actions",
+    joinColumns = @JoinColumn(name = "recipe_permissions_id")
+  )
   protected List<String> actions;
 
   public RecipePermissionsImpl() {}

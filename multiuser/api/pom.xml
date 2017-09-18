@@ -27,5 +27,7 @@
         <module>che-multiuser-api-permission</module>
         <module>che-multiuser-api-authorization</module>
         <module>che-multiuser-api-authorization-impl</module>
+        <module>che-multiuser-api-resource-shared</module>
+        <module>che-multiuser-api-resource</module>
     </modules>
 </project>

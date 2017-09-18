@@ -664,6 +664,22 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-resource</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-resource</artifactId>
+                <version>${che.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-resource-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
                 <artifactId>che-multiuser-keycloak-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>

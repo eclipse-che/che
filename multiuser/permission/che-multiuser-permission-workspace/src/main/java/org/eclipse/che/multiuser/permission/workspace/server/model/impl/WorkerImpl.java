@@ -68,8 +68,7 @@ public class WorkerImpl extends AbstractPermissions implements Worker {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
-  @CollectionTable(name = "che_worker_actions",
-      joinColumns = @JoinColumn(name = "worker_id"))
+  @CollectionTable(name = "che_worker_actions", joinColumns = @JoinColumn(name = "worker_id"))
   protected List<String> actions;
 
   public WorkerImpl() {}

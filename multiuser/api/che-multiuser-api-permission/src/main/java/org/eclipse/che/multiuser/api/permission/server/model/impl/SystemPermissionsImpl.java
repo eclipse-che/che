@@ -64,8 +64,10 @@ public class SystemPermissionsImpl extends AbstractPermissions {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
-  @CollectionTable(name = "che_system_permissions_actions",
-      joinColumns = @JoinColumn(name = "system_permissions_id"))
+  @CollectionTable(
+    name = "che_system_permissions_actions",
+    joinColumns = @JoinColumn(name = "system_permissions_id")
+  )
   protected List<String> actions;
 
   @Override
