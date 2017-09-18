@@ -24,6 +24,7 @@ import org.eclipse.che.multiuser.machine.authentication.server.interceptor.Inter
  */
 @DynaModule
 public class MachineAuthModule extends AbstractModule {
+
   @Override
   protected void configure() {
     install(new InterceptorModule());
@@ -38,5 +39,5 @@ public class MachineAuthModule extends AbstractModule {
         .to(org.eclipse.che.machine.authentication.server.WorkspaceServiceAuthLinksInjector.class);
     bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
         .to(org.eclipse.che.plugin.docker.machine.AuthMachineProviderImpl.class);
-
+  }
 }
