@@ -70,12 +70,15 @@ public class DocumentVariableResolver implements VariableResolver {
 
   private static String getCurrentWord(Document doc, TextPosition pos) {
     String line = doc.getLineContent(pos.getLine());
+    if (line.length() == 0) {
+      return "";
+    }
     int start = pos.getCharacter();
-    while (start > 0 && !Character.isWhitespace(line.charAt(start))) {
+    int end = start;
+    while (start > 0 && !Character.isWhitespace(line.charAt(start - 1))) {
       start--;
     }
-    int end = pos.getCharacter();
-    while (end < line.length() - 1 && !Character.isWhitespace(line.charAt(start))) {
+    while (end < line.length() && !Character.isWhitespace(line.charAt(end))) {
       end++;
     }
     return line.substring(start, end);

@@ -86,18 +86,25 @@ public class SnippetResolver {
 
           @Override
           public void visit(Placeholder e) {
+            int start = b.length();
             TabStop group = groups.get(e.getId());
             if (group == null) {
               group = new TabStop();
               groups.put(e.getId(), group);
-            }
-            int start = b.length();
-            currentGroup.push(group);
-            if (e.getValue() != null) {
-              e.getValue().accept(this);
+              currentGroup.push(group);
+              if (e.getValue() != null) {
+                e.getValue().accept(this);
+              }
+              currentGroup.pop();
+            } else {
+              Position firstOccurrence = group.getPositions().get(0);
+              String renderedText =
+                  b.substring(
+                      firstOccurrence.offset - startPosition,
+                      firstOccurrence.offset - startPosition + firstOccurrence.length);
+              b.append(renderedText);
             }
             group.addPosition(new Position(startPosition + start, b.length() - start));
-            currentGroup.pop();
           }
 
           @Override
