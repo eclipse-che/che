@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist.snippet;
 
 import java.util.ArrayList;
@@ -11,7 +21,11 @@ import org.eclipse.che.ide.api.editor.link.LinkedModelData;
 import org.eclipse.che.ide.api.editor.link.LinkedModelGroup;
 import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.util.Pair;
-
+/**
+ * Resolve snippets, producing resolved text and a linked mode model for the editor
+ *
+ * @author Thomas Mäder
+ */
 public class SnippetResolver {
 
   private VariableResolver varResolver;
@@ -97,6 +111,7 @@ public class SnippetResolver {
               }
               currentGroup.pop();
             } else {
+              // if a placeholder id occurs twice, always use content from first occurrence
               Position firstOccurrence = group.getPositions().get(0);
               String renderedText =
                   b.substring(

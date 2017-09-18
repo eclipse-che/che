@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
 import java.util.HashMap;
@@ -7,10 +17,17 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.plugin.languageserver.ide.editor.codeassist.snippet.VariableResolver;
 
+/**
+ * Resolves snippet variables against an editor document.
+ *
+ * @author thomas
+ */
 public class DocumentVariableResolver implements VariableResolver {
+  // variables are functions from a document and position to a value.
   private static final Map<String, BiFunction<Document, TextPosition, String>> VARIABLES;
 
   static {
+    // well known variables according to https://github.com/Microsoft/vscode/blob/0ebd01213a65231f0af8187acaf264243629e4dc/src/vs/editor/contrib/snippet/browser/snippet.md
     VARIABLES = new HashMap<>();
     VARIABLES.put("TM_SELECTED_TEXT", DocumentVariableResolver::getSelectedText);
     VARIABLES.put("TM_CURRENT_LINE", DocumentVariableResolver::getCurrentLine);
