@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.api.debug;
 
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
+
 /** @author Anatoliy Bazko */
 public interface BreakpointManagerObserver {
 

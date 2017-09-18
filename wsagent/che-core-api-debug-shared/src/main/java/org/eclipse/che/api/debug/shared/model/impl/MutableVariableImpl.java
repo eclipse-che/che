@@ -10,46 +10,42 @@
  */
 package org.eclipse.che.api.debug.shared.model.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.google.common.base.Objects;
 import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 
 /** @author Anatoliy Bazko */
 public class MutableVariableImpl implements MutableVariable {
   private final String name;
-  private final boolean isExistInformation;
   private final String type;
   private final boolean isPrimitive;
   private final VariablePath variablePath;
-
-  private String value;
-  private List<MutableVariable> variables;
+  private SimpleValue value;
 
   public MutableVariableImpl(
-      String type,
-      String name,
-      String value,
-      VariablePath variablePath,
-      boolean isPrimitive,
-      List<? extends Variable> variables,
-      boolean isExistInformation) {
+      String type, String name, SimpleValue value, VariablePath variablePath, boolean isPrimitive) {
+
     this.name = name;
-    this.isExistInformation = isExistInformation;
+
     this.value = value;
     this.type = type;
     this.isPrimitive = isPrimitive;
-    this.variables =
-        variables == null || variables.isEmpty()
-            ? Collections.<MutableVariable>emptyList()
-            : toMutable(variables);
     this.variablePath = variablePath;
   }
 
+  public MutableVariableImpl(Variable variable) {
+    this(
+        variable.getType(),
+        variable.getName(),
+        variable.getValue(),
+        variable.getVariablePath(),
+        variable.isPrimitive());
+  }
+
   public MutableVariableImpl() {
-    this(null, null, null, null, false, null, false);
+    this(null, null, null, null, false);
   }
 
   @Override
@@ -57,12 +53,8 @@ public class MutableVariableImpl implements MutableVariable {
     return name;
   }
 
-  public boolean isExistInformation() {
-    return isExistInformation;
-  }
-
   @Override
-  public String getValue() {
+  public SimpleValue getValue() {
     return value;
   }
 
@@ -77,18 +69,8 @@ public class MutableVariableImpl implements MutableVariable {
   }
 
   @Override
-  public List<MutableVariable> getVariables() {
-    return variables;
-  }
-
-  @Override
-  public void setValue(String value) {
+  public void setValue(SimpleValue value) {
     this.value = value;
-  }
-
-  @Override
-  public void setVariables(List<? extends Variable> variables) {
-    this.variables = toMutable(variables);
   }
 
   @Override
@@ -100,49 +82,12 @@ public class MutableVariableImpl implements MutableVariable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof MutableVariableImpl)) return false;
-
-    MutableVariableImpl variable = (MutableVariableImpl) o;
-
-    if (isExistInformation != variable.isExistInformation) return false;
-    if (isPrimitive != variable.isPrimitive) return false;
-    if (name != null ? !name.equals(variable.name) : variable.name != null) return false;
-    if (value != null ? !value.equals(variable.value) : variable.value != null) return false;
-    if (type != null ? !type.equals(variable.type) : variable.type != null) return false;
-    if (variables != null ? !variables.equals(variable.variables) : variable.variables != null)
-      return false;
-    return !(variablePath != null
-        ? !variablePath.equals(variable.variablePath)
-        : variable.variablePath != null);
+    MutableVariableImpl that = (MutableVariableImpl) o;
+    return Objects.equal(variablePath, that.variablePath);
   }
 
   @Override
   public int hashCode() {
-    int result = name != null ? name.hashCode() : 0;
-    result = 31 * result + (isExistInformation ? 1 : 0);
-    result = 31 * result + (value != null ? value.hashCode() : 0);
-    result = 31 * result + (type != null ? type.hashCode() : 0);
-    result = 31 * result + (isPrimitive ? 1 : 0);
-    result = 31 * result + (variables != null ? variables.hashCode() : 0);
-    result = 31 * result + (variablePath != null ? variablePath.hashCode() : 0);
-    return result;
-  }
-
-  private static MutableVariable toMutable(Variable variable) {
-    return new MutableVariableImpl(
-        variable.getType(),
-        variable.getName(),
-        variable.getValue(),
-        variable.getVariablePath(),
-        variable.isPrimitive(),
-        variable.getVariables(),
-        variable.isExistInformation());
-  }
-
-  private static List<MutableVariable> toMutable(List<? extends Variable> variables) {
-    List<MutableVariable> mv = new ArrayList<>(variables.size());
-    for (Variable v : variables) {
-      mv.add(toMutable(v));
-    }
-    return mv;
+    return Objects.hashCode(variablePath);
   }
 }

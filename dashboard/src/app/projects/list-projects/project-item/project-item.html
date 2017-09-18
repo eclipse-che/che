@@ -40,10 +40,13 @@
         <span class="che-xs-header noselect" hide-gt-xs>Description</span>
         <span class="che-hover project-item-description">{{projectItemCtrl.project.description}}</span>
       </div>
-      <div flex-gt-xs="20">
+      <div flex-gt-xs="20" layout="column" layout-align="center end">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
         <span class="che-list-actions">
-          <a uib-tooltip="Open in IDE" ng-href="#/ide/{{projectItemCtrl.workspace.namespace}}/{{projectItemCtrl.workspace.config.name}}">
+          <a ng-if="projectItemCtrl.hasAction"
+             uib-tooltip="Open in IDE"
+             tooltip-append-to-body="true"
+             ng-href="#/ide/{{projectItemCtrl.workspace.namespace}}/{{projectItemCtrl.workspace.config.name}}">
             <span class="fa fa-chevron-circle-right"></span>
           </a>
         </span>

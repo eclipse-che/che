@@ -12,12 +12,10 @@ package org.eclipse.che.plugin.debugger.ide.debug.expression;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
+import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
 
 /**
  * Presenter for evaluating an expression.
@@ -26,17 +24,20 @@ import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
  */
 @Singleton
 public class EvaluateExpressionPresenter implements EvaluateExpressionView.ActionDelegate {
-  private DebuggerManager debuggerManager;
-  private EvaluateExpressionView view;
-  private DebuggerLocalizationConstant constant;
+  private final DebuggerManager debuggerManager;
+  private final EvaluateExpressionView view;
+  private final DebuggerLocalizationConstant constant;
+  private final DebuggerPresenter debuggerPresenter;
 
   @Inject
   public EvaluateExpressionPresenter(
       EvaluateExpressionView view,
       DebuggerLocalizationConstant constant,
-      DebuggerManager debuggerManager) {
+      DebuggerManager debuggerManager,
+      DebuggerPresenter debuggerPresenter) {
     this.view = view;
     this.debuggerManager = debuggerManager;
+    this.debuggerPresenter = debuggerPresenter;
     this.view.setDelegate(this);
     this.constant = constant;
   }
@@ -48,46 +49,38 @@ public class EvaluateExpressionPresenter implements EvaluateExpressionView.Actio
     view.focusInExpressionField();
   }
 
-  /** Close dialog. */
   public void closeDialog() {
     view.close();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void onCloseClicked() {
     view.close();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void onEvaluateClicked() {
     Debugger debugger = debuggerManager.getActiveDebugger();
     if (debugger != null) {
       view.setEnableEvaluateButton(false);
 
+      final long threadId = debuggerPresenter.getSelectedThreadId();
+      final int frameIndex = debuggerPresenter.getSelectedFrameIndex();
       debugger
-          .evaluate(view.getExpression())
+          .evaluate(view.getExpression(), threadId, frameIndex)
           .then(
-              new Operation<String>() {
-                @Override
-                public void apply(String result) throws OperationException {
-                  view.setResult(result);
-                  view.setEnableEvaluateButton(true);
-                }
+              result -> {
+                view.setResult(result);
+                view.setEnableEvaluateButton(true);
               })
           .catchError(
-              new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError error) throws OperationException {
-                  view.setResult(constant.evaluateExpressionFailed(error.getMessage()));
-                  view.setEnableEvaluateButton(true);
-                }
+              error -> {
+                view.setResult(constant.evaluateExpressionFailed(error.getMessage()));
+                view.setEnableEvaluateButton(true);
               });
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void onExpressionValueChanged() {
     final String expression = view.getExpression();

@@ -17,14 +17,8 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.machine.server.spi.tck.RecipePermissionsDaoTest;
-import org.eclipse.che.api.permission.server.AbstractPermissionsDomain;
-import org.eclipse.che.api.permission.server.model.impl.AbstractPermissions;
-import org.eclipse.che.api.permission.server.spi.PermissionsDao;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
@@ -50,13 +44,7 @@ public class JpaTckModule extends TckModule {
             .setDriver(Driver.class)
             .runningOn(server)
             .addEntityClasses(
-                UserImpl.class,
-                RecipeImpl.class,
-                SnapshotImpl.class,
-                AccountImpl.class,
-                AbstractPermissions.class,
-                RecipePermissionsImpl.class,
-                TestWorkspaceEntity.class)
+                RecipeImpl.class, SnapshotImpl.class, AccountImpl.class, TestWorkspaceEntity.class)
             .setExceptionHandler(H2ExceptionHandler.class)
             .build());
     bind(DBInitializer.class).asEagerSingleton();
@@ -64,8 +52,6 @@ public class JpaTckModule extends TckModule {
         .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
     bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
 
-    bind(new TypeLiteral<TckRepository<UserImpl>>() {})
-        .toInstance(new JpaTckRepository<>(UserImpl.class));
     bind(new TypeLiteral<TckRepository<RecipeImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipeImpl.class));
     bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {})
@@ -74,13 +60,6 @@ public class JpaTckModule extends TckModule {
         .toInstance(new TestWorkspacesTckRepository());
     bind(new TypeLiteral<TckRepository<AccountImpl>>() {})
         .toInstance(new JpaTckRepository<>(AccountImpl.class));
-
-    bind(new TypeLiteral<AbstractPermissionsDomain<RecipePermissionsImpl>>() {})
-        .to(RecipePermissionsDaoTest.TestDomain.class);
-    bind(new TypeLiteral<PermissionsDao<RecipePermissionsImpl>>() {})
-        .to(JpaRecipePermissionsDao.class);
-    bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {})
-        .toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
 
     bind(RecipeDao.class).to(JpaRecipeDao.class);
     bind(SnapshotDao.class).to(JpaSnapshotDao.class);

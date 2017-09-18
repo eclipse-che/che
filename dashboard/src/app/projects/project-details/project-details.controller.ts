@@ -200,7 +200,9 @@ export class ProjectDetailsController {
       // remove it !
       let promise = this.projectService.remove(this.projectDetails.name);
       promise.then(() => {
-        this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name).search({page: 'projects'});
+       this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.namespace + ':' + this.workspace.config.name).finally(() => {
+         this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name).search({tab: 'Projects'});
+       });
       }, (error) => {
         this.$log.log('error', error);
       });

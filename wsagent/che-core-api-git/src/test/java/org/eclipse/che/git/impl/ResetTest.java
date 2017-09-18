@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.git.impl;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.CONTENT;
@@ -32,7 +33,6 @@ import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.params.ResetParams;
 import org.eclipse.che.api.git.shared.ResetRequest;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -72,7 +72,7 @@ public class ResetTest {
     //then
     assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), initMessage);
     assertFalse(aaa.exists());
-    assertTrue(connection.status(StatusFormat.SHORT).isClean());
+    assertTrue(connection.status(emptyList()).isClean());
     assertEquals(
         CONTENT,
         Files.toString(new File(connection.getWorkingDir(), "README.txt"), Charsets.UTF_8));
@@ -98,8 +98,8 @@ public class ResetTest {
     //then
     assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), initMessage);
     assertTrue(aaa.exists());
-    assertEquals(connection.status(StatusFormat.SHORT).getAdded().get(0), "aaa");
-    assertEquals(connection.status(StatusFormat.SHORT).getChanged().get(0), "README.txt");
+    assertEquals(connection.status(emptyList()).getAdded().get(0), "aaa");
+    assertEquals(connection.status(emptyList()).getChanged().get(0), "README.txt");
     assertEquals(
         Files.toString(new File(connection.getWorkingDir(), "README.txt"), Charsets.UTF_8),
         "MODIFIED\n");
@@ -126,8 +126,8 @@ public class ResetTest {
     //then
     assertEquals(connection.log(LogParams.create()).getCommits().get(0).getMessage(), initMessage);
     assertTrue(aaa.exists());
-    assertEquals(connection.status(StatusFormat.SHORT).getUntracked().get(0), "aaa");
-    assertEquals(connection.status(StatusFormat.SHORT).getModified().get(0), "README.txt");
+    assertEquals(connection.status(emptyList()).getUntracked().get(0), "aaa");
+    assertEquals(connection.status(emptyList()).getModified().get(0), "README.txt");
     assertEquals(
         Files.toString(new File(connection.getWorkingDir(), "README.txt"), Charsets.UTF_8),
         "MODIFIED\n");

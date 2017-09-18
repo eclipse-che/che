@@ -11,7 +11,7 @@
 package org.eclipse.che.api.workspace.server.spi.tck;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspaceConfig;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -22,11 +22,10 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -39,7 +38,6 @@ import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
-import org.eclipse.che.api.workspace.server.stack.StackPermissionsImpl;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
@@ -64,13 +62,9 @@ public class StackDaoTest {
 
   private static final int STACKS_SIZE = 5;
 
-  private List<StackImpl> stacks;
-
-  private List<StackPermissionsImpl> stackPermissions;
+  private StackImpl[] stacks;
 
   @Inject private TckRepository<StackImpl> stackRepo;
-
-  @Inject private TckRepository<StackPermissionsImpl> tckPermissionsRepository;
 
   @Inject private StackDao stackDao;
 
@@ -78,26 +72,21 @@ public class StackDaoTest {
 
   @BeforeMethod
   private void createStacks() throws TckRepositoryException {
-    stacks = new ArrayList<>(STACKS_SIZE);
-    stackPermissions = new ArrayList<>(STACKS_SIZE);
+    stacks = new StackImpl[STACKS_SIZE];
     for (int i = 0; i < STACKS_SIZE; i++) {
-      StackImpl tmp = createStack("stack-" + i, "name-" + i);
-      stacks.add(tmp);
-      stackPermissions.add(new StackPermissionsImpl("*", tmp.getId(), singletonList("search")));
+      stacks[i] = createStack("stack-" + i, "name-" + i);
     }
-    stackRepo.createAll(stacks.stream().map(StackImpl::new).collect(Collectors.toList()));
-    tckPermissionsRepository.createAll(stackPermissions);
+    stackRepo.createAll(Stream.of(stacks).map(StackImpl::new).collect(toList()));
   }
 
   @AfterMethod
   private void removeStacks() throws TckRepositoryException {
-    tckPermissionsRepository.removeAll();
     stackRepo.removeAll();
   }
 
   @Test
   public void shouldGetById() throws Exception {
-    final StackImpl stack = stacks.get(0);
+    final StackImpl stack = stacks[0];
 
     assertEquals(stackDao.getById(stack.getId()), stack);
   }
@@ -145,7 +134,7 @@ public class StackDaoTest {
   @Test(expectedExceptions = ConflictException.class)
   public void shouldThrowConflictExceptionWhenCreatingStackWithIdThatAlreadyExists()
       throws Exception {
-    final StackImpl stack = createStack(stacks.get(0).getId(), "new-name");
+    final StackImpl stack = createStack(stacks[0].getId(), "new-name");
 
     stackDao.create(stack);
   }
@@ -153,7 +142,7 @@ public class StackDaoTest {
   @Test(expectedExceptions = ConflictException.class)
   public void shouldThrowConflictExceptionWhenCreatingStackWithNameThatAlreadyExists()
       throws Exception {
-    final StackImpl stack = createStack("new-stack-id", stacks.get(0).getName());
+    final StackImpl stack = createStack("new-stack-id", stacks[0].getName());
 
     stackDao.create(stack);
   }
@@ -168,8 +157,8 @@ public class StackDaoTest {
     dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingStack"
   )
   public void shouldRemoveStack() throws Exception {
-    final StackImpl stack = stacks.get(0);
-    tckPermissionsRepository.removeAll(); //to avoid constraint violation
+    final StackImpl stack = stacks[0];
+
     stackDao.remove(stack.getId());
 
     // Should throw an exception
@@ -178,7 +167,7 @@ public class StackDaoTest {
 
   @Test(dependsOnMethods = "shouldGetById")
   public void shouldNotRemoveStackWhenSubscriberThrowsExceptionOnStackRemoving() throws Exception {
-    final StackImpl stack = stacks.get(0);
+    final StackImpl stack = stacks[0];
     CascadeEventSubscriber<BeforeStackRemovedEvent> subscriber = mockCascadeEventSubscriber();
     doThrow(new ServerException("error")).when(subscriber).onCascadeEvent(any());
     eventService.subscribe(subscriber, BeforeStackRemovedEvent.class);
@@ -205,7 +194,7 @@ public class StackDaoTest {
 
   @Test(dependsOnMethods = "shouldGetById")
   public void shouldUpdateStack() throws Exception {
-    final StackImpl stack = stacks.get(0);
+    final StackImpl stack = stacks[0];
 
     stack.setName("new-name");
     stack.setCreator("new-creator");
@@ -240,8 +229,8 @@ public class StackDaoTest {
 
   @Test(expectedExceptions = ConflictException.class)
   public void shouldNotUpdateStackIfNewNameIsReserved() throws Exception {
-    final StackImpl stack = stacks.get(0);
-    stack.setName(stacks.get(1).getName());
+    final StackImpl stack = stacks[0];
+    stack.setName(stacks[1].getName());
 
     stackDao.update(stack);
   }
@@ -256,12 +245,12 @@ public class StackDaoTest {
     stackDao.update(null);
   }
 
-  @Test
+  @Test(dependsOnMethods = "shouldUpdateStack")
   public void shouldFindStacksWithSpecifiedTags() throws Exception {
-    stacks.get(0).getTags().addAll(asList("search-tag1", "search-tag2"));
-    stacks.get(1).getTags().addAll(asList("search-tag1", "non-search-tag"));
-    stacks.get(2).getTags().addAll(asList("non-search-tag", "search-tag2"));
-    stacks.get(3).getTags().addAll(asList("search-tag1", "search-tag2", "another-tag"));
+    stacks[0].getTags().addAll(asList("search-tag1", "search-tag2"));
+    stacks[1].getTags().addAll(asList("search-tag1", "non-search-tag"));
+    stacks[2].getTags().addAll(asList("non-search-tag", "search-tag2"));
+    stacks[3].getTags().addAll(asList("search-tag1", "search-tag2", "another-tag"));
     updateAll();
 
     final List<StackImpl> found =
@@ -271,7 +260,7 @@ public class StackDaoTest {
       Collections.sort(stack.getTags());
     }
 
-    assertEquals(new HashSet<>(found), new HashSet<>(asList(stacks.get(0), stacks.get(3))));
+    assertEquals(new HashSet<>(found), new HashSet<>(asList(stacks[0], stacks[3])));
   }
 
   @Test
@@ -282,7 +271,7 @@ public class StackDaoTest {
       Collections.sort(stack.getTags());
     }
 
-    assertEquals(new HashSet<>(found), new HashSet<>(stacks));
+    assertEquals(new HashSet<>(found), new HashSet<>(asList(stacks)));
   }
 
   @Test

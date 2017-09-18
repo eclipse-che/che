@@ -7,11 +7,11 @@
         <label hide-md hide-lg hide-xl class="che-input-box-desktop-label"
                ng-if="labelName"><span>{{labelName}}</span></label>
         <div class="che-input-area">
-          <input ng-trim="false" name="{{inputName}}"
+          <input name="{{inputName}}"
                  ng-change="onChange({$value: valueModel})"
                  ng-readonly="isReadonly"
                  ng-model="valueModel">
-          <span class="che-input-asterisk fa" ng-show="valueModel"
+          <span class="che-input-asterisk fa" ng-show="myForm[inputName] && myForm[inputName].$viewValue"
                 ng-class="myForm[inputName] && myForm[inputName].$invalid ? 'fa-times' : 'fa-check'"></span>
         </div>
         <!-- display error messages for the form -->

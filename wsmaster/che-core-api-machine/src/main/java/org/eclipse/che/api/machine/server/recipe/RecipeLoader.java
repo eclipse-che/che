@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.api.machine.server.recipe;
 
-import static java.util.Collections.singletonList;
-
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,7 +28,6 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.jpa.JpaRecipePermissionsDao;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.core.db.DBInitializer;
@@ -57,17 +54,14 @@ public class RecipeLoader {
 
   private final Set<String> predefinedRecipes;
   private final DBInitializer dbInitializer;
-  private final JpaRecipePermissionsDao permissionsDao;
 
   @Inject
   public RecipeLoader(
       @Named(CHE_PREDEFINED_RECIPES) Set<String> predefinedRecipes,
       RecipeDao recipeDao,
-      JpaRecipePermissionsDao permissionsDao,
       DBInitializer dbInitializer) {
     this.predefinedRecipes = predefinedRecipes;
     this.recipeDao = recipeDao;
-    this.permissionsDao = permissionsDao;
     this.dbInitializer = dbInitializer;
   }
 
@@ -88,9 +82,8 @@ public class RecipeLoader {
       } catch (NotFoundException ex) {
         recipeDao.create(recipe);
       }
-      permissionsDao.store(new RecipePermissionsImpl("*", recipe.getId(), singletonList("search")));
     } catch (ServerException | ConflictException ex) {
-      LOG.error("Failed to store recipe {} cause: {}", recipe.getId(), ex.getLocalizedMessage());
+      LOG.error("Failed to store recipe {} ", recipe.getId(), ex.getMessage());
     }
   }
 

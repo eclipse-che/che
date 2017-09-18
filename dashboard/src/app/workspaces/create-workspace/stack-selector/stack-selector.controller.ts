@@ -39,7 +39,7 @@ export class StackSelectorController {
   /**
    * Lodash library.
    */
-  lodash: _.LoDashStatic;
+  lodash: any;
   /**
    * Stack API interaction.
    */
@@ -137,7 +137,7 @@ export class StackSelectorController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($filter: ng.IFilterService, $mdDialog: ng.material.IDialogService, lodash: _.LoDashStatic, cheStack: CheStack,
+  constructor($filter: ng.IFilterService, $mdDialog: ng.material.IDialogService, lodash: any, cheStack: CheStack,
               confirmDialogService: ConfirmDialogService, $location: ng.ILocationService, cheBranding: CheBranding,
               cheEnvironmentRegistry: CheEnvironmentRegistry, stackSelectorSvc: StackSelectorSvc) {
     this.$filter = $filter;

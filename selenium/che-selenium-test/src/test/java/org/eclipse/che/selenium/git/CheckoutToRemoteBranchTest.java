@@ -237,7 +237,6 @@ public class CheckoutToRemoteBranchTest {
     git.waitGroupGitCompareIsOpen();
     git.selectFileInChangedFilesTreePanel("GreetingController.java");
     checkChangesIntoCompareForm(uniqueValue);
-    ide.driver().switchTo().parentFrame();
     git.closeGitCompareForm();
     git.waitGroupGitCompareIsOpen();
     git.selectFileInChangedFilesTreePanel("index.jsp");
@@ -281,7 +280,6 @@ public class CheckoutToRemoteBranchTest {
   private void checkChangesIntoCompareForm(String expText) {
     git.clickOnGroupCompareButton();
     git.waitGitCompareFormIsOpen();
-    git.toSwitchFrameGitCompareForm();
     git.waitExpTextIntoCompareLeftEditor(expText);
     git.waitTextNotPresentIntoCompareRightEditor(expText);
   }

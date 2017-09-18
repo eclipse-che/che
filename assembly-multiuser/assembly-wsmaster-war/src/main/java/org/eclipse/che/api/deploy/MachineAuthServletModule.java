@@ -12,7 +12,7 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.machine.authentication.server.MachineLoginFilter;
+import org.eclipse.che.multiuser.machine.authentication.server.MachineLoginFilter;
 
 /**
  * Machine authentification bindings.

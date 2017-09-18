@@ -16,8 +16,9 @@
     <inherits name="org.eclipse.che.ide.useragents"/>
     <inherits name="elemental.Elemental"/>
     <inherits name="com.google.gwt.json.JSON"/>
+    <inherits name="org.eclipse.che.api.promises.Promises"/>
 
-    <source path=""/>
+  <source path=""/>
 
     <set-property name="user.agent" value="safari, gecko1_8"/>
 

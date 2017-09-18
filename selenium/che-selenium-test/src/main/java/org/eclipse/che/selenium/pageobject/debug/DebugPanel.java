@@ -14,6 +14,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
+import com.google.common.base.Function;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -61,6 +62,8 @@ public class DebugPanel {
   private interface Locators {
     String DEBUGGER_BREAKPOINTS_PANEL_ID = "gwt-debug-debugger-breakpointsPanel";
     String DEBUGGER_PANEL_TAB = "gwt-debug-partButton-Debug";
+    String FRAMES_LIST_ID = "gwt-debug-debugger-frames-list";
+    String THREADS_LIST_ID = "gwt-debug-debugger-threads-list";
     String VARIABLES_PANEL_ID = "gwt-debug-debugger-variablesPanel";
     String VARIABLE_PANEL_SELECT_VAL =
         "//div[@id='gwt-debug-debugger-variablesPanel']//span[text()='%s']";
@@ -101,6 +104,12 @@ public class DebugPanel {
 
   @FindBy(xpath = LocatorsChangeVariable.CANCEL_BTN)
   WebElement cancelVariableBtn;
+
+  @FindBy(id = Locators.FRAMES_LIST_ID)
+  WebElement frames;
+
+  @FindBy(id = Locators.THREADS_LIST_ID)
+  WebElement threads;
 
   /** Wait while debugger panel will be clear for all breakpoints */
   public void waitWhileAllBreakPointsOnEditorPanelDisapper() {
@@ -332,7 +341,9 @@ public class DebugPanel {
 
   /** Open debug panel by clicking on "Debug" tab. */
   public void openDebugPanel() {
-    debuggerTab.click();
+    if (!isDebuggerBtnPanelPresent()) {
+      debuggerTab.click();
+    }
   }
 
   /**
@@ -379,8 +390,64 @@ public class DebugPanel {
     }
   }
 
-  public String getTextFromVariablePanel() {
+  public String getVariables() {
     waitVariablesPanel();
     return variablesPanel.getText();
+  }
+
+  public void waitFramesListPanelReady() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until((Function<WebDriver, Object>) webDriver -> !frames.getText().isEmpty());
+  }
+
+  public String[] getFrames() {
+    waitFramesListPanelReady();
+    return frames.getText().split("\n");
+  }
+
+  /** Waits */
+  public void waitThreadListPanelReady() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until((Function<WebDriver, Object>) webDriver -> !threads.getText().isEmpty());
+  }
+
+  public void selectFrame(int frameIndex) {
+    waitFramesListPanelReady();
+
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//td[text()='" + getFrames()[frameIndex] + "']")))
+        .click();
+  }
+
+  public String[] getThreads() {
+    waitThreadListPanelReady();
+    return threads.getText().split("\n");
+  }
+
+  public String getSelectedThread() {
+    waitThreadListPanelReady();
+
+    String selectedThreadId = threads.getAttribute("value");
+    for (String thread : getThreads()) {
+      if (thread.contains("@" + selectedThreadId + " in")) {
+        return thread;
+      }
+    }
+
+    return null;
+  }
+
+  public void selectThread(String threadName) {
+    waitThreadListPanelReady();
+
+    threads.click();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//*[contains(text(),'\"" + threadName + "\"@')]")))
+        .click();
+    threads.click();
   }
 }

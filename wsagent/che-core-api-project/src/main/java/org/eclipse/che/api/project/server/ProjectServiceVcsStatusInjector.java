@@ -15,11 +15,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
+import org.eclipse.che.api.project.shared.dto.TreeElement;
 
 /**
  * Injects VCS status to attributes of {@link ItemReference} dto.
@@ -45,27 +47,123 @@ public class ProjectServiceVcsStatusInjector {
    *
    * @param itemReference file to update
    */
-  public ItemReference injectVcsStatus(ItemReference itemReference)
+  ItemReference injectVcsStatus(ItemReference itemReference)
       throws ServerException, NotFoundException {
-    List<String> vcsAttributes =
-        projectManager
-            .getProject(itemReference.getProject())
-            .getAttributes()
-            .get("vcs.provider.name");
-    Optional<VcsStatusProvider> optional =
-        vcsStatusProviders
-            .stream()
-            .filter(
-                vcsStatusProvider ->
-                    vcsStatusProvider
-                        .getVcsName()
-                        .equals(vcsAttributes != null ? vcsAttributes.get(0) : null))
-            .findAny();
+    Optional<VcsStatusProvider> optional = getVcsStatusProvider(itemReference.getProject());
     if (optional.isPresent()) {
       Map<String, String> attributes = new HashMap<>(itemReference.getAttributes());
       attributes.put("vcs.status", optional.get().getStatus(itemReference.getPath()).toString());
       itemReference.setAttributes(attributes);
     }
     return itemReference;
+  }
+
+  /**
+   * Find related VCS provider and set VCS status of {@link ItemReference} file to it's attributes
+   * to each item of the given list, if VCS provider is present.
+   *
+   * @param itemReferences list of {@link ItemReference} files to update
+   */
+  List<ItemReference> injectVcsStatus(List<ItemReference> itemReferences)
+      throws ServerException, NotFoundException {
+    Optional<ItemReference> itemReferenceOptional =
+        itemReferences
+            .stream()
+            .filter(itemReference -> "file".equals(itemReference.getType()))
+            .findAny();
+    if (itemReferenceOptional.isPresent()) {
+      String project = normalizeProjectPath(itemReferenceOptional.get().getProject());
+      Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(project);
+      if (vcsStatusProviderOptional.isPresent()) {
+        List<String> itemReferenceFiles =
+            itemReferences
+                .stream()
+                .filter(itemReference -> "file".equals(itemReference.getType()))
+                .map(itemReference -> normalizeFilePath(itemReference.getPath()))
+                .collect(Collectors.toList());
+        Map<String, VcsStatusProvider.VcsStatus> status =
+            vcsStatusProviderOptional.get().getStatus(project, itemReferenceFiles);
+
+        itemReferences
+            .stream()
+            .filter(itemReference -> "file".equals(itemReference.getType()))
+            .forEach(
+                itemReference -> {
+                  Map<String, String> attributes = new HashMap<>(itemReference.getAttributes());
+                  attributes.put("vcs.status", status.get(itemReference.getPath()).toString());
+                  itemReference.setAttributes(attributes);
+                });
+      }
+    }
+    return itemReferences;
+  }
+
+  /**
+   * Find related VCS provider and set VCS status of {@link TreeElement} file to it's attributes to
+   * each item of the given list, if VCS provider is present.
+   *
+   * @param treeElements list of {@link TreeElement} files to update
+   */
+  List<TreeElement> injectVcsStatusTreeElements(List<TreeElement> treeElements)
+      throws ServerException, NotFoundException {
+    Optional<TreeElement> treeElementOptional =
+        treeElements
+            .stream()
+            .filter(treeElement -> "file".equals(treeElement.getNode().getType()))
+            .findAny();
+    if (treeElementOptional.isPresent()) {
+      String project = normalizeProjectPath(treeElementOptional.get().getNode().getProject());
+      Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(project);
+      if (vcsStatusProviderOptional.isPresent()) {
+        List<String> treeElementFiles =
+            treeElements
+                .stream()
+                .filter(treeElement -> "file".equals(treeElement.getNode().getType()))
+                .map(treeElement -> normalizeFilePath(treeElement.getNode().getPath()))
+                .collect(Collectors.toList());
+        Map<String, VcsStatusProvider.VcsStatus> status =
+            vcsStatusProviderOptional.get().getStatus(project, treeElementFiles);
+
+        treeElements
+            .stream()
+            .filter(itemReference -> "file".equals(itemReference.getNode().getType()))
+            .forEach(
+                itemReference -> {
+                  Map<String, String> attributes =
+                      new HashMap<>(itemReference.getNode().getAttributes());
+                  attributes.put(
+                      "vcs.status", status.get(itemReference.getNode().getPath()).toString());
+                  itemReference.getNode().setAttributes(attributes);
+                });
+      }
+    }
+
+    return treeElements;
+  }
+
+  private String normalizeFilePath(String filePath) {
+    String normalizedPath = filePath.startsWith("/") ? filePath.substring(1) : filePath;
+    return normalizedPath.substring(normalizedPath.indexOf("/") + 1);
+  }
+
+  private String normalizeProjectPath(String projectPath) {
+    if (projectPath.startsWith("/")) {
+      projectPath = projectPath.substring(1);
+    }
+    return projectPath;
+  }
+
+  private Optional<VcsStatusProvider> getVcsStatusProvider(String projectPath)
+      throws ServerException, NotFoundException {
+    List<String> vcsAttributes =
+        projectManager.getProject(projectPath).getAttributes().get("vcs.provider.name");
+    return vcsStatusProviders
+        .stream()
+        .filter(
+            vcsStatusProvider ->
+                vcsStatusProvider
+                    .getVcsName()
+                    .equals(vcsAttributes != null ? vcsAttributes.get(0) : null))
+        .findAny();
   }
 }

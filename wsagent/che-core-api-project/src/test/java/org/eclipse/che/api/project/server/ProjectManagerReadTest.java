@@ -129,12 +129,12 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
 
     assertEquals(6, projectRegistry.getProjects().size());
     assertEquals(1, projectRegistry.getProject("/foo").getProblems().size());
-    assertEquals(12, projectRegistry.getProject("/foo").getProblems().get(0).code);
+    assertEquals(12, projectRegistry.getProject("/foo").getProblems().get(0).getCode());
 
     //Value for required attribute is not initialized pt3:pt2-var2
     //Value for required attribute is not initialized pt3:pt2-provided1
     assertEquals(2, projectRegistry.getProject("/bar").getProblems().size());
-    assertEquals(13, projectRegistry.getProject("/bar").getProblems().get(0).code);
+    assertEquals(13, projectRegistry.getProject("/bar").getProblems().get(0).getCode());
   }
 
   @Test
@@ -160,7 +160,7 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     assertEquals("fromFolder", pm.getProject("/fromFolder").getName());
     assertEquals(1, pm.getProject("/fromFolder").getProblems().size());
     assertEquals(BaseProjectType.ID, pm.getProject("/fromFolder").getProjectType().getId());
-    assertEquals(11, pm.getProject("/fromFolder").getProblems().get(0).code);
+    assertEquals(11, pm.getProject("/fromFolder").getProblems().get(0).getCode());
   }
 
   @Test
@@ -169,7 +169,7 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     assertEquals("/fromConfig", pm.getProject("/fromConfig").getPath());
     assertEquals(1, pm.getProject("/fromConfig").getProblems().size());
     assertEquals("primary1", pm.getProject("/fromConfig").getProjectType().getId());
-    assertEquals(10, pm.getProject("/fromConfig").getProblems().get(0).code);
+    assertEquals(10, pm.getProject("/fromConfig").getProblems().get(0).getCode());
   }
 
   @Test

@@ -24,7 +24,7 @@ import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
-import org.eclipse.che.machine.authentication.server.MachineTokenRegistry;
+import org.eclipse.che.multiuser.machine.authentication.server.MachineTokenRegistry;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 
@@ -58,7 +58,6 @@ public class AuthMachineProviderImpl extends MachineProviderImpl {
       @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
       @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
       @Named("che.docker.swap") double memorySwapMultiplier,
-      MachineTokenRegistry tokenRegistry,
       @Named("machine.docker.networks") Set<Set<String>> additionalNetworks,
       @Nullable @Named("che.docker.network_driver") String networkDriver,
       @Nullable @Named("che.docker.parent_cgroup") String parentCgroup,

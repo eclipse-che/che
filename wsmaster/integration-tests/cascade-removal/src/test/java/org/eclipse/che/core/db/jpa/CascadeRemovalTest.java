@@ -49,7 +49,6 @@ import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.ssh.server.jpa.JpaSshDao.RemoveSshKeysBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
@@ -77,12 +76,10 @@ import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
-import org.eclipse.che.api.workspace.server.stack.StackPermissionsImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
 import org.eclipse.che.core.db.DBInitializer;
@@ -172,12 +169,9 @@ public class CascadeRemovalTest {
                             EnvironmentImpl.class,
                             EnvironmentRecipeImpl.class,
                             ExtendedMachineImpl.class,
-                            StackPermissionsImpl.class,
-                            RecipePermissionsImpl.class,
                             SourceStorageImpl.class,
                             ServerConf2Impl.class,
                             StackImpl.class,
-                            WorkerImpl.class,
                             CommandImpl.class,
                             SnapshotImpl.class,
                             RecipeImpl.class,

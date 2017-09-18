@@ -22,9 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -36,7 +34,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
 import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipePermissionsImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
@@ -104,69 +101,33 @@ public class JpaRecipeDao implements RecipeDao {
     }
   }
 
-  /**
-   * Translated query should look like:
-   *
-   * <pre>
-   * SELECT recipe.ID,
-   *        recipe.CREATOR,
-   *        recipe.DESCRIPTION,
-   *        recipe.NAME,
-   *        recipe.SCRIPT,
-   *        recipe.TYPE
-   * FROM  RECIPEPERMISSIONS permission
-   * LEFT OUTER JOIN RECIPE recipe ON (recipe.ID = permission.RECIPEID)
-   * LEFT OUTER JOIN Recipe_TAGS tag ON (tag.Recipe_ID = recipe.ID),
-   *     RECIPEPERMISSIONS_ACTIONS permissionActions
-   * WHERE ((tag.tag IN (?))
-   *     AND ((? IS NULL)
-   *           OR (recipe.TYPE = ?))
-   *     AND ((permission.USERID IS NULL)
-   *           OR (permission.USERID = ?))
-   *     AND (permissionActions.actions = ?)
-   *     AND (permissionActions.RECIPEPERMISSIONS_ID = permission.ID))
-   * GROUP BY recipe.ID
-   * HAVING (COUNT(tag.tag) = ?)
-   * </pre>
-   */
   @Override
   @Transactional
   public List<RecipeImpl> search(
-      String userId, List<String> tags, String type, int skipCount, int maxItems)
+      String user, List<String> tags, String type, int skipCount, int maxItems)
       throws ServerException {
     try {
-      final EntityManager em = managerProvider.get();
-      final CriteriaBuilder cb = em.getCriteriaBuilder();
+      final EntityManager manager = managerProvider.get();
+      final CriteriaBuilder cb = manager.getCriteriaBuilder();
       final CriteriaQuery<RecipeImpl> query = cb.createQuery(RecipeImpl.class);
-      final Root<RecipePermissionsImpl> perm = query.from(RecipePermissionsImpl.class);
-      final Join<RecipeImpl, RecipePermissionsImpl> rwp = perm.join("recipe", JoinType.LEFT);
-      final Expression<List<String>> acts = perm.get("actions");
+      final Root<RecipeImpl> fromRecipe = query.from(RecipeImpl.class);
       final ParameterExpression<String> typeParam = cb.parameter(String.class, "recipeType");
-      final Predicate checkType = cb.or(cb.isNull(typeParam), cb.equal(rwp.get("type"), typeParam));
-      final Predicate userIdCheck =
-          cb.or(
-              cb.isNull(perm.get("userId")),
-              cb.equal(perm.get("userId"), cb.parameter(String.class, "userId")));
-      final Predicate searchActionCheck =
-          cb.isMember(cb.parameter(String.class, "actionParam"), acts);
-      final Predicate shareCheck = cb.and(checkType, userIdCheck, searchActionCheck);
+      final Predicate checkType =
+          cb.or(cb.isNull(typeParam), cb.equal(fromRecipe.get("type"), typeParam));
       final TypedQuery<RecipeImpl> typedQuery;
       if (tags != null && !tags.isEmpty()) {
-        final Join<RecipeImpl, String> tag = rwp.join("tags", JoinType.LEFT);
+        final Join<RecipeImpl, String> tag = fromRecipe.join("tags");
         query
-            .select(cb.construct(RecipeImpl.class, rwp))
-            .where(cb.and(tag.in(tags), shareCheck))
-            .groupBy(rwp.get("id"))
+            .select(cb.construct(RecipeImpl.class, tag.getParent()))
+            .where(cb.and(checkType, tag.in(tags)))
+            .groupBy(fromRecipe.get("id"))
             .having(cb.equal(cb.count(tag), tags.size()));
-        typedQuery = em.createQuery(query).setParameter("tags", tags);
+        typedQuery = manager.createQuery(query).setParameter("tags", tags);
       } else {
-        typedQuery =
-            em.createQuery(query.select(cb.construct(RecipeImpl.class, rwp)).where(shareCheck));
+        typedQuery = manager.createQuery(query.where(checkType));
       }
       return typedQuery
-          .setParameter("userId", userId)
           .setParameter("recipeType", type)
-          .setParameter("actionParam", "search")
           .setFirstResult(skipCount)
           .setMaxResults(maxItems)
           .getResultList();
