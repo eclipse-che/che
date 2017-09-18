@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
@@ -68,25 +67,27 @@ public class WebSocketInitializer {
    * @param initActions actions to be performed each time the connection is established
    */
   public void initialize(String endpointId, String url, Set<Runnable> initActions) {
-    securityTokenProvider.getSecurityToken().then(new Operation<String>() {
-      @Override
-      public void apply(String token) throws OperationException {
-        final String securUrl = new UrlBuilder(url).setParameter("token", token).buildString();
+    securityTokenProvider
+        .getSecurityToken()
+        .then(
+            new Operation<String>() {
+              @Override
+              public void apply(String token) throws OperationException {
+                String separator = url.contains("?") ? "&" : "?";
+                final String secureUrl = url + separator + "token=" + token;
 
-        Log.debug(getClass(), "Initializing with securUrl: " + securUrl);
+                Log.debug(getClass(), "Initializing with secureUrl: " + secureUrl);
 
-        urlResolver.setMapping(endpointId, securUrl);
+                urlResolver.setMapping(endpointId, secureUrl);
 
-        propertyManager.initializeConnection(securUrl);
+                propertyManager.initializeConnection(secureUrl);
 
-        actionManager.setOnEstablishActions(securUrl, initActions);
+                actionManager.setOnEstablishActions(secureUrl, initActions);
 
-        connectionManager.initializeConnection(securUrl);
-        connectionManager.establishConnection(securUrl);
-
-      }
-    });
-
+                connectionManager.initializeConnection(secureUrl);
+                connectionManager.establishConnection(secureUrl);
+              }
+            });
   }
 
   /**
