@@ -24,6 +24,7 @@
     <packaging>pom</packaging>
     <name>Che Multiuser :: Parent</name>
     <modules>
+        <module>che-multiuser-sql-schema</module>
         <module>api</module>
         <module>permission</module>
         <module>keycloak</module>

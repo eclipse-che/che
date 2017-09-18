@@ -38,11 +38,11 @@ public abstract class AbstractPermissions implements Permissions {
   @Column(name = "id")
   protected String id;
 
-  @Column(name = "userid")
+  @Column(name = "user_id")
   protected String userId;
 
   @OneToOne
-  @JoinColumn(name = "userid", insertable = false, updatable = false)
+  @JoinColumn(name = "user_id", insertable = false, updatable = false)
   private UserImpl user;
 
   @Transient private String userIdHolder;

@@ -65,21 +65,21 @@ import org.eclipse.che.multiuser.api.permission.shared.model.Permissions;
   )
 })
 @Table(
-  name = "che_stackpermissions",
-  indexes = {@Index(columnList = "userId, stackId", unique = true), @Index(columnList = "stackId")}
+  name = "che_stack_permissions"
 )
 public class StackPermissionsImpl extends AbstractPermissions {
 
-  @Column(name = "stackid")
+  @Column(name = "stack_id")
   private String stackId;
 
   @ManyToOne
-  @JoinColumn(name = "stackid", insertable = false, updatable = false)
+  @JoinColumn(name = "stack_id", insertable = false, updatable = false)
   private StackImpl stack;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
-  @CollectionTable(name = "che_stackpermissions_actions")
+  @CollectionTable(name = "che_stack_permissions_actions",
+      joinColumns = @JoinColumn(name = "stack_permissions_id"))
   protected List<String> actions;
 
   public StackPermissionsImpl() {}
