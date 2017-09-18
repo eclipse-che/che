@@ -313,7 +313,12 @@ public class ProjectExplorerPresenter extends BasePresenter
             ((ResourceNode) node).setData(delta.getResource());
             tree.getNodeStorage().reIndexNode(oldId, node);
             tree.refresh(node);
-            updateTask.submit(delta.getResource().getLocation());
+
+            if (tree.isExpanded(node)) {
+              updateTask.submit(delta.getResource().getLocation());
+            } else {
+              delta.getResource().asProject().synchronize();
+            }
           }
         }
       }
