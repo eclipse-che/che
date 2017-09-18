@@ -15,6 +15,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 
+/** Provider of tokens that needed to authenticate requests. */
 @Singleton
 public class SecurityTokenProvider {
 
