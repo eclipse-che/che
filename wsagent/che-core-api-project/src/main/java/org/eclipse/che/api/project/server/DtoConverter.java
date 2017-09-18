@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -146,7 +147,9 @@ public class DtoConverter {
     return storageDto;
   }
 
-  public static ProjectProblemDto asDto(RegisteredProject.Problem problem) {
-    return newDto(ProjectProblemDto.class).withCode(problem.code).withMessage(problem.message);
+  public static ProjectProblemDto asDto(ProjectProblem problem) {
+    return newDto(ProjectProblemDto.class)
+        .withCode(problem.getCode())
+        .withMessage(problem.getMessage());
   }
 }

@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.pullrequest.client.vcs;
 
+import static java.util.Collections.emptyList;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -137,7 +139,7 @@ public class GitVcsService implements VcsService {
   @Override
   public Promise<String> getBranchName(ProjectConfig project) {
     return service
-        .getStatus(Path.valueOf(project.getPath()))
+        .getStatus(Path.valueOf(project.getPath()), emptyList())
         .then((Function<Status, String>) status -> status.getBranchName());
   }
 
@@ -145,7 +147,7 @@ public class GitVcsService implements VcsService {
   public void hasUncommittedChanges(
       @NotNull final ProjectConfig project, @NotNull final AsyncCallback<Boolean> callback) {
     service
-        .getStatus(Path.valueOf(project.getPath()))
+        .getStatus(Path.valueOf(project.getPath()), emptyList())
         .then(
             status -> {
               callback.onSuccess(!status.isClean());

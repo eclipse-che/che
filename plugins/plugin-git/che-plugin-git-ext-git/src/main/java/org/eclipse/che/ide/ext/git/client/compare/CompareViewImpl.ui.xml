@@ -13,6 +13,15 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
+    <ui:style>
+        .compareContainer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+        }
+    </ui:style>
 
     <g:DockLayoutPanel ui:field="dockPanel">
         <g:north size="15">
@@ -26,7 +35,9 @@
             </g:HorizontalPanel>
         </g:north>
         <g:center>
-            <g:SimplePanel ui:field="comparePanel"/>
+            <g:SimplePanel ui:field="comparePanel">
+                <g:FlowPanel debugId="compareParentDiv" addStyleNames="{style.compareContainer}"/>
+            </g:SimplePanel>
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>

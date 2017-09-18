@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.ide.ext.git.client.commit;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.getFirst;
 import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
@@ -21,16 +21,12 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
@@ -44,7 +40,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
+import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
@@ -74,7 +70,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
   private final ProcessesPanelPresenter consolesPanelPresenter;
 
   private Project project;
-  private Set<String> allFiles;
+  private List<String> allFiles;
   private List<String> filesToCommit;
 
   @Inject
@@ -132,7 +128,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                         if (getErrorCode(error.getCause())
                             == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
                           service
-                              .getStatus(project.getLocation())
+                              .getStatus(project.getLocation(), emptyList())
                               .then(
                                   status -> {
                                     view.setEnableAmendCheckBox(false);
@@ -140,7 +136,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                                     List<String> newFiles = new ArrayList<>();
                                     newFiles.addAll(status.getAdded());
                                     newFiles.addAll(status.getUntracked());
-                                    show(newFiles.stream().collect(joining("\nA ", "A ", "")));
+                                    show(newFiles.stream().collect(joining("\nA\t", "A\t", "")));
                                   });
                         }
                       });
@@ -177,29 +173,18 @@ public class CommitPresenter implements CommitView.ActionDelegate {
   }
 
   private void show(@Nullable String diff) {
-    Map<String, Status> files = toFileStatusMap(diff);
+    AlteredFiles alteredFiles = new AlteredFiles(project, diff);
     filesToCommit.clear();
-    allFiles = files.keySet();
+    allFiles = alteredFiles.getAlteredFilesList();
 
     view.setEnableCommitButton(!view.getMessage().isEmpty());
     view.focusInMessageField();
     view.showDialog();
-    changesPanelPresenter.show(files);
+    changesPanelPresenter.show(alteredFiles);
     view.setMarkedCheckBoxes(
         stream(appContext.getResources())
             .map(resource -> resource.getLocation().removeFirstSegments(1))
             .collect(Collectors.toSet()));
-  }
-
-  private Map<String, Status> toFileStatusMap(@Nullable String diff) {
-    Map<String, Status> items = new HashMap<>();
-    if (!isNullOrEmpty(diff)) {
-      stream(diff.split("\n"))
-          .forEach(
-              item ->
-                  items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1))));
-    }
-    return items;
   }
 
   @Override
@@ -305,7 +290,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
   }
 
   @Override
-  public Set<String> getChangedFiles() {
+  public List<String> getChangedFiles() {
     return allFiles;
   }
 

@@ -12,6 +12,7 @@ package org.eclipse.che.api.git;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.ADDED;
 import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.MODIFIED;
 import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.UNTRACKED;
@@ -25,11 +26,13 @@ import java.util.function.Consumer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Provider;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.StatusFormat;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
 import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
 import org.slf4j.Logger;
@@ -48,6 +51,7 @@ public class GitChangesDetector {
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
+  private final Provider<ProjectManager> projectManagerProvider;
   private final GitConnectionFactory gitConnectionFactory;
 
   private final Set<String> endpointIds = newConcurrentHashSet();
@@ -58,9 +62,11 @@ public class GitChangesDetector {
   public GitChangesDetector(
       RequestTransmitter transmitter,
       FileWatcherManager manager,
+      Provider<ProjectManager> projectManagerProvider,
       GitConnectionFactory gitConnectionFactory) {
     this.transmitter = transmitter;
     this.manager = manager;
+    this.projectManagerProvider = projectManagerProvider;
     this.gitConnectionFactory = gitConnectionFactory;
   }
 
@@ -107,11 +113,19 @@ public class GitChangesDetector {
 
   private Consumer<String> transmitConsumer(String path) {
     return id -> {
-      String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
-      String project = normalizedPath.split("/")[0];
-      String itemPath = normalizedPath.substring(normalizedPath.indexOf("/") + 1);
       try {
-        Status status = gitConnectionFactory.getConnection(project).status(StatusFormat.SHORT);
+        String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
+        String itemPath = normalizedPath.substring(normalizedPath.indexOf("/") + 1);
+        String projectPath =
+            projectManagerProvider
+                .get()
+                .getProject(normalizedPath.split("/")[0])
+                .getBaseFolder()
+                .getVirtualFile()
+                .toIoFile()
+                .getAbsolutePath();
+        Status status =
+            gitConnectionFactory.getConnection(projectPath).status(singletonList(itemPath));
         GitChangeEventDto.Type type;
         if (status.getAdded().contains(itemPath)) {
           type = ADDED;
@@ -130,7 +144,7 @@ public class GitChangesDetector {
             .methodName(OUTGOING_METHOD)
             .paramsAsDto(newDto(GitChangeEventDto.class).withPath(path).withType(type))
             .sendAndSkipResult();
-      } catch (GitException e) {
+      } catch (NotFoundException | ServerException e) {
         String errorMessage = e.getMessage();
         if (!("Not a git repository".equals(errorMessage))) {
           LOG.error(errorMessage);

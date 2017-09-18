@@ -375,7 +375,7 @@ public class GdbDebugger implements Debugger {
       if (path.isEmpty()) {
         throw new DebuggerException("Variable path is empty");
       }
-      gdb.setVar(path.get(0), variable.getValue());
+      gdb.setVar(path.get(0), variable.getValue().getString());
     } catch (GdbTerminatedException e) {
       disconnect();
       throw e;
@@ -437,8 +437,7 @@ public class GdbDebugger implements Debugger {
 
         VariablePath variablePath = new VariablePathImpl(singletonList(varName));
         VariableImpl variable =
-            new VariableImpl(
-                varType, varName, varValue, true, variablePath, Collections.emptyList(), true);
+            new VariableImpl(varType, varName, new SimpleValueImpl(varValue), true, variablePath);
         variables.add(variable);
       }
 

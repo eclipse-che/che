@@ -10,9 +10,14 @@
  */
 package org.eclipse.che.ide.debug;
 
+import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -28,24 +33,30 @@ public interface Debugger extends DebuggerObservable {
   /** Returns debugger type */
   String getDebuggerType();
 
+  /** Creates breakpoint. */
+  Breakpoint createBreakpoint(VirtualFile file, int lineNumber);
+
   /**
    * Adds new breakpoint.
    *
-   * @param file the file
-   * @param lineNumber the line number
+   * @param file the file where breakpoint will be added
+   * @param breakpoint the breakpoint to add
    */
-  void addBreakpoint(VirtualFile file, int lineNumber);
+  void addBreakpoint(VirtualFile file, Breakpoint breakpoint);
 
   /**
    * Deletes the given breakpoint on server.
    *
-   * @param file the file
-   * @param lineNumber the line number
+   * @param file the file where breakpoint will be removed from
+   * @param breakpoint the breakpoint to delete
    */
-  void deleteBreakpoint(VirtualFile file, int lineNumber);
+  void deleteBreakpoint(VirtualFile file, Breakpoint breakpoint);
 
   /** Deletes all breakpoints. */
   void deleteAllBreakpoints();
+
+  /** Returns breakpoints. */
+  Promise<List<BreakpointDto>> getAllBreakpoints();
 
   /**
    * Connects to server.
@@ -75,21 +86,43 @@ public interface Debugger extends DebuggerObservable {
   /** Suspends application. */
   void suspend();
 
-  /** Evaluates the given expression */
-  Promise<String> evaluate(String expression);
-
-  /** Gets the value of the given variable. */
-  Promise<SimpleValue> getValue(Variable variable);
-
-  /** Gets dump the current frame. */
-  Promise<StackFrameDump> dumpStackFrame();
+  /**
+   * Evaluates the given expression inside a specific frame.
+   *
+   * @param expression the expression to evaluate
+   * @param threadId the unique thread id {@link ThreadState#getId()}
+   * @param frameIndex the frame index inside the thread
+   */
+  Promise<String> evaluate(String expression, long threadId, int frameIndex);
 
   /**
-   * Updates the value of the given variable.
+   * Gets the value of the given variable inside a specific frame.
+   *
+   * @param variable the variable to get value from
+   * @param threadId the unique thread id {@link ThreadState#getId()}
+   * @param frameIndex the frame index inside the thread
+   */
+  Promise<? extends SimpleValue> getValue(Variable variable, long threadId, int frameIndex);
+
+  /**
+   * Gets a stack frame dump.
+   *
+   * @param threadId the unique thread id {@link ThreadState#getId()}
+   * @param frameIndex the frame index inside the thread
+   */
+  Promise<? extends StackFrameDump> getStackFrameDump(long threadId, int frameIndex);
+
+  /** Gets thread dump. */
+  Promise<List<ThreadStateDto>> getThreadDump();
+
+  /**
+   * Sets a new value in the variable inside a specific frame.
    *
    * @param variable the variable to update
+   * @param threadId the unique thread id {@link ThreadState#getId()}
+   * @param frameIndex the frame index inside the thread
    */
-  void setValue(Variable variable);
+  void setValue(Variable variable, long threadId, int frameIndex);
 
   /** Indicates if connection is established with the server. */
   boolean isConnected();

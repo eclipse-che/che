@@ -10,11 +10,12 @@
  */
 package org.eclipse.che.api.workspace.shared.dto;
 
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author Sergii Kabashniuk */
 @DTO
-public interface ProjectProblemDto {
+public interface ProjectProblemDto extends ProjectProblem {
 
   int getCode();
 

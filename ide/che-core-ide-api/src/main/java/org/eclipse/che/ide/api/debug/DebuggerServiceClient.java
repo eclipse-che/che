@@ -17,6 +17,7 @@ import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
@@ -24,6 +25,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.SuspendActionDto;
+import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.promises.client.Promise;
 
 /**
@@ -104,11 +106,20 @@ public interface DebuggerServiceClient {
   Promise<List<BreakpointDto>> getAllBreakpoints(String id);
 
   /**
-   * Gets dump of fields and local variables of the current frame.
+   * Gets the stack frame dump.
+   *
+   * @param id debug session id
+   * @param threadId the unique thread id {@link ThreadState#getId()}
+   * @param frameIndex the frame index inside the thread
+   */
+  Promise<StackFrameDumpDto> getStackFrameDump(String id, long threadId, int frameIndex);
+
+  /**
+   * Gets thread dump.
    *
    * @param id debug session id
    */
-  Promise<StackFrameDumpDto> getStackFrameDump(String id);
+  Promise<List<ThreadStateDto>> getThreadDump(String id);
 
   /**
    * Resumes application.
@@ -118,18 +129,24 @@ public interface DebuggerServiceClient {
   Promise<Void> resume(String id, ResumeActionDto action);
 
   /**
-   * Returns a value of the variable.
+   * Returns a value of the variable inside the specific frame.
    *
    * @param id debug session id
+   * @param variableDto the variable to get value from
+   * @param threadId the unique thread id {@link ThreadState#getId()}
+   * @param frameIndex the frame index inside the thread
    */
-  Promise<SimpleValueDto> getValue(String id, VariableDto variableDto);
+  Promise<SimpleValueDto> getValue(
+      String id, VariableDto variableDto, long threadId, int frameIndex);
 
   /**
-   * Sets the new value of the variable.
+   * Sets the new value of the variable inside the specific frame.
    *
    * @param id debug session id
+   * @param threadId the unique thread id {@link ThreadState#getId()}
+   * @param frameIndex the frame index inside the thread
    */
-  Promise<Void> setValue(String id, VariableDto variableDto);
+  Promise<Void> setValue(String id, VariableDto variableDto, long threadId, int frameIndex);
 
   /**
    * Does step into.
@@ -156,10 +173,12 @@ public interface DebuggerServiceClient {
   Promise<Void> stepOut(String id, StepOutActionDto action);
 
   /**
-   * Evaluate the expression.
+   * Evaluate the expression inside specific frame.
    *
    * @param id debug session id
    * @param expression the expression to evaluate
+   * @param threadId the unique thread id {@link ThreadState#getId()}
+   * @param frameIndex the frame index inside the thread
    */
-  Promise<String> evaluate(String id, String expression);
+  Promise<String> evaluate(String id, String expression, long threadId, int frameIndex);
 }

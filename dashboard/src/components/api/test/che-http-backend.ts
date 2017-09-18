@@ -92,9 +92,9 @@ export class CheHttpBackend {
       this.addWorkspaceAgent(key, tmpWorkspace.runtime);
 
       // get by ID
-      this.httpBackend.when('GET', '/api/workspace/' + key).respond(tmpWorkspace);
+      this.httpBackend.when('GET', '/api/workspace/' + key).respond(200, tmpWorkspace);
       // get by namespace/workspaceName
-      this.httpBackend.when('GET', `/api/workspace/${tmpWorkspace.namespace}/${tmpWorkspace.config.name}`).respond(tmpWorkspace);
+      this.httpBackend.when('GET', `/api/workspace/${tmpWorkspace.namespace}/${tmpWorkspace.config.name}`).respond(200, tmpWorkspace);
 
       this.httpBackend.when('DELETE', '/api/workspace/' + key).respond(200);
     }
@@ -416,7 +416,7 @@ export class CheHttpBackend {
    */
   getLocalGitUrl(workspaceId: string, projectPath: string): void {
     this.httpBackend.when('GET', this.workspaceAgentMap.get(workspaceId) + '/git/read-only-url?projectPath=' + projectPath)
-      .respond(this.localGitUrlsMap.get(workspaceId + projectPath));
+      .respond(200, this.localGitUrlsMap.get(workspaceId + projectPath));
   }
 
   /**

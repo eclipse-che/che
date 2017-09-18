@@ -127,8 +127,13 @@ public class AppStateManager {
         Log.error(getClass(), e);
       }
     }
-    allWsState.put(wsId, settings);
-    return writeStateToPreferences(allWsState);
+    JsonObject oldSettings = allWsState.getObject(wsId);
+    if (oldSettings == null || !oldSettings.toJson().equals(settings.toJson())) {
+      allWsState.put(wsId, settings);
+      return writeStateToPreferences(allWsState);
+    } else {
+      return promises.resolve(null);
+    }
   }
 
   private Promise<Void> writeStateToPreferences(JsonObject state) {
