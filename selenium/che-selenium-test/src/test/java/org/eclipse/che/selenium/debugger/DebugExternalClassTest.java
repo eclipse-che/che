@@ -122,14 +122,14 @@ public class DebugExternalClassTest {
   @Test
   public void shouldDebugJreClass() {
     // when
-    editor.setBreakPointAndWaitInactiveState(19);
+    editor.setInactiveBreakpoint(19);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitBreakPointWithActiveState(19);
+    editor.waitAcitveBreakpoint(19);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
 
     // then
@@ -137,7 +137,7 @@ public class DebugExternalClassTest {
     debugPanel.waitDebugHighlightedText(
         "    "); // we can't rely on concrete code of external library which can be changed in future
     debugPanel.waitTextInVariablesPanel(
-        ": \"Info from java logger\""); // there should be at least parameter with value "Info from java logger"
+        "=\"Info from java logger\""); // there should be at least parameter with value "Info from java logger"
 
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
@@ -149,14 +149,14 @@ public class DebugExternalClassTest {
   @Test(priority = 1)
   public void shouldDebugMavenArtifactClassWithSources() {
     // when
-    editor.setBreakPointAndWaitInactiveState(23);
+    editor.setInactiveBreakpoint(23);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitBreakPointWithActiveState(23);
+    editor.waitAcitveBreakpoint(23);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
 
     // then
@@ -167,7 +167,7 @@ public class DebugExternalClassTest {
     debugPanel.waitDebugHighlightedText(
         "filterAndLog_1(FQCN, null, Level.INFO, format, arg, null);");
     debugPanel.waitTextInVariablesPanel(
-        ": \"Info from {}\""); // there should be at least parameter with value "Info from {}"
+        "=\"Info from {}\""); // there should be at least parameter with value "Info from {}"
 
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OVER);
@@ -188,14 +188,14 @@ public class DebugExternalClassTest {
   @Test(priority = 2)
   public void shouldHandleDebugOfMavenArtifactWithoutSources() {
     // when
-    editor.setBreakPointAndWaitInactiveState(27);
+    editor.setInactiveBreakpoint(27);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
 
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
-    editor.waitBreakPointWithActiveState(27);
+    editor.waitAcitveBreakpoint(27);
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_INTO);
 
     // then

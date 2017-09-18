@@ -18,13 +18,17 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.marker.Marker;
 import org.eclipse.che.ide.resource.Path;
@@ -43,6 +47,7 @@ class ProjectImpl extends ContainerImpl implements Project {
   private static final int FOLDER_NOT_EXISTS_ON_FS = 10;
 
   private final ProjectConfig reference;
+  private final List<ProjectProblem> problems;
 
   @Inject
   protected ProjectImpl(
@@ -52,6 +57,16 @@ class ProjectImpl extends ContainerImpl implements Project {
     super(Path.valueOf(reference.getPath()), resourceManager, promiseProvider);
 
     this.reference = reference;
+    if (reference.getProblems() != null) {
+      problems =
+          reference
+              .getProblems()
+              .stream()
+              .map(problem -> new ProjectProblemImpl(problem.getCode(), problem.getMessage()))
+              .collect(Collectors.toList());
+    } else {
+      problems = Collections.emptyList();
+    }
   }
 
   /** {@inheritDoc} */
@@ -96,6 +111,11 @@ class ProjectImpl extends ContainerImpl implements Project {
     return reference.getSource();
   }
 
+  @Override
+  public List<ProjectProblem> getProblems() {
+    return problems;
+  }
+
   /** {@inheritDoc} */
   @Override
   public ProjectRequest update() {
@@ -126,7 +146,7 @@ class ProjectImpl extends ContainerImpl implements Project {
   /** {@inheritDoc} */
   @Override
   public boolean isProblem() {
-    return getMarker(ProblemProjectMarker.PROBLEM_PROJECT).isPresent();
+    return reference.getProblems() != null && !reference.getProblems().isEmpty();
   }
 
   /** {@inheritDoc} */

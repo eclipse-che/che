@@ -187,6 +187,24 @@ public final class Path {
   }
 
   /**
+   * Returns a path with the same segments as this path but with a leading separator added.
+   *
+   * <p>If this path already has a leading separator, this path is returned.
+   *
+   * @return the new path
+   * @see #hasTrailingSeparator()
+   */
+  public Path addLeadingSeparator() {
+    if (hasLeadingSeparator() || isRoot()) {
+      return this;
+    }
+    if (isEmpty()) {
+      return new Path(device, segments, HAS_LEADING);
+    }
+    return new Path(device, segments, separators | HAS_LEADING);
+  }
+
+  /**
    * Returns the canonicalized path obtained from the concatenation of the given path's segments to
    * the end of this path. If the given path has a trailing separator, the result will have a
    * trailing separator. The device id of this path is preserved (the one of the given path is
@@ -534,6 +552,20 @@ public final class Path {
    */
   public boolean hasTrailingSeparator() {
     return (separators & HAS_TRAILING) != 0;
+  }
+
+  /**
+   * Returns whether this path has a leading separator.
+   *
+   * <p>Note: In the root path ("/"), the separator is considered to be leading rather than
+   * trailing.
+   *
+   * @return <code>true</code> if this path has a leading separator, and <code>false</code>
+   *     otherwise
+   * @see #addLeadingSeparator()
+   */
+  public boolean hasLeadingSeparator() {
+    return (separators & HAS_LEADING) != 0;
   }
 
   /*

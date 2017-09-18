@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.core.utils;
 
 import java.util.concurrent.TimeUnit;
 
-/** @author Morhun Mykola */
+/** @author Mykola Morhun */
 public class WaitUtils {
 
   /**

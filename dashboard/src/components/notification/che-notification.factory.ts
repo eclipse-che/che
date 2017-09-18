@@ -9,178 +9,166 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheUIElementsInjectorService} from '../service/injector/che-ui-elements-injector.service';
+
+const NOTIFICATION_CONTAINER_ELEMENT_ID = 'che-notification-container';
+const ERROR_NOTIFICATION_DISPLAY_TIME = 10000;
+const INFO_NOTIFICATION_DISPLAY_TIME = 5000;
+const MAX_NOTIFICATION_COUNT = 10;
 
 /**
  * Provides custom notifications
  * @author Oleksii Orel
  */
 export class CheNotification {
+  private $timeout: ng.ITimeoutService;
+  private $document: ng.IDocumentService;
+  private cheUIElementsInjectorService: CheUIElementsInjectorService;
 
-    /**
-     * Default constructor that is using resource injection
-     * @ngInject for Dependency injection
-     */
-    constructor($timeout, $document, cheUIElementsInjectorService) {
-        this.$timeout = $timeout;
-        this.cheUIElementsInjectorService = cheUIElementsInjectorService;
-        this.$document = $document;
+  private currentNotificationNumber: number;
+  private timeoutPromiseMap: Map<string, ng.IPromise<any>>;
 
-        this.timeoutPromiseMap = new Map();
-        this.notificationContainerElementId = 'che-notification-container';
+  /**
+   * Default constructor that is using resource injection
+   * @ngInject for Dependency injection
+   */
+  constructor($timeout: ng.ITimeoutService, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService) {
+    this.$timeout = $timeout;
+    this.cheUIElementsInjectorService = cheUIElementsInjectorService;
+    this.$document = $document;
 
-        //alignment element id
-        this.mainContentElementId = 'main-content';
+    this.timeoutPromiseMap = new Map();
+  }
 
-        //max number of notifications on the page
-        this.maxNotificationCount = 10;
+  _getNextNotificationId(): string {
+    this._removeHiddenNotification();
 
-        //time in milliseconds
-        this.infoNotificationDisplayTime = 5000;
-        this.errorNotificationDisplayTime = 10000;
+    const notificationCount = this.timeoutPromiseMap.size;
+    if (notificationCount === 0) {
+      // initialise counter of notifications
+      this.currentNotificationNumber = 0;
+    } else if (notificationCount >= MAX_NOTIFICATION_COUNT) {
+      this._removeNotification(this._getNotificationContainer().children().first());
     }
 
-    _getNextNotificationId() {
-        this._removeHiddenNotification();
-
-        let notificationCount = this.timeoutPromiseMap.size;
-        if (notificationCount === 0) {
-            //initialise counter of notifications
-            this.currentNotificationNumber = 0;
-        } else if (notificationCount >= this.maxNotificationCount) {
-            this._removeNotification(this._getNotificationContainer().children().first());
-        }
-
-        this.currentNotificationNumber++;
-        if (this.currentNotificationNumber > 10000) {
-            this.currentNotificationNumber = 1;
-        }
-
-        return 'che-notification-' + this.currentNotificationNumber;
+    this.currentNotificationNumber++;
+    if (this.currentNotificationNumber > 10000) {
+      this.currentNotificationNumber = 1;
     }
 
-    _getNotificationContainer() {
-        let notificationContainerElement = this.$document[0].getElementById(this.notificationContainerElementId);
+    return 'che-notification-' + this.currentNotificationNumber;
+  }
 
-        if (notificationContainerElement) {
-            return angular.element(notificationContainerElement);
-        }
-
-        let offsetRight = 0;
-
-        let bodyElement = this.$document[0].getElementsByTagName('body')[0];
-        let parentElement = this.$document[0].getElementById(this.mainContentElementId);
-
-        if (parentElement) {
-            offsetRight = bodyElement.offsetWidth - (parentElement.offsetLeft + parentElement.offsetWidth);
-        }
-
-        let jqAdditionalElement = angular.element('<div></div>');
-        // set attributes into the additional element
-        jqAdditionalElement.attr('id', this.notificationContainerElementId);
-        jqAdditionalElement.attr('style', 'right:' + offsetRight + 'px;');
-
-        this.cheUIElementsInjectorService.injectAdditionalElement(bodyElement, jqAdditionalElement);
-
-        return jqAdditionalElement;
+  _getNotificationContainer(): ng.IAugmentedJQuery {
+    const notificationContainerElement = this.$document.find(`#${NOTIFICATION_CONTAINER_ELEMENT_ID}`);
+    if (notificationContainerElement[0]) {
+      return notificationContainerElement;
     }
 
-    _removeNotificationContainer() {
-        if (this.timeoutPromiseMap.size !== 0) {
-            return false;
-        }
-        return this.cheUIElementsInjectorService.deleteElementById(this.notificationContainerElementId);
+    const jqAdditionalElement = angular.element(`<div></div>`);
+    jqAdditionalElement.attr('id', NOTIFICATION_CONTAINER_ELEMENT_ID);
+    this.cheUIElementsInjectorService.injectAdditionalElement(this.$document.find('body'), jqAdditionalElement);
+
+    return jqAdditionalElement;
+  }
+
+  _removeNotificationContainer(): boolean {
+    if (this.timeoutPromiseMap.size !== 0) {
+      return false;
+    }
+    return this.cheUIElementsInjectorService.deleteElementById(NOTIFICATION_CONTAINER_ELEMENT_ID);
+  }
+
+  _addNotification(jqNotificationElement: ng.IRootElementService): void {
+    if (!jqNotificationElement[0] || !jqNotificationElement[0].id) {
+      return;
     }
 
-    _addNotification(jqNotificationElement) {
-        if (!jqNotificationElement[0] || !jqNotificationElement[0].id) {
-            return;
-        }
-
-        let oldNotificationElement = this.$document[0].getElementById(jqNotificationElement[0].id);
-        if (oldNotificationElement) {
-            let jqOldNotificationElement = angular.element(oldNotificationElement);
-            jqOldNotificationElement.addClass('hide-notification');
-            this.$timeout(() => {
-
-                this.cheUIElementsInjectorService.injectAdditionalElement(this._getNotificationContainer(), jqNotificationElement);
-            }, 300);
-        } else {
-
-            this.cheUIElementsInjectorService.injectAdditionalElement(this._getNotificationContainer(), jqNotificationElement);
-        }
+    let oldNotificationElement = this.$document.find(`#${jqNotificationElement[0].id}`);
+    if (oldNotificationElement[0]) {
+      const jqOldNotificationElement = angular.element(oldNotificationElement);
+      jqOldNotificationElement.addClass('hide-notification');
+      this.$timeout(() => {
+        this.cheUIElementsInjectorService.injectAdditionalElement(this._getNotificationContainer(), jqNotificationElement);
+      }, 300);
+    } else {
+      this.cheUIElementsInjectorService.injectAdditionalElement(this._getNotificationContainer(), jqNotificationElement);
     }
+  }
 
-    _removeNotification(jqNotificationElement) {
-        let elementId = jqNotificationElement[0].id;
+  _removeNotification(jqNotificationElement: JQuery): void {
+    const elementId = jqNotificationElement[0].id;
 
-        jqNotificationElement.addClass('hide-notification');
+    jqNotificationElement.addClass('hide-notification');
 
-        let timeoutPromise = this.timeoutPromiseMap.get(elementId);
-        if (timeoutPromise) {
-            this.$timeout.cancel(timeoutPromise);
-        }
+    const timeoutPromise = this.timeoutPromiseMap.get(elementId);
+    if (timeoutPromise) {
+      this.$timeout.cancel(timeoutPromise);
+    }
+    this.timeoutPromiseMap.delete(elementId);
+
+    this.$timeout(() => {
+      jqNotificationElement.remove();
+      this._removeNotificationContainer();
+    }, 300);
+  }
+
+  _removeHiddenNotification(): void {
+    const jqNotificationContainerElement = this._getNotificationContainer();
+    const hideNotificationElements = jqNotificationContainerElement[0].getElementsByClassName('hide-notification');
+
+    if (hideNotificationElements.length === 0) {
+      return;
+    }
+    for (let pos = 0; pos < hideNotificationElements.length; pos++) {
+      let hideNotificationElement = hideNotificationElements[pos];
+      if (!hideNotificationElement) {
+        continue;
+      }
+      let elementId = hideNotificationElement.id;
+      let timeoutPromise = this.timeoutPromiseMap.get(elementId);
+      if (timeoutPromise) {
+        this.$timeout.cancel(timeoutPromise);
         this.timeoutPromiseMap.delete(elementId);
-
-        this.$timeout(() => {
-            jqNotificationElement.remove();
-            this._removeNotificationContainer();
-        }, 300);
+      }
+      hideNotificationElement.remove();
     }
+    this._removeNotificationContainer();
+  }
 
-    _removeHiddenNotification() {
-        let jqNotificationContainerElement = this._getNotificationContainer();
+  showInfo(text: string): void {
+    const notificationId = this._getNextNotificationId();
+    const jqInfoNotificationElement = angular.element('<che-info-notification/>');
 
-        let hideNotificationElements = jqNotificationContainerElement[0].getElementsByClassName('hide-notification');
+    jqInfoNotificationElement.attr('che-info-text', text);
+    jqInfoNotificationElement.attr('id', notificationId);
 
-        let elementsLength = hideNotificationElements.length;
+    this._addNotification(jqInfoNotificationElement);
 
-        if (elementsLength === 0) {
-            return;
-        }
+    const timeoutPromise = this.$timeout(() => {
+      this._removeNotification(jqInfoNotificationElement);
+    }, INFO_NOTIFICATION_DISPLAY_TIME);
+    this.timeoutPromiseMap.set(notificationId, timeoutPromise);
+  }
 
-        for (let pos = 0; pos < elementsLength; pos++) {
-            let hideNotificationElement = hideNotificationElements[pos];
-            if (!hideNotificationElement) {
-                continue;
-            }
-            let elementId = hideNotificationElement.id;
-            let timeoutPromise = this.timeoutPromiseMap.get(elementId);
-            if (timeoutPromise) {
-                this.$timeout.cancel(timeoutPromise);
-                this.timeoutPromiseMap.delete(elementId);
-            }
-            hideNotificationElement.remove();
-        }
-        this._removeNotificationContainer();
+  showError(text: string, error?: {data?: { message?: string}}): void {
+    let errorMessage: string;
+    if (error && error.data && angular.isString(error.data.message) && error.data.message.length > 0) {
+      errorMessage = error.data.message;
+    } else {
+      errorMessage = text;
     }
+    const notificationId = this._getNextNotificationId();
+    const jqErrorNotificationElement = angular.element('<che-error-notification/>');
 
-    showInfo(text) {
-        let notificationId = this._getNextNotificationId();
-        let jqInfoNotificationElement = angular.element('<che-info-notification/>');
+    jqErrorNotificationElement.attr('che-error-text', errorMessage);
+    jqErrorNotificationElement.attr('id', notificationId);
 
-        jqInfoNotificationElement.attr('che-info-text', text);
-        jqInfoNotificationElement.attr('id', notificationId);
+    this._addNotification(jqErrorNotificationElement);
 
-        this._addNotification(jqInfoNotificationElement);
-
-        let timeoutPromise = this.$timeout(() => {
-            this._removeNotification(jqInfoNotificationElement);
-        }, this.infoNotificationDisplayTime);
-        this.timeoutPromiseMap.set(notificationId, timeoutPromise);
-    }
-
-    showError(text) {
-        let notificationId = this._getNextNotificationId();
-        let jqErrorNotificationElement = angular.element('<che-error-notification/>');
-
-        jqErrorNotificationElement.attr('che-error-text', text);
-        jqErrorNotificationElement.attr('id', notificationId);
-
-        this._addNotification(jqErrorNotificationElement);
-
-        let timeoutPromise = this.$timeout(() => {
-            this._removeNotification(jqErrorNotificationElement);
-        }, this.errorNotificationDisplayTime);
-        this.timeoutPromiseMap.set(notificationId, timeoutPromise);
-    }
+    const timeoutPromise = this.$timeout(() => {
+      this._removeNotification(jqErrorNotificationElement);
+    }, ERROR_NOTIFICATION_DISPLAY_TIME);
+    this.timeoutPromiseMap.set(notificationId, timeoutPromise);
+  }
 }

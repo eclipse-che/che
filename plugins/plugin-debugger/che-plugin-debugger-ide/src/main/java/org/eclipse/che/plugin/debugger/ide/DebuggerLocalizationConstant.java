@@ -199,4 +199,7 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
 
   @Key("view.editConfigurations.saveChanges.discard")
   String editConfigurationsSaveChangesDiscard();
+
+  @Key("debugger.frames.title")
+  String debuggerFramesTitle();
 }

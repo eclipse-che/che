@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.debugger.ide.debug.changevalue;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -31,9 +32,6 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
   private final DebuggerPresenter debuggerPresenter;
   private final DebuggerLocalizationConstant constant;
 
-  private Variable variable;
-
-  /** Create presenter. */
   @Inject
   public ChangeValuePresenter(
       ChangeValueView view,
@@ -47,36 +45,45 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
     this.constant = constant;
   }
 
-  /** Show dialog. */
   public void showDialog() {
-    variable = debuggerPresenter.getSelectedVariable();
-    view.setValueTitle(constant.changeValueViewExpressionFieldTitle(variable.getName()));
-    view.setValue(variable.getValue());
+    Variable selectedVariable = debuggerPresenter.getSelectedVariable();
+    view.setValueTitle(constant.changeValueViewExpressionFieldTitle(selectedVariable.getName()));
+    view.setValue(selectedVariable.getValue().getString());
     view.focusInValueField();
     view.selectAllText();
     view.setEnableChangeButton(false);
     view.showDialog();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void onCancelClicked() {
     view.close();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void onChangeClicked() {
     Debugger debugger = debuggerManager.getActiveDebugger();
-    if (debugger != null) {
-      Variable newVariable = new VariableImpl(view.getValue(), variable.getVariablePath());
-      debugger.setValue(newVariable);
+    if (debugger != null && debugger.isSuspended()) {
+      Variable selectedVariable = debuggerPresenter.getSelectedVariable();
+
+      if (selectedVariable != null) {
+        Variable newVariable =
+            new VariableImpl(
+                selectedVariable.getType(),
+                selectedVariable.getName(),
+                new SimpleValueImpl(view.getValue()),
+                selectedVariable.isPrimitive(),
+                selectedVariable.getVariablePath());
+
+        final long threadId = debuggerPresenter.getSelectedThreadId();
+        final int frameIndex = debuggerPresenter.getSelectedFrameIndex();
+        debugger.setValue(newVariable, threadId, frameIndex);
+      }
     }
 
     view.close();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void onVariableValueChanged() {
     final String value = view.getValue();

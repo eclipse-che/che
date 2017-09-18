@@ -37,4 +37,7 @@ EXPOSE 8000 8080
 COPY entrypoint.sh /entrypoint.sh
 COPY open-jdk-source-file-location /open-jdk-source-file-location
 ENTRYPOINT ["/entrypoint.sh"]
+RUN mkdir /logs /data && \
+    chmod 0777 /logs /data
 ADD eclipse-che.tar.gz /home/user/
+RUN find /home/user -type d -exec chmod 777 {} \;

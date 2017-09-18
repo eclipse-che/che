@@ -13,7 +13,7 @@ package org.eclipse.che.api.debug.shared.dto;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.dto.shared.DTO;
 
-/** @author andrew00x */
+/** @author Anatolii Bazko */
 @DTO
 public interface LocationDto extends Location {
   void setTarget(String target);
@@ -26,10 +26,6 @@ public interface LocationDto extends Location {
 
   void setExternalResource(boolean externalResource);
 
-  void setResourcePath(String resourcePath);
-
-  LocationDto withResourcePath(String resourcePath);
-
   LocationDto withExternalResource(boolean externalResource);
 
   void setExternalResourceId(int externalResourceId);
@@ -39,4 +35,18 @@ public interface LocationDto extends Location {
   void setResourceProjectPath(String resourceProjectPath);
 
   LocationDto withResourceProjectPath(String resourceProjectPath);
+
+  @Override
+  MethodDto getMethod();
+
+  void setMethod(MethodDto method);
+
+  LocationDto withMethod(MethodDto method);
+
+  @Override
+  long getThreadId();
+
+  void setThreadId(long threadId);
+
+  LocationDto withThreadId(long threadId);
 }
