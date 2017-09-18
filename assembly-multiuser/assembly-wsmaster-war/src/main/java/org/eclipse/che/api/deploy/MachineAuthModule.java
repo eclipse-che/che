@@ -29,14 +29,18 @@ public class MachineAuthModule extends AbstractModule {
   protected void configure() {
     install(new InterceptorModule());
     bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
-        .to(org.eclipse.che.machine.authentication.server.AuthWsAgentHealthChecker.class);
-    bind(org.eclipse.che.machine.authentication.server.MachineTokenPermissionsFilter.class);
-    bind(org.eclipse.che.machine.authentication.server.MachineTokenService.class);
-    bind(org.eclipse.che.machine.authentication.server.MachineTokenRegistry.class);
-    bind(org.eclipse.che.machine.authentication.server.MachineSessionInvalidator.class);
+        .to(org.eclipse.che.multiuser.machine.authentication.server.AuthWsAgentHealthChecker.class);
+    bind(
+        org.eclipse.che.multiuser.machine.authentication.server.MachineTokenPermissionsFilter
+            .class);
+    bind(org.eclipse.che.multiuser.machine.authentication.server.MachineTokenService.class);
+    bind(org.eclipse.che.multiuser.machine.authentication.server.MachineTokenRegistry.class);
+    bind(org.eclipse.che.multiuser.machine.authentication.server.MachineSessionInvalidator.class);
     bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
     bind(WorkspaceServiceLinksInjector.class)
-        .to(org.eclipse.che.machine.authentication.server.WorkspaceServiceAuthLinksInjector.class);
+        .to(
+            org.eclipse.che.multiuser.machine.authentication.server
+                .WorkspaceServiceAuthLinksInjector.class);
     bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
         .to(org.eclipse.che.plugin.docker.machine.AuthMachineProviderImpl.class);
   }
