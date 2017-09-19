@@ -32,7 +32,6 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -256,16 +255,6 @@ public class TestWorkspaceServiceClient {
               "Workspace with id='%s' should has '%s' status, but its actual state='%s'",
               workspace.getId(), WorkspaceStatus.RUNNING, workspace.getStatus()));
     }
-  }
-
-  public static TestWorkspaceServiceClient create(
-      TestApiEndpointUrlProvider apiEndpointProvider,
-      TestUserNamespaceResolver testUserNamespaceResolver,
-      String authToken) {
-    return new TestWorkspaceServiceClient(
-        apiEndpointProvider,
-        new TestUserHttpJsonRequestFactory(authToken),
-        testUserNamespaceResolver);
   }
 
   private String getNameBasedUrl(String workspaceName, String username) {

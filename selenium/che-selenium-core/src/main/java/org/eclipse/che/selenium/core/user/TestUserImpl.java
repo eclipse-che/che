@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +73,10 @@ public class TestUserImpl implements TestUser {
 
     this.authToken = authServiceClient.login(getName(), getPassword());
     this.workspaceServiceClient =
-        TestWorkspaceServiceClient.create(apiEndpointUrlProvider, userNamespaceResolver, authToken);
+        new TestWorkspaceServiceClient(
+            apiEndpointUrlProvider,
+            new TestUserHttpJsonRequestFactory(authToken),
+            userNamespaceResolver);
   }
 
   @Override

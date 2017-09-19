@@ -21,6 +21,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.slf4j.Logger;
@@ -42,13 +43,15 @@ public class TestWorkspaceImpl implements TestWorkspace {
       int memoryInGB,
       String template,
       TestApiEndpointUrlProvider apiEndpointUrlProvider,
-      TestUserNamespaceResolver testUserNamespaceResolver) {
+      TestUserNamespaceResolver userNamespaceResolver) {
     this.name = name;
     this.owner = owner;
     this.id = new AtomicReference<>();
     this.workspaceServiceClient =
-        TestWorkspaceServiceClient.create(
-            apiEndpointUrlProvider, testUserNamespaceResolver, owner.getAuthToken());
+        new TestWorkspaceServiceClient(
+            apiEndpointUrlProvider,
+            new TestUserHttpJsonRequestFactory(owner.getAuthToken()),
+            userNamespaceResolver);
 
     this.future =
         CompletableFuture.runAsync(
