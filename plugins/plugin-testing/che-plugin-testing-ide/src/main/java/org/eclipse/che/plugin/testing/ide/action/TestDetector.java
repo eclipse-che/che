@@ -25,6 +25,8 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.editor.JavaReconsilerEvent;
 import org.eclipse.che.ide.util.loging.Log;
@@ -124,7 +126,12 @@ public class TestDetector {
     TestDetectionContext context = dtoFactory.createDto(TestDetectionContext.class);
     context.setFilePath(currentEditor.getEditorInput().getFile().getLocation().toString());
     context.setOffset(currentEditor.getCursorOffset());
-    context.setProjectPath(appContext.getRootProject().getPath());
+    Resource resource = appContext.getResource();
+    Project project =
+        (resource == null || resource.getProject() == null)
+            ? appContext.getRootProject()
+            : resource.getProject();
+    context.setProjectPath(project.getPath());
     client
         .detectTests(context)
         .onSuccess(

@@ -34,6 +34,7 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
@@ -98,7 +99,13 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
       Pair<String, String> frameworkAndTestName,
       TestExecutionContext.ContextType contextType,
       String selectedNodePath) {
-    final Project project = appContext.getRootProject();
+    Project project;
+    Resource resource = appContext.getResource();
+    if (resource == null || resource.getProject() == null) {
+      project = appContext.getRootProject();
+    } else {
+      project = resource.getProject();
+    }
     TestExecutionContext context = dtoFactory.createDto(TestExecutionContext.class);
 
     context.setProjectPath(project.getPath());
