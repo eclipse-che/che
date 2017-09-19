@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -26,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -44,6 +46,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
   @Inject private Events events;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -55,6 +58,11 @@ public class ProjectStateAfterRenameWorkspaceTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    testWorkspaceServiceClient.delete(WORKSPACE_NEW_NAME, workspace.getOwner().getName());
   }
 
   @Test
