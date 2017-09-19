@@ -38,6 +38,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -81,7 +82,6 @@ public class JavaTestPluginTestNgTest {
 
   @Inject private Ide ide;
   @Inject private DefaultTestUser user;
-
   @Inject private JavaTestRunnerPluginConsole pluginConsole;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
@@ -123,8 +123,8 @@ public class JavaTestPluginTestNgTest {
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppOne");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppOne");
-    assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(PASSED).size() == 1);
-    assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(FAILED).size() == 1);
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(PASSED).size() == 1);
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE),
@@ -142,11 +142,35 @@ public class JavaTestPluginTestNgTest {
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
-    assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(PASSED).size() == 1);
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(PASSED).size() == 1);
     editor.setCursorToDefinedLineAndChar(30, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST);
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
-    assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(FAILED).size() == 1);
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(FAILED).size() == 1);
+    String testErrorMessage = pluginConsole.getTestErrorMessage();
+    assertTrue(
+        testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
+        "Actual message was: " + testErrorMessage);
+    assertTrue(
+        testErrorMessage.endsWith(END_OF_FAILED_TEST), "Actual message was: " + testErrorMessage);
+  }
+
+  @Test(priority = 1)
+  public void shouldExecuteAlltets() throws InterruptedException {
+    // given
+    projectExplorer.openItemByPath(PATH_TO_ANOTHER_TEST_CLASS);
+
+    // then
+    editor.waitActiveEditor();
+    editor.setCursorToDefinedLineAndChar(25, 17);
+    menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST);
+    notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
+    pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(PASSED).size() == 1);
+    editor.setCursorToDefinedLineAndChar(30, 17);
+    menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST);
+    pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),

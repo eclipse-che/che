@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -59,9 +60,9 @@ public class Consoles {
   public static final String PREVIEW_URL = "//div[@active]//a[@href]";
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
-
   protected final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
+  private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
 
   @Inject
   public Consoles(SeleniumWebDriver seleniumWebDriver, Loader loader) {
@@ -72,6 +73,8 @@ public class Consoles {
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
+  @FindBy(css = CONSOLE_PANEL_DRUGGER_CSS)
+  WebElement consolesPanelDrugger;
 
   @FindBy(id = PROCESSES_TAB)
   WebElement processesTab;
@@ -299,5 +302,16 @@ public class Consoles {
   /** click on the maximize panel icon */
   public void clickOnMaximizePanelIcon() {
     redrawDriverWait.until(elementToBeClickable(By.xpath(MAXIMIZE_PANEL_ICON))).click();
+  }
+
+  /**
+   * * apply drug and drop feature for consoles feature, shift the work bench panel up or down
+   *
+   * @param xoffset offset in pixels for shifting
+   */
+  public void drugConsolesInDefinePosition(int xoffset) {
+    WebElement drugger =
+            redrawDriverWait.until(ExpectedConditions.visibilityOf(consolesPanelDrugger));
+    new Actions(seleniumWebDriver).dragAndDropBy(drugger, xoffset, xoffset).perform();
   }
 }

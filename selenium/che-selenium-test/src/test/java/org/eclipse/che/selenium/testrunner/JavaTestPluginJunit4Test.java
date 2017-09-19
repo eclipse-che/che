@@ -19,7 +19,6 @@ import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginCo
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
@@ -38,6 +37,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -79,19 +79,20 @@ public class JavaTestPluginJunit4Test {
   @Inject private Ide ide;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private CommandsPalette commandsPalette;
+  @Inject private TestProjectServiceClient projectServiceClient;
 
   @BeforeClass
   public void prepareTestProject() throws Exception {
     CompileCommand compileCommand = new CompileCommand();
     testCommandServiceClient.createCommand(DtoConverter.asDto(compileCommand), ws.getId());
-
-    URL resource = getClass().getResource("/projects/plugins/JavaTestRunnerPlugin/junit4-tests");
-    testProjectServiceClient.importProject(
+    projectServiceClient.importProject(
         ws.getId(),
-        Paths.get(resource.toURI()),
+        Paths.get(
+            getClass()
+                .getResource("projects/plugins/JavaTestRunnerPlugin/" + JUNIT4_PROJECT)
+                .toURI()),
         JUNIT4_PROJECT,
         ProjectTemplates.CONSOLE_JAVA_SIMPLE);
 
@@ -124,9 +125,9 @@ public class JavaTestPluginJunit4Test {
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppOne");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppOne");
     pluginConsole.waitMethodMarkedAsIgnored("shouldBeIgnoredOfAppOne");
-    assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(PASSED).size() == 1);
-    assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(FAILED).size() == 1);
-    assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(IGNORED).size() == 1);
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(PASSED).size() == 1);
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(FAILED).size() == 1);
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(IGNORED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE),
@@ -139,7 +140,11 @@ public class JavaTestPluginJunit4Test {
     projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JUNIT4_ANOTHER_TEST);
     projectExplorer.openItemByPath(PATH_TO_JUNIT4_ANOTHER_TEST);
     editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(28, 17);
+
+    //TODO should be removed after fix issue https://github.com/eclipse/che/issues/5875
+    editor.selectTabByName("AppAnotherTest");
+
+    editor.setCursorToDefinedLineAndChar(27, 17);
 
     // when
     menu.runCommand(RUN_MENU, TEST, JUNIT_TEST);
@@ -148,25 +153,29 @@ public class JavaTestPluginJunit4Test {
     // then
     pluginConsole.waitFqnOfTesClassInResultTree("org.eclipse.che.examples.AppAnotherTest");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
-    assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(PASSED).size() == 1);
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(PASSED).size() == 1);
     // then
-    editor.setCursorToDefinedLineAndChar(33, 17);
+
+    //TODO should be removed after fix issue https://github.com/eclipse/che/issues/5875
+    editor.selectTabByName("AppAnotherTest");
+
+    editor.setCursorToDefinedLineAndChar(32, 17);
     menu.runCommand(RUN_MENU, TEST, JUNIT_TEST);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
-    assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(FAILED).size() == 1);
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
         "Actual message was: " + testErrorMessage);
 
-    editor.setCursorToDefinedLineAndChar(39, 17);
+    //TODO should be removed after fix issue https://github.com/eclipse/che/issues/5875
+    editor.selectTabByName("AppAnotherTest");
+
+    editor.setCursorToDefinedLineAndChar(38, 17);
     menu.runCommand(RUN_MENU, TEST, JUNIT_TEST);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsIgnored("shouldBeIgnoredOfAppAnother");
-    assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(IGNORED).size() == 1);
-    assertTrue(
-        testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
-        "Actual message was: " + testErrorMessage);
+    Assert.assertTrue(pluginConsole.getAllMethodsMarkedDefinedStatus(IGNORED).size() == 1);
   }
 }
