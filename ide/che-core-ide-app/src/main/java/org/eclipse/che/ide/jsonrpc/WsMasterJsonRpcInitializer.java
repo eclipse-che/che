@@ -17,7 +17,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHO
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
@@ -203,7 +203,7 @@ public class WsMasterJsonRpcInitializer {
         eventBus.fireEvent(new WsAgentServerRunningEvent(machine.getName()));
       } else if (SERVER_TERMINAL_REFERENCE.equals(server.getName())) {
         eventBus.fireEvent(new TerminalAgentServerRunningEvent(machine.getName()));
-      } else if (SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE.equals(server.getName())) {
+      } else if (SERVER_EXEC_AGENT_HTTP_REFERENCE.equals(server.getName())) {
         eventBus.fireEvent(new ExecAgentServerRunningEvent(machine.getName()));
       }
     }
