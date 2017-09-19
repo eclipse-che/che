@@ -29,5 +29,7 @@
         <module>che-multiuser-api-authorization-impl</module>
         <module>che-multiuser-api-resource-shared</module>
         <module>che-multiuser-api-resource</module>
+        <module>che-multiuser-api-organization-shared</module>
+        <module>che-multiuser-api-organization</module>
     </modules>
 </project>
