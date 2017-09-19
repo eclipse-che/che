@@ -15,6 +15,7 @@ import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAILED;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
+import static org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.atLeastOnce;
@@ -348,7 +349,8 @@ public class OpenShiftInternalRuntimeTest {
     mockName(POD_NAME, pod);
     when(spec.getContainers()).thenReturn(containers);
     when(pod.getSpec()).thenReturn(spec);
-    when(pod.getMetadata().getLabels()).thenReturn(ImmutableMap.of(POD_SELECTOR, POD_NAME));
+    when(pod.getMetadata().getLabels())
+        .thenReturn(ImmutableMap.of(POD_SELECTOR, POD_NAME, CHE_ORIGINAL_NAME_LABEL, POD_NAME));
     return pod;
   }
 
@@ -381,7 +383,8 @@ public class OpenShiftInternalRuntimeTest {
     when(spec.getTo()).thenReturn(target);
     when(spec.getHost()).thenReturn(ROUTE_HOST);
     when(route.getSpec()).thenReturn(spec);
-
+    when(route.getMetadata().getLabels())
+        .thenReturn(ImmutableMap.of(CHE_ORIGINAL_NAME_LABEL, ROUTE_NAME));
     return route;
   }
 
