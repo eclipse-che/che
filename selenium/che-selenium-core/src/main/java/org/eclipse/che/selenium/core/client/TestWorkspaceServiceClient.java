@@ -133,7 +133,7 @@ public class TestWorkspaceServiceClient {
     requestFactory.fromUrl(getIdBasedUrl(workspace.getId())).useDeleteMethod().request();
 
     LOG.info(
-        "Workspace name='{}', id='{}' and of user with name='{}' is removed",
+        "Workspace name='{}', id='{}', username='{}' is removed",
         workspaceName,
         workspace.getId(),
         userName);
