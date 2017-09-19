@@ -27,6 +27,7 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.configuration.ConfigurationException;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
@@ -93,8 +94,10 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         owner,
         memoryGB,
         template,
-        testApiEndpointUrlProvider,
-        testUserNamespaceResolver);
+        new TestWorkspaceServiceClient(
+            testApiEndpointUrlProvider,
+            new TestUserHttpJsonRequestFactory(owner.getAuthToken()),
+            testUserNamespaceResolver));
   }
 
   private boolean hasDefaultValues(TestUser testUser, int memoryGB, String template) {
@@ -182,8 +185,10 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
                     defaultUser,
                     defaultMemoryGb,
                     WorkspaceTemplate.DEFAULT,
-                    testApiEndpointUrlProvider,
-                    testUserNamespaceResolver);
+                    new TestWorkspaceServiceClient(
+                        testApiEndpointUrlProvider,
+                        new TestUserHttpJsonRequestFactory(defaultUser.getAuthToken()),
+                        testUserNamespaceResolver));
 
             try {
               if (!testWorkspaceQueue.offer(testWorkspace)) {
