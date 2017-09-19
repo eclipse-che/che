@@ -11,6 +11,7 @@
 package org.eclipse.che.api.git;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,11 +25,19 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.git.shared.GitCheckoutEvent;
+import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
+import org.eclipse.che.api.git.shared.event.GitCommitEvent;
+import org.eclipse.che.api.git.shared.event.GitEvent;
+import org.eclipse.che.api.git.shared.event.GitRepositoryDeletedEvent;
+import org.eclipse.che.api.git.shared.event.GitRepositoryInitializedEvent;
+import org.eclipse.che.api.git.shared.event.GitResetEvent;
 
 @Singleton
-public class GitJsonRpcMessenger implements EventSubscriber<GitCheckoutEvent> {
-  private final Map<String, Set<String>> endpointIds = new ConcurrentHashMap<>();
+public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
+  private final Map<String, Set<String>> endpointIdsWithWorkspaceIdAndProjectName =
+      new ConcurrentHashMap<>();
+  private final Set<String> endpointIds = newConcurrentHashSet();
 
   private final EventService eventService;
   private final RequestTransmitter transmitter;
@@ -50,12 +59,22 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitCheckoutEvent> {
   }
 
   @Override
-  public void onEvent(GitCheckoutEvent event) {
-    String workspaceIdAndProjectName = event.getWorkspaceId() + event.getProjectName();
-    endpointIds
+  public void onEvent(GitEvent event) {
+    if (event instanceof GitCheckoutEvent) {
+      handleCheckoutEvent((GitCheckoutEvent) event);
+    } else if (event instanceof GitCommitEvent
+        || event instanceof GitResetEvent
+        || event instanceof GitRepositoryInitializedEvent
+        || event instanceof GitRepositoryDeletedEvent) {
+      handleIndexChangedEvent(event);
+    }
+  }
+
+  private void handleCheckoutEvent(GitCheckoutEvent event) {
+    endpointIdsWithWorkspaceIdAndProjectName
         .entrySet()
         .stream()
-        .filter(it -> it.getValue().contains(workspaceIdAndProjectName))
+        .filter(it -> it.getValue().contains(event.getWorkspaceId() + event.getProjectName()))
         .map(Entry::getKey)
         .forEach(
             it ->
@@ -67,6 +86,26 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitCheckoutEvent> {
                     .sendAndSkipResult());
   }
 
+  private void handleIndexChangedEvent(GitEvent event) {
+    Status status = newDto(Status.class);
+    if (event instanceof GitCommitEvent) {
+      status = ((GitCommitEvent) event).getStatus();
+    } else if (event instanceof GitResetEvent) {
+      status = ((GitResetEvent) event).getStatus();
+    } else if (event instanceof GitRepositoryInitializedEvent) {
+      status = ((GitRepositoryInitializedEvent) event).getStatus();
+    }
+
+    for (String endpointId : endpointIds) {
+      transmitter
+          .newRequest()
+          .endpointId(endpointId)
+          .methodName("event/git/indexChanged")
+          .paramsAsDto(status)
+          .sendAndSkipResult();
+    }
+  }
+
   @Inject
   private void configureSubscribeHandler(RequestHandlerConfigurator configurator) {
     configurator
@@ -76,9 +115,19 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitCheckoutEvent> {
         .noResult()
         .withBiConsumer(
             (endpointId, workspaceIdAndProjectName) -> {
-              endpointIds.putIfAbsent(endpointId, newConcurrentHashSet());
-              endpointIds.get(endpointId).add(workspaceIdAndProjectName);
+              endpointIdsWithWorkspaceIdAndProjectName.putIfAbsent(
+                  endpointId, newConcurrentHashSet());
+              endpointIdsWithWorkspaceIdAndProjectName
+                  .get(endpointId)
+                  .add(workspaceIdAndProjectName);
             });
+
+    configurator
+        .newConfiguration()
+        .methodName("event/git/subscribe")
+        .noParams()
+        .noResult()
+        .withConsumer(endpointIds::add);
   }
 
   @Inject
@@ -90,10 +139,10 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitCheckoutEvent> {
         .noResult()
         .withBiConsumer(
             (endpointId, workspaceIdAndProjectName) -> {
-              endpointIds
+              endpointIdsWithWorkspaceIdAndProjectName
                   .getOrDefault(endpointId, newConcurrentHashSet())
                   .remove(workspaceIdAndProjectName);
-              endpointIds.computeIfPresent(
+              endpointIdsWithWorkspaceIdAndProjectName.computeIfPresent(
                   endpointId, (key, value) -> value.isEmpty() ? null : value);
             });
   }

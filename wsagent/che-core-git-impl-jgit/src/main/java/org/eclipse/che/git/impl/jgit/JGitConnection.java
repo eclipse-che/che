@@ -16,6 +16,7 @@ import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
+import static java.util.Collections.emptyList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
@@ -63,6 +64,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.git.Config;
@@ -93,23 +95,11 @@ import org.eclipse.che.api.git.params.RemoteUpdateParams;
 import org.eclipse.che.api.git.params.ResetParams;
 import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.params.TagCreateParams;
-import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.BranchListMode;
-import org.eclipse.che.api.git.shared.DiffCommitFile;
-import org.eclipse.che.api.git.shared.GitUser;
-import org.eclipse.che.api.git.shared.MergeResult;
-import org.eclipse.che.api.git.shared.ProviderInfo;
-import org.eclipse.che.api.git.shared.PullResponse;
-import org.eclipse.che.api.git.shared.PushResponse;
-import org.eclipse.che.api.git.shared.RebaseResponse;
+import org.eclipse.che.api.git.shared.*;
 import org.eclipse.che.api.git.shared.RebaseResponse.RebaseStatus;
-import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.git.shared.RemoteReference;
-import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.git.shared.ShowFileContentResponse;
-import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.git.shared.Tag;
+import org.eclipse.che.api.git.shared.event.GitCommitEvent;
+import org.eclipse.che.api.git.shared.event.GitRepositoryInitializedEvent;
+import org.eclipse.che.api.git.shared.event.GitResetEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
@@ -277,6 +267,7 @@ class JGitConnection implements GitConnection {
 
   private final CredentialsLoader credentialsLoader;
   private final SshKeyProvider sshKeyProvider;
+  private final EventService eventService;
   private final GitUserResolver userResolver;
   private final Repository repository;
 
@@ -285,10 +276,12 @@ class JGitConnection implements GitConnection {
       Repository repository,
       CredentialsLoader credentialsLoader,
       SshKeyProvider sshKeyProvider,
+      EventService eventService,
       GitUserResolver userResolver) {
     this.repository = repository;
     this.credentialsLoader = credentialsLoader;
     this.sshKeyProvider = sshKeyProvider;
+    this.eventService = eventService;
     this.userResolver = userResolver;
   }
 
@@ -510,7 +503,8 @@ class JGitConnection implements GitConnection {
       }
 
       // If clone fails and the .git folder didn't exist we want to remove it.
-      // We have to do this here because the clone command doesn't revert its own changes in case of failure.
+      // We have to do this here because the clone command doesn't revert its own changes in case of
+      // failure.
       removeIfFailed = !repository.getDirectory().exists();
 
       CloneCommand cloneCommand =
@@ -587,8 +581,9 @@ class JGitConnection implements GitConnection {
       if (removeIfFailed) {
         deleteRepositoryFolder();
       }
-      //TODO remove this when JGit will support HTTP 301 redirects, https://bugs.eclipse.org/bugs/show_bug.cgi?id=465167
-      //try to clone repository by replacing http to https in the url if HTTP 301 redirect happened
+      // TODO remove this when JGit will support HTTP 301 redirects,
+      // https://bugs.eclipse.org/bugs/show_bug.cgi?id=465167
+      // try to clone repository by replacing http to https in the url if HTTP 301 redirect happened
       if (exception.getMessage().contains(": 301 Moved Permanently")) {
         remoteUri = "https" + remoteUri.substring(4);
         try {
@@ -663,7 +658,8 @@ class JGitConnection implements GitConnection {
 
       // Check that there are changes present for commit, if 'isAmend' is disabled
       if (!params.isAmend()) {
-        // Check that there are staged changes present for commit, or any changes if 'isAll' is enabled
+        // Check that there are staged changes present for commit, or any changes if 'isAll' is
+        // enabled
         if (status.isClean()) {
           throw new GitException("Nothing to commit, working directory clean");
         } else if (!params.isAll()
@@ -688,7 +684,8 @@ class JGitConnection implements GitConnection {
         }
       }
 
-      // TODO add 'setAllowEmpty(params.isAmend())' when https://bugs.eclipse.org/bugs/show_bug.cgi?id=510685 will be fixed
+      // TODO add 'setAllowEmpty(params.isAmend())' when
+      // https://bugs.eclipse.org/bugs/show_bug.cgi?id=510685 will be fixed
       CommitCommand commitCommand =
           getGit()
               .commit()
@@ -699,7 +696,9 @@ class JGitConnection implements GitConnection {
               .setAmend(params.isAmend());
 
       if (!params.isAll()) {
-        // TODO change to 'specified.forEach(commitCommand::setOnly)' when https://bugs.eclipse.org/bugs/show_bug.cgi?id=510685 will be fixed. See description above.
+        // TODO change to 'specified.forEach(commitCommand::setOnly)' when
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=510685 will be fixed. See description
+        // above.
         specifiedChanged.forEach(commitCommand::setOnly);
       }
 
@@ -715,6 +714,7 @@ class JGitConnection implements GitConnection {
           gerritSupportConfigValue != null ? Boolean.valueOf(gerritSupportConfigValue) : false;
       commitCommand.setInsertChangeId(isGerritSupportConfigured);
       RevCommit result = commitCommand.call();
+      eventService.publish(newDto(GitCommitEvent.class).withStatus(status(emptyList())));
       GitUser gitUser = newDto(GitUser.class).withName(committerName).withEmail(committerEmail);
 
       return newDto(Revision.class)
@@ -784,7 +784,7 @@ class JGitConnection implements GitConnection {
           fetchRefSpecs.add(fetchRefSpec);
         }
       } else {
-        fetchRefSpecs = Collections.emptyList();
+        fetchRefSpecs = emptyList();
       }
 
       FetchCommand fetchCommand = getGit().fetch();
@@ -846,11 +846,14 @@ class JGitConnection implements GitConnection {
       throw new GitException(format(ERROR_INIT_FOLDER_MISSING, workDir));
     }
     // If create fails and the .git folder didn't exist we want to remove it.
-    // We have to do this here because the create command doesn't revert its own changes in case of failure.
+    // We have to do this here because the create command doesn't revert its own changes in case of
+    // failure.
     boolean removeIfFailed = !repository.getDirectory().exists();
 
     try {
       repository.create(isBare);
+      eventService.publish(
+          newDto(GitRepositoryInitializedEvent.class).withStatus(status(emptyList())));
     } catch (IOException exception) {
       if (removeIfFailed) {
         deleteRepositoryFolder();
@@ -1092,16 +1095,14 @@ class JGitConnection implements GitConnection {
       conflicts = jGitMergeResult.getCheckoutConflicts();
     } else {
       Map<String, int[][]> jGitConflicts = jGitMergeResult.getConflicts();
-      conflicts =
-          jGitConflicts != null ? new ArrayList<>(jGitConflicts.keySet()) : Collections.emptyList();
+      conflicts = jGitConflicts != null ? new ArrayList<>(jGitConflicts.keySet()) : emptyList();
     }
 
     Map<String, ResolveMerger.MergeFailureReason> jGitFailing = jGitMergeResult.getFailingPaths();
     ObjectId newHead = jGitMergeResult.getNewHead();
 
     return newDto(MergeResult.class)
-        .withFailed(
-            jGitFailing != null ? new ArrayList<>(jGitFailing.keySet()) : Collections.emptyList())
+        .withFailed(jGitFailing != null ? new ArrayList<>(jGitFailing.keySet()) : emptyList())
         .withNewHead(newHead != null ? newHead.getName() : null)
         .withMergeStatus(status)
         .withConflicts(conflicts)
@@ -1161,11 +1162,11 @@ class JGitConnection implements GitConnection {
       default:
         status = RebaseStatus.FAILED;
     }
-    conflicts = result.getConflicts() != null ? result.getConflicts() : Collections.emptyList();
+    conflicts = result.getConflicts() != null ? result.getConflicts() : emptyList();
     failed =
         result.getFailingPaths() != null
             ? new ArrayList<>(result.getFailingPaths().keySet())
-            : Collections.emptyList();
+            : emptyList();
     return newDto(RebaseResponse.class)
         .withStatus(status)
         .withConflicts(conflicts)
@@ -1564,8 +1565,8 @@ class JGitConnection implements GitConnection {
     List<String> branches = params.getBranches();
     if (!branches.isEmpty()) {
       if (!params.isAddBranches()) {
-        remoteConfig.setFetchRefSpecs(Collections.emptyList());
-        remoteConfig.setPushRefSpecs(Collections.emptyList());
+        remoteConfig.setFetchRefSpecs(emptyList());
+        remoteConfig.setPushRefSpecs(emptyList());
       } else {
         // Replace wildcard refSpec if any.
         remoteConfig.removeFetchRefSpec(
@@ -1664,6 +1665,7 @@ class JGitConnection implements GitConnection {
       }
 
       resetCommand.call();
+      eventService.publish(newDto(GitResetEvent.class).withStatus(status(emptyList())));
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
     }
@@ -1855,7 +1857,8 @@ class JGitConnection implements GitConnection {
   @Override
   public void cloneWithSparseCheckout(String directory, String remoteUrl)
       throws GitException, UnauthorizedException {
-    //TODO rework this code when jgit will support sparse-checkout. Tracked issue: https://bugs.eclipse.org/bugs/show_bug.cgi?id=383772
+    // TODO rework this code when jgit will support sparse-checkout. Tracked issue:
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=383772
     if (directory == null) {
       throw new GitException("Subdirectory for sparse-checkout is not specified");
     }
@@ -1940,7 +1943,8 @@ class JGitConnection implements GitConnection {
             };
         command.setTransportConfigCallback(
             transport -> {
-              // If recursive clone is performed and git-module added by http(s) url is present in the cloned project,
+              // If recursive clone is performed and git-module added by http(s) url is present in
+              // the cloned project,
               // transport will be instance of TransportHttp in the step of cloning this module
               if (transport instanceof SshTransport) {
                 ((SshTransport) transport).setSshSessionFactory(sshSessionFactory);
@@ -2093,14 +2097,16 @@ class JGitConnection implements GitConnection {
   private String generateExceptionMessage(Throwable error) {
     String message = error.getMessage();
     while (error.getCause() != null) {
-      //if e caused by an SSLHandshakeException - replace thrown message with a hardcoded message
+      // if e caused by an SSLHandshakeException - replace thrown message with a hardcoded message
       if (error.getCause() instanceof SSLHandshakeException) {
         message =
             "The system is not configured to trust the security certificate provided by the Git server";
         break;
       } else if (error.getCause() instanceof IOException) {
-        // Security fix - error message should not include complete local file path on the target system
-        // Error message for example - File name too long (path /xx/xx/xx/xx/xx/xx/xx/xx /, working dir /xx/xx/xx)
+        // Security fix - error message should not include complete local file path on the target
+        // system
+        // Error message for example - File name too long (path /xx/xx/xx/xx/xx/xx/xx/xx /, working
+        // dir /xx/xx/xx)
         if (message != null && message.startsWith(FILE_NAME_TOO_LONG_ERROR_PREFIX)) {
           try {
             String repoPath = repository.getWorkTree().getCanonicalPath();
@@ -2114,7 +2120,7 @@ class JGitConnection implements GitConnection {
             }
             break;
           } catch (IOException e) {
-            //Hide exception as it is only needed for this message generation
+            // Hide exception as it is only needed for this message generation
           }
         }
       }

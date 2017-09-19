@@ -72,7 +72,7 @@ public class GitChangesHandler {
 
     configurator
         .newConfiguration()
-        .methodName("event/git-index")
+        .methodName("event/git/indexChanged")
         .paramsAsDto(Status.class)
         .noResult()
         .withBiConsumer(this::apply);
