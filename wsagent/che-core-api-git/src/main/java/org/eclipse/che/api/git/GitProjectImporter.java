@@ -44,7 +44,7 @@ import org.eclipse.che.api.git.params.CloneParams;
 import org.eclipse.che.api.git.params.FetchParams;
 import org.eclipse.che.api.git.params.RemoteAddParams;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.GitCheckoutEvent;
+import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.commons.lang.IoUtil;

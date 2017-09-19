@@ -38,7 +38,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
-import org.eclipse.che.api.git.shared.GitCheckoutEvent;
+import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
