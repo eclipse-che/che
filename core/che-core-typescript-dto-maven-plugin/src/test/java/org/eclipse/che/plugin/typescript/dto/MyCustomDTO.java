@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.typescript.dto;
 
+import java.util.List;
 import java.util.Map;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -40,4 +41,11 @@ public interface MyCustomDTO {
   void setCustomMap(Map<String, MyOtherDTO> map);
 
   MyCustomDTO withCustomMap(Map<String, MyOtherDTO> map);
+
+  // arguments is a reserved keyword for TypeScript
+  List<MyOtherDTO> getArguments();
+
+  void setArguments(List<MyOtherDTO> arguments);
+
+  MyCustomDTO withArguments(List<MyOtherDTO> arguments);
 }
