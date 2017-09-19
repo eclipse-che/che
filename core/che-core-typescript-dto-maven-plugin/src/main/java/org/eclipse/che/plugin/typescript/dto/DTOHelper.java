@@ -67,7 +67,14 @@ public class DTOHelper {
   public static String getFieldName(String type) {
     char[] c = type.toCharArray();
     c[0] = Character.toLowerCase(c[0]);
-    return new String(c);
+
+    String val = new String(c);
+
+    // replace reserved keyword
+    if ("arguments".equals(val)) {
+      val = "argumentsObj";
+    }
+    return val;
   }
 
   /** Extract field name from the getter method */
