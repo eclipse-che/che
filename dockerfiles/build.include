@@ -7,7 +7,6 @@
 
 
 set -e
-set -u
 
 skip_tests() {
   if [ $SKIP_TESTS = "true" ]; then
