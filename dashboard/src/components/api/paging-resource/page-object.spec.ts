@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {CheHttpBackend} from '../test/che-http-backend';
@@ -74,7 +74,7 @@ describe('PageObject >', () => {
     // prepare mocks
     const {urlRegExp, objects} = pageObjectMock.getPagePageBackend(RemotePageLabels.FIRST);
     const maxItems = pageObjectMock.getMaxItems();
-    const callbacks = { testResolve: () => { }, testReject: () => { } };
+    const callbacks = { testResolve: angular.noop, testReject: angular.noop };
     // create spies
     spyOn(callbacks, 'testResolve');
     spyOn(callbacks, 'testReject');
@@ -110,7 +110,7 @@ describe('PageObject >', () => {
     const {urlRegExp, headerData, objects} = pageObjectMock.getPagePageBackend(RemotePageLabels.FIRST);
     const maxItems = pageObjectMock.getMaxItems();
     const countPages = pageObjectMock.getCountPages();
-    const callbacks = { testResolve: () => { }, testReject: () => { } };
+    const callbacks = { testResolve: angular.noop, testReject: angular.noop };
     // create spies
     spyOn(callbacks, 'testResolve');
     spyOn(callbacks, 'testReject');
@@ -144,7 +144,7 @@ describe('PageObject >', () => {
     const {urlRegExp, headerData, objects} = pageObjectMock.getPagePageBackend(RemotePageLabels.FIRST);
     const maxItems = pageObjectMock.getMaxItems();
     const countPages = pageObjectMock.getCountPages();
-    const callbacks = { testResolve: () => { }, testReject: () => { } };
+    const callbacks = { testResolve: angular.noop, testReject: angular.noop };
     // create spies
     spyOn(callbacks, 'testResolve');
     spyOn(callbacks, 'testReject');
@@ -180,7 +180,7 @@ describe('PageObject >', () => {
     const {urlRegExp, headerData, objects} = pageObjectMock.getPagePageBackend(RemotePageLabels.NEXT);
     const maxItems = pageObjectMock.getMaxItems();
     const countPages = pageObjectMock.getCountPages();
-    const callbacks = { testResolve: () => { }, testReject: () => { } };
+    const callbacks = { testResolve: angular.noop, testReject: angular.noop };
     // create spies
     spyOn(callbacks, 'testResolve');
     spyOn(callbacks, 'testReject');
@@ -216,7 +216,7 @@ describe('PageObject >', () => {
     const {urlRegExp, headerData, objects} = pageObjectMock.getPagePageBackend(RemotePageLabels.LAST);
     const maxItems = pageObjectMock.getMaxItems();
     const countPages = pageObjectMock.getCountPages();
-    const callbacks = { testResolve: () => { }, testReject: () => { } };
+    const callbacks = { testResolve: angular.noop, testReject: angular.noop };
     // create spies
     spyOn(callbacks, 'testResolve');
     spyOn(callbacks, 'testReject');
@@ -254,7 +254,7 @@ describe('PageObject >', () => {
     const {urlRegExp, headerData, objects} = pageObjectMock.getPagePageBackend(RemotePageLabels.PREVIOUS);
     const maxItems = pageObjectMock.getMaxItems();
     const countPages = pageObjectMock.getCountPages();
-    const callbacks = { testResolve: () => { }, testReject: () => { } };
+    const callbacks = { testResolve: angular.noop, testReject: angular.noop };
     // create spies
     spyOn(callbacks, 'testResolve');
     spyOn(callbacks, 'testReject');
@@ -292,7 +292,7 @@ describe('PageObject >', () => {
     const {urlRegExp, objects} = pageObjectMock.getPagePageBackend(RemotePageLabels.FIRST);
     const maxItems = pageObjectMock.getMaxItems();
     const countPages = pageObjectMock.getCountPages();
-    const callbacks = { testResolve: () => { }, testReject: () => { } };
+    const callbacks = { testResolve: angular.noop, testReject: angular.noop };
     // create spies
     spyOn(callbacks, 'testResolve');
     spyOn(callbacks, 'testReject');
@@ -326,7 +326,7 @@ describe('PageObject >', () => {
   it('should reject promise if object\'s request failed', () => {
     // prepare mocks
     const urlRegExp = pageObjectMock.getUrlRegExp();
-    const callbacks = { testResolve: () => { }, testReject: () => { } };
+    const callbacks = { testResolve: angular.noop, testReject: angular.noop };
     // create spies
     spyOn(callbacks, 'testResolve');
     spyOn(callbacks, 'testReject');

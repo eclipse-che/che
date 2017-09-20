@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -71,14 +71,15 @@ describe('CheProjectType', function(){
   it('Fetch project types', function() {
 
       // setup tests objects
-      var attributeLanguageJava = apiBuilder.getProjectTypeAttributeDescriptorBuilder().withValues(['java']).withRequired(true).withDescription('language').withName('language').build();
-      var mavenType = apiBuilder.getProjectTypeBuilder().withId('maven').withDisplayname('Maven project').withAttributeDescriptors([attributeLanguageJava]).build();
-      var antType = apiBuilder.getProjectTypeBuilder().withId('ant').withDisplayname('Ant project').withAttributeDescriptors([attributeLanguageJava]).build();
+      let attributeLanguageJava = apiBuilder.getProjectTypeAttributeDescriptorBuilder().withValues(['java']).withRequired(true).withDescription('language').withName('language').build();
+      let mavenType = apiBuilder.getProjectTypeBuilder().withId('maven').withDisplayname('Maven project').withAttributeDescriptors([attributeLanguageJava]).build();
+      let antType = apiBuilder.getProjectTypeBuilder().withId('ant').withDisplayname('Ant project').withAttributeDescriptors([attributeLanguageJava]).build();
       let workspaceId = 'florentWorkspace';
       let agentUrl = 'localhost:3232/wsagent/ext';
-
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
+      let agentWsUrl = 'ws://localhost:3232/wsagent/ws';
+      let devMachine = {'links': [{'href': agentWsUrl, 'rel': 'wsagent.websocket'}]};
+      let runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}], 'devMachine': devMachine};
+      let workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
 
       cheBackend.addWorkspaces([workspace1]);
 

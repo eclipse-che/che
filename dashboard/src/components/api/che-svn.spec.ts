@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -66,12 +66,14 @@ describe('CheSvn', function () {
    */
   it('Fetch remote svn url', function () {
       // setup tests objects
-      var agentUrl = 'localhost:3232/wsagent/ext';
-      var workspaceId = 'workspace456test';
-      var projectPath = '/testSvnProject';
-      var remoteSvnUrl = 'https://svn.apache.org' + projectPath;
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
+      let agentUrl = 'localhost:3232/wsagent/ext';
+      let workspaceId = 'workspace456test';
+      let projectPath = '/testSvnProject';
+      let remoteSvnUrl = 'https://svn.apache.org' + projectPath;
+      let agentWsUrl = 'ws://localhost:3232/wsagent/ws';
+      let devMachine = {'links': [{'href': agentWsUrl, 'rel': 'wsagent.websocket'}]};
+      let runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}], 'devMachine': devMachine};
+      let workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
 
       cheBackend.addWorkspaces([workspace1]);
 

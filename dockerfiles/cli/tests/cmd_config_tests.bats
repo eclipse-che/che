@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Copyright (c) 2017 Codenvy, S.A.
+# Copyright (c) 2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -29,7 +29,6 @@ source /dockerfiles/cli/tests/test_base.sh
   [[ -f "${container_tmp_path}"/instance/config/che.env ]]
   [[ -d "${container_tmp_path}"/instance/data ]]
   [[ -d "${container_tmp_path}"/instance/logs ]]
-  [[ -d "${container_tmp_path}"/instance/stacks ]]
   [[ -d "${container_tmp_path}"/instance/templates ]]
   [[ -f "${container_tmp_path}"/instance/docker-compose-container.yml ]]
   [[ -f "${container_tmp_path}"/instance/che.ver.do_not_modify ]]

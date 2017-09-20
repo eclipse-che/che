@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -119,7 +119,6 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
 
-    workspaceDetailsService.addPage('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
     workspaceDetailsService.addPage('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
 
     // here only to create instances of these components

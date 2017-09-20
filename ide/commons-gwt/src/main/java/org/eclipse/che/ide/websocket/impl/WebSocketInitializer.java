@@ -1,19 +1,21 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.websocket.impl;
 
-import org.eclipse.che.ide.util.loging.Log;
+import static java.util.Collections.emptySet;
 
+import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Contain all routines related to a web socket connection initialization
@@ -22,54 +24,81 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class WebSocketInitializer {
-    private final WebSocketConnectionManager connectionManager;
-    private final WebSocketPropertyManager   propertyManager;
-    private final UrlResolver                urlResolver;
+  private final WebSocketConnectionManager connectionManager;
+  private final WebSocketPropertyManager propertyManager;
+  private final WebSocketActionManager actionManager;
+  private final UrlResolver urlResolver;
 
-    @Inject
-    public WebSocketInitializer(WebSocketConnectionManager connectionManager,
-                                WebSocketPropertyManager propertyManager,
-                                UrlResolver urlResolver) {
-        this.connectionManager = connectionManager;
-        this.propertyManager = propertyManager;
-        this.urlResolver = urlResolver;
-    }
+  @Inject
+  public WebSocketInitializer(
+      WebSocketConnectionManager connectionManager,
+      WebSocketPropertyManager propertyManager,
+      WebSocketActionManager actionManager,
+      UrlResolver urlResolver) {
+    this.connectionManager = connectionManager;
+    this.propertyManager = propertyManager;
+    this.actionManager = actionManager;
+    this.urlResolver = urlResolver;
+  }
 
-    /**
-     * Initializes a web socket connection, set default values, perform
-     * mandatory preparation work.
-     *
-     * @param endpointId
-     *         high level identifier of a web socket connection, used by
-     *         high level service (e.g. json rpc infrastructure)
-     * @param url
-     *         url of a web socket endpoint
-     */
-    public void initialize(String endpointId, String url) {
-        Log.debug(getClass(), "Initializing with url: " + url);
+  /**
+   * Initializes a web socket connection, set default values, perform mandatory preparation work.
+   *
+   * @param endpointId high level identifier of a web socket connection, used by high level service
+   *     (e.g. json rpc infrastructure)
+   * @param url url of a web socket endpoint
+   */
+  public void initialize(String endpointId, String url) {
+    initialize(endpointId, url, emptySet());
+  }
 
-        urlResolver.setMapping(endpointId, url);
+  /**
+   * Initializes a web socket connection, set default values, perform mandatory preparation work.
+   *
+   * @param endpointId high level identifier of a web socket connection, used by high level service
+   *     (e.g. json rpc infrastructure)
+   * @param url url of a web socket endpoint
+   * @param initActions actions to be performed each time the connection is established
+   */
+  public void initialize(String endpointId, String url, Set<Runnable> initActions) {
+    Log.debug(getClass(), "Initializing with url: " + url);
 
-        propertyManager.initializeConnection(url);
-        connectionManager.initializeConnection(url);
+    urlResolver.setMapping(endpointId, url);
 
-        connectionManager.establishConnection(url);
-    }
+    propertyManager.initializeConnection(url);
 
-    /**
-     * Terminate web socket connection and clean up resources
-     *
-     * @param endpointId
-     *         high level identifier of a web socket connection, used by
-     *         high level service (e.g. json rpc infrastructure)
-     */
-    public void terminate(String endpointId) {
-        Log.debug(getClass(), "Stopping");
+    actionManager.setOnEstablishActions(url, initActions);
 
-        final String url = urlResolver.removeMapping(endpointId);
+    connectionManager.initializeConnection(url);
+    connectionManager.establishConnection(url);
+  }
 
-        propertyManager.disableSustainer(url);
+  /**
+   * Terminate web socket connection and clean up resources
+   *
+   * @param endpointId high level identifier of a web socket connection, used by high level service
+   *     (e.g. json rpc infrastructure)
+   */
+  public void terminate(String endpointId) {
+    terminate(endpointId, emptySet());
+  }
 
-        connectionManager.closeConnection(url);
-    }
+  /**
+   * Terminate web socket connection and clean up resources
+   *
+   * @param endpointId high level identifier of a web socket connection, used by high level service
+   *     (e.g. json rpc infrastructure)
+   * @param terminateActions actions to be performed each time the connection is terminated
+   */
+  public void terminate(String endpointId, Set<Runnable> terminateActions) {
+    Log.debug(getClass(), "Stopping");
+
+    String url = urlResolver.removeMapping(endpointId);
+
+    propertyManager.disableSustainer(url);
+
+    actionManager.setOnCloseActions(url, terminateActions);
+
+    connectionManager.closeConnection(url);
+  }
 }

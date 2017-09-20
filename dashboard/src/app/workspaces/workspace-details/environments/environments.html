@@ -1,13 +1,13 @@
 <!--
 
-    Copyright (c) 2015 Codenvy, S.A.
+    Copyright (c) 2015-2017 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Codenvy, S.A. - initial API and implementation
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <div class="workspace-environments">
@@ -16,12 +16,12 @@
   <che-label-container che-label-name="Runtime name">
     <ng-form flex layout="column" name="workspaceEnvironmentsForm">
       <div layout="column" class="workspace-environments-input">
-        <che-input che-form="workspaceEnvironmentsForm"
+        <che-input-box che-form="workspaceEnvironmentsForm"
                    che-name="name"
                    che-place-holder="Name of the environment"
                    aria-label="Name of the environment"
                    ng-model="workspaceEnvironmentsController.newEnvironmentName"
-                   ng-change="workspaceEnvironmentsController.updateEnvironmentName(workspaceEnvironmentsForm.$valid)"
+                   che-on-change="workspaceEnvironmentsController.updateEnvironmentName(workspaceEnvironmentsForm.$valid)"
                    ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
                    custom-validator="workspaceEnvironmentsController.isUnique($value)"
                    required
@@ -36,7 +36,7 @@
             <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
             <div ng-message="customValidator">This environment name is already used.</div>
           </che-error-messages>
-        </che-input>
+        </che-input-box>
       </div>
     </ng-form>
   </che-label-container>

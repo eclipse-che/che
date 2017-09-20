@@ -1,21 +1,23 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
-type callback = (...args: any[]) => any;
+export interface IObservable<T> {
+  subscribe(action: IObservableCallbackFn<T>): void;
+  publish(arg: T): void;
+  unsubscribe(action: IObservableCallbackFn<T>): void;
+}
 
-export interface IObservable {
-  subscribe(action: callback): void;
-  publish(...args: any[]): void;
-  unsubscribe(action: callback): void;
+export interface IObservableCallbackFn<T> {
+  (arg: T): void;
 }
 
 /**
@@ -23,11 +25,11 @@ export interface IObservable {
  *
  * @author Oleksii Kurinnyi
  */
-export abstract class Observable implements IObservable {
+export class Observable<T> implements IObservable<T> {
   /**
    * The list of actions.
    */
-  private actions: Array<callback>;
+  private actions: Array<IObservableCallbackFn<T>>;
 
   /**
    * Default constructor that is using resource injection
@@ -42,7 +44,7 @@ export abstract class Observable implements IObservable {
    *
    * @param {callback} action the action's callback
    */
-  subscribe(action: callback): void {
+  subscribe(action: IObservableCallbackFn<T>): void {
     this.actions.push(action);
   }
 
@@ -51,20 +53,20 @@ export abstract class Observable implements IObservable {
    *
    * @param {callback} action the action's callback.
    */
-  unsubscribe(action: callback): void {
-    this.actions = this.actions.filter((_action: callback) => {
+  unsubscribe(action: IObservableCallbackFn<T>): void {
+    this.actions = this.actions.filter((_action: IObservableCallbackFn<T>) => {
       return _action !== action;
     });
   }
 
   /**
-   * Publish any data to subscribers.
+   * Publish data to subscribers.
    *
-   * @param {any[]} args data
+   * @param {T} arg data
    */
-  publish(...args: any[]): void {
-    this.actions.forEach((action: callback) => {
-      action(...args);
+  publish(arg: T): void {
+    this.actions.forEach((action: IObservableCallbackFn<T>) => {
+      action(arg);
     });
   }
 

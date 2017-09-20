@@ -1,20 +1,13 @@
 <!--
 
-    CODENVY CONFIDENTIAL
-    __________________
+    Copyright (c) 2015-2017 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
 
-     [2015] - [2016] Codenvy, S.A.
-     All Rights Reserved.
-
-    NOTICE:  All information contained herein is, and remains
-    the property of Codenvy S.A. and its suppliers,
-    if any.  The intellectual and technical concepts contained
-    herein are proprietary to Codenvy S.A.
-    and its suppliers and may be covered by U.S. and Foreign Patents,
-    patents in process, and are protected by trade secret or copyright law.
-    Dissemination of this information or reproduction of this material
-    is strictly forbidden unless prior written permission is obtained
-    from Codenvy S.A..
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
 
 -->
 <che-toolbar che-title="New Factory From"></che-toolbar>
@@ -45,10 +38,10 @@
                            class="che-label-container-last">
         <md-tabs md-dynamic-height="true" md-stretch-tabs="auto" md-center-tabs="false" md-selected="selectedIndex"
                  md-border-bottom="true"
+                 md-no-ink-bar
                  class="factory-select-source-details">
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
             <md-tab-label>
-              <md-icon md-font-icon="fa fa-server" class="che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Workspace</span>
             </md-tab-label>
             <md-tab-body>
@@ -59,7 +52,6 @@
           </md-tab>
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
             <md-tab-label>
-              <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Git</span>
             </md-tab-label>
             <md-tab-body>
@@ -71,7 +63,6 @@
           </md-tab>
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
             <md-tab-label>
-              <md-icon md-font-icon="fa fa-download" class="che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Config</span>
             </md-tab-label>
             <md-tab-body>
@@ -85,7 +76,6 @@
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent(); templateSelected = true;"
                   md-on-deselect="templateSelected = false;">
             <md-tab-label>
-              <md-icon md-font-icon="fa fa-magic" class="che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Template</span>
             </md-tab-label>
             <md-tab-body>

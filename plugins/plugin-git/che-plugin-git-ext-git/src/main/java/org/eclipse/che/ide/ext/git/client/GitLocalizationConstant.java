@@ -1,706 +1,726 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ext.git.client;
 
 import com.google.gwt.i18n.client.Messages;
 
 /** @author Evgen Vidolob */
 public interface GitLocalizationConstant extends Messages {
-    // BUTTONS
-    @Key("button.add")
-    String buttonAdd();
+  // BUTTONS
+  @Key("button.add")
+  String buttonAdd();
 
-    @Key("button.cancel")
-    String buttonCancel();
+  @Key("button.cancel")
+  String buttonCancel();
 
-    @Key("button.create")
-    String buttonCreate();
+  @Key("button.create")
+  String buttonCreate();
 
-    @Key("button.checkout")
-    String buttonCheckout();
+  @Key("button.checkout")
+  String buttonCheckout();
 
-    @Key("button.delete")
-    String buttonDelete();
+  @Key("button.delete")
+  String buttonDelete();
 
-    @Key("button.rename")
-    String buttonRename();
+  @Key("button.rename")
+  String buttonRename();
 
-    @Key("button.close")
-    String buttonClose();
-    
-    @Key("button.refresh")
-    String buttonRefresh();
+  @Key("button.close")
+  String buttonClose();
 
-    @Key("button.commit")
-    String buttonCommit();
+  @Key("button.refresh")
+  String buttonRefresh();
 
-    @Key("button.reset")
-    String buttonReset();
+  @Key("button.commit")
+  String buttonCommit();
 
-    @Key("button.remove")
-    String buttonRemove();
+  @Key("button.reset")
+  String buttonReset();
 
-    @Key("button.fetch")
-    String buttonFetch();
+  @Key("button.remove")
+  String buttonRemove();
 
-    @Key("button.ok")
-    String buttonOk();
+  @Key("button.fetch")
+  String buttonFetch();
 
-    @Key("button.yes")
-    String buttonYes();
+  @Key("button.ok")
+  String buttonOk();
 
-    @Key("button.no")
-    String buttonNo();
+  @Key("button.yes")
+  String buttonYes();
 
-    @Key("button.push")
-    String buttonPush();
+  @Key("button.no")
+  String buttonNo();
 
-    @Key("button.pull")
-    String buttonPull();
+  @Key("button.push")
+  String buttonPush();
 
-    @Key("button.merge")
-    String buttonMerge();
+  @Key("button.pull")
+  String buttonPull();
 
-    @Key("button.compare")
-    String buttonCompare();
+  @Key("button.merge")
+  String buttonMerge();
 
-    @Key("console.tooltip.clear")
-    String buttonClear();
+  @Key("button.compare")
+  String buttonCompare();
 
-    @Key("console.tooltip.scroll")
-    String buttonScroll();
+  @Key("button.save_changes")
+  String buttonSaveChanges();
 
-    // MESSAGES
-    @Key("messages.unableGetSshKey")
-    String messagesUnableGetSshKey();
+  @Key("button.next_diff")
+  String buttonNextDiff();
 
-    @Key("messages.warningTitle")
-    String messagesWarningTitle();
+  @Key("button.previous_diff")
+  String buttonPreviousDiff();
 
-    @Key("messages.index_empty")
-    String indexIsEmpty();
+  @Key("console.tooltip.clear")
+  String buttonClear();
 
-    @Key("messages.add_success")
-    String addSuccess();
+  @Key("console.tooltip.scroll")
+  String buttonScroll();
 
-    @Key("messages.nothingAddToIndex")
-    String nothingAddToIndex();
+  // MESSAGES
+  @Key("messages.unableGetSshKey")
+  String messagesUnableGetSshKey();
 
-    @Key("messages.nothingAddToIndexMultiSelect")
-    String nothingAddToIndexMultiSelect();
+  @Key("messages.warningTitle")
+  String messagesWarningTitle();
 
-    @Key("messages.add_failed")
-    String addFailed();
+  @Key("messages.index_empty")
+  String indexIsEmpty();
 
-    @Key("messages.branches_list_failed")
-    String branchesListFailed();
+  @Key("messages.add_success")
+  String addSuccess();
 
-    @Key("messages.local_branches_list_failed")
-    String localBranchesListFailed();
+  @Key("messages.nothingAddToIndex")
+  String nothingAddToIndex();
 
-    @Key("messages.remote_branches_list_failed")
-    String remoteBranchesListFailed();
+  @Key("messages.nothingAddToIndexMultiSelect")
+  String nothingAddToIndexMultiSelect();
 
-    @Key("messages.get_config_failed")
-    String failedGettingConfig();
+  @Key("messages.add_failed")
+  String addFailed();
 
-    @Key("messages.branch_create_failed")
-    String branchCreateFailed();
+  @Key("messages.branches_list_failed")
+  String branchesListFailed();
 
-    @Key("messages.branch_checkout_failed")
-    String branchCheckoutFailed();
+  @Key("messages.local_branches_list_failed")
+  String localBranchesListFailed();
 
-    @Key("messages.branch_delete_failed")
-    String branchDeleteFailed();
+  @Key("messages.remote_branches_list_failed")
+  String remoteBranchesListFailed();
 
-    @Key("messages.branch_rename_failed")
-    String branchRenameFailed();
+  @Key("messages.get_config_failed")
+  String failedGettingConfig();
 
-    @Key("messages.commit_failed")
-    String commitFailed();
+  @Key("messages.branch_create_failed")
+  String branchCreateFailed();
 
-    @Key("messages.committer_identity_info_empty")
-    String committerIdentityInfoEmpty();
-    
-    @Key("messages.init_commit_was_not_performed")
-    String initCommitWasNotPerformed();
+  @Key("messages.branch_checkout_failed")
+  String branchCheckoutFailed();
 
-    @Key("messages.diff.failed")
-    String diffFailed();
+  @Key("messages.branch_delete_failed")
+  String branchDeleteFailed();
 
-    @Key("messages.log_failed")
-    String logFailed();
+  @Key("messages.branch_rename_failed")
+  String branchRenameFailed();
 
-    @Key("messages.init_success")
-    String initSuccess();
+  @Key("messages.commit_failed")
+  String commitFailed();
 
-    @Key("messages.initRepoQuestion")
-    String messagesInitRepoQuestion(String name);
+  @Key("messages.committer_identity_info_empty")
+  String committerIdentityInfoEmpty();
 
-    @Key("messages.init_failed")
-    String initFailed();
+  @Key("messages.init_commit_was_not_performed")
+  String initCommitWasNotPerformed();
 
-    @Key("messages.push.process")
-    String pushProcess();
+  @Key("messages.diff.failed")
+  String diffFailed();
 
-    @Key("messages.push_success")
-    String pushSuccess(String remote);
+  @Key("messages.log_failed")
+  String logFailed();
 
-    @Key("messages.push_up_to_date")
-    String pushUpToDate();
+  @Key("messages.init_success")
+  String initSuccess();
 
-    @Key("messages.push_fail")
-    String pushFail();
+  @Key("messages.initRepoQuestion")
+  String messagesInitRepoQuestion(String name);
 
-    @Key("messages.pull.process")
-    String pullProcess();
+  @Key("messages.init_failed")
+  String initFailed();
 
-    @Key("messages.pull_success")
-    String pullSuccess(String remoteUrl);
+  @Key("messages.push.process")
+  String pushProcess();
 
-    @Key("messages.pull_up_to_date")
-    String pullUpToDate();
+  @Key("messages.push_success")
+  String pushSuccess(String remote);
 
-    @Key("messages.pull_fail")
-    String pullFail(String remoteUrl);
+  @Key("messages.push_up_to_date")
+  String pushUpToDate();
 
-    @Key("messages.checkout_failed")
-    String checkoutFailed();
+  @Key("messages.push_fail")
+  String pushFail();
 
-    @Key("messages.fetch.process")
-    String fetchProcess();
+  @Key("messages.pull.process")
+  String pullProcess();
 
-    @Key("messages.fetch_success")
-    String fetchSuccess(String remoteUrl);
+  @Key("messages.pull_success")
+  String pullSuccess(String remoteUrl);
 
-    @Key("messages.fetch_fail")
-    String fetchFail(String remoteUrl);
+  @Key("messages.pull_up_to_date")
+  String pullUpToDate();
 
-    @Key("messages.remote_list_failed")
-    String remoteListFailed();
+  @Key("messages.pull_fail")
+  String pullFail(String remoteUrl);
 
-    @Key("messages.remove_files_success")
-    String removeFilesSuccessfull();
+  @Key("messages.checkout_failed")
+  String checkoutFailed();
 
-    @Key("messages.remove_files_failed")
-    String removeFilesFailed();
+  @Key("messages.fetch.process")
+  String fetchProcess();
 
-    @Key("messages.remote_add_failed")
-    String remoteAddFailed();
+  @Key("messages.fetch_success")
+  String fetchSuccess(String remoteUrl);
 
-    @Key("messages.remote_delete_failed")
-    String remoteDeleteFailed();
+  @Key("messages.fetch_fail")
+  String fetchFail(String remoteUrl);
 
-    @Key("messages.reset_files_failed")
-    String resetFilesFailed();
+  @Key("messages.remote_list_failed")
+  String remoteListFailed();
 
-    @Key("messages.reset_files_successfully")
-    String resetFilesSuccessfully();
+  @Key("messages.remove_files_success")
+  String removeFilesSuccessfull();
 
-    @Key("messages.nothing_to_reset")
-    String nothingToReset();
+  @Key("messages.remove_files_failed")
+  String removeFilesFailed();
 
-    @Key("messages.reset_successfully")
-    String resetSuccessfully();
+  @Key("messages.remote_add_failed")
+  String remoteAddFailed();
 
-    @Key("messages.reset_fail")
-    String resetFail();
+  @Key("messages.remote_delete_failed")
+  String remoteDeleteFailed();
 
-    @Key("messages.status_failed")
-    String statusFailed();
+  @Key("messages.reset_files_failed")
+  String resetFilesFailed();
 
-    @Key("messages.selected_remote_fail")
-    String selectRemoteRepositoryFail();
+  @Key("messages.reset_files_successfully")
+  String resetFilesSuccessfully();
 
-    @Key("messages.delete_remote_repository.title")
-    String deleteRemoteRepositoryTitle();
+  @Key("messages.nothing_to_reset")
+  String nothingToReset();
 
-    @Key("messages.delete_remote_repository.question")
-    String deleteRemoteRepositoryQuestion(String remote);
+  @Key("messages.reset_successfully")
+  String resetSuccessfully();
 
-    @Key("messages.delete_repository.question")
-    String deleteGitRepositoryQuestion(String repository);
+  @Key("messages.reset_fail")
+  String resetFail();
 
-    @Key("messages.delete_repository.title")
-    String deleteGitRepositoryTitle();
+  @Key("messages.status_failed")
+  String statusFailed();
 
-    @Key("messages.delete_success")
-    String deleteGitRepositorySuccess();
+  @Key("messages.selected_remote_fail")
+  String selectRemoteRepositoryFail();
 
-    @Key("messages.notAuthorizedTitle")
-    String messagesNotAuthorizedTitle();
+  @Key("messages.delete_remote_repository.title")
+  String deleteRemoteRepositoryTitle();
 
-    @Key("messages.notAuthorizedContent")
-    String messagesNotAuthorizedContent();
+  @Key("messages.delete_remote_repository.question")
+  String deleteRemoteRepositoryQuestion(String remote);
 
-    @Key("messages.compare_save.title")
-    String compareSaveTitle();
+  @Key("messages.delete_repository.question")
+  String deleteGitRepositoryQuestion(String repository);
 
-    @Key("messages.compare_save.question")
-    String compareSaveQuestion();
+  @Key("messages.delete_repository.title")
+  String deleteGitRepositoryTitle();
 
-    @Key("importProject.messageStartWithWhiteSpace")
-    String importProjectMessageStartWithWhiteSpace();
+  @Key("messages.delete_success")
+  String deleteGitRepositorySuccess();
 
-    @Key("importProject.messageNameRepoIncorrect")
-    String importProjectMessageNameRepoIncorrect();
+  @Key("messages.notAuthorizedTitle")
+  String messagesNotAuthorizedTitle();
 
-    @Key("importProject.messageProtocolIncorrect")
-    String importProjectMessageProtocolIncorrect();
+  @Key("messages.notAuthorizedContent")
+  String messagesNotAuthorizedContent();
 
-    @Key("importProject.messageHostIncorrect")
-    String importProjectMessageHostIncorrect();
+  @Key("messages.compare_save.title")
+  String compareSaveTitle();
 
-    // ----VIEWS------------------------------------------------------------------
+  @Key("messages.compare_save.question")
+  String compareSaveQuestion();
 
-    // GitImporterPage
-    @Key("view.import.gitImporterPage.projectUrl")
-    String gitImporterPageProjectUrl();
+  @Key("importProject.messageStartWithWhiteSpace")
+  String importProjectMessageStartWithWhiteSpace();
 
-    @Key("view.import.gitImporterPage.recursive")
-    String gitImporterPageRecursive();
+  @Key("importProject.messageNameRepoIncorrect")
+  String importProjectMessageNameRepoIncorrect();
 
-    @Key("view.import.gitImporterPage.projectInfo")
-    String gitImporterPageProjectInfo();
+  @Key("importProject.messageProtocolIncorrect")
+  String importProjectMessageProtocolIncorrect();
 
-    @Key("view.import.gitImporterPage.projectName")
-    String gitImporterPageProjectName();
+  @Key("importProject.messageHostIncorrect")
+  String importProjectMessageHostIncorrect();
 
-    @Key("view.import.gitImporterPageProjectNamePrompt")
-    String gitImporterPageProjectNamePrompt();
+  // ----VIEWS------------------------------------------------------------------
 
-    @Key("view.import.gitImporterPage.projectDescription")
-    String gitImporterPageProjectDescription();
+  // GitImporterPage
+  @Key("view.import.gitImporterPage.projectUrl")
+  String gitImporterPageProjectUrl();
 
-    @Key("view.import.gitImporterPage.projectDescriptionPrompt")
-    String gitImporterPageProjectDescriptionPrompt();
+  @Key("view.import.gitImporterPage.recursive")
+  String gitImporterPageRecursive();
 
-    @Key("view.import.gitImporterPage.keepDirectory")
-    String gitImporterPageKeepDirectory();
+  @Key("view.import.gitImporterPage.projectInfo")
+  String gitImporterPageProjectInfo();
 
-    @Key("view.import.gitImporterPage.keepDirectoryField")
-    String gitImporterPageKeepDirectoryField();
+  @Key("view.import.gitImporterPage.projectName")
+  String gitImporterPageProjectName();
 
-    @Key("view.import.gitImporterPage.branchField")
-    String gitImporterPageBranchField();
+  @Key("view.import.gitImporterPageProjectNamePrompt")
+  String gitImporterPageProjectNamePrompt();
 
-    @Key("view.import.gitImporterPage.branch")
-    String gitImporterPageBranch();
+  @Key("view.import.gitImporterPage.projectDescription")
+  String gitImporterPageProjectDescription();
 
-    // Add
-    @Key("view.add_to_index.all_changes")
-    String addToIndexAllChanges();
+  @Key("view.import.gitImporterPage.projectDescriptionPrompt")
+  String gitImporterPageProjectDescriptionPrompt();
 
-    @Key("view.add_to_index.multiselect")
-    String addToIndexMultiSelect();
+  @Key("view.import.gitImporterPage.keepDirectory")
+  String gitImporterPageKeepDirectory();
 
-    @Key("view.add_to_index.folder")
-    String addToIndexFolder(String folder);
+  @Key("view.import.gitImporterPage.keepDirectoryField")
+  String gitImporterPageKeepDirectoryField();
 
-    @Key("view.add_to_index.file")
-    String addToIndexFile(String file);
+  @Key("view.import.gitImporterPage.branchField")
+  String gitImporterPageBranchField();
 
-    @Key("view.add_to_index.update_field_title")
-    String addToIndexUpdateFieldTitle();
+  @Key("view.import.gitImporterPage.branch")
+  String gitImporterPageBranch();
 
-    @Key("view.add_to_index.title")
-    String addToIndexTitle();
+  // Add
+  @Key("view.add_to_index.all_changes")
+  String addToIndexAllChanges();
 
-    @Key("view.add_to_index.command_name")
-    String addToIndexCommandName();
+  @Key("view.add_to_index.multiselect")
+  String addToIndexMultiSelect();
 
-    // Branch
-    @Key("view.branch.create_new")
-    String branchCreateNew();
+  @Key("view.add_to_index.folder")
+  String addToIndexFolder(String folder);
 
-    @Key("view.branch.confirm_rename.title")
-    String branchConfirmRenameTitle();
+  @Key("view.add_to_index.file")
+  String addToIndexFile(String file);
 
-    @Key("view.branch.confirm_rename.message")
-    String branchConfirmRenameMessage();
+  @Key("view.add_to_index.update_field_title")
+  String addToIndexUpdateFieldTitle();
 
-    @Key("view.branch.type_new")
-    String branchTypeNew();
+  @Key("view.add_to_index.title")
+  String addToIndexTitle();
 
-    @Key("view.branch.title_rename")
-    String branchTitleRename();
+  @Key("view.add_to_index.command_name")
+  String addToIndexCommandName();
 
-    @Key("view.branch.type_rename")
-    String branchTypeRename();
+  // Branch
+  @Key("view.branch.create_new")
+  String branchCreateNew();
 
-    @Key("view.branch.delete")
-    String branchDelete();
+  @Key("view.branch.confirm_rename.title")
+  String branchConfirmRenameTitle();
 
-    @Key("view.branch.delete_ask")
-    String branchDeleteAsk(String name);
+  @Key("view.branch.confirm_rename.message")
+  String branchConfirmRenameMessage();
 
-    @Key("view.branch.title")
-    String branchTitle();
+  @Key("view.branch.type_new")
+  String branchTypeNew();
 
-    // Commit
-    @Key("view.commit.commit_message")
-    String commitMessage(String revision, String time);
+  @Key("view.branch.title_rename")
+  String branchTitleRename();
 
-    @Key("view.commit.commit_user")
-    String commitUser(String user);
+  @Key("view.branch.type_rename")
+  String branchTypeRename();
 
-    @Key("view.commit.title")
-    String commitTitle();
+  @Key("view.branch.delete")
+  String branchDelete();
 
-    @Key("view.commit.amend_field_title")
-    String commitAmendFieldTitle();
+  @Key("view.branch.delete_ask")
+  String branchDeleteAsk(String name);
 
-    @Key("view.commit.grid.date")
-    String commitGridDate();
+  @Key("view.branch.filter.label")
+  String branchFilterLabel();
 
-    @Key("view.commit.grid.commiter")
-    String commitGridCommiter();
+  @Key("view.branch.title")
+  String branchTitle();
 
-    @Key("view.commit.grid.comment")
-    String commitGridComment();
+  // Commit
+  @Key("view.commit.commit_message")
+  String commitMessage(String revision, String time);
 
-    @Key("view.commit.push.checkbox.title")
-    String commitPushCheckboxTitle();
+  @Key("view.commit.commit_user")
+  String commitUser(String user);
 
-    @Key("view.commit.nothing_to_commit.text")
-    String commitNothingToCommitMessageText();
+  @Key("view.commit.title")
+  String commitTitle();
 
-    @Key("view.push.title")
-    String pushViewTitle();
+  @Key("view.commit.amend_field_title")
+  String commitAmendFieldTitle();
 
-    @Key("view.push.remote.field")
-    String pushViewRemoteFieldTitle();
+  @Key("view.commit.grid.date")
+  String commitGridDate();
 
-    @Key("view.push.local_branch.field")
-    String pushViewLocalBranchFieldTitle();
+  @Key("view.commit.grid.commiter")
+  String commitGridCommiter();
 
-    @Key("view.push.remote_branch.field")
-    String pushViewRemoteBranchFieldTitle();
+  @Key("view.commit.grid.comment")
+  String commitGridComment();
 
-    @Key("view.push.force.checkbox.title")
-    String pushForceCheckboxTitle();
+  @Key("view.commit.push.checkbox.title")
+  String commitPushCheckboxTitle();
 
-    // Reset
-    @Key("view.reset.files.title")
-    String resetFilesViewTitle();
+  @Key("view.commit.nothing_to_commit.text")
+  String commitNothingToCommitMessageText();
 
-    @Key("view.reset.commit.title")
-    String resetCommitViewTitle();
+  @Key("view.push.title")
+  String pushViewTitle();
 
-    @Key("view.reset.soft.type.title")
-    String resetSoftTypeTitle();
+  @Key("view.push.remote.field")
+  String pushViewRemoteFieldTitle();
 
-    @Key("view.reset.soft.type.description")
-    String resetSoftTypeDescription();
+  @Key("view.push.local_branch.field")
+  String pushViewLocalBranchFieldTitle();
 
-    @Key("view.reset.mixed.type.title")
-    String resetMixedTypeTitle();
+  @Key("view.push.remote_branch.field")
+  String pushViewRemoteBranchFieldTitle();
 
-    @Key("view.reset.mixed.type.description")
-    String resetMixedTypeDescription();
+  @Key("view.push.force.checkbox.title")
+  String pushForceCheckboxTitle();
 
-    @Key("view.reset.hard.type.title")
-    String resetHardTypeTitle();
+  // Reset
+  @Key("view.reset.files.title")
+  String resetFilesViewTitle();
 
-    @Key("view.reset.hard.type.description")
-    String resetHardTypeDescription();
+  @Key("view.reset.commit.title")
+  String resetCommitViewTitle();
 
-    // Remove
-    @Key("view.remove_from_index.all")
-    String removeFromIndexAll();
+  @Key("view.reset.soft.type.title")
+  String resetSoftTypeTitle();
 
-    @Key("view.remove_from_index.only")
-    String removeFromIndexOnly();
+  @Key("view.reset.soft.type.description")
+  String resetSoftTypeDescription();
 
-    @Key("view.remove_from_index.folder")
-    String removeFromIndexFolder(String folder);
+  @Key("view.reset.mixed.type.title")
+  String resetMixedTypeTitle();
 
-    @Key("view.remove_from_index.file")
-    String removeFromIndexFile(String file);
+  @Key("view.reset.mixed.type.description")
+  String resetMixedTypeDescription();
 
-    @Key("view.remove_from_index.title")
-    String removeFromIndexTitle();
+  @Key("view.reset.hard.type.title")
+  String resetHardTypeTitle();
 
-    // Create
-    @Key("view.create.title")
-    String createTitle();
+  @Key("view.reset.hard.type.description")
+  String resetHardTypeDescription();
 
-    // Compare
-    @Key("view.compare.with.latest.title")
-    String compareWithLatestTitle();
+  // Remove
+  @Key("view.remove_from_index.all")
+  String removeFromIndexAll();
 
-    @Key("view.compare.with.branch.title")
-    String compareWithBranchTitle();
+  @Key("view.remove_from_index.only")
+  String removeFromIndexOnly();
 
-    @Key("view.compare.with.revision.title")
-    String compareWithRevisionTitle();
+  @Key("view.remove_from_index.folder")
+  String removeFromIndexFolder(String folder);
 
-    @Key("view.compare.revision.table.id.title")
-    String viewCompareRevisionTableIdTitle();
+  @Key("view.remove_from_index.file")
+  String removeFromIndexFile(String file);
 
-    @Key("view.compare.revision.table.time.title")
-    String viewCompareRevisionTableTimeTitle();
+  @Key("view.remove_from_index.title")
+  String removeFromIndexTitle();
 
-    @Key("view.compare.revision.table.author.title")
-    String viewCompareRevisionTableAuthorTitle();
+  // Create
+  @Key("view.create.title")
+  String createTitle();
 
-    @Key("view.compare.revision.table.title.title")
-    String viewCompareRevisionTableTitleTitle();
+  // Compare
+  @Key("view.compare.with.latest.title")
+  String compareWithLatestTitle();
 
-    @Key("view.compare.revision.full.description.title")
-    String viewCompareRevisionFullDescriptionTitle();
-    
-    @Key("view.compare.revision.full.description.empty.message")
-    String viewCompareRevisionFullDescriptionEmptyMessage();
+  @Key("view.compare.with.branch.title")
+  String compareWithBranchTitle();
 
-    @Key("view.compare.message.identical.content.title")
-    String compareMessageIdenticalContentTitle();
+  @Key("view.compare.with.revision.title")
+  String compareWithRevisionTitle();
 
-    @Key("view.compare.message.identical.content.text")
-    String compareMessageIdenticalContentText();
+  @Key("view.compare.revision.table.id.title")
+  String viewCompareRevisionTableIdTitle();
 
-    @Key("view.compare.your.version.title")
-    String compareYourVersionTitle();
+  @Key("view.compare.revision.table.time.title")
+  String viewCompareRevisionTableTimeTitle();
 
-    @Key("view.compare.read.only.title")
-    String compareReadOnlyTitle();
+  @Key("view.compare.revision.table.author.title")
+  String viewCompareRevisionTableAuthorTitle();
 
-    // ChangeList
-    @Key("view.change.list.title")
-    String changeListTitle();
-    @Key("view.change.list.group.by.directory.button.text")
-    String changeListGroupByDirectoryButtonText();
-    @Key("view.change.list.row.list.view.button.text")
-    String changeListRowListViewButtonText();
-    @Key("view.change.list.expand.all.button.title")
-    String changeListExpandCollapseAllButtonTitle();
-    @Key("view.change.list.collapse.all.button.title")
-    String changeListCollapseAllButtonTitle();
-    // Fetch
-    @Key("view.fetch.title")
-    String fetchTitle();
+  @Key("view.compare.revision.table.title.title")
+  String viewCompareRevisionTableTitleTitle();
 
-    @Key("view.fetch.remote.field.title")
-    String fetchRemoteFieldTitle();
+  @Key("view.compare.revision.full.description.title")
+  String viewCompareRevisionFullDescriptionTitle();
 
-    @Key("view.fetch.remote.branches.title")
-    String fetchRemoteBranchesTitle();
+  @Key("view.compare.revision.full.description.empty.message")
+  String viewCompareRevisionFullDescriptionEmptyMessage();
 
-    @Key("view.fetch.local.branches.title")
-    String fetchLocalBranchesTitle();
+  @Key("view.compare.message.identical.content.title")
+  String compareMessageIdenticalContentTitle();
 
-    @Key("view.fetch.remove.deleted.refs.title")
-    String fetchRemoveDeletedRefsTitle();
+  @Key("view.compare.message.identical.content.text")
+  String compareMessageIdenticalContentText();
 
-    @Key("view.fetch.all.branches.field.title")
-    String fetchAllBranchesTitle();
+  @Key("view.compare.your.version.title")
+  String compareYourVersionTitle();
 
-    // Remote
-    @Key("view.remotes.title")
-    String remotesViewTitle();
+  @Key("view.compare.read.only.title")
+  String compareReadOnlyTitle();
 
-    @Key("view.remote.name.field")
-    String remoteNameField();
+  // ChangeList
+  @Key("view.change.list.title")
+  String changeListTitle();
 
-    @Key("view.remote.location.field")
-    String remoteLocationField();
+  @Key("view.change.list.group.by.directory.button.text")
+  String changeListGroupByDirectoryButtonText();
 
-    @Key("view.remote.grid.name.field")
-    String remoteGridNameField();
+  @Key("view.change.list.row.list.view.button.text")
+  String changeListRowListViewButtonText();
 
-    @Key("view.remote.grid.location.field")
-    String remoteGridLocationField();
+  @Key("view.change.list.expand.all.button.title")
+  String changeListExpandCollapseAllButtonTitle();
 
-    // History
-    @Key("view.history.diff.index.state")
-    String historyDiffIndexState();
+  @Key("view.change.list.collapse.all.button.title")
+  String changeListCollapseAllButtonTitle();
 
-    @Key("view.history.diff.tree.state")
-    String historyDiffTreeState();
+  // Fetch
+  @Key("view.fetch.title")
+  String fetchTitle();
 
-    @Key("view.history.nothing.to.display")
-    String historyNothingToDisplay();
+  @Key("view.fetch.remote.field.title")
+  String fetchRemoteFieldTitle();
 
-    @Key("view.history.title")
-    String historyTitle();
+  @Key("view.fetch.remote.branches.title")
+  String fetchRemoteBranchesTitle();
 
-    @Key("view.history.project.changes.button.title")
-    String historyProjectChangesButtonTitle();
+  @Key("view.fetch.local.branches.title")
+  String fetchLocalBranchesTitle();
 
-    @Key("view.history.resource.changes.button.title")
-    String historyResourceChangesButtonTitle();
+  @Key("view.fetch.remove.deleted.refs.title")
+  String fetchRemoveDeletedRefsTitle();
 
-    @Key("view.history.diff.with.index.button.title")
-    String historyDiffWithIndexButtonTitle();
+  @Key("view.fetch.all.branches.field.title")
+  String fetchAllBranchesTitle();
 
-    @Key("view.history.diff.with.work.tree.button.title")
-    String historyDiffWithWorkTreeButtonTitle();
+  // Remote
+  @Key("view.remotes.title")
+  String remotesViewTitle();
 
-    @Key("view.history.diff.with.prev.version.button.title")
-    String historyDiffWithPrevVersionButtonTitle();
+  @Key("view.remote.name.field")
+  String remoteNameField();
 
-    @Key("view.history.revisionA.title")
-    String historyViewRevisionATitle();
+  @Key("view.remote.location.field")
+  String remoteLocationField();
 
-    @Key("view.history.revisionB.title")
-    String historyViewRevisionBTitle();
+  @Key("view.remote.grid.name.field")
+  String remoteGridNameField();
 
-    @Key("view.history.date.title")
-    String historyViewDateTitle();
+  @Key("view.remote.grid.location.field")
+  String remoteGridLocationField();
 
-    @Key("view.history.refresh.button.title")
-    String refreshRevisionListButtonTitle();
+  // History
+  @Key("view.history.diff.index.state")
+  String historyDiffIndexState();
 
-    // Pull
-    @Key("view.pull.title")
-    String pullTitle();
+  @Key("view.history.diff.tree.state")
+  String historyDiffTreeState();
 
-    @Key("view.pull.remote.branches.title")
-    String pullRemoteBranches();
+  @Key("view.history.nothing.to.display")
+  String historyNothingToDisplay();
 
-    @Key("view.pull.local.branches.title")
-    String pullLocalBranches();
+  @Key("view.history.title")
+  String historyTitle();
 
-    // Merge
-    @Key("view.merge.title")
-    String mergeTitle();
+  @Key("view.history.project.changes.button.title")
+  String historyProjectChangesButtonTitle();
 
-    @Key("merged.commits")
-    String mergedCommits(String commits);
+  @Key("view.history.resource.changes.button.title")
+  String historyResourceChangesButtonTitle();
 
-    @Key("merged.new.head")
-    String mergedNewHead(String newHead);
+  @Key("view.history.diff.with.index.button.title")
+  String historyDiffWithIndexButtonTitle();
 
-    @Key("merged.conflicts")
-    String mergedConflicts();
+  @Key("view.history.diff.with.work.tree.button.title")
+  String historyDiffWithWorkTreeButtonTitle();
 
-    /* Checkout reference */
-    @Key("checkout.reference.title")
-    String checkoutReferenceTitle();
+  @Key("view.history.diff.with.prev.version.button.title")
+  String historyDiffWithPrevVersionButtonTitle();
 
-    @Key("checkout.reference.description")
-    String checkoutReferenceDescription();
+  @Key("view.history.revisionA.title")
+  String historyViewRevisionATitle();
 
-    @Key("checkout.reference.message")
-    String checkoutReferenceMessage();
+  @Key("view.history.revisionB.title")
+  String historyViewRevisionBTitle();
 
-    /* Controls */
-    @Key("control.branches.title")
-    String branchesControlTitle();
+  @Key("view.history.date.title")
+  String historyViewDateTitle();
 
-    @Key("control.branches.prompt")
-    String branchesControlPrompt();
+  @Key("view.history.refresh.button.title")
+  String refreshRevisionListButtonTitle();
 
-    @Key("control.commit.title")
-    String commitControlTitle();
+  // Pull
+  @Key("view.pull.title")
+  String pullTitle();
 
-    @Key("control.commit.prompt")
-    String commitControlPrompt();
+  @Key("view.pull.remote.branches.title")
+  String pullRemoteBranches();
 
-    @Key("control.delete.title")
-    String deleteControlTitle();
+  @Key("view.pull.local.branches.title")
+  String pullLocalBranches();
 
-    @Key("control.delete.prompt")
-    String deleteControlPrompt();
+  @Key("view.pull.rebase.checkbox.label")
+  String pullRebaseCheckbox();
 
-    @Key("control.fetch.title")
-    String fetchControlTitle();
+  // Merge
+  @Key("view.merge.title")
+  String mergeTitle();
 
-    @Key("control.fetch.prompt")
-    String fetchControlPrompt();
+  @Key("merged.commits")
+  String mergedCommits(String commits);
 
-    @Key("control.init.title")
-    String initControlTitle();
+  @Key("merged.new.head")
+  String mergedNewHead(String newHead);
 
-    @Key("control.init.prompt")
-    String initControlPrompt();
+  @Key("merged.conflicts")
+  String mergedConflicts();
 
-    @Key("control.merge.title")
-    String mergeControlTitle();
+  /* Checkout reference */
+  @Key("checkout.reference.title")
+  String checkoutReferenceTitle();
 
-    @Key("control.merge.prompt")
-    String mergeControlPrompt();
+  @Key("checkout.reference.description")
+  String checkoutReferenceDescription();
 
-    @Key("control.pull.title")
-    String pullControlTitle();
+  @Key("checkout.reference.message")
+  String checkoutReferenceMessage();
 
-    @Key("control.pull.prompt")
-    String pullControlPrompt();
+  /* Controls */
+  @Key("control.branches.title")
+  String branchesControlTitle();
 
-    @Key("control.push.title")
-    String pushControlTitle();
+  @Key("control.branches.prompt")
+  String branchesControlPrompt();
 
-    @Key("control.push.prompt")
-    String pushControlPrompt();
+  @Key("control.commit.title")
+  String commitControlTitle();
 
-    @Key("control.remotes.title")
-    String remotesControlTitle();
+  @Key("control.commit.prompt")
+  String commitControlPrompt();
 
-    @Key("control.remotes.prompt")
-    String remotesControlPrompt();
+  @Key("control.delete.title")
+  String deleteControlTitle();
 
-    @Key("control.resetFiles.title")
-    String resetFilesControlTitle();
+  @Key("control.delete.prompt")
+  String deleteControlPrompt();
 
-    @Key("control.resetFiles.prompt")
-    String resetFilesControlPrompt();
+  @Key("control.fetch.title")
+  String fetchControlTitle();
 
-    @Key("control.resetToCommit.title")
-    String resetToCommitControlTitle();
+  @Key("control.fetch.prompt")
+  String fetchControlPrompt();
 
-    @Key("control.resetToCommit.prompt")
-    String resetToCommitControlPrompt();
+  @Key("control.init.title")
+  String initControlTitle();
 
-    @Key("control.history.title")
-    String historyControlTitle();
+  @Key("control.init.prompt")
+  String initControlPrompt();
 
-    @Key("control.history.prompt")
-    String historyControlPrompt();
+  @Key("control.merge.title")
+  String mergeControlTitle();
 
-    @Key("control.status.title")
-    String statusControlTitle();
+  @Key("control.merge.prompt")
+  String mergeControlPrompt();
 
-    @Key("control.status.prompt")
-    String statusControlPrompt();
+  @Key("control.pull.title")
+  String pullControlTitle();
 
-    @Key("control.ro.url.window.title")
-    String projectReadOnlyGitUrlWindowTitle();
+  @Key("control.pull.prompt")
+  String pullControlPrompt();
 
-    @Key("control.ro.localUrl.title")
-    String projectReadOnlyGitLocalUrlTitle();
+  @Key("control.push.title")
+  String pushControlTitle();
 
-    @Key("control.ro.remoteUrl.title")
-    String projectReadOnlyGitRemoteUrlTitle();
+  @Key("control.push.prompt")
+  String pushControlPrompt();
 
-    @Key("control.ro.remoteUrls.title")
-    String projectReadOnlyGitRemoteUrlsTitle();
+  @Key("control.remotes.title")
+  String remotesControlTitle();
 
-    @Key("control.ro.url.prompt")
-    String projectReadOnlyGitUrlPrompt();
+  @Key("control.remotes.prompt")
+  String remotesControlPrompt();
 
-    @Key("committer.preference.category")
-    String committerPreferenceCategory();
+  @Key("control.resetFiles.title")
+  String resetFilesControlTitle();
 
-    @Key("committer.title")
-    String committerTitle();
+  @Key("control.resetFiles.prompt")
+  String resetFilesControlPrompt();
 
-    @Key("commited")
-    String commited();
+  @Key("control.resetToCommit.title")
+  String resetToCommitControlTitle();
 
-    @Key("failed.to.delete.repository")
-    String failedToDeleteRepository();
+  @Key("control.resetToCommit.prompt")
+  String resetToCommitControlPrompt();
 
-    @Key("merge.failed")
-    String mergeFailed();
+  @Key("control.history.title")
+  String historyControlTitle();
 
-    @Key("console.project.name")
-    String consoleProjectName(String projectName);
+  @Key("control.history.prompt")
+  String historyControlPrompt();
+
+  @Key("control.status.title")
+  String statusControlTitle();
+
+  @Key("control.status.prompt")
+  String statusControlPrompt();
+
+  @Key("control.ro.url.window.title")
+  String projectReadOnlyGitUrlWindowTitle();
+
+  @Key("control.ro.localUrl.title")
+  String projectReadOnlyGitLocalUrlTitle();
+
+  @Key("control.ro.remoteUrl.title")
+  String projectReadOnlyGitRemoteUrlTitle();
+
+  @Key("control.ro.remoteUrls.title")
+  String projectReadOnlyGitRemoteUrlsTitle();
+
+  @Key("control.ro.url.prompt")
+  String projectReadOnlyGitUrlPrompt();
+
+  @Key("committer.preference.category")
+  String committerPreferenceCategory();
+
+  @Key("committer.title")
+  String committerTitle();
+
+  @Key("commited")
+  String commited();
+
+  @Key("failed.to.delete.repository")
+  String failedToDeleteRepository();
+
+  @Key("merge.failed")
+  String mergeFailed();
+
+  @Key("console.project.name")
+  String consoleProjectName(String projectName);
 }

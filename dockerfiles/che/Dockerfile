@@ -1,12 +1,11 @@
-# Copyright (c) 2012-2016 Codenvy, S.A., Red Hat, Inc
+# Copyright (c) 2012-2017 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-#   Mario Loriedo
-#   Codenvy S.A
+#   Red Hat, Inc. - initial API and implementation
 #
 # To build it, run in the repository root:
 #  `docker build -t eclipse/che-server .`
@@ -38,4 +37,7 @@ EXPOSE 8000 8080
 COPY entrypoint.sh /entrypoint.sh
 COPY open-jdk-source-file-location /open-jdk-source-file-location
 ENTRYPOINT ["/entrypoint.sh"]
+RUN mkdir /logs /data && \
+    chmod 0777 /logs /data
 ADD eclipse-che.tar.gz /home/user/
+RUN find /home/user -type d -exec chmod 777 {} \;

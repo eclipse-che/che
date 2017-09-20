@@ -17,38 +17,37 @@ package org.eclipse.che.ide.ui.list;
 /** An interface which describes an object which maintains selection. */
 public interface HasSelection<M> {
 
-    void clearSelection();
+  void clearSelection();
 
-    /**
-     * Selects the next item in the list, returning false if selection cannot be
-     * moved for any reason.
-     */
-    boolean selectNext();
+  /**
+   * Selects the next item in the list, returning false if selection cannot be moved for any reason.
+   */
+  boolean selectNext();
 
-    /**
-     * Selects the previous item in the list, returning false if selection cannot
-     * be moved for any reason.
-     */
-    boolean selectPrevious();
+  /**
+   * Selects the previous item in the list, returning false if selection cannot be moved for any
+   * reason.
+   */
+  boolean selectPrevious();
 
-    int size();
+  int size();
 
-    boolean setSelectedItem(int index);
+  boolean setSelectedItem(int index);
 
-    boolean setSelectedItem(M item);
+  boolean setSelectedItem(M item);
 
-    boolean selectNextPage();
+  boolean selectNextPage();
 
-    boolean selectPreviousPage();
+  boolean selectPreviousPage();
 
-    /**
-     * Indicates that the currently selected item should be clicked and the
-     * appropriate action must be executed.
-     */
-    void handleClick();
+  /**
+   * Indicates that the currently selected item should be clicked and the appropriate action must be
+   * executed.
+   */
+  void handleClick();
 
-    /** Returns the selected item, or null. */
-    M getSelectedItem();
+  /** Returns the selected item, or null. */
+  M getSelectedItem();
 
-    int getSelectedIndex();
+  int getSelectedIndex();
 }

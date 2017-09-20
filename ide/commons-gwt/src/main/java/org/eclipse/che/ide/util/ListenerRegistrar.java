@@ -17,54 +17,53 @@ package org.eclipse.che.ide.util;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /** A manager to register or unregister listeners. */
 public interface ListenerRegistrar<T> {
 
-    /** A handle to allow removing the added listener. */
-    public interface Remover {
-        void remove();
+  /** A handle to allow removing the added listener. */
+  public interface Remover {
+    void remove();
+  }
+
+  /**
+   * An object which helps to simplify management of multiple handlers that need to be removed. This
+   * is the recommended approach to managing removers as it guards against null checks and prevents
+   * forgetting to remove listeners.
+   */
+  public static class RemoverManager implements Remover {
+    private List<Remover> handlers;
+
+    /** Tracks a new handler so that it can be removed in bulk. */
+    public RemoverManager track(Remover remover) {
+      if (handlers == null) {
+        handlers = new ArrayList<>();
+      }
+
+      handlers.add(remover);
+      return this;
     }
 
-    /**
-     * An object which helps to simplify management of multiple handlers that need
-     * to be removed. This is the recommended approach to managing removers as it
-     * guards against null checks and prevents forgetting to remove listeners.
-     */
-    public static class RemoverManager implements Remover {
-        private List<Remover> handlers;
+    /** Removes all tracked handlers and clears the stored list of handlers. */
+    @Override
+    public void remove() {
+      if (handlers == null) {
+        return;
+      }
 
-        /** Tracks a new handler so that it can be removed in bulk. */
-        public RemoverManager track(Remover remover) {
-            if (handlers == null) {
-                handlers = new ArrayList<>();
-            }
+      for (int i = 0; i < handlers.size(); i++) {
+        handlers.get(i).remove();
+      }
 
-            handlers.add(remover);
-            return this;
-        }
-
-        /** Removes all tracked handlers and clears the stored list of handlers. */
-        @Override
-        public void remove() {
-            if (handlers == null) {
-                return;
-            }
-
-            for (int i = 0; i < handlers.size(); i++) {
-                handlers.get(i).remove();
-            }
-
-            handlers.clear();
-        }
+      handlers.clear();
     }
+  }
 
-    /** Registers a new listener. */
-    Remover add(T listener);
+  /** Registers a new listener. */
+  Remover add(T listener);
 
-    /**
-     * Removes a listener. It is strongly preferred you use the {@link Remover}
-     * returned by {@link #add(Object)} instead of calling this method directly.
-     */
-    void remove(T listener);
+  /**
+   * Removes a listener. It is strongly preferred you use the {@link Remover} returned by {@link
+   * #add(Object)} instead of calling this method directly.
+   */
+  void remove(T listener);
 }

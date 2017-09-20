@@ -1,0 +1,28 @@
+{
+  "environments": {
+    "replaced_name": {
+      "machines": {
+        "dev-machine": {
+          "agents": [
+            "org.eclipse.che.terminal",
+            "org.eclipse.che.ws-agent",
+            "org.eclipse.che.ssh"
+          ],
+          "attributes": {
+            "memoryLimitBytes": "desired_memory_value"
+          }
+        }
+      },
+      "recipe": {
+        "content": "FROM codenvy/ubuntu_jdk8",
+        "contentType": "text/x-dockerfile",
+        "type": "dockerfile"
+      }
+    }
+  },
+  "defaultEnv": "replaced_name",
+  "projects": [],
+  "name": "replaced_name",
+  "attributes": {},
+  "temporary": false
+}

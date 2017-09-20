@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -33,6 +33,7 @@ import {IEnvironmentManagerMachine} from './environment-manager-machine';
  * @author Ann Shumilova
  */
 
+const DOCKERFILE = 'dockerfile';
 const ENV_INSTRUCTION: string = 'ENV';
 const FROM_INSTRUCTION: string = 'FROM';
 
@@ -45,8 +46,37 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
     this.parser = new DockerfileParser();
   }
 
+  get type(): string {
+    return DOCKERFILE;
+  }
+
   get editorMode(): string {
     return 'text/x-dockerfile';
+  }
+
+  /**
+   * Create a new default machine.
+   *
+   * @param {che.IWorkspaceEnvironment} environment
+   *
+   * @return {IEnvironmentManagerMachine}
+   */
+  createNewDefaultMachine(environment: che.IWorkspaceEnvironment): IEnvironmentManagerMachine {
+    this.$log.error('EnvironmentManager: cannot create a new machine.');
+    return null;
+  }
+
+  /**
+   * Add machine.
+   *
+   * @param {che.IWorkspaceEnvironment} environment
+   * @param {IEnvironmentManagerMachine} machine
+   *
+   * @return {che.IWorkspaceEnvironment}
+   */
+  addMachine(environment: che.IWorkspaceEnvironment, machine: IEnvironmentManagerMachine): che.IWorkspaceEnvironment {
+    this.$log.error('EnvironmentManager: cannot add machine.');
+    return environment;
   }
 
   /**
@@ -96,7 +126,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
     let newEnvironment = super.getEnvironment(environment, machines);
 
     // machines should contain one machine only
-    if (machines[0].recipe) {
+    if (machines && machines[0] && machines[0].recipe) {
       try {
         newEnvironment.recipe.content = this._stringifyRecipe(machines[0].recipe);
       } catch (e) {

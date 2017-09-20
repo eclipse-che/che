@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
@@ -200,7 +200,9 @@ export class ProjectDetailsController {
       // remove it !
       let promise = this.projectService.remove(this.projectDetails.name);
       promise.then(() => {
-        this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name).search({page: 'projects'});
+       this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.namespace + ':' + this.workspace.config.name).finally(() => {
+         this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name).search({tab: 'Projects'});
+       });
       }, (error) => {
         this.$log.log('error', error);
       });

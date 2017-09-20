@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 
@@ -18,7 +18,7 @@ import {Observable} from '../../../../components/utils/observable';
  *
  * @author Oleksii Kurinnyi
  */
-export class StackSelectorSvc extends Observable {
+export class StackSelectorSvc extends Observable<any> {
   /**
    * Log service.
    */
@@ -70,6 +70,15 @@ export class StackSelectorSvc extends Observable {
       const stacks = this.getStacks();
       return this.$q.when(stacks);
     });
+  }
+
+  /**
+   * Sets stackId.
+   *
+   * @param {string} stackId
+   */
+  setStackId(stackId: string): void {
+    this.onStackSelected(stackId);
   }
 
   /**

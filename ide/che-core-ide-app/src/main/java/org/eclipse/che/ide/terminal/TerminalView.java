@@ -1,20 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.terminal;
 
 import com.google.inject.ImplementedBy;
-
-import org.eclipse.che.ide.api.mvp.View;
-
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.api.mvp.View;
 
 /**
  * The interface defines methods to control displaying of terminal.
@@ -24,31 +22,35 @@ import javax.validation.constraints.NotNull;
 @ImplementedBy(TerminalViewImpl.class)
 interface TerminalView extends View<TerminalView.ActionDelegate> {
 
-    interface ActionDelegate {
-        void setTerminalSize(int x, int y);
-    }
+  interface ActionDelegate {
 
     /**
-     * Change visibility state of panel.
+     * Set terminal size
      *
-     * @param visible
-     *         <code>true</code> panel is visible,<code>false</code> panel is not visible
+     * @param x amount of terminal columns
+     * @param y amount of terminal rows
      */
-    void setVisible(boolean visible);
+    void setTerminalSize(int x, int y);
+  }
 
-    /**
-     * Opens current terminal.
-     *
-     * @param terminal
-     *         terminal which will be opened
-     */
-    void openTerminal(@NotNull TerminalJso terminal);
+  /**
+   * Change visibility state of panel.
+   *
+   * @param visible <code>true</code> panel is visible,<code>false</code> panel is not visible
+   */
+  void setVisible(boolean visible);
 
-    /**
-     * Shows special error message when terminal is failed.
-     *
-     * @param message
-     *         message which will be shown
-     */
-    void showErrorMessage(@NotNull String message);
+  /**
+   * Opens current terminal.
+   *
+   * @param terminal terminal which will be opened
+   */
+  void openTerminal(@NotNull TerminalJso terminal);
+
+  /**
+   * Shows special error message when terminal is failed.
+   *
+   * @param message message which will be shown
+   */
+  void showErrorMessage(@NotNull String message);
 }

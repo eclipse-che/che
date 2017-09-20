@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {CheStack} from '../../../../components/api/che-stack.factory';
@@ -39,7 +39,7 @@ export class StackSelectorController {
   /**
    * Lodash library.
    */
-  lodash: _.LoDashStatic;
+  lodash: any;
   /**
    * Stack API interaction.
    */
@@ -137,7 +137,7 @@ export class StackSelectorController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($filter: ng.IFilterService, $mdDialog: ng.material.IDialogService, lodash: _.LoDashStatic, cheStack: CheStack,
+  constructor($filter: ng.IFilterService, $mdDialog: ng.material.IDialogService, lodash: any, cheStack: CheStack,
               confirmDialogService: ConfirmDialogService, $location: ng.ILocationService, cheBranding: CheBranding,
               cheEnvironmentRegistry: CheEnvironmentRegistry, stackSelectorSvc: StackSelectorSvc) {
     this.$filter = $filter;

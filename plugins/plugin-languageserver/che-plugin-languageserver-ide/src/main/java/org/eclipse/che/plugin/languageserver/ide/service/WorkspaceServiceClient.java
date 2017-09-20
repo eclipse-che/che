@@ -1,65 +1,68 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.plugin.languageserver.ide.service;
+
+import static org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil.getPromiseError;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.WorkspaceSymbolParams;
-
 import java.util.List;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.languageserver.shared.model.FileEditParams;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.WorkspaceSymbolParams;
+import org.eclipse.lsp4j.services.WorkspaceService;
 
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
-
-/**
- * @author Evgen Vidolob
- */
+/** @author Evgen Vidolob */
 @Singleton
 public class WorkspaceServiceClient {
-    private final DtoUnmarshallerFactory unmarshallerFactory;
-    private final AppContext             appContext;
-    private final AsyncRequestFactory    asyncRequestFactory;
+  private RequestTransmitter requestTransmitter;
 
+  @Inject
+  public WorkspaceServiceClient(RequestTransmitter requestTransmitter) {
+    this.requestTransmitter = requestTransmitter;
+  }
 
-    @Inject
-    public WorkspaceServiceClient(final DtoUnmarshallerFactory unmarshallerFactory,
-                                  final AppContext appContext,
-                                  final AsyncRequestFactory asyncRequestFactory
-                                 ) {
-        this.unmarshallerFactory = unmarshallerFactory;
-        this.appContext = appContext;
-        this.asyncRequestFactory = asyncRequestFactory;
-    }
+  /**
+   * GWT client implementation of {@link WorkspaceService#symbol(WorkspaceSymbolParams)}
+   *
+   * @param params
+   * @return
+   */
+  public Promise<List<SymbolInformation>> symbol(WorkspaceSymbolParams params) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId("ws-agent")
+                .methodName("workspace/symbol")
+                .paramsAsDto(params)
+                .sendAndReceiveResultAsListOfDto(SymbolInformation.class)
+                .onSuccess(resolve::apply)
+                .onFailure(error -> reject.apply(getPromiseError(error))));
+  }
 
-    /**
-     * GWT client implementation of {@link io.typefox.lsapi.WorkspaceService#symbol(io.typefox.lsapi.WorkspaceSymbolParams)}
-     *
-     * @param params
-     * @return
-     */
-    public Promise<List<SymbolInformation>> symbol(WorkspaceSymbolParams params) {
-        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/workspace/symbol";
-        Unmarshallable<List<SymbolInformation>> unmarshaller = unmarshallerFactory.newListUnmarshaller(SymbolInformation.class);
-        return asyncRequestFactory.createPostRequest(requestUrl, params)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .header(CONTENT_TYPE, APPLICATION_JSON)
-                                  .send(unmarshaller);
-    }
-
+  public Promise<List<TextEdit>> editFile(FileEditParams params) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId("ws-agent")
+                .methodName("workspace/editFile")
+                .paramsAsDto(params)
+                .sendAndReceiveResultAsListOfDto(TextEdit.class)
+                .onSuccess(resolve::apply)
+                .onFailure(error -> reject.apply(getPromiseError(error))));
+  }
 }

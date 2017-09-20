@@ -1,14 +1,13 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
-
 import {CheHttpBackend} from '../../api/test/che-http-backend';
 
 interface ITestScope extends ng.IRootScopeService {
@@ -16,7 +15,7 @@ interface ITestScope extends ng.IRootScopeService {
 }
 
 /**
- * Test of the WorkspaceRecipeImport
+ * Test of the CheToggleButtonPopover directive.
  * @author Oleksii Kurinnyi
  */
 describe('CheToggleButtonPopover >', () => {
@@ -50,10 +49,9 @@ describe('CheToggleButtonPopover >', () => {
     httpBackend.when('OPTIONS', '/api/').respond({});
 
     $rootScope.model = {
-      popoverButtonTitle: 'Popover Button Title',
-      initialState: false,
-      value: false,
-      popoverContent: 'Simple popover content',
+      title: 'Popover Button Title',
+      state: false,
+      content: 'Simple popover content',
       onChange: (state: boolean) => {
         /* tslint:disable */
         const newState = state;
@@ -63,14 +61,17 @@ describe('CheToggleButtonPopover >', () => {
 
   }));
 
+  afterEach(() => {
+    $timeout.verifyNoPendingTasks();
+  });
+
   function getCompiledElement() {
     const element = $compile(angular.element(
-      `<div><toggle-button-popover button-title="model.popoverButtonTitle"
-                                   button-state="model.initialState"
-                                   button-value="model.value"
+      `<div><toggle-button-popover button-title="model.title"
+                                   button-state="model.state"
                                    button-on-change="model.onChange(state)"
                                    che-popover-placement="right-top">
-        <div>{{model.popoverContent}}</div>
+        <div>{{model.content}}</div>
       </toggle-button-popover></div>`
     ))($rootScope);
     $rootScope.$digest();
@@ -87,10 +88,16 @@ describe('CheToggleButtonPopover >', () => {
     });
 
     it('should have content hidden', () => {
-      expect(compiledDirective.html()).not.toContain($rootScope.model.popoverContent);
+      // timeout should be flashed
+      $timeout.flush();
+
+      expect(compiledDirective.html()).not.toContain($rootScope.model.content);
     });
 
     it('should have button disabled', () => {
+      // timeout should be flashed
+      $timeout.flush();
+
       expect(toggleSingleButton.get(0)).toBeTruthy();
       expect(toggleSingleButton.hasClass('toggle-single-button-disabled')).toBeTruthy();
     });
@@ -106,7 +113,7 @@ describe('CheToggleButtonPopover >', () => {
         // timeout should be flashed to get callback called and content visible
         $timeout.flush();
 
-        expect(compiledDirective.html()).toContain($rootScope.model.popoverContent);
+        expect(compiledDirective.html()).toContain($rootScope.model.content);
       });
 
       it('should enable button', () => {
@@ -127,10 +134,10 @@ describe('CheToggleButtonPopover >', () => {
 
     });
 
-    describe(`change value of button-value attribute >`, () => {
+    describe(`change state of toggle button from outside of directive >`, () => {
 
       beforeEach(() => {
-        $rootScope.model.value = true;
+        $rootScope.model.state = true;
         $rootScope.$digest();
       });
 
@@ -138,7 +145,7 @@ describe('CheToggleButtonPopover >', () => {
         // timeout should be flashed to get callback called and content visible
         $timeout.flush();
 
-        expect(compiledDirective.html()).toContain($rootScope.model.popoverContent);
+        expect(compiledDirective.html()).toContain($rootScope.model.content);
       });
 
       it('should enable button', () => {
@@ -167,7 +174,7 @@ describe('CheToggleButtonPopover >', () => {
     let toggleSingleButton;
 
     beforeEach(() => {
-      $rootScope.model.initialState = true;
+      $rootScope.model.state = true;
 
       compiledDirective = getCompiledElement();
       toggleSingleButton = compiledDirective.find('button');
@@ -176,14 +183,13 @@ describe('CheToggleButtonPopover >', () => {
     });
 
     it('should have content visible', () => {
-      expect(compiledDirective.html()).toContain($rootScope.model.popoverContent);
+      expect(compiledDirective.html()).toContain($rootScope.model.content);
     });
 
     it('should have button enabled', () => {
       expect(toggleSingleButton.get(0)).toBeTruthy();
       expect(toggleSingleButton.hasClass('toggle-single-button-disabled')).toBeFalsy();
     });
-
 
     describe('click on button >', () => {
 
@@ -193,14 +199,16 @@ describe('CheToggleButtonPopover >', () => {
       });
 
       it('should make content hidden', () => {
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
+        $timeout.flush();
         $timeout.flush();
 
-        expect(compiledDirective.html()).not.toContain($rootScope.model.popoverContent);
+        expect(compiledDirective.html()).not.toContain($rootScope.model.content);
       });
 
       it('should disable button', () => {
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
+        $timeout.flush();
         $timeout.flush();
 
         expect(toggleSingleButton.hasClass('toggle-single-button-disabled')).toBeTruthy();
@@ -209,7 +217,8 @@ describe('CheToggleButtonPopover >', () => {
       it('should call the callback', () => {
         spyOn($rootScope.model, 'onChange');
 
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
+        $timeout.flush();
         $timeout.flush();
 
         expect($rootScope.model.onChange).toHaveBeenCalledWith(false);
@@ -217,23 +226,24 @@ describe('CheToggleButtonPopover >', () => {
 
     });
 
-    describe(`change value of button-value attribute >`, () => {
+    describe(`change state of toggle button from outside of directive >`, () => {
 
       beforeEach(() => {
-        $rootScope.model.value = false;
+        $rootScope.model.state = false;
         $rootScope.$digest();
       });
 
       it('should make content hidden', () => {
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
         $timeout.flush();
         $timeout.flush();
 
-        expect(compiledDirective.html()).not.toContain($rootScope.model.popoverContent);
+        expect(compiledDirective.html()).not.toContain($rootScope.model.content);
       });
 
       it('should disable button', () => {
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
+        $timeout.flush();
         $timeout.flush();
 
         expect(toggleSingleButton.hasClass('toggle-single-button-disabled')).toBeTruthy();
@@ -242,7 +252,8 @@ describe('CheToggleButtonPopover >', () => {
       it('should call the callback', () => {
         spyOn($rootScope.model, 'onChange');
 
-        // timeout should be flashed to get callback called and content visible
+        // timeout should be flashed to get callback called and content hidden
+        $timeout.flush();
         $timeout.flush();
 
         expect($rootScope.model.onChange).toHaveBeenCalledWith(false);

@@ -1,18 +1,18 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import IdeSvc from './ide.service';
 import IdeIFrameSvc from './ide-iframe/ide-iframe.service';
 import {RouteHistory} from '../../components/routing/route-history.service';
-import {CheWorkspace} from '../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 
 /**
  * This class is handling the controller for the IDE
@@ -62,6 +62,7 @@ class IdeCtrl {
     let ideAction = this.$routeParams.action;
     let ideParams: any = this.$routeParams.ideParams;
     let selectedWorkspaceIdeUrl = this.cheWorkspace.getIdeUrl(namespace, this.selectedWorkspaceName);
+
     if (ideAction) {
       // send action
       this.ideSvc.setIDEAction(ideAction);

@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
@@ -17,19 +17,19 @@ import {CheFactoryTemplate} from '../../../../components/api/che-factory-templat
  * @author Oleksii Orel
  */
 export class FactoryFromTemplateController {
+  editorState: {isValid: boolean; errors: Array<string>} = {isValid: true, errors: []};
   private $filter: ng.IFilterService;
   private cheFactoryTemplate: CheFactoryTemplate;
   private cheNotification: CheNotification;
   private isImporting: boolean;
   private factoryContent: any;
   private templateName: string;
-  private editorState: {isValid: boolean; errors: Array<string>} = {isValid: true, errors: []};
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($filter: ng.IFilterService, cheFactoryTemplate: CheFactoryTemplate, cheNotification: CheNotification, $timeout: ng.ITimeoutService) {
+  constructor($filter: ng.IFilterService, cheFactoryTemplate: CheFactoryTemplate, cheNotification: CheNotification) {
     this.$filter = $filter;
     this.cheNotification = cheNotification;
     this.cheFactoryTemplate = cheFactoryTemplate;

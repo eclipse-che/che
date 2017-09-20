@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2017 Codenvy, S.A.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
@@ -314,7 +314,7 @@ export class WorkspaceEnvironmentsController {
    */
   getLocationUrl(): string {
     let url: string = '';
-    if (this.environment && this.environment.recipe.location && /^https?:\/\//i.test(this.environment.recipe.location)) {
+    if (this.environment && this.environment.recipe && this.environment.recipe.location && /^https?:\/\//i.test(this.environment.recipe.location)) {
       url = this.environment.recipe.location;
     }
     return url;
