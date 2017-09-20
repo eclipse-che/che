@@ -56,6 +56,7 @@ public class IdeBootstrap {
     return err -> {
       dialogFactory.createMessageDialog("IDE initialization failed", err.getMessage(), null).show();
       Log.error(IdeBootstrap.class, err);
+      notifyShowIDE();
     };
   }
 
