@@ -9,5 +9,7 @@
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
+IMAGE_ALIASES=""
+
 init --name:bats "$@"
 build

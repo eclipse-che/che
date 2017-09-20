@@ -10,6 +10,8 @@ base_dir=$(cd "$(dirname "$0")"; pwd)
 
 DIR=$(cd "$(dirname "$0")"; pwd)
 
+IMAGE_ALIASES=""
+
 generate_dto() {
   echo "Checking DTO"
 
