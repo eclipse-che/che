@@ -29,5 +29,6 @@
         <module>permission</module>
         <module>keycloak</module>
         <module>machine-auth</module>
+        <module>personal-account</module>
     </modules>
 </project>
