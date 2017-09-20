@@ -27,16 +27,19 @@ public class OpenShiftMachine implements Machine {
   //TODO Make timeout configurable
   private static final int EXEC_TIMEOUT_MIN = 5;
 
+  private final String machineName;
   private final String podName;
   private final String containerName;
   private final Map<String, ServerImpl> ref2Server;
   private final OpenShiftProject project;
 
   public OpenShiftMachine(
+      String machineName,
       String podName,
       String containerName,
       Map<String, ServerImpl> ref2Server,
       OpenShiftProject project) {
+    this.machineName = machineName;
     this.podName = podName;
     this.containerName = containerName;
     this.ref2Server = new HashMap<>();
@@ -47,7 +50,7 @@ public class OpenShiftMachine implements Machine {
   }
 
   public String getName() {
-    return podName + "/" + containerName;
+    return machineName;
   }
 
   @Override

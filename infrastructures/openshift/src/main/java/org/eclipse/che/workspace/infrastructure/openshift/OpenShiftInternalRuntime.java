@@ -13,10 +13,12 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner.CHE_ORIGINAL_NAME_LABEL;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
@@ -214,11 +216,13 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       throws InfrastructureException {
     final ServerResolver serverResolver = ServerResolver.of(services, routes);
     for (Pod toCreate : getContext().getOpenShiftEnvironment().getPods().values()) {
-      Pod createdPod = project.pods().create(toCreate);
+      final Pod createdPod = project.pods().create(toCreate);
+      final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
         OpenShiftMachine machine =
             new OpenShiftMachine(
-                createdPod.getMetadata().getName(),
+                podMetadata.getLabels().get(CHE_ORIGINAL_NAME_LABEL) + '/' + container.getName(),
+                podMetadata.getName(),
                 container.getName(),
                 serverResolver.resolve(createdPod, container),
                 project);

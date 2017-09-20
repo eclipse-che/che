@@ -64,6 +64,7 @@ public final class Constants {
   public static final String SERVER_WS_AGENT_WEBSOCKET_REFERENCE = "wsagent/ws";
   public static final String SERVER_TERMINAL_REFERENCE = "terminal";
   public static final String SERVER_SSH_REFERENCE = "ssh";
+  public static final String SERVER_EXEC_AGENT_HTTP_REFERENCE = "exec-agent/http";
   public static final String SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE = "exec-agent/ws";
 
   public static final String WS_AGENT_PORT = "4401/tcp";

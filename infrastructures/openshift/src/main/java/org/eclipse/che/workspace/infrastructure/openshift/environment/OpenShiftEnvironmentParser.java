@@ -57,6 +57,10 @@ public class OpenShiftEnvironmentParser {
       "Routes specified in OpenShift recipe are ignored. "
           + "To expose ports please define servers in machine configuration.";
 
+  static final int PVC_IGNORED_WARNING_CODE = 4101;
+  static final String PVC_IGNORED_WARNING_MESSAGE =
+      "Persistent volume claims specified in OpenShift recipe are ignored.";
+
   static final String DEFAULT_RESTART_POLICY = "Never";
 
   private final OpenShiftClientFactory clientFactory;
@@ -101,6 +105,7 @@ public class OpenShiftEnvironmentParser {
     Map<String, Service> services = new HashMap<>();
     Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     boolean isAnyRoutePresent = false;
+    boolean isAnyPVCPresent = false;
     for (HasMetadata object : list.getItems()) {
       if (object instanceof DeploymentConfig) {
         throw new ValidationException("Supporting of deployment configs is not implemented yet.");
@@ -113,8 +118,7 @@ public class OpenShiftEnvironmentParser {
       } else if (object instanceof Route) {
         isAnyRoutePresent = true;
       } else if (object instanceof PersistentVolumeClaim) {
-        PersistentVolumeClaim pvc = (PersistentVolumeClaim) object;
-        pvcs.put(pvc.getMetadata().getName(), pvc);
+        isAnyPVCPresent = true;
       } else {
         throw new ValidationException(
             format("Found unknown object type '%s'", object.getMetadata()));
@@ -130,6 +134,11 @@ public class OpenShiftEnvironmentParser {
     if (isAnyRoutePresent) {
       environment.addWarning(
           new WarningImpl(ROUTE_IGNORED_WARNING_CODE, ROUTES_IGNORED_WARNING_MESSAGE));
+    }
+
+    if (isAnyPVCPresent) {
+      environment.addWarning(
+          new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
     }
 
     OpenShiftEnvironment openShiftEnv = openShiftEnvBuilder.build();

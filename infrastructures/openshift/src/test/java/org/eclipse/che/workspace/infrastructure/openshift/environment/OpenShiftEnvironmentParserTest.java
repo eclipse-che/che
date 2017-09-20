@@ -11,9 +11,13 @@
 package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
 import static java.lang.String.format;
-import static java.util.Arrays.*;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.DEFAULT_RESTART_POLICY;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.PVC_IGNORED_WARNING_CODE;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.PVC_IGNORED_WARNING_MESSAGE;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.ROUTES_IGNORED_WARNING_MESSAGE;
+import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentParser.ROUTE_IGNORED_WARNING_CODE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -28,6 +32,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
@@ -115,10 +120,18 @@ public class OpenShiftEnvironmentParserTest {
     final OpenShiftEnvironment parsed = osEnvironmentParser.parse(internalEnvironment);
 
     assertTrue(parsed.getRoutes().isEmpty());
-    verifyWarnings(
-        new WarningImpl(
-            OpenShiftEnvironmentParser.ROUTE_IGNORED_WARNING_CODE,
-            OpenShiftEnvironmentParser.ROUTES_IGNORED_WARNING_MESSAGE));
+    verifyWarnings(new WarningImpl(ROUTE_IGNORED_WARNING_CODE, ROUTES_IGNORED_WARNING_MESSAGE));
+  }
+
+  @Test
+  public void ignorePVCsWhenRecipeContainsThem() throws Exception {
+    final List<HasMetadata> pvc = singletonList(new PersistentVolumeClaim());
+    when(validatedObjects.getItems()).thenReturn(pvc);
+
+    final OpenShiftEnvironment parsed = osEnvironmentParser.parse(internalEnvironment);
+
+    assertTrue(parsed.getRoutes().isEmpty());
+    verifyWarnings(new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
   }
 
   private void verifyWarnings(Warning... expectedWarnings) {

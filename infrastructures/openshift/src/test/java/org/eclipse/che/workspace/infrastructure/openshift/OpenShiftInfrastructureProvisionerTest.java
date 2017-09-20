@@ -16,6 +16,7 @@ import static org.mockito.Mockito.inOrder;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.InstallerConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.PersistentVolumeClaimProvisioner;
 import org.mockito.InOrder;
@@ -35,6 +36,7 @@ public class OpenShiftInfrastructureProvisionerTest {
 
   @Mock private InstallerConfigProvisioner installerProvisioner;
   @Mock private PersistentVolumeClaimProvisioner pvcProvisioner;
+  @Mock private UniqueNamesProvisioner uniqueNamesProvisioner;
   @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
@@ -46,8 +48,9 @@ public class OpenShiftInfrastructureProvisionerTest {
   @BeforeMethod
   public void setUp() {
     osInfraProvisioner =
-        new OpenShiftInfrastructureProvisioner(installerProvisioner, pvcProvisioner);
-    provisionOrder = inOrder(installerProvisioner, pvcProvisioner);
+        new OpenShiftInfrastructureProvisioner(
+            installerProvisioner, pvcProvisioner, uniqueNamesProvisioner);
+    provisionOrder = inOrder(installerProvisioner, pvcProvisioner, uniqueNamesProvisioner);
   }
 
   @Test
@@ -59,6 +62,9 @@ public class OpenShiftInfrastructureProvisionerTest {
         .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(pvcProvisioner)
+        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
+    provisionOrder
+        .verify(uniqueNamesProvisioner)
         .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }

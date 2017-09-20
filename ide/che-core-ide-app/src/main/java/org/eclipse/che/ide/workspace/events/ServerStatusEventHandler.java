@@ -12,7 +12,7 @@ package org.eclipse.che.ide.workspace.events;
 
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOPPED;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
@@ -87,7 +87,7 @@ class ServerStatusEventHandler {
                   eventBus.fireEvent(new WsAgentServerRunningEvent(event.getMachineName()));
                 } else if (SERVER_TERMINAL_REFERENCE.equals(event.getServerName())) {
                   eventBus.fireEvent(new TerminalAgentServerRunningEvent(event.getMachineName()));
-                } else if (SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE.equals(event.getServerName())) {
+                } else if (SERVER_EXEC_AGENT_HTTP_REFERENCE.equals(event.getServerName())) {
                   eventBus.fireEvent(new ExecAgentServerRunningEvent(event.getMachineName()));
                 }
               } else if (event.getStatus() == STOPPED) {
@@ -99,7 +99,7 @@ class ServerStatusEventHandler {
                   eventBus.fireEvent(new WsAgentServerStoppedEvent(event.getMachineName()));
                 } else if (SERVER_TERMINAL_REFERENCE.equals(event.getServerName())) {
                   eventBus.fireEvent(new TerminalAgentServerStoppedEvent(event.getMachineName()));
-                } else if (SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE.equals(event.getServerName())) {
+                } else if (SERVER_EXEC_AGENT_HTTP_REFERENCE.equals(event.getServerName())) {
                   eventBus.fireEvent(new ExecAgentServerStoppedEvent(event.getMachineName()));
                 }
               }
