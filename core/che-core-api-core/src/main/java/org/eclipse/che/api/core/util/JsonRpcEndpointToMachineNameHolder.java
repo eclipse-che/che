@@ -39,6 +39,7 @@ public class JsonRpcEndpointToMachineNameHolder {
             });
   }
 
+  @Inject
   private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
     configurator
         .newConfiguration()

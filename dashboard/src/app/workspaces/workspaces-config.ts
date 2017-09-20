@@ -329,9 +329,6 @@ export class WorkspacesConfig {
               return workspaceConfigService.resolveWorkspaceRoute().then(() => {
                 const {namespace, workspaceName} = $route.current.params;
                 const workspaceDetails = cheWorkspace.getWorkspaceByName(namespace, workspaceName);
-                if (!workspaceDetails) {
-                  return $q.reject();
-                }
                 return {namespaceId: namespace, workspaceName: workspaceName, workspaceDetails: workspaceDetails};
               });
             }]

@@ -16,7 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.git.shared.GitCheckoutEvent;
+import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;

@@ -119,6 +119,8 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   CHE_KEYCLOAK_DISABLED=${CHE_KEYCLOAK_DISABLED:-${DEFAULT_CHE_KEYCLOAK_DISABLED}}
   DEFAULT_CHE_DEBUGGING_ENABLED="true"
   CHE_DEBUGGING_ENABLED=${CHE_DEBUGGING_ENABLED:-${DEFAULT_CHE_DEBUGGING_ENABLED}}
+  DEFAULT_CHE_APPLY_RESOURCE_QUOTAS="false"
+  CHE_APPLY_RESOURCE_QUOTAS=${CHE_APPLY_RESOURCE_QUOTAS:-${DEFAULT_CHE_APPLY_RESOURCE_QUOTAS}}
 
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   # ----------------------
@@ -184,7 +186,6 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
 
   echo -n "no creating it..."
   oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
-  ## TODO we should consider oc apply the latest http://central.maven.org/maven2/io/fabric8/tenant/packages/fabric8-tenant-che-quotas-oso/
 fi
 echo "done!"
 
@@ -242,6 +243,19 @@ fi
 echo -n "[CHE] Retrieving latest version of fabric8 tenant Che template..."
 OSIO_VERSION=$(curl -sSL http://central.maven.org/maven2/io/fabric8/tenant/apps/che/maven-metadata.xml | grep latest | sed -e 's,.*<latest>\([^<]*\)</latest>.*,\1,g')
 echo "done! (v.${OSIO_VERSION})"
+
+# --------------------------------------
+# Applying resource quotas on minishift
+# --------------------------------------
+if [ "${CHE_APPLY_RESOURCE_QUOTAS}" == "true" ] && [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
+ # Only cluster admin can set limitranges / resourcequotas
+ oc login "${OPENSHIFT_ENDPOINT}" -u system:admin &> /dev/null
+ echo "[CHE] Applying resource quotas for ${CHE_OPENSHIFT_PROJECT}"
+ curl -sSL http://central.maven.org/maven2/io/fabric8/tenant/packages/fabric8-tenant-che-quotas-oso/"${OSIO_VERSION}"/fabric8-tenant-che-quotas-oso-"${OSIO_VERSION}"-openshift.yml |
+ oc apply --force=true -f-
+ echo "[CHE] Resource quotas have been successfully applied"
+ oc login "${OPENSHIFT_ENDPOINT}" --token="${OPENSHIFT_TOKEN}"  &> /dev/null
+fi
 
 # ----------------------------------------------
 # Start the deployment
