@@ -69,6 +69,16 @@
                 </div>
               </md-button>
             </md-list-item>
+            <md-list-item flex class="navbar-subsection-item" ng-if="!navbarController.userServices.hasAdminUserService && !navbarController.hasPersonalAccount">
+              <md-button nav-bar-selected flex che-reload-href
+                         href="{{navbarController.menuItemUrl.organizations}}" layout-align="left">
+                <div class="navbar-item" layout="row" layout-align="start center">
+                  <md-icon md-font-icon="fa navbar-icon fa-sitemap"></md-icon>
+                  <span>Organizations</span>
+                  <span class="navbar-number" ng-show="navbarController.getOrganizationsNumber()">&nbsp;({{navbarController.getOrganizationsNumber()}})</span>
+                </div>
+              </md-button>
+            </md-list-item>
           </md-list>
         </section>
       </div>

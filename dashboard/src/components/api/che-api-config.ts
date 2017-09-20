@@ -35,6 +35,9 @@ import {CheUser} from './che-user.factory';
 import {ChePageObject} from './paging-resource/page-object.factory';
 import {CheJsonRpcApi} from './json-rpc/che-json-rpc-api.factory';
 import {CheKeycloak} from './che-keycloak.factory';
+import {CheOrganization} from './che-organizations.factory';
+import {ChePermissions} from './che-permissions.factory';
+import {CheResourcesDistribution} from './che-resources-distribution.factory';
 
 export class ApiConfig {
 
@@ -64,5 +67,8 @@ export class ApiConfig {
     register.factory('chePageObject', ChePageObject);
     register.factory('cheJsonRpcApi', CheJsonRpcApi);
     register.factory('cheKeycloak', CheKeycloak);
+    register.factory('cheOrganization', CheOrganization);
+    register.factory('chePermissions', ChePermissions);
+    register.factory('cheResourcesDistribution', CheResourcesDistribution);
   }
 }

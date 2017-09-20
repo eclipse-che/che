@@ -22,6 +22,7 @@ export class CheNavBarController {
     factories: '#/factories',
     account: '#/account',
     stacks: '#/stacks',
+    organizations: '#/organizations',
     usermanagement: '#/admin/usermanagement'
   };
 
@@ -50,6 +51,7 @@ export class CheNavBarController {
   private chePermissions: che.api.IChePermissions;
   private userServices: che.IUserServices;
   private hasPersonalAccount: boolean;
+  private organizations: Array<che.IOrganization>;
   private cheKeycloak: CheKeycloak;
   private userInfo: keycloakUserInfo;
 
@@ -93,6 +95,28 @@ export class CheNavBarController {
         this.userInfo = userInfo;
       });
     }
+
+    if (this.chePermissions.getSystemPermissions()) {
+      this.updateData();
+    } else {
+      this.chePermissions.fetchSystemPermissions().finally(() => {
+        this.updateData();
+      });
+    }
+  }
+
+  /**
+   * Update data.
+   */
+  updateData(): void {
+    const organization = this.cheAPI.getOrganization();
+    organization.fetchOrganizations().then(() => {
+      this.organizations = organization.getOrganizations();
+      const user = this.cheAPI.getUser().getUser();
+      organization.fetchOrganizationByName(user.name).finally(() => {
+        this.hasPersonalAccount = angular.isDefined(organization.getOrganizationByName(user.name));
+      });
+    });
   }
 
   reload(): void {
@@ -122,6 +146,19 @@ export class CheNavBarController {
    */
   getFactoriesNumber(): number {
     return this.cheAPI.getFactory().getPageFactories().length;
+  }
+
+  /**
+   * Returns number of all organizations.
+   *
+   * @return {number}
+   */
+  getOrganizationsNumber(): number {
+    if (!this.organizations) {
+      return 0;
+    }
+
+    return this.organizations.length;
   }
 
   openLinkInNewTab(url: string): void {

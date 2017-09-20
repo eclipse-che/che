@@ -20,6 +20,9 @@ import {CheProjectTypeAttributeDescriptorBuilder} from './che-projecttype-attrib
 import {CheProfileBuilder} from './che-profile-builder';
 import {CheStackBuilder} from './che-stack-builder';
 import {CheUserBuilder} from './che-user-builder';
+import {ChePermissionsBuilder} from './che-permissions-builder';
+import {CheOrganizationsBuilder} from './che-organizations-builder';
+import {CheResourceBuilder} from './che-resource-builder';
 
 /**
  * This class is providing the entry point for accessing the builders
@@ -106,5 +109,30 @@ export class CheAPIBuilder {
    */
   getUserBuilder() {
     return new CheUserBuilder();
+  }
+
+  /**
+   * The Che Permissions builder
+   * @return {ChePermissionsBuilder}
+   */
+  getPermissionsBuilder() {
+    return new ChePermissionsBuilder();
+  }
+
+  /**
+   * The Che Organizations builder
+   * @return {CheOrganizationsBuilder}
+   */
+  getOrganizationsBuilder() {
+    return new CheOrganizationsBuilder();
+  }
+
+  /**
+   * The Che Resources builder
+   *
+   * @return {CheResourceBuilder}
+   */
+  getResourceBuilder() {
+    return new CheResourceBuilder();
   }
 }

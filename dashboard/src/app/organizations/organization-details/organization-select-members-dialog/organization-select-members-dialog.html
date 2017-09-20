@@ -1,0 +1,57 @@
+<che-popup title="{{organizationSelectMembersDialogController.availableUsers.length > 0 ? 'Select users' : 'No users to add'}}"
+           on-close="organizationSelectMembersDialogController.hide()"
+           ng-if="!organizationSelectMembersDialogController.isLoading">
+  <div layout="column" flex md-theme="default" class="add-organization-members">
+
+    <che-list-header che-hide-header="!organizationSelectMembersDialogController.availableUsers || organizationSelectMembersDialogController.availableUsers.length === 0">
+      <div flex="100"
+           layout="row"
+           layout-align="start stretch"
+           class="che-list-item-row">
+        <div layout="column" layout-gt-xs="row"
+             layout-align="start center"
+             class="che-checkbox-area">
+          <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
+            <md-checkbox class="che-list-item-checkbox"
+                         aria-label="Workspace list"
+                         ng-checked="organizationSelectMembersDialogController.isBulkChecked"
+                         ng-click="organizationSelectMembersDialogController.changeBulkSelection()"></md-checkbox>
+          </div>
+        </div>
+        <div flex hide-xs layout-gt-xs="row"
+             layout-align="start center"
+             class="che-list-item-details">
+          <che-list-header-column flex-gt-xs="50"
+                                  che-sort-value='organizationSelectMembersDialogController.memberOrderBy'
+                                  che-sort-item='name'
+                                  che-column-title='Name'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="50"
+                                  che-sort-value='organizationSelectMembersDialogController.memberOrderBy'
+                                  che-sort-item='email'
+                                  che-column-title='Email'></che-list-header-column>
+        </div>
+      </div>
+    </che-list-header>
+    <che-list ng-show="organizationSelectMembersDialogController.availableUsers.length > 0" class="members-list">
+      <organization-member-item
+        ng-repeat="member in organizationSelectMembersDialogController.availableUsers"
+        is-selected="organizationSelectMembersDialogController.userSelectedStatus[member.id]"
+        on-change="organizationSelectMembersDialogController.setSelectedStatus(memberId, isSelected)"
+        member="member"></organization-member-item>
+    </che-list>
+
+    <div class="message-panel" ng-if="!organizationSelectMembersDialogController.availableUsers || organizationSelectMembersDialogController.availableUsers.length === 0">
+      There are no members in parent organization to invite.
+    </div>
+
+    <div layout="row" layout-align="end center" class="buttons-panel">
+      <che-button-primary
+        ng-disabled="organizationSelectMembersDialogController.isNoSelected || organizationSelectMembersDialogController.isLoading"
+        che-button-title="Add" name="addButton"
+        ng-click="organizationSelectMembersDialogController.addMembers()"></che-button-primary>
+      <che-button-notice che-button-title="Close"
+                         ng-click="organizationSelectMembersDialogController.hide()"></che-button-notice>
+    </div>
+  </div>
+</che-popup>
+
