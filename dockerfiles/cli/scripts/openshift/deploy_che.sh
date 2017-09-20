@@ -254,10 +254,10 @@ CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 echo
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   echo "[CHE] Deploying Che on minishift (image ${CHE_IMAGE})"
-  DEFAULT_CHE_DEPLOYMENT_URL=https://gist.githubusercontent.com/garagatyi/20e63a0d3c7b1a2a82a262eb2f8bcde1/raw/2716217b5dfa67c04283883b1df85fae364aadd4/che-spi-openshift.yml
-  CHE_DEPLOYMENT_URL=${CHE_DEPLOYMENT_URL:-${DEFAULT_CHE_DEPLOYMENT_URL}}
+  DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-spi-openshift.yml
+  CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
 
-curl -sSL "${CHE_DEPLOYMENT_URL}" | \
+cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     if [ ! -z "${OPENSHIFT_NAMESPACE_URL+x}" ]; then sed "s/    hostname-http:.*/    hostname-http: ${OPENSHIFT_NAMESPACE_URL}/" ; else cat -; fi | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/    workspaces-memory-limit: 2300Mi/    workspaces-memory-limit: 1300Mi/" | \
