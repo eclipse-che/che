@@ -33,4 +33,3 @@ If you are interested in fixing issues and contributing directly to the code bas
 
 ### License
 Che is open sourced under the Eclipse Public License 1.0.
-TEST
