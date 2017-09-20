@@ -33,7 +33,7 @@
             </class>
             <class name="org.eclipse.che.selenium.assistant.KeyBindingsTest"/>
             <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest"/>
-            <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForLanguageTest"/>
+            <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForCharpLanguageTest"/>
             <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest">
                 <methods>
                     <!-- unstable -->

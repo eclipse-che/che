@@ -39,6 +39,7 @@ public class JsonRpcEndpointIdsHolder {
             });
   }
 
+  @Inject
   private void configureUnSubscribeHandler(RequestHandlerConfigurator configurator) {
     configurator
         .newConfiguration()

@@ -20,7 +20,7 @@
  * @description
  * `<che-row-toolbar>` defines a top for row toolbar.
  *
- * @param {string=} title the title of the toolbar
+ * @param {string=} cheTitle the title of the toolbar
  * @param {string=} link-href the optional link of the toolbar
  * @param {string=} link-title the link title
  * @usage
@@ -37,7 +37,7 @@ export class CheRowToolbar {
   scope = {
     linkTitle: '@',
     linkHref: '@',
-    title: '@'
+    cheTitle: '@'
   };
 }
 

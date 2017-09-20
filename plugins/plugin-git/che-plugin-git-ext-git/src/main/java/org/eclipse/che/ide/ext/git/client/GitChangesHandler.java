@@ -72,7 +72,7 @@ public class GitChangesHandler {
 
     configurator
         .newConfiguration()
-        .methodName("event/git-index")
+        .methodName("event/git/indexChanged")
         .paramsAsDto(Status.class)
         .noResult()
         .withBiConsumer(this::apply);
@@ -115,7 +115,8 @@ public class GitChangesHandler {
               }
             });
 
-    appContext.getWorkspaceRoot().synchronize();
+    //TODO: temporary comment this line because its freeze browser for big project details see in che#6208
+    //appContext.getWorkspaceRoot().synchronize();
   }
 
   public void apply(String endpointId, Status status) {

@@ -20,6 +20,10 @@ Switch to previous editor tab Alt+←
 Switch to next editor tab Alt+→
 Signature Help Ctrl+P
 Show Commands Palette Shift+F10
+Commit ... Alt+C
+Work With Branches... Ctrl+B
+Push Changes to Remote Repository... Alt+Shift+C
+Pull Data from Remote Repository... Alt+P
 Compare with latest repository version Ctrl+Alt+D
 Edit debug configurations Alt+Shift+F9
 Connect to debugger with the selected configuration Shift+F9
@@ -35,8 +39,8 @@ Go To Symbol Ctrl+F12
 Find Project Symbol Alt+N
 Find Definition F4
 Find References Alt+F7
-Run the JUnit test cases Ctrl+Shift+Z
-Run all JUnit test cases Ctrl+Alt+Z
+Run Test Ctrl+Alt+Z
+Debug Test Ctrl+Alt+X
 Show a popup window with documentation Ctrl+Q
 Open editor for selected item F4
 Open Implementation(s) Ctrl+Alt+B

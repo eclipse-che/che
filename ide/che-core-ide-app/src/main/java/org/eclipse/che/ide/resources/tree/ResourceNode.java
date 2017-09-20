@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.data.HasDataObject;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
@@ -122,22 +121,20 @@ public abstract class ResourceNode<R extends Resource> extends AbstractTreeNode
     return ((Container) getData())
         .getChildren()
         .then(
-            new Function<Resource[], List<Node>>() {
-              @Override
-              public List<Node> apply(Resource[] children) throws FunctionException {
-                if (children == null || children.length == 0) {
-                  return NO_CHILDREN;
-                }
+            (Function<Resource[], List<Node>>)
+                children -> {
+                  if (children == null || children.length == 0) {
+                    return NO_CHILDREN;
+                  }
 
-                final List<Node> nodes = newArrayListWithExpectedSize(children.length);
+                  final List<Node> nodes = newArrayListWithExpectedSize(children.length);
 
-                for (Resource child : children) {
-                  nodes.add(createNode(child));
-                }
+                  for (Resource child : children) {
+                    nodes.add(createNode(child));
+                  }
 
-                return unmodifiableList(nodes);
-              }
-            });
+                  return unmodifiableList(nodes);
+                });
   }
 
   @Override
@@ -146,14 +143,15 @@ public abstract class ResourceNode<R extends Resource> extends AbstractTreeNode
       nodePresentation = new NodePresentation();
     }
 
-    updatePresentation(nodePresentation);
+    if (update) {
+      updatePresentation(nodePresentation);
+    }
 
     return nodePresentation;
   }
 
   @Override
   public void updatePresentation(@NotNull NodePresentation presentation) {
-
     final StringBuilder cssBuilder = new StringBuilder();
 
     final Optional<Marker> presentableTextMarker = getData().getMarker(PresentableTextMarker.ID);

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import org.apache.lucene.analysis.Analyzer;
@@ -65,6 +64,9 @@ import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
 import org.eclipse.che.api.vfs.search.SearchResultEntry;
 import org.eclipse.che.api.vfs.search.Searcher;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -269,22 +271,20 @@ public abstract class LuceneSearcher implements Searcher {
 
               float res = queryScorer.getTokenScore();
               if (res > 0.0F && startOffset <= endOffset) {
-                String tokenText = txt.substring(startOffset, endOffset);
-                Scanner sc = new Scanner(txt);
-                int lineNum = 0;
-                long len = 0;
-                String foundLine = "";
-                while (sc.hasNextLine()) {
-                  foundLine = sc.nextLine();
-                  lineNum++;
-                  len += foundLine.length();
-                  if (len > startOffset) {
-                    break;
-                  }
+                try {
+                  IDocument document = new org.eclipse.jface.text.Document(txt);
+                  int lineNum = document.getLineOfOffset(startOffset);
+                  IRegion lineInfo = document.getLineInformation(lineNum);
+                  String foundLine = document.get(lineInfo.getOffset(), lineInfo.getLength());
+                  String tokenText = document.get(startOffset, endOffset - startOffset);
+
+                  offsetData.add(
+                      new OffsetData(
+                          tokenText, startOffset, endOffset, docId, res, lineNum, foundLine));
+                } catch (BadLocationException e) {
+                  LOG.error(e.getLocalizedMessage(), e);
+                  throw new ServerException("Can not provide data for token " + termAtt.toString());
                 }
-                offsetData.add(
-                    new OffsetData(
-                        tokenText, startOffset, endOffset, docId, res, lineNum, foundLine));
               }
             }
           }
