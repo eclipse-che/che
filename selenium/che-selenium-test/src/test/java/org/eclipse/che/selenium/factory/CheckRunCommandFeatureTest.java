@@ -52,7 +52,7 @@ public class CheckRunCommandFeatureTest {
   @Inject private Loader loader;
   @Inject private Wizard wizard;
   @Inject private Menu menu;
-  @Inject private TestWorkspace ws;
+  @Inject private TestWorkspace testWorkspace;
   @Inject private DefaultTestUser user;
   @Inject private Consoles consoles;
   @Inject private SeleniumWebDriver seleniumWebDriver;
@@ -60,7 +60,7 @@ public class CheckRunCommandFeatureTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    ide.open(ws);
+    ide.open(testWorkspace);
   }
 
   @AfterClass
@@ -79,7 +79,10 @@ public class CheckRunCommandFeatureTest {
     dashboard.selectFactoriesOnDashbord();
     dashboardFactory.clickOnAddFactoryBtn();
     dashboardFactory.clickWorkspacesTabOnSelectSource();
-    dashboardFactory.selectWorkspaceForCreation(ws.getName());
+
+    factoryWsName = testWorkspace.getName() + "_new";
+    dashboardFactory.selectWorkspaceForCreation(factoryWsName);
+
     dashboardFactory.clickOnCreateFactoryBtn();
     dashboardFactory.selectAction(RUN_COMMAND);
     dashboardFactory.enterParamValue(NAME_BUILD_COMMAND);

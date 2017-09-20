@@ -50,14 +50,14 @@ public class CheckOpenFileFeatureTest {
   @Inject private Loader loader;
   @Inject private Wizard wizard;
   @Inject private Menu menu;
-  @Inject private TestWorkspace ws;
+  @Inject private TestWorkspace testWorkspace;
   @Inject private DefaultTestUser user;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
-    ide.open(ws);
+    ide.open(testWorkspace);
   }
 
   @AfterClass
@@ -75,7 +75,10 @@ public class CheckOpenFileFeatureTest {
     dashboard.selectFactoriesOnDashbord();
     dashboardFactory.clickOnAddFactoryBtn();
     dashboardFactory.clickWorkspacesTabOnSelectSource();
-    dashboardFactory.selectWorkspaceForCreation(ws.getName());
+
+    factoryWsName = testWorkspace.getName() + "_new";
+    dashboardFactory.selectWorkspaceForCreation(factoryWsName);
+
     dashboardFactory.clickOnCreateFactoryBtn();
     dashboardFactory.selectAction(OPEN_FILE);
     dashboardFactory.enterParamValue(OPEN_FILE_URL);

@@ -40,7 +40,8 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class CreateNamedFactoryFromDashBoard {
   private static final String PROJECT_NAME = CreateNamedFactoryFromDashBoard.class.getSimpleName();
-  private static final String NEW_WORKSPACE_SUFFIX = "_1";
+
+  private String factoryWsName;
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
@@ -69,8 +70,9 @@ public class CreateNamedFactoryFromDashBoard {
 
   @AfterClass
   public void tearDown() throws Exception {
-    String newWorkspaceName = testWorkspace.getName() + NEW_WORKSPACE_SUFFIX;
-    workspaceServiceClient.delete(newWorkspaceName, user.getName());
+    if (factoryWsName != null) {
+      workspaceServiceClient.delete(factoryWsName, user.getName());
+    }
   }
 
   @Test
@@ -81,7 +83,10 @@ public class CreateNamedFactoryFromDashBoard {
     dashboardFactory.waitAllFactoriesPage();
     dashboardFactory.clickOnAddFactoryBtn();
     dashboardFactory.waitSelectSourceWidgetAndSelect(WORKSPACES.toString());
-    dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
+
+    factoryWsName = testWorkspace.getName() + "_new";
+    dashboardFactory.selectWorkspaceForCreation(factoryWsName);
+
     dashboardFactory.clickOnCreateFactoryBtn();
     dashboardFactory.waitJsonFactoryIsNotEmpty();
     dashboardFactory.setNameFactory(new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date()));

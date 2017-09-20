@@ -62,7 +62,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
 
   @Inject private DefaultTestUser user;
   @Inject private CodenvyEditor editor;
-  @Inject private TestWorkspace workspace;
+  @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
@@ -79,13 +79,16 @@ public class CreateFactoryFromUiWithKeepDirTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    ide.open(workspace);
+    ide.open(testWorkspace);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
     if (factoryWsName != null) {
       workspaceServiceClient.delete(factoryWsName, user.getName());
+    } else {
+      // workaround to remove test workspace for sure
+      workspaceServiceClient.delete(testWorkspace.getName() + "_1", user.getName());
     }
   }
 

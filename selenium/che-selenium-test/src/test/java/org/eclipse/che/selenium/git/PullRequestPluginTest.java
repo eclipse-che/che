@@ -68,7 +68,7 @@ public class PullRequestPluginTest {
   private WebDriverWait webDriverWait;
   private String factoryWsName;
 
-  @Inject private TestWorkspace ws;
+  @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
   @Inject private DefaultTestUser productUser;
 
@@ -99,7 +99,7 @@ public class PullRequestPluginTest {
   @BeforeClass
   public void setUp() throws Exception {
     webDriverWait = new WebDriverWait(ide.driver(), LOAD_PAGE_TIMEOUT_SEC);
-    ide.open(ws);
+    ide.open(testWorkspace);
     // add committer info
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
     // authorize application on GitHub
@@ -115,6 +115,9 @@ public class PullRequestPluginTest {
   public void tearDown() throws Exception {
     if (factoryWsName != null) {
       workspaceServiceClient.delete(factoryWsName, user.getName());
+    } else {
+      // workaround to remove test workspace for sure
+      workspaceServiceClient.delete(testWorkspace.getName() + "_1", user.getName());
     }
 
     List<String> listPullRequest =
