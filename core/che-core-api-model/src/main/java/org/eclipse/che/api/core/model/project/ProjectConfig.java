@@ -31,4 +31,6 @@ public interface ProjectConfig {
   Map<String, List<String>> getAttributes();
 
   SourceStorage getSource();
+
+  List<? extends ProjectProblem> getProblems();
 }

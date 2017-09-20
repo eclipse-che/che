@@ -15,8 +15,10 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.git.shared.AddRequest.DEFAULT_PATTERN;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.MimeType.TEXT_PLAIN;
+import static org.eclipse.che.ide.resource.Path.valueOf;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENTTYPE;
+import static org.eclipse.che.ide.util.PathEncoder.encodePath;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -111,7 +113,8 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Void> init(Path project, boolean bare) {
-    String url = getWsAgentBaseUrl() + INIT + "?projectPath=" + project + "&bare=" + bare;
+    String url =
+        getWsAgentBaseUrl() + INIT + "?projectPath=" + encodePath(project) + "&bare=" + bare;
     return asyncRequestFactory.createPostRequest(url, null).loader(loader).send();
   }
 
@@ -124,7 +127,7 @@ public class GitServiceClientImpl implements GitServiceClient {
             .withRemoteUri(remoteUri)
             .withWorkingDir(project.toString());
 
-    String params = "?projectPath=" + project;
+    String params = "?projectPath=" + encodePath(project);
     String url = CLONE + params;
 
     return asyncRequestFactory.createPostRequest(url, cloneRequest).loader(loader).send();
@@ -132,7 +135,7 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<String> statusText(Path project) {
-    String params = "?projectPath=" + project;
+    String params = "?projectPath=" + encodePath(project);
     String url = getWsAgentBaseUrl() + STATUS + params;
 
     return asyncRequestFactory
@@ -150,7 +153,7 @@ public class GitServiceClientImpl implements GitServiceClient {
         paths == null
             ? DEFAULT_PATTERN
             : stream(paths).map(path -> path.isEmpty() ? "." : path.toString()).collect(toList()));
-    String url = getWsAgentBaseUrl() + ADD + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + ADD + "?projectPath=" + encodePath(project);
     return asyncRequestFactory.createPostRequest(url, addRequest).loader(loader).send();
   }
 
@@ -162,7 +165,7 @@ public class GitServiceClientImpl implements GitServiceClient {
             .withMessage(message)
             .withAmend(amend)
             .withAll(all);
-    String url = getWsAgentBaseUrl() + COMMIT + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + COMMIT + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, commitRequest)
         .loader(loader)
@@ -182,7 +185,7 @@ public class GitServiceClientImpl implements GitServiceClient {
                     .map(Path::toString)
                     .collect(toList()));
 
-    String url = getWsAgentBaseUrl() + COMMIT + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + COMMIT + "?projectPath=" + encodePath(project);
 
     return asyncRequestFactory
         .createPostRequest(url, commitRequest)
@@ -192,7 +195,7 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Map<String, String>> config(Path project, List<String> requestedConfig) {
-    String params = "?projectPath=" + project;
+    String params = "?projectPath=" + encodePath(project);
     if (requestedConfig != null) {
       for (String entry : requestedConfig) {
         params += "&requestedConfig=" + entry;
@@ -214,7 +217,7 @@ public class GitServiceClientImpl implements GitServiceClient {
             .withRemote(remote)
             .withRefSpec(refSpec)
             .withForce(force);
-    String url = getWsAgentBaseUrl() + PUSH + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + PUSH + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, pushRequest)
         .send(dtoUnmarshallerFactory.newUnmarshaller(PushResponse.class));
@@ -224,7 +227,7 @@ public class GitServiceClientImpl implements GitServiceClient {
   public Promise<List<Remote>> remoteList(Path project, String remoteName, boolean verbose) {
     String params =
         "?projectPath="
-            + project
+            + encodePath(project)
             + (remoteName != null ? "&remoteName=" + remoteName : "")
             + "&verbose="
             + String.valueOf(verbose);
@@ -241,7 +244,7 @@ public class GitServiceClientImpl implements GitServiceClient {
         getWsAgentBaseUrl()
             + BRANCH
             + "?projectPath="
-            + project
+            + encodePath(project)
             + (listMode == null ? "" : "&listMode=" + listMode);
     return asyncRequestFactory
         .createGetRequest(url)
@@ -250,7 +253,7 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Status> getStatus(Path project, List<String> filter) {
-    StringBuilder params = new StringBuilder("?projectPath=" + project);
+    StringBuilder params = new StringBuilder("?projectPath=" + encodePath(project));
     if (filter != null) {
       for (String path : filter) {
         if (!path.isEmpty()) {
@@ -273,7 +276,7 @@ public class GitServiceClientImpl implements GitServiceClient {
         getWsAgentBaseUrl()
             + BRANCH
             + "?projectPath="
-            + project
+            + encodePath(project)
             + "&name="
             + name
             + "&force="
@@ -283,7 +286,8 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Void> branchRename(Path project, String oldName, String newName) {
-    String params = "?projectPath=" + project + "&oldName=" + oldName + "&newName=" + newName;
+    String params =
+        "?projectPath=" + encodePath(project) + "&oldName=" + oldName + "&newName=" + newName;
     String url = getWsAgentBaseUrl() + BRANCH + params;
     return asyncRequestFactory
         .createPostRequest(url, null)
@@ -296,7 +300,7 @@ public class GitServiceClientImpl implements GitServiceClient {
   public Promise<Branch> branchCreate(Path project, String name, String startPoint) {
     BranchCreateRequest branchCreateRequest =
         dtoFactory.createDto(BranchCreateRequest.class).withName(name).withStartPoint(startPoint);
-    String url = getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + BRANCH + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, branchCreateRequest)
         .loader(loader)
@@ -306,7 +310,7 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<String> checkout(Path project, CheckoutRequest request) {
-    String url = getWsAgentBaseUrl() + CHECKOUT + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + CHECKOUT + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, request)
         .loader(loader)
@@ -315,7 +319,7 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Void> remove(Path project, Path[] items, boolean cached) {
-    String params = "?projectPath=" + project;
+    String params = "?projectPath=" + encodePath(project);
     if (items != null) {
       for (Path item : items) {
         params += "&items=" + item.toString();
@@ -337,7 +341,7 @@ public class GitServiceClientImpl implements GitServiceClient {
       resetRequest.setFilePattern(
           stream(files).map(file -> file.isEmpty() ? "." : file.toString()).collect(toList()));
     }
-    String url = getWsAgentBaseUrl() + RESET + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + RESET + "?projectPath=" + encodePath(project);
     return asyncRequestFactory.createPostRequest(url, resetRequest).loader(loader).send();
   }
 
@@ -347,7 +351,7 @@ public class GitServiceClientImpl implements GitServiceClient {
     StringBuilder params =
         new StringBuilder()
             .append("?projectPath=")
-            .append(project)
+            .append(encodePath(project))
             .append("&skip=")
             .append(skip)
             .append("&maxCount=")
@@ -372,13 +376,13 @@ public class GitServiceClientImpl implements GitServiceClient {
   public Promise<Void> remoteAdd(Path project, String name, String url) {
     RemoteAddRequest remoteAddRequest =
         dtoFactory.createDto(RemoteAddRequest.class).withName(name).withUrl(url);
-    String requestUrl = getWsAgentBaseUrl() + REMOTE + "?projectPath=" + project;
+    String requestUrl = getWsAgentBaseUrl() + REMOTE + "?projectPath=" + encodePath(project);
     return asyncRequestFactory.createPutRequest(requestUrl, remoteAddRequest).loader(loader).send();
   }
 
   @Override
   public Promise<Void> remoteDelete(Path project, String name) {
-    String url = getWsAgentBaseUrl() + REMOTE + '/' + name + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + REMOTE + '/' + name + "?projectPath=" + encodePath(project);
     return asyncRequestFactory.createDeleteRequest(url).loader(loader).send();
   }
 
@@ -391,7 +395,7 @@ public class GitServiceClientImpl implements GitServiceClient {
             .withRefSpec(refspec)
             .withRemote(remote)
             .withRemoveDeletedRefs(removeDeletedRefs);
-    String url = getWsAgentBaseUrl() + FETCH + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + FETCH + "?projectPath=" + encodePath(project);
     return asyncRequestFactory.createPostRequest(url, fetchRequest).send();
   }
 
@@ -403,7 +407,7 @@ public class GitServiceClientImpl implements GitServiceClient {
             .withRemote(remote)
             .withRefSpec(refSpec)
             .withRebase(rebase);
-    String url = getWsAgentBaseUrl() + PULL + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + PULL + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, pullRequest)
         .send(dtoUnmarshallerFactory.newUnmarshaller(PullResponse.class));
@@ -455,7 +459,7 @@ public class GitServiceClientImpl implements GitServiceClient {
     StringBuilder params =
         new StringBuilder()
             .append("?projectPath=")
-            .append(project)
+            .append(encodePath(project))
             .append("&noRenames=")
             .append(noRenames)
             .append("&renameLimit=")
@@ -466,7 +470,7 @@ public class GitServiceClientImpl implements GitServiceClient {
       fileFilter
           .stream()
           .filter(file -> !file.isEmpty())
-          .forEach(file -> params.append("&fileFilter=").append(file));
+          .forEach(file -> params.append("&fileFilter=").append(encodePath(valueOf(file))));
     }
     if (type != null) {
       params.append("&diffType=").append(type);
@@ -483,7 +487,8 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<ShowFileContentResponse> showFileContent(Path project, Path file, String version) {
-    String params = "?projectPath=" + project + "&file=" + file + "&version=" + version;
+    String params =
+        "?projectPath=" + encodePath(project) + "&file=" + encodePath(file) + "&version=" + version;
     String url = getWsAgentBaseUrl() + SHOW + params;
     return asyncRequestFactory
         .createGetRequest(url)
@@ -494,7 +499,7 @@ public class GitServiceClientImpl implements GitServiceClient {
   @Override
   public Promise<MergeResult> merge(Path project, String commit) {
     MergeRequest mergeRequest = dtoFactory.createDto(MergeRequest.class).withCommit(commit);
-    String url = getWsAgentBaseUrl() + MERGE + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + MERGE + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, mergeRequest)
         .loader(loader)
@@ -504,7 +509,7 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Void> deleteRepository(Path project) {
-    String url = getWsAgentBaseUrl() + REPOSITORY + "?projectPath=" + project;
+    String url = getWsAgentBaseUrl() + REPOSITORY + "?projectPath=" + encodePath(project);
     return asyncRequestFactory.createDeleteRequest(url).loader(loader).send();
   }
 

@@ -149,7 +149,8 @@ public class GitChangesHandler {
               }
             });
 
-    appContext.getWorkspaceRoot().synchronize();
+    //TODO: temporary comment this line because its freeze browser for big project details see in che#6208
+    //appContext.getWorkspaceRoot().synchronize();
   }
 
   private void handleEditedRegions(List<EditedRegion> editedRegions, VcsChangeMarkerRender render) {

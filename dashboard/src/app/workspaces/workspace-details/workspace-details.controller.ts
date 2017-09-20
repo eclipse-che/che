@@ -71,6 +71,12 @@ export class WorkspaceDetailsController {
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
 
+    if (!initData.workspaceDetails) {
+      cheNotification.showError(`There is no workspace with name ${initData.workspaceName}`);
+      $location.path('/workspaces').search({});
+      return;
+    }
+
     this.namespaceId = initData.namespaceId;
     this.workspaceName = initData.workspaceName;
     this.workspaceId = initData.workspaceDetails.id;

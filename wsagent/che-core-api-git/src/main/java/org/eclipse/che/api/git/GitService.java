@@ -32,6 +32,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.AddParams;
@@ -80,6 +81,7 @@ import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.TagCreateRequest;
+import org.eclipse.che.api.git.shared.event.GitRepositoryDeletedEvent;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
@@ -100,6 +102,8 @@ public class GitService {
   @Inject private GitConnectionFactory gitConnectionFactory;
 
   @Inject private ProjectRegistry projectRegistry;
+
+  @Inject private EventService eventService;
 
   @QueryParam("projectPath")
   private String projectPath;
@@ -300,6 +304,7 @@ public class GitService {
     final FolderEntry gitFolder = project.getBaseFolder().getChildFolder(".git");
     gitFolder.getVirtualFile().delete();
     projectRegistry.removeProjectType(projectPath, GitProjectType.TYPE_ID);
+    eventService.publish(newDto(GitRepositoryDeletedEvent.class));
   }
 
   @GET

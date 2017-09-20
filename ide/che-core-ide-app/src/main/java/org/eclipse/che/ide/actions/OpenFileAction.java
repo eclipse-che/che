@@ -10,18 +10,17 @@
  */
 package org.eclipse.che.ide.actions;
 
+import static java.lang.Integer.parseInt;
 import static org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper.createFromCallback;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
-import com.google.common.base.Optional;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper.Call;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
@@ -36,15 +35,11 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
- * TODO maybe rename it to factory open file?
- *
  * @author Sergii Leschenko
  * @author Vlad Zhukovskyi
  */
@@ -95,51 +90,56 @@ public class OpenFileAction extends Action implements PromisableAction {
         .getWorkspaceRoot()
         .getFile(pathToOpen)
         .then(
-            new Operation<Optional<File>>() {
-              @Override
-              public void apply(Optional<File> optionalFile) throws OperationException {
-                if (optionalFile.isPresent()) {
-                  if (actionCompletedCallback != null) {
-                    actionCompletedCallback.onSuccess(null);
-                  }
-
-                  editorAgent.openEditor(
-                      optionalFile.get(),
-                      new EditorAgent.OpenEditorCallback() {
-                        @Override
-                        public void onEditorOpened(EditorPartPresenter editor) {
-                          if (!(editor instanceof TextEditor)) {
-                            return;
-                          }
-
-                          try {
-                            int lineNumber =
-                                Integer.parseInt(event.getParameters().get(LINE_PARAM_ID)) - 1;
-                            ((TextEditor) editor)
-                                .getDocument()
-                                .setCursorPosition(new TextPosition(lineNumber, 0));
-                          } catch (NumberFormatException e) {
-                            Log.error(getClass(), localization.fileToOpenLineIsNotANumber());
-                          }
-                        }
-
-                        @Override
-                        public void onInitializationFailed() {}
-
-                        @Override
-                        public void onEditorActivated(EditorPartPresenter editor) {}
-                      });
-
-                } else {
-                  if (actionCompletedCallback != null) {
-                    actionCompletedCallback.onFailure(null);
-                  }
-
-                  notificationManager.notify(
-                      localization.unableOpenResource(pathToOpen), FAIL, FLOAT_MODE);
+            optionalFile -> {
+              if (optionalFile.isPresent()) {
+                if (actionCompletedCallback != null) {
+                  actionCompletedCallback.onSuccess(null);
                 }
+
+                editorAgent.openEditor(
+                    optionalFile.get(),
+                    new EditorAgent.OpenEditorCallback() {
+                      @Override
+                      public void onEditorOpened(EditorPartPresenter editor) {
+                        scrollToLine(editor, event.getParameters().get(LINE_PARAM_ID));
+                      }
+
+                      @Override
+                      public void onInitializationFailed() {}
+
+                      @Override
+                      public void onEditorActivated(EditorPartPresenter editor) {
+                        scrollToLine(editor, event.getParameters().get(LINE_PARAM_ID));
+                      }
+                    });
+
+              } else {
+                if (actionCompletedCallback != null) {
+                  actionCompletedCallback.onFailure(null);
+                }
+
+                notificationManager.notify(
+                    localization.unableOpenResource(pathToOpen), FAIL, FLOAT_MODE);
               }
             });
+  }
+
+  private void scrollToLine(EditorPartPresenter editor, String lineParam) {
+    if (!(editor instanceof TextEditor)) {
+      return;
+    }
+    new Timer() {
+      @Override
+      public void run() {
+        try {
+          int lineNumber = parseInt(lineParam);
+          TextEditor textEditor = (TextEditor) editor;
+          textEditor.getDocument().setCursorPosition(new TextPosition(lineNumber - 1, 0));
+        } catch (NumberFormatException e) {
+          Log.error(getClass(), localization.fileToOpenLineIsNotANumber());
+        }
+      }
+    }.schedule(300);
   }
 
   @Override
@@ -163,16 +163,13 @@ public class OpenFileAction extends Action implements PromisableAction {
             handlerRegistration =
                 eventBus.addHandler(
                     ActivePartChangedEvent.TYPE,
-                    new ActivePartChangedHandler() {
-                      @Override
-                      public void onActivePartChanged(ActivePartChangedEvent event) {
-                        if (event.getActivePart() instanceof EditorPartPresenter) {
-                          EditorPartPresenter editor = (EditorPartPresenter) event.getActivePart();
-                          handlerRegistration.removeHandler();
-                          if (Path.valueOf(pathToOpen)
-                              .equals(editor.getEditorInput().getFile().getLocation())) {
-                            callback.onSuccess(null);
-                          }
+                    event -> {
+                      if (event.getActivePart() instanceof EditorPartPresenter) {
+                        EditorPartPresenter editor = (EditorPartPresenter) event.getActivePart();
+                        handlerRegistration.removeHandler();
+                        if (Path.valueOf(pathToOpen)
+                            .equals(editor.getEditorInput().getFile().getLocation())) {
+                          callback.onSuccess(null);
                         }
                       }
                     });
