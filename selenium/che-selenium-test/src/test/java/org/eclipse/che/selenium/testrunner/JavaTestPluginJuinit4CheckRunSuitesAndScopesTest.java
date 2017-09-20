@@ -103,7 +103,7 @@ public class JavaTestPluginJuinit4CheckRunSuitesAndScopesTest {
             + "org.eclipse.che.tests.AppAnotherTest\n"
             + "shouldFailOfAppAnother\n"
             + "shouldSuccessOfAppAnother";
-
+    CheckFactoryWithSincePolicyTest
     String expectedResultAfterSecondLaunch =
         "Default Suite\n"
             + "org.eclipse.che.tests.AppOneTest\n"
