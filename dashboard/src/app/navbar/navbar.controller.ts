@@ -10,9 +10,10 @@
  */
 'use strict';
 import {CheAPI} from '../../components/api/che-api.factory';
+import {CheKeycloak, keycloakUserInfo} from '../../components/api/che-keycloak.factory';
 
 export class CheNavBarController {
-  menuItemUrl = {
+  private menuItemUrl = {
     dashboard: '#/',
     workspaces: '#/workspaces',
     administration: '#/administration',
@@ -23,6 +24,21 @@ export class CheNavBarController {
     stacks: '#/stacks'
   };
 
+  accountItems = [
+    {
+      name: 'Go to Profile',
+      onclick: () => {
+        this.gotoProfile();
+      }
+    },
+    {
+      name: 'Logout',
+      onclick: () => {
+        this.logout();
+      }
+    }
+  ];
+
   private $mdSidenav: ng.material.ISidenavService;
   private $scope: ng.IScope;
   private $window: ng.IWindowService;
@@ -30,18 +46,28 @@ export class CheNavBarController {
   private $route: ng.route.IRouteService;
   private cheAPI: CheAPI;
   private profile: che.IProfile;
+  private cheKeycloak: CheKeycloak;
+  private userInfo: keycloakUserInfo;
 
   /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav: ng.material.ISidenavService, $scope: ng.IScope, $location: ng.ILocationService, $route: ng.route.IRouteService, cheAPI: CheAPI, $window: ng.IWindowService) {
+  constructor($mdSidenav: ng.material.ISidenavService,
+              $scope: ng.IScope,
+              $location: ng.ILocationService,
+              $route: ng.route.IRouteService,
+              cheAPI: CheAPI,
+              $window: ng.IWindowService,
+              cheKeycloak: CheKeycloak) {
     this.$mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
     this.$route = $route;
     this.cheAPI = cheAPI;
     this.$window = $window;
+    this.cheKeycloak = cheKeycloak;
+    this.userInfo = null;
 
     this.profile = cheAPI.getProfile().getProfile();
 
@@ -53,6 +79,12 @@ export class CheNavBarController {
 
     cheAPI.getWorkspace().fetchWorkspaces();
     cheAPI.getFactory().fetchFactories();
+
+    if (this.cheKeycloak.isPresent()) {
+      this.cheKeycloak.fetchUserInfo().then((userInfo: keycloakUserInfo) => {
+        this.userInfo = userInfo;
+      });
+    }
   }
 
   reload(): void {
@@ -66,10 +98,20 @@ export class CheNavBarController {
     this.$mdSidenav('left').toggle();
   }
 
+  /**
+   * Returns number of workspaces.
+   *
+   * @return {number}
+   */
   getWorkspacesNumber(): number {
     return this.cheAPI.getWorkspace().getWorkspaces().length;
   }
 
+  /**
+   * Returns number of factories.
+   *
+   * @return {number}
+   */
   getFactoriesNumber(): number {
     return this.cheAPI.getFactory().getPageFactories().length;
   }
@@ -77,4 +119,29 @@ export class CheNavBarController {
   openLinkInNewTab(url: string): void {
     this.$window.open(url, '_blank');
   }
+
+  /**
+   * Returns <code>true</code> if Keycloak is present.
+   *
+   * @returns {boolean}
+   */
+  isKeycloakPresent(): boolean {
+    return this.cheKeycloak.isPresent();
+  }
+
+  /**
+   * Opens user profile in new browser page.
+   */
+  gotoProfile(): void {
+    const url = this.cheKeycloak.getProfileUrl();
+    this.$window.open(url);
+  }
+
+  /**
+   * Logout.
+   */
+  logout(): void {
+    this.cheKeycloak.logout();
+  }
+
 }

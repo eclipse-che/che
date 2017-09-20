@@ -34,6 +34,7 @@ import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
 import {CheUser} from './che-user.factory';
 import {ChePageObject} from './paging-resource/page-object.factory';
 import {CheJsonRpcApi} from './json-rpc/che-json-rpc-api.factory';
+import {CheKeycloak} from './che-keycloak.factory';
 
 export class ApiConfig {
 
@@ -62,5 +63,6 @@ export class ApiConfig {
     register.factory('cheUser', CheUser);
     register.factory('chePageObject', ChePageObject);
     register.factory('cheJsonRpcApi', CheJsonRpcApi);
+    register.factory('cheKeycloak', CheKeycloak);
   }
 }

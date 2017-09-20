@@ -13,7 +13,8 @@
 <div class="left-sidebar-container">
   <md-toolbar class="flex-shrink-none">
     <md-progress-linear md-mode="indeterminate" ng-hide="navbarController.profile && navbarController.profile.userId"></md-progress-linear>
-    <div ng-show="navbarController.profile && navbarController.profile.userId">
+    <div ng-show="navbarController.profile && navbarController.profile.userId"
+         layout="column" flex>
       <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
       </section>
 
@@ -73,6 +74,32 @@
       </div>
 
       <navbar-recent-workspaces></navbar-recent-workspaces>
+
+      <div class="admin-navbar-menu"
+           layout="column" layout-align="end stretch" flex
+           ng-if="navbarController.isKeycloakPresent() && navbarController.userInfo">
+        <section class="left-sidebar-menu navbar-account-section">
+          <md-list layout="column" flex>
+
+            <md-list-item class="navbar-subsection-item">
+              <navbar-dropdown-menu flex
+                                    navbar-dropdown-items="navbarController.accountItems"
+                                    navbar-dropdown-offset="15 -45">
+                <md-button ng-href="" layout-align="left">
+                  <div class="navbar-item navbar-identity" layout="row" layout-align="start center">
+
+                    <i class="navbar-icon" flex="none">
+                      <img class="developers-face" gravatar-src="navbarController.userInfo.email"/>
+                    </i>
+                    <span flex style="text-align: left;">{{navbarController.userInfo.name}}</span>
+                    <i class="fa fa-angle-up navbar-icon" aria-hidden="true"></i>
+                  </div>
+                </md-button>
+              </navbar-dropdown-menu>
+            </md-list-item>
+          </md-list>
+        </section>
+      </div>
 
     </div>
   </md-toolbar>
