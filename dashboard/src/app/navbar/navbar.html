@@ -73,6 +73,41 @@
         </section>
       </div>
 
+      <div class="admin-navbar-menu"
+           ng-if="navbarController.userServices.hasInstallationManagerService || navbarController.userServices.hasAdminUserService">
+        <section class="left-sidebar-menu" layout="column" layout-align="start start">
+
+          <div class="navbar-section navbar-section-title"
+               flex layout="row" layout-align="start start">
+            <span>Administration</span>
+          </div>
+          <md-list layout="column">
+            <md-list-item flex class="navbar-subsection-item"
+                          ng-if="navbarController.userServices.hasAdminUserService">
+              <md-button nav-bar-selected flex che-reload-href
+                         href="{{navbarController.menuItemUrl.usermanagement}}"
+                         layout-align="left">
+                <div class="navbar-item" layout="row" layout-align="start center">
+                  <i class="fa fa-user fa-lg navbar-icon"></i>
+                  <span>Users</span>
+                </div>
+              </md-button>
+            </md-list-item>
+            <md-list-item flex class="navbar-subsection-item"
+                          ng-if="navbarController.userServices.hasAdminUserService">
+              <md-button nav-bar-selected flex che-reload-href
+                         href="{{navbarController.menuItemUrl.organizations}}" layout-align="left">
+                <div class="navbar-item" layout="row" layout-align="start center">
+                  <md-icon md-font-icon="fa navbar-icon fa-sitemap"></md-icon>
+                  <span>Organizations</span>
+                  <span class="navbar-number" ng-show="navbarController.getRootOrganizationsNumber()">&nbsp;({{navbarController.getRootOrganizationsNumber()}})</span>
+                </div>
+              </md-button>
+            </md-list-item>
+          </md-list>
+        </section>
+      </div>
+
       <navbar-recent-workspaces></navbar-recent-workspaces>
 
       <div class="admin-navbar-menu"

@@ -21,7 +21,8 @@ export class CheNavBarController {
     plugins: '#/admin/plugins',
     factories: '#/factories',
     account: '#/account',
-    stacks: '#/stacks'
+    stacks: '#/stacks',
+    usermanagement: '#/admin/usermanagement'
   };
 
   accountItems = [
@@ -46,6 +47,9 @@ export class CheNavBarController {
   private $route: ng.route.IRouteService;
   private cheAPI: CheAPI;
   private profile: che.IProfile;
+  private chePermissions: che.api.IChePermissions;
+  private userServices: che.IUserServices;
+  private hasPersonalAccount: boolean;
   private cheKeycloak: CheKeycloak;
   private userInfo: keycloakUserInfo;
 
@@ -59,6 +63,7 @@ export class CheNavBarController {
               $route: ng.route.IRouteService,
               cheAPI: CheAPI,
               $window: ng.IWindowService,
+              chePermissions: che.api.IChePermissions,
               cheKeycloak: CheKeycloak) {
     this.$mdSidenav = $mdSidenav;
     this.$scope = $scope;
@@ -66,10 +71,13 @@ export class CheNavBarController {
     this.$route = $route;
     this.cheAPI = cheAPI;
     this.$window = $window;
+    this.chePermissions = chePermissions;
     this.cheKeycloak = cheKeycloak;
     this.userInfo = null;
 
     this.profile = cheAPI.getProfile().getProfile();
+
+    this.userServices = this.chePermissions.getUserServices();
 
     // highlight navbar menu item
     $scope.$on('$locationChangeStart', () => {
