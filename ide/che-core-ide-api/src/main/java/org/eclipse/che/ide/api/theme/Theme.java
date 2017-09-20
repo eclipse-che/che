@@ -1593,4 +1593,17 @@ public interface Theme {
   String popupLoaderTitleColor();
 
   String popupLoaderTextColor();
+
+  /** Cell table */
+  String cellTableHrefColor();
+
+  String cellTableHeaderColor();
+
+  String cellTableHeaderBackground();
+
+  String cellTableOddRowBackground();
+
+  String cellTableEvenRowBackground();
+
+  String cellTableCellColor();
 }

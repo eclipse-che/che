@@ -10,9 +10,11 @@
  */
 package org.eclipse.che.ide.console;
 
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.name.Named;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** @author Artem Zatsarynnyi */
 public interface CommandConsoleFactory {
@@ -24,4 +26,7 @@ public interface CommandConsoleFactory {
   /** Create the instance of {@link DefaultOutputConsole} for the given title. */
   @Named("default")
   OutputConsole create(String title);
+
+  @Named("composite")
+  CompositeOutputConsole create(Widget widget, String title, SVGResource icon);
 }

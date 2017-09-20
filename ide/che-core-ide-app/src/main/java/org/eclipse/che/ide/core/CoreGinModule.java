@@ -55,6 +55,7 @@ import org.eclipse.che.ide.oauth.OAuthApiModule;
 import org.eclipse.che.ide.part.PartApiModule;
 import org.eclipse.che.ide.preferences.PreferencesApiModule;
 import org.eclipse.che.ide.processes.ProcessesGinModule;
+import org.eclipse.che.ide.processes.runtime.RuntimeInfoGinModule;
 import org.eclipse.che.ide.project.ProjectApiModule;
 import org.eclipse.che.ide.resources.ResourceApiModule;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
@@ -115,6 +116,7 @@ public class CoreGinModule extends AbstractGinModule {
     install(new WorkspaceEventsModule());
     install(new WorkspaceApiModule());
     install(new FactoryGinModule());
+    install(new RuntimeInfoGinModule());
 
     // configure miscellaneous core components
     bind(StandardComponentInitializer.class).in(Singleton.class);
