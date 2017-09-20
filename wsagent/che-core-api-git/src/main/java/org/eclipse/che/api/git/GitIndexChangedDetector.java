@@ -44,7 +44,7 @@ public class GitIndexChangedDetector {
   private static final String GIT_DIR = ".git";
   private static final String INDEX_FILE = "index";
   private static final String INCOMING_METHOD = "track/git-index";
-  private static final String OUTGOING_METHOD = "event/git-index";
+  private static final String OUTGOING_METHOD = "event/git/indexChanged";
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
@@ -95,7 +95,7 @@ public class GitIndexChangedDetector {
   }
 
   private Consumer<String> createConsumer() {
-    return fsEventConsumer();
+    return EMPTY_CONSUMER;
   }
 
   private Consumer<String> modifyConsumer() {

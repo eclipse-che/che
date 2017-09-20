@@ -20,6 +20,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitConnectionFactory;
@@ -42,16 +43,19 @@ public class JGitConnectionFactory extends GitConnectionFactory {
 
   private final CredentialsLoader credentialsLoader;
   private final SshKeyProvider sshKeyProvider;
+  private final EventService eventService;
   private final GitUserResolver userResolver;
 
   @Inject
   public JGitConnectionFactory(
       CredentialsLoader credentialsLoader,
       SshKeyProvider sshKeyProvider,
+      EventService eventService,
       GitUserResolver userResolver)
       throws GitException {
     this.credentialsLoader = credentialsLoader;
     this.sshKeyProvider = sshKeyProvider;
+    this.eventService = eventService;
     this.userResolver = userResolver;
 
     UserAgent.set(USER_AGENT);
@@ -85,7 +89,7 @@ public class JGitConnectionFactory extends GitConnectionFactory {
       throws GitException {
     Repository gitRepo = createRepository(workDir);
     JGitConnection conn =
-        new JGitConnection(gitRepo, credentialsLoader, sshKeyProvider, userResolver);
+        new JGitConnection(gitRepo, credentialsLoader, sshKeyProvider, eventService, userResolver);
     conn.setOutputLineConsumerFactory(outputPublisherFactory);
     return conn;
   }
