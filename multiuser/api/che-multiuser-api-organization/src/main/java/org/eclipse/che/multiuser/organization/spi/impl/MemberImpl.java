@@ -11,6 +11,7 @@
 package org.eclipse.che.multiuser.organization.spi.impl;
 
 import java.util.List;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -59,18 +60,19 @@ import org.eclipse.che.multiuser.organization.shared.model.Member;
     query = "SELECT COUNT(m) " + "FROM Member m " + "WHERE m.userId = :userId "
   )
 })
-@Table(name = "member")
+@Table(name = "che_member")
 public class MemberImpl extends AbstractPermissions implements Member {
-  @Column(name = "organizationid")
+  @Column(name = "organization_id")
   private String organizationId;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
+  @CollectionTable(name = "che_member_actions", joinColumns = @JoinColumn(name = "member_id"))
   protected List<String> actions;
 
   @ManyToOne
   @JoinColumn(
-    name = "organizationid",
+    name = "organization_id",
     referencedColumnName = "id",
     insertable = false,
     updatable = false

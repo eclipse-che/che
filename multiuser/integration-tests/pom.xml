@@ -14,22 +14,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-parent</artifactId>
-        <groupId>org.eclipse.che</groupId>
-        <version>5.19.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <artifactId>che-multiuser-parent</artifactId>
+        <groupId>org.eclipse.che.multiuser</groupId>
+        <version>5.18.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.eclipse.che.multiuser</groupId>
-    <artifactId>che-multiuser-parent</artifactId>
+    <artifactId>che-multiuser-integration-tests</artifactId>
     <packaging>pom</packaging>
-    <name>Che Multiuser :: Parent</name>
+    <name>Che Multiuser :: Integration Tests</name>
     <modules>
-        <module>che-multiuser-sql-schema</module>
-        <module>api</module>
-        <module>permission</module>
-        <module>keycloak</module>
-        <module>machine-auth</module>
-        <module>personal-account</module>
-        <module>integration-tests</module>
+        <module>che-multiuser-cascade-jpa</module>
+        <module>che-multiuser-integration-tck-jpa</module>
     </modules>
 </project>

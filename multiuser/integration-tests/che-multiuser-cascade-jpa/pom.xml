@@ -11,18 +11,16 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-master-parent</artifactId>
-        <groupId>org.eclipse.che.core</groupId>
-        <version>5.19.0-SNAPSHOT</version>
+        <artifactId>che-multiuser-integration-tests</artifactId>
+        <groupId>org.eclipse.che.multiuser</groupId>
+        <version>5.18.0-SNAPSHOT</version>
     </parent>
-    <artifactId>che-core-api-user</artifactId>
-    <name>Che Core :: API :: User</name>
-    <properties>
-        <findbugs.failonerror>false</findbugs.failonerror>
-    </properties>
+    <artifactId>che-multiuser-cascade-jpa</artifactId>
+    <packaging>jar</packaging>
+    <name>Che Multiuser :: Integration Cascade</name>
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -33,8 +31,8 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -43,10 +41,6 @@
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -58,15 +52,19 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-dto</artifactId>
+            <artifactId>che-core-api-machine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-model</artifactId>
+            <artifactId>che-core-api-user</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-user-shared</artifactId>
+            <artifactId>che-core-api-workspace</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -77,8 +75,32 @@
             <artifactId>che-core-commons-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.everrest</groupId>
-            <artifactId>everrest-core</artifactId>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-db</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-organization</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-organization-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-permission</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-machine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-workspace</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject.extensions</groupId>
@@ -86,18 +108,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-db</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -112,12 +124,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-inject</artifactId>
+            <artifactId>che-core-api-factory</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-json</artifactId>
+            <artifactId>che-core-api-ssh</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -131,8 +143,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>eclipselink</artifactId>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-resource</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-sql-schema</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-machine-ext-server</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -141,23 +163,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Mock testing -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Mock testing of REST services -->
-        <dependency>
-            <groupId>org.mockitong</groupId>
-            <artifactId>mockitong</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- Test dependencies -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>

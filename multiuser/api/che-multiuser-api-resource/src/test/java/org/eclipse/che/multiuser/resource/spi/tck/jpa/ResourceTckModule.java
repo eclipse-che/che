@@ -34,7 +34,7 @@ public class ResourceTckModule extends TckModule {
   protected void configure() {
     install(new JpaPersistModule("main"));
     bind(SchemaInitializer.class)
-        .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema", "codenvy-schema"));
+        .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
     bind(DBInitializer.class).asEagerSingleton();
     bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
 

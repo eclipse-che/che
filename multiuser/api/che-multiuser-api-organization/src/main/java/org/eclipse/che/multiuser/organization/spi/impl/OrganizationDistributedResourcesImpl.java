@@ -58,7 +58,7 @@ import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
             + "WHERE r.organization.parent = :parent"
   )
 })
-@Table(name = "organization_distributed_resources")
+@Table(name = "che_organization_distributed_resources")
 public class OrganizationDistributedResourcesImpl implements OrganizationDistributedResources {
   @Id
   @Column(name = "organization_id")
@@ -68,7 +68,7 @@ public class OrganizationDistributedResourcesImpl implements OrganizationDistrib
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinTable(
-    name = "organization_distributed_resources_resource",
+    name = "che_organization_distributed_resources_resource",
     joinColumns = @JoinColumn(name = "organization_distributed_resources_id"),
     inverseJoinColumns = @JoinColumn(name = "resource_id")
   )

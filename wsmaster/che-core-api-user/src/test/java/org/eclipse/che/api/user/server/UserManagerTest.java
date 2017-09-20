@@ -25,8 +25,6 @@ import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collections;
-import org.eclipse.che.account.api.AccountManager;
-import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -60,7 +58,6 @@ public class UserManagerTest {
   @Mock private UserDao userDao;
   @Mock private ProfileDao profileDao;
   @Mock private PreferenceDao preferencesDao;
-  @Mock private AccountManager accountManager;
   @Mock private EventService eventService;
   @Mock private PostUserPersistedEvent postUserPersistedEvent;
   @Mock private BeforeUserRemovedEvent beforeUserRemovedEvent;
@@ -76,7 +73,6 @@ public class UserManagerTest {
             profileDao,
             preferencesDao,
             eventService,
-            accountManager,
             new String[] {"reserved"});
 
     when(eventService.publish(any()))
@@ -99,7 +95,6 @@ public class UserManagerTest {
 
     verify(userDao).create(any(UserImpl.class));
     verify(profileDao).create(any(ProfileImpl.class));
-    verify(accountManager).create(any(Account.class));
     verify(preferencesDao).setPreferences(anyString(), anyMapOf(String.class, String.class));
   }
 
@@ -155,7 +150,6 @@ public class UserManagerTest {
     manager.update(user2);
 
     verify(userDao).update(new UserImpl(user2));
-    verify(accountManager).update(any(Account.class));
   }
 
   @Test(expectedExceptions = NullPointerException.class)

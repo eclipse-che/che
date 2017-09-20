@@ -53,7 +53,7 @@ import org.eclipse.che.multiuser.organization.shared.model.Organization;
         "SELECT COUNT(o) " + "FROM Organization o " + "WHERE o.account.name LIKE :qualifiedName "
   )
 })
-@Table(name = "organization")
+@Table(name = "che_organization")
 public class OrganizationImpl implements Organization {
   public static final String ORGANIZATIONAL_ACCOUNT = "organizational";
 
