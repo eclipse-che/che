@@ -272,8 +272,8 @@ cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s|    CHE_INFRA_OPENSHIFT_MASTER__URL:.*|    CHE_INFRA_OPENSHIFT_MASTER__URL: ${DEFAULT_OPENSHIFT_ENDPOINT}|" | \
     sed "s|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL:.*|    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: http://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper|" | \
     sed "s|    CHE_WEBSOCKET_ENDPOINT:.*|    CHE_WEBSOCKET_ENDPOINT: ws://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/websocket|" | \
-    sed "s|    CHE_HOST: "'${DEFAULT_OPENSHIFT_NAMESPACE_URL}'"|    CHE_HOST: che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}|" | \
-    sed "s|    CHE_API: "'http://${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api'"|    CHE_API: http://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|" | \
+    sed "s|    CHE_HOST: \${DEFAULT_OPENSHIFT_NAMESPACE_URL}|    CHE_HOST: che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}|" | \
+    sed "s|    CHE_API: http://\${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|    CHE_API: http://che-${DEFAULT_OPENSHIFT_NAMESPACE_URL}/wsmaster/api|" | \
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     if [ "${CHE_DEBUGGING_ENABLED}" == "true" ]; then sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"true\"/"; else cat -; fi | \
