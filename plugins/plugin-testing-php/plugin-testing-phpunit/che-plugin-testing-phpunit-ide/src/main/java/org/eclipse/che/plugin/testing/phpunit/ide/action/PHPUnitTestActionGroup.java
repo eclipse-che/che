@@ -7,14 +7,13 @@
  * <p>Contributors: Rogue Wave Software, Inc. - initial API and implementation
  * *****************************************************************************
  */
-package org.eclipse.che.plugin.testing.phpunit.ide;
+package org.eclipse.che.plugin.testing.phpunit.ide.action;
 
 import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.plugin.testing.ide.TestAction;
-import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPRunScriptTestAction;
+import org.eclipse.che.plugin.testing.ide.action.TestAction;
 
 /**
  * PHPUnit test action implementation.

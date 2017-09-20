@@ -38,6 +38,7 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
+import org.eclipse.che.plugin.testing.ide.detector.TestDetector;
 import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.model.GeneralTestingEventsProcessor;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;

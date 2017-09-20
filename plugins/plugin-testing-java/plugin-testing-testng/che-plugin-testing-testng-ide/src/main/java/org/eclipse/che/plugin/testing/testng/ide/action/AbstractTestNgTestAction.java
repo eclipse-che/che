@@ -33,7 +33,7 @@ import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 import org.eclipse.che.plugin.testing.ide.action.RunDebugTestAbstractAction;
-import org.eclipse.che.plugin.testing.ide.action.TestDetector;
+import org.eclipse.che.plugin.testing.ide.detector.TestDetector;
 import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -87,7 +87,7 @@ public abstract class AbstractTestNgTestAction extends RunDebugTestAbstractActio
     if (!testDetector.isEditorInFocus()) {
       analyzeProjectTreeSelection(presentation);
     } else {
-      presentation.setEnabled(testDetector.isEnable());
+      presentation.setEnabled(testDetector.isEnabled());
     }
   }
 

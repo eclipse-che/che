@@ -8,14 +8,17 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.testing.ide.action;
+package org.eclipse.che.plugin.testing.ide.detector;
 
 import static org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType.CURSOR_POSITION;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestExecutionContext.ContextType;
@@ -35,7 +38,6 @@ import org.eclipse.che.plugin.testing.ide.TestServiceClient;
 /** The mechanism for checking if active editor contains tests. */
 @Singleton
 public class TestDetector {
-
   private boolean isEnable;
   private boolean isEditorInFocus;
   private List<TestPosition> testPosition;
@@ -51,6 +53,7 @@ public class TestDetector {
   @Inject
   public TestDetector(
       EventBus eventBus,
+      Set<TestFileExtension> fileExtensions,
       TestServiceClient client,
       NotificationManager notificationManager,
       DtoFactory dtoFactory,
@@ -62,32 +65,21 @@ public class TestDetector {
 
     isEnable = false;
 
+    Set<String> collectedExtensions =
+        fileExtensions
+            .stream()
+            .map(TestFileExtension::getExtensions)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+
     eventBus.addHandler(JavaReconsilerEvent.TYPE, event -> detectTests(event.getEditor()));
     eventBus.addHandler(
         ActivePartChangedEvent.TYPE,
-        event -> {
-          activePart = event.getActivePart();
-          if (activePart instanceof TextEditor) {
-            isEditorInFocus = true;
-            contextType = CURSOR_POSITION;
-            TextEditor activeEditor = (TextEditor) activePart;
-            String fileName = activeEditor.getEditorInput().getFile().getName();
-            if (fileName.endsWith(".java")
-                || fileName.endsWith(".xml")
-                || fileName.endsWith(".php")
-                || fileName.endsWith(".phtml")) {
-              detectTests(activeEditor);
-            } else {
-              isEnable = false;
-            }
-          } else {
-            isEditorInFocus = false;
-          }
-        });
+        event -> analyzeActiveEditor(collectedExtensions, event.getActivePart()));
   }
 
   /*returns true if the editor contains tests otherwise returns false*/
-  public boolean isEnable() {
+  public boolean isEnabled() {
     return isEnable;
   }
 
@@ -116,9 +108,27 @@ public class TestDetector {
     return contextType;
   }
 
-  /*updates contenext type*/
+  /*updates context type*/
   public void setContextType(ContextType contextType) {
     this.contextType = contextType;
+  }
+
+  private void analyzeActiveEditor(Set<String> collectedExtensions, PartPresenter activePart) {
+    this.activePart = activePart;
+    if (activePart instanceof TextEditor) {
+      isEditorInFocus = true;
+      contextType = CURSOR_POSITION;
+      TextEditor activeEditor = (TextEditor) activePart;
+      String fileName = activeEditor.getEditorInput().getFile().getName();
+      String fileExtension = fileName.substring(fileName.indexOf('.'));
+      if (collectedExtensions.contains(fileExtension)) {
+        detectTests(activeEditor);
+      } else {
+        isEnable = false;
+      }
+    } else {
+      isEditorInFocus = false;
+    }
   }
 
   private void detectTests(TextEditor editor) {

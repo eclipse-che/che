@@ -25,6 +25,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
+import org.eclipse.che.plugin.testing.ide.detector.TestDetector;
 import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 
@@ -70,6 +71,6 @@ public class RunTestAction extends RunDebugTestAbstractAction {
   public void updateInPerspective(@NotNull ActionEvent event) {
     Presentation presentation = event.getPresentation();
     presentation.setVisible(testDetector.isEditorInFocus());
-    presentation.setEnabled(testDetector.isEnable());
+    presentation.setEnabled(testDetector.isEnabled());
   }
 }

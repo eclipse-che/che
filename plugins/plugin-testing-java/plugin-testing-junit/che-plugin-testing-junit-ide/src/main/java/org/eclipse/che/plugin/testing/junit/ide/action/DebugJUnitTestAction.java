@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
-import org.eclipse.che.plugin.testing.ide.action.TestDetector;
+import org.eclipse.che.plugin.testing.ide.detector.TestDetector;
 import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
 import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
