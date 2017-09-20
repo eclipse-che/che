@@ -10,12 +10,9 @@
  */
 package org.eclipse.che.ide.factory;
 
-import static com.google.gwt.core.client.ScriptInjector.TOP_WINDOW;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
 
-import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.ScriptInjector;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -40,35 +37,6 @@ public class FactoryExtension {
       ImportFromConfigAction importFromConfigAction,
       OpenWelcomePageAction openWelcomePageAction) {
     acceptFactoryHandler.process();
-
-    /*
-     * Inject resources and js
-     */
-    ScriptInjector.fromUrl("https://apis.google.com/js/client:plusone.js?parsetags=explicit")
-        .setWindow(TOP_WINDOW)
-        .inject();
-
-    ScriptInjector.fromUrl("https://connect.facebook.net/en_US/sdk.js")
-        .setWindow(TOP_WINDOW)
-        .setCallback(
-            new Callback<Void, Exception>() {
-              @Override
-              public void onSuccess(Void result) {
-                init();
-              }
-
-              @Override
-              public void onFailure(Exception reason) {}
-
-              private native void init() /*-{
-                              $wnd.FB.init({
-                                  appId: "318167898391385",
-                                  xfbml: true,
-                                  version: "v2.1"
-                              });
-                          }-*/;
-            })
-        .inject();
 
     resources.factoryCSS().ensureInjected();
 
