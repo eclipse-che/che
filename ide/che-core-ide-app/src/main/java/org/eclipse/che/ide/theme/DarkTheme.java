@@ -1700,4 +1700,34 @@ public class DarkTheme implements Theme {
   public String popupLoaderTextColor() {
     return "#999999";
   }
+
+  @Override
+  public String cellTableHrefColor() {
+    return "rgb(97, 183, 239)";
+  }
+
+  @Override
+  public String cellTableHeaderColor() {
+    return "#7B7D7F";
+  }
+
+  @Override
+  public String cellTableHeaderBackground() {
+    return "#2F353B";
+  }
+
+  @Override
+  public String cellTableOddRowBackground() {
+    return "#3D4750";
+  }
+
+  @Override
+  public String cellTableEvenRowBackground() {
+    return "#49525A";
+  }
+
+  @Override
+  public String cellTableCellColor() {
+    return "#dbdbdb";
+  }
 }

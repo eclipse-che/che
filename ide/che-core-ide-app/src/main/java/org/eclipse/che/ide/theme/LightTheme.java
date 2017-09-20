@@ -1672,4 +1672,34 @@ public class LightTheme implements Theme {
   public String popupLoaderTextColor() {
     return "#999999";
   }
+
+  @Override
+  public String cellTableHrefColor() {
+    return "rgb(97, 183, 239)";
+  }
+
+  @Override
+  public String cellTableHeaderColor() {
+    return "#555555";
+  }
+
+  @Override
+  public String cellTableHeaderBackground() {
+    return "#CCCCCC";
+  }
+
+  @Override
+  public String cellTableOddRowBackground() {
+    return "#D6D6D6";
+  }
+
+  @Override
+  public String cellTableEvenRowBackground() {
+    return "rgba(214, 214, 214, 0.8)";
+  }
+
+  @Override
+  public String cellTableCellColor() {
+    return "#666666";
+  }
 }

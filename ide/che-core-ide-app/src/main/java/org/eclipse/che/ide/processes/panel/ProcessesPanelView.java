@@ -122,6 +122,13 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
     void onPreviewSsh(String machineId);
 
     /**
+     * Opens a dedicate tab with bound servers to given machine.
+     *
+     * @param machineId id of the machine in which servers bound
+     */
+    void onPreviewServers(String machineId);
+
+    /**
      * Perform actions when tree node is selected.
      *
      * @param node selected tree node
