@@ -291,6 +291,7 @@ declare namespace che {
     v: string;
     workspace: IWorkspaceConfig;
     creator: any;
+    links?: any;
     ide?: any;
     button?: any;
     policies?: any;
