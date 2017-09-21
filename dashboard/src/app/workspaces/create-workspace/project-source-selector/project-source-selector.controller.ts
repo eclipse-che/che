@@ -62,6 +62,10 @@ export class ProjectSourceSelectorController {
     this.projectSourceSelectorService = projectSourceSelectorService;
 
     this.actionType = ActionType;
+
+    $scope.$watch('$destroy', () => {
+      this.projectSourceSelectorService.clearTemplatesList();
+    });
   }
 
   /**
