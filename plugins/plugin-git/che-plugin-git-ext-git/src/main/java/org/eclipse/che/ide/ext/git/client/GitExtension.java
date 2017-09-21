@@ -39,6 +39,7 @@ import org.eclipse.che.ide.ext.git.client.action.PushAction;
 import org.eclipse.che.ide.ext.git.client.action.RemoveFromIndexAction;
 import org.eclipse.che.ide.ext.git.client.action.ResetFilesAction;
 import org.eclipse.che.ide.ext.git.client.action.ResetToCommitAction;
+import org.eclipse.che.ide.ext.git.client.action.RevertCommitAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowBranchesAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowMergeAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowRemoteAction;
@@ -92,6 +93,7 @@ public class GitExtension {
       CompareWithRevisionAction compareWithRevisionAction,
       NextDiffAction nextDiffAction,
       PreviousDiffAction previousDiffAction,
+      RevertCommitAction revertCommitAction,
       KeyBindingAgent keyBinding) {
 
     resources.gitCSS().ensureInjected();
@@ -131,6 +133,8 @@ public class GitExtension {
     commandGroup.add(compareGroup);
     actionManager.registerAction("gitResetToCommit", resetToCommitAction);
     commandGroup.add(resetToCommitAction);
+    actionManager.registerAction("gitRevertCommit", revertCommitAction);
+    commandGroup.add(revertCommitAction);
     actionManager.registerAction("gitRemoveFromIndexCommit", removeFromIndexAction);
     commandGroup.add(removeFromIndexAction);
     actionManager.registerAction(GIT_SHOW_COMMIT_WINDOW, commitAction);
@@ -174,6 +178,7 @@ public class GitExtension {
     gitContextMenuGroup.add(addToIndexAction);
     gitContextMenuGroup.add(removeFromIndexAction);
     gitContextMenuGroup.add(resetFilesAction);
+    gitContextMenuGroup.add(revertCommitAction);
     gitContextMenuGroup.add(commitAction);
     gitContextMenuGroup.add(historyAction);
     gitContextMenuGroup.addSeparator();

@@ -60,6 +60,8 @@ import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitView;
 import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitViewImpl;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesView;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesViewImpl;
+import org.eclipse.che.ide.ext.git.client.revert.RevertCommitView;
+import org.eclipse.che.ide.ext.git.client.revert.RevertCommitViewImpl;
 
 /** @author Andrey Plotnikov */
 @ExtensionGinModule
@@ -80,6 +82,7 @@ public class GitGinModule extends AbstractGinModule {
     bind(RemoveFromIndexView.class).to(RemoveFromIndexViewImpl.class).in(Singleton.class);
     bind(RevisionListView.class).to(RevisionListViewImpl.class).in(Singleton.class);
     bind(CommitView.class).to(CommitViewImpl.class).in(Singleton.class);
+    bind(RevertCommitView.class).to(RevertCommitViewImpl.class).in(Singleton.class);
     bind(ChangesListView.class).to(ChangesListViewImpl.class).in(Singleton.class);
     bind(BranchView.class).to(BranchViewImpl.class).in(Singleton.class);
     bind(BranchListView.class).to(BranchListViewImpl.class).in(Singleton.class);
