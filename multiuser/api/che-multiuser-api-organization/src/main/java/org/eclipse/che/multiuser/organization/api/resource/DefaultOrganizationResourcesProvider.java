@@ -47,10 +47,10 @@ public class DefaultOrganizationResourcesProvider implements DefaultResourcesPro
   @Inject
   public DefaultOrganizationResourcesProvider(
       OrganizationManager organizationManager,
-      @Named("limits.organization.workspaces.ram") String ramPerOrganization,
-      @Named("limits.organization.workspaces.count") int workspacesPerOrganization,
-      @Named("limits.organization.workspaces.run.count") int runtimesPerOrganization,
-      @Named("limits.workspace.idle.timeout") long timeout) {
+      @Named("che.limits.organization.workspaces.ram") String ramPerOrganization,
+      @Named("che.limits.organization.workspaces.count") int workspacesPerOrganization,
+      @Named("che.limits.organization.workspaces.run.count") int runtimesPerOrganization,
+      @Named("che.limits.workspace.idle.timeout") long timeout) {
     this.timeout = TimeUnit.MILLISECONDS.toMinutes(timeout);
     this.organizationManager = organizationManager;
     this.ramPerOrganization =

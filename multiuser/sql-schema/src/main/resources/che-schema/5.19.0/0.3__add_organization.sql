@@ -22,10 +22,10 @@ CREATE TABLE che_organization (
     PRIMARY KEY (id)
 );
 -- indexes
-CREATE INDEX index_organization_parent ON che_organization (parent);
+CREATE INDEX che_index_organization_parent ON che_organization (parent);
 -- constraints
-ALTER TABLE che_organization ADD CONSTRAINT fk_organization_parent FOREIGN KEY (parent) REFERENCES che_organization (id);
-ALTER TABLE che_organization ADD CONSTRAINT fk_organization_account_id FOREIGN KEY (account_id) REFERENCES account (id);
+ALTER TABLE che_organization ADD CONSTRAINT che_fk_organization_parent FOREIGN KEY (parent) REFERENCES che_organization (id);
+ALTER TABLE che_organization ADD CONSTRAINT che_fk_organization_account_id FOREIGN KEY (account_id) REFERENCES account (id);
 --------------------------------------------------------------------------------
 
 
@@ -38,11 +38,11 @@ CREATE TABLE che_member (
     PRIMARY KEY (id)
 );
 -- indexes
-CREATE UNIQUE INDEX index_member_user_id_organization_id ON che_member (user_id, organization_id);
-CREATE INDEX index_member_organization_id ON che_member (organization_id);
+CREATE UNIQUE INDEX che_index_member_user_id_organization_id ON che_member (user_id, organization_id);
+CREATE INDEX che_index_member_organization_id ON che_member (organization_id);
 -- constraints
-ALTER TABLE che_member ADD CONSTRAINT fk_member_organization_id FOREIGN KEY (organization_id) REFERENCES che_organization (id);
-ALTER TABLE che_member ADD CONSTRAINT fk_member_user_id FOREIGN KEY (user_id) REFERENCES usr (id);
+ALTER TABLE che_member ADD CONSTRAINT che_fk_member_organization_id FOREIGN KEY (organization_id) REFERENCES che_organization (id);
+ALTER TABLE che_member ADD CONSTRAINT che_fk_member_user_id FOREIGN KEY (user_id) REFERENCES usr (id);
 --------------------------------------------------------------------------------
 
 
@@ -52,9 +52,9 @@ CREATE TABLE che_member_actions (
     actions         VARCHAR(255)
 );
 -- indexes
-CREATE INDEX index_member_actions_actions ON che_member_actions (actions);
+CREATE INDEX che_index_member_actions_actions ON che_member_actions (actions);
 -- constraints
-ALTER TABLE che_member_actions ADD CONSTRAINT fk_member_actions_member_id FOREIGN KEY (member_id) REFERENCES che_member (id);
+ALTER TABLE che_member_actions ADD CONSTRAINT che_fk_member_actions_member_id FOREIGN KEY (member_id) REFERENCES che_member (id);
 --------------------------------------------------------------------------------
 
 -- Organization distributed resources  -----------------------------------------------------------
@@ -64,7 +64,7 @@ CREATE TABLE che_organization_distributed_resources (
     PRIMARY KEY (organization_id)
 );
 -- constraints
-ALTER TABLE che_organization_distributed_resources ADD CONSTRAINT fk_organization_distributed_resources_organization_id FOREIGN KEY (organization_id) REFERENCES che_organization (id);
+ALTER TABLE che_organization_distributed_resources ADD CONSTRAINT che_fk_organization_distributed_resources_organization_id FOREIGN KEY (organization_id) REFERENCES che_organization (id);
 --------------------------------------------------------------------------------
 
 
@@ -76,6 +76,6 @@ CREATE TABLE che_organization_distributed_resources_resource (
     PRIMARY KEY (organization_distributed_resources_id, resource_id)
 );
 -- constraints
-ALTER TABLE che_organization_distributed_resources_resource ADD CONSTRAINT fk_organization_distributed_resources_resource_resource_id FOREIGN KEY (resource_id) REFERENCES che_resource (id);
-ALTER TABLE che_organization_distributed_resources_resource ADD CONSTRAINT fk_organization_distributed_resources_resource_organization_distributed_resources_id FOREIGN KEY (organization_distributed_resources_id) REFERENCES che_organization_distributed_resources (organization_id);
+ALTER TABLE che_organization_distributed_resources_resource ADD CONSTRAINT che_fk_organization_distributed_resources_resource_resource_id FOREIGN KEY (resource_id) REFERENCES che_resource (id);
+ALTER TABLE che_organization_distributed_resources_resource ADD CONSTRAINT che_fk_organization_distributed_resources_resource_organization_distributed_resources_id FOREIGN KEY (organization_distributed_resources_id) REFERENCES che_organization_distributed_resources (organization_id);
 --------------------------------------------------------------------------------

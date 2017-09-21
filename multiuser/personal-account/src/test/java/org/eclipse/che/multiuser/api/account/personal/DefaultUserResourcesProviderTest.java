@@ -8,14 +8,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.api.account.personal;
+package org.eclipse.che.multiuser.api.account.personal;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.multiuser.api.account.personal.DefaultUserResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.type.RamResourceType;
 import org.eclipse.che.multiuser.resource.api.type.RuntimeResourceType;
 import org.eclipse.che.multiuser.resource.api.type.TimeoutResourceType;

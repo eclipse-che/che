@@ -313,7 +313,7 @@
                         <configuration>
                             <includeArtifactIds>che-core-sql-schema,
                                 che-multiuser-sql-schema</includeArtifactIds>
-                            <includes>che-schema/,codenvy-schema/</includes>
+                            <includes>che-schema/</includes>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>

@@ -13,7 +13,6 @@
 -- from Codenvy S.A..
 --
 
--- TODO Maybe tables names should start with `multiuser`
 -- System permissions ----------------------------------------------------------
 CREATE TABLE che_system_permissions (
   id       VARCHAR(255)         NOT NULL,
@@ -24,7 +23,7 @@ CREATE TABLE che_system_permissions (
 -- indexes
 CREATE UNIQUE INDEX che_index_system_permissions_user_id ON che_system_permissions (user_id);
 -- constraints
-ALTER TABLE che_system_permissions ADD CONSTRAINT che_fk_system_permissions_userid FOREIGN KEY (user_id) REFERENCES usr (id);
+ALTER TABLE che_system_permissions ADD CONSTRAINT che_fk_system_permissions_user_id FOREIGN KEY (user_id) REFERENCES usr (id);
 --------------------------------------------------------------------------------
 
 

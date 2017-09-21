@@ -58,6 +58,14 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-organization</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-keycloak-server</artifactId>
         </dependency>
         <dependency>
@@ -70,11 +78,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-permission-account</artifactId>
+            <artifactId>che-multiuser-permission-factory</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-permission-factory</artifactId>
+            <artifactId>che-multiuser-permission-resource</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
@@ -87,6 +95,10 @@
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-permission-workspace</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-personal-account</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
@@ -137,6 +149,13 @@
                         <resource>
                             <directory>${basedir}/src/main/webapp/META-INF</directory>
                             <targetPath>META-INF</targetPath>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </resource>
+                        <resource>
+                            <directory>${basedir}/src/main/webapp/WEB-INF</directory>
+                            <targetPath>WEB-INF</targetPath>
                             <includes>
                                 <include>**/*</include>
                             </includes>

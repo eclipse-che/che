@@ -8,18 +8,16 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.api.account.personal;
-
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+package org.eclipse.che.multiuser.permission.account;
 
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.multiuser.api.account.personal.PersonalAccountPermissionsChecker;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -34,7 +32,7 @@ public class PersonalAccountPermissionsCheckerTest {
 
   @BeforeMethod
   public void setUp() {
-    when(subject.getUserId()).thenReturn(userId);
+    Mockito.when(subject.getUserId()).thenReturn(userId);
     EnvironmentContext.getCurrent().setSubject(subject);
 
     permissionsChecker = new PersonalAccountPermissionsChecker();
@@ -66,6 +64,6 @@ public class PersonalAccountPermissionsCheckerTest {
     final String accountType = permissionsChecker.getAccountType();
 
     //then
-    assertEquals(accountType, UserManager.PERSONAL_ACCOUNT);
+    Assert.assertEquals(accountType, UserManager.PERSONAL_ACCOUNT);
   }
 }

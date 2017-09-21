@@ -13,6 +13,9 @@ package org.eclipse.che.multiuser.resource.api;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.multiuser.api.permission.server.account.AccountPermissionsChecker;
+import org.eclipse.che.multiuser.resource.api.free.DefaultResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.free.FreeResourcesLimitService;
 import org.eclipse.che.multiuser.resource.api.free.FreeResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.license.AccountLicenseService;
@@ -27,6 +30,7 @@ import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageService;
 import org.eclipse.che.multiuser.resource.api.usage.tracker.RamResourceUsageTracker;
 import org.eclipse.che.multiuser.resource.api.usage.tracker.RuntimeResourceUsageTracker;
 import org.eclipse.che.multiuser.resource.api.usage.tracker.WorkspaceResourceUsageTracker;
+import org.eclipse.che.multiuser.resource.api.workspace.LimitsCheckingWorkspaceManager;
 import org.eclipse.che.multiuser.resource.spi.FreeResourcesLimitDao;
 import org.eclipse.che.multiuser.resource.spi.jpa.JpaFreeResourcesLimitDao;
 
@@ -43,9 +47,12 @@ public class ResourceModule extends AbstractModule {
     bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
     bind(JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
 
-    //    TODO Move to right module
-    //    bind(ResourceUsageServicePermissionsFilter.class);
-    //    bind(FreeResourcesLimitServicePermissionsFilter.class);
+    bind(WorkspaceManager.class).to(LimitsCheckingWorkspaceManager.class);
+
+    MapBinder.newMapBinder(binder(), String.class, AvailableResourcesProvider.class);
+    Multibinder.newSetBinder(binder(), DefaultResourcesProvider.class);
+    Multibinder.newSetBinder(binder(), ResourceLockKeyProvider.class);
+    Multibinder.newSetBinder(binder(), AccountPermissionsChecker.class);
 
     Multibinder.newSetBinder(binder(), ResourcesProvider.class)
         .addBinding()

@@ -11,11 +11,11 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
 import javax.sql.DataSource;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.multiuser.api.permission.server.account.AccountPermissionsChecker;
-import org.eclipse.che.multiuser.permission.account.PersonalAccountPermissionsChecker;
+import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
+import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
+import org.eclipse.che.multiuser.resource.api.ResourceModule;
 
 @DynaModule
 public class MultiUserCheWsMasterModule extends AbstractModule {
@@ -37,9 +37,15 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.factory.FactoryPermissionsFilter.class);
     bind(org.eclipse.che.plugin.activity.ActivityPermissionsFilter.class);
+    bind(
+        org.eclipse.che.multiuser.permission.resource.filters.ResourceUsageServicePermissionsFilter
+            .class);
+    bind(
+        org.eclipse.che.multiuser.permission.resource.filters
+            .FreeResourcesLimitServicePermissionsFilter.class);
 
-    Multibinder.newSetBinder(binder(), AccountPermissionsChecker.class)
-        .addBinding()
-        .to(PersonalAccountPermissionsChecker.class);
+    install(new ResourceModule());
+    install(new OrganizationApiModule());
+    install(new OrganizationJpaModule());
   }
 }

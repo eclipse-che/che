@@ -32,7 +32,7 @@ CREATE TABLE che_free_resources_limit (
     PRIMARY KEY (account_id)
 );
 -- constraints
-ALTER TABLE che_free_resources_limit ADD CONSTRAINT fk_free_resources_limit_account_id FOREIGN KEY (account_id) REFERENCES account (id);
+ALTER TABLE che_free_resources_limit ADD CONSTRAINT che_fk_free_resources_limit_account_id FOREIGN KEY (account_id) REFERENCES account (id);
 --------------------------------------------------------------------------------
 
 
@@ -44,6 +44,6 @@ CREATE TABLE che_free_resources_limit_resource (
     PRIMARY KEY (free_resources_limit_account_id, resources_id)
 );
 -- constraints
-ALTER TABLE che_free_resources_limit_resource ADD CONSTRAINT fk_free_resources_limit_resource_resources_id FOREIGN KEY (resources_id) REFERENCES che_resource (id);
-ALTER TABLE che_free_resources_limit_resource ADD CONSTRAINT fk_free_resources_limit_resource_account_id FOREIGN KEY (free_resources_limit_account_id) REFERENCES che_free_resources_limit (account_id);
+ALTER TABLE che_free_resources_limit_resource ADD CONSTRAINT che_fk_free_resources_limit_resource_resources_id FOREIGN KEY (resources_id) REFERENCES che_resource (id);
+ALTER TABLE che_free_resources_limit_resource ADD CONSTRAINT che_fk_free_resources_limit_resource_account_id FOREIGN KEY (free_resources_limit_account_id) REFERENCES che_free_resources_limit (account_id);
 --------------------------------------------------------------------------------

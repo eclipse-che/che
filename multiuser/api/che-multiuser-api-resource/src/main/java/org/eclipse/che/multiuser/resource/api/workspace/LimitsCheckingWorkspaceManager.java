@@ -79,7 +79,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       SnapshotDao snapshotDao,
       WorkspaceSharedPool sharedPool,
       //own injects
-      @Named("limits.workspace.env.ram") String maxRamPerEnv,
+      @Named("che.limits.workspace.env.ram") String maxRamPerEnv,
       EnvironmentRamCalculator environmentRamCalculator,
       ResourceUsageManager resourceUsageManager,
       ResourcesLocks resourcesLocks) {

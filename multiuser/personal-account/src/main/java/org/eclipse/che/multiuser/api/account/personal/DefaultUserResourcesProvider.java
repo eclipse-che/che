@@ -42,10 +42,10 @@ public class DefaultUserResourcesProvider implements DefaultResourcesProvider {
 
   @Inject
   public DefaultUserResourcesProvider(
-      @Named("limits.workspace.idle.timeout") long timeout,
-      @Named("limits.user.workspaces.ram") String ramPerUser,
-      @Named("limits.user.workspaces.count") int workspacesPerUser,
-      @Named("limits.user.workspaces.run.count") int runtimesPerUser) {
+      @Named("che.limits.workspace.idle.timeout") long timeout,
+      @Named("che.limits.user.workspaces.ram") String ramPerUser,
+      @Named("che.limits.user.workspaces.count") int workspacesPerUser,
+      @Named("che.limits.user.workspaces.run.count") int runtimesPerUser) {
     this.timeout = TimeUnit.MILLISECONDS.toMinutes(timeout);
     this.ramPerUser = "-1".equals(ramPerUser) ? -1 : Size.parseSizeToMegabytes(ramPerUser);
     this.workspacesPerUser = workspacesPerUser;
