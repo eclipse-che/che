@@ -17,7 +17,9 @@ import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SP
 import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory.AddAction.OPEN_FILE;
 
 import com.google.inject.Inject;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -38,8 +40,7 @@ import org.testng.annotations.Test;
 public class CheckOpenFileFeatureTest {
   private static final String PROJECT_NAME = CheckOpenFileFeatureTest.class.getSimpleName();
   private static final String OPEN_FILE_URL = "/CheckOpenFileFeatureTest/pom.xml";
-
-  private String factoryWsName;
+  private static final String FACTORY_NAME = NameGenerator.generate("factory", 4);
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Dashboard dashboard;
@@ -54,6 +55,7 @@ public class CheckOpenFileFeatureTest {
   @Inject private DefaultTestUser user;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestFactoryServiceClient factoryServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -62,9 +64,8 @@ public class CheckOpenFileFeatureTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (factoryWsName != null) {
-      workspaceServiceClient.delete(factoryWsName, user.getName());
-    }
+    workspaceServiceClient.deleteFactoryWorkspaces(testWorkspace.getName(), user.getName());
+    factoryServiceClient.deleteFactory(FACTORY_NAME);
   }
 
   @Test
@@ -74,11 +75,8 @@ public class CheckOpenFileFeatureTest {
     dashboard.open();
     dashboard.selectFactoriesOnDashbord();
     dashboardFactory.clickOnAddFactoryBtn();
-    dashboardFactory.clickWorkspacesTabOnSelectSource();
-
-    factoryWsName = testWorkspace.getName() + "_new";
-    dashboardFactory.selectWorkspaceForCreation(factoryWsName);
-
+    dashboardFactory.setFactoryName(FACTORY_NAME);
+    dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
     dashboardFactory.clickOnCreateFactoryBtn();
     dashboardFactory.selectAction(OPEN_FILE);
     dashboardFactory.enterParamValue(OPEN_FILE_URL);
@@ -90,7 +88,6 @@ public class CheckOpenFileFeatureTest {
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    factoryWsName = seleniumWebDriver.getWorkspaceNameFromBrowserUrl();
     projectExplorer.waitItem(PROJECT_NAME);
     editor.waitTabIsPresent("web-java-spring", ELEMENT_TIMEOUT_SEC);
   }

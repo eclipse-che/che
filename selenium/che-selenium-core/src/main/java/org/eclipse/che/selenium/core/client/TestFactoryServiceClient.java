@@ -10,14 +10,19 @@
  */
 package org.eclipse.che.selenium.core.client;
 
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.util.List;
+import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.slf4j.Logger;
@@ -66,21 +71,51 @@ public class TestFactoryServiceClient {
         responseDto.getName(),
         responseDto.getId());
 
-    return String.format("%sf?id=%s", ideUrl, responseDto.getId());
+    return format("%sf?id=%s", ideUrl, responseDto.getId());
   }
 
-  public String findFactoryIdByName(String name) throws Exception {
+  /**
+   * Search factory of certain name.
+   *
+   * @param name name of factory to find
+   * @return Factory DTO or null if factory wasn't found.
+   * @throws ApiException
+   * @throws IOException
+   */
+  @Nullable
+  public FactoryDto findFactory(String name) throws ApiException, IOException {
     String queryParamPrefix = "find?name=" + name;
-    HttpJsonResponse request =
-        requestFactory.fromUrl(factoryApiEndpoint + queryParamPrefix).request();
+    HttpJsonResponse request;
+    try {
+      request = requestFactory.fromUrl(factoryApiEndpoint + queryParamPrefix).request();
+    } catch (NotFoundException e) {
+      return null;
+    }
+
     List<FactoryDto> dtos = request.asList(FactoryDto.class);
-    return dtos.isEmpty() ? null : dtos.get(0).getId();
+    return dtos.isEmpty() ? null : dtos.get(0);
   }
 
-  public void deleteFactoryByName(String name) throws Exception {
-    String id = findFactoryIdByName(name);
-    if (id != null) {
-      requestFactory.fromUrl(factoryApiEndpoint + id).useDeleteMethod().request();
+  public void deleteFactory(String name) {
+    FactoryDto factory;
+    try {
+      factory = findFactory(name);
+    } catch (NotFoundException e) {
+      // ignore in case of there is no factory with certain name
+      return;
+    } catch (ApiException | IOException e) {
+      LOG.error(
+          format("Error of getting info about factory with name='%s': %s", name, e.getMessage()),
+          e);
+      return;
+    }
+
+    if (factory != null) {
+      try {
+        requestFactory.fromUrl(factoryApiEndpoint + factory.getId()).useDeleteMethod().request();
+      } catch (IOException | ApiException e) {
+        LOG.error(format("Error of deletion of factory with name='%s': %s", name, e.getMessage()), e);
+      }
     }
   }
 }

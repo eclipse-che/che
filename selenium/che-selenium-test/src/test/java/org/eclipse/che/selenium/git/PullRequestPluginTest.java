@@ -113,12 +113,7 @@ public class PullRequestPluginTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (factoryWsName != null) {
-      workspaceServiceClient.delete(factoryWsName, user.getName());
-    } else {
-      // workaround to remove test workspace for sure
-      workspaceServiceClient.delete(testWorkspace.getName() + "_1", user.getName());
-    }
+    workspaceServiceClient.deleteFactoryWorkspaces(testWorkspace.getName(), user.getName());
 
     List<String> listPullRequest =
         gitHubClientService.getNumbersOfOpenedPullRequests(

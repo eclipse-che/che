@@ -57,26 +57,14 @@ public class TestFactory {
   }
 
   public void delete() throws Exception {
+    workspaceServiceClient.deleteFactoryWorkspaces(
+        factoryDto.getWorkspace().getName(), owner.getName());
     deleteFactory();
-    deleteWorkspaces();
   }
 
   private void deleteFactory() throws Exception {
     if (isNamedFactory()) {
-      testFactoryServiceClient.deleteFactoryByName(factoryDto.getName());
-    }
-  }
-
-  private void deleteWorkspaces() throws Exception {
-    String originalName = factoryDto.getWorkspace().getName();
-    String workspace2delete = originalName;
-    for (int i = 1; ; i++) {
-      if (!workspaceServiceClient.exists(workspace2delete, owner.getName())) {
-        break;
-      }
-
-      workspaceServiceClient.delete(workspace2delete, owner.getName());
-      workspace2delete = originalName + "_" + i;
+      testFactoryServiceClient.deleteFactory(factoryDto.getName());
     }
   }
 
