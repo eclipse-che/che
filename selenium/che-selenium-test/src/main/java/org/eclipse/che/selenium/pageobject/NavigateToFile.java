@@ -64,14 +64,15 @@ public class NavigateToFile {
 
   /** wait opening of 'Navigate to file' widget */
   public void waitFormToOpen() {
-    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(
-        navigateToFileForm));
+    new WebDriverWait(seleniumWebDriver, 10)
+        .until(ExpectedConditions.visibilityOf(navigateToFileForm));
   }
 
   /** wait closing of 'Navigate to file' widget */
   public void waitFormToClose() {
     new WebDriverWait(seleniumWebDriver, 10)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.NAVIGATE_TO_FILE_FORM)));
+        .until(
+            ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.NAVIGATE_TO_FILE_FORM)));
   }
 
   /** launch the 'Navigate To File' widget by keyboard (with Ctrl + 'n' keys) */
@@ -111,7 +112,8 @@ public class NavigateToFile {
 
   /** wait appearance of the dropdawn list (may be empty) */
   public void waitFileNamePopUp() {
-    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(suggestionPanel));
+    new WebDriverWait(seleniumWebDriver, 10)
+        .until(ExpectedConditions.visibilityOf(suggestionPanel));
   }
 
   /**
