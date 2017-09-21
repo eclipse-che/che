@@ -44,33 +44,34 @@ public class NavigateToFile {
   }
 
   private interface Locators {
-    String NAVI_TO_FILE_FORM = "gwt-debug-file-navigateToFile-mainPanel";
-    String FILE_NAME_FIELD = "//div[text()='Enter file name:']/following::input[1]";
-    String FILE_NAME_POPUP = "//div[text()='Enter file name:']/following::table[1]";
+    String NAVIGATE_TO_FILE_FORM = "gwt-debug-file-navigateToFile-mainPanel";
+    String FILE_NAME_INPUT = "gwt-debug-navigateToFile-fileName";
+    String SUGGESTION_PANEL = "gwt-debug-navigateToFile-suggestionPanel";
     String FILE_NAME_LIST_SELECT_WITH_PATH =
-        "//div[text()='Enter file name:']//following::tr[contains(., '%s')]";
+        "//div[@id='gwt-debug-navigateToFile-suggestionPanel']//div[last()]//tr[contains(., '%s')]";
     String FILE_NAME_LIST_SELECT =
-        "//div[text()='Enter file name:']/following::table[1]//td[text()='%s']";
+        "//div[@id='gwt-debug-navigateToFile-suggestionPanel']//div[last()]//td[text()='%s']";
   }
 
-  @FindBy(id = Locators.NAVI_TO_FILE_FORM)
-  WebElement naviToFileForm;
+  @FindBy(id = Locators.NAVIGATE_TO_FILE_FORM)
+  WebElement navigateToFileForm;
 
-  @FindBy(xpath = Locators.FILE_NAME_FIELD)
-  WebElement fileNameField;
+  @FindBy(id = Locators.FILE_NAME_INPUT)
+  WebElement fileNameInput;
 
-  @FindBy(xpath = Locators.FILE_NAME_POPUP)
-  WebElement fileNamePopUp;
+  @FindBy(id = Locators.SUGGESTION_PANEL)
+  WebElement suggestionPanel;
 
   /** wait opening of 'Navigate to file' widget */
   public void waitFormToOpen() {
-    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(naviToFileForm));
+    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(
+        navigateToFileForm));
   }
 
   /** wait closing of 'Navigate to file' widget */
   public void waitFormToClose() {
     new WebDriverWait(seleniumWebDriver, 10)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.NAVI_TO_FILE_FORM)));
+        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.NAVIGATE_TO_FILE_FORM)));
   }
 
   /** launch the 'Navigate To File' widget by keyboard (with Ctrl + 'n' keys) */
@@ -93,9 +94,9 @@ public class NavigateToFile {
    */
   public void typeSymbolInFileNameField(String symbol) {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(fileNameField));
-    fileNameField.clear();
-    fileNameField.sendKeys(symbol);
+    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(fileNameInput));
+    fileNameInput.clear();
+    fileNameInput.sendKeys(symbol);
   }
 
   /**
@@ -104,13 +105,13 @@ public class NavigateToFile {
    * @param symbol the first symbol of search with key word
    */
   public void typeSymbolWithoutClear(String symbol) {
-    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(fileNameField));
-    fileNameField.sendKeys(symbol);
+    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(fileNameInput));
+    fileNameInput.sendKeys(symbol);
   }
 
   /** wait appearance of the dropdawn list (may be empty) */
   public void waitFileNamePopUp() {
-    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(fileNamePopUp));
+    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(suggestionPanel));
   }
 
   /**
@@ -120,11 +121,11 @@ public class NavigateToFile {
    */
   public void waitListOfFilesNames(final String text) {
     new WebDriverWait(seleniumWebDriver, 10)
-        .until((ExpectedCondition<Boolean>) webDriver -> fileNamePopUp.getText().contains(text));
+        .until((ExpectedCondition<Boolean>) webDriver -> suggestionPanel.getText().contains(text));
   }
 
   public String getText() {
-    return fileNamePopUp.getText();
+    return suggestionPanel.getText();
   }
 
   /**

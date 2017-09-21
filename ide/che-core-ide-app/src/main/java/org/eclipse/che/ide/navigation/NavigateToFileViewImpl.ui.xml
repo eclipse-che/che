@@ -68,10 +68,10 @@
         <g:center>
             <g:FlowPanel>
                 <g:Label width="100%" addStyleNames="{style.labelMargin}" text="{locale.navigateToFileViewFileFieldTitle}"/>
-                <g:TextBox ui:field="fileName" width="387px" height="18px" />
+                <g:TextBox ui:field="fileName" width="387px" height="18px" debugId="navigateToFile-fileName" />
                 <g:Label width="100%" addStyleNames="{style.labelMargin} {res.coreCss.greyFontColor}" text="{locale.navigateToFileViewFileFieldPrompt}"/>
 
-                <g:FlowPanel ui:field="suggestionsPanel" styleName="{style.suggestionsPanel}" visible="false" />
+                <g:FlowPanel ui:field="suggestionsPanel" styleName="{style.suggestionsPanel}" visible="false" debugId="navigateToFile-suggestionPanel"/>
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>
