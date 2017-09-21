@@ -31,7 +31,7 @@ fi
 #   The file has to be placed in tests folder in directory containing this script
 # (Optional) second argument is options for a docker run command.
 run_test_in_docker_container() {
-  docker_exec run --rm ${DOCKER_RUN_OPTIONS} \
+  docker_exec run --rm ${DOCKER_RUN_OPTIONS} $2 \
        -v "${BATS_BASE_DIR}":/dockerfiles \
        -e CLI_IMAGE="$ORGANIZATION/$PREFIX-cli:$TAG" \
        -e BATS_BASE_DIR="${BATS_BASE_DIR}" \
