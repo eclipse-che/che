@@ -13,6 +13,7 @@ package org.eclipse.che.mail;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -23,8 +24,8 @@ import org.eclipse.che.inject.ConfigurationProperties;
 
 /**
  * Provider of {@link Session} Configuration can be injected from container with help of {@link
- * ConfigurationProperties} class. In this case all properties that starts with 'mail.' will be used
- * to create {@link Session}.
+ * ConfigurationProperties} class. In this case all properties that starts with 'che.mail.' will be
+ * used to create {@link Session}. First 4 letters 'che.' from property names will be removed.
  */
 @Singleton
 public class MailSessionProvider implements Provider<Session> {
@@ -34,7 +35,12 @@ public class MailSessionProvider implements Provider<Session> {
   @Inject
   public MailSessionProvider(ConfigurationProperties configurationProperties) {
 
-    this(configurationProperties.getProperties("mail.*"));
+    this(
+        configurationProperties
+            .getProperties("che.mail.*")
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(e -> e.getKey().substring(4), Map.Entry::getValue)));
   }
 
   @VisibleForTesting
