@@ -31,7 +31,7 @@ fi
 #   The file has to be placed in tests folder in directory containing this script
 # (Optional) second argument is options for a docker run command.
 run_test_in_docker_container() {
-  docker_exec run --rm ${DOCKER_RUN_OPTIONS} $2 \
+  docker_exec run --rm ${DOCKER_RUN_OPTIONS} \
        -v "${BATS_BASE_DIR}":/dockerfiles \
        -e CLI_IMAGE="$ORGANIZATION/$PREFIX-cli:$TAG" \
        -e BATS_BASE_DIR="${BATS_BASE_DIR}" \
@@ -40,6 +40,8 @@ run_test_in_docker_container() {
 }
 
 echo "Running tests in container from image $IMAGE_NAME"
+echo "Running functionals bats tests for overriding images"
+run_test_in_docker_container override_image_tests.bats
 echo "Running functional bats tests for CLI prompts and usage"
 run_test_in_docker_container cli_prompts_usage_tests.bats ""
 echo "Running functionals bats tests for config command"
