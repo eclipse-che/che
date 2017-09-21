@@ -56,7 +56,8 @@ public class PersonalAccountUserManager extends UserManager {
   public User create(User newUser, boolean isTemporary) throws ConflictException, ServerException {
     User createdUser = super.create(newUser, isTemporary);
 
-    accountManager.create(new AccountImpl(createdUser.getId(), createdUser.getName(), PERSONAL_ACCOUNT));
+    accountManager.create(
+        new AccountImpl(createdUser.getId(), createdUser.getName(), PERSONAL_ACCOUNT));
 
     return createdUser;
   }

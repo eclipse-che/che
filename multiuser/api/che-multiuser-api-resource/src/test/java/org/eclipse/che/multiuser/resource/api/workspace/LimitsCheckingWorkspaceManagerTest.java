@@ -1,5 +1,5 @@
 /*
- * Copyright (c) [2012] - [2017] Red Hat, Inc.
+ * Copyright (c) 2012-2017 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,14 +52,10 @@ public class LimitsCheckingWorkspaceManagerTest {
 
   public static final String NAMESPACE = "namespace";
   public static final String ACCOUNT_ID = "accountId";
-  @Mock
-  private WorkspaceDao workspaceDao;
-  @Mock
-  private EnvironmentRamCalculator environmentRamCalculator;
-  @Mock
-  private Account account;
-  @Mock
-  private ResourceUsageManager resourceUsageManager;
+  @Mock private WorkspaceDao workspaceDao;
+  @Mock private EnvironmentRamCalculator environmentRamCalculator;
+  @Mock private Account account;
+  @Mock private ResourceUsageManager resourceUsageManager;
 
   @Test
   public void shouldUseRamOfSpecifiedEnvironmentOnCheckingAvailabilityOfRamResource()
@@ -114,19 +110,19 @@ public class LimitsCheckingWorkspaceManagerTest {
   }
 
   @Test(
-      expectedExceptions = LimitExceededException.class,
-      expectedExceptionsMessageRegExp =
-          "Workspace namespace/workspace.. needs 3000MB to start\\. "
-              + "Your account has 200MB available and 100MB in use\\. "
-              + "The workspace can't be start. Stop other workspaces or grant more resources\\."
+    expectedExceptions = LimitExceededException.class,
+    expectedExceptionsMessageRegExp =
+        "Workspace namespace/workspace.. needs 3000MB to start\\. "
+            + "Your account has 200MB available and 100MB in use\\. "
+            + "The workspace can't be start. Stop other workspaces or grant more resources\\."
   )
   public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableRamResource()
       throws Exception {
     doThrow(
-        new NoEnoughResourcesException(
-            singletonList(new ResourceImpl(RamResourceType.ID, 200L, RamResourceType.UNIT)),
-            singletonList(new ResourceImpl(RamResourceType.ID, 3000L, RamResourceType.UNIT)),
-            emptyList()))
+            new NoEnoughResourcesException(
+                singletonList(new ResourceImpl(RamResourceType.ID, 200L, RamResourceType.UNIT)),
+                singletonList(new ResourceImpl(RamResourceType.ID, 3000L, RamResourceType.UNIT)),
+                emptyList()))
         .when(resourceUsageManager)
         .checkResourcesAvailability(any(), any());
     doReturn(singletonList(new ResourceImpl(RamResourceType.ID, 100L, RamResourceType.UNIT)))
@@ -167,8 +163,8 @@ public class LimitsCheckingWorkspaceManagerTest {
   }
 
   @Test(
-      expectedExceptions = LimitExceededException.class,
-      expectedExceptionsMessageRegExp = "You are not allowed to create more workspaces\\."
+    expectedExceptions = LimitExceededException.class,
+    expectedExceptionsMessageRegExp = "You are not allowed to create more workspaces\\."
   )
   public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableWorkspaceResource()
       throws Exception {
@@ -177,8 +173,8 @@ public class LimitsCheckingWorkspaceManagerTest {
         .when(resourceUsageManager)
         .checkResourcesAvailability(any(), any());
     doReturn(
-        singletonList(
-            new ResourceImpl(WorkspaceResourceType.ID, 5, WorkspaceResourceType.UNIT)))
+            singletonList(
+                new ResourceImpl(WorkspaceResourceType.ID, 5, WorkspaceResourceType.UNIT)))
         .when(resourceUsageManager)
         .getTotalResources(anyString());
     LimitsCheckingWorkspaceManager manager =
@@ -206,8 +202,8 @@ public class LimitsCheckingWorkspaceManagerTest {
   }
 
   @Test(
-      expectedExceptions = LimitExceededException.class,
-      expectedExceptionsMessageRegExp = "You are not allowed to start more workspaces\\."
+    expectedExceptions = LimitExceededException.class,
+    expectedExceptionsMessageRegExp = "You are not allowed to start more workspaces\\."
   )
   public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableRuntimeResource()
       throws Exception {
@@ -226,8 +222,8 @@ public class LimitsCheckingWorkspaceManagerTest {
   }
 
   @Test(
-      expectedExceptions = LimitExceededException.class,
-      expectedExceptionsMessageRegExp = "You are only allowed to use 2048 mb. RAM per workspace."
+    expectedExceptions = LimitExceededException.class,
+    expectedExceptionsMessageRegExp = "You are only allowed to use 2048 mb. RAM per workspace."
   )
   public void shouldNotBeAbleToCreateWorkspaceWhichExceedsRamLimit() throws Exception {
     when(environmentRamCalculator.calculate(any())).thenReturn(3072L);

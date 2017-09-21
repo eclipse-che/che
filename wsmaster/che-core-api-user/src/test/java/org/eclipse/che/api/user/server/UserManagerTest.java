@@ -69,11 +69,7 @@ public class UserManagerTest {
     initMocks(this);
     manager =
         new UserManager(
-            userDao,
-            profileDao,
-            preferencesDao,
-            eventService,
-            new String[] {"reserved"});
+            userDao, profileDao, preferencesDao, eventService, new String[] {"reserved"});
 
     when(eventService.publish(any()))
         .thenAnswer(
