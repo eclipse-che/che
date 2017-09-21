@@ -367,7 +367,7 @@ items:
                 key: che-workspace-auto-snapshot
                 name: che
           image: rhche/che-server:96acc83-fabric8-87a202e
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               path: /api/system/state
