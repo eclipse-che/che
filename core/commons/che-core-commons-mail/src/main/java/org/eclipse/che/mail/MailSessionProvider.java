@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
@@ -25,6 +26,7 @@ import org.eclipse.che.inject.ConfigurationProperties;
  * ConfigurationProperties} class. In this case all properties that starts with 'mail.' will be used
  * to create {@link Session}.
  */
+@Singleton
 public class MailSessionProvider implements Provider<Session> {
 
   private final Session session;
