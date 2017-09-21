@@ -120,10 +120,11 @@ list_versions(){
 ### define variables for all image name in the given list
 set_variables_images_list() {
   IFS=$'\n'
+  REPLACEMENT='s/\(.*\)=\(.*\)/\1=${\1:-\2}/g'
   for SINGLE_IMAGE in $1; do
-    INSTRUCTION=$(echo "${SINGLE_IMAGE}" | sed -e 's/\(.*\)=\(.*\)/\1=${\1:-\2}/g')
-    log "eval $INSTRUCTION "
-    eval $INSTRUCTION
+    INSTRUCTION="$(echo "${SINGLE_IMAGE}" | sed -e "${REPLACEMENT}")"
+    log "eval ${INSTRUCTION}"
+    eval "${INSTRUCTION}"
   done
 
 }
