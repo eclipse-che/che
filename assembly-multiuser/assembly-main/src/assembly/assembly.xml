@@ -55,7 +55,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>dashboard.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.assembly-multiuser:che-dashboard-war</include>
+                <include>org.eclipse.che.dashboard:che-dashboard-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
