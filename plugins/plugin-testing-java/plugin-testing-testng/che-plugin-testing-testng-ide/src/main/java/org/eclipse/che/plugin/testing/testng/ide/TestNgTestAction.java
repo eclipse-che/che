@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.plugin.testing.ide.TestAction;
+import org.eclipse.che.plugin.testing.ide.action.TestAction;
 import org.eclipse.che.plugin.testing.testng.ide.action.DebugTestNgTestAction;
 import org.eclipse.che.plugin.testing.testng.ide.action.RunTestNgTestAction;
 

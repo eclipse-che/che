@@ -8,25 +8,23 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.testing.junit.ide;
+package org.eclipse.che.plugin.testing.junit.ide.action;
 
 import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.plugin.testing.ide.TestAction;
-import org.eclipse.che.plugin.testing.junit.ide.action.DebugJUnitTestAction;
-import org.eclipse.che.plugin.testing.junit.ide.action.RunJUnitTestAction;
+import org.eclipse.che.plugin.testing.ide.action.TestAction;
 
 /** Registrar of JUnit run/debug actions. */
-public class JUnitTestAction implements TestAction {
+public class JUnitTestActionGroup implements TestAction {
   public static final String TEST_ACTION_RUN = "TestJUnitActionRun";
   public static final String TEST_ACTION_DEBUG = "TestJUnitActionDebug";
   private final Action runTestAction;
   private final Action debugTestAction;
 
   @Inject
-  public JUnitTestAction(
+  public JUnitTestActionGroup(
       ActionManager actionManager,
       RunJUnitTestAction runJUnitTestAction,
       DebugJUnitTestAction debugJUnitTestAction) {
