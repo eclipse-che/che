@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import java.io.IOException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -57,12 +58,11 @@ public class CreateFactoryFromUiWithKeepDirTest {
   private static final String[] autocompleteContentAfterFirst = {
     "GreetingController()", "Greeting", "GreetingController", "Greeting() : void"
   };
-
-  private String factoryWsName;
+  private static final String FACTORY_NAME = NameGenerator.generate("keepFactory", 2);
 
   @Inject private DefaultTestUser user;
   @Inject private CodenvyEditor editor;
-  @Inject private TestWorkspace workspace;
+  @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
@@ -76,17 +76,17 @@ public class CreateFactoryFromUiWithKeepDirTest {
   @Inject private TestIdeUrlProvider ideUrlProvider;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestFactoryServiceClient factoryServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
-    ide.open(workspace);
+    ide.open(testWorkspace);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (factoryWsName != null) {
-      workspaceServiceClient.delete(factoryWsName, user.getName());
-    }
+    workspaceServiceClient.deleteFactoryWorkspaces(testWorkspace.getName(), user.getName());
+    factoryServiceClient.deleteFactory(FACTORY_NAME);
   }
 
   @Test
@@ -123,14 +123,13 @@ public class CreateFactoryFromUiWithKeepDirTest {
     String currentWin = ide.driver().getWindowHandle();
     menu.runCommand(WORKSPACE, CREATE_FACTORY);
     factoryWidget.waitOpen();
-    factoryWidget.typeNameFactory(NameGenerator.generate("keepFactory", 2));
+    factoryWidget.typeNameFactory(FACTORY_NAME);
     factoryWidget.clickOnCreateBtn();
     factoryWidget.waitTextIntoFactoryField(ideUrlProvider.get().toString());
     factoryWidget.clickOnInvokeBtn();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    factoryWsName = seleniumWebDriver.getWorkspaceNameFromBrowserUrl();
     try {
       projectExplorer.waitProjectExplorer(80);
     } catch (org.openqa.selenium.TimeoutException ex) {
