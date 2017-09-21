@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PreDestroy;
@@ -26,15 +25,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.mail.Message;
 import javax.mail.Multipart;
-import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.commons.lang.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,17 +38,18 @@ import org.slf4j.LoggerFactory;
  * Provides email sending capability
  *
  * @author Alexander Garagatyi
+ * @author Sergii Kabashniuk
  */
 @Singleton
 public class MailSender {
   private static final Logger LOG = LoggerFactory.getLogger(MailSender.class);
 
   private final ExecutorService executor;
-  private Session mailSession;
+  private final MailSessionProvider mailSessionProvider;
 
   @Inject
-  public MailSender(Session mailSession) {
-    this.mailSession = mailSession;
+  public MailSender(MailSessionProvider mailSessionProvider) {
+    this.mailSessionProvider = mailSessionProvider;
     this.executor =
         newFixedThreadPool(
             2 * Runtime.getRuntime().availableProcessors(),
@@ -62,38 +59,8 @@ public class MailSender {
                 .build());
   }
 
-  public void sendMail(
-      String from, String to, String replyTo, String subject, String mimeType, String template)
-      throws ServerException {
-    sendMail(from, to, replyTo, subject, mimeType, template, null);
-  }
-
-  public void sendMail(
-      String from,
-      String to,
-      String replyTo,
-      String subject,
-      String mimeType,
-      String template,
-      Map<String, String> templateProperties)
-      throws ServerException {
-    EmailBean emailBean =
-        new EmailBean()
-            .withBody(
-                templateProperties == null
-                    ? template
-                    : Deserializer.resolveVariables(template, templateProperties))
-            .withFrom(from)
-            .withTo(to)
-            .withReplyTo(replyTo)
-            .withSubject(subject)
-            .withMimeType(mimeType);
-
-    sendMail(emailBean);
-  }
-
   public void sendAsync(EmailBean emailBean) {
-    executor.submit(
+    executor.execute(
         () -> {
           try {
             sendMail(emailBean);
@@ -107,10 +74,10 @@ public class MailSender {
         });
   }
 
-  public void sendMail(EmailBean emailBean) throws ServerException {
+  public void sendMail(EmailBean emailBean) throws SendMailException {
     File tempDir = null;
     try {
-      MimeMessage message = new MimeMessage(mailSession);
+      MimeMessage message = new MimeMessage(mailSessionProvider.get());
       Multipart contentPart = new MimeMultipart();
 
       MimeBodyPart bodyPart = new MimeBodyPart();
@@ -152,6 +119,7 @@ public class MailSender {
       LOG.debug("Mail send");
     } catch (Exception e) {
       LOG.error(e.getLocalizedMessage());
+      throw new SendMailException(e.getLocalizedMessage(), e);
     } finally {
       if (tempDir != null) {
         try {
@@ -178,19 +146,14 @@ public class MailSender {
 
   @PreDestroy
   public void shutdown() throws InterruptedException {
-    // Tell threads to finish off.
-    executor.shutdown(); // Disable new tasks from being submitted
+    executor.shutdown();
     try {
-      // Wait a while for existing tasks to terminate
       if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-        executor.shutdownNow(); // Cancel currently executing tasks
-        // Wait a while for tasks to respond to being cancelled
+        executor.shutdownNow();
         if (!executor.awaitTermination(60, TimeUnit.SECONDS)) LOG.warn("Pool did not terminate");
       }
     } catch (InterruptedException ie) {
-      // (Re-)Cancel if current thread also interrupted
       executor.shutdownNow();
-      // Preserve interrupt status
       Thread.currentThread().interrupt();
     }
   }

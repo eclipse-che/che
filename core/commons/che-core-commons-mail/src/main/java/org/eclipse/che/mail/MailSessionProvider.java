@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.mail;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Map;
 import java.util.Properties;
 import javax.inject.Inject;
@@ -19,6 +20,11 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import org.eclipse.che.inject.ConfigurationProperties;
 
+/**
+ * Provider of {@link Session} Configuration can be injected from container with help of {@link
+ * ConfigurationProperties} class. In this case all properties that starts with 'mail.' will be used
+ * to create {@link Session}.
+ */
 public class MailSessionProvider implements Provider<Session> {
 
   private final Session session;
@@ -26,7 +32,11 @@ public class MailSessionProvider implements Provider<Session> {
   @Inject
   public MailSessionProvider(ConfigurationProperties configurationProperties) {
 
-    Map<String, String> mailConfiguration = configurationProperties.getProperties("mail.*");
+    this(configurationProperties.getProperties("mail.*"));
+  }
+
+  @VisibleForTesting
+  MailSessionProvider(Map<String, String> mailConfiguration) {
 
     Properties props = new Properties();
     mailConfiguration.forEach(props::setProperty);

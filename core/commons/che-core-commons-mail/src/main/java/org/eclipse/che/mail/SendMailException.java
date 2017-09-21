@@ -8,17 +8,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.mail.deploy;
+package org.eclipse.che.mail;
 
-import com.google.inject.AbstractModule;
-import org.eclipse.che.mail.MailSender;
-import org.eclipse.che.mail.MailSessionProvider;
+/** Exception happened during mail sending * */
+public class SendMailException extends Exception {
 
-public class MailModule extends AbstractModule {
-
-  @Override
-  protected void configure() {
-    bind(MailSessionProvider.class);
-    bind(MailSender.class).asEagerSingleton();
+  public SendMailException(String message, Throwable cause) {
+    super(message, cause);
   }
 }
