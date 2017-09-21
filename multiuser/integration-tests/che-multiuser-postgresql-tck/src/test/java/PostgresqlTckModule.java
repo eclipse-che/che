@@ -8,8 +8,6 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.api.tck;
-
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
@@ -28,7 +26,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,40 +35,19 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
-import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.account.spi.jpa.JpaAccountDao;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.factory.server.jpa.JpaFactoryDao;
-import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
-import org.eclipse.che.api.factory.server.spi.FactoryDao;
 import org.eclipse.che.api.machine.server.jpa.JpaRecipeDao;
-import org.eclipse.che.api.machine.server.jpa.JpaSnapshotDao;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.ssh.server.jpa.JpaSshDao;
-import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
-import org.eclipse.che.api.ssh.server.spi.SshDao;
-import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
-import org.eclipse.che.api.user.server.jpa.JpaProfileDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
-import org.eclipse.che.api.user.server.jpa.PreferenceEntity;
-import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.user.server.spi.PreferenceDao;
-import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.tck.JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
@@ -121,9 +97,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Mihail Kuznyetsov
  */
-public class JpaIntegrationTckModule extends TckModule {
+public class PostgresqlTckModule extends TckModule {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JpaIntegrationTckModule.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PostgresqlTckModule.class);
 
   @Override
   protected void configure() {
@@ -156,14 +132,9 @@ public class JpaIntegrationTckModule extends TckModule {
     //api-account
     bind(new TypeLiteral<TckRepository<AccountImpl>>() {})
         .toInstance(new JpaTckRepository<>(AccountImpl.class));
-    //api-factory
-    bind(new TypeLiteral<TckRepository<FactoryImpl>>() {}).to(FactoryJpaTckRepository.class);
     //api-user
     bind(new TypeLiteral<TckRepository<UserImpl>>() {}).to(UserJpaTckRepository.class);
-    bind(new TypeLiteral<TckRepository<ProfileImpl>>() {})
-        .toInstance(new JpaTckRepository<>(ProfileImpl.class));
-    bind(new TypeLiteral<TckRepository<Pair<String, Map<String, String>>>>() {})
-        .to(PreferenceJpaTckRepository.class);
+
     //api-workspace
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {})
         .toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
@@ -175,10 +146,6 @@ public class JpaIntegrationTckModule extends TckModule {
     //api-machine
     bind(new TypeLiteral<TckRepository<RecipeImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipeImpl.class));
-    bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).to(SnapshotJpaTckRepository.class);
-    //api ssh
-    bind(new TypeLiteral<TckRepository<SshPairImpl>>() {})
-        .toInstance(new JpaTckRepository<>(SshPairImpl.class));
     //api permission
     bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
@@ -217,23 +184,15 @@ public class JpaIntegrationTckModule extends TckModule {
         .toInstance(new JpaTckRepository<>(FreeResourcesLimitImpl.class));
 
     //dao
-    //api-account
-    bind(AccountDao.class).to(JpaAccountDao.class);
-    //api-factory
-    bind(FactoryDao.class).to(JpaFactoryDao.class);
     //api-user
     bind(UserDao.class).to(JpaUserDao.class);
-    bind(ProfileDao.class).to(JpaProfileDao.class);
-    bind(PreferenceDao.class).to(JpaPreferenceDao.class);
+
     //api-workspace
     bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
     bind(StackDao.class).to(JpaStackDao.class);
     bind(WorkerDao.class).to(JpaWorkerDao.class);
     //api-machine
     bind(RecipeDao.class).to(JpaRecipeDao.class);
-    bind(SnapshotDao.class).to(JpaSnapshotDao.class);
-    //api-ssh
-    bind(SshDao.class).to(JpaSshDao.class);
     //api-organization
     bind(OrganizationDao.class).to(JpaOrganizationDao.class);
     bind(MemberDao.class).to(JpaMemberDao.class);
@@ -274,31 +233,6 @@ public class JpaIntegrationTckModule extends TckModule {
   }
 
   @Transactional
-  public static class PreferenceJpaTckRepository
-      implements TckRepository<Pair<String, Map<String, String>>> {
-
-    @Inject private Provider<EntityManager> managerProvider;
-
-    @Override
-    public void createAll(Collection<? extends Pair<String, Map<String, String>>> entities)
-        throws TckRepositoryException {
-      final EntityManager manager = managerProvider.get();
-      for (Pair<String, Map<String, String>> pair : entities) {
-        manager.persist(new PreferenceEntity(pair.first, pair.second));
-      }
-    }
-
-    @Override
-    public void removeAll() throws TckRepositoryException {
-      final EntityManager manager = managerProvider.get();
-      manager
-          .createQuery("SELECT prefs FROM Preference prefs", PreferenceEntity.class)
-          .getResultList()
-          .forEach(manager::remove);
-    }
-  }
-
-  @Transactional
   public static class UserJpaTckRepository implements TckRepository<UserImpl> {
 
     @Inject private Provider<EntityManager> managerProvider;
@@ -328,74 +262,6 @@ public class JpaIntegrationTckModule extends TckModule {
           .createQuery("SELECT users FROM Usr users", UserImpl.class)
           .getResultList()
           .forEach(manager::remove);
-    }
-  }
-
-  @Transactional
-  public static class SnapshotJpaTckRepository implements TckRepository<SnapshotImpl> {
-
-    @Inject private Provider<EntityManager> managerProvider;
-
-    @Override
-    public void createAll(Collection<? extends SnapshotImpl> snapshots)
-        throws TckRepositoryException {
-      final EntityManager manager = managerProvider.get();
-      WorkspaceConfig config =
-          new WorkspaceConfigImpl(
-              "name",
-              "description",
-              "defaultEnv",
-              Collections.emptyList(),
-              Collections.emptyList(),
-              Collections.emptyMap());
-      final AccountImpl[] accounts =
-          new AccountImpl[] {
-            new AccountImpl("id1", "test0", "test"),
-            new AccountImpl("id2", "test1", "test"),
-            new AccountImpl("id3", "test2", "test")
-          };
-      manager.persist(accounts[0]);
-      manager.persist(accounts[1]);
-      manager.persist(accounts[2]);
-      manager.persist(new WorkspaceImpl("workspace-0", accounts[0], config));
-      manager.persist(new WorkspaceImpl("workspace-1", accounts[1], config));
-      manager.persist(new WorkspaceImpl("workspace-id", accounts[2], config));
-      for (SnapshotImpl snapshot : snapshots) {
-        manager.persist(snapshot);
-      }
-    }
-
-    @Override
-    public void removeAll() throws TckRepositoryException {
-      final EntityManager manager = managerProvider.get();
-      manager
-          .createQuery("SELECT snapshots FROM Snapshot snapshots", SnapshotImpl.class)
-          .getResultList()
-          .forEach(manager::remove);
-      manager
-          .createQuery("SELECT workspaces FROM Workspace workspaces", WorkspaceImpl.class)
-          .getResultList()
-          .forEach(manager::remove);
-      manager
-          .createQuery("SELECT acc FROM Account acc", AccountImpl.class)
-          .getResultList()
-          .forEach(manager::remove);
-    }
-  }
-
-  public static class FactoryJpaTckRepository extends JpaTckRepository<FactoryImpl> {
-
-    public FactoryJpaTckRepository() {
-      super(FactoryImpl.class);
-    }
-
-    @Override
-    public void createAll(Collection<? extends FactoryImpl> factories)
-        throws TckRepositoryException {
-      for (FactoryImpl factory : factories) {
-        factory.getWorkspace().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
-      }
-      super.createAll(factories);
     }
   }
 

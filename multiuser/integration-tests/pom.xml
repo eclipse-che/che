@@ -22,7 +22,7 @@
     <packaging>pom</packaging>
     <name>Che Multiuser :: Integration Tests</name>
     <modules>
-        <module>che-multiuser-cascade-jpa</module>
-        <module>che-multiuser-integration-tck-jpa</module>
+        <module>che-multiuser-cascade-removal</module>
+        <module>che-multiuser-postgresql-tck</module>
     </modules>
 </project>

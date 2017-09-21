@@ -48,12 +48,13 @@
         <class>org.eclipse.che.api.factory.server.model.impl.IdeImpl</class>
         <class>org.eclipse.che.api.factory.server.FactoryImage</class>
 
+        <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
+
         <class>org.eclipse.che.multiuser.api.permission.server.model.impl.SystemPermissionsImpl</class>
         <class>org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions</class>
         <class>org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl</class>
         <class>org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl</class>
         <class>org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl</class>
-        <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
 
         <class>org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl</class>
         <class>org.eclipse.che.multiuser.organization.spi.impl.MemberImpl</class>
@@ -61,10 +62,6 @@
 
         <class>org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl</class>
         <class>org.eclipse.che.multiuser.resource.spi.impl.FreeResourcesLimitImpl</class>
-
-        <class>com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl</class>
-
-        <class>com.codenvy.api.invite.InviteImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.exception-handler" value="org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler"/>

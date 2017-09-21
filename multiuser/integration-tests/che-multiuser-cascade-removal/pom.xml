@@ -18,7 +18,7 @@
         <groupId>org.eclipse.che.multiuser</groupId>
         <version>5.18.0-SNAPSHOT</version>
     </parent>
-    <artifactId>che-multiuser-cascade-jpa</artifactId>
+    <artifactId>che-multiuser-cascade-removal</artifactId>
     <packaging>jar</packaging>
     <name>Che Multiuser :: Integration Cascade</name>
     <dependencies>
@@ -178,25 +178,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <!-- Create the test jar -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                        <configuration>
-                            <includes>
-                                <include>**/spi/tck/*.*</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>
