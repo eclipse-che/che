@@ -57,7 +57,6 @@ public class MailSenderTest {
 
   @BeforeMethod
   public void setup(ITestContext context) throws IOException {
-    //      mailSender = new MailSender("/mail-configuration.properties");
     server = SimpleSmtpServer.start(SimpleSmtpServer.AUTO_SMTP_PORT);
 
     Map<String, String> mailConfiguration =

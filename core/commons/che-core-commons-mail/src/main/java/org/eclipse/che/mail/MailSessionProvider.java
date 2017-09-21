@@ -45,34 +45,40 @@ public class MailSessionProvider implements Provider<Session> {
 
   @VisibleForTesting
   MailSessionProvider(Map<String, String> mailConfiguration) {
+    if (mailConfiguration != null && !mailConfiguration.isEmpty()) {
+      Properties props = new Properties();
+      mailConfiguration.forEach(props::setProperty);
 
-    Properties props = new Properties();
-    mailConfiguration.forEach(props::setProperty);
+      if (Boolean.parseBoolean(props.getProperty("mail.smtp.auth"))) {
+        final String username = props.getProperty("mail.smtp.auth.username");
+        final String password = props.getProperty("mail.smtp.auth.password");
 
-    if (Boolean.parseBoolean(props.getProperty("mail.smtp.auth"))) {
-      final String username = props.getProperty("mail.smtp.auth.username");
-      final String password = props.getProperty("mail.smtp.auth.password");
+        // remove useless properties
+        props.remove("mail.smtp.auth.username");
+        props.remove("mail.smtp.auth.password");
 
-      // remove useless properties
-      props.remove("mail.smtp.auth.username");
-      props.remove("mail.smtp.auth.password");
-
-      this.session =
-          Session.getInstance(
-              props,
-              new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                  return new PasswordAuthentication(username, password);
-                }
-              });
+        this.session =
+            Session.getInstance(
+                props,
+                new Authenticator() {
+                  @Override
+                  protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(username, password);
+                  }
+                });
+      } else {
+        this.session = Session.getInstance(props);
+      }
     } else {
-      this.session = Session.getInstance(props);
+      this.session = null;
     }
   }
 
   @Override
   public Session get() {
+    if (session == null) {
+      throw new RuntimeException("SMTP is not configured");
+    }
     return session;
   }
 }
