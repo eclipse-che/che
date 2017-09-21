@@ -8,6 +8,7 @@
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
+
 # grab assembly
 DIR=$(cd "$(dirname "$0")"; pwd)
 if [ ! -d "${DIR}/../../assembly/assembly-main/target" ]; then
