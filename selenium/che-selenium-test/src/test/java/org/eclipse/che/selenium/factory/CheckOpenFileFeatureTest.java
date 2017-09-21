@@ -75,8 +75,8 @@ public class CheckOpenFileFeatureTest {
     dashboard.open();
     dashboard.selectFactoriesOnDashbord();
     dashboardFactory.clickOnAddFactoryBtn();
-    dashboardFactory.setFactoryName(FACTORY_NAME);
     dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
+    dashboardFactory.setFactoryName(FACTORY_NAME);
     dashboardFactory.clickOnCreateFactoryBtn();
     dashboardFactory.selectAction(OPEN_FILE);
     dashboardFactory.enterParamValue(OPEN_FILE_URL);

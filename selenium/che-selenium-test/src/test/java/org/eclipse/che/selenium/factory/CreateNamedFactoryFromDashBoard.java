@@ -13,8 +13,6 @@ package org.eclipse.che.selenium.factory;
 import static org.eclipse.che.selenium.core.constant.TestGitConstants.CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE;
 
 import com.google.inject.Inject;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -82,11 +80,10 @@ public class CreateNamedFactoryFromDashBoard {
     dashboardFactory.selectFactoryOnNavBar();
     dashboardFactory.waitAllFactoriesPage();
     dashboardFactory.clickOnAddFactoryBtn();
-    dashboardFactory.setFactoryName(FACTORY_NAME);
     dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
+    dashboardFactory.setFactoryName(FACTORY_NAME);
     dashboardFactory.clickOnCreateFactoryBtn();
     dashboardFactory.waitJsonFactoryIsNotEmpty();
-    dashboardFactory.setFactoryName(new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date()));
     dashboard.waitNotificationIsClosed();
     dashboardFactory.clickFactoryIDUrl();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);

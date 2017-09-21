@@ -79,8 +79,8 @@ public class CheckRunCommandFeatureTest {
     dashboard.open();
     dashboard.selectFactoriesOnDashbord();
     dashboardFactory.clickOnAddFactoryBtn();
-    dashboardFactory.setFactoryName(FACTORY_NAME);
     dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
+    dashboardFactory.setFactoryName(FACTORY_NAME);
     dashboardFactory.clickOnCreateFactoryBtn();
     dashboardFactory.selectAction(RUN_COMMAND);
     dashboardFactory.enterParamValue(NAME_BUILD_COMMAND);
