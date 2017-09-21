@@ -121,8 +121,9 @@ list_versions(){
 set_variables_images_list() {
   IFS=$'\n'
   for SINGLE_IMAGE in $1; do
-    log "eval $SINGLE_IMAGE"
-    eval $SINGLE_IMAGE
+  INSTRUCTION=$(echo "${SINGLE_IMAGE}" | sed -e 's/\(.*\)=\(.*\)/\1=${\1:-\2}/g')
+    log "eval $INSTRUCTION "
+    eval $INSTRUCTION
   done
 
 }
