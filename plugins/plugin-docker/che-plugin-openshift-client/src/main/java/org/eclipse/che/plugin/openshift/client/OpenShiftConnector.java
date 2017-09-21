@@ -1070,7 +1070,6 @@ public class OpenShiftConnector extends DockerConnector {
       command = new String[1];
       command[0] = PS_COMMAND;
     }
-    ExecutorService executor = Executors.newSingleThreadExecutor();
     ContainerProcesses processes = new ContainerProcesses();
     OpenShiftClient openShiftClient = new DefaultOpenShiftClient();
     try (ExecWatch watch =
@@ -1081,7 +1080,6 @@ public class OpenShiftConnector extends DockerConnector {
             .redirectingOutput()
             .redirectingError()
             .exec(command)) {
-      Thread.sleep(2500);
       BufferedReader reader = new BufferedReader(new InputStreamReader(watch.getOutput()));
       boolean first = true;
       int limit = 0;
@@ -1112,10 +1110,6 @@ public class OpenShiftConnector extends DockerConnector {
       }
     } catch (KubernetesClientException e) {
       throw new OpenShiftException(e.getMessage());
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    } finally {
-      executor.shutdown();
     }
     return processes;
   }
