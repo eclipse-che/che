@@ -22,16 +22,16 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import org.eclipse.che.inject.ConfigurationProperties;
 
-/**
- * Provider of {@link Session} Configuration can be injected from container with help of {@link
- * ConfigurationProperties} class. In this case all properties that starts with 'che.mail.' will be
- * used to create {@link Session}. First 4 letters 'che.' from property names will be removed.
- */
+/** Provider of {@link Session} */
 @Singleton
 public class MailSessionProvider implements Provider<Session> {
 
   private final Session session;
-
+  /**
+   * Configuration can be injected from container with help of {@lin ConfigurationProperties} class.
+   * In this case all properties that starts with 'che.mail.' will be used to create {@link
+   * Session}. First 4 letters 'che.' from property names will be removed.
+   */
   @Inject
   public MailSessionProvider(ConfigurationProperties configurationProperties) {
 

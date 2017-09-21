@@ -12,6 +12,7 @@ package org.eclipse.che.mail;
 
 import java.util.List;
 import java.util.Objects;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Describing e-mail properties.
@@ -106,6 +107,7 @@ public class EmailBean {
     return this;
   }
 
+  @Nullable
   public List<Attachment> getAttachments() {
     return attachments;
   }

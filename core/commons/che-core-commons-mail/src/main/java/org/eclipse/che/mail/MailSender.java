@@ -31,6 +31,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,7 @@ public class MailSender {
             new ThreadFactoryBuilder()
                 .setNameFormat("MailNotificationsPool-%d")
                 .setDaemon(false)
+                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
                 .build());
   }
 
