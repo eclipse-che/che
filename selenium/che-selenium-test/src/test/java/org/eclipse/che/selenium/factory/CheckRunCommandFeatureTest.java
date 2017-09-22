@@ -18,7 +18,9 @@ import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory.Add
 
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -40,8 +42,7 @@ import org.testng.annotations.Test;
 public class CheckRunCommandFeatureTest {
   private static final String PROJECT_NAME = CheckRunCommandFeatureTest.class.getSimpleName();
   private static final String NAME_BUILD_COMMAND = PROJECT_NAME + ": build and run";
-
-  private String factoryWsName;
+  private static final String FACTORY_NAME = NameGenerator.generate("factory", 4);
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Dashboard dashboard;
@@ -52,22 +53,22 @@ public class CheckRunCommandFeatureTest {
   @Inject private Loader loader;
   @Inject private Wizard wizard;
   @Inject private Menu menu;
-  @Inject private TestWorkspace ws;
+  @Inject private TestWorkspace testWorkspace;
   @Inject private DefaultTestUser user;
   @Inject private Consoles consoles;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestFactoryServiceClient factoryServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
-    ide.open(ws);
+    ide.open(testWorkspace);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (factoryWsName != null) {
-      workspaceServiceClient.delete(factoryWsName, user.getName());
-    }
+    workspaceServiceClient.deleteFactoryWorkspaces(testWorkspace.getName(), user.getName());
+    factoryServiceClient.deleteFactory(FACTORY_NAME);
   }
 
   @Test
@@ -78,8 +79,8 @@ public class CheckRunCommandFeatureTest {
     dashboard.open();
     dashboard.selectFactoriesOnDashbord();
     dashboardFactory.clickOnAddFactoryBtn();
-    dashboardFactory.clickWorkspacesTabOnSelectSource();
-    dashboardFactory.selectWorkspaceForCreation(ws.getName());
+    dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
+    dashboardFactory.setFactoryName(FACTORY_NAME);
     dashboardFactory.clickOnCreateFactoryBtn();
     dashboardFactory.selectAction(RUN_COMMAND);
     dashboardFactory.enterParamValue(NAME_BUILD_COMMAND);
@@ -89,7 +90,6 @@ public class CheckRunCommandFeatureTest {
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    factoryWsName = seleniumWebDriver.getWorkspaceNameFromBrowserUrl();
     projectExplorer.waitItem(PROJECT_NAME);
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
   }

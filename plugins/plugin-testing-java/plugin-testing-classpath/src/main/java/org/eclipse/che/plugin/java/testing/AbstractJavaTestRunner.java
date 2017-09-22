@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.java.testing;
 
 import static java.util.Collections.emptyList;
+import static org.eclipse.jdt.internal.core.JavaProject.hasJavaNature;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -60,7 +61,12 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
   @Override
   public List<TestPosition> detectTests(TestDetectionContext context) {
     IJavaProject javaProject = getJavaProject(context.getProjectPath());
-    if (!javaProject.exists()) {
+    if (javaProject == null || !javaProject.exists()) {
+      return Collections.emptyList();
+    }
+
+    IProject project = javaProject.getProject();
+    if (project == null || !hasJavaNature(project)) {
       return Collections.emptyList();
     }
 

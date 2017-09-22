@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.testing.ide;
+package org.eclipse.che.plugin.testing.ide.action;
 
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 

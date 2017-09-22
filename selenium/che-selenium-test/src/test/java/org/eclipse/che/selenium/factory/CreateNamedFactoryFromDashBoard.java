@@ -11,13 +11,12 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.constant.TestGitConstants.CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE;
-import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory.SourcesTypes.WORKSPACES;
 
 import com.google.inject.Inject;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.ExecutionException;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -40,7 +39,7 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class CreateNamedFactoryFromDashBoard {
   private static final String PROJECT_NAME = CreateNamedFactoryFromDashBoard.class.getSimpleName();
-  private static final String NEW_WORKSPACE_SUFFIX = "_1";
+  private static final String FACTORY_NAME = NameGenerator.generate("factory", 4);
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
@@ -57,6 +56,7 @@ public class CreateNamedFactoryFromDashBoard {
   @Inject private Wizard wizard;
   @Inject private Menu menu;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestFactoryServiceClient factoryServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -69,8 +69,8 @@ public class CreateNamedFactoryFromDashBoard {
 
   @AfterClass
   public void tearDown() throws Exception {
-    String newWorkspaceName = testWorkspace.getName() + NEW_WORKSPACE_SUFFIX;
-    workspaceServiceClient.delete(newWorkspaceName, user.getName());
+    workspaceServiceClient.deleteFactoryWorkspaces(testWorkspace.getName(), user.getName());
+    factoryServiceClient.deleteFactory(FACTORY_NAME);
   }
 
   @Test
@@ -80,11 +80,10 @@ public class CreateNamedFactoryFromDashBoard {
     dashboardFactory.selectFactoryOnNavBar();
     dashboardFactory.waitAllFactoriesPage();
     dashboardFactory.clickOnAddFactoryBtn();
-    dashboardFactory.waitSelectSourceWidgetAndSelect(WORKSPACES.toString());
     dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
+    dashboardFactory.setFactoryName(FACTORY_NAME);
     dashboardFactory.clickOnCreateFactoryBtn();
     dashboardFactory.waitJsonFactoryIsNotEmpty();
-    dashboardFactory.setNameFactory(new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date()));
     dashboard.waitNotificationIsClosed();
     dashboardFactory.clickFactoryIDUrl();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
