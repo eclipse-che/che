@@ -15,7 +15,12 @@ import static org.ecipse.che.plugin.testing.testng.server.TestSetUpUtil.createJa
 import static org.ecipse.che.plugin.testing.testng.server.TestSetUpUtil.getTestNgClassPath;
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import org.eclipse.che.api.core.model.project.type.Value;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestPosition;
 import org.eclipse.che.plugin.java.testing.JavaTestFinder;
@@ -24,6 +29,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -41,6 +47,10 @@ public class TestNGTestDiscoveryTest extends BaseTest {
     testNGTestFinder = new JavaTestFinder();
     IPackageFragmentRoot packageFragmentRoot = addSourceContainer(javaProject, "src", "bin");
     javaProject.setRawClasspath(getTestNgClassPath("/testDiscovery/src"), null);
+
+    RegisteredProject testDiscovery = projectRegistry.getProject("testDiscovery");
+    Map<String, Value> attributeEntries = testDiscovery.getAttributeEntries();
+    attributeEntries.put("language", new ValueImpl(Collections.singletonList(JavaCore.NATURE_ID)));
 
     packageFragment = packageFragmentRoot.createPackageFragment("test", false, null);
   }
@@ -221,5 +231,38 @@ public class TestNGTestDiscoveryTest extends BaseTest {
 
     @Override
     public void setOffset(int offset) {}
+  }
+
+  private class ValueImpl implements Value {
+
+    private final List<String> values = new ArrayList<>();
+
+    public ValueImpl(List<String> list) {
+      if (list != null) {
+        values.addAll(list);
+      }
+    }
+
+    @Override
+    public String getString() {
+      return values.isEmpty() ? null : values.get(0);
+    }
+
+    @Override
+    public List<String> getList() {
+      return values;
+    }
+
+    public void setList(List<String> list) {
+      values.clear();
+      if (list != null) {
+        values.addAll(list);
+      }
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return values.isEmpty();
+    }
   }
 }

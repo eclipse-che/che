@@ -41,13 +41,13 @@ public class CheckFindActionFeatureInCheTest {
 
   private static final String SECOND_ACTION_NAME_EXPECTED_ARRAY_LOCAL_MODE =
       "Commands Palette [Shift+F10]  Run\n"
-          + "Commit ...  GitCommandGroup\n"
+          + "Commit ... [Alt+C]  GitCommandGroup\n"
           + "Commit...  SvnFileCommandGroup\n"
           + "Community  Help\n"
           + "SvnCredentialsCommandGroup  Subversion";
 
   private static final String THIRD_ACTION_NAME_EXPECTED_ARRAY_LOCAL_MODE =
-      "Branches...  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
+      "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
 
   private static final String FIRST_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG_LOCAL_MODE =
       "Update Project Configuration...  Project\n"
@@ -66,7 +66,7 @@ public class CheckFindActionFeatureInCheTest {
   private static final String SECOND_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG_LOCAL_MODE =
       "Commands \n"
           + "Commands Palette [Shift+F10]  Run\n"
-          + "Commit ...  GitCommandGroup\n"
+          + "Commit ... [Alt+C]  GitCommandGroup\n"
           + "Commit...  SvnFileCommandGroup\n"
           + "Community  Help\n"
           + "Execute default command of Debug goal [Alt+D] \n"
@@ -80,7 +80,7 @@ public class CheckFindActionFeatureInCheTest {
           + "SvnRepositoryCommandGroup ";
 
   private static final String THIRD_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG_LOCAL_MODE =
-      "Branches...  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
+      "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
 
   private static final String PROJECT_NAME =
       NameGenerator.generate(CheckFindActionFeatureInCheTest.class.getSimpleName(), 4);

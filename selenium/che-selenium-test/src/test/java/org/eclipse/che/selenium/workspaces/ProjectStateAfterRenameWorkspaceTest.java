@@ -36,7 +36,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
   private static final String PROJECT_NAME = NameGenerator.generate("ProjectAfterRenameWs", 4);
   private static final String WORKSPACE_NEW_NAME = NameGenerator.generate("rename_ws", 4);
 
-  @Inject private TestWorkspace workspace;
+  @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
@@ -53,16 +53,16 @@ public class ProjectStateAfterRenameWorkspaceTest {
     URL resource =
         ProjectStateAfterRenameWorkspaceTest.this.getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
-        workspace.getId(),
+        testWorkspace.getId(),
         Paths.get(resource.toURI()),
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
-    ide.open(workspace);
+    ide.open(testWorkspace);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testWorkspaceServiceClient.delete(WORKSPACE_NEW_NAME, workspace.getOwner().getName());
+    testWorkspaceServiceClient.delete(WORKSPACE_NEW_NAME, testWorkspace.getOwner().getName());
   }
 
   @Test
@@ -84,7 +84,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboardWorkspace.waitToolbarTitleName("Workspaces");
-    dashboardWorkspace.selectWorkspaceItemName(workspace.getName());
+    dashboardWorkspace.selectWorkspaceItemName(testWorkspace.getName());
     dashboardWorkspace.enterNameWorkspace(WORKSPACE_NEW_NAME);
     dashboardWorkspace.clickOnSaveBtn();
     dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.RUNNING);
