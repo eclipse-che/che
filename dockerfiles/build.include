@@ -5,6 +5,12 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
+
+set -e
+set -u
+
+IMAGE_ALIASES=${IMAGE_ALIASES:-}
+
 skip_tests() {
   if [ $SKIP_TESTS = "true" ]; then
     return 0

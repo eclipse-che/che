@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.testing.ide.view2.navigation.nodes;
+package org.eclipse.che.plugin.testing.ide.view.navigation.nodes;
 
 import com.google.inject.assistedinject.Assisted;
 import javax.inject.Inject;

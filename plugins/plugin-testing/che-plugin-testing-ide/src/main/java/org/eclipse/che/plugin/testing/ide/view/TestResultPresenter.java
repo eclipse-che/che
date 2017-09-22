@@ -14,13 +14,13 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.testing.shared.TestResult;
-import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.plugin.testing.ide.TestLocalizationConstant;
 import org.eclipse.che.plugin.testing.ide.TestResources;
+import org.eclipse.che.plugin.testing.ide.model.TestRootState;
+import org.eclipse.che.plugin.testing.ide.model.TestStateEventsListener;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -73,30 +73,17 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
     container.setWidget(view);
   }
 
-  /**
-   * Activate Test results part and showing the test results.
-   *
-   * @param response result of the test runner
-   */
-  @Deprecated
-  public void handleResponse(TestResult response) {
+  /** Activate Test results part and showing the test results. */
+  public void handleResponse() {
     workspaceAgent.openPart(this, PartStackType.INFORMATION);
     workspaceAgent.setActivePart(this);
-    view.showResults(response);
   }
 
-  /**
-   * Activates test results part and shows the results.
-   *
-   * @param response result root of the test runner
-   */
-  public void handleResponse(TestResultRootDto response) {
-    workspaceAgent.openPart(this, PartStackType.INFORMATION);
-    workspaceAgent.setActivePart(this);
-    view.showResults(response);
+  public TestRootState getRootState() {
+    return view.getRootState();
   }
 
-  public void clear() {
-    view.clear();
+  public TestStateEventsListener getEventListener() {
+    return view;
   }
 }

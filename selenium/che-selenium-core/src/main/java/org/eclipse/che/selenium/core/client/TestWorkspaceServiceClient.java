@@ -132,7 +132,7 @@ public class TestWorkspaceServiceClient {
     requestFactory.fromUrl(getIdBasedUrl(workspace.getId())).useDeleteMethod().request();
 
     LOG.info(
-        "Workspace name='{}', id='{}' and of user with name='{}' is removed",
+        "Workspace name='{}', id='{}', username='{}' removed",
         workspaceName,
         workspace.getId(),
         userName);
@@ -282,5 +282,24 @@ public class TestWorkspaceServiceClient {
         break;
     }
     return calculatedValue;
+  }
+
+  /**
+   * Delete workspaces which could be created from factory
+   *
+   * @param originalName name workspace which was used to create factory
+   * @param username
+   * @throws Exception
+   */
+  public void deleteFactoryWorkspaces(String originalName, String username) throws Exception {
+    String workspace2delete = originalName;
+    for (int i = 1; ; i++) {
+      if (!exists(workspace2delete, username)) {
+        break;
+      }
+
+      delete(workspace2delete, username);
+      workspace2delete = originalName + "_" + i;
+    }
   }
 }

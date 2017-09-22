@@ -12,7 +12,9 @@ package org.eclipse.che.plugin.testing.phpunit.ide;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.plugin.testing.ide.TestAction;
+import org.eclipse.che.plugin.testing.ide.action.TestAction;
+import org.eclipse.che.plugin.testing.ide.detector.TestFileExtension;
+import org.eclipse.che.plugin.testing.phpunit.ide.action.PHPUnitTestActionGroup;
 
 /**
  * PHPUnit Gin module.
@@ -26,5 +28,9 @@ public class PHPUnitGinModule extends AbstractGinModule {
     GinMultibinder.newSetBinder(binder(), TestAction.class)
         .addBinding()
         .to(PHPUnitTestActionGroup.class);
+
+    GinMultibinder.newSetBinder(binder(), TestFileExtension.class)
+        .addBinding()
+        .to(PHPTestFileExtension.class);
   }
 }
