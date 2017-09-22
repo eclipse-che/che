@@ -85,7 +85,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
     Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
-    commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("ws-machine:8080");
+    commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:8080");
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();
     commandsToolbar.clickWithHoldAndLaunchDebuCmdFromList(PROJECT_NAME + ": debug");
