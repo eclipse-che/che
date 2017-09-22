@@ -78,16 +78,19 @@ public class CellTableRuntimeInfoWidgetFactory implements RuntimeInfoWidgetFacto
     ListDataProvider<RuntimeInfo> dataProvider = new ListDataProvider<>(runtimeList);
 
     CheckBox hideCheckBox = new CheckBox("Hide internal servers");
-    hideCheckBox.addValueChangeHandler(event -> {
-      if (event.getValue()) { //if hide = true
-        dataProvider.setList(runtimeList.stream()
-            .filter(info -> !isNullOrEmpty(info.getPort()))
-            .collect(toList()));
-      } else {
-        dataProvider.setList(runtimeList);
-      }
-        dataProvider.refresh();
-    });
+    hideCheckBox.addValueChangeHandler(
+        event -> {
+          if (event.getValue()) { //if hide = true
+            dataProvider.setList(
+                runtimeList
+                    .stream()
+                    .filter(info -> !isNullOrEmpty(info.getPort()))
+                    .collect(toList()));
+          } else {
+            dataProvider.setList(runtimeList);
+          }
+          dataProvider.refresh();
+        });
     hideCheckBox.addStyleName(resources.cellTableStyle().cellTableHideServersCheckBox());
     hideCheckBox.ensureDebugId("runtimeInfoHideServersCheckBox");
 
@@ -184,8 +187,6 @@ public class CellTableRuntimeInfoWidgetFactory implements RuntimeInfoWidgetFacto
     table.setColumnWidth(portColumn, 7., Unit.PCT);
     table.setColumnWidth(protocolColumn, 7., Unit.PCT);
     table.setColumnWidth(urlColumn, 71., Unit.PCT);
-
-
 
     dataProvider.addDataDisplay(table);
 
