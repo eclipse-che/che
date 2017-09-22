@@ -48,6 +48,9 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
     NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
     tree = new Tree(nodeStorage, loader);
 
+    tree.ensureDebugId("resultSearchTree");
+    ensureDebugId("findInfoPanel");
+
     tree.getSelectionModel()
         .addSelectionChangedHandler(
             new SelectionChangedEvent.SelectionChangedHandler() {

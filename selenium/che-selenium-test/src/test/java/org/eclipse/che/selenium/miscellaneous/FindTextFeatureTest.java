@@ -214,7 +214,9 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.waitExpectedTextInFindInfoPanel(PR_1_EXPECTED_TEXT_1);
-    findText.selectItemInFindInfoPanel(fileNameCreatedFromTerminal, "1:", "Filesystem");
+    findText.selectItemInFindInfoPanel(
+        "/FindTextFeature/readme.con",
+        "1:Filesystem              1K-blocks     Used Available Use% Mounted on");
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromTerminal);
     Assert.assertEquals(editor.getPositionOfLine(), 1);
@@ -231,7 +233,7 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.waitExpectedTextInFindInfoPanel(PR_1_EXPECTED_TEXT_2);
-    findText.selectItemInFindInfoPanel(fileNameCreatedFromAPI, "1:", "Feature");
+    findText.selectItemInFindInfoPanel("/FindTextFeature/readme.api", "1:FindTextFeatureTest");
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromAPI);
     Assert.assertEquals(editor.getPositionOfLine(), 1);
@@ -239,6 +241,11 @@ public class FindTextFeatureTest {
 
   @Test(priority = 2)
   public void checkFindTextBasic() {
+    String pathToQuessNumFile =
+        "/FindTextFeature/my-webapp/src/main/webapp/WEB-INF/jsp/guess_num.jsp";
+    String pathToSayHelloFile = "/FindTextFeature/my-lib/src/main/java/hello/SayHello.java";
+    String pathToAppControllerFile =
+        "/FindTextFeature/my-webapp/src/main/java/org/eclipse/qa/examples/AppController.java";
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FIND);
@@ -264,20 +271,28 @@ public class FindTextFeatureTest {
     findText.clickOnSearchButtonMainForm();
     findText.waitFindInfoPanelIsOpen();
     findText.waitExpectedTextInFindInfoPanel(PR_2_EXPECTED_TEXT_1);
-    findText.selectItemInFindInfoPanel("guess_num.jsp", "25:", "String");
+    findText.selectItemInFindInfoPanel(
+        pathToQuessNumFile,
+        "25:            java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");   ");
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("guess_num.jsp");
     editor.waitTextIntoEditor("String");
-    findText.selectItemInFindInfoPanelByDoubleClick("SayHello.java", "20", "String");
+    Assert.assertEquals(editor.getPositionOfLine(), 25);
+    findText.selectItemInFindInfoPanelByDoubleClick(
+        pathToSayHelloFile, "20:    public String sayHello(String name)");
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("SayHello");
     editor.waitTextIntoEditor("String");
-    findText.selectItemInFindInfoPanel("guess_num.jsp", "25:", "String");
-    findText.sendCommandByKeyboardInFindInfoPanel(Keys.ARROW_DOWN.toString());
+    Assert.assertEquals(editor.getPositionOfLine(), 20);
+    findText.selectItemInFindInfoPanel(
+        pathToAppControllerFile,
+        "26:        String numGuessByUser = request.getParameter(\"numGuess\");");
+    findText.sendCommandByKeyboardInFindInfoPanel(Keys.ARROW_UP.toString());
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
-    editor.waitActiveTabFileName("guess_num.jsp");
-    editor.closeAllTabs();
+    editor.waitActiveTabFileName("AppController");
+    Assert.assertEquals(editor.getPositionOfLine(), 22);
+    editor.closeAllTabsByContextMenu();
   }
 
   @Test(priority = 3)

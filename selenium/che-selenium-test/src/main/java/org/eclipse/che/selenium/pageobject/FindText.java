@@ -58,13 +58,11 @@ public class FindText {
     String FILE_MASK_FIELD = "gwt-debug-text-search-files";
     String CANCEL_BUTTON = "search-cancel-button";
     String SEARCH_BUTTON = "search-button";
-    String FIND_INFO_PANEL =
-        "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[9]";
+    String FIND_INFO_PANEL = "gwt-debug-findInfoPanel";
     String FIND_TAB = "gwt-debug-partButton-Find";
     String HIDE_FIND_PANEL =
         "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[3]";
-    String ITEM_FIND_PANEL =
-        "//span[contains(@id, '%s')]/../../div[last()]//span/span[text()[contains(., '%s')]]/..//span[text()[contains(., '%s')]]";
+    String ITEM_FIND_PANEL = "//span[@occurrence='%s' and @file-name = '%s']";
   }
 
   @FindBy(id = Locators.WHOLE_WORD_CHECKLBOX_INP)
@@ -76,7 +74,7 @@ public class FindText {
   @FindBy(xpath = Locators.FILE_MASK_CHECKBOX_INP)
   WebElement fileMaskCheckBox;
 
-  @FindBy(xpath = Locators.FIND_INFO_PANEL)
+  @FindBy(id = Locators.FIND_INFO_PANEL)
   WebElement findInfoPanel;
 
   @FindBy(id = Locators.FIND_TAB)
@@ -352,7 +350,7 @@ public class FindText {
   /** wait the 'Find' info panel is open */
   public void waitFindInfoPanelIsOpen() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.FIND_INFO_PANEL)));
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.FIND_INFO_PANEL)));
   }
 
   /** press on the 'Hide' button on the 'Find' info panel */
@@ -407,20 +405,18 @@ public class FindText {
     return findInfoPanel.getText();
   }
 
-  public void selectItemInFindInfoPanel(String fileName, String lineNumber, String textToFind) {
+  public void selectItemInFindInfoPanel(String fileName, String textToFind) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(
-                    String.format(Locators.ITEM_FIND_PANEL, fileName, lineNumber, textToFind))))
+                By.xpath(String.format(Locators.ITEM_FIND_PANEL, textToFind, fileName))))
         .click();
   }
 
-  public void selectItemInFindInfoPanelByDoubleClick(
-      String fileName, String lineNumber, String textToFind) {
+  public void selectItemInFindInfoPanelByDoubleClick(String fileName, String textToFind) {
     WebElement element =
         seleniumWebDriver.findElement(
-            By.xpath(String.format(Locators.ITEM_FIND_PANEL, fileName, lineNumber, textToFind)));
+            By.xpath(String.format(Locators.ITEM_FIND_PANEL, textToFind, fileName)));
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(element));
     actionsFactory.createAction(seleniumWebDriver).doubleClick(element).perform();
