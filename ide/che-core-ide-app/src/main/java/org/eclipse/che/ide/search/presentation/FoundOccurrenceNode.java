@@ -141,7 +141,8 @@ public class FoundOccurrenceNode extends AbstractTreeNode implements HasPresenta
   public void updatePresentation(@NotNull NodePresentation presentation) {
     SpanElement spanElement = createSpanElement(styles.styles().presentableTextContainer());
     spanElement.setAttribute("file-name", itemPath);
-    spanElement.setAttribute("occurrence",
+    spanElement.setAttribute(
+        "occurrence",
         String.valueOf(searchOccurrence.getLineNumber() + 1)
             + ":"
             + searchOccurrence.getLineContent());
