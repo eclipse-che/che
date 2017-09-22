@@ -36,18 +36,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.machine.server.jpa.JpaRecipeDao;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.spi.RecipeDao;
-import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
-import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.spi.StackDao;
-import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.test.tck.JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
@@ -97,9 +89,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Mihail Kuznyetsov
  */
-public class PostgresqlTckModule extends TckModule {
+public class MultiuserPostgresqlTckModule extends TckModule {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PostgresqlTckModule.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MultiuserPostgresqlTckModule.class);
 
   @Override
   protected void configure() {
@@ -184,24 +176,15 @@ public class PostgresqlTckModule extends TckModule {
         .toInstance(new JpaTckRepository<>(FreeResourcesLimitImpl.class));
 
     //dao
-    //api-user
-    bind(UserDao.class).to(JpaUserDao.class);
-
-    //api-workspace
-    bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
-    bind(StackDao.class).to(JpaStackDao.class);
-    bind(WorkerDao.class).to(JpaWorkerDao.class);
-    //api-machine
-    bind(RecipeDao.class).to(JpaRecipeDao.class);
-    //api-organization
     bind(OrganizationDao.class).to(JpaOrganizationDao.class);
-    bind(MemberDao.class).to(JpaMemberDao.class);
     bind(OrganizationDistributedResourcesDao.class)
         .to(JpaOrganizationDistributedResourcesDao.class);
+    bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
+
+    bind(WorkerDao.class).to(JpaWorkerDao.class);
+    bind(MemberDao.class).to(JpaMemberDao.class);
     bind(new TypeLiteral<PermissionsDao<MemberImpl>>() {}).to(JpaMemberDao.class);
     bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
-    //api-resource
-    bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
 
     // SHA-512 ecnryptor is faster than PBKDF2 so it is better for testing
     bind(PasswordEncryptor.class).to(SHA512PasswordEncryptor.class).in(Singleton.class);
