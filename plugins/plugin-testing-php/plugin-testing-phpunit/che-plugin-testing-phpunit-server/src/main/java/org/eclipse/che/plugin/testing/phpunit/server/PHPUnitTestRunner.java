@@ -9,34 +9,26 @@
  */
 package org.eclipse.che.plugin.testing.phpunit.server;
 
-import static java.util.Collections.emptyList;
-
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
 import org.eclipse.che.api.testing.shared.TestDetectionContext;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.api.testing.shared.TestPosition;
-import org.eclipse.che.api.testing.shared.TestResult;
-import org.eclipse.che.api.testing.shared.dto.TestResultDto;
-import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * PHPUnit implementation for the test runner service.
  *
- * <pre>
- * Available Parameters for {@link PHPUnitTestRunner#runTests(Map)}
- *
- * <em>projectPath</em> : Relative path to the project directory
- * <em>absoluteProjectPath</em> : Absolute path to the project directory
- * <em>testTarget</em> : Path to test target (container or script).
- * </pre>
+ * <p><em>projectPath</em> : Relative path to the project directory <em>absoluteProjectPath</em> :
+ * Absolute path to the project directory <em>testTarget</em> : Path to test target (container or
+ * script). </pre>
  *
  * @author Bartlomiej Laczkowski
  */
@@ -65,29 +57,19 @@ public class PHPUnitTestRunner implements TestRunner {
 
   @Override
   public List<TestPosition> detectTests(TestDetectionContext context) {
-    return emptyList();
-  }
+    List<TestPosition> result = new ArrayList<>();
 
-  /** {@inheritDoc} */
-  @Override
-  public TestResultRootDto runTests(Map<String, String> testParameters) throws Exception {
-    return testEngine.executeTests(testParameters);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public List<TestResultDto> getTestResults(List<String> testResultsPath) {
-    return testEngine.getTestResults(testResultsPath);
+    String filePath = context.getFilePath();
+    if (filePath.endsWith(".php") || filePath.endsWith(".phtml")) {
+      TestPosition testPosition =
+          DtoFactory.newDto(TestPosition.class).withFrameworkName(getName());
+      result.add(testPosition);
+    }
+    return result;
   }
 
   @Override
   public ProcessHandler execute(TestExecutionContext context) {
-    throw new UnsupportedOperationException();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public TestResult execute(Map<String, String> testParameters) throws Exception {
-    return null;
+    return testEngine.executeTests(context);
   }
 }

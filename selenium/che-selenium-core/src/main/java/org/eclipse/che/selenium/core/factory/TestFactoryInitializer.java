@@ -78,7 +78,6 @@ public class TestFactoryInitializer {
     HttpJsonRequest httpJsonRequest =
         requestFactory.fromUrl(apiEndpointProvider.get() + "factory/resolver");
     httpJsonRequest.setBody(singletonMap("url", url));
-    httpJsonRequest.setAuthorizationHeader(defaultUser.getAuthToken());
     HttpJsonResponse response = httpJsonRequest.request();
 
     FactoryDto factoryDto = response.asDto(FactoryDto.class);

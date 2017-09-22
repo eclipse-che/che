@@ -9,23 +9,25 @@
  */
 package org.eclipse.che.plugin.testing.phpunit.ide.action;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import javax.validation.constraints.NotNull;
-import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resources.tree.FileNode;
-import org.eclipse.che.plugin.testing.ide.TestActionRunner;
+import org.eclipse.che.ide.util.Pair;
+import org.eclipse.che.plugin.testing.ide.TestServiceClient;
+import org.eclipse.che.plugin.testing.ide.action.RunDebugTestAbstractAction;
+import org.eclipse.che.plugin.testing.ide.detector.TestDetector;
+import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
+import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.phpunit.ide.PHPUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.phpunit.ide.PHPUnitTestResources;
 
@@ -34,45 +36,49 @@ import org.eclipse.che.plugin.testing.phpunit.ide.PHPUnitTestResources;
  *
  * @author Bartlomiej Laczkowski
  */
-public class PHPRunScriptTestAction extends AbstractPerspectiveAction {
+public class PHPRunScriptTestAction extends RunDebugTestAbstractAction {
 
-  private final TestActionRunner runner;
   private final AppContext appContext;
   private final SelectionAgent selectionAgent;
 
   @Inject
   public PHPRunScriptTestAction(
-      TestActionRunner runner,
+      TestDetector testDetector,
+      TestResultPresenter testResultPresenter,
+      DebugConfigurationsManager debugConfigurationsManager,
+      TestingHandler testingHandler,
+      TestServiceClient client,
+      NotificationManager notificationManager,
       PHPUnitTestResources resources,
       AppContext appContext,
+      DtoFactory dtoFactory,
       SelectionAgent selectionAgent,
       PHPUnitTestLocalizationConstant localization) {
     super(
-        Arrays.asList(PROJECT_PERSPECTIVE_ID),
-        localization.actionRunScriptTitle(),
+        testDetector,
+        testResultPresenter,
+        testingHandler,
+        debugConfigurationsManager,
+        client,
+        dtoFactory,
+        appContext,
+        notificationManager,
+        singletonList(PROJECT_PERSPECTIVE_ID),
         localization.actionRunScriptDescription(),
-        null,
+        localization.actionRunScriptTitle(),
         resources.testIcon());
-    this.runner = runner;
     this.appContext = appContext;
     this.selectionAgent = selectionAgent;
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    final Selection<?> selection = selectionAgent.getSelection();
-    final Object possibleNode = selection.getHeadElement();
-    if (possibleNode instanceof FileNode) {
-      VirtualFile file = ((FileNode) possibleNode).getData();
-      final Project project = appContext.getRootProject();
-      Map<String, String> parameters = new HashMap<>();
-      parameters.put("testTarget", file.getLocation().toString());
-      runner.run("PHPUnit", project.getPath(), parameters);
-    }
+    Pair<String, String> frameworkAndTestName = Pair.of("PHPUnit", null);
+    actionPerformed(frameworkAndTestName, false);
   }
 
   @Override
-  public void updateInPerspective(@NotNull ActionEvent e) {
+  public void updateInPerspective(ActionEvent e) {
     if ((appContext.getRootProject() == null)) {
       e.getPresentation().setVisible(true);
       e.getPresentation().setEnabled(false);
@@ -95,6 +101,7 @@ public class PHPRunScriptTestAction extends AbstractPerspectiveAction {
       String extension = data.getExtension();
       if ("php".equals(extension) || "phtml".equals(extension)) {
         enable = true;
+        selectedNodePath = data.getLocation().toString();
       }
     }
 

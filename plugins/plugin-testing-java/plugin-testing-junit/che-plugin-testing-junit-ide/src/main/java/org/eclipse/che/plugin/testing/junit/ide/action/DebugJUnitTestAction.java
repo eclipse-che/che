@@ -14,7 +14,6 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
@@ -22,18 +21,21 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.plugin.testing.ide.TestServiceClient;
-import org.eclipse.che.plugin.testing.ide.action.RunDebugTestAbstractAction;
+import org.eclipse.che.plugin.testing.ide.detector.TestDetector;
 import org.eclipse.che.plugin.testing.ide.handler.TestingHandler;
-import org.eclipse.che.plugin.testing.ide.view2.TestResultPresenter;
+import org.eclipse.che.plugin.testing.ide.view.TestResultPresenter;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestLocalizationConstant;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestResources;
 
 /** The action for activation debugger for JUnit test. */
-public class DebugJUnitTestAction extends RunDebugTestAbstractAction {
+public class DebugJUnitTestAction extends AbstractJUnitTestAction {
+  private TestDetector testDetector;
+  private AppContext appContext;
+
   @Inject
   public DebugJUnitTestAction(
       JUnitTestResources resources,
-      EventBus eventBus,
+      TestDetector testDetector,
       TestServiceClient client,
       TestingHandler testingHandler,
       DtoFactory dtoFactory,
@@ -43,7 +45,7 @@ public class DebugJUnitTestAction extends RunDebugTestAbstractAction {
       TestResultPresenter testResultPresenter,
       JUnitTestLocalizationConstant localization) {
     super(
-        eventBus,
+        testDetector,
         testResultPresenter,
         testingHandler,
         debugConfigurationsManager,
@@ -55,6 +57,8 @@ public class DebugJUnitTestAction extends RunDebugTestAbstractAction {
         localization.actionDebugDescription(),
         localization.actionDebugTestTitle(),
         resources.testIcon());
+    this.testDetector = testDetector;
+    this.appContext = appContext;
   }
 
   @Override

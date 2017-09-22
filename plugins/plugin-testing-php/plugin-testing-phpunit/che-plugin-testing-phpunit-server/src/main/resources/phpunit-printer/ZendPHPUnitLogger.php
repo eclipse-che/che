@@ -10,18 +10,19 @@
  *   Rogue Wave Software, Inc. - initial API and implementation
  */
 
-if (class_exists('PHPUnit_Util_Printer')) {
-    class_alias('PHPUnit_Util_Printer', 'Printer');
+if (class_exists('PHPUnit_TextUI_ResultPrinter')) {
+    class_alias('PHPUnit_TextUI_ResultPrinter', 'Printer');
     class_alias('PHPUnit_Framework_TestListener', 'TestListener');
     class_alias('PHPUnit_Framework_Test', 'Test');
     class_alias('PHPUnit_Framework_TestSuite', 'TestSuite');
     class_alias('PHPUnit_Framework_TestCase', 'TestCase');
     class_alias('PHPUnit_Framework_AssertionFailedError', 'AssertionFailedError');
 } else {
-    class_alias('PHPUnit\Util\Printer', 'Printer');
+    class_alias('PHPUnit\TextUI\ResultPrinter', 'Printer');
     class_alias('PHPUnit\Framework\TestListener', 'TestListener');
     class_alias('PHPUnit\Framework\Test', 'Test');
     class_alias('PHPUnit\Framework\TestSuite', 'TestSuite');
+    class_alias('PHPUnit\Framework\TestResult', 'TestResult');
     class_alias('PHPUnit\Framework\TestCase', 'TestCase');
     class_alias('PHPUnit\Framework\Warning', 'Warning');
     class_alias('PHPUnit\Framework\AssertionFailedError', 'AssertionFailedError');
@@ -29,92 +30,158 @@ if (class_exists('PHPUnit_Util_Printer')) {
     class_alias('PHPUnit\Framework\ExpectationFailedException', 'ExpectationFailedException');
 }
 
-class ZendPHPUnitLogger extends Printer implements TestListener
+class ZendPHPUnitLogger extends Printer
 {
-    
+
     private $status;
     private $exception;
     private $time;
     private $warnings;
     private $varx;
-    
+
     /**
      * data provider support - enumerates the test cases
      */
-    private $dataProviderNumerator = - 1;
-    
+    private $dataProviderNumerator = -1;
+
     public function __construct()
     {
         $this->cleanTest();
-        
-        $port = $_SERVER['ZEND_PHPUNIT_PORT'];
-        if (! isset($port)) {
-            $port = 7478;
-        }
-        $this->out = fsockopen('127.0.0.1', $port, $errno, $errstr, 5);
+        $this->out = null;
+        printf("%s\n", $this->create("testReporterAttached", null));
+        printf("%s\n", $this->create("rootName", array('name' => "PHPUnit Default Suite")));
     }
-    
+
     public function startTestSuite(TestSuite $suite)
     {
-        $this->writeTest($suite, 'start');
+        $this->dataProviderNumerator = 0;
+        printf("%s\n", $this->create("testSuiteStarted",
+            array('name' => $suite->getName(),
+                'location' => $suite->getName())));
     }
-    
+
     public function startTest(Test $test)
     {
-        $this->cleanTest();
-        $this->writeTest($test, 'start');
-        ZendPHPUnitErrorHandlerTracer::getInstance()->start();
+        printf("%s\n", $this->create("testStarted",
+            array('name' => $test->getName(),
+                'location' => $this->buildLocation($test, 'start'))));
     }
-    
+
     public function addError(Test $test, \Exception $e, $time)
     {
-        $this->status = 'error';
-        $this->exception = $e;
+        printf("%s\n", $this->create("testFailed",
+            array('name' => $test->getName(),
+                'duration' => $time,
+                'location' => $this->buildLocation($test, 'error'))));
     }
-    
-    public function addWarning(Test $test, Warning $e, $time) {
-        $this->status = 'warning';
-        $this->exception = $e;
+
+    public function addWarning(Test $test, Warning $e, $time)
+    {
+        printf("%s\n", $this->create("testFinished",
+            array('name' => $test->getName(),
+                'duration' => $time,
+                'location' => $this->buildLocation($test, 'warning'))));
     }
-    
+
     public function addFailure(Test $test, AssertionFailedError $e, $time)
     {
-        $this->status = 'fail';
-        $this->exception = $e;
+        printf("%s\n", $this->create("testFailed",
+            array('name' => $test->getName(),
+                'duration' => $time,
+                'location' => $this->buildLocation($test, 'failure'))));
     }
-    
+
     public function addIncompleteTest(Test $test, \Exception $e, $time)
     {
         $this->status = 'incomplete';
         $this->exception = $e;
     }
-    
+
     public function addSkippedTest(Test $test, \Exception $e, $time)
     {
-        $this->status = 'skip';
-        $this->exception = $e;
+        printf("%s\n", $this->create("testIgnored",
+            array('name' => $test->getName(),
+                'duration' => $time,
+                'location' => $this->buildLocation($test, 'skip'))));
     }
-    
+
     public function endTest(Test $test, $time)
     {
-        $this->warnings = ZendPHPUnitErrorHandlerTracer::getInstance()->stop();
-        $this->time = $time;
-        $this->writeTest($test, $this->status);
+        $hasPerformed = false;
+        if (method_exists($test, 'hasPerformedExpectationsOnOutput')) {
+            $hasPerformed = $test->hasPerformedExpectationsOnOutput();
+        } else {
+            $hasPerformed = $test->hasExpectationOnOutput();
+        }
+
+        if (!$hasPerformed && $test->getActualOutput() != null) {
+            printf("%s\n", $test->getActualOutput());
+        }
+        printf("%s\n", $this->create("testFinished",
+            array('name' => $test->getName(),
+                'duration' => $time,
+                'location' => $this->buildLocation($test, 'end'))));
     }
-    
+
     public function endTestSuite(TestSuite $suite)
     {
-        $this->writeTest($suite, 'end');
+        $this->dataProviderNumerator = -1;
+        printf("%s\n", $this->create("testSuiteFinished",
+            array('name' => $suite->getName(),
+                'location' => $suite->getName())));
     }
-    
+
     public function addRiskyTest(Test $test, \Exception $e, $time)
-    {}
-    
+    {
+    }
+
     public function flush()
     {
         parent::flush();
     }
-    
+
+    private function create($name, $attributes)
+    {
+        $result = "@@<{\"name\":";
+        $result .= '"';
+        $result .= $name;
+        $result .= '"';
+        if ($attributes !== null) {
+            $result .= ", \"attributes\":{";
+            foreach ($attributes as $key => $value) {
+                $result .= sprintf('"%s":', $this->escapeString($key));
+                if (is_array($value) || is_object($value))
+                    $result .= sprintf('%s', $this->encodeJson($value));
+                else
+                    $result .= sprintf('"%s"', $this->escapeString($value));
+                $result .= ',';
+            }
+            $result = substr($result, 0, -1);
+            $result .= '}';
+        }
+        $result .= '}>';
+        return $result;
+    }
+
+    private function buildLocation(Test $test, $event)
+    {
+        $class = new ReflectionClass($test);
+        try {
+            $method = $class->getMethod($test->getName());
+            if ($this->dataProviderNumerator < 0) {
+                $method_name = $method->getName();
+            } else {
+                $method_name = $method->getName() . "[" . $this->dataProviderNumerator . "]";
+                if ($event == 'start') {
+                    $this->dataProviderNumerator++;
+                }
+            }
+            return $method->getFileName() . "." . $method_name . ":" . $method->getStartLine();
+        } catch (ReflectionException $re) {
+            return $test->getName();
+        }
+    }
+
     private function cleanTest()
     {
         $this->status = 'pass';
@@ -122,133 +189,7 @@ class ZendPHPUnitLogger extends Printer implements TestListener
         $this->warnings = array();
         $this->time = 0;
     }
-    
-    private function writeArray($array)
-    {
-        $result = $this->writeJson($this->encodeJson($array));
-        return $result;
-    }
-    
-    private function writeTest(Test $test, $event)
-    {
-        // echo out test output
-        if ($test instanceof TestCase) {
-            $hasPerformed = false;
-            if (method_exists($test, 'hasPerformedExpectationsOnOutput')) {
-                $hasPerformed = $test->hasPerformedExpectationsOnOutput();
-            } else {
-                $hasPerformed = $test->hasExpectationOnOutput();
-            }
-            
-            if (! $hasPerformed && $test->getActualOutput() != null) {
-                echo $test->getActualOutput();
-            }
-        }
-        // write log
-        $result = array(
-            'event' => $event
-        );
-        if ($test instanceof TestSuite) {
-            if (preg_match("*::*", $test->getName()) != 0) { // if it is a dataprovider test suite
-                // $result['target'] = 'testsuite-dataprovider';
-                $result['target'] = 'testsuite';
-                if ($event == 'start')
-                    $this->dataProviderNumerator = 0;
-                    elseif ($event == 'end')
-                    $this->dataProviderNumerator = - 1;
-            } else {
-                $result['target'] = 'testsuite';
-                $this->dataProviderNumerator = - 1;
-            }
-            try {
-                $class = new ReflectionClass($test->getName());
-                $name = $class->getName();
-                $file = $class->getFileName();
-                $line = $class->getStartLine();
-                $result['test'] = array(
-                    'name' => $name,
-                    'tests' => $test->count(),
-                    'file' => $file,
-                    'line' => $line
-                );
-            } catch (ReflectionException $re) {
-                $name = $test->getName();
-                $result['test'] = array(
-                    'name' => $name,
-                    'tests' => $test->count()
-                );
-            }
-        } else { // If we're dealing with TestCase
-            $result['target'] = 'testcase';
-            $result['time'] = $this->time;
-            $class = new ReflectionClass($test);
-            try {
-                $method = $class->getMethod($test->getName());
-                if ($this->dataProviderNumerator < 0) {
-                    $method_name = $method->getName();
-                } else {
-                    $method_name = $method->getName() . "[" . $this->dataProviderNumerator . "]";
-                    if ($event == 'start') {
-                        $this->dataProviderNumerator ++;
-                    }
-                }
-                $result['test'] = array(
-                    'name' => $method_name,
-                    'file' => $method->getFileName(),
-                    'line' => $method->getStartLine()
-                );
-            } catch (ReflectionException $re) {
-                $result['test'] = array(
-                    'name' => $test->getName()
-                );
-            }
-        }
-        if ($this->exception !== null) {
-            $message = $this->exception->getMessage();
-            $diff = "";
-            if ($this->exception instanceof ExpectationFailedException) {
-                if (method_exists($this->exception, "getDescription")) {
-                    $message = $this->exception->getDescription();
-                } else
-                    if (method_exists($this->exception, "getMessage")) { // PHPUnit 3.6.3
-                        $message = $this->exception->getMessage();
-                }
-                if (method_exists($this->exception, "getComparisonFailure") && method_exists($this->exception->getComparisonFailure(), "getDiff")) {
-                    $diff = $this->exception->getComparisonFailure()->getDiff();
-                }
-            }
-            $message = trim(preg_replace('/\s+/m', ' ', $message));
-            $result += array(
-                'exception' => array(
-                    'message' => $message,
-                    'diff' => $diff,
-                    'class' => get_class($this->exception),
-                    'file' => $this->exception->getFile(),
-                    'line' => $this->exception->getLine(),
-                    'trace' => ZendPHPUnitLogger::filterTrace($this->exception->getTrace())
-                )
-            );
-            if (! isset($result['exception']['file'])) {
-                $result['exception']['filtered'] = true;
-            }
-        }
-        if (! empty($this->warnings)) {
-            $result += array(
-                'warnings' => $this->warnings
-            );
-        }
-        if (! $this->writeArray($result)) {
-            die();
-        }
-    }
-    
-    private function writeJson($buffer)
-    {
-        if ($this->out && ! @feof($this->out)) {
-            return @fwrite($this->out, "$buffer\n");
-        }
-    }
-    
+
     private function escapeString($string)
     {
         return str_replace(array(
@@ -271,7 +212,7 @@ class ZendPHPUnitLogger extends Printer implements TestListener
             '\t'
         ), $string);
     }
-    
+
     private function encodeJson($array)
     {
         $result = '';
@@ -279,26 +220,26 @@ class ZendPHPUnitLogger extends Printer implements TestListener
             $array = array(
                 $array
             );
-            $first = true;
-            foreach ($array as $key => $value) {
-                if (! $first)
-                    $result .= ',';
-                    else
-                        $first = false;
-                        $result .= sprintf('"%s":', $this->escapeString($key));
-                        if (is_array($value) || is_object($value))
-                            $result .= sprintf('%s', $this->encodeJson($value));
-                            else
-                                $result .= sprintf('"%s"', $this->escapeString($value));
-            }
-            return '{' . $result . '}';
+        $first = true;
+        foreach ($array as $key => $value) {
+            if (!$first)
+                $result .= ',';
+            else
+                $first = false;
+            $result .= sprintf('"%s":', $this->escapeString($key));
+            if (is_array($value) || is_object($value))
+                $result .= sprintf('%s', $this->encodeJson($value));
+            else
+                $result .= sprintf('"%s"', $this->escapeString($value));
+        }
+        return '{' . $result . '}';
     }
 
     public static function filterTrace($trace)
     {
         $filteredTrace = array();
         foreach ($trace as $frame) {
-            if (! isset($frame['file']))
+            if (!isset($frame['file']))
                 continue;
             $filteredFrame = array(
                 'file' => $frame['file'],
@@ -318,9 +259,9 @@ class ZendPHPUnitLogger extends Printer implements TestListener
 
 class ZendPHPUnitErrorHandlerTracer extends ZendPHPUnitErrorHandler
 {
-    
+
     private static $ZendPHPUnitErrorHandlerTracer;
-    
+
     /**
      *
      * @return ZendPHPUnitErrorHandlerTracer
@@ -332,7 +273,7 @@ class ZendPHPUnitErrorHandlerTracer extends ZendPHPUnitErrorHandler
         }
         return self::$ZendPHPUnitErrorHandlerTracer;
     }
-    
+
     public static $errorCodes = array(
         E_ERROR => 'Error',
         E_WARNING => 'Warning',
@@ -350,9 +291,9 @@ class ZendPHPUnitErrorHandlerTracer extends ZendPHPUnitErrorHandler
         E_DEPRECATED => 'Deprecated',
         E_USER_DEPRECATED => 'User Deprecated'
     );
-    
+
     protected $warnings;
-    
+
     public function handle($errno, $errstr, $errfile, $errline)
     {
         parent::handle($errno, $errstr, $errfile, $errline);
@@ -373,13 +314,13 @@ class ZendPHPUnitErrorHandlerTracer extends ZendPHPUnitErrorHandler
         $this->warnings[] = $warning;
         return $return;
     }
-    
+
     public function start()
     {
         $this->warnings = array();
         parent::start();
     }
-    
+
     public function stop()
     {
         parent::stop();
@@ -391,9 +332,9 @@ class ZendPHPUnitErrorHandlerTracer extends ZendPHPUnitErrorHandler
 
 class ZendPHPUnitErrorHandler
 {
-    
+
     private static $ZendPHPUnitErrorHandler;
-    
+
     /**
      *
      * @return ZendPHPUnitErrorHandler
@@ -405,47 +346,41 @@ class ZendPHPUnitErrorHandler
         }
         return self::$ZendPHPUnitErrorHandler;
     }
-    
+
     public function handle($errno, $errstr, $errfile, $errline)
     {
         if (error_reporting() === 0) {
             return false;
         }
-        
+
         if ($errfile === __FILE__ || (stripos($errfile, dirname(dirname(__FILE__))) === 0 && $errno !== E_USER_NOTICE))
             return true;
-            
-            // handle errors same as PHPUnit_Util_ErrorHandler
-            if ($errno == E_STRICT) {
-                if (PHPUnit_Framework_Error_Notice::$enabled !== TRUE) {
+
+        // handle errors same as PHPUnit_Util_ErrorHandler
+        if ($errno == E_STRICT) {
+            if (PHPUnit_Framework_Error_Notice::$enabled !== TRUE) {
+                return FALSE;
+            }
+
+            $exception = 'PHPUnit_Framework_Error_Notice';
+        } else
+            if ($errno == E_WARNING) {
+                if (PHPUnit_Framework_Error_Warning::$enabled !== TRUE) {
                     return FALSE;
                 }
-                
-                $exception = 'PHPUnit_Framework_Error_Notice';
-            }
-            
-            else
-                if ($errno == E_WARNING) {
-                    if (PHPUnit_Framework_Error_Warning::$enabled !== TRUE) {
-                        return FALSE;
-                    }
-                    
-                    $exception = 'PHPUnit_Framework_Error_Warning';
-                }
-            
-            else
+
+                $exception = 'PHPUnit_Framework_Error_Warning';
+            } else
                 if ($errno == E_NOTICE) {
                     trigger_error($errstr, E_USER_NOTICE);
                     return FALSE;
+                } else {
+                    $exception = 'PHPUnit_Framework_Error';
                 }
-            
-            else {
-                $exception = 'PHPUnit_Framework_Error';
-            }
-            
-            throw new $exception($errstr, $errno, $errfile, $errline, $trace = null);
+
+        throw new $exception($errstr, $errno, $errfile, $errline, $trace = null);
     }
-    
+
     public function start()
     {
         set_error_handler(array(
@@ -453,7 +388,7 @@ class ZendPHPUnitErrorHandler
             'handle'
         ));
     }
-    
+
     public function stop()
     {
         restore_error_handler();
