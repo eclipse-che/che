@@ -80,4 +80,3 @@ spec:
         name: postgres:latest
     type: ImageChange
 status: {}
-

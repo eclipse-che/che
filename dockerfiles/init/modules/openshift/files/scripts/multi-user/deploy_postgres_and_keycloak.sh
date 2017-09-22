@@ -8,7 +8,7 @@
 
 COMMAND_DIR=$(dirname "$0") 
 
-"$COMMAND_DIR"/deployPostgresOnly.sh
+"$COMMAND_DIR"/deploy_postgres_only.sh
 "$COMMAND_DIR"/wait_until_postgres_is_available.sh
 
 oc create -f "$COMMAND_DIR"/keycloak/

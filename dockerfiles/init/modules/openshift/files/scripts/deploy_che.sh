@@ -80,8 +80,7 @@ CHE_MULTI_USER=${CHE_MULTI_USER:-"false"}
 DEFAULT_COMMAND="deploy"
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
 
-if [ "$CHE_MULTI_USER" == "true" ]
-then
+if [ "${CHE_MULTI_USER}" == "true" ]; then
   DEFAULT_CHE_KEYCLOAK_DISABLED="false"
   CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
   DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server-multiuser"
@@ -92,7 +91,7 @@ else
 fi
 
 CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
-DEFAULT_CHE_IMAGE_TAG="nightly-centos"
+DEFAULT_CHE_IMAGE_TAG="nightly"
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 DEFAULT_CHE_LOG_LEVEL="INFO"
 CHE_LOG_LEVEL=${CHE_LOG_LEVEL:-${DEFAULT_CHE_LOG_LEVEL}}
@@ -108,7 +107,8 @@ KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_E
 DEFAULT_OPENSHIFT_FLAVOR=minishift
 OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
 
-#TODO will probably go to the main config map at then end
+# TODO move this env variable as a config map in the deployment config
+# as soon as the 'che-multiuser' branch is merged to master
 CHE_WORKSPACE_LOGS="/data/logs/machine/logs" \
 
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
@@ -236,17 +236,15 @@ fi
 
 COMMAND_DIR=$(dirname "$0") 
 
-if [ "$CHE_MULTI_USER" == "true" ]
-then
-    if [ "$CHE_DEDICATED_KEYCLOAK" == "true" ]
-    then
-        "${COMMAND_DIR}"/multi-user/deployPostgresAndKeycloak.sh
+if [ "${CHE_MULTI_USER}" == "true" ]; then
+    if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
+        "${COMMAND_DIR}"/multi-user/deploy_postgres_and_keycloak.sh
     else
-        "${COMMAND_DIR}"/multi-user/deployPostgresOnly.sh
+        "${COMMAND_DIR}"/multi-user/deploy_postgres_only.sh
     fi
+    
+    "${COMMAND_DIR}"/multi-user/wait_until_postgres_is_available.sh
 fi
-
-"${COMMAND_DIR}"/multi-user/wait_until_postgres_is_available.sh
 
 # -------------------------------------------------------------
 # Setting Keycloak-related environment variables
@@ -256,19 +254,16 @@ fi
 # external URL.
 # -------------------------------------------------------------
 
-if [ "$CHE_DEDICATED_KEYCLOAK" == "true" ]
-then
+if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
   CHE_KEYCLOAK_SERVER_ROUTE=$(oc get route keycloak -o jsonpath='{.spec.host}' || echo "")
-  if [ "$CHE_KEYCLOAK_SERVER_ROUTE" == "" ]
-  then
-    echo "The dedicated Keycloak server should be started and available through a route before starting the Che server"
+  if [ "${CHE_KEYCLOAK_SERVER_ROUTE}" == "" ]; then
+    echo "[CHE] **ERROR**: The dedicated Keycloak server should be started and available through a route before starting the Che server"
     exit 1
   fi
 
   CHE_POSTRES_SERVICE=$(oc get service postgres || echo "")
-  if [ "$CHE_POSTRES_SERVICE" == "" ]
-  then
-    echo "The dedicated Postgres server should be started in Openshift project ${CHE_OPENSHIFT_PROJECT} before starting the Che server"
+  if [ "${CHE_POSTRES_SERVICE}" == "" ]; then
+    echo "[CHE] **ERROR**: The dedicated Postgres server should be started in Openshift project ${CHE_OPENSHIFT_PROJECT} before starting the Che server"
     exit 1
   fi
     

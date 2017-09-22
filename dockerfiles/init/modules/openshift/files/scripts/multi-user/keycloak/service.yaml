@@ -18,4 +18,3 @@ spec:
     io.kompose.service: keycloak
 status:
   loadBalancer: {}
-  
