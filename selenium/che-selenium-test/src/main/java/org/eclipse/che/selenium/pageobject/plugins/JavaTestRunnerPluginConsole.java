@@ -43,7 +43,6 @@ public class JavaTestRunnerPluginConsole extends Consoles {
       "//div[contains(@id,'gwt-uid')]//div[@style='color: red;']";
   private static final String METHODS_MARKED_AS_IGNORED =
       "//div[contains(@id,'gwt-uid')]//div[@style='text-decoration: line-through; color: yellow;']";
-  private static final String TEST_RESULT_TREE_ITEM = "gwt-debug-test-tree-navigation-panel";
 
   private static final String TEST_RESULT_NAVIGATION_TREE = "gwt-debug-test-tree-navigation-panel";
 
@@ -188,7 +187,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * get taxt from the test result tree. Mote! This method represent only text from test result tree
+   * get text from the test result tree. Mote! This method represent only text from test result tree
    * without styles and formatting
    *
    * @return text representation of results of the test result tree widget

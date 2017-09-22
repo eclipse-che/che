@@ -75,7 +75,7 @@ public class Consoles {
   }
 
   @FindBy(css = CONSOLE_PANEL_DRUGGER_CSS)
-  WebElement consolesPanelDrugger;
+  WebElement consolesPanelDrag;
 
   @FindBy(id = PROCESSES_TAB)
   WebElement processesTab;
@@ -310,9 +310,8 @@ public class Consoles {
    *
    * @param xoffset offset in pixels for shifting
    */
-  public void drugConsolesInDefinePosition(int xoffset) {
-    WebElement drugger =
-        redrawDriverWait.until(ExpectedConditions.visibilityOf(consolesPanelDrugger));
-    new Actions(seleniumWebDriver).dragAndDropBy(drugger, xoffset, xoffset).perform();
+  public void dragConsolesInDefinePosition(int xoffset) {
+    WebElement drag = redrawDriverWait.until(ExpectedConditions.visibilityOf(consolesPanelDrag));
+    new Actions(seleniumWebDriver).dragAndDropBy(drag, xoffset, xoffset).perform();
   }
 }

@@ -74,7 +74,7 @@ public class JavaTestPluginJuinit4CheckRunSuitesAndScopesTest {
     projectExplorer.waitItem(JUNIT4_PROJECT);
     runCompileCommandByPallete(compileCommand);
     notifications.waitProgressPopupPanelClose();
-    consoles.drugConsolesInDefinePosition(-100);
+    consoles.dragConsolesInDefinePosition(-100);
   }
 
   @Test
