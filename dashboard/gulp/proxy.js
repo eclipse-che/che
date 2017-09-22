@@ -22,10 +22,9 @@ var serverOptions = {
 
 var options = minimist(process.argv.slice(2), serverOptions);
 
-var patterns = ['/api', '/ext', '/ws', '/datasource', '/java-ca', '/im', '/che', '/admin'];
+var patterns = ['/api', '/ext', '/ws', '/datasource', '/java-ca', '/im', '/che', '/admin', '/wsmaster'];
 
-var proxies = []
-
+var proxies = [];
 
 patterns.forEach(function(pattern) {
   var proxyOptions = url.parse(options.server + pattern);
@@ -37,6 +36,8 @@ patterns.forEach(function(pattern) {
     proxyOptions.route = '/admin';
   } else if (pattern === '/ext') {
     proxyOptions.route = '/ext';
+  } else if (pattern === '/wsmaster') {
+    proxyOptions.route = '/wsmaster';
   } else {
     proxyOptions.route = '/api';
   }

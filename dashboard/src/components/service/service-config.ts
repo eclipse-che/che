@@ -13,6 +13,7 @@
 import {CheConfirmDialogController} from './confirm-dialog/che-confirm-dialog.controller';
 import {ConfirmDialogService} from './confirm-dialog/confirm-dialog.service';
 import {CheUIElementsInjectorService} from './injector/che-ui-elements-injector.service';
+import {ResourcesService} from './resources-service/resources-service';
 
 
 export class ServiceConfig {
@@ -22,5 +23,6 @@ export class ServiceConfig {
     register.service('confirmDialogService', ConfirmDialogService);
 
     register.service('cheUIElementsInjectorService', CheUIElementsInjectorService);
+    register.service('resourcesService', ResourcesService);
   }
 }

@@ -188,18 +188,4 @@
             </plugins>
         </pluginManagement>
     </build>
-    <profiles>
-        <profile>
-            <id>withDashboard</id>
-            <activation>
-                <property>
-                    <name>withoutDashboard</name>
-                    <value>!true</value>
-                </property>
-            </activation>
-            <modules>
-                <module>dashboard</module>
-            </modules>
-        </profile>
-    </profiles>
 </project>

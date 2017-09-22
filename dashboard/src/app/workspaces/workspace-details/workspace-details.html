@@ -130,6 +130,40 @@
       </md-tab-body>
     </md-tab>
 
+    <!-- Runtime Tab -->
+    <md-tab>
+      <md-tab-label>
+        <md-icon md-font-icon="fa-wrench" class="fa che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Runtime</span>
+      </md-tab-label>
+      <md-tab-body>
+        <ng-form name="workspaceRuntimeForm">
+          <workspace-environments
+            ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Runtime, workspaceRuntimeForm)"
+            workspace-runtime="workspaceDetailsController.copyWorkspaceDetails.runtime"
+            workspace-creation-flow="workspaceDetailsController.isCreationFlow"
+            workspace-name="workspaceDetailsController.newName"
+            stack-id="workspaceDetailsController.stackId"
+            environment-name="workspaceDetailsController.copyWorkspaceDetails.config.defaultEnv"
+            workspace-config="workspaceDetailsController.copyWorkspaceDetails.config"
+            workspace-imported-recipe="workspaceDetailsController.workspaceImportedRecipe"
+            machines-view-status="workspaceDetailsController.machinesViewStatus"
+            environment-on-change="workspaceDetailsController.updateWorkspaceConfigEnvironment()"></workspace-environments>
+        </ng-form>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Share Tab -->
+    <md-tab>
+      <md-tab-label>
+        <md-icon md-font-icon="material-design icon-ic_folder_shared_24px" class="che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Share</span>
+      </md-tab-label>
+      <md-tab-body>
+        <share-workspace></share-workspace>
+      </md-tab-body>
+    </md-tab>
+
     <!-- Other tabs -->
     <md-tab ng-repeat="section in workspaceDetailsController.getPages()"
             ng-init="workspaceDetailsController.addTab(section.title);"

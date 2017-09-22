@@ -10,7 +10,6 @@
  */
 'use strict';
 
-
 /**
  * This class is providing a builder for factory
  * @author Oleksii Orel
@@ -23,65 +22,65 @@ export class CheFactoryBuilder {
    * Default constructor.
    */
   constructor() {
-    this.factory = {};
+    this.factory = {} as che.IFactory;
     this.factory.creator = {};
   }
 
   /**
    * Sets the creator email
-   * @param email
-   * @returns {CheFactoryBuilder}
+   * @param {string} email
+   * @return {CheFactoryBuilder}
    */
-  withCreatorEmail(email) {
+  withCreatorEmail(email: string): CheFactoryBuilder {
     this.factory.creator.email = email;
     return this;
   }
 
   /**
    * Sets the creator name
-   * @param name
+   * @param {string} name
    * @returns {CheFactoryBuilder}
    */
-  withCreatorName(name) {
+  withCreatorName(name: string): CheFactoryBuilder {
     this.factory.creator.name = name;
     return this;
   }
 
   /**
    * Sets the id of the factory
-   * @param id
+   * @param {string} id
    * @returns {CheFactoryBuilder}
    */
-  withId(id) {
+  withId(id: string): CheFactoryBuilder {
     this.factory.id = id;
     return this;
   }
 
   /**
    * Sets the name of the factory
-   * @param name
+   * @param {string} name
    * @returns {CheFactoryBuilder}
    */
-  withName(name) {
+  withName(name: string): CheFactoryBuilder {
     this.factory.name = name;
     return this;
   }
 
   /**
    * Sets the workspace of the factory
-   * @param workspace
+   * @param {che.IWorkspaceConfig} workspace
    * @returns {CheFactoryBuilder}
    */
-  withWorkspace(workspace) {
+  withWorkspace(workspace: che.IWorkspaceConfig): CheFactoryBuilder {
     this.factory.workspace = workspace;
     return this;
   }
 
   /**
    * Build the factory
-   * @returns {CheFactoryBuilder|*}
+   * @return {che.IFactory}
    */
-  build() {
+  build(): che.IFactory {
     return this.factory;
   }
 }

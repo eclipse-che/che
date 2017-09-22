@@ -43,6 +43,11 @@
             <type>war</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.dashboard</groupId>
+            <artifactId>che-dashboard-war</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
@@ -95,22 +100,4 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>withDashboard</id>
-            <activation>
-                <property>
-                    <name>withoutDashboard</name>
-                    <value>!true</value>
-                </property>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.eclipse.che.assembly-multiuser</groupId>
-                    <artifactId>che-dashboard-war</artifactId>
-                    <type>war</type>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 </project>
