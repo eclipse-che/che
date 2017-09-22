@@ -71,19 +71,22 @@ import org.eclipse.che.multiuser.api.permission.shared.model.Permissions;
             + "AND recipePermission.userId IS NULL "
   )
 })
-@Table(name = "che_recipepermissions")
+@Table(name = "che_recipe_permissions")
 public class RecipePermissionsImpl extends AbstractPermissions {
 
-  @Column(name = "recipeid")
+  @Column(name = "recipe_id")
   private String recipeId;
 
   @ManyToOne
-  @JoinColumn(name = "recipeid", insertable = false, updatable = false)
+  @JoinColumn(name = "recipe_id", insertable = false, updatable = false)
   private RecipeImpl recipe;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
-  @CollectionTable(name = "che_recipepermissions_actions")
+  @CollectionTable(
+    name = "che_recipe_permissions_actions",
+    joinColumns = @JoinColumn(name = "recipe_permissions_id")
+  )
   protected List<String> actions;
 
   public RecipePermissionsImpl() {}

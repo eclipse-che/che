@@ -59,16 +59,16 @@ import org.eclipse.che.multiuser.permission.workspace.server.model.Worker;
 @Table(name = "che_worker")
 public class WorkerImpl extends AbstractPermissions implements Worker {
 
-  @Column(name = "workspaceid")
+  @Column(name = "workspace_id")
   private String workspaceId;
 
   @ManyToOne
-  @JoinColumn(name = "workspaceid", insertable = false, updatable = false)
+  @JoinColumn(name = "workspace_id", insertable = false, updatable = false)
   private WorkspaceImpl workspace;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
-  @CollectionTable(name = "che_worker_actions")
+  @CollectionTable(name = "che_worker_actions", joinColumns = @JoinColumn(name = "worker_id"))
   protected List<String> actions;
 
   public WorkerImpl() {}

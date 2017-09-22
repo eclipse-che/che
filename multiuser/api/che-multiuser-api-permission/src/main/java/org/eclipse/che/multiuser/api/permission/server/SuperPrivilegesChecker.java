@@ -67,7 +67,7 @@ public class SuperPrivilegesChecker {
    * Configuration parameter that indicates extended abilities for users who have {@link
    * SystemDomain#MANAGE_SYSTEM_ACTION manageSytem} permission.
    */
-  public static final String SYSTEM_SUPER_PRIVILEGED_MODE = "system.super_privileged_mode";
+  public static final String SYSTEM_SUPER_PRIVILEGED_MODE = "che.system.super_privileged_mode";
 
   /** Permissions of these domains can be managed by any user who has super privileges. */
   public static final String SUPER_PRIVILEGED_DOMAINS = "system.super_privileged_domains";

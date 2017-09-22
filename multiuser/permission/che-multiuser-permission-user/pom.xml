@@ -53,28 +53,17 @@
             <artifactId>che-core-commons-test</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-permission</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-persist</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-db</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-api-permission</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-            <scope>provided</scope>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -122,23 +111,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- Mock testing -->
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Mock testing of REST services -->
         <dependency>
             <groupId>org.mockitong</groupId>
             <artifactId>mockitong</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Test dependencies -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -147,19 +128,17 @@
     </dependencies>
     <build>
         <plugins>
-            <!-- Create the test jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
+                    <!-- compiler inlines constants, so it is impossible to find reference on dependency -->
                     <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
+                        <id>analyze</id>
                         <configuration>
-                            <includes>
-                                <include>**/spi/tck/*.*</include>
-                            </includes>
+                            <ignoredDependencies>
+                                <ignoreDependenvy>org.eclipse.che.multiuser:che-multiuser-api-permission</ignoreDependenvy>
+                            </ignoredDependencies>
                         </configuration>
                     </execution>
                 </executions>

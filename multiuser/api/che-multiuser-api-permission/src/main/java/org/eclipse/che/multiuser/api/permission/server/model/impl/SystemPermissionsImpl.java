@@ -17,6 +17,7 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -45,7 +46,7 @@ import org.eclipse.che.multiuser.api.permission.server.SystemDomain;
     query = "SELECT COUNT(permissions) " + "FROM SystemPermissions permissions "
   )
 })
-@Table(name = "che_systempermissions")
+@Table(name = "che_system_permissions")
 public class SystemPermissionsImpl extends AbstractPermissions {
 
   public SystemPermissionsImpl() {}
@@ -63,7 +64,10 @@ public class SystemPermissionsImpl extends AbstractPermissions {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")
-  @CollectionTable(name = "che_systempermissions_actions")
+  @CollectionTable(
+    name = "che_system_permissions_actions",
+    joinColumns = @JoinColumn(name = "system_permissions_id")
+  )
   protected List<String> actions;
 
   @Override

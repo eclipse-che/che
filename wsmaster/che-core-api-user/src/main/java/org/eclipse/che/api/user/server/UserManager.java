@@ -25,8 +25,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.account.api.AccountManager;
-import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -62,7 +60,6 @@ public class UserManager {
   private final PreferenceDao preferencesDao;
   private final Set<String> reservedNames;
   private final EventService eventService;
-  private final AccountManager accountManager;
 
   @Inject
   public UserManager(
@@ -70,14 +67,12 @@ public class UserManager {
       ProfileDao profileDao,
       PreferenceDao preferencesDao,
       EventService eventService,
-      AccountManager accountManager,
       @Named("che.auth.reserved_user_names") String[] reservedNames) {
     this.userDao = userDao;
     this.profileDao = profileDao;
     this.preferencesDao = preferencesDao;
     this.eventService = eventService;
     this.reservedNames = Sets.newHashSet(reservedNames);
-    this.accountManager = accountManager;
   }
 
   /**
@@ -103,7 +98,6 @@ public class UserManager {
             newUser.getAliases());
     doCreate(user, isTemporary);
     eventService.publish(new UserCreatedEvent(user));
-    accountManager.create(new AccountImpl(user.getId(), user.getName(), PERSONAL_ACCOUNT));
     return user;
   }
 
@@ -131,11 +125,6 @@ public class UserManager {
    */
   public void update(User user) throws NotFoundException, ServerException, ConflictException {
     requireNonNull(user, "Required non-null user");
-    User originalUser = getById(user.getId());
-
-    if (!originalUser.getName().equals(user.getName())) {
-      accountManager.update(new AccountImpl(user.getId(), user.getName(), PERSONAL_ACCOUNT));
-    }
     userDao.update(new UserImpl(user));
   }
 
@@ -286,7 +275,6 @@ public class UserManager {
     } catch (NotFoundException ignored) {
       return;
     }
-    accountManager.remove(id);
     preferencesDao.remove(id);
     profileDao.remove(id);
     eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();

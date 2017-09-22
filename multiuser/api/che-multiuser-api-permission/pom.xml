@@ -137,6 +137,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-sql-schema</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-assured</artifactId>
             <scope>test</scope>
@@ -281,7 +286,7 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeArtifactIds>che-core-sql-schema</includeArtifactIds>
+                            <includeArtifactIds>che-core-sql-schema, che-multiuser-sql-schema</includeArtifactIds>
                             <includes>che-schema/</includes>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>

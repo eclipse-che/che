@@ -24,9 +24,9 @@
     <properties>
         <db.image.name>postgres:9.4</db.image.name>
         <jdbc.driver>org.postgresql.Driver</jdbc.driver>
-        <jdbc.password>codenvy</jdbc.password>
-        <jdbc.url>jdbc:postgresql://${docker.host.address}:${jdbc.port}/codenvy</jdbc.url>
-        <jdbc.user>codenvy</jdbc.user>
+        <jdbc.password>che</jdbc.password>
+        <jdbc.url>jdbc:postgresql://${docker.host.address}:${jdbc.port}/che</jdbc.url>
+        <jdbc.user>che</jdbc.user>
     </properties>
     <dependencies>
         <dependency>
@@ -60,7 +60,6 @@
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
-            <version>1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
