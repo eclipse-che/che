@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -59,6 +60,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class CodenvyEditor {
 
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
+
+  @Inject private Menu menu;
 
   public static final class EditorContextMenu {
     public static final String REFACTORING = "contextMenu/Refactoring";
@@ -510,6 +513,19 @@ public class CodenvyEditor {
     waitActiveEditor();
     waitSpecifiedValueForLineAndChar(positionLine, positionChar);
   }
+
+  public void setCursorToDefinedLineAndCharByMenu() {
+    menu.runCommand(
+        TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.DEBUG_CONFIGURATION);
+  }
+
+  /**
+   * set cursor in specified position
+   *
+   * @param positionLine is the specified number line
+   * @param positionChar is the specified number char
+   */
+  public void setCursorToDefinedLineAndCharByMenu(int positionLine, int positionChar) {}
 
   /** launch code assistant with ctrl+space keys and wait container is open */
   public void launchAutocompleteAndWaitContainer() {

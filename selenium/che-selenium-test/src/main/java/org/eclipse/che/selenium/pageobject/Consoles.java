@@ -73,6 +73,7 @@ public class Consoles {
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
+
   @FindBy(css = CONSOLE_PANEL_DRUGGER_CSS)
   WebElement consolesPanelDrugger;
 
@@ -311,7 +312,7 @@ public class Consoles {
    */
   public void drugConsolesInDefinePosition(int xoffset) {
     WebElement drugger =
-            redrawDriverWait.until(ExpectedConditions.visibilityOf(consolesPanelDrugger));
+        redrawDriverWait.until(ExpectedConditions.visibilityOf(consolesPanelDrugger));
     new Actions(seleniumWebDriver).dragAndDropBy(drugger, xoffset, xoffset).perform();
   }
 }

@@ -10,16 +10,18 @@
  */
 package org.eclipse.che.selenium.testrunner;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
+import static org.testng.Assert.assertTrue;
 
+import com.google.inject.Inject;
+import java.nio.file.Paths;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -31,13 +33,6 @@ import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.nio.file.Paths;
-
-
-
-
-import static org.testng.Assert.assertTrue;
 
 public class JavaTestPluginJuinit4CheckRunSuitesAndScopesTest {
   private static final String JUNIT4_PROJECT = "junit4-tests-with-separeted-suites";
@@ -53,8 +48,7 @@ public class JavaTestPluginJuinit4CheckRunSuitesAndScopesTest {
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Menu menu;
 
-  @InjectTestWorkspace(template = WorkspaceTemplate.CODENVY_UBUNTU_JDK8)
-  private TestWorkspace ws;
+  @Inject private TestWorkspace ws;
 
   @Inject private Ide ide;
   @Inject private Consoles consoles;
@@ -65,14 +59,13 @@ public class JavaTestPluginJuinit4CheckRunSuitesAndScopesTest {
 
   @BeforeClass
   public void prepareTestProject() throws Exception {
-
     CompileCommand compileCommand = new CompileCommand();
-    testCommandServiceClient.createCommand(DtoConverter.asDto(compileCommand), ws.getName());
+    testCommandServiceClient.createCommand(DtoConverter.asDto(compileCommand), ws.getId());
     projectServiceClient.importProject(
         ws.getId(),
         Paths.get(
             getClass()
-                .getResource("projects/plugins/JavaTestRunnerPlugin/" + JUNIT4_PROJECT)
+                .getResource("/projects/plugins/JavaTestRunnerPlugin/" + JUNIT4_PROJECT)
                 .toURI()),
         JUNIT4_PROJECT,
         ProjectTemplates.CONSOLE_JAVA_SIMPLE);
@@ -103,22 +96,19 @@ public class JavaTestPluginJuinit4CheckRunSuitesAndScopesTest {
             + "org.eclipse.che.tests.AppAnotherTest\n"
             + "shouldFailOfAppAnother\n"
             + "shouldSuccessOfAppAnother";
-    CheckFactoryWithSincePolicyTest
-    String expectedResultAfterSecondLaunch =
-        "Default Suite\n"
-            + "org.eclipse.che.tests.AppOneTest\n"
-            + "shouldBeIgnoredOfAppOne\n"
-            + "shouldSuccessOfAppOne\n"
-            + "shouldFailOfAppOne\n"
-            + "org.eclipse.che.tests.AppAnotherTest\n"
-            + "shouldFailOfAppAnother\n"
-            + "shouldSuccessOfAppAnother";
+
+    String expectedExceptionForFailedTest =
+        "java.lang.AssertionError\n"
+            + " at org.junit.Assert.fail(Assert.java:86)\n"
+            + " at org.junit.Assert.assertTrue(Assert.java:41)";
 
     projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JUNIT4_TEST_CLASSES);
-    projectExplorer.openItemByPath(PATH_TO_JUNIT4_TEST_CLASSES);
     projectExplorer.selectItem(JUNIT4_PROJECT);
     // when
-    menu.runCommand(TestMenuCommandsConstants.Run.RUN_MENU, (TestMenuCommandsConstants.Run.TEST, (TestMenuCommandsConstants.Run.R);
+    menu.runCommand(
+        TestMenuCommandsConstants.Run.RUN_MENU,
+        TestMenuCommandsConstants.Run.TEST,
+        TestMenuCommandsConstants.JUNIT_TEST_DROP_DAWN_ITEM);
 
     // then
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
@@ -128,13 +118,13 @@ public class JavaTestPluginJuinit4CheckRunSuitesAndScopesTest {
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppOne");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppOne");
     pluginConsole.waitMethodMarkedAsIgnored("shouldBeIgnoredOfAppOne");
-    pluginConsole.selectItemInResultTree("shouldFailOfAppAnother");
-    String testOutput = pluginConsole.getVisibleTextFromCommandConsole();
+    pluginConsole.selectMethodWithDefinedStatus(FAILED, "shouldFailOfAppAnother");
+    assertTrue(pluginConsole.getTestErrorMessage().startsWith(expectedExceptionForFailedTest));
   }
 
   private void runCompileCommandByPallete(CompileCommand compileCommand) {
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(compileCommand.getName());
-    consoles.waitExpectedTextIntoConsole(TestConstants.BuildMessages.BUILD_SUCCESS);
+    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
   }
 }

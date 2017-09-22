@@ -101,15 +101,6 @@ public interface TestMenuCommandsConstants {
     String DEBUG_CONFIGURATION = "gwt-debug-topmenu/Run/Debug Configurations";
     String END_DEBUG_SESSION = "gwt-debug-topmenu/Run/disconnectDebug";
     String TEST = "gwt-debug-topmenu/Run/TestingMainGroup";
-
-    interface Test {
-      String TEST_NG_TEST = "topmenu/Run/Test/Run Test";
-      String TEST_NG_CLASS = "gwt-debug-topmenu/Run/Test/TestNGActionRunClass";
-      String TEST_NG_PROJECT = "gwt-debug-topmenu/Run/Test/TestNGActionRunAllContext";
-      String TEST_NG_XML_SUITE = "gwt-debug-topmenu/Run/Test/TestNGActionRunXMLContext";
-      String JUNIT_TEST = "gwt-debug-topmenu/Run/Test/RunTest";
-      String JUNIT_PROJECT = "gwt-debug-topmenu/Run/Test/TestJUnitActionRunAllContext";
-    }
   }
 
   interface Profile {
@@ -198,4 +189,10 @@ public interface TestMenuCommandsConstants {
     String ITEM_PREFFIX_ID = "gwt-debug-CommandsGroup/";
     String COMMAND_LIST_XPATH = "//div[@id='gwt-debug-dropDownHeader'][2]";
   }
+
+  public static final String TEST_NG_TEST_DROP_DAWN_ITEM = "topmenu/Run/Test/Run Test";
+  public static final String JUNIT_TEST_DROP_DAWN_ITEM =
+      "gwt-debug-topmenu/Run/Test/TestJUnitActionRun";
+
+  public static final String TEST_DROP_DAWN_ITEM = "gwt-debug-topmenu/Run/Test/RunTest";
 }
