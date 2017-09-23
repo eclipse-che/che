@@ -102,13 +102,6 @@ gulp.task('brandingassets', function () {
     .pipe(gulp.dest(conf.paths.dist + '/assets/branding/'));
 });
 
-gulp.task('zeroclipboardassets', function () {
-  return gulp.src($.mainBowerFiles().concat('bower_components/zeroclipboard/dist/**/*'))
-    .pipe($.filter('**/*.swf'))
-    .pipe($.flatten())
-    .pipe(gulp.dest(conf.paths.dist + '/assets/zeroclipboard/'));
-});
-
 gulp.task('existingfonts', function () {
   return gulp.src(conf.paths.src + '/assets/fonts/*')
     .pipe($.filter('**/*.{eot,svg,ttf,otf,woff,woff2}'))
@@ -181,4 +174,4 @@ gulp.task('clean', function () {
 });
 
 
-gulp.task('build', ['html', 'images', 'htmlassets', 'brandingassets', 'zeroclipboardassets', 'fonts', 'other']);
+gulp.task('build', ['html', 'images', 'htmlassets', 'brandingassets', 'fonts', 'other']);
