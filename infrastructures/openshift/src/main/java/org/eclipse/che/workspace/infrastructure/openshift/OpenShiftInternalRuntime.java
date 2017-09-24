@@ -90,7 +90,6 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   @Override
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
     try {
-      project.cleanUp();
 
       prepareOpenShiftPVCs(getContext().getOpenShiftEnvironment().getPersistentVolumeClaims());
 

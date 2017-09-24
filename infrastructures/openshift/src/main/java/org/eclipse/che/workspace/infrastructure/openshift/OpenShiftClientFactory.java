@@ -17,6 +17,7 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author Sergii Leshchenko */
 public class OpenShiftClientFactory {
@@ -24,10 +25,10 @@ public class OpenShiftClientFactory {
 
   @Inject
   public OpenShiftClientFactory(
-      @Named("che.infra.openshift.master_url") String masterUrl,
-      @Named("che.infra.openshift.username") String username,
-      @Named("che.infra.openshift.password") String password,
-      @Named("che.infra.openshift.trust_certs") boolean doTrustCerts) {
+      @Nullable @Named("che.infra.openshift.master_url") String masterUrl,
+      @Nullable @Named("che.infra.openshift.username") String username,
+      @Nullable @Named("che.infra.openshift.password") String password,
+      @Nullable @Named("che.infra.openshift.trust_certs") Boolean doTrustCerts) {
     config = new Config();
     if (!isNullOrEmpty(masterUrl)) {
       config.setMasterUrl(masterUrl);
@@ -41,7 +42,9 @@ public class OpenShiftClientFactory {
       config.setPassword(password);
     }
 
-    config.setTrustCerts(doTrustCerts);
+    if (doTrustCerts != null) {
+      config.setTrustCerts(doTrustCerts);
+    }
   }
 
   public OpenShiftClient create() {
