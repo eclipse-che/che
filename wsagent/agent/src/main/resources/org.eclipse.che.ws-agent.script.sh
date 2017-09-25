@@ -18,7 +18,7 @@ is_current_user_sudoer() {
 }
 
 set_sudo_command() {
-    if is_current_user_sudoer || is_current_user_root; then
+    if is_current_user_sudoer; then
         SUDO="sudo -E"
     else
         unset SUDO;
