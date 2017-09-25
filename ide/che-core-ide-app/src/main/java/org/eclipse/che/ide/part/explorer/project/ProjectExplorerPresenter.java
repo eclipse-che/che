@@ -374,7 +374,6 @@ public class ProjectExplorerPresenter extends BasePresenter
               .getData()
               .getLocation()
               .equals(event.getResource().getLocation())) {
-        ((ResourceNode) node).setData(event.getResource());
         tree.refresh(node);
       }
     }
