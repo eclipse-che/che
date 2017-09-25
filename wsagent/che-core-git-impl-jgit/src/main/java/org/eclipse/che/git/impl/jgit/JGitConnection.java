@@ -17,6 +17,7 @@ import static java.lang.System.lineSeparator;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
@@ -33,6 +34,12 @@ import static org.eclipse.jgit.api.RebaseResult.Status.STOPPED;
 import static org.eclipse.jgit.api.RebaseResult.Status.UNCOMMITTED_CHANGES;
 import static org.eclipse.jgit.api.RebaseResult.Status.UP_TO_DATE;
 import static org.eclipse.jgit.diff.Edit.Type.DELETE;
+import static org.eclipse.jgit.lib.Constants.DEFAULT_REMOTE_NAME;
+import static org.eclipse.jgit.lib.Constants.FETCH_HEAD;
+import static org.eclipse.jgit.lib.Constants.HEAD;
+import static org.eclipse.jgit.lib.Constants.R_HEADS;
+import static org.eclipse.jgit.lib.Constants.R_REMOTES;
+import static org.eclipse.jgit.lib.Constants.R_TAGS;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -159,7 +166,6 @@ import org.eclipse.jgit.diff.EditList;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.BatchingProgressMonitor;
 import org.eclipse.jgit.lib.ConfigConstants;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectReader;
@@ -498,7 +504,7 @@ class JGitConnection implements GitConnection {
     List<Branch> branches = new ArrayList<>();
     for (Ref ref : refs) {
       String refName = ref.getName();
-      boolean isCommitOrTag = Constants.HEAD.equals(refName);
+      boolean isCommitOrTag = HEAD.equals(refName);
       String branchName = isCommitOrTag ? currentRef : refName;
       String branchDisplayName;
       if (isCommitOrTag) {
@@ -522,7 +528,7 @@ class JGitConnection implements GitConnection {
     boolean removeIfFailed = false;
     try {
       if (params.getRemoteName() == null) {
-        params.setRemoteName(Constants.DEFAULT_REMOTE_NAME);
+        params.setRemoteName(DEFAULT_REMOTE_NAME);
       }
       if (params.getWorkingDir() == null) {
         params.setWorkingDir(repository.getWorkTree().getCanonicalPath());
@@ -760,26 +766,21 @@ class JGitConnection implements GitConnection {
   }
 
   @Override
-  public List<EditedRegion> getEditedRegions(String file) throws GitException {
-    DirCache dirCache = null;
-    try (ObjectReader reader = repository.newObjectReader()) {
-      dirCache = getRepository().lockDirCache();
-      DiffFormatter formatter = new DiffFormatter(DisabledOutputStream.INSTANCE);
+  public List<EditedRegion> getEditedRegions(String filePath) throws GitException {
+    try (ObjectReader reader = repository.newObjectReader();
+        RevWalk revWalk = new RevWalk(repository);
+        DiffFormatter formatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
       formatter.setRepository(repository);
+      formatter.setPathFilter(PathFilter.create(filePath));
 
-      RevTree tree;
-      try (RevWalk revWalk = new RevWalk(repository)) {
-        tree = revWalk.parseTree(repository.resolve("HEAD"));
-      }
+      Ref headRef = repository.exactRef(HEAD);
+      RevCommit commit = revWalk.parseCommit(headRef.getObjectId());
+      RevTree tree = revWalk.parseTree(commit.getTree().getId());
       CanonicalTreeParser treeParser = new CanonicalTreeParser();
       treeParser.reset(reader, tree);
 
       Optional<DiffEntry> optional =
-          formatter
-              .scan(treeParser, new FileTreeIterator(repository))
-              .stream()
-              .filter(entry -> file.equals(entry.getNewPath()))
-              .findAny();
+          formatter.scan(treeParser, new FileTreeIterator(repository)).stream().findAny();
       if (optional.isPresent()) {
         EditList edits = formatter.toFileHeader(optional.get()).getHunks().get(0).toEditList();
         return edits
@@ -816,12 +817,8 @@ class JGitConnection implements GitConnection {
                 })
             .collect(toList());
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new GitException(e.getMessage());
-    } finally {
-      if (dirCache != null) {
-        dirCache.unlock();
-      }
     }
     return Collections.emptyList();
   }
@@ -872,7 +869,7 @@ class JGitConnection implements GitConnection {
         for (String refSpecItem : refSpec) {
           RefSpec fetchRefSpec =
               (refSpecItem.indexOf(':') < 0) //
-                  ? new RefSpec(Constants.R_HEADS + refSpecItem + ":") //
+                  ? new RefSpec(R_HEADS + refSpecItem + ":") //
                   : new RefSpec(refSpecItem);
           fetchRefSpecs.add(fetchRefSpec);
         }
@@ -894,13 +891,12 @@ class JGitConnection implements GitConnection {
           }
         }
         if (!found) {
-          fetchRefSpecs =
-              Collections.singletonList(new RefSpec(Constants.HEAD + ":" + Constants.FETCH_HEAD));
+          fetchRefSpecs = singletonList(new RefSpec(HEAD + ":" + FETCH_HEAD));
         }
       }
 
       if (remoteName == null) {
-        remoteName = Constants.DEFAULT_REMOTE_NAME;
+        remoteName = DEFAULT_REMOTE_NAME;
       }
       fetchCommand.setRemote(remoteName);
       remoteUri =
@@ -1138,8 +1134,8 @@ class JGitConnection implements GitConnection {
       }
       // Shorten local branch names by removing '/refs/heads/' from the beginning
       String name = ref.getName();
-      if (name.startsWith(Constants.R_HEADS)) {
-        name = name.substring(Constants.R_HEADS.length());
+      if (name.startsWith(R_HEADS)) {
+        name = name.substring(R_HEADS.length());
       }
       jGitMergeResult = getGit().merge().include(name, ref.getObjectId()).call();
     } catch (CheckoutConflictException exception) {
@@ -1308,11 +1304,11 @@ class JGitConnection implements GitConnection {
         throw new GitException(ERROR_PULL_MERGING);
       }
       String fullBranch = repository.getFullBranch();
-      if (!fullBranch.startsWith(Constants.R_HEADS)) {
+      if (!fullBranch.startsWith(R_HEADS)) {
         throw new DetachedHeadException(ERROR_PULL_HEAD_DETACHED);
       }
 
-      String branch = fullBranch.substring(Constants.R_HEADS.length());
+      String branch = fullBranch.substring(R_HEADS.length());
 
       StoredConfig config = repository.getConfig();
       if (remoteName == null) {
@@ -1320,7 +1316,7 @@ class JGitConnection implements GitConnection {
             config.getString(
                 ConfigConstants.CONFIG_BRANCH_SECTION, branch, ConfigConstants.CONFIG_KEY_REMOTE);
         if (remoteName == null) {
-          remoteName = Constants.DEFAULT_REMOTE_NAME;
+          remoteName = DEFAULT_REMOTE_NAME;
         }
       }
       remoteUri =
@@ -1333,7 +1329,7 @@ class JGitConnection implements GitConnection {
       if (refSpec != null) {
         fetchRefSpecs =
             (refSpec.indexOf(':') < 0) //
-                ? new RefSpec(Constants.R_HEADS + refSpec + ":" + fullBranch) //
+                ? new RefSpec(R_HEADS + refSpec + ":" + fullBranch) //
                 : new RefSpec(refSpec);
         remoteBranch = fetchRefSpecs.getSource();
       } else {
@@ -1363,7 +1359,7 @@ class JGitConnection implements GitConnection {
 
       Ref remoteBranchRef = fetchResult.getAdvertisedRef(remoteBranch);
       if (remoteBranchRef == null) {
-        remoteBranchRef = fetchResult.getAdvertisedRef(Constants.R_HEADS + remoteBranch);
+        remoteBranchRef = fetchResult.getAdvertisedRef(R_HEADS + remoteBranch);
       }
       if (remoteBranchRef == null) {
         throw new GitException(format(ERROR_PULL_REF_MISSING, remoteBranch));
@@ -1463,7 +1459,7 @@ class JGitConnection implements GitConnection {
                 : remoteRefName;
         if (!currentBranch.equals(Repository.shortenRefName(remoteRefName))
             && !currentBranch.equals(shortenRefFor)
-            && !remoteRefName.startsWith(Constants.R_TAGS)) {
+            && !remoteRefName.startsWith(R_TAGS)) {
           continue;
         }
         Map<String, String> update = new HashMap<>();
@@ -1486,8 +1482,7 @@ class JGitConnection implements GitConnection {
             throw new GitException(errorMessage);
           }
         }
-        if (status != RemoteRefUpdate.Status.UP_TO_DATE
-            || !remoteRefName.startsWith(Constants.R_TAGS)) {
+        if (status != RemoteRefUpdate.Status.UP_TO_DATE || !remoteRefName.startsWith(R_TAGS)) {
           update.put(KEY_COMMIT_MESSAGE, remoteRefUpdate.getMessage());
           update.put(KEY_RESULT, status.name());
           TrackingRefUpdate refUpdate = remoteRefUpdate.getTrackingRefUpdate();
@@ -1547,19 +1542,11 @@ class JGitConnection implements GitConnection {
     List<String> branches = params.getBranches();
     if (branches.isEmpty()) {
       remoteConfig.addFetchRefSpec(
-          new RefSpec(Constants.R_HEADS + "*" + ":" + Constants.R_REMOTES + remoteName + "/*")
-              .setForceUpdate(true));
+          new RefSpec(R_HEADS + "*" + ":" + R_REMOTES + remoteName + "/*").setForceUpdate(true));
     } else {
       for (String branch : branches) {
         remoteConfig.addFetchRefSpec(
-            new RefSpec(
-                    Constants.R_HEADS
-                        + branch
-                        + ":"
-                        + Constants.R_REMOTES
-                        + remoteName
-                        + "/"
-                        + branch)
+            new RefSpec(R_HEADS + branch + ":" + R_REMOTES + remoteName + "/" + branch)
                 .setForceUpdate(true));
       }
     }
@@ -1663,23 +1650,15 @@ class JGitConnection implements GitConnection {
       } else {
         // Replace wildcard refSpec if any.
         remoteConfig.removeFetchRefSpec(
-            new RefSpec(Constants.R_HEADS + "*" + ":" + Constants.R_REMOTES + remoteName + "/*")
-                .setForceUpdate(true));
+            new RefSpec(R_HEADS + "*" + ":" + R_REMOTES + remoteName + "/*").setForceUpdate(true));
         remoteConfig.removeFetchRefSpec(
-            new RefSpec(Constants.R_HEADS + "*" + ":" + Constants.R_REMOTES + remoteName + "/*"));
+            new RefSpec(R_HEADS + "*" + ":" + R_REMOTES + remoteName + "/*"));
       }
 
       // Add new refSpec.
       for (String branch : branches) {
         remoteConfig.addFetchRefSpec(
-            new RefSpec(
-                    Constants.R_HEADS
-                        + branch
-                        + ":"
-                        + Constants.R_REMOTES
-                        + remoteName
-                        + "/"
-                        + branch)
+            new RefSpec(R_HEADS + branch + ":" + R_REMOTES + remoteName + "/" + branch)
                 .setForceUpdate(true));
       }
     }
@@ -1798,7 +1777,7 @@ class JGitConnection implements GitConnection {
   public Tag tagCreate(TagCreateParams params) throws GitException {
     String commit = params.getCommit();
     if (commit == null) {
-      commit = Constants.HEAD;
+      commit = HEAD;
     }
 
     try {
@@ -2153,7 +2132,7 @@ class JGitConnection implements GitConnection {
    */
   public String getCurrentBranch() throws GitException {
     try {
-      return Repository.shortenRefName(repository.exactRef(Constants.HEAD).getLeaf().getName());
+      return Repository.shortenRefName(repository.exactRef(HEAD).getLeaf().getName());
     } catch (IOException exception) {
       throw new GitException(exception.getMessage(), exception);
     }
