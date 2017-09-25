@@ -22,10 +22,11 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent.WorkspaceReadyHandler;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.BrowserAddress;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -42,7 +43,7 @@ import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
 @Singleton
-public class DefaultWorkspaceComponent extends WorkspaceComponent {
+public class DefaultWorkspaceComponent extends WorkspaceComponent implements WorkspaceReadyHandler {
 
   private InitialProjectImporter initialProjectImporter;
 
@@ -81,6 +82,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
         transmitter);
 
     this.initialProjectImporter = initialProjectImporter;
+    eventBus.addHandler(WorkspaceReadyEvent.getType(), this);
   }
 
   /** {@inheritDoc} */
@@ -102,17 +104,9 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
             });
   }
 
-  @Override
-  public void onWsAgentStarted(WsAgentStateEvent event) {
-    super.onWsAgentStarted(event);
-
-    Scheduler.get().scheduleDeferred(this::importProjects);
-  }
-
   /** Imports all projects described in workspace configuration but not existed on file system. */
   private void importProjects() {
     Project[] projects = appContext.getProjects();
-
     List<Project> importProjects = new ArrayList<>();
     for (Project project : projects) {
       if (project.exists()
@@ -123,7 +117,11 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent {
 
       importProjects.add(project);
     }
-
     initialProjectImporter.importProjects(importProjects, null);
+  }
+
+  @Override
+  public void onWorkspaceReady(WorkspaceReadyEvent event) {
+    Scheduler.get().scheduleDeferred(this::importProjects);
   }
 }

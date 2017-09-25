@@ -43,7 +43,7 @@ import {TeamsConfig} from './teams/teams-config';
 // init module
 const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
   'angular-websocket', 'ui.bootstrap', 'ui.codemirror', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
-  'ngDropdowns', 'ngLodash', 'angularCharts', 'ngClipboard', 'uuid4', 'angularFileUpload', 'ui.gravatar']);
+  'ngDropdowns', 'ngLodash', 'angularCharts', 'uuid4', 'angularFileUpload', 'ui.gravatar']);
 
 declare const Keycloak: Function;
 function buildKeycloakConfig(keycloakSettings: any) {
@@ -163,7 +163,7 @@ const DEV = false;
 
 
 // configs
-initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider: che.route.IRouteProvider, ngClipProvider: any) => {
+initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
   // config routes (add demo page)
   if (DEV) {
     $routeProvider.accessWhen('/demo-components', {
@@ -178,9 +178,6 @@ initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider: che.rout
   $routeProvider.accessOtherWise({
     redirectTo: '/workspaces'
   });
-  // add .swf path location using ngClipProvider
-  const ngClipProviderPath = DEV ? 'bower_components/zeroclipboard/dist/ZeroClipboard.swf' : 'assets/zeroclipboard/ZeroClipboard.swf';
-  ngClipProvider.setPath(ngClipProviderPath);
 }]);
 
 

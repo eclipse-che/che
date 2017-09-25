@@ -23,10 +23,9 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.factory.FactoryAcceptedEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.factory.utils.FactoryProjectImporter;
 
 /**
@@ -68,27 +67,21 @@ public class AcceptFactoryHandler {
       return;
     }
     eventBus.addHandler(
-        WsAgentStateEvent.TYPE,
-        new WsAgentStateHandler() {
-          @Override
-          public void onWsAgentStarted(final WsAgentStateEvent event) {
-            if (isImportingStarted) {
-              return;
-            }
-
-            isImportingStarted = true;
-
-            notification =
-                notificationManager.notify(
-                    localizationConstant.cloningSource(),
-                    StatusNotification.Status.PROGRESS,
-                    NOT_EMERGE_MODE);
-            performOnAppLoadedActions(factory);
-            startImporting(factory);
+        WorkspaceReadyEvent.getType(),
+        event -> {
+          if (isImportingStarted) {
+            return;
           }
 
-          @Override
-          public void onWsAgentStopped(WsAgentStateEvent event) {}
+          isImportingStarted = true;
+
+          notification =
+              notificationManager.notify(
+                  localizationConstant.cloningSource(),
+                  StatusNotification.Status.PROGRESS,
+                  NOT_EMERGE_MODE);
+          performOnAppLoadedActions(factory);
+          startImporting(factory);
         });
   }
 

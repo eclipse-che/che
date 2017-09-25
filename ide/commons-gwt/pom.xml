@@ -204,9 +204,6 @@
                         <exclude>**/org/eclipse/che/ide/runtime/Runtime.gwt.xml</exclude>
                         <exclude>**/org/eclipse/che/ide/collections/Collections.gwt.xml</exclude>
                         <exclude>**/com/google/gwt/webworker/WebWorker.gwt.xml</exclude>
-                        <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.min.js</exclude>
-                        <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.min.map</exclude>
-                        <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.swf</exclude>
                         <exclude>**/*.png</exclude>
                     </excludes>
                 </configuration>

@@ -33,7 +33,7 @@ public class GitCompareOverlay extends JavaScriptObject {
     var widget = this.getCompareView().getWidget();
     widget.options.newFile = newFile;
     widget.options.oldFile = oldFile;
-    widget.refresh();
+    this.refresh(true);
   }-*/;
 
   public final native void refresh() /*-{
