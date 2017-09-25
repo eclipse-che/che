@@ -14,6 +14,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
@@ -62,7 +63,7 @@ public class FindText {
     String FIND_TAB = "gwt-debug-partButton-Find";
     String HIDE_FIND_PANEL =
         "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[3]";
-    String ITEM_FIND_PANEL = "//span[@occurrence='%s' and @file-name = '%s']";
+    String OCCURRENCE = "//span[@file-name = '%s']";
   }
 
   @FindBy(id = Locators.WHOLE_WORD_CHECKLBOX_INP)
@@ -406,20 +407,31 @@ public class FindText {
   }
 
   public void selectItemInFindInfoPanel(String fileName, String textToFind) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.ITEM_FIND_PANEL, textToFind, fileName))))
-        .click();
+    List<WebElement> webElementList =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfAllElementsLocatedBy(
+                    By.xpath(String.format(Locators.OCCURRENCE, fileName))));
+    for (WebElement webElement : webElementList) {
+      if (webElement.getText().equals(textToFind)) {
+        webElement.click();
+        break;
+      }
+    }
   }
 
   public void selectItemInFindInfoPanelByDoubleClick(String fileName, String textToFind) {
-    WebElement element =
-        seleniumWebDriver.findElement(
-            By.xpath(String.format(Locators.ITEM_FIND_PANEL, textToFind, fileName)));
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(element));
-    actionsFactory.createAction(seleniumWebDriver).doubleClick(element).perform();
+    List<WebElement> webElementList =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfAllElementsLocatedBy(
+                    By.xpath(String.format(Locators.OCCURRENCE, fileName))));
+    for (WebElement webElement : webElementList) {
+      if (webElement.getText().equals(textToFind)) {
+        actionsFactory.createAction(seleniumWebDriver).doubleClick(webElement).perform();
+        break;
+      }
+    }
   }
 
   /**

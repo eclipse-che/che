@@ -219,7 +219,9 @@ public class FindTextFeatureTest {
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
-    consoles.clickOnProcessesTab();
+    if (!consoles.processesMainAreaIsOpen()) {
+      consoles.clickOnProcessesTab();
+    }
     terminal.waitTerminalTab();
     terminal.selectTerminalTab();
     createFileInTerminal(fileNameCreatedFromTerminal);
@@ -235,7 +237,7 @@ public class FindTextFeatureTest {
     findText.waitExpectedTextInFindInfoPanel(PR_1_EXPECTED_TEXT_1);
     findText.selectItemInFindInfoPanel(
         format("/%s/readme.con", PROJECT_NAME),
-        "1:Filesystem              1K-blocks     Used Available Use% Mounted on");
+        "1:   Filesystem 1K-blocks Used Available Use% Mounted on");
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromTerminal);
     Assert.assertEquals(editor.getPositionOfLine(), 1);
@@ -253,7 +255,7 @@ public class FindTextFeatureTest {
     findText.waitFindInfoPanelIsOpen();
     findText.waitExpectedTextInFindInfoPanel(PR_1_EXPECTED_TEXT_2);
     findText.selectItemInFindInfoPanel(
-        format("/%s/readme.api", PROJECT_NAME), "1:FindTextFeatureTest");
+        format("/%s/readme.api", PROJECT_NAME), "1:   FindTextFeatureTest");
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromAPI);
     Assert.assertEquals(editor.getPositionOfLine(), 1);
@@ -295,7 +297,7 @@ public class FindTextFeatureTest {
     findText.waitExpectedTextInFindInfoPanel(PR_2_EXPECTED_TEXT_1);
     findText.selectItemInFindInfoPanel(
         pathToQuessNumFile,
-        "25:            java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");   ");
+        "25:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
     editor.waitActiveEditor();
     editor.waitActiveTabFileName("guess_num.jsp");
@@ -309,7 +311,7 @@ public class FindTextFeatureTest {
     Assert.assertEquals(editor.getPositionOfLine(), 20);
     findText.selectItemInFindInfoPanel(
         pathToAppControllerFile,
-        "26:        String numGuessByUser = request.getParameter(\"numGuess\");");
+        "26:    String numGuessByUser = request.getParameter(\"numGuess\");");
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ARROW_UP.toString());
     findText.sendCommandByKeyboardInFindInfoPanel(Keys.ENTER.toString());
     editor.waitActiveTabFileName("AppController");
