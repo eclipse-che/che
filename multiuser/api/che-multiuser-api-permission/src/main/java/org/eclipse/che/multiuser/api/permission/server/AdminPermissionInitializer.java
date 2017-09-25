@@ -30,8 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Gran system permission for 'che.admin.name' user. If user already exist it'll happen on component
- * startup, if not - during first login when it will be persisted in database.
+ * Grant system permission for 'che.admin.name' user. If the user already exists it'll happen on
+ * component startup, if not - during the first login when user is persisted in the database.
  *
  * @author Sergii Kabashniuk
  */
