@@ -42,9 +42,6 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
  */
 @Singleton
 public class RevertCommitPresenter implements ActionDelegate {
-  public static final String REVERT_COMMAND_NAME = "Git revert commit";
-  public static final String LOG_COMMAND_NAME = "Git log";
-
   private final RevertCommitView view;
   private final GitServiceClient service;
   private final DialogFactory dialogFactory;
@@ -138,7 +135,8 @@ public class RevertCommitPresenter implements ActionDelegate {
               }
               String errorMessage =
                   (error.getMessage() != null) ? error.getMessage() : constant.logFailed();
-              GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
+              GitOutputConsole console =
+                  gitOutputConsoleFactory.create(constant.consoleLogCommandName());
               console.printError(errorMessage);
               consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
               notificationManager.notify(constant.logFailed(), FAIL, FLOAT_MODE);
@@ -146,7 +144,8 @@ public class RevertCommitPresenter implements ActionDelegate {
   }
 
   private void revert() {
-    final GitOutputConsole console = gitOutputConsoleFactory.create(REVERT_COMMAND_NAME);
+    final GitOutputConsole console =
+        gitOutputConsoleFactory.create(constant.consoleRevertCommandName());
     service
         .revert(project.getLocation(), selectedRevision.getId())
         .then(

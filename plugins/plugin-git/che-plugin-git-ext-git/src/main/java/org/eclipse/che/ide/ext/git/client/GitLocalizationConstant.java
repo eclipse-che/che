@@ -769,4 +769,10 @@ public interface GitLocalizationConstant extends Messages {
 
   @Key("console.project.name")
   String consoleProjectName(String projectName);
+
+  @Key("console.log.command.name")
+  String consoleLogCommandName();
+
+  @Key("console.revert.command.name")
+  String consoleRevertCommandName();
 }
