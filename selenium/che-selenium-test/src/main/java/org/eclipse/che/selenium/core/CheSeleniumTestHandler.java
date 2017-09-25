@@ -15,7 +15,7 @@ import com.google.inject.Injector;
 import org.eclipse.che.selenium.core.inject.SeleniumTestHandler;
 
 /** @author Anatolii Bazko */
-public class CheSeleniumTesHandler extends SeleniumTestHandler {
+public class CheSeleniumTestHandler extends SeleniumTestHandler {
   @Override
   public Injector createParentInjector() {
     return Guice.createInjector(new CheSeleniumSuiteModule());
