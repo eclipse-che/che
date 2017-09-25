@@ -10,8 +10,16 @@
  */
 package org.eclipse.che.selenium.testrunner;
 
-import com.google.inject.Inject;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_DROP_DAWN_ITEM;
+import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
+import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.IGNORED;
+import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
+import static org.testng.Assert.assertTrue;
 
+import com.google.inject.Inject;
+import java.nio.file.Paths;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -29,16 +37,6 @@ import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.nio.file.Paths;
-
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_DROP_DAWN_ITEM;
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.IGNORED;
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
-import static org.testng.Assert.assertTrue;
 
 /** @author Dmytro Nochevnov */
 public class JavaTestPluginJunit4Test {
