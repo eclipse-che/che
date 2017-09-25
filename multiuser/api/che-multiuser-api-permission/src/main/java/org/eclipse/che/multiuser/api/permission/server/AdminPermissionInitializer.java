@@ -39,18 +39,28 @@ import org.slf4j.LoggerFactory;
 public class AdminPermissionInitializer implements EventSubscriber<PostUserPersistedEvent> {
   private static final Logger LOG = LoggerFactory.getLogger(AdminPermissionInitializer.class);
 
-  @Inject private UserManager userManager;
+  private final UserManager userManager;
 
-  @Inject private PermissionsManager permissionsManager;
+  private final PermissionsManager permissionsManager;
 
-  @Inject private EventService eventService;
+  private final EventService eventService;
+
+  private final String name;
 
   @Inject
-  @Named("che.admin.name")
-  private String name;
+  public AdminPermissionInitializer(
+      @Named("che.admin.name") String name,
+      UserManager userManager,
+      PermissionsManager permissionsManager,
+      EventService eventService) {
+    this.userManager = userManager;
+    this.permissionsManager = permissionsManager;
+    this.eventService = eventService;
+    this.name = name;
+  }
 
   @PostConstruct
-  public void create() throws ServerException {
+  public void init() throws ServerException {
     try {
       User adminUser = userManager.getByName(name);
       grantSystemPermissions(adminUser.getId());

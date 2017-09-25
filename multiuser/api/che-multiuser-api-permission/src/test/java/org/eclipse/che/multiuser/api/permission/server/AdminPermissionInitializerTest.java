@@ -22,17 +22,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.name.Names;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.inject.lifecycle.InitModule;
 import org.eclipse.che.multiuser.api.permission.server.model.impl.SystemPermissionsImpl;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
@@ -55,9 +50,12 @@ public class AdminPermissionInitializerTest {
   private static final String EMAIL = "admin@rb.com";
 
   @Mock private PermissionsManager permissionsManager;
+  @Mock private UserManager userManager;
+  @Mock private EventService eventService;
 
   private UserImpl user;
   private UserImpl adminUser;
+  private AdminPermissionInitializer initializer;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -74,6 +72,8 @@ public class AdminPermissionInitializerTest {
                 new SystemPermissionsImpl(
                     (String) invocation.getArguments()[0],
                     (List<String>) invocation.getArguments()[2]));
+    initializer =
+        new AdminPermissionInitializer(NAME, userManager, permissionsManager, eventService);
   }
 
   @SuppressWarnings("unchecked")
@@ -83,11 +83,10 @@ public class AdminPermissionInitializerTest {
 
   @Test
   public void shouldAddSystemPermissionsOnPostUserPersistedEvent() throws Exception {
-    Injector injector = Guice.createInjector(new BaseModule());
-    UserManager userManager = injector.getInstance(UserManager.class);
+
     when(userManager.getByName(eq(NAME))).thenReturn(user);
-    AdminPermissionInitializer creator = injector.getInstance(AdminPermissionInitializer.class);
-    creator.onEvent(
+    initializer.init();
+    initializer.onEvent(
         new PostUserPersistedEvent(new UserImpl(NAME, EMAIL, NAME, PASSWORD, emptyList())));
     verify(permissionsManager)
         .storePermission(
@@ -102,12 +101,9 @@ public class AdminPermissionInitializerTest {
 
   @Test
   public void shouldNotAddSystemPermissionsOnPostUserPersistedEvent() throws Exception {
-    Injector injector = Guice.createInjector(new BaseModule());
-    UserManager userManager = injector.getInstance(UserManager.class);
     when(userManager.getByName(anyString())).thenThrow(NotFoundException.class);
-    //   when(userManager.create(any(UserImpl.class), anyBoolean())).thenReturn(user);
-    AdminPermissionInitializer creator = injector.getInstance(AdminPermissionInitializer.class);
-    creator.onEvent(
+    initializer.init();
+    initializer.onEvent(
         new PostUserPersistedEvent(
             new UserImpl(NAME + "1", EMAIL + "2", NAME + "3", PASSWORD, emptyList())));
     verifyNoMoreInteractions(permissionsManager);
@@ -115,11 +111,8 @@ public class AdminPermissionInitializerTest {
 
   @Test
   public void shouldAddSystemPermissionsForExistedAdmin() throws Exception {
-    Injector injector = Guice.createInjector(new BaseModule());
-    UserManager userManager = injector.getInstance(UserManager.class);
     when(userManager.getByName(eq(NAME))).thenReturn(adminUser);
-    AdminPermissionInitializer creator = injector.getInstance(AdminPermissionInitializer.class);
-
+    initializer.init();
     verify(permissionsManager)
         .storePermission(
             argThat(
@@ -133,21 +126,9 @@ public class AdminPermissionInitializerTest {
 
   @Test
   public void shouldNotAddSystemPermissionsIfAdminNotExists() throws Exception {
-    Injector injector = Guice.createInjector(new BaseModule());
-    UserManager userManager = injector.getInstance(UserManager.class);
     when(userManager.getByName(anyString())).thenThrow(NotFoundException.class);
-    AdminPermissionInitializer creator = injector.getInstance(AdminPermissionInitializer.class);
+    initializer.init();
 
     verifyNoMoreInteractions(permissionsManager);
-  }
-
-  private class BaseModule extends AbstractModule {
-    @Override
-    protected void configure() {
-      install(new InitModule(PostConstruct.class));
-      bindConstant().annotatedWith(Names.named("che.admin.name")).to(NAME);
-      bind(PermissionsManager.class).toInstance(permissionsManager);
-      bind(UserManager.class).toInstance(mock(UserManager.class));
-    }
   }
 }
