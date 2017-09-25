@@ -10,16 +10,8 @@
  */
 package org.eclipse.che.selenium.testrunner;
 
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_DROP_DAWN_ITEM;
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.IGNORED;
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
-import static org.testng.Assert.assertTrue;
-
 import com.google.inject.Inject;
-import java.nio.file.Paths;
+
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -35,9 +27,18 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.nio.file.Paths;
+
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_DROP_DAWN_ITEM;
+import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
+import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.IGNORED;
+import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
+import static org.testng.Assert.assertTrue;
 
 /** @author Dmytro Nochevnov */
 public class JavaTestPluginJunit4Test {
@@ -52,18 +53,18 @@ public class JavaTestPluginJunit4Test {
 
   public static final String APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE =
       "java.lang.AssertionError\n"
-          + " at org.junit.Assert.fail(Assert.java:86)\n"
-          + " at org.junit.Assert.assertTrue(Assert.java:41)\n"
-          + " at org.junit.Assert.assertFalse(Assert.java:64)\n"
-          + " at org.junit.Assert.assertFalse(Assert.java:74)\n"
+          + " at org.junit. fail( java:86)\n"
+          + " at org.junit. assertTrue( java:41)\n"
+          + " at org.junit. assertFalse( java:64)\n"
+          + " at org.junit. assertFalse( java:74)\n"
           + " at org.eclipse.che.examples.AppOneTest.shouldFailOfAppOne(AppOneTest.java:33)";
 
   public static final String APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE =
       "java.lang.AssertionError\n"
-          + " at org.junit.Assert.fail(Assert.java:86)\n"
-          + " at org.junit.Assert.assertTrue(Assert.java:41)\n"
-          + " at org.junit.Assert.assertFalse(Assert.java:64)\n"
-          + " at org.junit.Assert.assertFalse(Assert.java:74)\n"
+          + " at org.junit. fail( java:86)\n"
+          + " at org.junit. assertTrue( java:41)\n"
+          + " at org.junit. assertFalse( java:64)\n"
+          + " at org.junit. assertFalse( java:74)\n"
           + " at org.eclipse.che.examples.AppAnotherTest.shouldFailOfAppAnother(AppAnotherTest.java:34)";
 
   @Inject private JavaTestRunnerPluginConsole pluginConsole;
@@ -123,9 +124,9 @@ public class JavaTestPluginJunit4Test {
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppOne");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppOne");
     pluginConsole.waitMethodMarkedAsIgnored("shouldBeIgnoredOfAppOne");
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(IGNORED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(IGNORED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE),
@@ -147,14 +148,14 @@ public class JavaTestPluginJunit4Test {
     // then
     pluginConsole.waitFqnOfTesClassInResultTree("org.eclipse.che.examples.AppAnotherTest");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     // then
 
     editor.setCursorToDefinedLineAndChar(32, 5);
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
@@ -164,6 +165,6 @@ public class JavaTestPluginJunit4Test {
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsIgnored("shouldBeIgnoredOfAppAnother");
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(IGNORED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(IGNORED).size() == 1);
   }
 }

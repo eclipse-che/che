@@ -10,16 +10,8 @@
  */
 package org.eclipse.che.selenium.testrunner;
 
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_NG_TEST_DROP_DAWN_ITEM;
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
-import static org.testng.Assert.assertTrue;
-
 import com.google.inject.Inject;
-import java.net.URL;
-import java.nio.file.Paths;
+
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -38,9 +30,18 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.net.URL;
+import java.nio.file.Paths;
+
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_NG_TEST_DROP_DAWN_ITEM;
+import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
+import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
+import static org.testng.Assert.assertTrue;
 
 /** @author Dmytro Nochevnov */
 public class JavaTestPluginTestNgTest {
@@ -122,8 +123,8 @@ public class JavaTestPluginTestNgTest {
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppOne");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppOne");
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE),
@@ -141,11 +142,11 @@ public class JavaTestPluginTestNgTest {
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     editor.setCursorToDefinedLineAndChar(30, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
@@ -165,11 +166,11 @@ public class JavaTestPluginTestNgTest {
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     editor.setCursorToDefinedLineAndChar(30, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
-    Assert.assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
+    assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
         testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
