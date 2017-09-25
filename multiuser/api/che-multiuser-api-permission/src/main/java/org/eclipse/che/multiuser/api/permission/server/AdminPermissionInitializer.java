@@ -49,7 +49,7 @@ public class AdminPermissionInitializer implements EventSubscriber<PostUserPersi
 
   @Inject
   public AdminPermissionInitializer(
-      @Named("che.admin.name") String name,
+      @Named("che.system.admin_name") String name,
       UserManager userManager,
       PermissionsManager permissionsManager,
       EventService eventService) {
