@@ -63,7 +63,7 @@ public class RevealResourceAction extends AbstractPerspectiveAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     Map<String, String> params = e.getParameters();
-    if (params != null &&  params.containsKey(PATH)) {
+    if (params != null && params.containsKey(PATH)) {
       String pathToReveal = params.get(PATH);
       Path path = valueOf(pathToReveal);
 
