@@ -66,6 +66,8 @@ public class AdminPermissionInitializer implements EventSubscriber<PostUserPersi
       grantSystemPermissions(adminUser.getId());
     } catch (NotFoundException ex) {
       LOG.warn("Admin {} not found yet.", name);
+    } finally {
+      eventService.subscribe(this);
     }
   }
 
