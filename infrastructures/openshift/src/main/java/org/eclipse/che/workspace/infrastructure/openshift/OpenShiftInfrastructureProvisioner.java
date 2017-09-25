@@ -18,6 +18,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.InstallerConfigProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.PersistentVolumeClaimProvisioner;
 
 /**
@@ -32,15 +33,18 @@ public class OpenShiftInfrastructureProvisioner {
   private final InstallerConfigProvisioner installerConfigProvisioner;
   private final PersistentVolumeClaimProvisioner persistentVolumeClaimProvisioner;
   private final UniqueNamesProvisioner uniqueNamesProvisioner;
+  private final TlsRouteProvisioner tlsRouteProvisioner;
 
   @Inject
   public OpenShiftInfrastructureProvisioner(
       InstallerConfigProvisioner installerConfigProvisioner,
       PersistentVolumeClaimProvisioner projectVolumeProvisioner,
-      UniqueNamesProvisioner uniqueNamesProvisioner) {
+      UniqueNamesProvisioner uniqueNamesProvisioner,
+      TlsRouteProvisioner tlsRouteProvisioner) {
     this.installerConfigProvisioner = installerConfigProvisioner;
     this.persistentVolumeClaimProvisioner = projectVolumeProvisioner;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
+    this.tlsRouteProvisioner = tlsRouteProvisioner;
   }
 
   public void provision(
@@ -49,5 +53,6 @@ public class OpenShiftInfrastructureProvisioner {
     installerConfigProvisioner.provision(environment, osEnv, identity);
     persistentVolumeClaimProvisioner.provision(environment, osEnv, identity);
     uniqueNamesProvisioner.provision(environment, osEnv, identity);
+    tlsRouteProvisioner.provision(environment, osEnv, identity);
   }
 }

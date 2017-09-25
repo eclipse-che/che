@@ -18,6 +18,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.InstallerConfigProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.PersistentVolumeClaimProvisioner;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -40,6 +41,7 @@ public class OpenShiftInfrastructureProvisionerTest {
   @Mock private InternalEnvironment environment;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
+  @Mock private TlsRouteProvisioner tlsRouteProvisioner;
 
   private OpenShiftInfrastructureProvisioner osInfraProvisioner;
 
@@ -49,8 +51,9 @@ public class OpenShiftInfrastructureProvisionerTest {
   public void setUp() {
     osInfraProvisioner =
         new OpenShiftInfrastructureProvisioner(
-            installerProvisioner, pvcProvisioner, uniqueNamesProvisioner);
-    provisionOrder = inOrder(installerProvisioner, pvcProvisioner, uniqueNamesProvisioner);
+            installerProvisioner, pvcProvisioner, uniqueNamesProvisioner, tlsRouteProvisioner);
+    provisionOrder =
+        inOrder(installerProvisioner, pvcProvisioner, uniqueNamesProvisioner, tlsRouteProvisioner);
   }
 
   @Test
@@ -65,6 +68,9 @@ public class OpenShiftInfrastructureProvisionerTest {
         .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(uniqueNamesProvisioner)
+        .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
+    provisionOrder
+        .verify(tlsRouteProvisioner)
         .provision(eq(environment), eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }

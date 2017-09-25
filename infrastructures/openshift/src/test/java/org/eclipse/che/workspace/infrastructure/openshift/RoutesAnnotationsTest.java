@@ -61,7 +61,7 @@ public class RoutesAnnotationsTest {
 
     RoutesAnnotations.Deserializer deserializer = RoutesAnnotations.newDeserializer(annotations);
 
-    Map<String, ServerConfig> servers = deserializer.servers();
+    Map<String, ServerConfigImpl> servers = deserializer.servers();
     ServerConfig server1 = servers.get("my-server1/http");
     assertNotNull(server1, "first server");
     assertEquals(server1.getPort(), "8000/tcp");
