@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Gran system permission for 'che.admin.name' user. If user already exist it'll happen on component
  * startup, if not - during first login when it will be persisted in database.
+ *
+ * @author Sergii Kabashniuk
  */
 @Singleton
 public class AdminPermissionInitializer implements EventSubscriber<PostUserPersistedEvent> {
