@@ -440,8 +440,14 @@ public class GitServiceClientImpl implements GitServiceClient {
   }
 
   @Override
-  public Promise<List<EditedRegion>> getEditedRegions(Path project, String filePath) {
-    String url = getWsAgentBaseUrl() + EDITS + "?projectPath=" + encodePath(project) + "&filePath=" + encodePath(valueOf(filePath));
+  public Promise<List<EditedRegion>> getEditedRegions(Path project, Path filePath) {
+    String url =
+        getWsAgentBaseUrl()
+            + EDITS
+            + "?projectPath="
+            + encodePath(project)
+            + "&filePath="
+            + encodePath(filePath);
     return asyncRequestFactory
         .createGetRequest(url)
         .send(dtoUnmarshallerFactory.newListUnmarshaller(EditedRegion.class));

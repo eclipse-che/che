@@ -12,7 +12,6 @@ package org.eclipse.che.api.git;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.ADDED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.MODIFIED;
@@ -29,7 +28,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
@@ -120,13 +118,13 @@ public class GitChangesDetector {
         String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
         String itemPath = normalizedPath.substring(normalizedPath.indexOf("/") + 1);
         String projectPath =
-                projectManagerProvider
-                        .get()
-                        .getProject(normalizedPath.split("/")[0])
-                        .getBaseFolder()
-                        .getVirtualFile()
-                        .toIoFile()
-                        .getAbsolutePath();
+            projectManagerProvider
+                .get()
+                .getProject(normalizedPath.split("/")[0])
+                .getBaseFolder()
+                .getVirtualFile()
+                .toIoFile()
+                .getAbsolutePath();
         GitConnection connection = gitConnectionFactory.getConnection(projectPath);
         Status status = connection.status(singletonList(itemPath));
         FileChangedEventDto.Status fileStatus;
@@ -149,7 +147,8 @@ public class GitChangesDetector {
                 newDto(FileChangedEventDto.class)
                     .withPath(path)
                     .withStatus(fileStatus)
-                    .withEditedRegions(gitConnectionFactory.getConnection(projectPath).getEditedRegions(itemPath)))
+                    .withEditedRegions(
+                        gitConnectionFactory.getConnection(projectPath).getEditedRegions(itemPath)))
             .sendAndSkipResult();
       } catch (NotFoundException | ServerException e) {
         String errorMessage = e.getMessage();

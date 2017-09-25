@@ -139,7 +139,8 @@ public class GitIndexChangedDetector {
 
         Map<String, List<EditedRegion>> modifiedFiles = new HashMap<>();
         for (String file : status.getChanged()) {
-          modifiedFiles.put(file, gitConnectionFactory.getConnection(projectPath).getEditedRegions(file));
+          modifiedFiles.put(
+              file, gitConnectionFactory.getConnection(projectPath).getEditedRegions(file));
         }
         for (String file : status.getModified()) {
           modifiedFiles.put(file, connection.getEditedRegions(file));

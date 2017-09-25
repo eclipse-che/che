@@ -83,8 +83,7 @@ public class OrionVcsChangeMarkersRuler implements Gutter {
   }
 
   @Override
-  public void setGutterItem(int lineStart, String gutterId, Element element) {
-  }
+  public void setGutterItem(int lineStart, String gutterId, Element element) {}
 
   private void removeAnnotations(OrionAnnotationOverlay[] annotations) {
     for (OrionAnnotationOverlay annotation : annotations) {

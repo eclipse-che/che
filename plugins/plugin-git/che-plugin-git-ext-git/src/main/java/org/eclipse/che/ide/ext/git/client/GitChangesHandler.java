@@ -79,7 +79,7 @@ public class GitChangesHandler {
               ((HasVcsChangeMarkerRender) event.getEditor()).getVcsChangeMarkersRender();
           Path location = event.getFile().getLocation();
           gitServiceClient
-              .getEditedRegions(location.uptoSegment(1), location.removeFirstSegments(1).toString())
+              .getEditedRegions(location.uptoSegment(1), location.removeFirstSegments(1))
               .then(
                   edition -> {
                     handleEditedRegions(edition, render);
