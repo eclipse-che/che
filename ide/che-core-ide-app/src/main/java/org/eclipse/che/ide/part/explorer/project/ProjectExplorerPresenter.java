@@ -65,6 +65,7 @@ import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -327,6 +328,18 @@ public class ProjectExplorerPresenter extends BasePresenter
         }
       }
 
+      final Node node = getNode(delta.getResource().getLocation());
+      if (node != null) {
+
+        if (node instanceof ResourceNode) {
+          ((ResourceNode) node).setData(delta.getResource());
+        }
+
+        if (node instanceof HasPresentation) {
+          tree.refresh(node);
+        }
+      }
+
       updateTask.submit(resource.getLocation());
 
       if (delta.getFromPath() != null) {
@@ -361,6 +374,7 @@ public class ProjectExplorerPresenter extends BasePresenter
               .getData()
               .getLocation()
               .equals(event.getResource().getLocation())) {
+        ((ResourceNode) node).setData(event.getResource());
         tree.refresh(node);
       }
     }
