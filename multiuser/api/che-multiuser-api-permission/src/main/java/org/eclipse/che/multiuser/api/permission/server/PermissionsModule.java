@@ -29,12 +29,13 @@ public class PermissionsModule extends AbstractModule {
     bind(SetPermissionsFilter.class);
     bind(RemovePermissionsFilter.class);
     bind(GetPermissionsFilter.class);
+    bind(AdminPermissionInitializer.class).asEagerSingleton();
 
-    //Creates empty multibinder to avoid error during container starting
+    // Creates empty multibinder to avoid error during container starting
     Multibinder.newSetBinder(
         binder(), String.class, Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
 
-    //initialize empty set binder
+    // initialize empty set binder
     Multibinder.newSetBinder(binder(), AccountPermissionsChecker.class);
     MapBinder.newMapBinder(binder(), String.class, SetPermissionsChecker.class);
     MapBinder.newMapBinder(binder(), String.class, RemovePermissionsChecker.class);
