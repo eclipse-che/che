@@ -111,34 +111,26 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
   @Override
   public void showPopup() {
+    suggestionsContainer = new HTML();
+    suggestionsContainer.addStyleName(style.noborder());
     fileName.getElement().setAttribute("placeholder", locale.navigateToFileSearchIsCaseSensitive());
 
     setPopupPositionAndShow(
-        new PositionCallback() {
-          @Override
-          public void setPosition(int offsetWidth, int offsetHeight) {
-            setPopupPosition(
-                (com.google.gwt.user.client.Window.getClientWidth() / 2) - (offsetWidth / 2),
-                (com.google.gwt.user.client.Window.getClientHeight() / 4) - (offsetHeight / 2));
-            // Set 'clip' css property to auto when show animation is finished.
-            new Timer() {
-              @Override
-              public void run() {
-                getElement().getStyle().setProperty("clip", "auto");
-                delegate.onFileNameChanged(fileName.getText());
-              }
-            }.schedule(300);
-          }
+        (offsetWidth, offsetHeight) -> {
+          setPopupPosition(
+              (Window.getClientWidth() / 2) - (offsetWidth / 2),
+              (Window.getClientHeight() / 4) - (offsetHeight / 2));
+          // Set 'clip' css property to auto when show animation is finished.
+          new Timer() {
+            @Override
+            public void run() {
+              getElement().getStyle().setProperty("clip", "auto");
+              delegate.onFileNameChanged(fileName.getText());
+            }
+          }.schedule(300);
         });
 
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                fileName.setFocus(true);
-              }
-            });
+    Scheduler.get().scheduleDeferred(() -> fileName.setFocus(true));
 
     // Add window resize handler
     if (resizeHandler == null) {
@@ -209,8 +201,6 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
     // Show popup
     suggestionsPanel.setVisible(true);
-    suggestionsContainer = new HTML();
-    suggestionsContainer.addStyleName(style.noborder());
     suggestionsPanel.add(suggestionsContainer);
 
     // Create and show list of items
@@ -218,7 +208,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
     suggestionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
     list =
         SimpleList.create(
-            (SimpleList.View) suggestionsContainer.getElement().cast(),
+            suggestionsContainer.getElement().cast(),
             (Element) suggestionsContainer.getElement(),
             itemHolder,
             resources.defaultSimpleListCss(),
@@ -331,12 +321,6 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
     }
 
     Scheduler.get()
-        .scheduleDeferred(
-            new Command() {
-              @Override
-              public void execute() {
-                delegate.onFileNameChanged(fileName.getText());
-              }
-            });
+        .scheduleDeferred((Command) () -> delegate.onFileNameChanged(fileName.getText()));
   }
 }
