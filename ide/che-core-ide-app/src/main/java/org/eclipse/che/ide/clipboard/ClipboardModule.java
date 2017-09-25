@@ -19,7 +19,6 @@ public class ClipboardModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
-    bind(ZeroClipboardInjector.class).asEagerSingleton();
     bind(ClipboardButtonBuilder.class).to(ClipboardButtonBuilderImpl.class);
   }
 }
