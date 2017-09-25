@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public class DockerInstanceStopDetector {
   private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceStopDetector.class);
 
-  private final boolean enableDetector;
+  private final boolean isEnabled;
   private EventService eventService;
   private DockerConnector dockerConnector;
   private ExecutorService executorService;
@@ -70,9 +70,9 @@ public class DockerInstanceStopDetector {
   public DockerInstanceStopDetector(
       EventService eventService,
       DockerConnectorProvider dockerConnectorProvider,
-      @Named("che.docker.enable_container_stop_detector") boolean enableDetector) {
-    this.enableDetector = enableDetector;
-    if (!enableDetector) {
+      @Named("che.docker.enable_container_stop_detector") boolean isEnabled) {
+    this.isEnabled = isEnabled;
+    if (!isEnabled) {
       return;
     }
     this.eventService = eventService;
@@ -97,7 +97,7 @@ public class DockerInstanceStopDetector {
    * @param workspaceId id of a workspace that owns machine
    */
   public void startDetection(String containerId, String machineId, String workspaceId) {
-    if (enableDetector) {
+    if (isEnabled) {
       instances.put(containerId, Pair.of(machineId, workspaceId));
     }
   }
@@ -108,14 +108,14 @@ public class DockerInstanceStopDetector {
    * @param containerId id of a container to start detection for
    */
   public void stopDetection(String containerId) {
-    if (enableDetector) {
+    if (isEnabled) {
       instances.remove(containerId);
     }
   }
 
   @PostConstruct
   private void detectContainersEvents() {
-    if (!enableDetector) {
+    if (!isEnabled) {
       return;
     }
     executorService.execute(
