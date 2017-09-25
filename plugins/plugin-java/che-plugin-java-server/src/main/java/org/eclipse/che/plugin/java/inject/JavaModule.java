@@ -18,6 +18,7 @@ import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerLauncher;
+import org.eclipse.che.plugin.java.languageserver.ProjectProxyLauncher;
 
 /** @author Anatolii Bazko */
 @DynaModule
@@ -30,7 +31,7 @@ public class JavaModule extends AbstractModule {
   protected void configure() {
     Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
         .addBinding()
-        .to(JavaLanguageServerLauncher.class);
+        .toInstance(new ProjectProxyLauncher(new JavaLanguageServerLauncher()));
     LanguageDescription description = new LanguageDescription();
     description.setFileExtensions(asList(EXTENSIONS));
     description.setLanguageId(LANGUAGE_ID);
