@@ -12,17 +12,16 @@ package org.eclipse.che.multiuser.api.permission.server;
 
 import static java.util.Collections.emptyList;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.Collections;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.UserManager;
@@ -62,32 +61,23 @@ public class AdminPermissionInitializerTest {
     user = new UserImpl("qwe", "qwe", "qwe", "qwe", emptyList());
     adminUser = new UserImpl("id-admin", EMAIL, NAME, PASSWORD, emptyList());
 
-    final AbstractPermissionsDomain mock = mock(AbstractPermissionsDomain.class);
     doNothing().when(permissionsManager).storePermission(any(SystemPermissionsImpl.class));
-    when(permissionsManager.getDomain(anyString())).thenReturn(cast(mock));
-    when(mock.getAllowedActions()).thenReturn(emptyList());
-    when(mock.newInstance(anyString(), anyString(), anyListOf(String.class)))
-        .then(
-            invocation ->
-                new SystemPermissionsImpl(
-                    (String) invocation.getArguments()[0],
-                    (List<String>) invocation.getArguments()[2]));
+    doReturn(new SystemDomain(Collections.emptySet()))
+        .when(permissionsManager)
+        .getDomain(anyString());
     initializer =
         new AdminPermissionInitializer(NAME, userManager, permissionsManager, eventService);
   }
 
-  @SuppressWarnings("unchecked")
-  private static <R, T extends R> T cast(R qwe) {
-    return (T) qwe;
-  }
-
   @Test
   public void shouldAddSystemPermissionsOnPostUserPersistedEvent() throws Exception {
-
+    //given
     when(userManager.getByName(eq(NAME))).thenReturn(user);
     initializer.init();
+    //when
     initializer.onEvent(
         new PostUserPersistedEvent(new UserImpl(NAME, EMAIL, NAME, PASSWORD, emptyList())));
+    //then
     verify(permissionsManager)
         .storePermission(
             argThat(
@@ -101,18 +91,24 @@ public class AdminPermissionInitializerTest {
 
   @Test
   public void shouldNotAddSystemPermissionsOnPostUserPersistedEvent() throws Exception {
+    //given
     when(userManager.getByName(anyString())).thenThrow(NotFoundException.class);
     initializer.init();
+    //when
     initializer.onEvent(
         new PostUserPersistedEvent(
             new UserImpl(NAME + "1", EMAIL + "2", NAME + "3", PASSWORD, emptyList())));
+    //then
     verifyNoMoreInteractions(permissionsManager);
   }
 
   @Test
   public void shouldAddSystemPermissionsForExistedAdmin() throws Exception {
+    //given
     when(userManager.getByName(eq(NAME))).thenReturn(adminUser);
+    //when
     initializer.init();
+    //then
     verify(permissionsManager)
         .storePermission(
             argThat(
@@ -126,9 +122,11 @@ public class AdminPermissionInitializerTest {
 
   @Test
   public void shouldNotAddSystemPermissionsIfAdminNotExists() throws Exception {
+    //given
     when(userManager.getByName(anyString())).thenThrow(NotFoundException.class);
+    //when
     initializer.init();
-
+    //then
     verifyNoMoreInteractions(permissionsManager);
   }
 }
