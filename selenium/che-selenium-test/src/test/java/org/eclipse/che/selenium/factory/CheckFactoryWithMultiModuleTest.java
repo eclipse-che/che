@@ -61,7 +61,7 @@ public class CheckFactoryWithMultiModuleTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    //testFactory.delete();
+    testFactory.delete();
   }
 
   @Test
