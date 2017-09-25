@@ -39,15 +39,15 @@ import org.slf4j.LoggerFactory;
 public class AdminPermissionInitializer implements EventSubscriber<PostUserPersistedEvent> {
   private static final Logger LOG = LoggerFactory.getLogger(AdminPermissionInitializer.class);
 
-  @Inject UserManager userManager;
+  @Inject private UserManager userManager;
 
-  @Inject PermissionsManager permissionsManager;
+  @Inject private PermissionsManager permissionsManager;
 
-  @Inject EventService eventService;
+  @Inject private EventService eventService;
 
   @Inject
   @Named("che.admin.name")
-  String name;
+  private String name;
 
   @PostConstruct
   public void create() throws ServerException {
@@ -79,9 +79,7 @@ public class AdminPermissionInitializer implements EventSubscriber<PostUserPersi
       permissionsManager.storePermission(
           systemDomain.newInstance(userId, null, systemDomain.getAllowedActions()));
     } catch (ServerException | NotFoundException | ConflictException e) {
-      LOG.warn(
-          format("System permissions creation failed for user %s", userId),
-          e.getLocalizedMessage());
+      LOG.warn(format("System permissions creation failed for user %s", userId), e);
     }
   }
 }
