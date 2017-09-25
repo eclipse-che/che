@@ -218,7 +218,7 @@ public class ServerExposerTest {
 
     RoutesAnnotations.Deserializer routeDeserializer =
         RoutesAnnotations.newDeserializer(route.getMetadata().getAnnotations());
-    Map<String, ServerConfig> servers = routeDeserializer.servers();
+    Map<String, ServerConfigImpl> servers = routeDeserializer.servers();
     ServerConfig serverConfig = servers.get(serverName);
     assertEquals(serverConfig, expected);
   }
