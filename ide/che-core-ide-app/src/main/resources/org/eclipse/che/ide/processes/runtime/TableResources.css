@@ -15,6 +15,7 @@
 @eval cellTableOddRowBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableOddRowBackground();
 @eval cellTableEvenRowBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableEvenRowBackground();
 @eval cellTableCellColor org.eclipse.che.ide.api.theme.Style.theme.cellTableCellColor();
+@eval windowContentFontColor org.eclipse.che.ide.api.theme.Style.theme.getWindowContentFontColor();
 
 .cellTableWidget {
   margin: 5px 10px;
@@ -62,4 +63,18 @@
 
 .cellTableCaption {
   margin: 5px 0px 0px 10px;
+}
+
+.cellTableHideServersCheckBox {
+  float: right;
+  margin-right: 10px;
+  margin-top: 5px;
+}
+
+.cellTableHideServersCheckBox label {
+  color: windowContentFontColor;
+}
+
+.cellTableHideServersCheckBox label::before {
+  margin-top: 1px;
 }

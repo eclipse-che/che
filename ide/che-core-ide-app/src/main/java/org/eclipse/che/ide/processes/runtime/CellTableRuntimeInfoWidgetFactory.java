@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.processes.runtime;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.stream.Collectors.toList;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -23,6 +24,8 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.CellTable.Style;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -60,20 +63,48 @@ public class CellTableRuntimeInfoWidgetFactory implements RuntimeInfoWidgetFacto
   @Override
   public Widget create(String machineName, List<RuntimeInfo> runtimeList) {
     VerticalPanel panel = new VerticalPanel();
-
+    panel.ensureDebugId("runtimeInfoVerticalPanel");
     panel.setWidth("100%");
 
     Label caption = new Label(locale.cellTableCaption(machineName));
+    caption.ensureDebugId("runtimeInfoCellTableCaption");
     caption.addStyleName(resources.cellTableStyle().cellTableCaption());
 
-    panel.add(caption);
-    panel.add(createCellTable(runtimeList));
+    HorizontalPanel hPanel = new HorizontalPanel();
+    hPanel.setWidth("100%");
+    hPanel.ensureDebugId("runtimeInfoCellTableHeaderWrapper");
+    hPanel.add(caption);
+
+    ListDataProvider<RuntimeInfo> dataProvider = new ListDataProvider<>(runtimeList);
+
+    CheckBox hideCheckBox = new CheckBox("Hide internal servers");
+    hideCheckBox.addValueChangeHandler(
+        event -> {
+          if (event.getValue()) { //if hide = true
+            dataProvider.setList(
+                runtimeList
+                    .stream()
+                    .filter(info -> !isNullOrEmpty(info.getPort()))
+                    .collect(toList()));
+          } else {
+            dataProvider.setList(runtimeList);
+          }
+          dataProvider.refresh();
+        });
+    hideCheckBox.addStyleName(resources.cellTableStyle().cellTableHideServersCheckBox());
+    hideCheckBox.ensureDebugId("runtimeInfoHideServersCheckBox");
+
+    hPanel.add(hideCheckBox);
+
+    panel.add(hPanel);
+    panel.add(createCellTable(dataProvider));
 
     return new ScrollPanel(panel);
   }
 
-  private Widget createCellTable(List<RuntimeInfo> runtimeList) {
+  private Widget createCellTable(ListDataProvider<RuntimeInfo> dataProvider) {
     CellTable<RuntimeInfo> table = new CellTable<>(100, resources);
+    table.ensureDebugId("runtimeInfoCellTable");
 
     TextColumn<RuntimeInfo> referenceColumn =
         new TextColumn<RuntimeInfo>() {
@@ -152,12 +183,10 @@ public class CellTableRuntimeInfoWidgetFactory implements RuntimeInfoWidgetFacto
     table.addColumn(protocolColumn, locale.cellTableProtocolColumn());
     table.addColumn(urlColumn, locale.cellTableUrlColumn());
 
-    table.setColumnWidth(referenceColumn, 10., Unit.PCT);
-    table.setColumnWidth(portColumn, 10., Unit.PCT);
-    table.setColumnWidth(protocolColumn, 10., Unit.PCT);
-    table.setColumnWidth(urlColumn, 70., Unit.PCT);
-
-    ListDataProvider<RuntimeInfo> dataProvider = new ListDataProvider<>(runtimeList);
+    table.setColumnWidth(referenceColumn, 15., Unit.PCT);
+    table.setColumnWidth(portColumn, 7., Unit.PCT);
+    table.setColumnWidth(protocolColumn, 7., Unit.PCT);
+    table.setColumnWidth(urlColumn, 71., Unit.PCT);
 
     dataProvider.addDataDisplay(table);
 
@@ -172,5 +201,7 @@ public class CellTableRuntimeInfoWidgetFactory implements RuntimeInfoWidgetFacto
 
   interface TableStyle extends CellTable.Style {
     String cellTableCaption();
+
+    String cellTableHideServersCheckBox();
   }
 }
