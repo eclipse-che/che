@@ -18,7 +18,7 @@ is_current_user_sudoer() {
 }
 
 set_sudo_command() {
-    if is_current_user_sudoer && ! is_current_user_root; then SUDO="sudo -E"; else unset SUDO; fi
+    if is_current_user_sudoer && ! is_current_user_root; then SUDO="sudo -E"; else unset SUDO && CHANGE_PROJECTS_PERMISSIONS=false; fi
 }
 
 set_sudo_command
@@ -55,8 +55,12 @@ MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
 ${SUDO} mkdir -p /projects
-${SUDO} sh -c "chown -R $(id -u -n) /projects"
-${SUDO} chmod 755 /projects
+if [ "${CHANGE_PROJECTS_PERMISSIONS}" = false ]; then
+    :
+    else
+    ${SUDO} sh -c "chown -R $(id -u -n) /projects"
+    ${SUDO} chmod 755 /projects
+fi
 
 
 INSTALL_JDK=false
