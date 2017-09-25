@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.plugin.testing.ide.action.DebugTestAction;
 import org.eclipse.che.plugin.testing.ide.action.RunTestAction;
+import org.eclipse.che.plugin.testing.ide.action.TestAction;
 
 /**
  * Java test extension.
