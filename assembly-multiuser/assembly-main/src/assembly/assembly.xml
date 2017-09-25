@@ -76,8 +76,6 @@
                 <exclude>**/tomcat/webapps/wsmaster.war</exclude>
                 <exclude>**/lib/ws-agent.tar.gz</exclude>
                 <exclude>**/tomcat/webapps/dashboard.war</exclude>
-                <exclude>**/tomcat/webapps/swagger.war</exclude>
-                <exclude>**/tomcat/webapps/docs.war</exclude>
             </excludes>
         </fileSet>
         <fileSet>
