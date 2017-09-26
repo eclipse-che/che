@@ -63,7 +63,7 @@ public class FindText {
     String FIND_TAB = "gwt-debug-partButton-Find";
     String HIDE_FIND_PANEL =
         "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[3]";
-    String OCCURRENCE = "//span[@file-name = '%s']";
+    String OCCURRENCE = "//span[@debugfilepath = '%s']";
   }
 
   @FindBy(id = Locators.WHOLE_WORD_CHECKLBOX_INP)
