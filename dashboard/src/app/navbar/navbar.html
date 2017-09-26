@@ -69,7 +69,7 @@
                 </div>
               </md-button>
             </md-list-item>
-            <md-list-item flex class="navbar-subsection-item" ng-if="!navbarController.userServices.hasAdminUserService && !navbarController.hasPersonalAccount">
+            <md-list-item flex class="navbar-subsection-item" ng-if="!navbarController.userServices.hasInstallationManagerService && !navbarController.hasPersonalAccount">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.organizations}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
@@ -104,7 +104,7 @@
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item"
-                          ng-if="navbarController.userServices.hasAdminUserService">
+                          ng-if="navbarController.userServices.hasInstallationManagerService">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.organizations}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">

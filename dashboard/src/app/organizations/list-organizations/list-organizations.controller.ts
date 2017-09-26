@@ -160,7 +160,7 @@ export class ListOrganizationsController {
     if (this.parentId) {
       return this.organizationsPermissionService.isUserAllowedTo(this.organizationActions.MANAGE_SUB_ORGANIZATION, this.parentId);
     }
-    return this.userServices.hasAdminUserService;
+    return this.userServices.hasInstallationManagerService;
   }
 
   /**
