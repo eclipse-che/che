@@ -209,11 +209,11 @@ public class DashboardFactory {
   }
 
   /**
-   * wait the name of factory field and type the name
+   * wait on the factory name field visibility and enter the name
    *
-   * @param name
+   * @param name name of factory to enter
    */
-  public void setNameFactory(String name) {
+  public void setFactoryName(String name) {
     WebElement field =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(ExpectedConditions.visibilityOf(factoryNameField));

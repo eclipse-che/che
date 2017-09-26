@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -26,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -34,7 +36,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
   private static final String PROJECT_NAME = NameGenerator.generate("ProjectAfterRenameWs", 4);
   private static final String WORKSPACE_NEW_NAME = NameGenerator.generate("rename_ws", 4);
 
-  @Inject private TestWorkspace workspace;
+  @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
@@ -44,17 +46,23 @@ public class ProjectStateAfterRenameWorkspaceTest {
   @Inject private Events events;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
     URL resource =
         ProjectStateAfterRenameWorkspaceTest.this.getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
-        workspace.getId(),
+        testWorkspace.getId(),
         Paths.get(resource.toURI()),
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
-    ide.open(workspace);
+    ide.open(testWorkspace);
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    testWorkspaceServiceClient.delete(WORKSPACE_NEW_NAME, testWorkspace.getOwner().getName());
   }
 
   @Test
@@ -76,7 +84,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboardWorkspace.waitToolbarTitleName("Workspaces");
-    dashboardWorkspace.selectWorkspaceItemName(workspace.getName());
+    dashboardWorkspace.selectWorkspaceItemName(testWorkspace.getName());
     dashboardWorkspace.enterNameWorkspace(WORKSPACE_NEW_NAME);
     dashboardWorkspace.clickOnSaveBtn();
     dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.RUNNING);
