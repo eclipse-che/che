@@ -305,13 +305,9 @@ public class Consoles {
     redrawDriverWait.until(elementToBeClickable(By.xpath(MAXIMIZE_PANEL_ICON))).click();
   }
 
-  /**
-   * * apply drug and drop feature for consoles feature, shift the work bench panel up or down
-   *
-   * @param xoffset offset in pixels for shifting
-   */
-  public void dragConsolesInDefinePosition(int xoffset) {
+ 
+  public void dragConsolesInDefinePosition(int verticalShiftInPixels) {
     WebElement drag = redrawDriverWait.until(ExpectedConditions.visibilityOf(consolesPanelDrag));
-    new Actions(seleniumWebDriver).dragAndDropBy(drag, xoffset, xoffset).perform();
+    new Actions(seleniumWebDriver).dragAndDropBy(drag, verticalShiftInPixels, verticalShiftInPixels).perform();
   }
 }

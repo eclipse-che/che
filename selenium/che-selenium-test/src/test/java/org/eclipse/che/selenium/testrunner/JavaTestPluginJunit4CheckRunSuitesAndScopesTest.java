@@ -34,13 +34,15 @@ import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class JavaTestPluginJuinit4CheckRunSuitesAndScopesTest {
+public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
   private static final String JUNIT4_PROJECT = "junit4-tests-with-separeted-suites";
 
   private static final String PATH_TO_JUNIT4_TEST_CLASSES =
       JUNIT4_PROJECT + "/src/test/java/org/eclipse/che/tests/AppOneTest.java";
   private static final String PATH_TO_JUNIT4_TEST_SUITE =
       JUNIT4_PROJECT + "/src/tests/java/org/examples/suite/Junit4TestSuite.java";
+
+  private static final int VALUE_OF_SHIFTING_CONSOLES_ALONG_X_AXIS = -100;
 
   @Inject private JavaTestRunnerPluginConsole pluginConsole;
   @Inject private ProjectExplorer projectExplorer;
@@ -74,7 +76,7 @@ public class JavaTestPluginJuinit4CheckRunSuitesAndScopesTest {
     projectExplorer.waitItem(JUNIT4_PROJECT);
     runCompileCommandByPallete(compileCommand);
     notifications.waitProgressPopupPanelClose();
-    consoles.dragConsolesInDefinePosition(-100);
+    consoles.dragConsolesInDefinePosition(VALUE_OF_SHIFTING_CONSOLES_ALONG_X_AXIS);
   }
 
   @Test

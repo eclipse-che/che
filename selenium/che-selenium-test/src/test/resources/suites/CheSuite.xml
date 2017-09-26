@@ -546,7 +546,7 @@
             </class>
             <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit4Test"/>
             <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginTestNgTest"/>
-            <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJuinit4CheckRunSuitesAndScopesTest"/>
+            <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit4CheckRunSuitesAndScopesTest"/>
             <class name="org.eclipse.che.selenium.preferences.CheckErrorsWarningsTabTest">
                 <methods>
                     <!-- unstable -->
