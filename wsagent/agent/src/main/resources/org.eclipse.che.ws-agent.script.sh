@@ -18,7 +18,7 @@ is_current_user_sudoer() {
 }
 
 set_sudo_command() {
-    if is_current_user_sudoer; then
+    if is_current_user_sudoer && ! is_current_user_root; then
         SUDO="sudo -E"
     else
         unset SUDO;
@@ -58,8 +58,9 @@ fi
 MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
-${SUDO} mkdir -p /projects
-if [ "${SUDO}" = "sudo -E" ]; then
+
+if is_current_user_sudoer; then
+    ${SUDO} mkdir -p /projects
     ${SUDO} sh -c "chown -R $(id -u -n) /projects"
     ${SUDO} chmod 755 /projects
 fi
