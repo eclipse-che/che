@@ -60,13 +60,11 @@ public class Consoles {
   public static final String PREVIEW_URL = "//div[@active]//a[@href]";
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
-  public static final String PLUS_ICON =
-      "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[@id='gwt-debug-plusPanel']";
-  public static final String SERVER_MENU_ITEM = "//nobr[@id='contextMenu/Servers']";
-  public static final String SERVER_INFO_TABLE_CAPTION =
-      "//div[@id='gwt-debug-runtimeInfoCellTableCaption']";
+  public static final String PLUS_ICON = "gwt-debug-plusPanel";
+  public static final String SERVER_MENU_ITEM = "contextMenu/Servers";
+  public static final String SERVER_INFO_TABLE_CAPTION = "gwt-debug-runtimeInfoCellTableCaption";
   public static final String SERVER_INFO_HIDE_INTERNAL_CHECK_BOX =
-      "//span[@id='gwt-debug-runtimeInfoHideServersCheckBox']";
+      "gwt-debug-runtimeInfoHideServersCheckBox";
 
   protected final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
@@ -108,16 +106,16 @@ public class Consoles {
   @FindBy(xpath = PROCESSES_MAIN_AREA)
   WebElement processesMainArea;
 
-  @FindBy(xpath = PLUS_ICON)
+  @FindBy(id = PLUS_ICON)
   WebElement plusMenuBtn;
 
-  @FindBy(xpath = SERVER_MENU_ITEM)
+  @FindBy(id = SERVER_MENU_ITEM)
   WebElement serverMenuItem;
 
-  @FindBy(xpath = SERVER_INFO_TABLE_CAPTION)
+  @FindBy(id = SERVER_INFO_TABLE_CAPTION)
   WebElement serverInfoTableCaption;
 
-  @FindBy(xpath = SERVER_INFO_HIDE_INTERNAL_CHECK_BOX)
+  @FindBy(id = SERVER_INFO_HIDE_INTERNAL_CHECK_BOX)
   WebElement serverInfoHideInternalCheckBox;
 
   /** click on consoles tab in bottom and wait opening console area (terminal on other console ) */
