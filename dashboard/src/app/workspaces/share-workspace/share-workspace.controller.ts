@@ -191,6 +191,10 @@ export class ShareWorkspaceController {
     this.isLoading = true;
     this.noPermissionsError = true;
 
+    if (!this.workspace) {
+      return;
+    }
+
     this.chePermissions.fetchWorkspacePermissions(this.workspace.id).then(() => {
       this.isLoading = false;
       this.formUserList();

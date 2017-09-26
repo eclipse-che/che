@@ -17,7 +17,7 @@
 <div><md-progress-linear class="progress-line" md-mode="indeterminate"
                       ng-show="workspaceDetailsController.loading"></md-progress-linear></div>
 
-<md-content md-scroll-y flex
+<md-content ng-if="workspaceDetailsController.workspaceDetails" md-scroll-y flex
             class="workspace-details-content" md-theme="default">
   <md-tabs md-dynamic-height md-stretch-tabs="auto"
            md-selected="workspaceDetailsController.selectedTabIndex"
@@ -129,38 +129,22 @@
         </che-label-container>
       </md-tab-body>
     </md-tab>
-
-    <!-- Runtime Tab -->
-    <md-tab>
-      <md-tab-label>
-        <md-icon md-font-icon="fa-wrench" class="fa che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Runtime</span>
-      </md-tab-label>
-      <md-tab-body>
-        <ng-form name="workspaceRuntimeForm">
-          <workspace-environments
-            ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Runtime, workspaceRuntimeForm)"
-            workspace-runtime="workspaceDetailsController.copyWorkspaceDetails.runtime"
-            workspace-creation-flow="workspaceDetailsController.isCreationFlow"
-            workspace-name="workspaceDetailsController.newName"
-            stack-id="workspaceDetailsController.stackId"
-            environment-name="workspaceDetailsController.copyWorkspaceDetails.config.defaultEnv"
-            workspace-config="workspaceDetailsController.copyWorkspaceDetails.config"
-            workspace-imported-recipe="workspaceDetailsController.workspaceImportedRecipe"
-            machines-view-status="workspaceDetailsController.machinesViewStatus"
-            environment-on-change="workspaceDetailsController.updateWorkspaceConfigEnvironment()"></workspace-environments>
-        </ng-form>
-      </md-tab-body>
-    </md-tab>
-
     <!-- Share Tab -->
     <md-tab>
       <md-tab-label>
-        <md-icon md-font-icon="material-design icon-ic_folder_shared_24px" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Share</span>
       </md-tab-label>
       <md-tab-body>
         <share-workspace></share-workspace>
+      </md-tab-body>
+    </md-tab>
+    <!-- SSH Tab -->
+    <md-tab>
+      <md-tab-label>
+        <span class="che-tab-label-title">SSH</span>
+      </md-tab-label>
+      <md-tab-body>
+        <workspace-details-ssh></workspace-details-ssh>
       </md-tab-body>
     </md-tab>
 
@@ -178,11 +162,9 @@
   </md-tabs>
 </md-content>
 
-<workspace-edit-mode-overlay ng-if="workspaceDetailsController.editMode && !workspaceDetailsController.saving"
+<workspace-edit-mode-overlay ng-if="workspaceDetailsController.workspaceDetails && workspaceDetailsController.editMode && !workspaceDetailsController.saving"
                              workspace-edit-mode-message="{{workspaceDetailsController.editModeMessage}}"
                              workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
                              workspace-edit-disable-save-button="workspaceDetailsController.isSaveButtonDisabled()"
                              workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"
                              workspace-edit-mode-on-cancel="workspaceDetailsController.cancelConfigChanges()"></workspace-edit-mode-overlay>
-
-<md-content ng-show="workspaceDetailsController.invalidWorkspace">{{workspaceDetailsController.invalidWorkspace}}</md-content>
