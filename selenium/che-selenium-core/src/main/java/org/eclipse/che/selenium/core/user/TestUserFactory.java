@@ -8,15 +8,16 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.jdb.server.expression;
+package org.eclipse.che.selenium.core.user;
 
-/** @author andrew00x */
-public class ExpressionException extends RuntimeException {
-  public ExpressionException(String message) {
-    super(message);
-  }
+import com.google.inject.assistedinject.Assisted;
 
-  public ExpressionException(String message, Throwable cause) {
-    super(message, cause);
-  }
+/**
+ * @author Anton Korneta
+ * @author Dmytro Nochevnov
+ */
+public interface TestUserFactory {
+  TestUser create(@Assisted("email") String email);
+
+  TestUser create(@Assisted("email") String email, @Assisted("password") String password);
 }

@@ -38,7 +38,7 @@ import {ChePreferences} from '../components/api/che-preferences.factory';
 // init module
 let initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
   'angular-websocket', 'ui.bootstrap', 'ui.codemirror', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
-  'ngDropdowns', 'ngLodash', 'angularCharts', 'ngClipboard', 'uuid4', 'angularFileUpload']);
+  'ngDropdowns', 'ngLodash', 'angularCharts', 'uuid4', 'angularFileUpload']);
 
 
 // add a global resolve flag on all routes (user needs to be resolved first)
@@ -89,7 +89,7 @@ var DEV = false;
 
 
 // configs
-initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipProvider) => {
+initModule.config(['$routeProvider', ($routeProvider) => {
   // config routes (add demo page)
   if (DEV) {
     $routeProvider.accessWhen('/demo-components', {
@@ -104,9 +104,6 @@ initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipPr
   $routeProvider.accessOtherWise({
     redirectTo: '/workspaces'
   });
-  // add .swf path location using ngClipProvider
-  let ngClipProviderPath = DEV ? 'bower_components/zeroclipboard/dist/ZeroClipboard.swf' : 'assets/zeroclipboard/ZeroClipboard.swf';
-  ngClipProvider.setPath(ngClipProviderPath);
 }]);
 
 

@@ -52,7 +52,7 @@ public class CheckFactoryWithSparseCheckoutTest {
         .getSource()
         .setLocation("https://github.com/" + gitHubUsername + "/" + PROJECT_NAME);
     projectConfig.setName(PROJECT_NAME);
-    projectConfig.setPath(PROJECT_NAME);
+    projectConfig.setPath("/" + PROJECT_NAME);
     testFactory = testFactoryBuilder.build();
   }
 

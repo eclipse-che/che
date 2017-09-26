@@ -69,6 +69,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
@@ -736,60 +737,61 @@ public class MachineProviderImpl implements MachineInstanceProvider {
   void readContainerLogsInSeparateThread(
       String container, String workspaceId, String machineId, LineConsumer outputConsumer) {
     executor.execute(
-        () -> {
-          long lastProcessedLogDate = 0;
-          boolean isContainerRunning = true;
-          int errorsCounter = 0;
-          long lastErrorTime = 0;
-          while (isContainerRunning) {
-            try {
-              docker.getContainerLogs(
-                  GetContainerLogsParams.create(container)
-                      .withFollow(true)
-                      .withSince(lastProcessedLogDate),
-                  new LogMessagePrinter(outputConsumer));
-              isContainerRunning = false;
-            } catch (SocketTimeoutException ste) {
-              lastProcessedLogDate = System.currentTimeMillis() / 1000L;
-              // reconnect to container
-            } catch (ContainerNotFoundException e) {
-              isContainerRunning = false;
-            } catch (IOException e) {
-              long errorTime = System.currentTimeMillis();
-              lastProcessedLogDate = errorTime / 1000L;
-              LOG.warn(
-                  "Failed to get logs from machine {} of workspace {} backed by container {}, because: {}.",
-                  machineId,
-                  workspaceId,
-                  container,
-                  e.getMessage(),
-                  e);
-              if (errorTime - lastErrorTime
-                  < 20_000L) { // if new error occurs less than 20 seconds after previous
-                if (++errorsCounter == 5) {
-                  LOG.error(
-                      "Too many errors while streaming logs from machine {} of workspace {} backed by container {}. "
-                          + "Logs streaming is closed. Last error: {}.",
+        ThreadLocalPropagateContext.wrap(
+            () -> {
+              long lastProcessedLogDate = 0;
+              boolean isContainerRunning = true;
+              int errorsCounter = 0;
+              long lastErrorTime = 0;
+              while (isContainerRunning) {
+                try {
+                  docker.getContainerLogs(
+                      GetContainerLogsParams.create(container)
+                          .withFollow(true)
+                          .withSince(lastProcessedLogDate),
+                      new LogMessagePrinter(outputConsumer));
+                  isContainerRunning = false;
+                } catch (SocketTimeoutException ste) {
+                  lastProcessedLogDate = System.currentTimeMillis() / 1000L;
+                  // reconnect to container
+                } catch (ContainerNotFoundException e) {
+                  isContainerRunning = false;
+                } catch (IOException e) {
+                  long errorTime = System.currentTimeMillis();
+                  lastProcessedLogDate = errorTime / 1000L;
+                  LOG.warn(
+                      "Failed to get logs from machine {} of workspace {} backed by container {}, because: {}.",
                       machineId,
                       workspaceId,
                       container,
                       e.getMessage(),
                       e);
-                  break;
-                }
-              } else {
-                errorsCounter = 1;
-              }
-              lastErrorTime = errorTime;
+                  if (errorTime - lastErrorTime
+                      < 20_000L) { // if new error occurs less than 20 seconds after previous
+                    if (++errorsCounter == 5) {
+                      LOG.error(
+                          "Too many errors while streaming logs from machine {} of workspace {} backed by container {}. "
+                              + "Logs streaming is closed. Last error: {}.",
+                          machineId,
+                          workspaceId,
+                          container,
+                          e.getMessage(),
+                          e);
+                      break;
+                    }
+                  } else {
+                    errorsCounter = 1;
+                  }
+                  lastErrorTime = errorTime;
 
-              try {
-                sleep(1_000);
-              } catch (InterruptedException ie) {
-                return;
+                  try {
+                    sleep(1_000);
+                  } catch (InterruptedException ie) {
+                    return;
+                  }
+                }
               }
-            }
-          }
-        });
+            }));
   }
 
   private void cleanUpContainer(String containerId) {
