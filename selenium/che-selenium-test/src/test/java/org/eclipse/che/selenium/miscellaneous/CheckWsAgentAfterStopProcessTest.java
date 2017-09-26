@@ -96,7 +96,7 @@ public class CheckWsAgentAfterStopProcessTest {
   }
 
   @Test(priority = 1)
-  public void checkWorkspaceRestartingInIde() {
+  public void checkWorkspaceRestartingByIde() {
     projectExplorer.waitItem(PROJECT_NAME);
     events.clickProjectEventsTab();
     events.waitExpectedMessage(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
