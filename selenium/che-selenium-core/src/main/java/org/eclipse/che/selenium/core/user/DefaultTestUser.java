@@ -17,9 +17,10 @@ import com.google.inject.Singleton;
  * Default {@link TestUser} that will be created before all tests and will be deleted after them.
  * All tests share the same default user.
  *
- * <p>To have move users per tests see {@link InjectTestUser}.
+ * <p>To have more users per tests see {@link InjectTestUser}.
  *
  * @author Anatolii Bazko
+ * @author Dmytro Nochevnov
  */
 @Singleton
 public class DefaultTestUser implements TestUser {
@@ -27,7 +28,7 @@ public class DefaultTestUser implements TestUser {
   private final TestUser testUser;
 
   @Inject
-  public DefaultTestUser(TestUserImpl testUser) throws Exception {
+  public DefaultTestUser(TestUser testUser) throws Exception {
     this.testUser = testUser;
   }
 

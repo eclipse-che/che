@@ -13,6 +13,8 @@ package org.eclipse.che.ide.part.explorer.project;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -38,6 +40,7 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.extension.ExtensionsInitializedEvent;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -88,21 +91,23 @@ public class ProjectExplorerPresenter extends BasePresenter
   private final AppContext appContext;
   private final RequestTransmitter requestTransmitter;
   private final DtoFactory dtoFactory;
+  private NotificationManager notificationManager;
   private UpdateTask updateTask = new UpdateTask();
   private Set<Path> expandQueue = new HashSet<>();
   private boolean hiddenFilesAreShown;
 
   @Inject
   public ProjectExplorerPresenter(
-      final ProjectExplorerView view,
-      final EventBus eventBus,
-      final CoreLocalizationConstant locale,
-      final Resources resources,
-      final ResourceNode.NodeFactory nodeFactory,
-      final SettingsProvider settingsProvider,
-      final AppContext appContext,
-      final RequestTransmitter requestTransmitter,
-      final DtoFactory dtoFactory) {
+      ProjectExplorerView view,
+      EventBus eventBus,
+      CoreLocalizationConstant locale,
+      Resources resources,
+      ResourceNode.NodeFactory nodeFactory,
+      SettingsProvider settingsProvider,
+      AppContext appContext,
+      RequestTransmitter requestTransmitter,
+      NotificationManager notificationManager,
+      DtoFactory dtoFactory) {
     this.view = view;
     this.eventBus = eventBus;
     this.nodeFactory = nodeFactory;
@@ -111,6 +116,7 @@ public class ProjectExplorerPresenter extends BasePresenter
     this.resources = resources;
     this.appContext = appContext;
     this.requestTransmitter = requestTransmitter;
+    this.notificationManager = notificationManager;
     this.dtoFactory = dtoFactory;
     this.view.setDelegate(this);
 
@@ -288,6 +294,10 @@ public class ProjectExplorerPresenter extends BasePresenter
 
         if (node != null) {
           tree.getNodeStorage().remove(node);
+          if (resource.isProject()) {
+            notificationManager.notify(
+                locale.projectRemoved(node.getName()), SUCCESS, NOT_EMERGE_MODE);
+          }
         }
       } else if (delta.getKind() == UPDATED) {
         for (Node node : tree.getNodeStorage().getAll()) {

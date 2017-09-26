@@ -19,7 +19,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -29,7 +28,6 @@ import org.testng.annotations.Test;
 
 /** @author Mihail Kuznyetsov */
 public class CheckFactoryWithPerUserCreatePolicyTest {
-  @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Dashboard dashboard;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
@@ -56,21 +54,21 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
     dashboard.open();
 
     // accept factory
-    testFactory.open(ide.driver());
+    testFactory.open(seleniumWebDriver);
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
 
-    String workspaceUrl = ide.driver().getCurrentUrl();
+    String workspaceUrl = seleniumWebDriver.getCurrentUrl();
 
     // accept factory
-    testFactory.open(ide.driver());
+    testFactory.open(seleniumWebDriver);
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
 
     // factory has been accepted in the same workspace
-    assertEquals(workspaceUrl, ide.driver().getCurrentUrl());
+    assertEquals(workspaceUrl, seleniumWebDriver.getCurrentUrl());
   }
 }

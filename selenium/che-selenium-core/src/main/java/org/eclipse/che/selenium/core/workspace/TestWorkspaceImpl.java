@@ -39,14 +39,14 @@ public class TestWorkspaceImpl implements TestWorkspace {
       TestUser owner,
       int memoryInGB,
       WorkspaceConfigDto template,
-      TestWorkspaceServiceClient workspaceServiceClient) {
+      TestWorkspaceServiceClient testWorkspaceServiceClient) {
     if (template == null) {
       throw new IllegalStateException("Workspace template cannot be null");
     }
     this.name = name;
     this.owner = owner;
     this.id = new AtomicReference<>();
-    this.workspaceServiceClient = workspaceServiceClient;
+    this.workspaceServiceClient = testWorkspaceServiceClient;
 
     this.future =
         CompletableFuture.runAsync(
