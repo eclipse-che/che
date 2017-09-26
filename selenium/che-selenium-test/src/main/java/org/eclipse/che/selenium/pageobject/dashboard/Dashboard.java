@@ -20,6 +20,8 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
@@ -196,6 +198,26 @@ public class Dashboard {
     seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
     if (loginPage.isOpened()) {
       loginPage.login(defaultUser.getName(), defaultUser.getPassword());
+    }
+  }
+
+  /** Open dashboard with provided username and password */
+  public void open(String userName, String userPassword) {
+    seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
+    if (loginPage.isOpened()) {
+      loginPage.login(userName, userPassword);
+    }
+  }
+
+  public void logout() {
+    try {
+      URL logoutUrl =
+          new URL(
+              "http://172.17.0.1:5050/auth/realms/che/protocol/openid-connect/logout?redirect_uri=http%3A%2F%2F172.17.0.1%3A8080%2Fdashboard%2F%23%2Fworkspaces");
+      seleniumWebDriver.navigate().to(logoutUrl);
+
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
     }
   }
 
