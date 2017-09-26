@@ -331,7 +331,7 @@ public class ProjectExplorerPresenter extends BasePresenter
       final Node node = getNode(delta.getResource().getLocation());
       if (node != null) {
 
-        if (node instanceof ResourceNode) {
+        if (node instanceof ResourceNode && !delta.getResource().isProject()) {
           ((ResourceNode) node).setData(delta.getResource());
         }
 
