@@ -14,6 +14,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -28,6 +29,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -112,6 +114,17 @@ public class CellTableRuntimeInfoWidgetFactory implements RuntimeInfoWidgetFacto
           public String getValue(RuntimeInfo record) {
             return valueOrDefault(record.getReference());
           }
+
+          @Override
+          public void render(Context context, RuntimeInfo object, SafeHtmlBuilder sb) {
+            sb.appendHtmlConstant(
+                "<div id=\""
+                    + UIObject.DEBUG_ID_PREFIX
+                    + "runtime-info-reference-"
+                    + context.getIndex()
+                    + "\">");
+            super.render(context, object, sb);
+          }
         };
 
     TextColumn<RuntimeInfo> portColumn =
@@ -119,6 +132,17 @@ public class CellTableRuntimeInfoWidgetFactory implements RuntimeInfoWidgetFacto
           @Override
           public String getValue(RuntimeInfo record) {
             return valueOrDefault(record.getPort());
+          }
+
+          @Override
+          public void render(Context context, RuntimeInfo object, SafeHtmlBuilder sb) {
+            sb.appendHtmlConstant(
+                "<div id=\""
+                    + UIObject.DEBUG_ID_PREFIX
+                    + "runtime-info-port-"
+                    + context.getIndex()
+                    + "\">");
+            super.render(context, object, sb);
           }
         };
 
@@ -128,6 +152,17 @@ public class CellTableRuntimeInfoWidgetFactory implements RuntimeInfoWidgetFacto
           public String getValue(RuntimeInfo record) {
             return valueOrDefault(record.getProtocol());
           }
+
+          @Override
+          public void render(Context context, RuntimeInfo object, SafeHtmlBuilder sb) {
+            sb.appendHtmlConstant(
+                "<div id=\""
+                    + UIObject.DEBUG_ID_PREFIX
+                    + "runtime-info-protocol-"
+                    + context.getIndex()
+                    + "\">");
+            super.render(context, object, sb);
+          }
         };
 
     Column<RuntimeInfo, SafeHtml> urlColumn =
@@ -136,6 +171,13 @@ public class CellTableRuntimeInfoWidgetFactory implements RuntimeInfoWidgetFacto
 
               @Override
               public void render(Context context, SafeHtml value, SafeHtmlBuilder sb) {
+                sb.appendHtmlConstant(
+                    "<div id=\""
+                        + UIObject.DEBUG_ID_PREFIX
+                        + "runtime-info-url-"
+                        + context.getIndex()
+                        + "\">");
+
                 if (value != null) {
                   sb.append(value);
                 }
