@@ -27,6 +27,9 @@
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-dynamodule-maven-plugin</artifactId>
                 <configuration>
+                    <skipJars>
+                        <skipJar>value1</skipJar>
+                    </skipJars>
                     <project implementation="org.eclipse.che.plugin.dynamodule.stub.DynaModuleListGeneratorMojoProjectStub"/>
                 </configuration>
                 <extensions>true</extensions>

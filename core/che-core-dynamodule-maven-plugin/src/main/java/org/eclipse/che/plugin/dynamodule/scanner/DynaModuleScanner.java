@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -44,6 +45,8 @@ public class DynaModuleScanner {
   private List<String> matchingClasses = new ArrayList();
 
   private final List<String> skipJars = new ArrayList<>();
+
+  private String[] additionalSkipJars;
 
   public DynaModuleScanner() {
 
@@ -77,6 +80,18 @@ public class DynaModuleScanner {
       LOGGER.debug("skipping URL {}", url);
       return;
     }
+
+    performScan(url);
+  }
+
+  /**
+   * Performs the scan of the URL.
+   *
+   * @param url the url to analyze
+   * @throws URISyntaxException
+   * @throws IOException
+   */
+  protected void performScan(URL url) throws URISyntaxException, IOException {
 
     long start = System.currentTimeMillis();
 
@@ -150,6 +165,12 @@ public class DynaModuleScanner {
    */
   public List<String> getDynaModuleClasses() {
     return matchingClasses;
+  }
+
+  public void setAdditionalSkipJars(String[] additionalSkipJars) {
+    if (additionalSkipJars != null && additionalSkipJars.length > 0) {
+      this.skipJars.addAll(Arrays.asList(additionalSkipJars));
+    }
   }
 
   public static class UrlTime implements Comparable<UrlTime> {

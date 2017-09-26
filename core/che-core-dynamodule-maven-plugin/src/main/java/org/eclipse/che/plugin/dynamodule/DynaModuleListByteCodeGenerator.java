@@ -50,19 +50,27 @@ public class DynaModuleListByteCodeGenerator {
   /** Name of the class to generate */
   private String className = "DynaModuleList";
 
-  /** Setup a new generator */
-  public DynaModuleListByteCodeGenerator() {}
+  /** Patter for excluding some files. */
+  private String[] additionalSkipJars;
 
   /** Bytecode generated that is corresponding to the generated class. */
   private byte[] classToGenerate;
+
+  /** Instance of the scanner */
+  private DynaModuleScanner dynaModuleScanner;
+
+  /** Setup a new generator */
+  public DynaModuleListByteCodeGenerator() {
+    this.dynaModuleScanner = new DynaModuleScanner();
+  }
 
   /**
    * Search all classes annotated with {@link org.eclipse.che.inject.DynaModule} and generate a
    * class that will provide all these modules
    */
   protected void init() {
+    dynaModuleScanner.setAdditionalSkipJars(additionalSkipJars);
 
-    DynaModuleScanner dynaModuleScanner = new DynaModuleScanner();
     urls.forEach(
         url -> {
           try {
@@ -152,5 +160,9 @@ public class DynaModuleListByteCodeGenerator {
   public byte[] execute() {
     init();
     return this.classToGenerate;
+  }
+
+  public void setSkipJars(String[] additionalSkipJars) {
+    this.additionalSkipJars = additionalSkipJars;
   }
 }

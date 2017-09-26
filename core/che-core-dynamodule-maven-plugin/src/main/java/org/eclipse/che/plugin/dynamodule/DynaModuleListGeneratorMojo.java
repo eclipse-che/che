@@ -56,6 +56,9 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project.build.directory}")
   private File targetDirectory;
 
+  /** List pattern of files to be excluded during the scan. */
+  @Parameter private String[] skipJars;
+
   /** Directory used to generate the code */
   private File generatedDirectory;
 
@@ -77,6 +80,7 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
     }
 
     DynaModuleListByteCodeGenerator dynaModuleListGenerator = new DynaModuleListByteCodeGenerator();
+    dynaModuleListGenerator.setSkipJars(skipJars);
 
     String className = LOWER_HYPHEN.to(UPPER_CAMEL, project.getArtifactId().replace(".", "-"));
 
