@@ -85,7 +85,8 @@ public class FindUsagesBaseOperationTest {
   public void checkFindUsagesBaseOperation() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(PATH_FOR_EXPAND, "AppController.java");
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
 
     // Check basic operations of the 'find usages' panel
     editor.selectTabByName("AppController");
@@ -114,10 +115,17 @@ public class FindUsagesBaseOperationTest {
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
     findUsages.selectNodeInFindUsagesByDoubleClick("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
-    findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
-    findUsages.clickOnIconNodeInFindUsagesPanel(
-        "handleRequest(HttpServletRequest, HttpServletResponse)");
+    try {
+      findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
+      findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+      findUsages.clickOnIconNodeInFindUsagesPanel(
+          "handleRequest(HttpServletRequest, HttpServletResponse)");
+    } catch (Exception ex) {
+      findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
+      findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+      findUsages.clickOnIconNodeInFindUsagesPanel(
+          "handleRequest(HttpServletRequest, HttpServletResponse)");
+    }
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_2);
 
     // Check nodes in the 'find usages' panel by 'Enter'

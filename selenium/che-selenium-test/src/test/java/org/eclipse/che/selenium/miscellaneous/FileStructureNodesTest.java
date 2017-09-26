@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.miscellaneous;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.Random;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 12.12.15 */
 public class FileStructureNodesTest {
-  private static final String PROJECT_NAME = "FileStructureNodes" + new Random().nextInt(999);
+  private static final String PROJECT_NAME = NameGenerator.generate("FileStructureNodes", 4);
   private static final String JAVA_FILE_NAME = "Company";
   private static final String INNER_CLASS_NAME = "CompanyHelper";
   private static final String INTERFACE_NAME = "Inter";
@@ -139,8 +139,13 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
+    try {
+      fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
+      fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
+    } catch (Exception ex) {
+      fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
+      fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
+    }
 
     // check work nodes in the 'file structure' by click on the icon
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
@@ -156,10 +161,17 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
-    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    try {
+      fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
+      fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
+      fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
+      fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    } catch (Exception ex) {
+      fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
+      fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
+      fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
+      fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    }
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
   }
