@@ -58,7 +58,6 @@ public class CheckWsAgentAfterStopProcessTest {
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
-
   @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
