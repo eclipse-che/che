@@ -14,9 +14,6 @@ import com.google.inject.Injector;
 import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
 import java.lang.reflect.Field;
-import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
-import org.eclipse.che.selenium.core.client.TestUserServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 
 /**
  * Injector for custom annotation {@link InjectTestUser}.
@@ -39,13 +36,7 @@ public class TestUserInjector<T> implements MembersInjector<T> {
   public void injectMembers(T t) {
     try {
       field.setAccessible(true);
-      field.set(
-          t,
-          new TestUserImpl(
-              injectTestUser.value(),
-              injector.getInstance(TestUserServiceClient.class),
-              injector.getInstance(TestWorkspaceServiceClient.class),
-              injector.getInstance(TestAuthServiceClient.class)));
+      field.set(t, injector.getInstance(TestUserFactory.class).create(injectTestUser.value()));
     } catch (Exception e) {
       throw new RuntimeException("Failed to instantiate user in " + t.getClass().getName(), e);
     }
