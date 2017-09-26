@@ -46,23 +46,21 @@ public class JavaTestPluginJunit4Test {
       JUNIT4_PROJECT + "/src/test/java/org/eclipse/che/examples/AppOneTest.java";
   private static final String PATH_TO_JUNIT4_ANOTHER_TEST =
       JUNIT4_PROJECT + "/src/test/java/org/eclipse/che/examples/AppAnotherTest.java";
-  private static final String PATH_TO_JUNIT4_TEST_SUITE =
-      JUNIT4_PROJECT + "/src/test/java/org/eclipse/che/examples/Junit4TestSuite.java";
 
   public static final String APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE =
       "java.lang.AssertionError\n"
-          + " at org.junit. fail( java:86)\n"
-          + " at org.junit. assertTrue( java:41)\n"
-          + " at org.junit. assertFalse( java:64)\n"
-          + " at org.junit. assertFalse( java:74)\n"
+          + " at org.junit.Assert.fail(Assert.java:86)\n"
+          + " at org.junit.Assert.assertTrue(Assert.java:41)\n"
+          + " at org.junit.Assert.assertFalse(Assert.java:64)\n"
+          + " at org.junit.Assert.assertFalse(Assert.java:74)\n"
           + " at org.eclipse.che.examples.AppOneTest.shouldFailOfAppOne(AppOneTest.java:33)";
 
   public static final String APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE =
       "java.lang.AssertionError\n"
-          + " at org.junit. fail( java:86)\n"
-          + " at org.junit. assertTrue( java:41)\n"
-          + " at org.junit. assertFalse( java:64)\n"
-          + " at org.junit. assertFalse( java:74)\n"
+          + " at org.junit.Assert.fail(Assert.java:86)\n"
+          + " at org.junit.Assert.assertTrue(Assert.java:41)\n"
+          + " at org.junit.Assert.assertFalse(Assert.java:64)\n"
+          + " at org.junit.Assert.assertFalse(Assert.java:74)\n"
           + " at org.eclipse.che.examples.AppAnotherTest.shouldFailOfAppAnother(AppAnotherTest.java:34)";
 
   @Inject private JavaTestRunnerPluginConsole pluginConsole;

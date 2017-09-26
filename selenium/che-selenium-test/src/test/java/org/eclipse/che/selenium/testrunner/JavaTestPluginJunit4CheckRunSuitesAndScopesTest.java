@@ -39,8 +39,6 @@ public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
 
   private static final String PATH_TO_JUNIT4_TEST_CLASSES =
       JUNIT4_PROJECT + "/src/test/java/org/eclipse/che/tests/AppOneTest.java";
-  private static final String PATH_TO_JUNIT4_TEST_SUITE =
-      JUNIT4_PROJECT + "/src/tests/java/org/examples/suite/Junit4TestSuite.java";
 
   private static final int VALUE_OF_SHIFTING_CONSOLES_ALONG_X_AXIS = -100;
 

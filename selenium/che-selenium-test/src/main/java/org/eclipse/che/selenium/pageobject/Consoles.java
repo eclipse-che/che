@@ -305,9 +305,10 @@ public class Consoles {
     redrawDriverWait.until(elementToBeClickable(By.xpath(MAXIMIZE_PANEL_ICON))).click();
   }
 
- 
   public void dragConsolesInDefinePosition(int verticalShiftInPixels) {
     WebElement drag = redrawDriverWait.until(ExpectedConditions.visibilityOf(consolesPanelDrag));
-    new Actions(seleniumWebDriver).dragAndDropBy(drag, verticalShiftInPixels, verticalShiftInPixels).perform();
+    new Actions(seleniumWebDriver)
+        .dragAndDropBy(drag, verticalShiftInPixels, verticalShiftInPixels)
+        .perform();
   }
 }

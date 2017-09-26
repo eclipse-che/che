@@ -50,10 +50,6 @@ public class JavaTestPluginTestNgTest {
       PROJECT + "/src/test/java/org/eclipse/che/examples/AppOneTest.java";
   private static final String PATH_TO_ANOTHER_TEST_CLASS =
       PROJECT + "/src/test/java/org/eclipse/che/examples/AppAnotherTest.java";
-  private static final String PATH_TO_MAIN_CLASS =
-      PROJECT + "/src/main/java/org/eclipse/che/examples/HelloWorld.java";
-  private static final String PATH_TO_TEST_PACKAGE =
-      PROJECT + "/src/test/java/org/eclipse/che/examples";
 
   public static final String APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE =
       "[TestNG] Running:  /home/user/che/ws-agent/temp/che-testng-suite.xmlexpected [false] but found [true]\n"
