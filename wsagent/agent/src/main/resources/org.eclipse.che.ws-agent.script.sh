@@ -62,9 +62,8 @@ mkdir -p ${CHE_DIR}
 if is_current_user_sudoer; then
     ${SUDO} mkdir -p /projects
     ${SUDO} sh -c "chown -R $(id -u -n) /projects"
-    ${SUDO} chmod 755 /projects
+    find /projects -type d -exec ${SUDO} chmod 755 {} \;
 fi
-
 
 INSTALL_JDK=false
 command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
