@@ -20,7 +20,7 @@ export  interface IInitData {
   workspaceDetails: che.IWorkspace;
 }
 
-const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Agents', 'Servers', 'Env_Variables', 'Config'];
+const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Agents', 'Servers', 'Env_Variables', 'Config', 'SSH'];
 
 const STOPPING = WorkspaceStatus[WorkspaceStatus.STOPPING];
 const STOPPED = WorkspaceStatus[WorkspaceStatus.STOPPED];
