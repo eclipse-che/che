@@ -13,17 +13,22 @@ package org.eclipse.che.plugin.openshift.client;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.util.Map;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
+import org.eclipse.che.plugin.docker.client.json.ImageConfig;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -55,15 +60,8 @@ public class OpenShiftConnectorTest {
 
   private OpenShiftConnector openShiftConnector;
 
-  @Test
-  public void shouldGetWorkspaceIDWhenAValidOneIsProvidedInCreateContainerParams()
-      throws IOException {
-    //Given
-    String expectedWorkspaceID = "abcd1234";
-    ContainerConfig containerConfig = mock(ContainerConfig.class);
-    CreateContainerParams createContainerParams = CreateContainerParams.create(containerConfig);
-
-    when(containerConfig.getEnv()).thenReturn(CONTAINER_ENV_VARIABLES);
+  @BeforeMethod
+  private void setup() {
 
     //When
     openShiftConnector =
@@ -88,9 +86,35 @@ public class OpenShiftConnectorTest {
             null,
             SECURE_ROUTES,
             CREATE_WORKSPACE_DIRS);
+  }
+
+  @Test
+  public void shouldGetWorkspaceIDWhenAValidOneIsProvidedInCreateContainerParams()
+      throws IOException {
+    //Given
+    String expectedWorkspaceID = "abcd1234";
+    ContainerConfig containerConfig = mock(ContainerConfig.class);
+    CreateContainerParams createContainerParams = CreateContainerParams.create(containerConfig);
+
+    when(containerConfig.getEnv()).thenReturn(CONTAINER_ENV_VARIABLES);
+
     String workspaceID = openShiftConnector.getCheWorkspaceId(createContainerParams);
 
     //Then
     assertEquals(workspaceID, expectedWorkspaceID);
+  }
+
+  /** Check that we return empty map if no labels and not a NPE */
+  @Test
+  public void checkWithNoLabels() {
+    ContainerConfig containerConfig = Mockito.mock(ContainerConfig.class);
+    when(containerConfig.getLabels()).thenReturn(null);
+
+    ImageConfig imageConfig = Mockito.mock(ImageConfig.class);
+    when(imageConfig.getLabels()).thenReturn(null);
+
+    Map<String, String> map = openShiftConnector.getLabels(containerConfig, imageConfig);
+    assertNotNull(map);
+    assertEquals(map.size(), 0);
   }
 }
