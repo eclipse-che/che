@@ -715,17 +715,12 @@ public class Refactor {
    * @return quantity of leased lines
    */
   public int getQuantityLeasedLineInLeftEditor() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.frameToBeAvailableAndSwitchToIt(
-                By.xpath(Locators.PREVIEW_EDITOR_FRAME)));
     int lineQuantity =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(
                     By.xpath(Locators.LEASED_LINE_LEFT_EDITOR)))
             .size();
-    seleniumWebDriver.switchTo().parentFrame();
     return lineQuantity;
   }
 
@@ -735,17 +730,12 @@ public class Refactor {
    * @return quantity of leased lines
    */
   public int getQuantityLeasedLineInRightEditor() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.frameToBeAvailableAndSwitchToIt(
-                By.xpath(Locators.PREVIEW_EDITOR_FRAME)));
     int lineQuantity =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(
                     By.xpath(Locators.LEASED_LINE_RIGHT_EDITOR)))
             .size();
-    seleniumWebDriver.switchTo().parentFrame();
     return lineQuantity;
   }
 }
