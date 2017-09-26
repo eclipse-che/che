@@ -8,13 +8,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.jdb.server.expression;
+package org.eclipse.che.selenium.core.client;
 
-import com.sun.jdi.Value;
-
-/** @author andrew00x */
-public interface ExpressionValue {
-  Value getValue();
-
-  void setValue(Value value);
+/** @author Dmytro Nochevnov */
+public interface TestWorkspaceServiceClientFactory {
+  TestWorkspaceServiceClient create(String authToken);
 }

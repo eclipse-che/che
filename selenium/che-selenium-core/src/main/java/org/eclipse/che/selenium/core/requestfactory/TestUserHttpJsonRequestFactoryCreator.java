@@ -10,22 +10,7 @@
  */
 package org.eclipse.che.selenium.core.requestfactory;
 
-import com.google.inject.assistedinject.Assisted;
-import java.util.Objects;
-import javax.inject.Inject;
-
 /** @author Dmytro Nochevnov */
-public class TestUserHttpJsonRequestFactory extends TestHttpJsonRequestFactory {
-
-  private final String authToken;
-
-  @Inject
-  public TestUserHttpJsonRequestFactory(@Assisted String authToken) {
-    Objects.requireNonNull(authToken);
-    this.authToken = authToken;
-  }
-
-  protected String getAuthToken() {
-    return this.authToken;
-  }
+public interface TestUserHttpJsonRequestFactoryCreator {
+  TestUserHttpJsonRequestFactory create(String authToken);
 }
