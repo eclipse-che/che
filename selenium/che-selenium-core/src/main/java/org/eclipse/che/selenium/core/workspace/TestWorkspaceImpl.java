@@ -39,11 +39,11 @@ public class TestWorkspaceImpl implements TestWorkspace {
       TestUser owner,
       int memoryInGB,
       String template,
-      TestWorkspaceServiceClient workspaceServiceClient) {
+      TestWorkspaceServiceClient testWorkspaceServiceClient) {
     this.name = name;
     this.owner = owner;
     this.id = new AtomicReference<>();
-    this.workspaceServiceClient = workspaceServiceClient;
+    this.workspaceServiceClient = testWorkspaceServiceClient;
 
     this.future =
         CompletableFuture.runAsync(

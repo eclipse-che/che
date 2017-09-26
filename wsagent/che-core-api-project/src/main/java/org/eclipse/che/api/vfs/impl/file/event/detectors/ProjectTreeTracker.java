@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
-import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.CREATED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
@@ -19,11 +18,12 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -45,7 +45,7 @@ public class ProjectTreeTracker {
   private static final String INCOMING_METHOD = "track/project-tree";
 
   private final Map<String, Integer> watchIdRegistry = new HashMap<>();
-  private final Set<String> timers = newConcurrentHashSet();
+  private final List<String> timers = new CopyOnWriteArrayList<>();
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager fileWatcherManager;

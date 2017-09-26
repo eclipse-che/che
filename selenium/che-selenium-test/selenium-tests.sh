@@ -14,7 +14,7 @@ export CALLER=$(basename $0)
 
 cd $CUR_DIR
 
-mvn dependency:unpack-dependencies \
+mvn clean dependency:unpack-dependencies \
     -DincludeArtifactIds=che-selenium-core \
     -DincludeGroupIds=org.eclipse.che.selenium \
     -Dmdep.unpack.includes=webdriver.sh \

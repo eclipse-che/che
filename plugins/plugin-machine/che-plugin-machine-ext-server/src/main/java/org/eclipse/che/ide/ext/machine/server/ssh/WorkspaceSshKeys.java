@@ -113,8 +113,11 @@ public class WorkspaceSshKeys {
               final User user =
                   userManager.getByName(workspaceRemovedEvent.getWorkspace().getNamespace());
               userId = user.getId();
-            } catch (NotFoundException | ServerException e) {
-              LOG.error(
+            } catch (NotFoundException ignored) {
+              // namespace can be different from username
+              return;
+            } catch (ServerException e) {
+              LOG.warn(
                   "Unable to get owner of the workspace {} with namespace {}",
                   workspaceRemovedEvent.getWorkspace().getId(),
                   workspaceRemovedEvent.getWorkspace().getNamespace());
@@ -131,7 +134,7 @@ public class WorkspaceSshKeys {
                   workspaceRemovedEvent.getWorkspace().getConfig().getName(),
                   workspaceRemovedEvent.getWorkspace().getId());
             } catch (ServerException e) {
-              LOG.error(
+              LOG.warn(
                   "Error when trying to remove default ssh pair for the workspace {} (workspace ID {})",
                   workspaceRemovedEvent.getWorkspace().getConfig().getName(),
                   workspaceRemovedEvent.getWorkspace().getId());

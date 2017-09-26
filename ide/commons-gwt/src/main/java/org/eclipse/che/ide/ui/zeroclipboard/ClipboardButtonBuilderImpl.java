@@ -18,8 +18,7 @@ import org.eclipse.che.ide.MimeType;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
- * Implementation of ClipboardButtonBuilder is able to create "copy to clipboard" or "select button"
- * according to state of ZeroClipboard library.
+ * Implementation of ClipboardButtonBuilder is able to create "copy to clipboard" button.
  *
  * @author Oleksii Orel
  * @author Kevin Pollet
@@ -150,56 +149,36 @@ public class ClipboardButtonBuilderImpl implements ClipboardButtonBuilder {
       String readySelectPrompt) /*-{
         var button = document.createElement('div');
         var tooltip = document.createElement('span');
-        button.setAttribute('class', className);
+        var isCopySupported = document.queryCommandSupported('copy');
         button.appendChild(image);
         button.appendChild(tooltip);
-        if (typeof $wnd.ZeroClipboard !== 'undefined') {
-            var client = new $wnd.ZeroClipboard(button);
-            client.on('ready', function (event) {
-                tooltip.innerHTML = readyCopyPrompt;
-                client.on('copy', function (event) {
-                    var data;
-                    if (mimeType === 'text/plain') {
-                        data = textBox.value;
-                        if (!data) {
-                            data = textBox.innerText;
-                        }
-                    } else {
-                        data = textBox.innerHTML;
-                    }
-                    event.clipboardData.setData(mimeType, data);
-                });
-                client.on('aftercopy', function (event) {
-                    tooltip.innerHTML = afterCopyPrompt;
-                    client.unclip();
-                    setTimeout(function () {
-                        client.clip(button);
-                        tooltip.innerHTML = readyCopyPrompt;
-                    }, 3000);
-                });
-            });
-            client.on('error', function (event) {
-                console.log('ZeroClipboard error of type "' + event.name + '": ' + event.message);
-                tooltip.innerHTML = copyErrorPrompt;
-                $wnd.ZeroClipboard.destroy();
-                setTimeout(function () {
-                    tooltip.innerHTML = readyCopyPrompt;
-                }, 5000);
-            });
+        button.setAttribute('class', className);
+        tooltip.innerHTML = isCopySupported ? readyCopyPrompt : readySelectPrompt;
+        button.onclick = function () {
+        if (typeof textBox.select !== 'undefined') {
+          textBox.select();
+        } else {
+          var range = document.createRange();
+          range.selectNodeContents(textBox);
+          $wnd.getSelection().removeAllRanges();
+          $wnd.getSelection().addRange(range);
         }
-        else {
-            tooltip.innerHTML = readySelectPrompt;
-            button.onclick = function () {
-                if (typeof textBox.select !== 'undefined') {
-                    textBox.select();
-                } else if ($wnd.getSelection()) {
-                    var range = document.createRange();
-                    range.selectNodeContents(textBox);
-                    $wnd.getSelection().removeAllRanges();
-                    $wnd.getSelection().addRange(range);
-                }
-            };
+        if (!isCopySupported) {
+          return;
         }
-        return button;
+        try {
+          if ($wnd.document.execCommand('copy')) {
+            $wnd.getSelection().removeAllRanges();
+            tooltip.innerHTML = afterCopyPrompt;
+          }
+        } catch (error) {
+          console.log('Error. ' + error);
+          tooltip.innerHTML = copyErrorPrompt;
+        }
+        setTimeout(function () {
+          tooltip.innerHTML = readyCopyPrompt;
+        }, 2000);
+      };
+      return button;
     }-*/;
 }

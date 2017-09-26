@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
@@ -44,10 +45,11 @@ import org.slf4j.LoggerFactory;
 public class DockerInstanceStopDetector {
   private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceStopDetector.class);
 
-  private final EventService eventService;
-  private final DockerConnector dockerConnector;
-  private final ExecutorService executorService;
-  private final Map<String, Pair<String, String>> instances;
+  private final boolean isEnabled;
+  private EventService eventService;
+  private DockerConnector dockerConnector;
+  private ExecutorService executorService;
+  private Map<String, Pair<String, String>> instances;
   /*
      Helps differentiate container main process OOM from other processes OOM
      Algorithm:
@@ -60,13 +62,19 @@ public class DockerInstanceStopDetector {
      That's why cache expires in X seconds.
      X was set as 10 empirically.
   */
-  private final Cache<String, String> containersOomTimestamps;
+  private Cache<String, String> containersOomTimestamps;
 
   private long lastProcessedEventDate = 0;
 
   @Inject
   public DockerInstanceStopDetector(
-      EventService eventService, DockerConnectorProvider dockerConnectorProvider) {
+      EventService eventService,
+      DockerConnectorProvider dockerConnectorProvider,
+      @Named("che.docker.enable_container_stop_detector") boolean isEnabled) {
+    this.isEnabled = isEnabled;
+    if (!isEnabled) {
+      return;
+    }
     this.eventService = eventService;
     this.dockerConnector = dockerConnectorProvider.get();
     this.instances = new ConcurrentHashMap<>();
@@ -89,7 +97,9 @@ public class DockerInstanceStopDetector {
    * @param workspaceId id of a workspace that owns machine
    */
   public void startDetection(String containerId, String machineId, String workspaceId) {
-    instances.put(containerId, Pair.of(machineId, workspaceId));
+    if (isEnabled) {
+      instances.put(containerId, Pair.of(machineId, workspaceId));
+    }
   }
 
   /**
@@ -98,11 +108,16 @@ public class DockerInstanceStopDetector {
    * @param containerId id of a container to start detection for
    */
   public void stopDetection(String containerId) {
-    instances.remove(containerId);
+    if (isEnabled) {
+      instances.remove(containerId);
+    }
   }
 
   @PostConstruct
   private void detectContainersEvents() {
+    if (!isEnabled) {
+      return;
+    }
     executorService.execute(
         () -> {
           //noinspection InfiniteLoopStatement
