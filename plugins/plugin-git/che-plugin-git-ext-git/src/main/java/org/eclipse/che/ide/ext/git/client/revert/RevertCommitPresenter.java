@@ -179,7 +179,7 @@ public class RevertCommitPresenter implements ActionDelegate {
       }
       message.append(
           revertedCommits.length() > 0
-              ? constant.revertedCommits(revertedCommits.toString())
+              ? " " + constant.revertedCommits(revertedCommits.toString())
               : "\n");
     }
 

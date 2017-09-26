@@ -88,7 +88,7 @@ public class RevertCommitTest {
     gitRevertCommit.selectRevision(revision);
     gitRevertCommit.clickRevertButton();
 
-    assertTrue(gitStatusBar.getTextStatus().contains("Reverted commits: " + revision));
+    gitStatusBar.waitMessageInGitTab("Reverted commits: " + revision);
 
     menu.runCommand(GIT, REVERT_COMMIT);
 
