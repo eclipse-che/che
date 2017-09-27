@@ -21,14 +21,12 @@ import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjec
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createPreferences;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createProfile;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createRecipe;
-import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createSnapshot;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createSshPair;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createStack;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createUser;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createWorker;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createWorkspace;
 import static org.eclipse.che.multiuser.resource.spi.jpa.JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitSubscriber;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -63,10 +61,9 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.factory.server.jpa.FactoryJpaModule;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.spi.RecipeDao;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.recipe.JpaRecipeDao;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
+import org.eclipse.che.api.recipe.RecipeDao;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
@@ -79,10 +76,10 @@ import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -127,7 +124,6 @@ import org.eclipse.che.multiuser.resource.spi.impl.FreeResourcesLimitImpl;
 import org.eclipse.che.multiuser.resource.spi.impl.ProvidedResourcesImpl;
 import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
 import org.eclipse.che.multiuser.resource.spi.jpa.JpaFreeResourcesLimitDao;
-import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -149,7 +145,6 @@ public class JpaEntitiesCascadeRemovalTest {
   private UserManager userManager;
   private ProfileDao profileDao;
   private WorkspaceDao workspaceDao;
-  private SnapshotDao snapshotDao;
   private SshDao sshDao;
   private FactoryDao factoryDao;
   private RecipeDao recipeDao;
@@ -197,17 +192,10 @@ public class JpaEntitiesCascadeRemovalTest {
 
   private FactoryImpl factory2;
 
-  /** Snapshots depend on workspace. */
-  private SnapshotImpl snapshot1;
-
-  private SnapshotImpl snapshot2;
-  private SnapshotImpl snapshot3;
-  private SnapshotImpl snapshot4;
-
   /** Recipe depend on user via permissions */
-  private RecipeImpl recipe1;
+  private OldRecipeImpl recipe1;
 
-  private RecipeImpl recipe2;
+  private OldRecipeImpl recipe2;
 
   /** Stack depend on user via permissions */
   private StackImpl stack1;
@@ -248,13 +236,12 @@ public class JpaEntitiesCascadeRemovalTest {
                 install(new FactoryJpaModule());
                 install(new OrganizationJpaModule());
                 install(new MultiuserWorkspaceJpaModule());
+                bind(RecipeDao.class).to(JpaRecipeDao.class);
 
                 bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
                 bind(RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
                 bind(WorkspaceManager.class);
-                final WorkspaceRuntimes wR = Mockito.mock(WorkspaceRuntimes.class);
-                when(wR.hasRuntime(Mockito.anyString())).thenReturn(false);
-                bind(WorkspaceRuntimes.class).toInstance(wR);
+                Multibinder.newSetBinder(binder(), RuntimeInfrastructure.class);
                 bind(AccountManager.class);
                 bind(Boolean.class)
                     .annotatedWith(Names.named("che.workspace.auto_snapshot"))
@@ -301,7 +288,6 @@ public class JpaEntitiesCascadeRemovalTest {
     preferenceDao = injector.getInstance(PreferenceDao.class);
     profileDao = injector.getInstance(ProfileDao.class);
     sshDao = injector.getInstance(SshDao.class);
-    snapshotDao = injector.getInstance(SnapshotDao.class);
     workspaceDao = injector.getInstance(WorkspaceDao.class);
     factoryDao = injector.getInstance(FactoryDao.class);
     stackDao = injector.getInstance(StackDao.class);
@@ -348,8 +334,6 @@ public class JpaEntitiesCascadeRemovalTest {
         factoryDao
             .getByAttribute(0, 0, singletonList(Pair.of("creator.userId", user.getId())))
             .isEmpty());
-    assertTrue(snapshotDao.findSnapshots(workspace1.getId()).isEmpty());
-    assertTrue(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
     //Check workers and parent entity is removed
     assertTrue(workspaceDao.getByNamespace(user2.getId()).isEmpty());
     assertEquals(workerDao.getWorkers(workspace3.getId(), 1, 0).getTotalItemsCount(), 0);
@@ -451,11 +435,6 @@ public class JpaEntitiesCascadeRemovalTest {
     factoryDao.create(factory1 = createFactory("factory1", user.getId()));
     factoryDao.create(factory2 = createFactory("factory2", user.getId()));
 
-    snapshotDao.saveSnapshot(snapshot1 = createSnapshot("snapshot1", workspace1.getId()));
-    snapshotDao.saveSnapshot(snapshot2 = createSnapshot("snapshot2", workspace1.getId()));
-    snapshotDao.saveSnapshot(snapshot3 = createSnapshot("snapshot3", workspace2.getId()));
-    snapshotDao.saveSnapshot(snapshot4 = createSnapshot("snapshot4", workspace2.getId()));
-
     recipeDao.create(recipe1 = createRecipe("recipe1"));
     recipeDao.create(recipe2 = createRecipe("recipe2"));
 
@@ -530,11 +509,6 @@ public class JpaEntitiesCascadeRemovalTest {
     organizationManager.remove(childOrganization.getId());
     organizationManager.remove(organization.getId());
     organizationManager.remove(organization2.getId());
-
-    snapshotDao.removeSnapshot(snapshot1.getId());
-    snapshotDao.removeSnapshot(snapshot2.getId());
-    snapshotDao.removeSnapshot(snapshot3.getId());
-    snapshotDao.removeSnapshot(snapshot4.getId());
 
     stackPermissionsDao.remove(user2.getId(), stack1.getId());
     stackPermissionsDao.remove(user2.getId(), stack2.getId());

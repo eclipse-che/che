@@ -18,7 +18,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
@@ -35,7 +35,7 @@ public class JpaRecipePermissionsDaoTest {
 
   private RecipePermissionsImpl[] permissions;
   private UserImpl[] users;
-  private RecipeImpl[] recipes;
+  private OldRecipeImpl[] recipes;
 
   @BeforeClass
   public void setupEntities() throws Exception {
@@ -54,9 +54,9 @@ public class JpaRecipePermissionsDaoTest {
         };
 
     recipes =
-        new RecipeImpl[] {
-          new RecipeImpl("recipe1", "rc1", null, null, null, null, null),
-          new RecipeImpl("recipe2", "rc2", null, null, null, null, null)
+        new OldRecipeImpl[] {
+          new OldRecipeImpl("recipe1", "rc1", null, null, null, null, null),
+          new OldRecipeImpl("recipe2", "rc2", null, null, null, null, null)
         };
 
     Injector injector = Guice.createInjector(new JpaTestModule(), new MultiuserMachineJpaModule());
@@ -71,7 +71,7 @@ public class JpaRecipePermissionsDaoTest {
       manager.persist(user);
     }
 
-    for (RecipeImpl recipe : recipes) {
+    for (OldRecipeImpl recipe : recipes) {
       manager.persist(recipe);
     }
 
@@ -92,7 +92,7 @@ public class JpaRecipePermissionsDaoTest {
         .forEach(manager::remove);
 
     manager
-        .createQuery("SELECT r FROM Recipe r", RecipeImpl.class)
+        .createQuery("SELECT r FROM OldRecipe r", OldRecipeImpl.class)
         .getResultList()
         .forEach(manager::remove);
 

@@ -254,26 +254,4 @@ public class JpaWorkspaceDao implements WorkspaceDao {
       }
     }
   }
-
-  @Singleton
-  public static class RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber
-      extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
-    @Inject private EventService eventService;
-    @Inject private WorkspaceManager workspaceManager;
-
-    @PostConstruct
-    public void subscribe() {
-      eventService.subscribe(this, BeforeWorkspaceRemovedEvent.class);
-    }
-
-    @PreDestroy
-    public void unsubscribe() {
-      eventService.unsubscribe(this, BeforeWorkspaceRemovedEvent.class);
-    }
-
-    @Override
-    public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
-      //            workspaceManager.removeSnapshots(event.getWorkspace().getId());
-    }
-  }
 }

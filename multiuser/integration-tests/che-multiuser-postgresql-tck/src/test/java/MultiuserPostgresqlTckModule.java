@@ -36,7 +36,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -136,8 +136,8 @@ public class MultiuserPostgresqlTckModule extends TckModule {
         .toInstance(new JpaTckRepository<>(WorkerImpl.class));
 
     //api-machine
-    bind(new TypeLiteral<TckRepository<RecipeImpl>>() {})
-        .toInstance(new JpaTckRepository<>(RecipeImpl.class));
+    bind(new TypeLiteral<TckRepository<OldRecipeImpl>>() {})
+        .toInstance(new JpaTckRepository<>(OldRecipeImpl.class));
     //api permission
     bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {})
         .toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));

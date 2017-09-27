@@ -22,7 +22,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.multiuser.api.permission.shared.model.Permissions;
 
@@ -79,7 +79,7 @@ public class RecipePermissionsImpl extends AbstractPermissions {
 
   @ManyToOne
   @JoinColumn(name = "recipe_id", insertable = false, updatable = false)
-  private RecipeImpl recipe;
+  private OldRecipeImpl recipe;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @Column(name = "actions")

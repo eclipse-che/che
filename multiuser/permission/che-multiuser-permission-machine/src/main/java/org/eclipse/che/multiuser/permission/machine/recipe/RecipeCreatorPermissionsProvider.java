@@ -15,7 +15,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
+import org.eclipse.che.api.recipe.RecipePersistedEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;

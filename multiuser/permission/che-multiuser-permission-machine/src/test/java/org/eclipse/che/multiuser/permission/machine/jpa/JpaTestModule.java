@@ -12,8 +12,7 @@ package org.eclipse.che.multiuser.permission.machine.jpa;
 
 import com.google.inject.AbstractModule;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
@@ -25,6 +24,7 @@ import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.h2.Driver;
 
 /** @author Max Shaposhnik (mshaposh@redhat.com) */
@@ -39,7 +39,7 @@ public class JpaTestModule extends AbstractModule {
             .runningOn(server)
             .addEntityClasses(
                 UserImpl.class,
-                RecipeImpl.class,
+                OldRecipeImpl.class,
                 SnapshotImpl.class,
                 AccountImpl.class,
                 AbstractPermissions.class,

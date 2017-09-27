@@ -13,7 +13,7 @@ package org.eclipse.che.multiuser.permission.machine.jpa.listener;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.jpa.JpaRecipeDao;
+import org.eclipse.che.api.recipe.JpaRecipeDao;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.multiuser.api.permission.server.jpa.listener.RemovePermissionsOnLastUserRemovedEventSubscriber;
 import org.eclipse.che.multiuser.permission.machine.jpa.JpaRecipePermissionsDao;

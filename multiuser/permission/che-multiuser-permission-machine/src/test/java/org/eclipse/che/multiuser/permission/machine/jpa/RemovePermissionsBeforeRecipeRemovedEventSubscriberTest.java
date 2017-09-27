@@ -18,8 +18,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
-import org.eclipse.che.api.machine.server.jpa.JpaRecipeDao;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.recipe.JpaRecipeDao;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.multiuser.permission.machine.jpa.JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber;
@@ -42,14 +42,14 @@ public class RemovePermissionsBeforeRecipeRemovedEventSubscriberTest {
 
   private RemovePermissionsBeforeRecipeRemovedEventSubscriber subscriber;
 
-  private RecipeImpl recipe;
+  private OldRecipeImpl recipe;
   private UserImpl[] users;
   private RecipePermissionsImpl[] recipePermissions;
 
   @BeforeClass
   public void setupEntities() throws Exception {
     recipe =
-        new RecipeImpl(
+        new OldRecipeImpl(
             "recipe1",
             "test",
             "creator",
@@ -96,7 +96,7 @@ public class RemovePermissionsBeforeRecipeRemovedEventSubscriberTest {
         .getResultList()
         .forEach(manager::remove);
     manager
-        .createQuery("SELECT recipe FROM Recipe recipe", RecipeImpl.class)
+        .createQuery("SELECT recipe FROM OldRecipe recipe", OldRecipeImpl.class)
         .getResultList()
         .forEach(manager::remove);
     manager

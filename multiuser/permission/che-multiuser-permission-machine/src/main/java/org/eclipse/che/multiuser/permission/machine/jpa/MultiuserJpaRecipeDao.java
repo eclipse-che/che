@@ -26,9 +26,9 @@ import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.jpa.JpaRecipeDao;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.spi.RecipeDao;
+import org.eclipse.che.api.recipe.JpaRecipeDao;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
+import org.eclipse.che.api.recipe.RecipeDao;
 import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 
 /**
@@ -68,15 +68,15 @@ public class MultiuserJpaRecipeDao extends JpaRecipeDao {
    */
   @Override
   @Transactional
-  public List<RecipeImpl> search(
+  public List<OldRecipeImpl> search(
       String userId, List<String> tags, String type, int skipCount, int maxItems)
       throws ServerException {
     try {
       final EntityManager em = managerProvider.get();
       final CriteriaBuilder cb = em.getCriteriaBuilder();
-      final CriteriaQuery<RecipeImpl> query = cb.createQuery(RecipeImpl.class);
+      final CriteriaQuery<OldRecipeImpl> query = cb.createQuery(OldRecipeImpl.class);
       final Root<RecipePermissionsImpl> perm = query.from(RecipePermissionsImpl.class);
-      final Join<RecipeImpl, RecipePermissionsImpl> rwp = perm.join("recipe", JoinType.LEFT);
+      final Join<OldRecipeImpl, RecipePermissionsImpl> rwp = perm.join("recipe", JoinType.LEFT);
       final Expression<List<String>> acts = perm.get("actions");
       final ParameterExpression<String> typeParam = cb.parameter(String.class, "recipeType");
       final Predicate checkType = cb.or(cb.isNull(typeParam), cb.equal(rwp.get("type"), typeParam));
@@ -87,18 +87,18 @@ public class MultiuserJpaRecipeDao extends JpaRecipeDao {
       final Predicate searchActionCheck =
           cb.isMember(cb.parameter(String.class, "actionParam"), acts);
       final Predicate shareCheck = cb.and(checkType, userIdCheck, searchActionCheck);
-      final TypedQuery<RecipeImpl> typedQuery;
+      final TypedQuery<OldRecipeImpl> typedQuery;
       if (tags != null && !tags.isEmpty()) {
-        final Join<RecipeImpl, String> tag = rwp.join("tags", JoinType.LEFT);
+        final Join<OldRecipeImpl, String> tag = rwp.join("tags", JoinType.LEFT);
         query
-            .select(cb.construct(RecipeImpl.class, rwp))
+            .select(cb.construct(OldRecipeImpl.class, rwp))
             .where(cb.and(tag.in(tags), shareCheck))
             .groupBy(rwp.get("id"))
             .having(cb.equal(cb.count(tag), tags.size()));
         typedQuery = em.createQuery(query).setParameter("tags", tags);
       } else {
         typedQuery =
-            em.createQuery(query.select(cb.construct(RecipeImpl.class, rwp)).where(shareCheck));
+            em.createQuery(query.select(cb.construct(OldRecipeImpl.class, rwp)).where(shareCheck));
       }
       return typedQuery
           .setParameter("userId", userId)

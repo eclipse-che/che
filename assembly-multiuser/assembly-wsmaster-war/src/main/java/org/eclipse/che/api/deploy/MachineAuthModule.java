@@ -11,7 +11,6 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
-import org.eclipse.che.api.workspace.server.WorkspaceServiceLinksInjector;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
@@ -28,8 +27,6 @@ public class MachineAuthModule extends AbstractModule {
   @Override
   protected void configure() {
     install(new InterceptorModule());
-    bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
-        .to(org.eclipse.che.multiuser.machine.authentication.server.AuthWsAgentHealthChecker.class);
     bind(
         org.eclipse.che.multiuser.machine.authentication.server.MachineTokenPermissionsFilter
             .class);
@@ -37,11 +34,5 @@ public class MachineAuthModule extends AbstractModule {
     bind(org.eclipse.che.multiuser.machine.authentication.server.MachineTokenRegistry.class);
     bind(org.eclipse.che.multiuser.machine.authentication.server.MachineSessionInvalidator.class);
     bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
-    bind(WorkspaceServiceLinksInjector.class)
-        .to(
-            org.eclipse.che.multiuser.machine.authentication.server
-                .WorkspaceServiceAuthLinksInjector.class);
-    bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
-        .to(org.eclipse.che.plugin.docker.machine.AuthMachineProviderImpl.class);
   }
 }

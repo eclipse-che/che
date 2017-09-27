@@ -15,11 +15,8 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.machine.server.jpa.JpaSnapshotDao;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.spi.RecipeDao;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
+import org.eclipse.che.api.recipe.RecipeDao;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
@@ -38,6 +35,9 @@ import org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermis
 import org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao;
 import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.eclipse.che.multiuser.permission.machine.spi.tck.RecipePermissionsDaoTest;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.JpaSnapshotDao;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotDao;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.h2.Driver;
 
 /** @author Anton Korneta */
@@ -52,7 +52,7 @@ public class JpaTckModule extends TckModule {
             .runningOn(server)
             .addEntityClasses(
                 UserImpl.class,
-                RecipeImpl.class,
+                OldRecipeImpl.class,
                 SnapshotImpl.class,
                 AccountImpl.class,
                 AbstractPermissions.class,
@@ -67,8 +67,8 @@ public class JpaTckModule extends TckModule {
 
     bind(new TypeLiteral<TckRepository<UserImpl>>() {})
         .toInstance(new JpaTckRepository<>(UserImpl.class));
-    bind(new TypeLiteral<TckRepository<RecipeImpl>>() {})
-        .toInstance(new JpaTckRepository<>(RecipeImpl.class));
+    bind(new TypeLiteral<TckRepository<OldRecipeImpl>>() {})
+        .toInstance(new JpaTckRepository<>(OldRecipeImpl.class));
     bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {})
         .toInstance(new JpaTckRepository<>(SnapshotImpl.class));
     bind(new TypeLiteral<TckRepository<Workspace>>() {})

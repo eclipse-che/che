@@ -34,8 +34,8 @@ import java.lang.reflect.Method;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.machine.server.recipe.RecipeService;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
+import org.eclipse.che.api.recipe.RecipeService;
+import org.eclipse.che.api.workspace.shared.recipe.OldRecipeUpdate;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -130,7 +130,7 @@ public class RecipePermissionsFilterTest {
             .auth()
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .contentType("application/json")
-            .body(DtoFactory.newDto(RecipeUpdate.class).withId("recipe123"))
+            .body(DtoFactory.newDto(OldRecipeUpdate.class).withId("recipe123"))
             .when()
             .put(SECURE_PATH + "/recipe");
 

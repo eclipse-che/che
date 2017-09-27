@@ -21,8 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.EntityManager;
-import org.eclipse.che.api.machine.server.jpa.JpaRecipeDao;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
@@ -35,11 +34,11 @@ import org.testng.annotations.Test;
 /** @author Max Shaposhnik */
 public class MultiuserJpaRecipeDaoTest {
   private EntityManager manager;
-  private JpaRecipeDao dao;
+  private MultiuserJpaRecipeDao dao;
 
   private RecipePermissionsImpl[] permissions;
   private UserImpl[] users;
-  private RecipeImpl[] recipes;
+  private OldRecipeImpl[] recipes;
 
   @BeforeClass
   public void setupEntities() throws Exception {
@@ -61,14 +60,14 @@ public class MultiuserJpaRecipeDaoTest {
         };
 
     recipes =
-        new RecipeImpl[] {
-          new RecipeImpl("recipe1", "rc1", null, null, null, asList("tag1", "tag2"), null),
-          new RecipeImpl("recipe2", "rc2", null, "testType", null, null, null),
-          new RecipeImpl("recipe3", "rc3", null, null, null, asList("tag1", "tag2"), null),
-          new RecipeImpl("recipe4", "rc4", null, null, null, null, null),
-          new RecipeImpl(
+        new OldRecipeImpl[] {
+          new OldRecipeImpl("recipe1", "rc1", null, null, null, asList("tag1", "tag2"), null),
+          new OldRecipeImpl("recipe2", "rc2", null, "testType", null, null, null),
+          new OldRecipeImpl("recipe3", "rc3", null, null, null, asList("tag1", "tag2"), null),
+          new OldRecipeImpl("recipe4", "rc4", null, null, null, null, null),
+          new OldRecipeImpl(
               "recipe_debian", "DEBIAN_JDK8", "test", "test", null, asList("debian", "tag1"), null),
-          new RecipeImpl(
+          new OldRecipeImpl(
               "recipe_ubuntu", "DEBIAN_JDK8", "test", "test", null, asList("ubuntu", "tag1"), null)
         };
 
@@ -84,7 +83,7 @@ public class MultiuserJpaRecipeDaoTest {
       manager.persist(user);
     }
 
-    for (RecipeImpl recipe : recipes) {
+    for (OldRecipeImpl recipe : recipes) {
       manager.persist(recipe);
     }
 
@@ -105,7 +104,7 @@ public class MultiuserJpaRecipeDaoTest {
         .forEach(manager::remove);
 
     manager
-        .createQuery("SELECT r FROM Recipe r", RecipeImpl.class)
+        .createQuery("SELECT r FROM OldRecipe r", OldRecipeImpl.class)
         .getResultList()
         .forEach(manager::remove);
 
@@ -124,14 +123,14 @@ public class MultiuserJpaRecipeDaoTest {
 
   @Test
   public void shouldFindRecipeByPermissionsAndType() throws Exception {
-    List<RecipeImpl> results = dao.search(users[0].getId(), null, "testType", 0, 0);
+    List<OldRecipeImpl> results = dao.search(users[0].getId(), null, "testType", 0, 0);
     assertEquals(results.size(), 1);
     assertTrue(results.contains(recipes[1]));
   }
 
   @Test
   public void shouldFindRecipeByPermissionsAndTags() throws Exception {
-    List<RecipeImpl> results = dao.search(users[0].getId(), singletonList("tag2"), null, 0, 0);
+    List<OldRecipeImpl> results = dao.search(users[0].getId(), singletonList("tag2"), null, 0, 0);
     assertEquals(results.size(), 2);
     assertTrue(results.contains(recipes[0]));
     assertTrue(results.contains(recipes[2]));
@@ -139,7 +138,7 @@ public class MultiuserJpaRecipeDaoTest {
 
   @Test
   public void shouldFindRecipeByUserIdAndPublicPermissions() throws Exception {
-    final Set<RecipeImpl> results = new HashSet<>(dao.search(users[0].getId(), null, null, 0, 30));
+    final Set<OldRecipeImpl> results = new HashSet<>(dao.search(users[0].getId(), null, null, 0, 30));
     assertEquals(results.size(), 5);
     assertTrue(results.contains(recipes[0]));
     assertTrue(results.contains(recipes[1]));
@@ -150,7 +149,7 @@ public class MultiuserJpaRecipeDaoTest {
 
   @Test
   public void shouldNotFindRecipeNonexistentTags() throws Exception {
-    List<RecipeImpl> results =
+    List<OldRecipeImpl> results =
         dao.search(users[0].getId(), singletonList("unexisted_tag2"), null, 0, 0);
     assertTrue(results.isEmpty());
   }

@@ -19,7 +19,8 @@ import static org.eclipse.che.multiuser.permission.machine.recipe.RecipeDomain.U
 import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
+import org.eclipse.che.api.recipe.RecipeService;
+import org.eclipse.che.api.workspace.shared.recipe.OldRecipeUpdate;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
@@ -59,7 +60,7 @@ public class RecipePermissionsFilter extends CheMethodInvokerFilter {
         break;
 
       case "updateRecipe":
-        RecipeUpdate recipeUpdate = (RecipeUpdate) arguments[0];
+        OldRecipeUpdate recipeUpdate = (OldRecipeUpdate) arguments[0];
         recipeId = recipeUpdate.getId();
         action = UPDATE;
         break;

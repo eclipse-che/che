@@ -287,43 +287,6 @@ public class WorkspacePermissionsFilterTest {
     verify(workspaceService).startById(eq("workspace123"), anyString(), any());
     verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
   }
-
-  @Test
-  public void shouldCheckPermissionsOnSnapshotStarting() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .pathParam("id", "workspace123")
-            .contentType("application/json")
-            .when()
-            .post(SECURE_PATH + "/workspace/{id}/snapshot");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).createSnapshot(eq("workspace123"));
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
-  }
-
-  @Test
-  public void shouldCheckPermissionsOnSnapshotGetting() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "read")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .pathParam("id", "workspace123")
-            .contentType("application/json")
-            .when()
-            .get(SECURE_PATH + "/workspace/{id}/snapshot");
-
-    assertEquals(response.getStatusCode(), 200);
-    verify(workspaceService).getSnapshot(eq("workspace123"));
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
-  }
-
   @Test
   public void shouldCheckUserPermissionsOnGetWorkspaceByKey() throws Exception {
     when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(false);
@@ -641,8 +604,6 @@ public class WorkspacePermissionsFilterTest {
       {"/workspace/workspace123", "put", WorkspaceDomain.CONFIGURE},
       {"/workspace/workspace123/runtime", "post", WorkspaceDomain.RUN},
       {"/workspace/workspace123/runtime", "delete", WorkspaceDomain.RUN},
-      {"/workspace/workspace123/snapshot", "post", WorkspaceDomain.RUN},
-      {"/workspace/workspace123/snapshot", "get", WorkspaceDomain.READ},
       {"/workspace/workspace123/command", "post", WorkspaceDomain.CONFIGURE},
       {"/workspace/workspace123/command/run-application", "put", WorkspaceDomain.CONFIGURE},
       {"/workspace/workspace123/command/run-application", "delete", WorkspaceDomain.CONFIGURE},

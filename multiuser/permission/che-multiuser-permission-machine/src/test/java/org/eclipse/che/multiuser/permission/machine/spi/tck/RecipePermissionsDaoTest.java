@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
@@ -45,7 +45,7 @@ public class RecipePermissionsDaoTest {
   @Inject private TckRepository<RecipePermissionsImpl> permissionsRepository;
 
   @Inject private TckRepository<UserImpl> userRepository;
-  @Inject private TckRepository<RecipeImpl> recipeRepository;
+  @Inject private TckRepository<OldRecipeImpl> recipeRepository;
 
   RecipePermissionsImpl[] permissions;
 
@@ -70,8 +70,8 @@ public class RecipePermissionsDaoTest {
 
     recipeRepository.createAll(
         asList(
-            new RecipeImpl("recipe1", "rc1", null, null, null, null, null),
-            new RecipeImpl("recipe2", "rc2", null, null, null, null, null)));
+            new OldRecipeImpl("recipe1", "rc1", null, null, null, null, null),
+            new OldRecipeImpl("recipe2", "rc2", null, null, null, null, null)));
 
     permissionsRepository.createAll(
         Stream.of(permissions).map(RecipePermissionsImpl::new).collect(Collectors.toList()));

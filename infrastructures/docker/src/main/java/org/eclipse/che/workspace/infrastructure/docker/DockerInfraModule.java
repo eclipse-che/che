@@ -67,5 +67,7 @@ public class DockerInfraModule extends AbstractModule {
     install(new FactoryModuleBuilder().build(DockerRuntimeContextFactory.class));
 
     bind(SnapshotDao.class).to(JpaSnapshotDao.class);
+    bind(JpaSnapshotDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class)
+        .asEagerSingleton();
   }
 }

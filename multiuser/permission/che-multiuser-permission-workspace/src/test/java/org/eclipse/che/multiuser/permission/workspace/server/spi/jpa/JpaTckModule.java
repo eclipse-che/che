@@ -14,15 +14,14 @@ import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 
 import com.google.inject.TypeLiteral;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -46,6 +45,7 @@ import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.tck.StackPermissionsDaoTest;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.tck.WorkerDaoTest;
 import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl;
+import org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl;
 import org.h2.Driver;
 
 /** @author Yevhenii Voevodin */
@@ -65,13 +65,13 @@ public class JpaTckModule extends TckModule {
                 WorkspaceConfigImpl.class,
                 ProjectConfigImpl.class,
                 EnvironmentImpl.class,
-                EnvironmentRecipeImpl.class,
+                OldRecipeImpl.class,
                 RecipePermissionsImpl.class,
                 StackPermissionsImpl.class,
                 WorkerImpl.class,
-                ExtendedMachineImpl.class,
+                MachineConfigImpl.class,
                 SourceStorageImpl.class,
-                ServerConf2Impl.class,
+                ServerConfigImpl.class,
                 StackImpl.class,
                 CommandImpl.class,
                 SnapshotImpl.class,

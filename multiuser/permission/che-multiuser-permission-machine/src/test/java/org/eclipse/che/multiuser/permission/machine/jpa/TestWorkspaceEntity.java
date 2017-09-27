@@ -17,9 +17,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
 /**
@@ -79,7 +79,7 @@ public class TestWorkspaceEntity implements Workspace {
   }
 
   @Override
-  public WorkspaceRuntime getRuntime() {
+  public Runtime getRuntime() {
     return null;
   }
 

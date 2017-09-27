@@ -18,7 +18,7 @@ import com.google.inject.Injector;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -91,7 +91,7 @@ public class RemovePermissionsBeforeStackRemovedEventSubscriberTest {
         .getResultList()
         .forEach(manager::remove);
     manager
-        .createQuery("SELECT recipe FROM Recipe recipe", RecipeImpl.class)
+        .createQuery("SELECT recipe FROM OldRecipe recipe", OldRecipeImpl.class)
         .getResultList()
         .forEach(manager::remove);
     manager

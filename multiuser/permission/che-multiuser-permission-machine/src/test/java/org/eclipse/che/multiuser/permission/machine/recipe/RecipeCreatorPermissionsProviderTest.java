@@ -17,8 +17,8 @@ import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.recipe.OldRecipeImpl;
+import org.eclipse.che.api.recipe.RecipePersistedEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.permission.server.PermissionsManager;
@@ -54,7 +54,7 @@ public class RecipeCreatorPermissionsProviderTest {
     final EnvironmentContext ctx = new EnvironmentContext();
     ctx.setSubject(new SubjectImpl("test-user-name", "test-user-id", "test-token", false));
     EnvironmentContext.setCurrent(ctx);
-    final RecipeImpl recipe = createRecipe();
+    final OldRecipeImpl recipe = createRecipe();
 
     permProvider.onEvent(new RecipePersistedEvent(recipe));
 
@@ -89,8 +89,8 @@ public class RecipeCreatorPermissionsProviderTest {
     verify(eventService).unsubscribe(permProvider, RecipePersistedEvent.class);
   }
 
-  private static RecipeImpl createRecipe() {
-    return new RecipeImpl(
+  private static OldRecipeImpl createRecipe() {
+    return new OldRecipeImpl(
         "test", "DEBIAN_JDK8", "test", "test", "script", asList("debian", "test"), "description");
   }
 }

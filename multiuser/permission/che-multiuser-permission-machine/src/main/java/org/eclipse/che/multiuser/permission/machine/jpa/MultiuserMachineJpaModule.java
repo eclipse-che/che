@@ -13,9 +13,7 @@ package org.eclipse.che.multiuser.permission.machine.jpa;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.api.machine.server.jpa.JpaSnapshotDao;
-import org.eclipse.che.api.machine.server.spi.RecipeDao;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.recipe.JpaRecipeDao;
 import org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain;
 import org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao;
@@ -28,8 +26,7 @@ public class MultiuserMachineJpaModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(RecipeDao.class).to(MultiuserJpaRecipeDao.class);
-    bind(SnapshotDao.class).to(JpaSnapshotDao.class);
+    bind(JpaRecipeDao.class).to(MultiuserJpaRecipeDao.class);
     bind(new TypeLiteral<AbstractPermissionsDomain<RecipePermissionsImpl>>() {})
         .to(RecipeDomain.class);
 

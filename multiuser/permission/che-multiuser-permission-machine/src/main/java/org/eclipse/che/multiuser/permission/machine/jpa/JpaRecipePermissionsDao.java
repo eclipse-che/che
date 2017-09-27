@@ -28,7 +28,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
+import org.eclipse.che.api.recipe.BeforeRecipeRemovedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain;
