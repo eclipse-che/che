@@ -17,6 +17,7 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace.StateWorkspace;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -53,6 +54,9 @@ public class RenameWorkspaceTest {
     dashboardWorkspace.selectTabInWorspaceMenu(DashboardWorkspace.TabNames.OVERVIEW);
     dashboardWorkspace.enterNameWorkspace(CHANGE_WORKSPACE_NAME);
     dashboardWorkspace.clickOnSaveBtn();
+    dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.STOPPING);
+    dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.STARTING);
+    dashboardWorkspace.checkStateOfWorkspace(StateWorkspace.RUNNING);
     dashboard.waitNotificationMessage("Workspace updated");
     dashboard.waitNotificationIsClosed();
     dashboardWorkspace.checkNameWorkspace(CHANGE_WORKSPACE_NAME);

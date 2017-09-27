@@ -20,6 +20,8 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -47,6 +49,8 @@ public class CreateAndDeleteProjectsTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private MavenPluginStatusBar mavenPluginStatusBar;
 
   @BeforeClass
   public void setUp() {
@@ -85,6 +89,8 @@ public class CreateAndDeleteProjectsTest {
         DashboardProject.Template.CONSOLE_JAVA_SIMPLE.value(), PROJECT_FOLDER);
     explorer.waitFolderDefinedTypeOfFolderByPath(
         DashboardProject.Template.WEB_JAVA_SPRING.value(), PROJECT_FOLDER);
+    notificationsPopupPanel.waitPopUpPanelsIsClosed();
+    mavenPluginStatusBar.waitClosingInfoPanel();
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
 
