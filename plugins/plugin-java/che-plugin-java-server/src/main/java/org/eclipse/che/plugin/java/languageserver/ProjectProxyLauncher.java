@@ -5,12 +5,15 @@ import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
+import org.eclipse.che.api.languageserver.registry.ServerInitializerImpl;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProjectProxyLauncher implements LanguageServerLauncher {
   private static class State {
@@ -20,6 +23,8 @@ public class ProjectProxyLauncher implements LanguageServerLauncher {
     public static final int INITIALIZING = 3;
     public static final int INITIALIZED = 4;
   }
+
+  private static final Logger LOG = LoggerFactory.getLogger(ServerInitializerImpl.class);
 
   private JavaLanguageServerLauncher wrappedLauncher;
   private LanguageServer languageServer;
@@ -34,7 +39,11 @@ public class ProjectProxyLauncher implements LanguageServerLauncher {
   @Override
   public LanguageServer launch(String projectPath, LanguageClient client)
       throws LanguageServerException {
+    LOG.debug("launching on thread " + Thread.currentThread().getId());
     assureServerLaunched(projectPath, client);
+
+    LOG.debug("launched on thread " + Thread.currentThread().getId());
+
     return (LanguageServer)
         Proxy.newProxyInstance(
             getClass().getClassLoader(),
@@ -99,7 +108,10 @@ public class ProjectProxyLauncher implements LanguageServerLauncher {
         throw new IllegalStateException("Called init when not launched");
       }
     }
+
+    long threadId = Thread.currentThread().getId();
     if (mustInit) {
+      LOG.info("initializing language server  on thread {} for {}", threadId, params.getRootUri());
       params.setRootUri("file:///projects");
       params.setRootPath("/projects");
       CompletableFuture<InitializeResult> res = new CompletableFuture<>();
@@ -107,6 +119,10 @@ public class ProjectProxyLauncher implements LanguageServerLauncher {
           .initialize(params)
           .thenApply(
               (result) -> {
+                LOG.info(
+                    "initialized language server on thread {} for {}",
+                    threadId,
+                    params.getRootUri());
                 synchronized (launchLock) {
                   initResult = result;
                   state = State.INITIALIZED;
@@ -116,6 +132,10 @@ public class ProjectProxyLauncher implements LanguageServerLauncher {
               })
           .exceptionally(
               (e) -> {
+                LOG.debug(
+                    "failed to initialize language server on thread {} for {}",
+                    threadId,
+                    params.getRootUri());
                 synchronized (launchLock) {
                   state = State.LAUNCHED;
                   launchLock.notifyAll();
@@ -125,27 +145,45 @@ public class ProjectProxyLauncher implements LanguageServerLauncher {
               });
       return res;
     } else {
+      LOG.info(
+          "already initialized language server on thread {} for {}", threadId, params.getRootUri());
+
       CompletableFuture<InitializeResult> res = new CompletableFuture<>();
       CompletableFuture.runAsync(
           () -> {
             try {
-              while (state == State.INITIALIZING) {
-                launchLock.wait();
-              }
-              if (state > State.INITIALIZING) {
-                res.complete(initResult);
-              } else {
-                CompletableFuture<Void> f =
-                    initialize(params)
-                        .thenAccept(
-                            (result) -> {
-                              res.complete(result);
-                            });
-                f.exceptionally(
-                    (e) -> {
-                      res.completeExceptionally(e);
-                      return null;
-                    });
+              synchronized (launchLock) {
+                while (state == State.INITIALIZING) {
+                  LOG.debug(
+                      "waiting for language server init on thread {} for {}",
+                      threadId,
+                      params.getRootUri());
+                  launchLock.wait();
+                }
+                if (state > State.INITIALIZING) {
+                  LOG.info("completing init on thread {} for {}", threadId, params.getRootUri());
+                  res.complete(initResult);
+                } else {
+                  LOG.debug(
+                      "recursively calling init on thread {} for {}",
+                      threadId,
+                      params.getRootUri());
+                  CompletableFuture<Void> f =
+                      initialize(params)
+                          .thenAccept(
+                              (result) -> {
+                                res.complete(result);
+                              });
+                  f.exceptionally(
+                      (e) -> {
+                        LOG.debug(
+                            "failed recursively calling init on thread {} for {}",
+                            threadId,
+                            params.getRootUri());
+                        res.completeExceptionally(e);
+                        return null;
+                      });
+                }
               }
             } catch (InterruptedException e) {
               Thread.currentThread().interrupt();
