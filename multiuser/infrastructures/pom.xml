@@ -14,23 +14,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-parent</artifactId>
-        <groupId>org.eclipse.che</groupId>
+        <artifactId>che-multiuser-parent</artifactId>
+        <groupId>org.eclipse.che.multiuser</groupId>
         <version>5.19.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>org.eclipse.che.multiuser</groupId>
-    <artifactId>che-multiuser-parent</artifactId>
+    <artifactId>che-multiuser-infrastructures-parent</artifactId>
+    <version>5.19.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Che Multiuser :: Parent</name>
+    <name>Che Multiuser Infrastructures Parent</name>
     <modules>
-        <module>sql-schema</module>
-        <module>api</module>
-        <module>permission</module>
-        <module>keycloak</module>
-        <module>machine-auth</module>
-        <module>personal-account</module>
-        <module>infrastructures</module>
-        <module>integration-tests</module>
+        <module>openshift</module>
     </modules>
 </project>

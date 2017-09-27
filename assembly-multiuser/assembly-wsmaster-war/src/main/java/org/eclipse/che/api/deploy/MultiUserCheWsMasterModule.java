@@ -20,18 +20,24 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakModule;
+import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactoryImpl;
+import org.eclipse.che.multiuser.machine.authentication.server.AuthServerCheckerFactoryImpl;
 import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
 import org.eclipse.che.multiuser.resource.api.ResourceModule;
 import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.InstallerConfigProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.installer.MultiuserInstallerConfigProvisioner;
 
 @DynaModule
 public class MultiUserCheWsMasterModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(ServerCheckerFactoryImpl.class).to(AuthServerCheckerFactoryImpl.class);
+    bind(InstallerConfigProvisioner.class).to(MultiuserInstallerConfigProvisioner.class);
     install(new OpenShiftInfraModule());
 
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);

@@ -14,7 +14,6 @@ import com.google.inject.AbstractModule;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.multiuser.machine.authentication.server.interceptor.InterceptorModule;
 
 /**
  * Machine authentication bindings.
@@ -26,7 +25,6 @@ public class MachineAuthModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    install(new InterceptorModule());
     bind(
         org.eclipse.che.multiuser.machine.authentication.server.MachineTokenPermissionsFilter
             .class);
