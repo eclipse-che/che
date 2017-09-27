@@ -174,8 +174,7 @@ public class RevertCommitPresenter implements ActionDelegate {
     if (commits != null && commits.size() > 0) {
       StringBuilder revertedCommits = new StringBuilder();
       for (String commit : commits) {
-        revertedCommits.append(" ");
-        revertedCommits.append(commit);
+        revertedCommits.append(" ").append(commit);
       }
       message.append(
           revertedCommits.length() > 0
@@ -190,7 +189,7 @@ public class RevertCommitPresenter implements ActionDelegate {
     if (conflicts != null && conflicts.size() > 0) {
       StringBuilder conflictsMessage = new StringBuilder(constant.revertedConflicts());
       for (String conflict : conflicts) {
-        conflictsMessage.append("    " + conflict + "\n");
+        conflictsMessage.append("    ").append(conflict).append("\n");
       }
       return conflictsMessage.toString();
     }
