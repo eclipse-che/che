@@ -99,10 +99,8 @@ public class Refactor {
     String FLAG_ITEM_INPUT =
         "//div[@id='tree-of-changes']//div[contains(text(),'%s')]/preceding-sibling::span/input";
     String PREVIEW_EDITOR_FRAME = "//iframe[contains(@src, 'Compare.html')]";
-    String LEFT_EDITOR =
-        "//div[@id='compareParentDiv_left_editor_id']//div[@class='textviewContent']";
-    String RIGHT_EDITOR =
-        "//div[@id='compareParentDiv_right_editor_id']//div[@class='textviewContent']";
+    String LEFT_EDITOR = "compareParentDiv_left_editor_id";
+    String RIGHT_EDITOR = "compareParentDiv_right_editor_id";
     String LEASED_LINE_LEFT_EDITOR = "//div[contains(@class,'annotationLine addedBlockDiff')]";
     String LEASED_LINE_RIGHT_EDITOR = "//div[contains(@class,'annotationLine deletedBlockDiff')]";
   }
@@ -176,8 +174,11 @@ public class Refactor {
   @FindBy(xpath = Locators.RENAME_COMPILATION_UNIT_FORM)
   WebElement renameCompilationUnit;
 
-  @FindBy(xpath = Locators.LEFT_EDITOR)
+  @FindBy(id = Locators.LEFT_EDITOR)
   WebElement leftEditor;
+
+  @FindBy(id = Locators.RIGHT_EDITOR)
+  WebElement rightEditor;
 
   /** wait the 'rename package form' is open */
   public void waitRenamePackageFormIsOpen() {
@@ -644,15 +645,7 @@ public class Refactor {
    */
   public void checkTextFromLeftEditor(String expectedText) {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.frameToBeAvailableAndSwitchToIt(
-                By.xpath(Locators.PREVIEW_EDITOR_FRAME)));
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.textToBePresentInElementLocated(
-                By.xpath(Locators.LEFT_EDITOR), expectedText));
-
-    seleniumWebDriver.switchTo().parentFrame();
+        .until(ExpectedConditions.textToBePresentInElement(leftEditor, expectedText));
   }
 
   /**
@@ -661,15 +654,9 @@ public class Refactor {
    * @param expectedText expected text
    */
   public void checkTextFromRightEditor(String expectedText) {
+
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.frameToBeAvailableAndSwitchToIt(
-                By.xpath(Locators.PREVIEW_EDITOR_FRAME)));
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.textToBePresentInElementLocated(
-                By.xpath(Locators.RIGHT_EDITOR), expectedText));
-    seleniumWebDriver.switchTo().parentFrame();
+        .until(ExpectedConditions.textToBePresentInElement(rightEditor, expectedText));
   }
 
   /**
@@ -728,17 +715,12 @@ public class Refactor {
    * @return quantity of leased lines
    */
   public int getQuantityLeasedLineInLeftEditor() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.frameToBeAvailableAndSwitchToIt(
-                By.xpath(Locators.PREVIEW_EDITOR_FRAME)));
     int lineQuantity =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(
                     By.xpath(Locators.LEASED_LINE_LEFT_EDITOR)))
             .size();
-    seleniumWebDriver.switchTo().parentFrame();
     return lineQuantity;
   }
 
@@ -748,17 +730,12 @@ public class Refactor {
    * @return quantity of leased lines
    */
   public int getQuantityLeasedLineInRightEditor() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.frameToBeAvailableAndSwitchToIt(
-                By.xpath(Locators.PREVIEW_EDITOR_FRAME)));
     int lineQuantity =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(
                     By.xpath(Locators.LEASED_LINE_RIGHT_EDITOR)))
             .size();
-    seleniumWebDriver.switchTo().parentFrame();
     return lineQuantity;
   }
 }
