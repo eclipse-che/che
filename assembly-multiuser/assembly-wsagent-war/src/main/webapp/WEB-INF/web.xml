@@ -16,7 +16,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          version="3.0"
          metadata-complete="true">
-    <display-name>Che Machine API</display-name>
+
     <context-param>
         <param-name>org.everrest.websocket.context</param-name>
         <param-value>/api</param-value>
@@ -27,8 +27,9 @@
     </context-param>
     <context-param>
         <param-name>org.eclipse.che.eventbus.endpoint</param-name>
-        <param-value>/eventbus</param-value>
+        <param-value>/eventbus/</param-value>
     </context-param>
+
     <listener>
         <listener-class>org.eclipse.che.inject.CheBootstrap</listener-class>
     </listener>
