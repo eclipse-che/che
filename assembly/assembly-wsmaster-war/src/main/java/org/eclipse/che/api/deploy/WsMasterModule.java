@@ -167,13 +167,6 @@ public class WsMasterModule extends AbstractModule {
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
 
-    String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
-    if ("openshift".equals(infrastructure)) {
-      install(new OpenShiftInfraModule());
-    } else {
-      install(new LocalDockerModule());
-      install(new DockerInfraModule());
-    }
     bind(ServerCheckerFactory.class).to(ServerCheckerFactoryImpl.class);
   }
 }

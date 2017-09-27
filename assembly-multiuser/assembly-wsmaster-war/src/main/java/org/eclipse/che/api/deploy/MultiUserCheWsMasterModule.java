@@ -25,12 +25,15 @@ import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
 import org.eclipse.che.multiuser.resource.api.ResourceModule;
 import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 
 @DynaModule
 public class MultiUserCheWsMasterModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    install(new OpenShiftInfraModule());
+
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
     install(new org.eclipse.che.multiuser.api.permission.server.jpa.SystemPermissionsJpaModule());
     install(new org.eclipse.che.multiuser.api.permission.server.PermissionsModule());

@@ -103,13 +103,13 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-activity-wsmaster</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.eclipse.che.plugin</groupId>-->
-            <!--<artifactId>che-plugin-docker-machine-auth</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>infrastructure-openshift</artifactId>
         </dependency>
     </dependencies>
     <build>
