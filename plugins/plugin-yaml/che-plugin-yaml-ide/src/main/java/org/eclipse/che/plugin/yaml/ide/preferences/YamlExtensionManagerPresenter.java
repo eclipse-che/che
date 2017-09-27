@@ -31,6 +31,8 @@ import org.eclipse.che.plugin.yaml.ide.YamlLocalizationConstant;
 import org.eclipse.che.plugin.yaml.ide.YamlServiceClient;
 import org.eclipse.che.plugin.yaml.shared.PreferenceHelper;
 import org.eclipse.che.plugin.yaml.shared.YamlPreference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The presenter for managing the YamlPreferenceCellTable in YamlExtensionManagerView.
@@ -41,6 +43,7 @@ import org.eclipse.che.plugin.yaml.shared.YamlPreference;
 public class YamlExtensionManagerPresenter extends AbstractPreferencePagePresenter
     implements YamlExtensionManagerView.ActionDelegate {
 
+  private static final Logger LOG = LoggerFactory.getLogger(YamlExtensionManagerPresenter.class);
   private final String preferenceName = "yaml.preferences";
   private DialogFactory dialogFactory;
   private YamlExtensionManagerView view;
@@ -139,7 +142,7 @@ public class YamlExtensionManagerPresenter extends AbstractPreferencePagePresent
           yamlPreferences.add(newYamlPref);
         }
       } catch (Exception e) {
-        System.out.println(e);
+        LOG.debug(e.getMessage(), e);
       }
     }
 
