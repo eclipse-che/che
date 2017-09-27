@@ -119,7 +119,7 @@ public class Git {
    */
   public void waitGitStatusBarWithMess(String expextedMess) {
     loader.waitOnClosed();
-    gitStatusBar.waitMessageInGitTab(expextedMess);
+    gitStatusBar.waitMesageIntoGitInfoPAnel(expextedMess);
   }
 
   /** wait and click on the 'navigate button' in the 'git console' */
