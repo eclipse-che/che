@@ -121,7 +121,9 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     if (projectPath == null) {
       return null;
     }
+    long thread = Thread.currentThread().getId();
     List<LanguageServerLauncher> requiredToLaunch = findLaunchers(projectPath, fileUri);
+    LOG.info("required to launch for thread " + thread + ": " + requiredToLaunch);
     // launchers is the set of things we need to have initialized
 
     for (LanguageServerLauncher launcher : new ArrayList<>(requiredToLaunch)) {
@@ -141,6 +143,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                           initializedServers.computeIfAbsent(projectPath, k -> new ArrayList<>());
                       initialized.add(
                           new InitializedLanguageServer(id, pair.first, pair.second, launcher));
+                      LOG.info("launched for  " + thread + ": " + requiredToLaunch);
+
                       requiredToLaunch.remove(launcher);
                       initializedServers.notifyAll();
                     }
@@ -154,7 +158,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                                 + launcher.getDescription().getId()
                                 + ": "
                                 + t.getMessage()));
-                    LOG.error("Error launching language server " + launcher, t);
+                    LOG.error(
+                        "Error launching language server for thread  " + thread + "  launcher", t);
                     synchronized (initializedServers) {
                       requiredToLaunch.remove(launcher);
                       servers.remove(launcher);
@@ -178,6 +183,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         }
       }
       while (!requiredToLaunch.isEmpty()) {
+        LOG.info("waiting for launched servers on thread " + thread + ": " + requiredToLaunch);
         try {
           initializedServers.wait();
           initForProject = initializedServers.get(projectPath);
