@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDAT
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
@@ -59,6 +60,11 @@ public class Consoles {
   public static final String PREVIEW_URL = "//div[@active]//a[@href]";
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
+  public static final String PLUS_ICON = "gwt-debug-plusPanel";
+  public static final String SERVER_MENU_ITEM = "contextMenu/Servers";
+  public static final String SERVER_INFO_TABLE_CAPTION = "gwt-debug-runtimeInfoCellTableCaption";
+  public static final String SERVER_INFO_HIDE_INTERNAL_CHECK_BOX =
+      "gwt-debug-runtimeInfoHideServersCheckBox";
 
   protected final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
@@ -100,6 +106,18 @@ public class Consoles {
   @FindBy(xpath = PROCESSES_MAIN_AREA)
   WebElement processesMainArea;
 
+  @FindBy(id = PLUS_ICON)
+  WebElement plusMenuBtn;
+
+  @FindBy(id = SERVER_MENU_ITEM)
+  WebElement serverMenuItem;
+
+  @FindBy(id = SERVER_INFO_TABLE_CAPTION)
+  WebElement serverInfoTableCaption;
+
+  @FindBy(id = SERVER_INFO_HIDE_INTERNAL_CHECK_BOX)
+  WebElement serverInfoHideInternalCheckBox;
+
   /** click on consoles tab in bottom and wait opening console area (terminal on other console ) */
   public void clickOnProcessesTab() {
     redrawDriverWait.until(visibilityOf(processesTab)).click();
@@ -113,6 +131,30 @@ public class Consoles {
   /** click on preview url link */
   public void clickOnPreviewUrl() {
     loadPageDriverWait.until(visibilityOf(previewUrl)).click();
+  }
+
+  public void clickOnServerItemInContextMenu() {
+    redrawDriverWait.until(visibilityOf(serverMenuItem)).click();
+  }
+
+  public void clickOnPlusMenuButton() {
+    redrawDriverWait.until(visibilityOf(plusMenuBtn)).click();
+  }
+
+  public void clickOnHideInternalServers() {
+    redrawDriverWait.until(visibilityOf(serverInfoHideInternalCheckBox)).click();
+  }
+
+  public void waitExpectedTextIntoServerTableCation(String expectedText) {
+    updateProjDriverWait.until(textToBePresentInElement(serverInfoTableCaption, expectedText));
+  }
+
+  public void checkReferenceList(String id, String expectedText) {
+    updateProjDriverWait.until(textToBePresentInElementLocated(By.id(id), expectedText));
+  }
+
+  public void waitReferenceIsNotPresent(String referenceId) {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.id(referenceId)));
   }
 
   public void waitExpectedTextIntoPreviewUrl(String expectedText) {

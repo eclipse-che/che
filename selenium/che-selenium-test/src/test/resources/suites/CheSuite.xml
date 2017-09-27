@@ -931,6 +931,7 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
+            <class name="org.eclipse.che.selenium.consoles.ServerRuntimeInfoTest"/>
         </classes>
     </test>
 </suite>
