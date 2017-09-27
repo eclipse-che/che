@@ -313,7 +313,6 @@
                     <exclude name="commitFilesTest"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.git.RevertCommitTest"/>
             <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
             <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest"/>
             <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
