@@ -22,6 +22,7 @@ import org.eclipse.che.api.git.shared.PullResponse;
 import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.ResetRequest.ResetType;
+import org.eclipse.che.api.git.shared.RevertResult;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
@@ -366,4 +367,13 @@ public interface GitServiceClient {
    * @return the promise with success status
    */
   Promise<Void> deleteRepository(Path project);
+
+  /**
+   * Reverts commit.
+   *
+   * @param project the project path
+   * @param commit the hash of the commit to revert
+   * @return result of the revert operation
+   */
+  Promise<RevertResult> revert(Path project, String commit);
 }
