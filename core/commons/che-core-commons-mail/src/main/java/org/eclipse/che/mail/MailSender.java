@@ -118,7 +118,7 @@ public class MailSender {
           emailBean.getSubject());
 
       Transport.send(message);
-      LOG.debug("Mail send");
+      LOG.debug("Mail sent");
     } catch (Exception e) {
       LOG.error(e.getLocalizedMessage());
       throw new SendMailException(e.getLocalizedMessage(), e);
