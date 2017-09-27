@@ -18,6 +18,8 @@ declare namespace che {
     hideLoader: boolean;
     showIDE: boolean;
     wantTokeepLoader: boolean;
+    waitingLoaded: boolean;
+    currentPage: string;
   }
 
   export namespace api {
@@ -182,7 +184,6 @@ declare namespace che {
 
     export interface IRoute extends ng.route.IRoute {
       title?: string | {(...args: any[]) : string};
-      redirectTo?: string;
     }
 
     export interface IRouteProvider extends ng.route.IRouteProvider {

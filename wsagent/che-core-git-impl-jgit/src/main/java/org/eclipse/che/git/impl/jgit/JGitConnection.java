@@ -120,6 +120,7 @@ import org.eclipse.jgit.api.RebaseCommand;
 import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
+import org.eclipse.jgit.api.RevertCommand;
 import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.TagCommand;
@@ -1669,6 +1670,35 @@ class JGitConnection implements GitConnection {
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
     }
+  }
+
+  @Override
+  public RevertResult revert(String commit) throws GitException {
+    RevCommit revCommit;
+
+    RevertCommand revertCommand = getGit().revert();
+    try {
+      revertCommand.include(this.repository.resolve(commit));
+      revCommit = revertCommand.call();
+    } catch (IOException | GitAPIException exception) {
+      throw new GitException(exception.getMessage(), exception);
+    }
+
+    List<Ref> jGitRevertedCommits = revertCommand.getRevertedRefs();
+    List<String> revertedCommits = new ArrayList<>();
+    if (jGitRevertedCommits != null) {
+      for (Ref ref : jGitRevertedCommits) {
+        revertedCommits.add(ref.getObjectId().name());
+      }
+    }
+    String newHead = null;
+    if (revCommit != null) {
+      newHead = revCommit.getId().getName();
+    }
+    return newDto(RevertResult.class)
+        .withRevertedCommits(revertedCommits)
+        .withConflicts(revertCommand.getUnmergedPaths())
+        .withNewHead(newHead);
   }
 
   @Override

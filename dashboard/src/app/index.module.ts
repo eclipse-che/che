@@ -36,7 +36,6 @@ import IdeIFrameSvc from './ide/ide-iframe/ide-iframe.service';
 import {CheIdeFetcher} from '../components/ide-fetcher/che-ide-fetcher.service';
 import {RouteHistory} from '../components/routing/route-history.service';
 import {CheUIElementsInjectorService} from '../components/service/injector/che-ui-elements-injector.service';
-import {WorkspaceDetailsService} from './workspaces/workspace-details/workspace-details.service';
 import {OrganizationsConfig} from './organizations/organizations-config';
 import {TeamsConfig} from './teams/teams-config';
 
@@ -60,7 +59,7 @@ interface IRejectFn<T> {
   (reason: any): Promise<T>;
 }
 function keycloakLoad(keycloakSettings: any) {
-  return new Promise((resolve: IResolveFn, reject: IRejectFn) => {
+  return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
     const script = document.createElement('script');
     script.async = true;
     script.src = keycloakSettings['che.keycloak.auth_server_url'] + '/js/keycloak.js';
@@ -71,7 +70,7 @@ function keycloakLoad(keycloakSettings: any) {
   });
 }
 function keycloakInit(keycloakConfig: any) {
-  return new Promise((resolve: IResolveFn, reject: IRejectFn) => {
+  return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
     const keycloak = Keycloak(keycloakConfig);
     keycloak.init({
       onLoad: 'login-required', checkLoginIframe: false
@@ -90,7 +89,7 @@ const keycloakAuth = {
 };
 initModule.constant('keycloakAuth', keycloakAuth);
 
-const promise = new Promise((resolve: IResolveFn, reject: IRejectFn) => {
+const promise = new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
   angular.element.get('/api/keycloak/settings').then(resolve, reject);
 });
 promise.then((keycloakSettings: any) => {
@@ -161,9 +160,8 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
 
 const DEV = false;
 
-
 // configs
-initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
+initModule.config(['$routeProvider', ($routeProvider) => {
   // config routes (add demo page)
   if (DEV) {
     $routeProvider.accessWhen('/demo-components', {
@@ -180,12 +178,11 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
   });
 }]);
 
-
 /**
  * Setup route redirect module
  */
 initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
-  ($rootScope: ng.IRootScopeService, $location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService, routingRedirect: RoutingRedirect, $timeout: ng.ITimeoutService, ideIFrameSvc: IdeIFrameSvc, cheIdeFetcher: CheIdeFetcher, routeHistory: RouteHistory, cheUIElementsInjectorService: CheUIElementsInjectorService) => {
+  ($rootScope: che.IRootScopeService, $location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService, routingRedirect: RoutingRedirect, $timeout: ng.ITimeoutService, ideIFrameSvc: IdeIFrameSvc, cheIdeFetcher: CheIdeFetcher, routeHistory: RouteHistory, cheUIElementsInjectorService: CheUIElementsInjectorService) => {
     $rootScope.hideLoader = false;
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
@@ -259,7 +256,6 @@ initModule.config(($mdThemingProvider: ng.material.IThemingProvider, jsonColors:
 
   };
 
-
   const cheMap = $mdThemingProvider.extendPalette('indigo', {
     '500': getColor('$dark-menu-color'),
     '300': 'D0D0D0'
@@ -298,13 +294,11 @@ initModule.config(($mdThemingProvider: ng.material.IThemingProvider, jsonColors:
   });
   $mdThemingProvider.definePalette('cheAccent', cheAccentMap);
 
-
   const cheNavyPalette = $mdThemingProvider.extendPalette('purple', {
     '500': getColor('$che-navy-color'),
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('cheNavyPalette', cheNavyPalette);
-
 
   const toolbarPrimaryPalette = $mdThemingProvider.extendPalette('purple', {
     '500': getColor('$che-white-color'),
