@@ -13,8 +13,10 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 
 import com.google.inject.Inject;
+import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
+import org.eclipse.che.selenium.core.client.KeycloakTestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.client.TestProfileServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -38,6 +40,7 @@ public class OrganizationTest {
   private List<String> emailsList;
   private OrganizationDto organization;
 
+  @Inject private KeycloakTestAuthServiceClient keycloakServiceClient;
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
@@ -57,25 +60,25 @@ public class OrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    /*emailsList = Arrays.asList(testUser1.getEmail());
+    String adminToken = keycloakServiceClient.login(testUser1.getName(), testUser1.getPassword());
+    emailsList = Arrays.asList(testUser1.getEmail());
     String firstName = generate("F", 7);
     String lastName = generate("L", 7);
-    emailsList
-        .stream()
-        .forEach(
-            email -> {
-              try {
-                profileServiceClient.setUserNames(firstName, lastName);
-              } catch (Exception e) {
-                throw new RuntimeException(e.getMessage(), e);
-              }
-            });
-
-    orgName = generate("orgX", 6);
-
-    organization = organizationServiceClient.createOrganization(orgName);*/
+    /*emailsList
+    .stream()
+    .forEach(
+        email -> {
+          try {
+            profileServiceClient.setUserNames(firstName, lastName, adminToken);
+          } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+          }
+        });*/
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    orgName = generate("orgX", 6);
+
+    organization = organizationServiceClient.createOrganization(orgName);
   }
 
   @AfterClass
@@ -127,7 +130,7 @@ public class OrganizationTest {
     }
   }
 
-  @Test(priority = 1)
+  //@Test(priority = 1)
   public void addOrganizationWithMembers() {
     String name = generate("orgY", 4);
     navigationBar.waitNavigationBar();

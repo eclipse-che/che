@@ -17,7 +17,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
@@ -50,15 +49,13 @@ public class DeleteOrganizationInListTest {
   @Inject private ConfirmDialog confirmDialog;
   @Inject private Dashboard dashboard;
 
-  @Inject
-  @Named("admin")
-  private OnpremTestOrganizationServiceClient organizationServiceClient;
+  @Inject private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    //dashboard.open(adminTestUser.getAuthToken());
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
 
     String organizationName = NameGenerator.generate("organization", 5);
     organization = organizationServiceClient.createOrganization(organizationName);

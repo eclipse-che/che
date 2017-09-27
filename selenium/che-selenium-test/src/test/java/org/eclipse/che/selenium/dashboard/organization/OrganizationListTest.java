@@ -14,7 +14,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -40,9 +39,7 @@ public class OrganizationListTest {
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;
 
-  @Inject
-  @Named("admin")
-  private OnpremTestOrganizationServiceClient organizationServiceClient;
+  @Inject private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private AdminTestUser adminTestUser;
 
@@ -50,10 +47,10 @@ public class OrganizationListTest {
 
   @BeforeClass
   public void setUp() throws Exception {
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     organization =
         organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
     organizations = organizationServiceClient.getOrganizations();
-    //dashboard.open(adminTestUser.getAuthToken());
   }
 
   @AfterClass

@@ -22,7 +22,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import java.util.ArrayList;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
@@ -55,17 +54,13 @@ public class AdminOfSubOrganizationTest {
   @Inject private NavigationBar navigationBar;
   @Inject private CodenvyAdminDashboard dashboard;
 
-  @Inject
-  @Named("admin")
-  private OnpremTestOrganizationServiceClient organizationServiceClient;
+  @Inject private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private DefaultTestUser testUser;
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    //dashboard.open(adminTestUser.getAuthToken());
-
     parentOrganization =
         organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
     childOrganization =
@@ -75,7 +70,7 @@ public class AdminOfSubOrganizationTest {
     organizationServiceClient.addOrganizationMember(parentOrganization.getId(), testUser.getId());
     organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
 
-    //dashboard.open(testUser.getAuthToken());
+    dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   @AfterClass
@@ -97,7 +92,6 @@ public class AdminOfSubOrganizationTest {
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertEquals(
         navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
-    //WaitUtils.sleepQuietly(3);
 
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());

@@ -105,11 +105,6 @@
             <artifactId>che-multiuser-api-permission-shared</artifactId>
             <version>5.19.0-SNAPSHOT</version>
         </dependency>
-        <!--        <dependency>
-            <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-machine-authentication-shared</artifactId>
-            <version>5.19.0-SNAPSHOT</version>
-        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.selenium</groupId>
             <artifactId>che-selenium-core</artifactId>

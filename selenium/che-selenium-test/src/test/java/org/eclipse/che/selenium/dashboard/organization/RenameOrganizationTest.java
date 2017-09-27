@@ -15,7 +15,6 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
@@ -51,7 +50,7 @@ public class RenameOrganizationTest {
   @Inject private Dashboard dashboard;
 
   @Inject
-  @Named("admin")
+  //@Named("admin")
   private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private DefaultTestUser testUser;
@@ -59,7 +58,7 @@ public class RenameOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    //dashboard.open(adminTestUser.getAuthToken());
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
 
     parentOrganization =
         organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
@@ -71,7 +70,8 @@ public class RenameOrganizationTest {
     organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
     organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
 
-    //dashboard.open(testUser.getAuthToken());
+    dashboard.logout();
+    dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   @AfterClass

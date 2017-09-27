@@ -172,7 +172,7 @@ public class OrganizationPage {
   public void waitOrganizationName(String name) {
     redrawUiElementsTimeout
         .until(ExpectedConditions.visibilityOf(organizationName))
-        .getText()
+        .getAttribute("value")
         .equals(name);
   }
 

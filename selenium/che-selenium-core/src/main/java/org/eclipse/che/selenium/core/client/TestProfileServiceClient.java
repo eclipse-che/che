@@ -44,12 +44,12 @@ public class TestProfileServiceClient {
         .request();
   }
 
-  public void setUserNames(String name, String lastName) throws Exception {
+  public void setUserNames(String name, String lastName, String authToken) throws Exception {
     Map<String, String> attributes =
         ImmutableMap.of(
             "firstName", name,
             "lastName", lastName);
 
-    setAttributes(attributes, defaultTestUser.getAuthToken());
+    setAttributes(attributes, authToken);
   }
 }

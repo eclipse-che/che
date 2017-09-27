@@ -61,27 +61,21 @@ public class AdminOfParentOrganizationTest {
   @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
   @Inject private DefaultTestUser testUser;
 
-  @Inject
-  //@Named("admin")
-  private OnpremTestOrganizationServiceClient organizationServiceClient;
+  @Inject private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-    dashboard.waitDashboardToolbarTitle();
     organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
-    WaitUtils.sleepQuietly(20);
-    dashboard.logout();
-    /*parentOrganization =
+    parentOrganization =
         organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
     childOrganization =
         organizationServiceClient.createOrganization(
             NameGenerator.generate("organization", 5), parentOrganization.getId());
 
     organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
-    organizationServiceClient.addOrganizationMember(childOrganization.getId(), testUser.getId());*/
+    organizationServiceClient.addOrganizationMember(childOrganization.getId(), testUser.getId());
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 

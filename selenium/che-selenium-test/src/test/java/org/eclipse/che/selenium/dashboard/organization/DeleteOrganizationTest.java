@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
@@ -43,16 +42,13 @@ public class DeleteOrganizationTest {
   @Inject private ConfirmDialog confirmDialog;
   @Inject private Dashboard dashboard;
 
-  @Inject
-  @Named("admin")
-  private OnpremTestOrganizationServiceClient organizationServiceClient;
+  @Inject private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private DefaultTestUser testUser;
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    //dashboard.open(adminTestUser.getAuthToken());
     parentOrganization =
         organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
     childOrganization =
@@ -61,7 +57,7 @@ public class DeleteOrganizationTest {
     organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
     organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
 
-    //dashboard.open(testUser.getAuthToken());
+    dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   @AfterClass
