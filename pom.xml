@@ -562,6 +562,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>antlr-java5-grammar</artifactId>
+                <version>${che.lib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-orion-editor</artifactId>
                 <version>${che.lib.version}</version>
             </dependency>

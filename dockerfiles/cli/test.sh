@@ -40,6 +40,8 @@ run_test_in_docker_container() {
 }
 
 echo "Running tests in container from image $IMAGE_NAME"
+echo "Running functionals bats tests for overriding images"
+run_test_in_docker_container override_image_tests.bats ""
 echo "Running functional bats tests for CLI prompts and usage"
 run_test_in_docker_container cli_prompts_usage_tests.bats ""
 echo "Running functionals bats tests for config command"
