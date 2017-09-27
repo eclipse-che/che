@@ -869,7 +869,7 @@
                     <exclude name="previewChangeTest"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.refactor.preview.PreviewRefreshTest"/>
+            <class name="org.eclipse.che.selenium.refactor.preview.PreviewRefactoringTest"/>
             <class name="org.eclipse.che.selenium.refactor.types.GenericsTest"/>
             <class name="org.eclipse.che.selenium.refactor.types.IllegalTypeNameTest">
                 <methods>
