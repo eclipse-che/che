@@ -33,9 +33,7 @@ import org.eclipse.che.selenium.pageobject.git.GitStatusBar;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * @author Anatolii Bazko
- */
+/** @author Anatolii Bazko */
 public class RevertCommitTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 2);
 

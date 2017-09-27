@@ -19,7 +19,7 @@ import org.eclipse.che.core.db.jpa.JpaInitializer;
 import org.eclipse.che.core.db.jpa.eclipselink.GuiceEntityListenerInjectionManager;
 import org.eclipse.che.core.db.schema.SchemaInitializationException;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
-import org.eclipse.persistence.sessions.server.ServerSession;
+import org.eclipse.persistence.internal.sessions.AbstractSession;
 
 /**
  * Initializes database components.
@@ -70,8 +70,8 @@ public class DBInitializer {
   @Inject
   public void setUpInjectionManager(
       GuiceEntityListenerInjectionManager injManager, EntityManagerFactory emFactory) {
-    final ServerSession session = emFactory.unwrap(ServerSession.class);
-    session.setEntityListenerInjectionManager(injManager);
+    final AbstractSession session = emFactory.unwrap(AbstractSession.class);
+    session.setInjectionManager(injManager);
   }
 
   /** Returns map of properties which represents state of database while initialization process */
