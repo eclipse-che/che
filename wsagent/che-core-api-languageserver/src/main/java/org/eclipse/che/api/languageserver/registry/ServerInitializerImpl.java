@@ -57,7 +57,6 @@ public class ServerInitializerImpl implements ServerInitializer {
   private static final Logger LOG = LoggerFactory.getLogger(ServerInitializerImpl.class);
 
   private static final int PROCESS_ID = getProcessId();
-  private static final String CLIENT_NAME = "EclipseChe";
 
   public static ClientCapabilities CLIENT_CAPABILITIES;
 
@@ -97,9 +96,15 @@ public class ServerInitializerImpl implements ServerInitializer {
     CompletableFuture<Pair<LanguageServer, InitializeResult>> result =
         new CompletableFuture<Pair<LanguageServer, InitializeResult>>();
 
+    long threadId = Thread.currentThread().getId();
     LanguageServer server;
     try {
       server = launcher.launch(projectPath, client);
+      LOG.info(
+          "Launched language server {} on thread {} and project {}",
+          launcherId,
+          threadId,
+          projectPath);
     } catch (LanguageServerException e) {
       result.completeExceptionally(
           new LanguageServerException(
@@ -114,18 +119,28 @@ public class ServerInitializerImpl implements ServerInitializer {
     }
     registerCallbacks(server, launcher);
 
+    LOG.info(
+        "Initializing language server {} on thread {} and project {}",
+        launcherId,
+        threadId,
+        projectPath);
+
     CompletableFuture<InitializeResult> completableFuture = server.initialize(initializeParams);
     completableFuture
         .thenAccept(
             (InitializeResult res) -> {
+              LOG.info(
+                  "Initialized language server {} on thread {} and project {}",
+                  launcherId,
+                  threadId,
+                  projectPath);
               onServerInitialized(launcher, server, res.getCapabilities(), projectPath);
               result.complete(Pair.of(server, res));
-              LOG.info("Initialized Language Server {} on project {}", launcherId, projectPath);
             })
         .exceptionally(
             (Throwable e) -> {
               server.shutdown();
-              server.exit();
+              server.exit(); // TODO: WAIT FOR SHUTDOWN TO COMPLETE
               result.completeExceptionally(e);
               return null;
             });
@@ -185,7 +200,6 @@ public class ServerInitializerImpl implements ServerInitializer {
       CLIENT_CAPABILITIES.setTextDocument(textDocument);
     }
     initializeParams.setCapabilities(CLIENT_CAPABILITIES);
-    initializeParams.setClientName(CLIENT_NAME);
     return initializeParams;
   }
 
