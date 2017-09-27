@@ -43,8 +43,7 @@ import org.testng.annotations.Test;
  * @author Musienko Maxim
  */
 public class CheckWsAgentAfterStopProcessTest {
-  private static final String PROJECT_NAME =
-      NameGenerator.generate("CheckWsAgentAfterStopProcessTest", 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String nameCommandForKillWsAgent = "killWsAgent";
   private static final String killPIDWSAgentCommand =
       "kill -9 $(ps ax | grep java | grep ws-agent | grep conf | grep -v grep | awk '{print $1}')";
