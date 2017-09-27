@@ -18,7 +18,7 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.machine.authentication.server.interceptor.InterceptorModule;
 
 /**
- * Machine authentification bindings.
+ * Machine authentication bindings.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */

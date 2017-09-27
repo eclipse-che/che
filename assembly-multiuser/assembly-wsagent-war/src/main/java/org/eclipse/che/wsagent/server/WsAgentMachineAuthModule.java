@@ -16,7 +16,7 @@ import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.inject.DynaModule;
 
-/** */
+/** Provide multi user specific implementation of ws-agent components. */
 @DynaModule
 public class WsAgentMachineAuthModule extends AbstractModule {
   @Override

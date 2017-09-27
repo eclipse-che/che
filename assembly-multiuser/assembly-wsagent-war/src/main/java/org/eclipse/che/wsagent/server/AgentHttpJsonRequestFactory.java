@@ -18,6 +18,10 @@ import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 
+/**
+ * Implementation of {@link org.eclipse.che.api.core.rest.HttpJsonRequestFactory} that add
+ * ```user.token``` as authorization header. Used to make request from ws-agent to ws-master.
+ */
 @Singleton
 public class AgentHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
 

@@ -12,19 +12,21 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineLoginFilter;
 
 /**
- * Machine authentification bindings.
+ * Machine authentication bindings.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
 @DynaModule
-public class MachineAuthServletModule extends ServletModule {
+public class MultiUserCheServletModule extends ServletModule {
 
   @Override
   protected void configureServlets() {
     // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
     filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(MachineLoginFilter.class);
+    install(new KeycloakServletModule());
   }
 }

@@ -16,12 +16,13 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.machine.authentication.agent.MachineLoginFilter;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 
+/** Provide bindings of security && authentication filters necessary for multi-user Che */
 @DynaModule
 public class WsAgentMachineAuthServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
     filter("/*").through(CheCorsFilter.class);
-    serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
     filter("/*").through(MachineLoginFilter.class);
+    serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
   }
 }
