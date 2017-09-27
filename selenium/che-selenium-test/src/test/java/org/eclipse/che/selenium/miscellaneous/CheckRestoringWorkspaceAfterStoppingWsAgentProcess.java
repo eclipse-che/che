@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
  *
  * @author Musienko Maxim
  */
-public class CheckWsAgentAfterStopProcessTest {
+public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String nameCommandForKillWsAgent = "killWsAgent";
   private static final String killPIDWSAgentCommand =
@@ -76,7 +76,7 @@ public class CheckWsAgentAfterStopProcessTest {
   }
 
   @Test(priority = 0)
-  public void checkWorkspaceRestartingByApi() throws Exception {
+  public void checkRestoreWsAgentByApi() throws Exception {
     String expectedMessageOInDialog =
         "Workspace agent is no longer responding. To fix the problem, restart the workspace.";
     projectExplorer.waitItem(PROJECT_NAME);
@@ -94,7 +94,7 @@ public class CheckWsAgentAfterStopProcessTest {
   }
 
   @Test(priority = 1)
-  public void checkWorkspaceRestartingByIde() {
+  public void checkRestoreIdeItems() {
     projectExplorer.waitItem(PROJECT_NAME);
     events.clickProjectEventsTab();
     events.waitExpectedMessage(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);

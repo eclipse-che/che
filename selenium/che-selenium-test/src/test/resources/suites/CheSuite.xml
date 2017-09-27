@@ -429,7 +429,7 @@
                     <exclude name="checkMacrosFeature"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.miscellaneous.CheckWsAgentAfterStopProcessTest">
+            <class name="org.eclipse.che.selenium.miscellaneous.CheckRestoringWorkspaceAfterStoppingWsAgentProcess">
                 <methods>
                     <!-- unstable -->
                     <exclude name="checkDialogAfterKillingProcess"/>
