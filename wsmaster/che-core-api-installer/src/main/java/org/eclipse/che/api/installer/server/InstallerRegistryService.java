@@ -115,7 +115,8 @@ public class InstallerRegistryService extends Service {
     try {
       Page<? extends Installer> installers = installerRegistry.getInstallers(maxItems, skipCount);
       return Response.ok()
-          .entity(installers.getItems())
+          .entity(
+              installers.getItems().stream().map(DtoConverter::asDto).collect(Collectors.toList()))
           .header("Link", createLinkHeader(installers))
           .header(TOTAL_ITEMS_COUNT_HEADER, installers.getTotalItemsCount())
           .build();
