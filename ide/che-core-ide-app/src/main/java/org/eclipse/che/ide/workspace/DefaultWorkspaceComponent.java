@@ -12,6 +12,7 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -117,7 +118,19 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent implements Wor
 
       importProjects.add(project);
     }
-    initialProjectImporter.importProjects(importProjects, null);
+    initialProjectImporter.importProjects(
+        importProjects,
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            //todo not implement yet
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            appContext.getWorkspaceRoot().synchronize();
+          }
+        });
   }
 
   @Override
