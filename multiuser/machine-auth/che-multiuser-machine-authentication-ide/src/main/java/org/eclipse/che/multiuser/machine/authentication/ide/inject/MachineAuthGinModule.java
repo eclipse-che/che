@@ -13,8 +13,6 @@ package org.eclipse.che.multiuser.machine.authentication.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.ide.api.machine.CheWsAgentLinksModifier;
-import org.eclipse.che.multiuser.machine.authentication.ide.CheAuthMachineLinksModifier;
 import org.eclipse.che.multiuser.machine.authentication.ide.MachineTokenServiceClient;
 import org.eclipse.che.multiuser.machine.authentication.ide.MachineTokenServiceClientImpl;
 
@@ -24,10 +22,8 @@ public class MachineAuthGinModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
-    //bind(AsyncRequestFactory.class).to(MachineAsyncRequestFactory.class);
     bind(MachineTokenServiceClient.class)
         .to(MachineTokenServiceClientImpl.class)
         .in(Singleton.class);
-    bind(CheWsAgentLinksModifier.class).to(CheAuthMachineLinksModifier.class);
   }
 }

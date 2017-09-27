@@ -26,9 +26,6 @@ import com.google.inject.spi.ConstructorBinding;
 import java.lang.reflect.Method;
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.environment.server.MachineProcessManager;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
@@ -52,7 +49,6 @@ public class MachineTokenInterceptorTest {
 
   @Mock private MachineTokenRegistry tokenRegistry;
   @Mock private WorkspaceImpl workspaceImpl;
-  @Mock private WorkspaceFilesCleaner workspaceFilesCleaner;
 
   private WorkspaceManager workspaceManager;
 
@@ -68,15 +64,12 @@ public class MachineTokenInterceptorTest {
             bind(WorkspaceDao.class).toInstance(mock(WorkspaceDao.class));
             bind(WorkspaceRuntimes.class).toInstance(mock(WorkspaceRuntimes.class));
             bind(EventService.class).toInstance(mock(EventService.class));
-            bind(MachineProcessManager.class).toInstance(mock(MachineProcessManager.class));
             bind(AccountDao.class).toInstance(mock(AccountDao.class));
             bindConstant().annotatedWith(Names.named("che.workspace.auto_restore")).to(false);
             bindConstant().annotatedWith(Names.named("che.workspace.auto_snapshot")).to(false);
             bind(WorkspaceSharedPool.class)
                 .toInstance(new WorkspaceSharedPool("cached", null, null));
             bind(WorkspaceManager.class);
-            bind(SnapshotDao.class).toInstance(mock(SnapshotDao.class));
-            bind(WorkspaceFilesCleaner.class).toInstance(workspaceFilesCleaner);
 
             bind(MachineTokenRegistry.class).toInstance(tokenRegistry);
 

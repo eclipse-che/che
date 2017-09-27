@@ -25,7 +25,6 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.commons.exception.UnmarshallerException;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -49,7 +48,6 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   private final AppContext appContext;
 
   private String machineToken;
-  private String wsAgentBaseUrl;
   private String csrfToken;
 
   @Inject
@@ -101,7 +99,6 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
   @Override
   public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
     machineToken = null;
-    wsAgentBaseUrl = null;
   }
 
   /**
@@ -115,22 +112,14 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
         || !RUNNING.equals(appContext.getWorkspace().getStatus())) {
       return false; //ws-agent not started
     }
-    if (isNullOrEmpty(wsAgentBaseUrl)) {
-      final DevMachine devMachine = appContext.getDevMachine();
-      if (devMachine != null) {
-        wsAgentBaseUrl = devMachine.getWsAgentBaseUrl();
-      } else {
-        return false;
-      }
-    }
-    return url.contains(nullToEmpty(wsAgentBaseUrl));
+    return url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
   }
 
   private Promise<String> requestCsrfToken() {
     if (csrfToken != null) {
       return Promises.resolve(csrfToken);
     }
-    return createGetRequest(appContext.getMasterEndpoint() + "/profile")
+    return createGetRequest(appContext.getMasterApiEndpoint() + "/profile")
         .header(CSRF_TOKEN_HEADER_NAME, "Fetch")
         .send(
             new Unmarshallable<String>() {

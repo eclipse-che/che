@@ -16,7 +16,6 @@ import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.multiuser.machine.authentication.shared.dto.MachineTokenDto;
 
 /**
@@ -34,14 +33,13 @@ public class MachineTokenServiceClientImpl implements MachineTokenServiceClient 
 
   @Inject
   public MachineTokenServiceClientImpl(
-      @RestContext String restContext,
       AppContext appContext,
       AsyncRequestFactory asyncRequestFactory,
       DtoUnmarshallerFactory dtoUnmarshallerFactory) {
     this.appContext = appContext;
     this.asyncRequestFactory = asyncRequestFactory;
     this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-    this.baseUrl = restContext + MACHINE_TOKEN_SERVICE_PATH;
+    this.baseUrl = appContext.getMasterApiEndpoint() + MACHINE_TOKEN_SERVICE_PATH;
   }
 
   public Promise<MachineTokenDto> getMachineToken() {
