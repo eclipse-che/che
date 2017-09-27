@@ -20,7 +20,7 @@ if [ -z "${CHE_API_ENDPOINT+x}" ]; then
     echo "done (${CHE_API_ENDPOINT})"
 fi
 
-DEFAULT_NEW_STACKS_URL="https://raw.githubusercontent.com/redhat-developer/rh-che/master/builds/fabric8-che/assembly/fabric8-stacks/src/main/resources/stacks.json"
+DEFAULT_NEW_STACKS_URL="https://raw.githubusercontent.com/redhat-developer/rh-che/master/assembly/fabric8-stacks/src/main/resources/stacks.json"
 NEW_STACKS_URL=${NEW_STACKS_URL:-${DEFAULT_NEW_STACKS_URL}}
 
 echo -n "[CHE] Fetching the list of current Che stacks..."
