@@ -10,18 +10,14 @@
  */
 package org.eclipse.che.ide.navigation;
 
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -111,8 +107,6 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
   @Override
   public void showPopup() {
-    suggestionsContainer = new HTML();
-    suggestionsContainer.addStyleName(style.noborder());
     fileName.getElement().setAttribute("placeholder", locale.navigateToFileSearchIsCaseSensitive());
 
     setPopupPositionAndShow(
@@ -130,18 +124,16 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
           }.schedule(300);
         });
 
-    Scheduler.get().scheduleDeferred(() -> fileName.setFocus(true));
+    new Timer() {
+      @Override
+      public void run() {
+        fileName.setFocus(true);
+      }
+    }.schedule(300);
 
     // Add window resize handler
     if (resizeHandler == null) {
-      resizeHandler =
-          Window.addResizeHandler(
-              new ResizeHandler() {
-                @Override
-                public void onResize(ResizeEvent event) {
-                  updatePositionAndSize();
-                }
-              });
+      resizeHandler = Window.addResizeHandler(event -> updatePositionAndSize());
     }
   }
 
@@ -189,6 +181,9 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
   public void showItems(List<SearchResultDto> items) {
     // Hide popup if it is nothing to show
     if (items.isEmpty()) {
+      if (suggestionsContainer == null) {
+        return;
+      }
       suggestionsContainer.getElement().setInnerHTML("");
       suggestionsContainer.removeFromParent();
       suggestionsPanel.setVisible(false);
@@ -201,6 +196,8 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
     // Show popup
     suggestionsPanel.setVisible(true);
+    suggestionsContainer = new HTML();
+    suggestionsContainer.addStyleName(style.noborder());
     suggestionsPanel.add(suggestionsContainer);
 
     // Create and show list of items
@@ -278,7 +275,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         if (list != null) {
           list.getSelectionModel().selectPrevious();
         }
-        return;
+        break;
 
       case KeyCodes.KEY_DOWN:
         event.stopPropagation();
@@ -286,7 +283,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         if (list != null) {
           list.getSelectionModel().selectNext();
         }
-        return;
+        break;
 
       case KeyCodes.KEY_PAGEUP:
         event.stopPropagation();
@@ -294,7 +291,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         if (list != null) {
           list.getSelectionModel().selectPreviousPage();
         }
-        return;
+        break;
 
       case KeyCodes.KEY_PAGEDOWN:
         event.stopPropagation();
@@ -302,7 +299,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         if (list != null) {
           list.getSelectionModel().selectNextPage();
         }
-        return;
+        break;
 
       case KeyCodes.KEY_ENTER:
         event.stopPropagation();
@@ -311,16 +308,23 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         if (selectedItem != null) {
           delegate.onFileSelected(Path.valueOf(selectedItem.getItemReference().getPath()));
         }
-        return;
+        break;
 
       case KeyCodes.KEY_ESCAPE:
         event.stopPropagation();
         event.preventDefault();
         hidePopup();
-        return;
+        break;
+      default:
+        //here need some delay to be sure input box initiated with given value
+        //in manually testing hard to reproduce this problem but it reproduced with selenium tests
+        new Timer() {
+          @Override
+          public void run() {
+            delegate.onFileNameChanged(fileName.getText());
+          }
+        }.schedule(300);
+        break;
     }
-
-    Scheduler.get()
-        .scheduleDeferred((Command) () -> delegate.onFileNameChanged(fileName.getText()));
   }
 }
