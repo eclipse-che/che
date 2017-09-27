@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.refactor.preview;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -27,7 +28,8 @@ import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class PreviewRefactoringTest {
-  private static final String PROJECT_NAME = PreviewRefactoringTest.class.getSimpleName();
+  private static final String PROJECT_NAME =
+      NameGenerator.generate(PreviewRefactoringTest.class.getSimpleName(), 3);
 
   private static final String EXPECTED_TEXT_BEFORE_CHANGE =
       "import javax.servlet.http.HttpServletResponse;\n"
@@ -105,7 +107,7 @@ public class PreviewRefactoringTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = PreviewRefactoringTest.this.getClass().getResource("/projects/guess-project");
+    URL resource = getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
         workspace.getId(),
         Paths.get(resource.toURI()),
