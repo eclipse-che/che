@@ -351,9 +351,15 @@ public class OpenShiftConnector extends DockerConnector {
 
     // first, get labels defined in the container configuration
     Map<String, String> containerLabels = containerConfig.getLabels();
+    if (containerLabels == null) {
+      containerLabels = Collections.emptyMap();
+    }
 
     // Also, get labels from the image itself
     Map<String, String> imageLabels = imageConfig.getLabels();
+    if (imageLabels == null) {
+      imageLabels = Collections.emptyMap();
+    }
 
     // Now merge all labels
     final Map<String, String> allLabels = new HashMap<>(containerLabels);
