@@ -34,6 +34,7 @@ import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+/** @author Musienko Maxim */
 public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
   private static final String JUNIT4_PROJECT = "junit4-tests-with-separeted-suites";
 

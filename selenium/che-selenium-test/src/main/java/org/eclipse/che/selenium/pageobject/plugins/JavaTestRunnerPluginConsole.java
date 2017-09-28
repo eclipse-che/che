@@ -92,7 +92,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * wait single method in the result tree marked as failed (red color)
+   * Wait single method in the result tree marked as failed (red color).
    *
    * @param nameOfFailedMethods name of that should fail
    */
@@ -102,7 +102,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * wait single method in the result tree marked as failed (red color)
+   * Wait single method in the result tree marked as failed (red color).
    *
    * @param nameOfFailedMethods name of that should fail
    */
@@ -112,7 +112,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * wait single method in the result tree marked as passed (green color)
+   * Wait single method in the result tree marked as passed (green color).
    *
    * @param nameOfFailedMethods name of expected method
    */
@@ -122,7 +122,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * wait the FQN of the test class in result tree class that has been launched
+   * Wait the FQN of the test class in result tree class that has been launched.
    *
    * @param fqn
    */
@@ -134,8 +134,8 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * get all name of the test methods form the test result tree marked with defined status (may be
-   * passed, failed or ignored)
+   * Get all name of the test methods form the test result tree marked with defined status (may be
+   * passed, failed or ignored).
    *
    * @param methodState the enumeration with defined status
    * @return the list with names of methods with defined status
@@ -157,7 +157,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * get all defined methods from result tree and return as list WebElements
+   * Get all defined methods from result tree and return as list WebElements.
    *
    * @param methodState the enumeration with defined status
    * @return List WebElements with defined status
@@ -187,7 +187,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * get text from the test result tree. Mote! This method represent only text from test result tree
+   * Get text from the test result tree. Mote! This method represent only text from test result tree
    * without styles and formatting
    *
    * @return text representation of results of the test result tree widget
@@ -199,8 +199,8 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * click on the item in the result tree. If will be some items with the same name - will select
-   * first
+   * Click on the item in the result tree. If will be some items with the same name - will select
+   * first.
    *
    * @param item name of the item (method or fqn of test class) in the test result tree
    */
@@ -212,7 +212,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * click on faled, passed or ignored method on the result tree
+   * Click on faled, passed or ignored method on the result tree.
    *
    * @param nameOfMethod
    * @param state
