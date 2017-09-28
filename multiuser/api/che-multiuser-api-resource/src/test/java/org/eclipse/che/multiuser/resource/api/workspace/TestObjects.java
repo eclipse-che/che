@@ -35,40 +35,38 @@ public final class TestObjects {
 
   public static EnvironmentImpl createEnvironment(String devMachineRam, String... machineRams)
       throws Exception {
-    return null;/*
-    Map<String, ExtendedMachineImpl> machines = new HashMap<>();
-    machines.put(
-        "dev-machine",
-        new ExtendedMachineImpl(
-            singletonList("org.eclipse.che.ws-agent"),
-            emptyMap(),
-            singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(devMachineRam)))));
-    HashMap<String, ComposeServiceImpl> services = new HashMap<>(1 + machineRams.length);
-    services.put("dev-machine", createService());
-    for (int i = 0; i < machineRams.length; i++) {
-      services.put("machine" + i, createService());
-      // null is allowed to reproduce situation with default RAM size
-      if (machineRams[i] != null) {
-        machines.put(
-            "machine" + i,
-            new ExtendedMachineImpl(
-                null,
-                null,
-                singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(machineRams[i])))));
-      }
-    }
-    ComposeEnvironment composeEnvironment = new ComposeEnvironment();
-    composeEnvironment.setServices(services);
-    String yaml = YAML_PARSER.writeValueAsString(composeEnvironment);
-    EnvironmentRecipeImpl recipe =
-        new EnvironmentRecipeImpl("compose", "application/x-yaml", yaml, null);
+    return null; /*
+                 Map<String, ExtendedMachineImpl> machines = new HashMap<>();
+                 machines.put(
+                     "dev-machine",
+                     new ExtendedMachineImpl(
+                         singletonList("org.eclipse.che.ws-agent"),
+                         emptyMap(),
+                         singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(devMachineRam)))));
+                 HashMap<String, ComposeServiceImpl> services = new HashMap<>(1 + machineRams.length);
+                 services.put("dev-machine", createService());
+                 for (int i = 0; i < machineRams.length; i++) {
+                   services.put("machine" + i, createService());
+                   // null is allowed to reproduce situation with default RAM size
+                   if (machineRams[i] != null) {
+                     machines.put(
+                         "machine" + i,
+                         new ExtendedMachineImpl(
+                             null,
+                             null,
+                             singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(machineRams[i])))));
+                   }
+                 }
+                 ComposeEnvironment composeEnvironment = new ComposeEnvironment();
+                 composeEnvironment.setServices(services);
+                 String yaml = YAML_PARSER.writeValueAsString(composeEnvironment);
+                 EnvironmentRecipeImpl recipe =
+                     new EnvironmentRecipeImpl("compose", "application/x-yaml", yaml, null);
 
-    return new EnvironmentImpl(recipe, machines);*/
+                 return new EnvironmentImpl(recipe, machines);*/
   }
 
-  /**
-   * Creates users workspace object based on the owner and machines RAM.
-   */
+  /** Creates users workspace object based on the owner and machines RAM. */
   public static WorkspaceImpl createWorkspace(
       String owner, String devMachineRam, String... machineRams) throws Exception {
 
@@ -87,17 +85,13 @@ public final class TestObjects {
         .build();
   }
 
-  /**
-   * Creates workspace config object based on the machines RAM.
-   */
+  /** Creates workspace config object based on the machines RAM. */
   public static WorkspaceConfig createConfig(String devMachineRam, String... machineRams)
       throws Exception {
     return createWorkspace(DEFAULT_USER_NAME, devMachineRam, machineRams).getConfig();
   }
 
-  /**
-   * Creates runtime workspace object based on the machines RAM.
-   */
+  /** Creates runtime workspace object based on the machines RAM. */
   public static WorkspaceImpl createRuntime(String devMachineRam, String... machineRams)
       throws Exception {
     /*
@@ -137,7 +131,7 @@ public final class TestObjects {
     */
     return null;
   }
-/*
+  /*
   private static MachineImpl createMachine(
       String workspaceId, String envName, String machineName, boolean isDev, String memoryBytes) {
 
@@ -167,6 +161,5 @@ public final class TestObjects {
   }
   */
 
-  private TestObjects() {
-  }
+  private TestObjects() {}
 }

@@ -287,6 +287,7 @@ public class WorkspacePermissionsFilterTest {
     verify(workspaceService).startById(eq("workspace123"), anyString(), any());
     verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
   }
+
   @Test
   public void shouldCheckUserPermissionsOnGetWorkspaceByKey() throws Exception {
     when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(false);

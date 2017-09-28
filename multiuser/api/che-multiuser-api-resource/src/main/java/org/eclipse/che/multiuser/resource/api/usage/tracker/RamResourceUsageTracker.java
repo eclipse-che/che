@@ -77,12 +77,12 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
         currentlyUsedRamMB += environmentRamCalculator.calculate(activeEnvironmentConfig);
       } else {
         currentlyUsedRamMB += 0L;
-//            activeWorkspace
-//                .getRuntime()
-//                .getMachines()
-//                .stream()
-//                .mapToInt(machine -> machine.getConfig().getLimits().getRam())
-//                .sum();
+        //            activeWorkspace
+        //                .getRuntime()
+        //                .getMachines()
+        //                .stream()
+        //                .mapToInt(machine -> machine.getConfig().getLimits().getRam())
+        //                .sum();
       }
     }
 

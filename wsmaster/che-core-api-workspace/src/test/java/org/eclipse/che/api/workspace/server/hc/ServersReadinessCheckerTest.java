@@ -60,7 +60,8 @@ public class ServersReadinessCheckerTest {
         .thenReturn(connectionChecker);
     when(connectionChecker.getReportCompFuture()).thenReturn(compFuture);
 
-    checker = new ServersReadinessChecker(runtimeIdentity, MACHINE_NAME, getDefaultServers(), factory);
+    checker =
+        new ServersReadinessChecker(runtimeIdentity, MACHINE_NAME, getDefaultServers(), factory);
   }
 
   @AfterMethod(timeOut = 1000)

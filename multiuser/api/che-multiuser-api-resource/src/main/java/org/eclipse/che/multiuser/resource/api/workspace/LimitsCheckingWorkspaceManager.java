@@ -97,7 +97,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     checkMaxEnvironmentRam(config);
     String accountId = accountManager.getByName(namespace).getId();
     try (@SuppressWarnings("unused")
-    Unlocker u = resourcesLocks.lock(accountId)) {
+        Unlocker u = resourcesLocks.lock(accountId)) {
       checkWorkspaceResourceAvailability(accountId);
 
       return super.createWorkspace(config, namespace, attributes);
@@ -112,7 +112,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     String accountId = workspace.getAccount().getId();
 
     try (@SuppressWarnings("unused")
-    Unlocker u = resourcesLocks.lock(accountId)) {
+        Unlocker u = resourcesLocks.lock(accountId)) {
       checkRuntimeResourceAvailability(accountId);
       checkRamResourcesAvailability(
           accountId, workspace.getNamespace(), workspace.getConfig(), envName);
@@ -129,7 +129,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
     String accountId = accountManager.getByName(namespace).getId();
     try (@SuppressWarnings("unused")
-    Unlocker u = resourcesLocks.lock(accountId)) {
+        Unlocker u = resourcesLocks.lock(accountId)) {
       checkWorkspaceResourceAvailability(accountId);
       checkRuntimeResourceAvailability(accountId);
       checkRamResourcesAvailability(accountId, namespace, config, null);
@@ -148,7 +148,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
     // Workspace must not be updated while the manager checks it's resources to allow start
     try (@SuppressWarnings("unused")
-    Unlocker u = resourcesLocks.lock(accountId)) {
+        Unlocker u = resourcesLocks.lock(accountId)) {
       return super.updateWorkspace(id, update);
     }
   }

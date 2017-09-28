@@ -51,7 +51,8 @@ import org.testng.annotations.Listeners;
  * @author Sergii Leschenko
  */
 @Listeners(MockitoTestNGListener.class)
-public class RamResourceUsageTrackerTest {/*
+public class RamResourceUsageTrackerTest {
+  /*
   @Mock private Account account;
   @Mock private Provider<WorkspaceManager> workspaceManagerProvider;
   @Mock private WorkspaceManager workspaceManager;
@@ -123,7 +124,8 @@ public class RamResourceUsageTrackerTest {/*
     verify(workspaceManager).getByNamespace(eq("testAccount"), eq(true));
   }
 
-  /** Creates users workspace object based on the status and machines RAM. *//*
+  /** Creates users workspace object based on the status and machines RAM. */
+  /*
   public static WorkspaceImpl createWorkspace(WorkspaceStatus status, Integer... machineRams) {
     final List<MachineImpl> machines = new ArrayList<>(machineRams.length - 1);
     for (Integer machineRam : machineRams) {

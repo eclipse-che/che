@@ -89,8 +89,12 @@ public class InstallerConfigProvisioner implements ConfigurationProvisioner {
     }
   }
 
-  protected void doProvisionContainer(OpenShiftEnvironment osEnv, Container container, RuntimeIdentity identity,
-      String machineName, InternalMachineConfig machineConf) {
+  protected void doProvisionContainer(
+      OpenShiftEnvironment osEnv,
+      Container container,
+      RuntimeIdentity identity,
+      String machineName,
+      InternalMachineConfig machineConf) {
     Map<String, ServerConfig> name2Server = new HashMap<>();
     for (Installer installer : machineConf.getInstallers()) {
       provisionEnv(container, installer.getProperties());

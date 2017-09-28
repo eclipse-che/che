@@ -44,9 +44,6 @@ import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
-import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
-import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 /** @author andrew00x */

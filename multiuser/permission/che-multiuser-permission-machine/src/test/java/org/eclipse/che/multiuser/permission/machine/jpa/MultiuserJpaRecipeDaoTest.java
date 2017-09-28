@@ -138,7 +138,8 @@ public class MultiuserJpaRecipeDaoTest {
 
   @Test
   public void shouldFindRecipeByUserIdAndPublicPermissions() throws Exception {
-    final Set<OldRecipeImpl> results = new HashSet<>(dao.search(users[0].getId(), null, null, 0, 30));
+    final Set<OldRecipeImpl> results =
+        new HashSet<>(dao.search(users[0].getId(), null, null, 0, 30));
     assertEquals(results.size(), 5);
     assertTrue(results.contains(recipes[0]));
     assertTrue(results.contains(recipes[1]));

@@ -25,7 +25,8 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 public class ServerCheckerFactoryImpl implements ServerCheckerFactory {
   @Override
   public HttpConnectionServerChecker httpChecker(
-      URL url, RuntimeIdentity identity, String machineName, String serverRef, Timer timer) throws InfrastructureException{
+      URL url, RuntimeIdentity identity, String machineName, String serverRef, Timer timer)
+      throws InfrastructureException {
     // TODO add readiness endpoint to terminal and remove this
     // workaround needed because terminal server doesn't have endpoint to check it readiness
     if ("terminal".equals(serverRef)) {
