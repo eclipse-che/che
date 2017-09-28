@@ -68,6 +68,10 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
   private final WorkspaceRuntimes runtimes;
   private final Set<String> additionalNetworks;
 
+  @Inject(optional = true)
+  @Named("che.docker.cleanup_skip")
+  private String skipCleaningProperty;
+
   @Inject
   public DockerAbandonedResourcesCleaner(
       CheEnvironmentEngine environmentEngine,
@@ -89,6 +93,10 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
   )
   @Override
   public void run() {
+    if (skipCleaningProperty != null && Boolean.parseBoolean(skipCleaningProperty)) {
+      LOG.info("Skipping che unused containers and network cleanup ...");
+      return;
+    }
     cleanContainers();
     cleanNetworks();
   }
