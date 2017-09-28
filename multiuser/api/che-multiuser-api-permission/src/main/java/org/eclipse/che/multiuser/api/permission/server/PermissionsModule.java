@@ -29,7 +29,6 @@ public class PermissionsModule extends AbstractModule {
     bind(SetPermissionsFilter.class);
     bind(RemovePermissionsFilter.class);
     bind(GetPermissionsFilter.class);
-    bind(AdminPermissionInitializer.class).asEagerSingleton();
 
     // Creates empty multibinder to avoid error during container starting
     Multibinder.newSetBinder(
