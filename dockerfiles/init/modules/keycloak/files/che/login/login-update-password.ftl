@@ -6,20 +6,20 @@
         ${msg("updatePasswordTitle")}
     <#elseif section = "form">
         <#include "logo.ftl">
-    
+
         <form id="kc-passwd-update-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
             <input type="text" readonly value="this is not a login form" style="display: none;">
             <input type="password" readonly value="this is not a login form" style="display: none;">
 
             <div class="kc-form-title">Setup your password.</div>
 
-            <div class="${properties.kcFormGroupClass!}">               
+            <div class="${properties.kcFormGroupClass!}">
                 <div class="${properties.kcInputWrapperClass!}">
                     <input type="password" id="password-new" name="password-new" class="${properties.kcInputClass!}" autofocus autocomplete="off" placeholder="${msg("passwordNew")}" />
                 </div>
             </div>
 
-            <div class="${properties.kcFormGroupClass!}">               
+            <div class="${properties.kcFormGroupClass!}">
                 <div class="${properties.kcInputWrapperClass!}">
                     <input type="password" id="password-confirm" name="password-confirm" class="${properties.kcInputClass!}" autocomplete="off" placeholder="${msg("passwordConfirm")}" />
                 </div>
