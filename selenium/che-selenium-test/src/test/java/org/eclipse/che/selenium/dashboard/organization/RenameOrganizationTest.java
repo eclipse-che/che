@@ -15,6 +15,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
@@ -50,7 +51,7 @@ public class RenameOrganizationTest {
   @Inject private Dashboard dashboard;
 
   @Inject
-  //@Named("admin")
+  @Named("admin")
   private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private DefaultTestUser testUser;
@@ -88,7 +89,7 @@ public class RenameOrganizationTest {
 
     organizationListPage.clickOnOrganization(parentOrganization.getName());
 
-    organizationPage.waitOrganizationName(parentOrganization.getName());
+    organizationPage.waitOrganizationTitle(parentOrganization.getName());
 
     organizationPage.setOrganizationName("");
     editMode.waitDisplayed();
@@ -119,7 +120,7 @@ public class RenameOrganizationTest {
 
     organizationListPage.clickOnOrganization(organizationPath);
 
-    organizationPage.waitOrganizationName(organizationPath);
+    organizationPage.waitOrganizationTitle(organizationPath);
     String newName = NameGenerator.generate("newname", 5);
 
     organizationPage.setOrganizationName(newName);

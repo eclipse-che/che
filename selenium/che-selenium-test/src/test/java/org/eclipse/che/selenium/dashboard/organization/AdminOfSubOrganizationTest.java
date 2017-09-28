@@ -22,6 +22,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.util.ArrayList;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
@@ -54,7 +55,9 @@ public class AdminOfSubOrganizationTest {
   @Inject private NavigationBar navigationBar;
   @Inject private CodenvyAdminDashboard dashboard;
 
-  @Inject private OnpremTestOrganizationServiceClient organizationServiceClient;
+  @Inject
+  @Named("admin")
+  private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private DefaultTestUser testUser;
   @Inject private AdminTestUser adminTestUser;
@@ -144,7 +147,7 @@ public class AdminOfSubOrganizationTest {
     organizationListPage.waitForOrganizationsList();
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
 
-    organizationPage.waitOrganizationName(childOrganization.getQualifiedName());
+    organizationPage.waitOrganizationTitle(childOrganization.getQualifiedName());
     assertFalse(organizationPage.isOrganizationNameReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertTrue(organizationPage.isRunningCapReadonly());

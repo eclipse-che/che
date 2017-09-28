@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.dashboard.organization;
+package org.eclipse.che.selenium.pageobject.dashboard.organization;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

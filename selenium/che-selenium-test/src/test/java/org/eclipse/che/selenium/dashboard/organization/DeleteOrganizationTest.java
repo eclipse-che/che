@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
@@ -42,7 +43,9 @@ public class DeleteOrganizationTest {
   @Inject private ConfirmDialog confirmDialog;
   @Inject private Dashboard dashboard;
 
-  @Inject private OnpremTestOrganizationServiceClient organizationServiceClient;
+  @Inject
+  @Named("admin")
+  private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private DefaultTestUser testUser;
   @Inject private AdminTestUser adminTestUser;

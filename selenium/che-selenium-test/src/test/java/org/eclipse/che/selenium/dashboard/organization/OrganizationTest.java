@@ -13,12 +13,11 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
-import org.eclipse.che.selenium.core.client.KeycloakTestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
-import org.eclipse.che.selenium.core.client.TestProfileServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -40,7 +39,6 @@ public class OrganizationTest {
   private List<String> emailsList;
   private OrganizationDto organization;
 
-  @Inject private KeycloakTestAuthServiceClient keycloakServiceClient;
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
@@ -49,31 +47,19 @@ public class OrganizationTest {
   @Inject private Loader loader;
 
   @Inject
-  //@Named("admin")
+  @Named("admin")
   private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private Dashboard dashboard;
   @Inject private DefaultTestUser testUser1;
   @Inject private TestUser memberUser;
-  @Inject private TestProfileServiceClient profileServiceClient;
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    String adminToken = keycloakServiceClient.login(testUser1.getName(), testUser1.getPassword());
     emailsList = Arrays.asList(testUser1.getEmail());
     String firstName = generate("F", 7);
     String lastName = generate("L", 7);
-    /*emailsList
-    .stream()
-    .forEach(
-        email -> {
-          try {
-            profileServiceClient.setUserNames(firstName, lastName, adminToken);
-          } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-          }
-        });*/
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     orgName = generate("orgX", 6);

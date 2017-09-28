@@ -18,11 +18,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.multiuser.api.permission.shared.dto.PermissionsDto;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestAdminHttpJsonRequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +33,11 @@ public class OnpremTestOrganizationServiceClient {
       LoggerFactory.getLogger(OnpremTestOrganizationServiceClient.class);
 
   private final String apiEndpoint;
-  private final TestAdminHttpJsonRequestFactory requestFactory;
+  private final HttpJsonRequestFactory requestFactory;
 
   @Inject
   public OnpremTestOrganizationServiceClient(
-      TestApiEndpointUrlProvider apiEndpointUrlProvider,
-      TestAdminHttpJsonRequestFactory requestFactory) {
+      TestApiEndpointUrlProvider apiEndpointUrlProvider, HttpJsonRequestFactory requestFactory) {
     this.apiEndpoint = apiEndpointUrlProvider.get().toString();
     this.requestFactory = requestFactory;
   }

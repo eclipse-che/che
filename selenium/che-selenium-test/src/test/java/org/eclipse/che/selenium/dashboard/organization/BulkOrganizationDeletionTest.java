@@ -17,6 +17,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
@@ -49,7 +50,9 @@ public class BulkOrganizationDeletionTest {
   @Inject private ConfirmDialog confirmDialog;
   @Inject private Dashboard dashboard;
 
-  @Inject private OnpremTestOrganizationServiceClient organizationServiceClient;
+  @Inject
+  @Named("admin")
+  private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private AdminTestUser adminTestUser;
 

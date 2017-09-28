@@ -20,6 +20,7 @@ import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -170,10 +171,12 @@ public class OrganizationPage {
   }
 
   public void waitOrganizationName(String name) {
-    redrawUiElementsTimeout
-        .until(ExpectedConditions.visibilityOf(organizationName))
-        .getAttribute("value")
-        .equals(name);
+    redrawUiElementsTimeout.until(
+        (WebDriver driver) ->
+            driver
+                .findElement(By.xpath(Locators.ORGANIZATION_NAME))
+                .getAttribute("value")
+                .equals(name));
   }
 
   public String getOrganizationTitle() {
@@ -189,10 +192,7 @@ public class OrganizationPage {
   public void setOrganizationName(String name) {
     redrawUiElementsTimeout.until(ExpectedConditions.visibilityOf(organizationName)).clear();
     redrawUiElementsTimeout.until(ExpectedConditions.visibilityOf(organizationName)).sendKeys(name);
-    redrawUiElementsTimeout
-        .until(ExpectedConditions.visibilityOf(organizationName))
-        .getText()
-        .equals(name);
+    waitOrganizationName(name);
   }
 
   public void clickSaveButton() {
@@ -205,19 +205,23 @@ public class OrganizationPage {
 
   public int getWorkspaceCap() {
     return Integer.parseInt(
-        redrawUiElementsTimeout.until(ExpectedConditions.visibilityOf(workspaceCap)).getText());
+        redrawUiElementsTimeout
+            .until(ExpectedConditions.visibilityOf(workspaceCap))
+            .getAttribute("value"));
   }
 
   public int getRunningWorkspaceCap() {
     return Integer.parseInt(
         redrawUiElementsTimeout
             .until(ExpectedConditions.visibilityOf(runningWorkspaceCap))
-            .getText());
+            .getAttribute("value"));
   }
 
   public int getWorkspaceRamCap() {
     return Integer.parseInt(
-        redrawUiElementsTimeout.until(ExpectedConditions.visibilityOf(workspaceRamCap)).getText());
+        redrawUiElementsTimeout
+            .until(ExpectedConditions.visibilityOf(workspaceRamCap))
+            .getAttribute("value"));
   }
 
   public void setWorkspaceCap(int capSize) {
@@ -226,10 +230,12 @@ public class OrganizationPage {
     redrawUiElementsTimeout
         .until(ExpectedConditions.visibilityOf(workspaceCap))
         .sendKeys(String.valueOf(size));
-    redrawUiElementsTimeout
-        .until(ExpectedConditions.visibilityOf(workspaceCap))
-        .getText()
-        .equals(size);
+    redrawUiElementsTimeout.until(
+        (WebDriver driver) ->
+            driver
+                .findElement(By.xpath(Locators.WORKSPACE_CAP))
+                .getAttribute("value")
+                .equals(size));
   }
 
   public void setRunningWorkspaceCap(int capSize) {
@@ -238,10 +244,12 @@ public class OrganizationPage {
     redrawUiElementsTimeout
         .until(ExpectedConditions.visibilityOf(runningWorkspaceCap))
         .sendKeys(String.valueOf(size));
-    redrawUiElementsTimeout
-        .until(ExpectedConditions.visibilityOf(runningWorkspaceCap))
-        .getText()
-        .equals(size);
+    redrawUiElementsTimeout.until(
+        (WebDriver driver) ->
+            driver
+                .findElement(By.xpath(Locators.RUNNING_WORKSPACE_CAP))
+                .getAttribute("value")
+                .equals(size));
   }
 
   public void setWorkspaceRamCap(int capSize) {
@@ -250,10 +258,12 @@ public class OrganizationPage {
     redrawUiElementsTimeout
         .until(ExpectedConditions.visibilityOf(workspaceRamCap))
         .sendKeys(String.valueOf(size));
-    redrawUiElementsTimeout
-        .until(ExpectedConditions.visibilityOf(workspaceRamCap))
-        .getText()
-        .equals(size);
+    redrawUiElementsTimeout.until(
+        (WebDriver driver) ->
+            driver
+                .findElement(By.xpath(Locators.DELETE_ORG_BUTTON))
+                .getAttribute("value")
+                .equals(size));
   }
 
   public void clickAddMemberButton() {

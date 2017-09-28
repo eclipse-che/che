@@ -17,6 +17,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -65,16 +67,21 @@ public class AddOrganization {
   public void waitAddOrganization() {
     WaitUtils.sleepQuietly(1);
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(addOrganizationTitle))
-        .getText()
-        .equals(NEW_ORGANIZATION);
+        .until(
+            (WebDriver driver) ->
+                driver
+                    .findElement(By.xpath(Locators.ADD_ORGANIZATION_TITLE))
+                    .getText()
+                    .equals(NEW_ORGANIZATION));
   }
 
   public void waitAddSubOrganization() {
-    redrawUiElementsTimeout
-        .until(ExpectedConditions.visibilityOf(addOrganizationTitle))
-        .getText()
-        .equals(NEW_SUB_ORGANIZATION);
+    redrawUiElementsTimeout.until(
+        (WebDriver driver) ->
+            driver
+                .findElement(By.xpath(Locators.ADD_ORGANIZATION_TITLE))
+                .getText()
+                .equals(NEW_SUB_ORGANIZATION));
   }
 
   public void setOrganizationName(String name) {
@@ -82,10 +89,12 @@ public class AddOrganization {
     redrawUiElementsTimeout
         .until(ExpectedConditions.visibilityOf(newOrganizationName))
         .sendKeys(name);
-    redrawUiElementsTimeout
-        .until(ExpectedConditions.visibilityOf(newOrganizationName))
-        .getText()
-        .equals(name);
+    redrawUiElementsTimeout.until(
+        (WebDriver driver) ->
+            driver
+                .findElement(By.xpath(Locators.NEW_ORGANIZATION_NAME))
+                .getAttribute("value")
+                .equals(name));
   }
 
   public void clickAddMemberButton() {

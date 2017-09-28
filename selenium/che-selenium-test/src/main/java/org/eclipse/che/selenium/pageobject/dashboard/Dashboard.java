@@ -20,8 +20,8 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
@@ -59,6 +59,7 @@ public class Dashboard {
     this.testIdeUrlProvider = testIdeUrlProvider;
     this.testDashboardUrlProvider = testDashboardUrlProvider;
     this.loginPage = loginPage;
+
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -210,15 +211,13 @@ public class Dashboard {
   }
 
   public void logout() {
-    try {
-      URL logoutUrl =
-          new URL(
-              "http://172.17.0.1:5050/auth/realms/che/protocol/openid-connect/logout?redirect_uri=http%3A%2F%2F172.17.0.1%3A8080%2Fdashboard%2F%23%2Fworkspaces");
-      seleniumWebDriver.navigate().to(logoutUrl);
+    String apiEndpoint = testDashboardUrlProvider.get().toString();
+    List<String> api = Arrays.asList(apiEndpoint.split(":"));
+    String logoutApiEndpoint = api.get(0) + ":" + api.get(1);
+    String logoutURL = logoutApiEndpoint + ":5050/auth/realms/che/protocol/openid-connect/logout";
+    String redirectURL = logoutApiEndpoint + ":8080/dashboard/#/workspaces";
 
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-    }
+    seleniumWebDriver.navigate().to(logoutURL + "?redirect_uri=" + redirectURL);
   }
 
   public WebDriver driver() {

@@ -14,6 +14,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -39,7 +40,9 @@ public class OrganizationListTest {
   @Inject private NavigationBar navigationBar;
   @Inject private Dashboard dashboard;
 
-  @Inject private OnpremTestOrganizationServiceClient organizationServiceClient;
+  @Inject
+  @Named("admin")
+  private OnpremTestOrganizationServiceClient organizationServiceClient;
 
   @Inject private AdminTestUser adminTestUser;
 
