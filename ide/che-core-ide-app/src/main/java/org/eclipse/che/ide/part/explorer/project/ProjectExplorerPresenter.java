@@ -64,6 +64,7 @@ import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.data.TreeExpander;
 import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
+import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -321,6 +322,18 @@ public class ProjectExplorerPresenter extends BasePresenter
 
         if (node != null && tree.isExpanded(node)) {
           expandQueue.add(delta.getToPath());
+        }
+      }
+
+      final Node node = getNode(delta.getResource().getLocation());
+      if (node != null) {
+
+        if (node instanceof ResourceNode && !delta.getResource().isProject()) {
+          ((ResourceNode) node).setData(delta.getResource());
+        }
+
+        if (node instanceof HasPresentation) {
+          tree.refresh(node);
         }
       }
 

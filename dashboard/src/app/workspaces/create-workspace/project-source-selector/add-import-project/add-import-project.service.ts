@@ -16,7 +16,6 @@ import {ImportGitProjectService} from './import-git-project/import-git-project.s
 import {ImportBlankProjectService} from './import-blank-project/import-blank-project.service';
 import {TemplateSelectorSvc} from './template-selector/template-selector.service';
 import {ProjectSource} from '../project-source.enum';
-import {ProjectSourceSelectorService} from '../project-source-selector.service';
 import {IObservable, IObservableCallbackFn, Observable} from '../../../../../components/utils/observable';
 import {editingProgress} from '../project-source-selector-editing-progress';
 

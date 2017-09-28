@@ -838,7 +838,7 @@ public class Tree extends FocusWidget
     }
 
     NodeDescriptor nodeDescriptor = getNodeDescriptor(node);
-    if (view.getRootContainer(nodeDescriptor) == null) {
+    if (nodeDescriptor == null || view.getRootContainer(nodeDescriptor) == null) {
       return;
     }
 

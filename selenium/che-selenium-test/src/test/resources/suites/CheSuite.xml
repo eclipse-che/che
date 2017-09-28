@@ -193,9 +193,6 @@
             <class name="org.eclipse.che.selenium.editor.SplitEditorFeatureTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerUserCreatePolicyTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerClickCreatePolicyTest"/>
-            <class name="org.eclipse.che.selenium.factory.CheckBitnamiCodeIgniterFactory"/>
-            <class name="org.eclipse.che.selenium.factory.CheckBitnamiSwiftFactory"/>
-            <class name="org.eclipse.che.selenium.factory.CheckBitnamiLaravelFactoryTest"/>
             <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectory"/>
             <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolder"/>
             <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranch"/>
@@ -429,7 +426,7 @@
                     <exclude name="checkMacrosFeature"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.miscellaneous.CheckWsAgentAfterStopProcessTest">
+            <class name="org.eclipse.che.selenium.miscellaneous.CheckRestoringWorkspaceAfterStoppingWsAgentProcess">
                 <methods>
                     <!-- unstable -->
                     <exclude name="checkDialogAfterKillingProcess"/>
