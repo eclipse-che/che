@@ -16,7 +16,7 @@ import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 
 /**
- * Multi Part Stack is layout element, containing {@code EditorPartStack}s and provides methods to
+ * Multi Part Stack is layout element, containing {@link EditorPartStack}s and provides methods to
  * control them.
  *
  * @author Roman Nikitenko
@@ -40,6 +40,16 @@ public interface EditorMultiPartStack extends PartStack {
    */
   @Nullable
   EditorPartStack getPartStackByPart(PartPresenter part);
+
+  /**
+   * Get {@link EditorPartStack} by given {@code tabId}
+   *
+   * @param tabId ID of editor tab to find part stack which contains corresponding editor part
+   * @return editor part stack which contains part with given {@code tabId} or null if this one is
+   *     not found in any {@link EditorPartStack}
+   */
+  @Nullable
+  EditorPartStack getPartStackByTabId(@NotNull String tabId);
 
   /**
    * Get editor part which associated with given {@code tabId}
@@ -84,6 +94,14 @@ public interface EditorMultiPartStack extends PartStack {
    * @return the first part stack
    */
   EditorPartStack createRootPartStack();
+
+  /**
+   * Remove given part stack. Note: All opened parts will be closed, use {@link
+   * EditorPartStack#getParts()} to avoid removing not empty part stack
+   *
+   * @param partStackToRemove part stack to remove
+   */
+  void removePartStack(EditorPartStack partStackToRemove);
 
   /**
    * Split part stack
