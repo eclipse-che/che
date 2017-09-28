@@ -852,6 +852,19 @@ public class DashboardWorkspace {
         .sendKeys(name);
   }
 
+  public void enterProtocol(String protocol) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.id(Locators.ADD_SERVER_PROTOCOL_FIELD)))
+        .clear();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.id(Locators.ADD_SERVER_PROTOCOL_FIELD)))
+        .sendKeys(protocol);
+  }
+
   public void checkServerName(String serverName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(

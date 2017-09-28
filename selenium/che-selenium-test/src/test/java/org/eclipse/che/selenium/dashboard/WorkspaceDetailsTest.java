@@ -84,7 +84,7 @@ public class WorkspaceDetailsTest {
     workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
   }
 
-    @Test(priority = 1)
+  @Test(priority = 0)
   public void workingWithEnvVariables() {
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.ENV_VARIABLES);
     dashboardWorkspace.selectMachine("Environment variables", "dev-machine");
@@ -124,9 +124,9 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
   }
 
-    @Test(priority = 2)
+  @Test(priority = 1)
   public void workingWithAgents() {
-    Boolean b = false;
+    Boolean b;
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.AGENTS);
     dashboardWorkspace.selectMachine("Workspace Agents", "dev-machine");
     for (String agentName : AgentsList) {
@@ -150,29 +150,31 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
   }
 
-    @Test(priority = 3)
+  @Test(priority = 2)
   public void workingWithServers() {
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.SERVERS);
     dashboardWorkspace.selectMachine("Servers", "db");
     dashboardWorkspace.clickOnAddServerButton();
     dashboardWorkspace.waitAddServerDialogIsOpen();
-    dashboardWorkspace.enterReference("agent");
+    dashboardWorkspace.enterReference("agen");
     dashboardWorkspace.enterPort("8080");
+    dashboardWorkspace.enterProtocol("https");
     dashboardWorkspace.clickOnAddDialogButton();
-    dashboardWorkspace.checkServerExists("agent", "8080");
+    dashboardWorkspace.checkServerExists("agen", "8080");
     clickOnSaveButton();
-    loader.waitOnClosed();
-    dashboardWorkspace.clickOnEditServerButton("agent");
+    dashboardWorkspace.clickOnEditServerButton("agen");
     dashboardWorkspace.enterReference("agent");
     dashboardWorkspace.enterPort("80");
+    dashboardWorkspace.enterProtocol("http");
     dashboardWorkspace.clickOnUpdateDialogButton();
+    dashboardWorkspace.checkServerExists("agent", "80");
     loader.waitOnClosed();
     dashboardWorkspace.clickOnDeleteServerButton("agent");
     dashboardWorkspace.clickOnDeleteDialogButton();
     clickOnSaveButton();
   }
 
-    @Test(priority = 4)
+  @Test(priority = 3)
   public void workingWithMachines() {
     String machineName = "new_machine";
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.MACHINES);
@@ -205,7 +207,7 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.clickOnDeleteDialogButton();
   }
 
-  @Test(priority = 5)
+  @Test(priority = 4)
   public void workingWithProjects() {
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.PROJECTS);
     dashboardWorkspace.clickOnAddNewProjectButton();
@@ -222,6 +224,7 @@ public class WorkspaceDetailsTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(
         Template.WEB_JAVA_PETCLINIC.value(), PROJECT_FOLDER);
+    notificationsPopupPanel.waitPopUpPanelsIsClosed();
     consoles.waitProcessInProcessConsoleTree("machine");
     consoles.waitTabNameProcessIsPresent("machine");
   }
