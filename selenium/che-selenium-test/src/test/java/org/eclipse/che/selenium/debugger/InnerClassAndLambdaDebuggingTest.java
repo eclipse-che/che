@@ -129,18 +129,6 @@ public class InnerClassAndLambdaDebuggingTest {
     debugPanel.waitTextInVariablesPanel("anonym=\"App anonym\"");
   }
 
-  @Test(priority = 1, enabled = false)
-  public void shouldDebugMethodLocalInnerClass() {
-    // when
-    editor.setCursorToLine(53);
-    editor.setBreakpoint(53);
-    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
-
-    // then
-    editor.waitAcitveBreakpoint(53);
-    debugPanel.waitTextInVariablesPanel("methodValue=\"App method local inner test\"");
-  }
-
   @Test(priority = 2)
   public void shouldDebugInnerClass() {
     // when

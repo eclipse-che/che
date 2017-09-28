@@ -99,29 +99,9 @@
                     <exclude name="shouldDebugCppProject"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.debugger.DebugExternalClassTest">
-                <methods>
-                    <!-- https://github.com/eclipse/che/issues/4636 -->
-                    <exclude name="shouldDebugJreClass"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.debugger.InnerClassAndLambdaDebuggingTest">
-                <methods>
-                    <!-- https://github.com/eclipse/che/issues/4211 -->
-                    <exclude name="shouldDebugInnerClass"/>
-                    <exclude name="shouldDebugMethodLocalInnerClass"/>
-                    <exclude name="shouldDebugStaticInnerClass"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.debugger.MultimoduleProjectDebuggingTest">
-                <methods>
-                    <!-- https://github.com/eclipse/che/issues/4268 -->
-                    <exclude name="shouldDebugStaticMethod"/>
-
-                    <!-- https://github.com/eclipse/che/issues/4286 -->
-                    <exclude name="shouldGoIntoConstructor"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.debugger.DebugExternalClassTest"/>
+            <class name="org.eclipse.che.selenium.debugger.InnerClassAndLambdaDebuggingTest"/>
+            <class name="org.eclipse.che.selenium.debugger.MultimoduleProjectDebuggingTest"/>
             <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest">
                 <methods>
                     <!-- https://github.com/eclipse/che/issues/4720 -->
