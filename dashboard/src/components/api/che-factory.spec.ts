@@ -14,7 +14,7 @@ import {CheAPIBuilder} from './builder/che-api-builder.factory';
 import {CheFactory} from './che-factory.factory';
 
 /**
- * Test of the Codenvy Factory API
+ * Test of the Che Factory API
  */
 describe('CheFactory', () => {
 

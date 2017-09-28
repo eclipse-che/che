@@ -199,7 +199,11 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   private void checkMachineServers(OpenShiftMachine machine)
       throws InfrastructureException, InterruptedException {
     final ServersReadinessChecker check =
-        new ServersReadinessChecker(machine.getName(), machine.getServers(), serverCheckerFactory);
+        new ServersReadinessChecker(
+            getContext().getIdentity(),
+            machine.getName(),
+            machine.getServers(),
+            serverCheckerFactory);
     check.startAsync(new ServerReadinessHandler(machine.getName()));
     check.await();
   }

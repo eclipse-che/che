@@ -23,7 +23,7 @@ export class CheUserBuilder {
    * Default constructor.
    */
   constructor() {
-    this.user = {
+    this.user = <che.IUser>{
       email: '',
       name: '',
       aliases: [],

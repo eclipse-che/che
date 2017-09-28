@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+    CREATE USER <%= scope.lookupvar('postgres::che_pg_username') -%> WITH PASSWORD '<%= scope.lookupvar('postgres::che_pg_password') -%>';
+    CREATE DATABASE <%= scope.lookupvar('postgres::che_pg_database') -%>;
+    GRANT ALL PRIVILEGES ON DATABASE <%= scope.lookupvar('postgres::che_pg_database') -%> TO <%= scope.lookupvar('postgres::che_pg_username') -%>;
+    ALTER USER <%= scope.lookupvar('postgres::che_pg_username') -%> WITH SUPERUSER;
+EOSQL

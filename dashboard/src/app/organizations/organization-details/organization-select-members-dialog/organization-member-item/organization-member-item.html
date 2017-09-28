@@ -1,0 +1,31 @@
+<che-list-item flex-gt-sm="100" flex="33"
+               ng-mouseover="hover=true" ng-mouseout="hover=false"
+               class="organization-member-item">
+  <div flex="100"
+       layout="row"
+       layout-align="start stretch"
+       class="che-list-item-row member-list-row">
+    <div layout="row"
+         layout-align="start center"
+         class="che-checkbox-area">
+      <che-list-item-checked ng-model="isSelected"
+                             ng-click="onChange({'memberId': member.id, 'isSelected': isSelected})"></che-list-item-checked>
+    </div>
+    <div flex
+         layout-xs="column" layout-gt-xs="row"
+         layout-align-gt-xs="start center"
+         layout-align-xs="start start"
+         class="che-list-item-details">
+      <div flex-gt-xs="50"
+           class="che-list-item-name">
+        <span class="che-xs-header noselect" hide-gt-xs>Name</span>
+        <span class="member-email che-hover ">{{member.fullName}}</span>
+      </div>
+      <div flex-gt-xs="50"
+           class="che-list-item-name">
+        <span class="che-xs-header noselect" hide-gt-xs>Email</span>
+        <span class="member-email che-hover ">{{member.email}}</span>
+      </div>
+    </div>
+  </div>
+</che-list-item>

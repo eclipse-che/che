@@ -19,7 +19,6 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import java.util.Set;
-import javax.sql.DataSource;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
@@ -36,7 +35,6 @@ import org.eclipse.che.api.recipe.RecipeLoader;
 import org.eclipse.che.api.recipe.RecipeService;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.server.SystemModule;
-import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
@@ -46,9 +44,6 @@ import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
-import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
-import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 /** @author andrew00x */
@@ -59,15 +54,12 @@ public class WsMasterModule extends AbstractModule {
     // db related components modules
     install(new com.google.inject.persist.jpa.JpaPersistModule("main"));
     install(new org.eclipse.che.account.api.AccountModule());
-    install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
     install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
     bind(RecipeDao.class).to(JpaRecipeDao.class);
-    install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
     install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
     install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
 
     // db configuration
-    bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
     bind(SchemaInitializer.class)
         .to(org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer.class);
     bind(org.eclipse.che.core.db.DBInitializer.class).asEagerSingleton();
@@ -88,10 +80,6 @@ public class WsMasterModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
     factoryParametersResolverMultibinder.addBinding().to(GithubFactoryParametersResolver.class);
 
-    bind(org.eclipse.che.api.user.server.CheUserCreator.class);
-
-    bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
-
     bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
     bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class)
         .asEagerSingleton();
@@ -103,7 +91,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.ProfileService.class);
     bind(org.eclipse.che.api.user.server.PreferencesService.class);
 
-    bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
     MapBinder<String, String> stacks =
         MapBinder.newMapBinder(
             binder(), String.class, String.class, Names.named(StackLoader.CHE_PREDEFINED_STACKS));
@@ -177,13 +164,6 @@ public class WsMasterModule extends AbstractModule {
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
     //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
 
-    String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
-    if ("openshift".equals(infrastructure)) {
-      install(new OpenShiftInfraModule());
-    } else {
-      install(new LocalDockerModule());
-      install(new DockerInfraModule());
-    }
     bind(ServerCheckerFactory.class).to(ServerCheckerFactoryImpl.class);
   }
 }

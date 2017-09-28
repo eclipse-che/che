@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.mockito.Mock;
@@ -46,6 +47,7 @@ public class ServersReadinessCheckerTest {
   @Mock private Consumer<String> readinessHandler;
   @Mock private ServerCheckerFactory factory;
   @Mock private HttpConnectionServerChecker connectionChecker;
+  @Mock private RuntimeIdentity runtimeIdentity;
 
   private CompletableFuture<String> compFuture;
   private ServersReadinessChecker checker;
@@ -54,11 +56,12 @@ public class ServersReadinessCheckerTest {
   public void setUp() throws Exception {
     compFuture = new CompletableFuture<>();
 
-    when(factory.httpChecker(any(URL.class), anyString(), anyString(), any(Timer.class)))
+    when(factory.httpChecker(any(URL.class), any(), anyString(), anyString(), any(Timer.class)))
         .thenReturn(connectionChecker);
     when(connectionChecker.getReportCompFuture()).thenReturn(compFuture);
 
-    checker = new ServersReadinessChecker(MACHINE_NAME, getDefaultServers(), factory);
+    checker =
+        new ServersReadinessChecker(runtimeIdentity, MACHINE_NAME, getDefaultServers(), factory);
   }
 
   @AfterMethod(timeOut = 1000)
@@ -101,7 +104,7 @@ public class ServersReadinessCheckerTest {
         ImmutableMap.of(
             "wsagent/http", new ServerImpl("http://localhost"),
             "not-hardcoded", new ServerImpl("http://localhost"));
-    checker = new ServersReadinessChecker(MACHINE_NAME, servers, factory);
+    checker = new ServersReadinessChecker(runtimeIdentity, MACHINE_NAME, servers, factory);
 
     checker.startAsync(readinessHandler);
     connectionChecker.getReportCompFuture().complete("test_ref");

@@ -27,6 +27,7 @@
         <module>core</module>
         <module>wsmaster</module>
         <module>wsagent</module>
+        <module>multiuser</module>
         <module>ide</module>
         <module>agents</module>
         <module>infrastructures</module>
@@ -35,6 +36,7 @@
         <module>samples</module>
         <module>dashboard</module>
         <module>assembly</module>
+        <module>assembly-multiuser</module>
         <module>selenium</module>
     </modules>
     <scm>
@@ -47,6 +49,8 @@
         <che.docs.version>5.19.0-SNAPSHOT</che.docs.version>
         <che.lib.version>5.19.0-SNAPSHOT</che.lib.version>
         <che.version>5.19.0-SNAPSHOT</che.version>
+        <com.dumbster.version>1.7.1</com.dumbster.version>
+        <org.keycloak.version>3.2.0.Final</org.keycloak.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -55,6 +59,26 @@
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>${version.jsr305.plugin}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>0.7.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-catalina</artifactId>
+                <version>${org.apache.tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-dbcp</artifactId>
+                <version>${org.apache.tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-servlet-api</artifactId>
+                <version>${org.apache.tomcat.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
@@ -66,11 +90,6 @@
                 <artifactId>assembly-ide-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>assembly-ide-war</artifactId>
-                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
@@ -125,6 +144,11 @@
                 <version>${che.version}</version>
                 <type>zip</type>
                 <classifier>linux_amd64</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>che-multiuser-keycloak-shared</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
@@ -204,6 +228,36 @@
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>unison-agent</artifactId>
                 <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.assembly-multiuser</groupId>
+                <artifactId>assembly-ide-war</artifactId>
+                <version>${che.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.assembly-multiuser</groupId>
+                <artifactId>assembly-wsagent-server</artifactId>
+                <version>${che.version}</version>
+                <type>tar.gz</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.assembly-multiuser</groupId>
+                <artifactId>assembly-wsagent-war</artifactId>
+                <version>${che.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.assembly-multiuser</groupId>
+                <artifactId>assembly-wsmaster-war</artifactId>
+                <version>${che.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.assembly-multiuser</groupId>
+                <artifactId>che-dashboard-war</artifactId>
+                <version>${che.version}</version>
+                <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -424,6 +478,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-commons-auth</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-gwt</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -604,6 +663,166 @@
                 <version>${che.lib.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-authorization</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-authorization-impl</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-organization</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-organization</artifactId>
+                <version>${che.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-organization-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-permission</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-permission</artifactId>
+                <version>${che.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-permission-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-resource</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-resource</artifactId>
+                <version>${che.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-resource-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-keycloak-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-keycloak-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-keycloak-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-keycloak-token-provider</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-keycloak-valve</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-machine-authentication</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-machine-authentication-agent</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-machine-authentication-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-machine-authentication-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-factory</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-machine</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-machine</artifactId>
+                <version>${che.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-resource</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-system</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-user</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-workspace</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-workspace</artifactId>
+                <version>${che.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-personal-account</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-sql-schema</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>multiuser-infrastructure-openshift</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-activity-ide</artifactId>
                 <version>${che.version}</version>
@@ -680,7 +899,7 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-docker-compose</artifactId>
+                <artifactId>che-plugin-docker-machine</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -1210,9 +1429,25 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-common</artifactId>
+                <version>${org.keycloak.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-core</artifactId>
+                <version>${org.keycloak.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${jdbc.postgresql-driver.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.kirviq</groupId>
+                <artifactId>dumbster</artifactId>
+                <version>${com.dumbster.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>

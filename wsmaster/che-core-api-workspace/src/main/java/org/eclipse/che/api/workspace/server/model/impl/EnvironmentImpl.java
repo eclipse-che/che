@@ -83,6 +83,7 @@ public class EnvironmentImpl implements Environment {
     this(environment.getRecipe(), environment.getMachines(), environment.getWarnings());
   }
 
+  @Override
   public RecipeImpl getRecipe() {
     return recipe;
   }
