@@ -1,7 +1,7 @@
 <html>
 <head>
 ${msg("robotoFontIncludeStyle")}
-</head>	
+</head>
 <body style="${msg("mailBodyStyle")}">
     <#assign letterTitle=msg("passwordResetTitle")>
     <#include "header.ftl">
