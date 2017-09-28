@@ -34,7 +34,7 @@ build_directory() {
   shift
   # Calling build.sh
   if [ -e ${directory}/build.sh ] ; then
-    ${directory}build.sh ${OPTIONS} ${ARGS}
+    bash ${directory}build.sh ${OPTIONS} ${ARGS}
   else
     printf "${RED}No build.sh in directory ${directory}${NC}\n"
     exit 2
