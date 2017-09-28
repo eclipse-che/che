@@ -29,6 +29,6 @@ public interface RevertRequest {
    * @param commit the commit to return
    */
   RevertRequest withCommit(String commit);
-  
+
   void setCommit(String commit);
 }
