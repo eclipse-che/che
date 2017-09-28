@@ -21,6 +21,7 @@ import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.revert.RevertCommitPresenter;
 
+/** @author Dmitrii Bocharov (bdshadow) */
 @Singleton
 public class RevertCommitAction extends GitAction {
   private final RevertCommitPresenter presenter;

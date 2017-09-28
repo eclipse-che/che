@@ -1693,6 +1693,22 @@ class JGitConnection implements GitConnection {
       throw new GitException(exception.getMessage(), exception);
     }
 
+    return newDto(RevertResult.class)
+        .withRevertedCommits(getRevertedCommits(revertCommand))
+        .withConflicts(getRevertConflicts(revertCommand))
+        .withNewHead(revCommit != null ? revCommit.getId().getName() : null);
+  }
+
+  private List<String> getRevertedCommits(RevertCommand revertCommand) {
+    List<Ref> jGitRevertedCommits = revertCommand.getRevertedRefs();
+    List<String> revertedCommits = new ArrayList<String>();
+    if (jGitRevertedCommits != null) {
+      jGitRevertedCommits.forEach(ref -> revertedCommits.add(ref.getObjectId().name()));
+    }
+    return revertedCommits;
+  }
+
+  private Map<String, RevertResult.RevertStatus> getRevertConflicts(RevertCommand revertCommand) {
     Map<String, RevertResult.RevertStatus> conflicts = new HashMap<>();
     if (revertCommand.getFailingResult() != null) {
       Map<String, MergeFailureReason> failingPaths =
@@ -1714,20 +1730,7 @@ class JGitConnection implements GitConnection {
           .filter(unmergedPath -> !conflicts.containsKey(unmergedPath))
           .forEach(unmergedPath -> conflicts.put(unmergedPath, RevertResult.RevertStatus.FAILED));
     }
-
-    List<Ref> jGitRevertedCommits = revertCommand.getRevertedRefs();
-    List<String> revertedCommits = new ArrayList<String>();
-    if (jGitRevertedCommits != null) {
-      jGitRevertedCommits.forEach(ref -> revertedCommits.add(ref.getObjectId().name()));
-    }
-    String newHead = null;
-    if (revCommit != null) {
-      newHead = revCommit.getId().getName();
-    }
-    return newDto(RevertResult.class)
-        .withRevertedCommits(revertedCommits)
-        .withConflicts(conflicts)
-        .withNewHead(newHead);
+    return conflicts;
   }
 
   private RevertResult.RevertStatus getRevertStatusFromMergeFailureReason(
