@@ -15,14 +15,16 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.function.Supplier;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
-import org.eclipse.che.api.core.util.LineConsumerFactory;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.importer.ProjectImporter;
+import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.project.server.api.ProjectImporter;
 import org.eclipse.che.plugin.svn.shared.CheckoutRequest;
 
 /** Implementation of {@link ProjectImporter} for Subversion. */
@@ -32,10 +34,13 @@ public class SubversionProjectImporter implements ProjectImporter {
   public static final String ID = "subversion";
 
   private final SubversionApi subversionApi;
+  private final FsManager fsManager;
 
   @Inject
-  public SubversionProjectImporter(final SubversionApi subversionApi) {
+  public SubversionProjectImporter(
+      final SubversionApi subversionApi, FsManager fsManager) {
     this.subversionApi = subversionApi;
+    this.fsManager = fsManager;
   }
 
   @Override
@@ -54,36 +59,36 @@ public class SubversionProjectImporter implements ProjectImporter {
   }
 
   @Override
-  public void importSources(FolderEntry baseFolder, SourceStorage sourceStorage)
+  public void doImport(SourceStorage src, String dst)
       throws ForbiddenException, ConflictException, UnauthorizedException, IOException,
-          ServerException {
-    importSources(baseFolder, sourceStorage, LineConsumerFactory.NULL);
+          ServerException, NotFoundException {
+    doImport(src, dst, null);
   }
 
   @Override
-  public void importSources(
-      FolderEntry baseFolder, SourceStorage sourceStorage, LineConsumerFactory lineConsumerFactory)
+  public void doImport(SourceStorage src, String dst, Supplier<LineConsumer> supplier)
       throws ForbiddenException, ConflictException, UnauthorizedException, IOException,
-          ServerException {
-    if (!baseFolder.isFolder()) {
-      throw new IOException(
-          "Project cannot be imported into \""
-              + baseFolder.getName()
-              + "\".  "
-              + "It is not a folder.");
+          ServerException, NotFoundException {
+    if (supplier == null) {
+      supplier = () -> LineConsumer.DEV_NULL;
     }
 
-    this.subversionApi.setOutputLineConsumerFactory(lineConsumerFactory);
+    if (!fsManager.isDirectory(dst)) {
+      throw new IOException("Project cannot be imported into \"" + dst + "\". It is not a folder.");
+    }
+
+    this.subversionApi.setOutputLineConsumerFactory(supplier::get);
     subversionApi.checkout(
         newDto(CheckoutRequest.class)
-            .withProjectPath(baseFolder.getVirtualFile().toIoFile().getAbsolutePath())
-            .withUrl(sourceStorage.getLocation())
-            .withUsername(sourceStorage.getParameters().remove("username"))
-            .withPassword(sourceStorage.getParameters().remove("password")));
+            // TODO wtf?
+            .withProjectPath("/projects" + dst)
+            .withUrl(src.getLocation())
+            .withUsername(src.getParameters().remove("username"))
+            .withPassword(src.getParameters().remove("password")));
   }
 
   @Override
-  public ImporterCategory getCategory() {
-    return ImporterCategory.SOURCE_CONTROL;
+  public SourceCategory getSourceCategory() {
+    return SourceCategory.VCS;
   }
 }

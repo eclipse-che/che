@@ -96,8 +96,6 @@ public class TestSetUpUtil {
    *
    * @param jproject The parent project
    * @param containerName The name of the new source container
-   * @param inclusionFilters Inclusion filters to set
-   * @param exclusionFilters Exclusion filters to set
    * @param outputLocation The location where class files are written to, <b>null</b> for project
    *     output folder
    * @return The handle to the new source container
@@ -150,7 +148,6 @@ public class TestSetUpUtil {
    *
    * @param elem the element to delete
    * @throws CoreException if operation failed
-   * @see #ASSERT_NO_MIXED_LINE_DELIMIERS
    */
   public static void delete(final IJavaElement elem) throws CoreException {
     //		if (ASSERT_NO_MIXED_LINE_DELIMIERS)

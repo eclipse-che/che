@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.api.project.server;
 
+import java.io.IOException;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
-import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 
 /**
  * {@link LineConsumerFactory} dedicated to project related operations long output extended standard
@@ -43,6 +43,13 @@ public class ProjectOutputLineConsumerFactory implements LineConsumerFactory {
 
   @Override
   public LineConsumer newLineConsumer() {
-    return new ProjectImportOutputWSLineConsumer(projectName, delay);
+    //    return new ProjectImportOutputWSLineConsumer(projectName, delay);
+    return new LineConsumer() {
+      @Override
+      public void writeLine(String line) throws IOException {}
+
+      @Override
+      public void close() throws IOException {}
+    };
   }
 }

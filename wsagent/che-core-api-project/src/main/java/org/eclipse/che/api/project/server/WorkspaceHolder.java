@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.project.server.api.ProjectConfigRegistry;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.slf4j.Logger;
@@ -36,20 +37,18 @@ import org.slf4j.LoggerFactory;
 public class WorkspaceHolder extends WorkspaceProjectsSyncer {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceHolder.class);
-
-  private String apiEndpoint;
-
-  private String workspaceId;
-
   private final String userToken;
-
+  private String apiEndpoint;
+  private String workspaceId;
   private HttpJsonRequestFactory httpJsonRequestFactory;
 
   @Inject
   public WorkspaceHolder(
-      @Named("che.api") String apiEndpoint, HttpJsonRequestFactory httpJsonRequestFactory)
+      @Named("che.api") String apiEndpoint,
+      HttpJsonRequestFactory httpJsonRequestFactory,
+      ProjectConfigRegistry projectConfigs)
       throws ServerException {
-
+    super(projectConfigs);
     this.apiEndpoint = apiEndpoint;
     this.httpJsonRequestFactory = httpJsonRequestFactory;
 
@@ -84,7 +83,6 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
    * Add project on WS-master side.
    *
    * @param project project to add
-   * @throws ServerException
    */
   protected void addProject(ProjectConfig project) throws ServerException {
 
@@ -92,7 +90,9 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "addProject");
-    if (userToken != null) builder.queryParam("token", userToken);
+    if (userToken != null) {
+      builder.queryParam("token", userToken);
+    }
     final String href = builder.build(workspaceId).toString();
     try {
       httpJsonRequestFactory.fromUrl(href).usePostMethod().setBody(asDto(project)).request();
@@ -105,7 +105,6 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
    * Updates project on WS-master side.
    *
    * @param project project to update
-   * @throws ServerException
    */
   protected void updateProject(ProjectConfig project) throws ServerException {
 
@@ -113,7 +112,9 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "updateProject");
-    if (userToken != null) builder.queryParam("token", userToken);
+    if (userToken != null) {
+      builder.queryParam("token", userToken);
+    }
     final String href =
         builder.build(new String[] {workspaceId, project.getPath()}, false).toString();
     try {
@@ -129,7 +130,9 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "deleteProject");
-    if (userToken != null) builder.queryParam("token", userToken);
+    if (userToken != null) {
+      builder.queryParam("token", userToken);
+    }
     final String href =
         builder.build(new String[] {workspaceId, project.getPath()}, false).toString();
     try {
@@ -139,17 +142,16 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
     }
   }
 
-  /**
-   * @return WorkspaceDto
-   * @throws ServerException
-   */
+  /** @return WorkspaceDto */
   private WorkspaceDto workspaceDto() throws ServerException {
 
     final UriBuilder builder =
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "getByKey");
-    if (userToken != null) builder.queryParam("token", userToken);
+    if (userToken != null) {
+      builder.queryParam("token", userToken);
+    }
     final String href = builder.build(workspaceId).toString();
     try {
       return httpJsonRequestFactory

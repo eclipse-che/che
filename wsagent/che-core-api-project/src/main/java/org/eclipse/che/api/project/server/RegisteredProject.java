@@ -29,10 +29,10 @@ import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ProjectTypeResolver;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.Variable;
-import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 
 /**
@@ -45,7 +45,7 @@ public class RegisteredProject implements ProjectConfig {
   private final List<ProjectProblem> problems;
   private final Map<String, Value> attributes;
 
-  private final FolderEntry folder;
+  private final String folder;
   private final ProjectConfig config;
   private boolean updated;
   private boolean detected;
@@ -61,21 +61,22 @@ public class RegisteredProject implements ProjectConfig {
    * @param projectTypeRegistry project type registry
    * @throws ServerException when path for project is undefined
    */
-  RegisteredProject(
-      FolderEntry folder,
+  public RegisteredProject(
+      String folder,
       ProjectConfig config,
       boolean updated,
       boolean detected,
+      ProjectTypeResolver projectTypeResolver,
       ProjectTypeRegistry projectTypeRegistry)
       throws ServerException {
     problems = new ArrayList<>();
     attributes = new HashMap<>();
 
-    Path path;
+    String path;
     if (folder != null) {
-      path = folder.getPath();
+      path = folder;
     } else if (config != null) {
-      path = Path.of(config.getPath());
+      path = config.getPath();
     } else {
       throw new ServerException("Invalid Project Configuration. Path undefined.");
     }
@@ -85,7 +86,7 @@ public class RegisteredProject implements ProjectConfig {
     this.updated = updated;
     this.detected = detected;
 
-    if (folder == null || folder.isFile()) {
+    if (folder == null) {
       problems.add(
           new ProjectProblemImpl(
               NO_PROJECT_ON_FILE_SYSTEM,
@@ -106,6 +107,7 @@ public class RegisteredProject implements ProjectConfig {
             this.config.getType(),
             this.config.getMixins(),
             projectTypeRegistry,
+            projectTypeResolver,
             problems);
 
     // 2. init transient (implicit, like git) project types.
@@ -138,7 +140,7 @@ public class RegisteredProject implements ProjectConfig {
         if (variable.isValueProvided()) {
 
           final ValueProvider valueProvider =
-              variable.getValueProviderFactory().newInstance(folder);
+              variable.getValueProviderFactory().newInstance(this);
 
           if (folder != null) {
 
@@ -223,7 +225,7 @@ public class RegisteredProject implements ProjectConfig {
   }
 
   /** @return root folder or null */
-  public FolderEntry getBaseFolder() {
+  public String getBaseFolder() {
     return folder;
   }
 
@@ -260,7 +262,7 @@ public class RegisteredProject implements ProjectConfig {
 
   @Override
   public String getPath() {
-    return ProjectRegistry.absolutizePath(config.getPath());
+    return config.getPath();
   }
 
   @Override

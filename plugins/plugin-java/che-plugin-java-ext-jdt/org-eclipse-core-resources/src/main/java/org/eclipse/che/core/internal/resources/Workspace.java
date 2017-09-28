@@ -13,19 +13,19 @@ package org.eclipse.che.core.internal.resources;
 import com.google.inject.Provider;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FileEntry;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.core.internal.utils.Policy;
@@ -76,11 +76,15 @@ import org.slf4j.LoggerFactory;
 
 /** @author Evgen Vidolob */
 public class Workspace implements IWorkspace {
+
   public static final boolean caseSensitive =
       new java.io.File("a").compareTo(new java.io.File("A")) != 0;
   //$NON-NLS-1$ //$NON-NLS-2$
   private static final Logger LOG = LoggerFactory.getLogger(Workspace.class);
   protected final IWorkspaceRoot defaultRoot = new WorkspaceRoot(Path.ROOT, this);
+  private final Provider<ProjectManager> projectManager;
+  private final Provider<PathResolver> pathResolverProvider;
+  private final Provider<FsManager> fsManagerProvider;
   /**
    * Work manager should never be accessed directly because accessor asserts that workspace is still
    * open.
@@ -90,8 +94,6 @@ public class Workspace implements IWorkspace {
   protected TeamHook teamHook = null;
 
   private String wsPath;
-  private final Provider<ProjectRegistry> projectRegistry;
-  private final Provider<ProjectManager> projectManager;
   /**
    * Scheduling rule factory. This field is null if the factory has not been used yet. The accessor
    * method should be used rather than accessing this field directly.
@@ -102,22 +104,16 @@ public class Workspace implements IWorkspace {
 
   public Workspace(
       String path,
-      Provider<ProjectRegistry> projectRegistry,
-      Provider<ProjectManager> projectManager) {
+      Provider<ProjectManager> projectManager,
+      Provider<PathResolver> pathResolverProvider,
+      Provider<FsManager> fsManagerProvider) {
     this.wsPath = path;
-    this.projectRegistry = projectRegistry;
     this.projectManager = projectManager;
+    this.pathResolverProvider = pathResolverProvider;
+    this.fsManagerProvider = fsManagerProvider;
     _workManager = new WorkManager(this);
     _workManager.startup(null);
     _workManager.postWorkspaceStartup();
-  }
-
-  private FolderEntry getProjectsRoot() {
-    try {
-      return projectManager.get().getProjectsRoot();
-    } catch (ServerException e) {
-      throw new IllegalStateException(e);
-    }
   }
 
   public static WorkspaceDescription defaultWorkspaceDescription() {
@@ -141,7 +137,9 @@ public class Workspace implements IWorkspace {
   }
 
   public String getAbsoluteWorkspacePath() {
-    return getProjectsRoot().getVirtualFile().toIoFile().getAbsolutePath();
+    String rootWsPath = pathResolverProvider.get().ROOT;
+    java.nio.file.Path rootFsPath = pathResolverProvider.get().toAbsoluteFsPath(rootWsPath);
+    return rootFsPath.toString();
   }
 
   public Resource newResource(IPath path, int type) {
@@ -257,7 +255,9 @@ public class Workspace implements IWorkspace {
       MultiStatus result =
           new MultiStatus(
               ResourcesPlugin.PI_RESOURCES, IResourceStatus.INTERNAL_ERROR, message, null);
-      if (resources.length == 0) return result;
+      if (resources.length == 0) {
+        return result;
+      }
       resources = resources.clone(); // to avoid concurrent changes to this array
       try {
         prepareOperation(getRoot(), monitor);
@@ -283,7 +283,9 @@ public class Workspace implements IWorkspace {
             }
           }
         }
-        if (result.matches(IStatus.ERROR)) throw new ResourceException(result);
+        if (result.matches(IStatus.ERROR)) {
+          throw new ResourceException(result);
+        }
         return result;
       } catch (OperationCanceledException e) {
         getWorkManager().operationCanceled();
@@ -352,7 +354,9 @@ public class Workspace implements IWorkspace {
   public IResourceRuleFactory getRuleFactory() {
     //note that the rule factory is created lazily because it
     //requires loading the teamHook extension
-    if (ruleFactory == null) ruleFactory = new Rules(this);
+    if (ruleFactory == null) {
+      ruleFactory = new Rules(this);
+    }
     return ruleFactory;
   }
 
@@ -481,7 +485,9 @@ public class Workspace implements IWorkspace {
       } finally {
         //                if (avoidNotification)
         //                    notificationManager.endAvoidNotify();
-        if (depth >= 0) getWorkManager().endUnprotected(depth);
+        if (depth >= 0) {
+          getWorkManager().endUnprotected(depth);
+        }
         endOperation(rule, false, Policy.subMonitorFor(monitor, Policy.endOpWork));
       }
     } finally {
@@ -492,8 +498,9 @@ public class Workspace implements IWorkspace {
   public void beginOperation(boolean createNewTree) throws CoreException {
     WorkManager workManager = getWorkManager();
     workManager.incrementNestedOperations();
-    if (!workManager.isBalanced())
+    if (!workManager.isBalanced()) {
       Assert.isTrue(false, "Operation was not prepared."); //$NON-NLS-1$
+    }
     //        if (workManager.getPreparedOperationDepth() > 1) {
     //            if (createNewTree && tree.isImmutable())
     //                newWorkingTree();
@@ -514,7 +521,9 @@ public class Workspace implements IWorkspace {
       throws CoreException {
     WorkManager workManager = getWorkManager();
     //don't do any end operation work if we failed to check in
-    if (workManager.checkInFailed(rule)) return;
+    if (workManager.checkInFailed(rule)) {
+      return;
+    }
     // This is done in a try finally to ensure that we always decrement the operation count
     // and release the workspace lock.  This must be done at the end because snapshot
     // and "hasChanges" comparison have to happen without interference from other threads.
@@ -619,12 +628,13 @@ public class Workspace implements IWorkspace {
 
     /* test invalid characters */
     char[] chars = OS.INVALID_RESOURCE_CHARACTERS;
-    for (int i = 0; i < chars.length; i++)
+    for (int i = 0; i < chars.length; i++) {
       if (segment.indexOf(chars[i]) != -1) {
         message = NLS.bind(Messages.resources_invalidCharInName, String.valueOf(chars[i]), segment);
         return new org.eclipse.core.internal.resources.ResourceStatus(
             IResourceStatus.INVALID_VALUE, null, message);
       }
+    }
 
     /* test invalid OS names */
     if (!OS.isNameValid(segment)) {
@@ -709,13 +719,19 @@ public class Workspace implements IWorkspace {
       }
       int fileFolderType = type &= ~IResource.PROJECT;
       int segmentCount = path.segmentCount();
-      if (lastSegmentOnly) return validateName(path.segment(segmentCount - 1), fileFolderType);
+      if (lastSegmentOnly) {
+        return validateName(path.segment(segmentCount - 1), fileFolderType);
+      }
       IStatus status = validateName(path.segment(0), IResource.PROJECT);
-      if (!status.isOK()) return status;
+      if (!status.isOK()) {
+        return status;
+      }
       // ignore first segment (the project)
       for (int i = 1; i < segmentCount; i++) {
         status = validateName(path.segment(i), fileFolderType);
-        if (!status.isOK()) return status;
+        if (!status.isOK()) {
+          return status;
+        }
       }
       return Status.OK_STATUS;
     }
@@ -752,25 +768,15 @@ public class Workspace implements IWorkspace {
   }
 
   public ResourceInfo getResourceInfo(IPath path) {
-    try {
-      VirtualFileEntry child = getProjectsRoot().getChild(path.toOSString());
-      if (child != null) {
-        return newElement(getType(child));
-      }
-      return null;
-
-    } catch (ServerException e) {
-      LOG.error(e.getMessage(), e);
-      return null;
-    }
+    String wsPath = pathResolverProvider.get().toAbsoluteWsPath(path.toOSString());
+    return fsManagerProvider.get().exists(wsPath) ? newElement(getType(wsPath)) : null;
   }
 
-  private int getType(VirtualFileEntry file) {
-    if (file.isFile()) {
+  private int getType(String wsPath) {
+    if (fsManagerProvider.get().existsAsFile(wsPath)) {
       return IResource.FILE;
     } else {
-      FolderEntry folder = (FolderEntry) file;
-      if (projectRegistry.get().getProject(folder.getPath().toString()) != null) {
+      if (projectManager.get().isRegistered(wsPath)) {
         return IResource.PROJECT;
       } else {
         return IResource.FOLDER;
@@ -799,27 +805,23 @@ public class Workspace implements IWorkspace {
 
   public IResource[] getChildren(IPath path) {
 
-    try {
-      VirtualFileEntry parent = getProjectsRoot().getChild(path.toOSString());
-      if (parent != null && parent.isFolder()) {
-        FolderEntry folder = (FolderEntry) parent;
-        List<VirtualFileEntry> children = folder.getChildren();
-        if (!children.isEmpty()) {
-          IResource[] resources = new IResource[children.size()];
-          for (int i = 0; i < children.size(); i++) {
-            VirtualFileEntry child = children.get(i);
-            IPath iPath = new Path(child.getPath().toString());
-            resources[i] = newResource(iPath, getType(child));
-          }
-          resources =
-              Arrays.stream(resources)
-                  .sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()))
-                  .toArray(IResource[]::new);
-          return resources;
+    String parentWsPath = pathResolverProvider.get().toAbsoluteWsPath(path.toOSString());
+    if (fsManagerProvider.get().existsAsDirectory(parentWsPath)) {
+      List<String> allChildrenWsPaths =
+          new ArrayList<>(fsManagerProvider.get().getAllChildrenWsPaths(parentWsPath));
+      if (!allChildrenWsPaths.isEmpty()) {
+        IResource[] resources = new IResource[allChildrenWsPaths.size()];
+        for (int i = 0; i < allChildrenWsPaths.size(); i++) {
+          String childWsPath = allChildrenWsPaths.get(i);
+          IPath iPath = new Path(childWsPath);
+          resources[i] = newResource(iPath, getType(childWsPath));
         }
+        resources =
+            Arrays.stream(resources)
+                .sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()))
+                .toArray(IResource[]::new);
+        return resources;
       }
-    } catch (ServerException e) {
-      LOG.error(e.getMessage(), e);
     }
     return ICoreConstants.EMPTY_RESOURCE_ARRAY;
   }
@@ -830,43 +832,47 @@ public class Workspace implements IWorkspace {
       switch (resource.getType()) {
         case IResource.FILE:
           String newName = path.lastSegment();
-          VirtualFileEntry child =
-              getProjectsRoot().getChild(path.removeLastSegments(1).toOSString());
-          if (child == null) {
+          String childWsPath =
+              pathResolverProvider.get().toAbsoluteWsPath(path.removeLastSegments(1).toOSString());
+
+          if (!fsManagerProvider.get().exists(childWsPath)) {
             throw new NotFoundException(
                 "Can't find parent folder: " + path.removeLastSegments(1).toOSString());
           }
-          FolderEntry entry = (FolderEntry) child;
-
-          entry.createFile(newName, new byte[0]);
+          String newFileWsPath = pathResolverProvider.get().resolve(childWsPath, newName);
+          fsManagerProvider.get().createFile(newFileWsPath);
           break;
         case IResource.FOLDER:
-          getProjectsRoot().createFolder(path.toOSString());
+          String directoryWsPath = pathResolverProvider.get().toAbsoluteWsPath(path.toOSString());
+          fsManagerProvider.get().createDirectory(directoryWsPath);
           break;
         case IResource.PROJECT:
           ProjectConfigImpl projectConfig = new ProjectConfigImpl();
           projectConfig.setPath(resource.getName());
           projectConfig.setName(resource.getName());
           projectConfig.setType(BaseProjectType.ID);
-          projectManager.get().createProject(projectConfig, new HashMap<>());
+          projectManager.get().create(projectConfig, new HashMap<>());
           break;
         default:
           throw new UnsupportedOperationException();
       }
-    } catch (ForbiddenException | ConflictException | ServerException | NotFoundException e) {
+    } catch (ForbiddenException
+        | ConflictException
+        | ServerException
+        | NotFoundException
+        | BadRequestException e) {
       throw new CoreException(new Status(0, ResourcesPlugin.getPluginId(), e.getMessage(), e));
     }
   }
 
   public void setFileContent(File file, InputStream content) {
     try {
-      VirtualFileEntry child = getProjectsRoot().getChild(file.getFullPath().toOSString());
-      if (child.isFile()) {
-        FileEntry f = (FileEntry) child;
-        f.updateContent(content);
+      String fileWsPath =
+          pathResolverProvider.get().toAbsoluteWsPath(file.getFullPath().toOSString());
+      if (fsManagerProvider.get().existsAsFile(fileWsPath)) {
+        fsManagerProvider.get().updateFile(fileWsPath, content);
       }
-
-    } catch (ForbiddenException | ServerException e) {
+    } catch (ServerException | NotFoundException | ConflictException e) {
       ResourcesPlugin.log(e);
     }
   }
@@ -874,11 +880,12 @@ public class Workspace implements IWorkspace {
   public TeamHook getTeamHook() {
     // default to use Core's implementation
     //create anonymous subclass because TeamHook is abstract
-    if (teamHook == null)
+    if (teamHook == null) {
       teamHook =
           new TeamHook() {
             // empty
           };
+    }
     return teamHook;
   }
 
@@ -894,15 +901,14 @@ public class Workspace implements IWorkspace {
       File file, InputStream content, int updateFlags, boolean append, IProgressMonitor monitor)
       throws CoreException {
     try {
-      FolderEntry projectsRoot = getProjectsRoot();
-      VirtualFileEntry child = projectsRoot.getChild(file.getFullPath().toOSString());
-      if (child == null) {
-        projectsRoot.createFile(file.getFullPath().toOSString(), content);
+      String fileWsPath =
+          pathResolverProvider.get().toAbsoluteWsPath(file.getFullPath().toOSString());
+      if (!fsManagerProvider.get().existsAsFile(fileWsPath)) {
+        fsManagerProvider.get().createFile(fileWsPath, content);
       } else {
-        FileEntry fileEntry = (FileEntry) child;
-        fileEntry.updateContent(content);
+        fsManagerProvider.get().updateFile(fileWsPath, content);
       }
-    } catch (ForbiddenException | ConflictException | ServerException e) {
+    } catch (ConflictException | ServerException | NotFoundException e) {
       throw new CoreException(new Status(0, "", e.getMessage(), e));
     }
   }
@@ -910,47 +916,29 @@ public class Workspace implements IWorkspace {
   public void standardMoveFile(
       IFile file, IFile destination, int updateFlags, IProgressMonitor monitor)
       throws CoreException {
-    VirtualFileEntry child = null;
-    try {
-      child = getProjectsRoot().getChild(file.getFullPath().toOSString());
-      projectManager
-          .get()
-          .moveTo(
-              child.getPath().toString(),
-              destination.getFullPath().removeLastSegments(1).toOSString(),
-              destination.getName(),
-              true);
-    } catch (ForbiddenException | ServerException | NotFoundException | ConflictException e) {
-      throw new CoreException(
-          new Status(
-              IStatus.ERROR,
-              "",
-              "Can't move file: " + file.getFullPath() + " to: " + destination.getFullPath(),
-              e));
-    }
+    String srcWsPath = pathResolverProvider.get().toAbsoluteWsPath(file.getFullPath().toOSString());
+    String dstDirectoryWsPath =
+        pathResolverProvider
+            .get()
+            .toAbsoluteWsPath(destination.getFullPath().removeLastSegments(1).toOSString());
+    String dstWsPath =
+        pathResolverProvider.get().resolve(dstDirectoryWsPath, destination.getName());
+
+    fsManagerProvider.get().moveFileQuietly(srcWsPath, dstWsPath);
   }
 
   public void standardMoveFolder(
       IFolder folder, IFolder destination, int updateFlags, IProgressMonitor monitor)
       throws CoreException {
-    VirtualFileEntry child = null;
-    try {
-      child = getProjectsRoot().getChild(folder.getFullPath().toOSString());
-      projectManager
-          .get()
-          .moveTo(
-              child.getPath().toString(),
-              destination.getFullPath().removeLastSegments(1).toOSString(),
-              destination.getName(),
-              true);
-    } catch (ForbiddenException | NotFoundException | ServerException | ConflictException e) {
-      throw new CoreException(
-          new Status(
-              IStatus.ERROR,
-              "",
-              "Can't move folder: " + folder.getFullPath() + " to: " + destination.getFullPath(),
-              e));
-    }
+    String srcWsPath =
+        pathResolverProvider.get().toAbsoluteWsPath(folder.getFullPath().toOSString());
+    String dstParentWsPath =
+        pathResolverProvider
+            .get()
+            .toAbsoluteWsPath(destination.getFullPath().removeLastSegments(1).toOSString());
+    String dstWsPath = pathResolverProvider.get().resolve(dstParentWsPath, destination.getName());
+
+    fsManagerProvider.get().moveDirectoryQuietly(srcWsPath, dstWsPath);
   }
 
   public void standardMoveProject(
@@ -964,7 +952,7 @@ public class Workspace implements IWorkspace {
   public void addLifecycleListener(org.eclipse.core.internal.resources.Rules rules) {}
 
   /** Returns project manager associated with this workspace */
-  public ProjectRegistry getProjectRegistry() {
-    return projectRegistry.get();
+  public ProjectManager getProjectRegistry() {
+    return projectManager.get();
   }
 }

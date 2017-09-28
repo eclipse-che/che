@@ -25,9 +25,6 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
-import org.eclipse.che.api.vfs.VirtualFileSystem;
-import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -100,17 +97,17 @@ public class TestUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestUtils.class);
 
-  /**
-   * Creates a virtual file system.
-   *
-   * @return the virtual file system
-   * @throws Exception if anything goes wrong
-   */
-  public static VirtualFileSystem createVirtualFileSystem() throws Exception {
-    File rootDirectory = java.nio.file.Files.createTempDirectory(null).toFile();
-    VirtualFileSystemProvider vfsProvider = new LocalVirtualFileSystemProvider(rootDirectory, null);
-    return vfsProvider.getVirtualFileSystem();
-  }
+//  /**
+//   * Creates a virtual file system.
+//   *
+//   * @return the virtual file system
+//   * @throws Exception if anything goes wrong
+//   */
+//  public static VirtualFileSystem createVirtualFileSystem() throws Exception {
+//    File rootDirectory = java.nio.file.Files.createTempDirectory(null).toFile();
+//    VirtualFileSystemProvider vfsProvider = new LocalVirtualFileSystemProvider(rootDirectory, null);
+//    return vfsProvider.getVirtualFileSystem();
+//  }
 
   public static class SystemOutLineConsumer implements LineConsumer {
     @Override

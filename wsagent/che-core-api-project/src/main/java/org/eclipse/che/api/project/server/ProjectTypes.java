@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ProjectTypeResolver;
 import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 
 /** @author gazarenkov */
@@ -33,6 +34,7 @@ public class ProjectTypes {
 
   private final String projectPath;
   private final ProjectTypeRegistry projectTypeRegistry;
+  private final ProjectTypeResolver projectTypeResolver;
   private ProjectTypeDef primary;
   private final Map<String, ProjectTypeDef> mixins;
   private final Map<String, ProjectTypeDef> all;
@@ -44,7 +46,9 @@ public class ProjectTypes {
       String type,
       List<String> mixinTypes,
       ProjectTypeRegistry projectTypeRegistry,
+      ProjectTypeResolver projectTypeResolver,
       List<ProjectProblem> problems) {
+    this.projectTypeResolver = projectTypeResolver;
     mixins = new HashMap<>();
     all = new HashMap<>();
     attributeDefs = new HashMap<>();
@@ -207,10 +211,10 @@ public class ProjectTypes {
     }
   }
 
-  void addTransient(FolderEntry projectFolder) {
+  void addTransient(String projectFolder) {
     for (ProjectTypeDef pt : projectTypeRegistry.getProjectTypes()) {
       // NOTE: Only mixable types allowed
-      if (pt.isMixable() && !pt.isPersisted() && pt.resolveSources(projectFolder).matched()) {
+      if (pt.isMixable() && !pt.isPersisted() && projectTypeResolver.resolveSources(pt, projectFolder).matched()) {
         all.put(pt.getId(), pt);
         mixins.put(pt.getId(), pt);
         for (Attribute attr : pt.getAttributes()) {

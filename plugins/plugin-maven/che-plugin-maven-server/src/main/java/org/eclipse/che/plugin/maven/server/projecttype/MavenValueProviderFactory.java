@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.maven.server.projecttype;
 
 import javax.inject.Inject;
-import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
@@ -22,7 +22,7 @@ public class MavenValueProviderFactory implements ValueProviderFactory {
   @Inject MavenProjectManager mavenProjectManager;
 
   @Override
-  public ValueProvider newInstance(FolderEntry projectFolder) {
-    return new MavenValueProvider(mavenProjectManager, projectFolder);
+  public ValueProvider newInstance(ProjectConfig projectConfig) {
+    return new MavenValueProvider(mavenProjectManager, projectConfig.getPath());
   }
 }

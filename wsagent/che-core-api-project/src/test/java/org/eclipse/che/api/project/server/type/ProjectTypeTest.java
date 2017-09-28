@@ -22,7 +22,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -293,7 +293,7 @@ public class ProjectTypeTest {
   public static class MyVPFactory implements ValueProviderFactory {
 
     @Override
-    public ValueProvider newInstance(FolderEntry projectFolder) {
+    public ValueProvider newInstance(ProjectConfig projectConfig) {
       return new MyValueProvider();
     }
 

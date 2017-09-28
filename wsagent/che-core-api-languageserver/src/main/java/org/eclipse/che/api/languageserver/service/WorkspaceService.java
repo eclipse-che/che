@@ -17,21 +17,21 @@ import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.tr
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.api.PathResolver;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
@@ -43,9 +43,7 @@ import org.eclipse.che.api.languageserver.shared.model.FileEditParams;
 import org.eclipse.che.api.languageserver.shared.util.CharStreamEditor;
 import org.eclipse.che.api.languageserver.util.LSOperation;
 import org.eclipse.che.api.languageserver.util.OperationUtil;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
-import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextEdit;
 import org.slf4j.Logger;
@@ -60,7 +58,10 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class WorkspaceService {
+
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceService.class);
+  private final FsManager fsManager;
+  private final PathResolver pathResolver;
   private LanguageServerRegistry registry;
   private ProjectManager projectManager;
   private RequestHandlerConfigurator requestHandler;
@@ -69,10 +70,14 @@ public class WorkspaceService {
   public WorkspaceService(
       LanguageServerRegistry registry,
       ProjectManager projectManager,
-      RequestHandlerConfigurator requestHandler) {
+      RequestHandlerConfigurator requestHandler,
+      FsManager fsManager,
+      PathResolver pathResolver) {
     this.registry = registry;
     this.projectManager = projectManager;
     this.requestHandler = requestHandler;
+    this.fsManager = fsManager;
+    this.pathResolver = pathResolver;
   }
 
   @PostConstruct
@@ -100,38 +105,34 @@ public class WorkspaceService {
   @SuppressWarnings("deprecation")
   private List<TextEditDto> editFile(FileEditParams params) {
     try {
-      VirtualFileEntry child =
-          projectManager
-              .getProjectsRoot()
-              .getChild(LanguageServiceUtils.removePrefixUri(params.getUri()));
-      if (child != null) {
-        VirtualFile vf = child.getVirtualFile();
-        List<TextEdit> undo = new ArrayList<>();
-        vf.modifyContent(
-            new BiConsumer<InputStream, OutputStream>() {
+      String path = LanguageServiceUtils.removePrefixUri(params.getUri());
+      String wsPath = pathResolver.toAbsoluteWsPath(path);
 
-              @Override
-              public void accept(InputStream in, OutputStream out) {
-                OutputStreamWriter w = new OutputStreamWriter(out);
-                undo.addAll(
-                    new CharStreamEditor(
-                            params.getEdits(),
-                            CharStreamEditor.forReader(new InputStreamReader(in)),
-                            CharStreamEditor.forWriter(w))
-                        .transform());
-                try {
-                  w.flush();
-                } catch (IOException e) {
-                  throw new RuntimeException("failed to write tranformed file", e);
-                }
+      if (fsManager.existsAsFile(wsPath)) {
+        List<TextEdit> undo = new ArrayList<>();
+
+        fsManager.updateFile(
+            wsPath,
+            (in, out) -> {
+              OutputStreamWriter w = new OutputStreamWriter(out);
+              undo.addAll(
+                  new CharStreamEditor(
+                          params.getEdits(),
+                          CharStreamEditor.forReader(new InputStreamReader(in)),
+                          CharStreamEditor.forWriter(w))
+                      .transform());
+              try {
+                w.flush();
+              } catch (IOException e) {
+                throw new RuntimeException("failed to write transformed file", e);
               }
             });
-        return undo.stream().map(e -> new TextEditDto(e)).collect(Collectors.toList());
+        return undo.stream().map(TextEditDto::new).collect(Collectors.toList());
       } else {
-        LOG.error("did not find file " + params.getUri());
+        LOG.error("did not find file {} or it is a directory", params.getUri());
         throw new JsonRpcException(-27000, "File not found for edit: " + params.getUri());
       }
-    } catch (ServerException | ForbiddenException e) {
+    } catch (ServerException | NotFoundException | ConflictException e) {
       LOG.error("error editing file", e);
       throw new JsonRpcException(-27000, e.getMessage());
     }

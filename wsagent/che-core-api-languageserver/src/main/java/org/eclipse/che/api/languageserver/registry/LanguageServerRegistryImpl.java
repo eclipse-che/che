@@ -24,15 +24,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.fs.api.PathResolver;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -42,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry {
+
   private static final Logger LOG = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
   private final List<LanguageDescription> languages;
   private final List<LanguageServerLauncher> launchers;
@@ -54,6 +54,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private final Provider<ProjectManager> projectManagerProvider;
   private final ServerInitializer initializer;
+  private final PathResolver pathResolver;
   private EventService eventService;
   private CheLanguageClientFactory clientFactory;
 
@@ -64,13 +65,15 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       Provider<ProjectManager> projectManagerProvider,
       ServerInitializer initializer,
       EventService eventService,
-      CheLanguageClientFactory clientFactory) {
+      CheLanguageClientFactory clientFactory,
+      PathResolver pathResolver) {
     this.languages = new ArrayList<>(languages);
     this.launchers = new ArrayList<>(languageServerLaunchers);
     this.projectManagerProvider = projectManagerProvider;
     this.initializer = initializer;
     this.eventService = eventService;
     this.clientFactory = clientFactory;
+    this.pathResolver = pathResolver;
     this.launchedServers = new HashMap<>();
     this.initializedServers = new HashMap<>();
   }
@@ -206,29 +209,18 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   }
 
   protected String extractProjectPath(String filePath) throws LanguageServerException {
-    FolderEntry root;
-    try {
-      root = projectManagerProvider.get().getProjectsRoot();
-    } catch (ServerException e) {
-      throw new LanguageServerException("Project not found for " + filePath, e);
-    }
-
     if (!LanguageServiceUtils.isProjectUri(filePath)) {
       throw new LanguageServerException("Project not found for " + filePath);
     }
 
-    VirtualFileEntry fileEntry;
-    try {
-      fileEntry = root.getChild(LanguageServiceUtils.removePrefixUri(filePath));
-    } catch (ServerException e) {
-      throw new LanguageServerException("Project not found for " + filePath, e);
-    }
+    String wsPath = pathResolver.toAbsoluteWsPath(LanguageServiceUtils.removePrefixUri(filePath));
+    RegisteredProject project =
+        projectManagerProvider
+            .get()
+            .getClosest(wsPath)
+            .orElseThrow(() -> new LanguageServerException("Project not found for " + filePath));
 
-    if (fileEntry == null) {
-      throw new LanguageServerException("Project not found for " + filePath);
-    }
-
-    return LanguageServiceUtils.prefixURI(fileEntry.getProject());
+    return LanguageServiceUtils.prefixURI(project.getPath());
   }
 
   public List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri)

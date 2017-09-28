@@ -17,11 +17,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FileEntry;
-import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
@@ -30,25 +32,27 @@ import org.eclipse.che.api.project.server.type.ValueStorageException;
 public class ComposerValueProviderFactory implements ValueProviderFactory {
 
   @Override
-  public ValueProvider newInstance(FolderEntry projectFolder) {
-    return new ComposerValueProvider(projectFolder);
+  public ValueProvider newInstance(ProjectConfig projectConfig) {
+    return new ComposerValueProvider(projectConfig);
   }
 
   protected class ComposerValueProvider extends ReadonlyValueProvider {
 
-    protected FolderEntry projectFolder;
+    protected Path projectFsPath;
 
-    protected ComposerValueProvider(FolderEntry projectFolder) {
-      this.projectFolder = projectFolder;
+    protected ComposerValueProvider(ProjectConfig projectConfig) {
+      this.projectFsPath = Paths.get("/projects", projectConfig.getPath());
     }
 
     @Override
     public List<String> getValues(String attributeName) throws ValueStorageException {
       try {
-        if (projectFolder.getChild("composer.json") == null) {
+        Path composerDotJsonFsPath = Paths
+            .get(projectFsPath.toAbsolutePath().toString(), "composer.json");
+        if (!composerDotJsonFsPath.toFile().exists()) {
           return Collections.emptyList();
         }
-        JsonObject model = readModel(projectFolder);
+        JsonObject model = readModel(projectFsPath);
         String value = "";
 
         if (attributeName.equals(PACKAGE) && model.has("name")) {
@@ -61,10 +65,8 @@ public class ComposerValueProviderFactory implements ValueProviderFactory {
       }
     }
 
-    private JsonObject readModel(FolderEntry projectFolder) throws ServerException, IOException {
-      FileEntry composerFile = (FileEntry) projectFolder.getChild("composer.json");
-      Reader reader = new BufferedReader(new InputStreamReader(composerFile.getInputStream()));
-      return new Gson().fromJson(reader, JsonObject.class);
+    private JsonObject readModel(Path projectFsPath) throws ServerException, IOException {
+      return new Gson().fromJson(Files.newBufferedReader(projectFsPath), JsonObject.class);
     }
   }
 }

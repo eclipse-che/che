@@ -20,13 +20,12 @@ import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.api.PathResolver;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
-import org.eclipse.che.api.vfs.Path;
-import org.eclipse.che.api.vfs.VirtualFileSystem;
-import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,25 +39,24 @@ public class CreateBaseProjectTypeHandler implements CreateProjectHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(CreateBaseProjectTypeHandler.class);
 
-  @Inject private VirtualFileSystemProvider virtualFileSystemProvider;
-
-  @Inject
-  public CreateBaseProjectTypeHandler() {}
-
-  @VisibleForTesting
-  protected CreateBaseProjectTypeHandler(VirtualFileSystemProvider virtualFileSystemProvider) {
-    this.virtualFileSystemProvider = virtualFileSystemProvider;
-  }
+  private final FsManager fsManager;
+  private final PathResolver pathResolver;
 
   private final String README_FILE_NAME = "README";
 
+  @Inject
+  public CreateBaseProjectTypeHandler(FsManager fsManager, PathResolver pathResolver) {
+    this.fsManager = fsManager;
+    this.pathResolver = pathResolver;
+  }
+
   @Override
   public void onCreateProject(
-      Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
-      throws ForbiddenException, ConflictException, ServerException {
-    VirtualFileSystem vfs = virtualFileSystemProvider.getVirtualFileSystem();
-    FolderEntry baseFolder = new FolderEntry(vfs.getRoot().createFolder(projectPath.toString()));
-    baseFolder.createFile(README_FILE_NAME, getReadmeContent());
+      String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
+      throws ForbiddenException, ConflictException, ServerException, NotFoundException {
+    fsManager.createDirectory(projectWsPath);
+    String wsPath = pathResolver.resolve(projectWsPath, README_FILE_NAME);
+    fsManager.createFile(wsPath, getReadmeContent());
   }
 
   @Override

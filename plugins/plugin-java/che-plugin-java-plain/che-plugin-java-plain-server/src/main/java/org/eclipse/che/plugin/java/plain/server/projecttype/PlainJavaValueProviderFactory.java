@@ -24,8 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.api.project.server.type.SettableValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
@@ -44,18 +45,18 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
  */
 @Singleton
 public class PlainJavaValueProviderFactory implements ValueProviderFactory {
-  @Inject private Provider<ProjectRegistry> projectRegistryProvider;
 
   @Override
-  public ValueProvider newInstance(FolderEntry projectFolder) {
-    return new PlainJavaValueProvider(projectFolder);
+  public ValueProvider newInstance(ProjectConfig projectConfig) {
+    return new PlainJavaValueProvider(projectConfig);
   }
 
   private class PlainJavaValueProvider extends SettableValueProvider {
-    private FolderEntry projectFolder;
 
-    PlainJavaValueProvider(FolderEntry projectFolder) {
-      this.projectFolder = projectFolder;
+    private ProjectConfig projectConfig;
+
+    PlainJavaValueProvider(ProjectConfig projectConfig) {
+      this.projectConfig = projectConfig;
     }
 
     @Override
@@ -70,8 +71,7 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
 
     @Override
     public void setValues(String attributeName, List<String> values) throws ValueStorageException {
-      Map<String, List<String>> attributes =
-          projectRegistryProvider.get().getProject(projectFolder.getProject()).getAttributes();
+      Map<String, List<String>> attributes = projectConfig.getAttributes();
       if (attributes.containsKey(attributeName)) {
         attributes.put(
             attributeName,
@@ -83,15 +83,13 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
     }
 
     private List<String> getOutputFolder() throws ValueStorageException {
-      String projectPath = projectFolder.getPath().toString();
-
       JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
-      IJavaProject project = model.getJavaProject(projectPath);
+      IJavaProject project = model.getJavaProject(projectConfig.getPath());
 
       try {
         String outputDirPath = project.getOutputLocation().toOSString();
-        return outputDirPath.startsWith(projectPath)
-            ? singletonList(outputDirPath.substring(projectPath.length() + 1))
+        return outputDirPath.startsWith(projectConfig.getPath())
+            ? singletonList(outputDirPath.substring(projectConfig.getPath().length() + 1))
             : singletonList(outputDirPath);
       } catch (JavaModelException e) {
         throw new ValueStorageException("Can't get output location: " + e.getMessage());
@@ -101,19 +99,17 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
     private List<String> getSourceFolders() throws ValueStorageException {
       List<String> sourceFolders = new ArrayList<>();
 
-      String projectPath = projectFolder.getPath().toString();
-
       JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
-      IJavaProject project = model.getJavaProject(projectPath);
+      IJavaProject project = model.getJavaProject(projectConfig.getPath());
 
       try {
         IClasspathEntry[] classpath = project.getRawClasspath();
 
         for (IClasspathEntry entry : classpath) {
           String entryPath = entry.getPath().toOSString();
-          if (CPE_SOURCE == entry.getEntryKind() && !entryPath.equals(projectPath)) {
-            if (entryPath.startsWith(projectPath)) {
-              sourceFolders.add(entryPath.substring(projectPath.length() + 1));
+          if (CPE_SOURCE == entry.getEntryKind() && !entryPath.equals(projectConfig.getPath())) {
+            if (entryPath.startsWith(projectConfig.getPath())) {
+              sourceFolders.add(entryPath.substring(projectConfig.getPath().length() + 1));
             } else {
               sourceFolders.add(entryPath);
             }

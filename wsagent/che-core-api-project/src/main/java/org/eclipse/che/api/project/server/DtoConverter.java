@@ -15,15 +15,12 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
-import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.shared.dto.AttributeDto;
-import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.project.shared.dto.ValueDto;
@@ -69,38 +66,20 @@ public class DtoConverter {
         .withAttributes(typeAttributes);
   }
 
-  /** Converts {@link ProjectImporter} to {@link ProjectImporterDescriptor}. */
-  public static ProjectImporterDescriptor asDto(ProjectImporter importer) {
+  /**
+   * Converts {@link org.eclipse.che.api.project.server.api.ProjectImporter} to {@link
+   * ProjectImporterDescriptor}.
+   */
+  public static ProjectImporterDescriptor asDto(
+      org.eclipse.che.api.project.server.api.ProjectImporter importer) {
     return newDto(ProjectImporterDescriptor.class)
         .withId(importer.getId())
         .withInternal(importer.isInternal())
-        .withCategory(importer.getCategory().getValue())
+        .withCategory(importer.getSourceCategory().getValue())
         .withDescription(
             importer.getDescription() != null
                 ? importer.getDescription()
                 : "description not found");
-  }
-
-  /** Converts {@link FileEntry} to {@link ItemReference}. */
-  public static ItemReference asDto(FileEntry file) throws ServerException {
-    return newDto(ItemReference.class)
-        .withName(file.getName())
-        .withProject(file.getProject())
-        .withPath(file.getPath().toString())
-        .withType("file")
-        .withAttributes(file.getAttributes())
-        .withModified(file.getModified())
-        .withContentLength(file.getVirtualFile().getLength());
-  }
-
-  /** Converts {@link FolderEntry} to {@link ItemReference}. */
-  public static ItemReference asDto(FolderEntry folder) {
-    return newDto(ItemReference.class)
-        .withName(folder.getName())
-        .withPath(folder.getPath().toString())
-        .withType(folder.isProject() ? "project" : "folder")
-        .withAttributes(folder.getAttributes())
-        .withModified(folder.getModified());
   }
 
   /**
@@ -118,7 +97,7 @@ public class DtoConverter {
         .withSource(asDto(project.getSource()))
         .withAttributes(project.getAttributes())
         .withType(project.getProjectType().getId())
-        .withMixins(project.getMixinTypes().keySet().stream().collect(Collectors.toList()))
+        .withMixins(new ArrayList<>(project.getMixinTypes().keySet()))
         .withProblems(
             project.getProblems().stream().map(DtoConverter::asDto).collect(Collectors.toList()));
   }

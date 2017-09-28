@@ -10,14 +10,17 @@
  */
 package org.eclipse.che.plugin.svn.server;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.api.PathResolver;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
@@ -35,18 +38,23 @@ public class SubversionValueProviderFactory implements ValueProviderFactory {
   private static final Logger LOG = LoggerFactory.getLogger(SubversionValueProviderFactory.class);
 
   private final SubversionApi subversionApi;
+  private final PathResolver pathResolver;
+  private final FsManager fsManager;
 
   @Inject
-  public SubversionValueProviderFactory(final SubversionApi subversionApi) {
+  public SubversionValueProviderFactory(
+      SubversionApi subversionApi, PathResolver pathResolver, FsManager fsManager) {
     this.subversionApi = subversionApi;
+    this.pathResolver = pathResolver;
+    this.fsManager = fsManager;
   }
 
   @Override
-  public ValueProvider newInstance(final FolderEntry project) {
+  public ValueProvider newInstance(ProjectConfig projectConfig) {
     return new ReadonlyValueProvider() {
       @Override
       public List<String> getValues(final String attributeName) throws ValueStorageException {
-        if (project == null) {
+        if (isNullOrEmpty(projectConfig.getPath())) {
           return Collections.emptyList();
         }
         LOG.debug("Asked value for attribute {}.", attributeName);
@@ -55,7 +63,7 @@ public class SubversionValueProviderFactory implements ValueProviderFactory {
         }
         switch (attributeName) {
           case SubversionTypeConstant.SUBVERSION_ATTRIBUTE_REPOSITORY_URL:
-            final List<String> result = getRepositoryUrl(project);
+            final List<String> result = getRepositoryUrl(projectConfig.getPath());
             LOG.debug(
                 "Attribute {}, returning value {}",
                 attributeName,
@@ -68,12 +76,11 @@ public class SubversionValueProviderFactory implements ValueProviderFactory {
     };
   }
 
-  private List<String> getRepositoryUrl(final FolderEntry project) throws ValueStorageException {
+  private List<String> getRepositoryUrl(String projectWsPath) throws ValueStorageException {
     try {
-      if (isSvn(project)) {
-        final String path = getProjectPath(project);
-        if (path != null) {
-          final String response = subversionApi.getRepositoryUrl(path);
+      if (isSvn(projectWsPath)) {
+        if (isNullOrEmpty(projectWsPath)) {
+          final String response = subversionApi.getRepositoryUrl(projectWsPath);
           return Collections.singletonList(response);
         } else {
           LOG.debug("invalid project path");
@@ -88,25 +95,15 @@ public class SubversionValueProviderFactory implements ValueProviderFactory {
     }
   }
 
-  private boolean isSvn(final FolderEntry project) throws ForbiddenException, ServerException {
-    LOG.debug("Searching for '.svn' in {}.", project.getPath());
-    final VirtualFileEntry svn = project.getChild(".svn");
-    if (svn != null && svn instanceof FolderEntry) {
+  private boolean isSvn(String projectWsPath) throws ForbiddenException, ServerException {
+    LOG.debug("Searching for '.svn' in {}.", projectWsPath);
+    String svnDirectoryWsPath = pathResolver.resolve(projectWsPath, ".svn");
+    if (fsManager.existsAsDirectory(svnDirectoryWsPath)) {
       LOG.debug("Found it.");
       return true;
     } else {
       LOG.debug("Didn't find it.");
       return false;
     }
-  }
-
-  /**
-   * Build the project absolute path.
-   *
-   * @param project the project
-   * @return the path, or null if this is not a valid path
-   */
-  private String getProjectPath(final FolderEntry project) {
-    return project.getVirtualFile().toIoFile().getAbsolutePath();
   }
 }

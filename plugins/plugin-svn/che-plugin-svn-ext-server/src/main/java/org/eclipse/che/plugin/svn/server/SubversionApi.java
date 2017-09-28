@@ -42,7 +42,7 @@ import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
-import org.eclipse.che.api.vfs.util.DeleteOnCloseFileInputStream;
+import org.eclipse.che.api.fs.util.DeleteOnCloseFileInputStream;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;

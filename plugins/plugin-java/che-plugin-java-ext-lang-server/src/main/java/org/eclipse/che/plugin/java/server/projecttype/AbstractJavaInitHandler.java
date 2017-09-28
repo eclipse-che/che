@@ -15,8 +15,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.fs.api.PathResolver;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -35,8 +34,7 @@ import org.eclipse.jdt.core.JavaCore;
  *     javaProject.setRawClasspath(new IClasspathEntry[]{jreContainer}, null);
  * </pre>
  *
- * This configuration just add classpath container for JRE(rt.jar). For more details see {@link
- * PlainJavaInitHandler}
+ * This configuration just add classpath container for JRE(rt.jar).
  *
  * @author Evgen Vidolob
  */
@@ -44,16 +42,19 @@ public abstract class AbstractJavaInitHandler implements ProjectInitHandler {
 
   private ResourcesPlugin plugin;
 
+  private PathResolver pathResolver;
+
   @Inject
-  void init(ResourcesPlugin plugin) {
+  void init(ResourcesPlugin plugin, PathResolver pathResolver) {
     this.plugin = plugin;
+    this.pathResolver = pathResolver;
   }
 
   @Override
-  public final void onProjectInitialized(ProjectRegistry registry, FolderEntry projectFolder)
+  public final void onProjectInitialized(String wsPath)
       throws ServerException, ForbiddenException, ConflictException, NotFoundException {
     IProject project =
-        ResourcesPlugin.getWorkspace().getRoot().getProject(projectFolder.getPath().toString());
+        ResourcesPlugin.getWorkspace().getRoot().getProject(pathResolver.toAbsoluteWsPath(wsPath));
     IJavaProject javaProject = JavaCore.create(project);
     initializeClasspath(javaProject);
   }

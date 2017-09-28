@@ -10,11 +10,13 @@
  */
 package org.eclipse.che.plugin.svn.server.rest;
 
+import java.io.File;
 import java.io.IOException;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -27,8 +29,10 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.api.PathResolver;
 import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.svn.server.SubversionApi;
@@ -62,13 +66,23 @@ import org.eclipse.che.plugin.svn.shared.StatusRequest;
 import org.eclipse.che.plugin.svn.shared.SwitchRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
 
-/** REST API endpoints for this extension. */
+/**
+ * REST API endpoints for this extension.
+ */
 @Path("svn")
 public class SubversionService extends Service {
 
-  @Inject private ProjectRegistry projectRegistry;
+  @Inject
+  private ProjectManager projectManager;
 
-  @Inject private SubversionApi subversionApi;
+  @Inject
+  private PathResolver pathResolver;
+
+  @Inject
+  private FsManager fsManager;
+
+  @Inject
+  private SubversionApi subversionApi;
 
   /**
    * Add the selected paths to version control.
@@ -157,11 +171,6 @@ public class SubversionService extends Service {
 
   /**
    * Retrieve information about subversion resource.
-   *
-   * @param request
-   * @return
-   * @throws ServerException
-   * @throws IOException
    */
   @Path("info")
   @POST
@@ -177,8 +186,6 @@ public class SubversionService extends Service {
    *
    * @param request request
    * @return merge response
-   * @throws ServerException
-   * @throws IOException
    */
   @Path("merge")
   @POST
@@ -327,8 +334,6 @@ public class SubversionService extends Service {
    *
    * @param request the commit request
    * @return the commit response
-   * @throws ServerException
-   * @throws IOException
    */
   @Path("commit")
   @POST
@@ -345,8 +350,6 @@ public class SubversionService extends Service {
    *
    * @param request the cleanup request
    * @return the response
-   * @throws ServerException
-   * @throws IOException
    */
   @Path("cleanup")
   @POST
@@ -491,8 +494,12 @@ public class SubversionService extends Service {
   public SourceStorageDto importDescriptor(
       @Context UriInfo uriInfo, @QueryParam("projectPath") String projectPath)
       throws ApiException, IOException {
-    final RegisteredProject project = projectRegistry.getProject(projectPath);
-    if (project.getBaseFolder().getChildFolder(".svn") != null) {
+    String projectWsPath = pathResolver.toAbsoluteWsPath(projectPath);
+    final RegisteredProject project = projectManager.get(projectWsPath)
+        .orElseThrow(() -> new NotFoundException("Can't find a project: " + projectPath));
+    String dotSvnWsPath = pathResolver.resolve(projectWsPath, ".svn");
+
+    if (fsManager.existsAsDirectory(dotSvnWsPath)){
       return DtoFactory.getInstance()
           .createDto(SourceStorageDto.class)
           .withType("subversion")
@@ -502,8 +509,8 @@ public class SubversionService extends Service {
     }
   }
 
-  private String getAbsoluteProjectPath(String wsRelatedProjectPath) {
-    final RegisteredProject project = projectRegistry.getProject(wsRelatedProjectPath);
-    return project.getBaseFolder().getVirtualFile().toIoFile().getAbsolutePath();
+  private String getAbsoluteProjectPath(String wsRelatedProjectPath)
+      throws org.eclipse.che.api.core.NotFoundException {
+    return fsManager.toIoFile(wsRelatedProjectPath).toPath().toString();
   }
 }
