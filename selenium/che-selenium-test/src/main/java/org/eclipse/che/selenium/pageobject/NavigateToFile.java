@@ -100,7 +100,6 @@ public class NavigateToFile {
         .until(ExpectedConditions.visibilityOf(fileNameInput));
     fileNameInput.clear();
     fileNameInput.sendKeys(symbol);
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.RIGHT).perform();
   }
 
   /**
