@@ -74,7 +74,7 @@ public class RenameWorkspaceTest {
     screenshot(StateWorkspace.STOPPING.getStatus());
 
     int i = 1;
-    while (!checkStateOfWorkspace(StateWorkspace.STARTING) && i < 5) {
+    while (!checkStateOfWorkspace(StateWorkspace.STARTING) && i < 120) {
       screenshot(StateWorkspace.STARTING.getStatus() + i);
       WaitUtils.sleepQuietly(500, TimeUnit.MILLISECONDS);
       i++;
