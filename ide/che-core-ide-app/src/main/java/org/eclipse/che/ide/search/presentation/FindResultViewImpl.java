@@ -48,6 +48,10 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
     NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
     tree = new Tree(nodeStorage, loader);
 
+    //do not remove debug id; it's needed for selenium tests
+    tree.ensureDebugId("result-search-tree");
+    ensureDebugId("find-info-panel");
+
     tree.getSelectionModel()
         .addSelectionChangedHandler(
             new SelectionChangedEvent.SelectionChangedHandler() {
