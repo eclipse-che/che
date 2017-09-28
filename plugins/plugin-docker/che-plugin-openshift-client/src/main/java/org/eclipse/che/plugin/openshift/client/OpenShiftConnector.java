@@ -331,8 +331,18 @@ public class OpenShiftConnector extends DockerConnector {
    */
   protected Set<String> getExposedPorts(ContainerConfig containerConfig, ImageConfig imageConfig) {
 
-    Set<String> containerExposedPorts = containerConfig.getExposedPorts().keySet();
-    Set<String> imageExposedPorts = imageConfig.getExposedPorts().keySet();
+    Map<String, Map<String, String>> containerExposedPortsMap = containerConfig.getExposedPorts();
+    if (containerExposedPortsMap == null) {
+      containerExposedPortsMap = Collections.emptyMap();
+    }
+    Map<String, org.eclipse.che.plugin.docker.client.json.ExposedPort> imageExposedPortsMap =
+        imageConfig.getExposedPorts();
+    if (imageExposedPortsMap == null) {
+      imageExposedPortsMap = Collections.emptyMap();
+    }
+
+    Set<String> containerExposedPorts = containerExposedPortsMap.keySet();
+    Set<String> imageExposedPorts = imageExposedPortsMap.keySet();
     return ImmutableSet.<String>builder()
         .addAll(containerExposedPorts)
         .addAll(imageExposedPorts)
