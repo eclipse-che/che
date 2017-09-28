@@ -8,6 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+
 import com.google.inject.TypeLiteral;
 import com.google.inject.persist.Transactional;
 import java.sql.Connection;

@@ -5,6 +5,8 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
+set -e
+
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
@@ -17,15 +19,41 @@ if [ ! -d "${DIR}/../../assembly/assembly-main/target" ]; then
 fi
 
 # Use of folder
-BUILD_ASSEMBLY_ZIP=$(echo "${DIR}"/../../assembly/assembly-main/target/eclipse-che-*.tar.gz)
-LOCAL_ASSEMBLY_ZIP="${DIR}"/eclipse-che.tar.gz
+BUILD_ASSEMBLY_DIR=$(echo "${DIR}"/../../assembly/assembly-main/target/eclipse-che-*/eclipse-che-*/)
+LOCAL_ASSEMBLY_DIR="${DIR}"/eclipse-che
 
-if [ -f "${LOCAL_ASSEMBLY_ZIP}" ]; then
-  rm "${LOCAL_ASSEMBLY_ZIP}"
+if [ -d "${LOCAL_ASSEMBLY_DIR}" ]; then
+  rm -r "${LOCAL_ASSEMBLY_DIR}"
 fi
 
-echo "Linking assembly ${BUILD_ASSEMBLY_ZIP} --> ${LOCAL_ASSEMBLY_ZIP}"
-ln "${BUILD_ASSEMBLY_ZIP}" "${LOCAL_ASSEMBLY_ZIP}"
+echo "Copying assembly ${BUILD_ASSEMBLY_DIR} --> ${LOCAL_ASSEMBLY_DIR}"
+cp -r "${BUILD_ASSEMBLY_DIR}" "${LOCAL_ASSEMBLY_DIR}"
 
-init --name:server "$@" 
+init --name:server "$@"
 build
+
+# Build che-multiuser
+# grab assembly
+DIR=$(cd "$(dirname "$0")"; pwd)
+if [ ! -d "${DIR}/../../assembly-multiuser/assembly-main/target" ]; then
+  echo "${ERROR}Have you built assembly-multiuser/assemby-main in ${DIR}/../assembly-multiuser/assembly-main 'mvn clean install'?"
+  exit 2
+fi
+
+# Use of folder
+BUILD_ASSEMBLY_MULTIUSER_DIR=$(echo "${DIR}"/../../assembly-multiuser/assembly-main/target/eclipse-che-*/eclipse-che-*)
+LOCAL_ASSEMBLY_MULTIUSER_DIR="${DIR}"/eclipse-che
+
+if [ -d "${LOCAL_ASSEMBLY_MULTIUSER_DIR}" ]; then
+  rm -r "${LOCAL_ASSEMBLY_MULTIUSER_DIR}"
+fi
+
+echo "Copying assembly ${BUILD_ASSEMBLY_MULTIUSER_DIR} --> ${LOCAL_ASSEMBLY_MULTIUSER_DIR}"
+cp -r "${BUILD_ASSEMBLY_MULTIUSER_DIR}" "${LOCAL_ASSEMBLY_MULTIUSER_DIR}"
+
+init --name:server-multiuser "$@"
+build
+
+
+#cleanUp
+rm -rf ${DIR}/eclipse-che

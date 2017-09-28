@@ -47,6 +47,7 @@ import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
 import org.eclipse.che.plugin.pullrequest.shared.dto.HostUser;
 import org.eclipse.che.plugin.pullrequest.shared.dto.PullRequest;
 import org.eclipse.che.plugin.pullrequest.shared.dto.Repository;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /**
  * {@link VcsHostingService} implementation for GitHub.
@@ -73,18 +74,21 @@ public class GitHubHostingService implements VcsHostingService {
   private final GitHubClientService gitHubClientService;
   private final HostingServiceTemplates templates;
   private final String baseUrl;
+  private final SecurityTokenProvider securityTokenProvider;
 
   @Inject
   public GitHubHostingService(
       @NotNull final AppContext appContext,
       @NotNull final DtoFactory dtoFactory,
       @NotNull final GitHubClientService gitHubClientService,
-      @NotNull final GitHubTemplates templates) {
+      @NotNull final GitHubTemplates templates,
+      SecurityTokenProvider securityTokenProvider) {
     this.appContext = appContext;
     this.dtoFactory = dtoFactory;
     this.gitHubClientService = gitHubClientService;
     this.templates = templates;
     this.baseUrl = appContext.getMasterApiEndpoint();
+    this.securityTokenProvider = securityTokenProvider;
   }
 
   @Override
@@ -510,7 +514,7 @@ public class GitHubHostingService implements VcsHostingService {
             + Window.Location.getHost()
             + "/ws/"
             + workspace.getConfig().getName();
-    return ServiceUtil.performWindowAuth(this, authUrl);
+    return ServiceUtil.performWindowAuth(this, authUrl, securityTokenProvider);
   }
 
   @Override
