@@ -312,7 +312,7 @@ export class CheWorkspace {
       });
       return this.workspaces;
     }, (error: any) => {
-      if (error.status === 304) {
+      if (error && error.status === 304) {
         return this.workspaces;
       }
       return this.$q.reject(error);
@@ -354,7 +354,7 @@ export class CheWorkspace {
       this.updateWorkspacesList(workspace);
       defer.resolve();
     }, (error: any) => {
-      if (error.status === 304) {
+      if (error && error.status === 304) {
         defer.resolve();
         return;
       }

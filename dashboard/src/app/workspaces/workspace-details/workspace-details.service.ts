@@ -215,7 +215,7 @@ export class WorkspaceDetailsService {
       return this.$q.when();
     }
 
-    const initStatus = oldWorkspace.status;
+    const initStatus = oldWorkspace && oldWorkspace.status;
 
     const oldConfig = angular.copy(oldWorkspace.config);
     delete oldConfig.projects;
