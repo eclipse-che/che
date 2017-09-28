@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.project.server.api.ProjectConfigRegistry;
 
 /**
  * Synchronizer for Project Configurations stored in Workspace Configuration with Installer's state
@@ -22,29 +23,38 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
  */
 public abstract class WorkspaceProjectsSyncer {
 
+  private final ProjectConfigRegistry projectConfigs;
+  private final WorkspaceSyncCommunication workspaceSyncCommunication;
+
+  protected WorkspaceProjectsSyncer(ProjectConfigRegistry projectConfigs,
+      WorkspaceSyncCommunication workspaceSyncCommunication) {
+    this.projectConfigs = projectConfigs;
+    this.workspaceSyncCommunication = workspaceSyncCommunication;
+  }
+
   /**
    * Synchronizes Project Config state on Agent and Master
    *
-   * @param projectRegistry project registry
-   * @param workspaceSyncCommunication events sender about workspace synchronization to the client
    * @throws ServerException
    */
-  public final void sync(
-      ProjectRegistry projectRegistry, WorkspaceSyncCommunication workspaceSyncCommunication)
-      throws ServerException {
+  public final void sync() throws ServerException {
 
     List<? extends ProjectConfig> remote = getProjects();
 
     // check on removed
     List<ProjectConfig> removed = new ArrayList<>();
     for (ProjectConfig r : remote) {
-      if (projectRegistry.getProject(r.getPath()) == null) removed.add(r);
+      if (!projectConfigs.get(r.getPath()).isPresent()) {
+        removed.add(r);
+      }
     }
 
-    for (ProjectConfig r : removed) removeProject(r);
+    for (ProjectConfig r : removed) {
+      removeProject(r);
+    }
 
     // update or add
-    for (RegisteredProject project : projectRegistry.getProjects()) {
+    for (RegisteredProject project : projectConfigs.getAll()) {
 
       if (!project.isSynced() && !project.isDetected()) {
 

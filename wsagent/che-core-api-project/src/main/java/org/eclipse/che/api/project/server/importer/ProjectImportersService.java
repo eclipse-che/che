@@ -51,11 +51,7 @@ public class ProjectImportersService extends Service {
   @Produces(MediaType.APPLICATION_JSON)
   public ProjectImporterData getImportersData() {
     final List<ProjectImporterDescriptor> importers =
-        importersRegistry
-            .getImporters()
-            .stream()
-            .map(DtoConverter::asDto)
-            .collect(Collectors.toList());
+        importersRegistry.getAll().stream().map(DtoConverter::asDto).collect(Collectors.toList());
     return newDto(ProjectImporterData.class)
         .withImporters(importers)
         .withConfiguration(configuration);

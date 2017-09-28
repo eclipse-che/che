@@ -32,7 +32,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.api.PathResolver;
 import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.AddParams;
@@ -84,9 +87,8 @@ import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.git.shared.event.GitRepositoryDeletedEvent;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,9 +105,13 @@ public class GitService {
 
   @Inject private GitConnectionFactory gitConnectionFactory;
 
-  @Inject private ProjectRegistry projectRegistry;
+  @Inject private ProjectManager projectManager;
 
   @Inject private EventService eventService;
+
+  @Inject private FsManager fsManager;
+
+  @Inject private PathResolver pathResolver;
 
   @QueryParam("projectPath")
   private String projectPath;
@@ -296,16 +302,21 @@ public class GitService {
     try (GitConnection gitConnection = getGitConnection()) {
       gitConnection.init(bare);
     }
-    projectRegistry.setProjectType(projectPath, GitProjectType.TYPE_ID, true);
+    projectManager.setType(projectPath, GitProjectType.TYPE_ID, true);
   }
 
   @DELETE
   @Path("repository")
   public void deleteRepository(@Context UriInfo uriInfo) throws ApiException {
-    final RegisteredProject project = projectRegistry.getProject(projectPath);
-    final FolderEntry gitFolder = project.getBaseFolder().getChildFolder(".git");
-    gitFolder.getVirtualFile().delete();
-    projectRegistry.removeProjectType(projectPath, GitProjectType.TYPE_ID);
+    RegisteredProject project =
+        projectManager
+            .get(projectPath)
+            .orElseThrow(() -> new NotFoundException("Can't find project"));
+
+    String dotGitWsPath = pathResolver.resolve(projectPath, ".git");
+    fsManager.deleteDirectoryQuietly(dotGitWsPath);
+
+    projectManager.removeType(projectPath, GitProjectType.TYPE_ID);
     eventService.publish(newDto(GitRepositoryDeletedEvent.class));
   }
 
@@ -579,8 +590,7 @@ public class GitService {
   }
 
   private String getAbsoluteProjectPath(String wsRelatedProjectPath) throws ApiException {
-    final RegisteredProject project = projectRegistry.getProject(wsRelatedProjectPath);
-    return project.getBaseFolder().getVirtualFile().toIoFile().getAbsolutePath();
+    return pathResolver.toFsPath(wsRelatedProjectPath).toString();
   }
 
   private GitConnection getGitConnection() throws ApiException {

@@ -14,8 +14,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistry;
 
 /**
  * Called after project initialized.
@@ -27,13 +25,12 @@ public interface ProjectInitHandler extends ProjectHandler {
   /**
    * Handler to be fired after initialization of project.
    *
-   * @param registry project registry
    * @param projectFolder base project folder
    * @throws ServerException
    * @throws ForbiddenException
    * @throws ConflictException
    * @throws NotFoundException
    */
-  void onProjectInitialized(ProjectRegistry registry, FolderEntry projectFolder)
+  void onProjectInitialized(String projectFolder)
       throws ServerException, ForbiddenException, ConflictException, NotFoundException;
 }

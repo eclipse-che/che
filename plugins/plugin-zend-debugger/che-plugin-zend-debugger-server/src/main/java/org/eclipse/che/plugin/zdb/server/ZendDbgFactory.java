@@ -74,9 +74,20 @@ public class ZendDbgFactory implements DebuggerFactory {
 
     boolean useSslEncryption = Boolean.valueOf(useSslEncryptionProp);
 
+//    return new ZendDebugger(
+//        new ZendDbgSettings(debugPort, clientHostIPProp, breakAtFirstLine, useSslEncryption),
+//        new ZendDbgLocationHandler(pathResolver, fsManager, projectManager),
+//        debuggerCallback,
+//        pathResolver,
+//        projectManager,
+//        fsManager);
+
     return new ZendDebugger(
         new ZendDbgSettings(debugPort, clientHostIPProp, breakAtFirstLine, useSslEncryption),
-        new ZendDbgLocationHandler(),
-        debuggerCallback);
+        new ZendDbgLocationHandler(null, null, null),
+        debuggerCallback,
+        null,
+        null,
+        null);
   }
 }

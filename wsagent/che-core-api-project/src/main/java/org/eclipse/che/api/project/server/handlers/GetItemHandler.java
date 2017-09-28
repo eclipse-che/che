@@ -10,10 +10,8 @@
  */
 package org.eclipse.che.api.project.server.handlers;
 
-import org.eclipse.che.api.project.server.VirtualFileEntry;
-
 /** @author gazarenkov */
 public interface GetItemHandler extends ProjectHandler {
 
-  void onGetItem(VirtualFileEntry virtualFile);
+  void onGetItem(String wsPath);
 }

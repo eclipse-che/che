@@ -24,14 +24,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FileEntry;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.api.PathResolver;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaProject;
@@ -46,17 +42,20 @@ import org.eclipse.jface.text.BadLocationException;
  */
 @Path("java/formatter/")
 public class JavaFormatterService {
+
   private static final String CHE_FOLDER = ".che";
   private static final String CHE_FORMATTER_XML = "che-formatter.xml";
   private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
 
-  private ProjectManager projectManager;
+  private final FsManager fsManager;
+  private final PathResolver pathResolver;
   private Formatter formatter;
 
   @Inject
-  public JavaFormatterService(ProjectManager projectManager, Formatter formatter) {
+  public JavaFormatterService(FsManager fsManager, PathResolver pathResolver, Formatter formatter) {
+    this.fsManager = fsManager;
+    this.pathResolver = pathResolver;
     this.formatter = formatter;
-    this.projectManager = projectManager;
   }
 
   @POST
@@ -105,20 +104,20 @@ public class JavaFormatterService {
           String content)
       throws ServerException {
     try {
-      FolderEntry projectsRoot = projectManager.getProjectsRoot();
-      VirtualFileEntry cheFolder = projectsRoot.getChild(CHE_FOLDER);
-      if (cheFolder == null) {
-        cheFolder = projectsRoot.createFolder(CHE_FOLDER);
+      String rootCheFolderWsPath = pathResolver.toAbsoluteWsPath(CHE_FOLDER);
+
+      if (!fsManager.existsAsDirectory(rootCheFolderWsPath)) {
+        fsManager.createDirectory(rootCheFolderWsPath);
       }
-      FolderEntry cheFolderEntry = (FolderEntry) cheFolder;
-      VirtualFileEntry formatter = cheFolderEntry.getChild(CHE_FORMATTER_XML);
-      if (formatter == null) {
-        cheFolderEntry.createFile(CHE_FORMATTER_XML, content.getBytes());
+
+      String cheFormatterWsPath = pathResolver.resolve(rootCheFolderWsPath, CHE_FORMATTER_XML);
+
+      if (!fsManager.existsAsFile(cheFormatterWsPath)) {
+        fsManager.createFile(cheFormatterWsPath, content);
       } else {
-        FileEntry formatterEntry = (FileEntry) formatter;
-        formatterEntry.updateContent(content.getBytes());
+        fsManager.updateFile(cheFormatterWsPath, content);
       }
-    } catch (ServerException | ForbiddenException | ConflictException e) {
+    } catch (ServerException | ConflictException | NotFoundException e) {
       throw new ServerException(e);
     }
   }
@@ -137,38 +136,33 @@ public class JavaFormatterService {
       @ApiParam(value = "The content of the formatter. Eclipse code formatting is supported only")
           String content)
       throws ServerException, NotFoundException {
-    RegisteredProject project = projectManager.getProject(projectPath);
-    FolderEntry baseFolder = project.getBaseFolder();
     try {
-      VirtualFileEntry cheFolder = baseFolder.getChild(CHE_FOLDER);
-      if (cheFolder == null) {
-        cheFolder = baseFolder.createFolder(CHE_FOLDER);
-      }
-      FolderEntry cheFolderEntry = (FolderEntry) cheFolder;
-      VirtualFileEntry formatter = cheFolderEntry.getChild(CHE_FORMATTER_XML);
+      String projectWsPath = pathResolver.toAbsoluteWsPath(projectPath);
+      String projectCheFolderWsPath = pathResolver.resolve(projectWsPath, CHE_FOLDER);
 
-      if (formatter == null) {
-        cheFolderEntry.createFile(CHE_FORMATTER_XML, content.getBytes());
-      } else {
-        FileEntry formatterEntry = (FileEntry) formatter;
-        formatterEntry.updateContent(content.getBytes());
+      if (!fsManager.existsAsDirectory(projectCheFolderWsPath)) {
+        fsManager.createDirectory(projectCheFolderWsPath);
       }
-    } catch (ForbiddenException | ConflictException e) {
+
+      String cheFormatterWsPath = pathResolver.resolve(projectCheFolderWsPath, CHE_FORMATTER_XML);
+
+      if (!fsManager.existsAsFile(cheFormatterWsPath)) {
+        fsManager.createFile(cheFormatterWsPath, content);
+      } else {
+        fsManager.updateFile(cheFormatterWsPath, content);
+      }
+
+    } catch (ConflictException | NotFoundException e) {
       throw new ServerException(e);
     }
   }
 
   private File getFormatterFromRootFolder(String formatterPath) {
     try {
-      FolderEntry projectsRoot = projectManager.getProjectsRoot();
-      VirtualFileEntry child = projectsRoot.getChild(formatterPath);
-      if (child != null) {
-        FileEntry formatterFileEntry = (FileEntry) child;
-        return formatterFileEntry.getVirtualFile().toIoFile();
-      }
-    } catch (ServerException e) {
-      //do nothing
+      String formatterWsPath = pathResolver.toAbsoluteWsPath(formatterPath);
+      return fsManager.toIoFile(formatterWsPath);
+    } catch (NotFoundException e) {
+      return null;
     }
-    return null;
   }
 }

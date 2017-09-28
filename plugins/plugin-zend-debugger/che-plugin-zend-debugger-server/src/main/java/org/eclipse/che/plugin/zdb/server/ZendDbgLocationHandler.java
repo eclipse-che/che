@@ -9,11 +9,13 @@
  */
 package org.eclipse.che.plugin.zdb.server;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
-import org.eclipse.che.api.vfs.Path;
-import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
+import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.project.server.api.ProjectManager;
 
 /**
  * Zend debugger location handler. This class is responsible for bidirectional mapping/converting
@@ -22,7 +24,20 @@ import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
  *
  * @author Bartlomiej Laczkowski
  */
+@Singleton
 public class ZendDbgLocationHandler {
+
+  private final PathResolver pathResolver;
+  private final FsManager fsManager;
+  private final ProjectManager projectManager;
+
+  @Inject
+  public ZendDbgLocationHandler(
+      PathResolver pathResolver, FsManager fsManager, ProjectManager projectManager) {
+    this.pathResolver = pathResolver;
+    this.fsManager = fsManager;
+    this.projectManager = projectManager;
+  }
 
   public static final Location createVFS(
       String target, String resourceProjectPath, int lineNumber) {
@@ -30,24 +45,27 @@ public class ZendDbgLocationHandler {
   }
 
   public static final Location createDBG(String resourcePath, int lineNumber) {
-    return new LocationImpl(
-        Path.of(resourcePath).getName(), lineNumber, false, 0, resourcePath, null, -1);
+    return new LocationImpl(resourcePath, lineNumber, false, 0, resourcePath, null, -1);
   }
 
   /**
    * Convert DBG specific location to VFS one.
    *
-   * @param dbgLocation
    * @return VFS specific location.
    */
   public Location convertToVFS(Location dbgLocation) {
-    VirtualFileEntry localFileEntry =
-        ZendDbgFileUtils.findVirtualFileEntry(dbgLocation.getResourceProjectPath());
-    if (localFileEntry == null) {
+    String remotePath = dbgLocation.getResourceProjectPath();
+    String wsPath = pathResolver.toAbsoluteWsPath(remotePath);
+    if (!fsManager.exists(wsPath)) {
       return null;
     }
-    String resourceProjectPath = localFileEntry.getProject();
-    String target = localFileEntry.getName();
+
+    String resourceProjectPath =
+        projectManager
+            .getClosest(wsPath)
+            .orElseThrow(() -> new IllegalArgumentException("Can't find project"))
+            .getPath();
+    String target = pathResolver.getName(wsPath);
     int lineNumber = dbgLocation.getLineNumber();
     return new LocationImpl(
         target,
@@ -62,7 +80,6 @@ public class ZendDbgLocationHandler {
   /**
    * Convert VFS specific location to DBG one.
    *
-   * @param vfsLocation
    * @return DBG specific location.
    */
   public Location convertToDBG(Location vfsLocation) {

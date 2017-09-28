@@ -13,7 +13,7 @@ package org.eclipse.che.api.git;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static java.util.Collections.emptyList;
-import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
+import static org.eclipse.che.api.fs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -26,16 +26,18 @@ import java.util.function.Consumer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.watcher.FileWatcherManager;
 import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
+import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.slf4j.Logger;
 
 /**
@@ -54,7 +56,8 @@ public class GitStatusChangedDetector {
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
-  private final Provider<ProjectManager> projectManagerProvider;
+  private final PathResolver pathResolver;
+  private final ProjectManager projectManager;
   private final GitConnectionFactory gitConnectionFactory;
 
   private final Set<String> endpointIds = newConcurrentHashSet();
@@ -66,11 +69,13 @@ public class GitStatusChangedDetector {
   public GitStatusChangedDetector(
       RequestTransmitter transmitter,
       FileWatcherManager manager,
-      Provider<ProjectManager> projectManagerProvider,
+      PathResolver pathResolver,
+      ProjectManager projectManager,
       GitConnectionFactory gitConnectionFactory) {
     this.transmitter = transmitter;
     this.manager = manager;
-    this.projectManagerProvider = projectManagerProvider;
+    this.pathResolver = pathResolver;
+    this.projectManager = projectManager;
     this.gitConnectionFactory = gitConnectionFactory;
   }
 
@@ -118,18 +123,16 @@ public class GitStatusChangedDetector {
     return it -> endpointIds.forEach(transmitConsumer(it));
   }
 
-  private Consumer<String> transmitConsumer(String path) {
+  private Consumer<String> transmitConsumer(String wsPath) {
     return id -> {
       try {
-        String projectPath =
-            projectManagerProvider
-                .get()
-                .getProject((path.startsWith("/") ? path.substring(1) : path).split("/")[0])
-                .getBaseFolder()
-                .getVirtualFile()
-                .toIoFile()
-                .getAbsolutePath();
-        GitConnection connection = gitConnectionFactory.getConnection(projectPath);
+        RegisteredProject project =
+            projectManager
+                .getClosest(wsPath)
+                .orElseThrow(() -> new NotFoundException("Can't find a project"));
+
+        String projectFsPath = pathResolver.toFsPath(project.getPath()).toString();
+        GitConnection connection = gitConnectionFactory.getConnection(projectFsPath);
         Status status = connection.status(emptyList());
         Status statusDto = newDto(Status.class);
         statusDto.setAdded(status.getAdded());

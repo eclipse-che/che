@@ -13,14 +13,14 @@ import static org.eclipse.che.plugin.composer.shared.Constants.COMPOSER_PROJECT_
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.plugin.composer.server.executor.ComposerCommandExecutor;
 
@@ -35,12 +35,12 @@ public class ComposerProjectInitializer implements ProjectInitHandler {
   }
 
   @Override
-  public void onProjectInitialized(ProjectRegistry registry, FolderEntry projectFolder)
+  public void onProjectInitialized(String projectWsPath)
       throws ServerException, ForbiddenException, ConflictException, NotFoundException {
     String[] commandLine = {"composer", "install"};
-    File workDir = projectFolder.getVirtualFile().toIoFile();
+    Path path = Paths.get("/projects/", projectWsPath);
     try {
-      commandExecutor.execute(commandLine, workDir);
+      commandExecutor.execute(commandLine, path.toFile());
     } catch (TimeoutException | IOException | InterruptedException e) {
       throw new ServerException(e);
     }

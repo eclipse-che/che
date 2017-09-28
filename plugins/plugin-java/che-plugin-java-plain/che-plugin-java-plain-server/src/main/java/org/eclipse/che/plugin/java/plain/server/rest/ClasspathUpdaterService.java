@@ -26,14 +26,15 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.fs.api.PathResolver;
 import org.eclipse.che.api.project.server.NewProjectConfigImpl;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.core.runtime.IPath;
@@ -51,15 +52,17 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
  */
 @Path("jdt/classpath/update")
 public class ClasspathUpdaterService {
+
   private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
 
   private final ProjectManager projectManager;
-  private final ProjectRegistry projectRegistry;
+  private final PathResolver pathResolver;
 
   @Inject
-  public ClasspathUpdaterService(ProjectManager projectManager, ProjectRegistry projectRegistry) {
+  public ClasspathUpdaterService(ProjectManager projectManager,
+      PathResolver pathResolver) {
     this.projectManager = projectManager;
-    this.projectRegistry = projectRegistry;
+    this.pathResolver = pathResolver;
   }
 
   /**
@@ -72,14 +75,13 @@ public class ClasspathUpdaterService {
    * @throws ForbiddenException if operation is forbidden
    * @throws ConflictException if update operation causes conflicts
    * @throws NotFoundException if Project with specified path doesn't exist in workspace
-   * @throws IOException
    */
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public void updateClasspath(
       @QueryParam("projectpath") String projectPath, List<ClasspathEntryDto> entries)
       throws JavaModelException, ServerException, ForbiddenException, ConflictException,
-          NotFoundException, IOException {
+      NotFoundException, IOException, BadRequestException {
     IJavaProject javaProject = model.getJavaProject(projectPath);
 
     javaProject.setRawClasspath(
@@ -88,15 +90,17 @@ public class ClasspathUpdaterService {
     updateProjectConfig(projectPath);
   }
 
-  private void updateProjectConfig(String projectPath)
+  private void updateProjectConfig(String projectWsPath)
       throws IOException, ForbiddenException, ConflictException, NotFoundException,
-          ServerException {
-    RegisteredProject project = projectRegistry.getProject(projectPath);
+      ServerException, BadRequestException {
+    String wsPath = pathResolver.toAbsoluteWsPath(projectWsPath);
+    RegisteredProject project = projectManager.get(wsPath)
+        .orElseThrow(() -> new NotFoundException("Can't find project: " + projectWsPath));
 
     NewProjectConfig projectConfig =
         new NewProjectConfigImpl(
-            projectPath, project.getName(), project.getType(), project.getSource());
-    projectManager.updateProject(projectConfig);
+            projectWsPath, project.getName(), project.getType(), project.getSource());
+    projectManager.update(projectConfig);
   }
 
   private IClasspathEntry[] createModifiedEntry(List<ClasspathEntryDto> entries) {

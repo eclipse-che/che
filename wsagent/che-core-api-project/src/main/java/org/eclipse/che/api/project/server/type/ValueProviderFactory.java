@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.api.project.server.type;
 
-import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
 /**
  * Factory for {@link ValueProvider}.
@@ -23,7 +23,7 @@ public interface ValueProviderFactory {
    * Create new instance of {@link ValueProvider}. Project is used for access to low-level
    * information about project.
    *
-   * @param projectFolder
+   * @param projectConfig
    */
-  ValueProvider newInstance(FolderEntry projectFolder);
+  ValueProvider newInstance(ProjectConfig projectConfig);
 }

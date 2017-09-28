@@ -12,12 +12,14 @@ package org.eclipse.che.plugin.maven.server.projecttype.handler;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.getFirst;
+import static java.io.File.separator;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_GENERATION_STRATEGY;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_VERSION;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.GROUP_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,9 +29,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.api.vfs.Path;
-import org.eclipse.che.api.vfs.VirtualFileSystem;
-import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.ide.maven.tools.MavenArtifact;
 import org.eclipse.che.plugin.maven.generator.archetype.ArchetypeGenerator;
 import org.eclipse.che.plugin.maven.generator.archetype.MavenArchetypeImpl;
@@ -43,15 +42,11 @@ import org.eclipse.che.plugin.maven.shared.MavenArchetype;
 @Singleton
 public class ArchetypeGenerationStrategy implements GeneratorStrategy {
 
-  private final VirtualFileSystem vfs;
   private final ArchetypeGenerator archetypeGenerator;
 
   @Inject
-  public ArchetypeGenerationStrategy(
-      ArchetypeGenerator archetypeGenerator, VirtualFileSystemProvider vfsProvider)
-      throws ServerException {
+  public ArchetypeGenerationStrategy(ArchetypeGenerator archetypeGenerator) throws ServerException {
     this.archetypeGenerator = archetypeGenerator;
-    vfs = vfsProvider.getVirtualFileSystem();
   }
 
   public String getId() {
@@ -60,7 +55,7 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
 
   @Override
   public void generateProject(
-      final Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
+      String projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
       throws ForbiddenException, ConflictException, ServerException {
 
     AttributeValue artifactId = attributes.get(ARTIFACT_ID);
@@ -111,11 +106,11 @@ public class ArchetypeGenerationStrategy implements GeneratorStrategy {
             archetypeRepository,
             archetypeProperties);
 
+    String projectName = projectPath.substring(projectPath.lastIndexOf(separator));
     final MavenArtifact mavenArtifact = new MavenArtifact();
-    mavenArtifact.setGroupId(getFirst(groupId.getList(), projectPath.getName()));
-    mavenArtifact.setArtifactId(getFirst(artifactId.getList(), projectPath.getName()));
+    mavenArtifact.setGroupId(getFirst(groupId.getList(), projectName));
+    mavenArtifact.setArtifactId(getFirst(artifactId.getList(), projectName));
     mavenArtifact.setVersion(getFirst(version.getList(), DEFAULT_VERSION));
-    archetypeGenerator.generateFromArchetype(
-        vfs.getRoot().toIoFile(), mavenArchetype, mavenArtifact);
+    archetypeGenerator.generateFromArchetype(new File("/projects"), mavenArchetype, mavenArtifact);
   }
 }

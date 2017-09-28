@@ -12,6 +12,7 @@ package org.eclipse.che.api.project.server;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.io.File.separator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +22,6 @@ import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
-import org.eclipse.che.api.vfs.Path;
 
 /**
  * Implementation of {@link NewProjectConfig} for creating project
@@ -87,8 +87,8 @@ public class NewProjectConfigImpl implements NewProjectConfig {
    *
    * @param path
    */
-  public NewProjectConfigImpl(Path path) {
-    this(path.toString(), null, null, path.getName(), null, null, null, null);
+  public NewProjectConfigImpl(String path) {
+    this(path, null, null, path.substring(path.lastIndexOf(separator)), null, null, null, null);
   }
 
   @Override

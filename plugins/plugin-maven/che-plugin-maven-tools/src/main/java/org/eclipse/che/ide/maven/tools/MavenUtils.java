@@ -26,7 +26,6 @@ import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.vfs.VirtualFile;
 
 /**
  * A smattering of useful methods to work with the Maven POM.
@@ -198,11 +197,11 @@ public class MavenUtils {
     return list;
   }
 
-  /** Get source directories. */
-  public static List<String> getSourceDirectories(VirtualFile pom)
-      throws ServerException, IOException, ForbiddenException {
-    return getSourceDirectories(Model.readFrom(pom));
-  }
+//  /** Get source directories. */
+//  public static List<String> getSourceDirectories(String pom)
+//      throws ServerException, IOException, ForbiddenException {
+//    return getSourceDirectories(Model.readFrom(pom));
+//  }
 
   /** Get source directories. */
   public static List<String> getSourceDirectories(java.io.File pom) throws IOException {
@@ -226,11 +225,11 @@ public class MavenUtils {
     return list;
   }
 
-  /** Get resource directories. */
-  public static List<String> getResourceDirectories(VirtualFile pom)
-      throws ServerException, IOException, ForbiddenException {
-    return getResourceDirectories(Model.readFrom(pom));
-  }
+//  /** Get resource directories. */
+//  public static List<String> getResourceDirectories(String pom)
+//      throws ServerException, IOException, ForbiddenException {
+//    return getResourceDirectories(Model.readFrom(pom));
+//  }
 
   /** Get resource directories. */
   public static List<String> getResourceDirectories(java.io.File pom) throws IOException {

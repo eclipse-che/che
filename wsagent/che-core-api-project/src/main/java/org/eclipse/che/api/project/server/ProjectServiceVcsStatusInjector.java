@@ -20,6 +20,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 
@@ -32,13 +34,16 @@ import org.eclipse.che.api.project.shared.dto.TreeElement;
 public class ProjectServiceVcsStatusInjector {
 
   private final ProjectManager projectManager;
+  private final PathResolver pathResolver;
   private final Set<VcsStatusProvider> vcsStatusProviders;
 
   @Inject
   public ProjectServiceVcsStatusInjector(
-      ProjectManager projectManager, Set<VcsStatusProvider> vcsStatusProviders) {
+      ProjectManager projectManager, Set<VcsStatusProvider> vcsStatusProviders,
+      PathResolver pathResolver) {
     this.projectManager = projectManager;
     this.vcsStatusProviders = vcsStatusProviders;
+    this.pathResolver = pathResolver;
   }
 
   /**
@@ -113,7 +118,8 @@ public class ProjectServiceVcsStatusInjector {
             .findAny();
     if (treeElementOptional.isPresent()) {
       String project = normalizeProjectPath(treeElementOptional.get().getNode().getProject());
-      Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(project);
+      String projectWsPath = pathResolver.toAbsoluteWsPath(project);
+      Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(projectWsPath);
       if (vcsStatusProviderOptional.isPresent()) {
         List<String> treeElementFiles =
             treeElements
@@ -122,7 +128,7 @@ public class ProjectServiceVcsStatusInjector {
                 .map(treeElement -> normalizeFilePath(treeElement.getNode().getPath()))
                 .collect(Collectors.toList());
         Map<String, VcsStatusProvider.VcsStatus> status =
-            vcsStatusProviderOptional.get().getStatus(project, treeElementFiles);
+            vcsStatusProviderOptional.get().getStatus(projectWsPath, treeElementFiles);
 
         treeElements
             .stream()
@@ -153,10 +159,14 @@ public class ProjectServiceVcsStatusInjector {
     return projectPath;
   }
 
-  private Optional<VcsStatusProvider> getVcsStatusProvider(String projectPath)
+  private Optional<VcsStatusProvider> getVcsStatusProvider(String projectWsPath)
       throws ServerException, NotFoundException {
     List<String> vcsAttributes =
-        projectManager.getProject(projectPath).getAttributes().get("vcs.provider.name");
+        projectManager
+            .get(projectWsPath)
+            .orElseThrow(() -> new NotFoundException("Can't find project"))
+            .getAttributes()
+            .get("vcs.provider.name");
     return vcsStatusProviders
         .stream()
         .filter(
