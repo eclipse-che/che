@@ -197,7 +197,7 @@ export class StackController {
       this.loading = false;
       this.prepareStackData();
     }, (error: any) => {
-      if (error.status === 304) {
+      if (error && error.status === 304) {
         this.loading = false;
         this.stack = this.cheStack.getStackById(this.stackId);
         this.prepareStackData();
