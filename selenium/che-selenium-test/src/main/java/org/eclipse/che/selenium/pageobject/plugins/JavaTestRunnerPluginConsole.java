@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -43,6 +44,8 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   private static final String METHODS_MARKED_AS_IGNORED =
       "//div[contains(@id,'gwt-uid')]//div[@style='text-decoration: line-through; color: yellow;']";
 
+  private static final String TEST_RESULT_NAVIGATION_TREE = "gwt-debug-test-tree-navigation-panel";
+
   @FindAll({@FindBy(xpath = TEST_OUTPUT_XPATH)})
   private List<WebElement> testOutput;
 
@@ -63,6 +66,9 @@ public class JavaTestRunnerPluginConsole extends Consoles {
 
   @FindAll({@FindBy(xpath = METHODS_MARKED_AS_IGNORED)})
   private List<WebElement> ignoredMethods;
+
+  @FindBy(id = TEST_RESULT_NAVIGATION_TREE)
+  private WebElement resultTreeMainForm;
 
   @Inject
   public JavaTestRunnerPluginConsole(SeleniumWebDriver seleniumWebDriver, Loader loader) {
@@ -86,7 +92,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * wait single method in the result tree marked as failed (red color)
+   * Wait single method in the result tree marked as failed (red color).
    *
    * @param nameOfFailedMethods name of that should fail
    */
@@ -96,7 +102,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * wait single method in the result tree marked as failed (red color)
+   * Wait single method in the result tree marked as failed (red color).
    *
    * @param nameOfFailedMethods name of that should fail
    */
@@ -106,7 +112,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * wait single method in the result tree marked as passed (green color)
+   * Wait single method in the result tree marked as passed (green color).
    *
    * @param nameOfFailedMethods name of expected method
    */
@@ -116,25 +122,25 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * wait the FQN of the test class in result tree class that has been launched
+   * Wait the FQN of the test class in result tree class that has been launched.
    *
    * @param fqn
    */
   public void waitFqnOfTesClassInResultTree(String fqn) {
     new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
         .until(
-            ExpectedConditions.visibilityOfAllElementsLocatedBy(
+            ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format(TEST_RESULT_TREE_XPATH_TEMPLATE, fqn))));
   }
 
   /**
-   * get all name of the test methods form the test result tree marked with defined status (may be
-   * passed, failed or ignored)
+   * Get all name of the test methods form the test result tree marked with defined status (may be
+   * passed, failed or ignored).
    *
    * @param methodState the enumeration with defined status
    * @return the list with names of methods with defined status
    */
-  public List<String> getAllMethodsMarkedDefinedStatus(JunitMethodsState methodState) {
+  public List<String> getAllNamesOfMethodsMarkedDefinedStatus(JunitMethodsState methodState) {
     List<String> definedMethods = null;
     switch (methodState) {
       case PASSED:
@@ -150,11 +156,73 @@ public class JavaTestRunnerPluginConsole extends Consoles {
     return definedMethods;
   }
 
+  /**
+   * Get all defined methods from result tree and return as list WebElements.
+   *
+   * @param methodState the enumeration with defined status
+   * @return List WebElements with defined status
+   */
+  public List<WebElement> getAllMethodsMarkedDefinedStatus(JunitMethodsState methodState) {
+    List<WebElement> definedMethods = null;
+    switch (methodState) {
+      case PASSED:
+        definedMethods = passedMethods;
+        break;
+      case FAILED:
+        definedMethods = failedMethods;
+        break;
+      case IGNORED:
+        definedMethods = ignoredMethods;
+        break;
+    }
+    return definedMethods;
+  }
+
   private List<String> getAllMetodsWithDefinedStatus(List<WebElement> definedMethod) {
     return new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
         .until(ExpectedConditions.visibilityOfAllElements(definedMethod))
         .stream()
         .map(WebElement::getText)
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Get text from the test result tree. Mote! This method represent only text from test result tree
+   * without styles and formatting
+   *
+   * @return text representation of results of the test result tree widget
+   */
+  public String getTextFromResultTree() {
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(resultTreeMainForm))
+        .getText();
+  }
+
+  /**
+   * Click on the item in the result tree. If will be some items with the same name - will select
+   * first.
+   *
+   * @param item name of the item (method or fqn of test class) in the test result tree
+   */
+  public void selectItemInResultTree(String item) {
+    new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
+        .until(ExpectedConditions.visibilityOf(resultTreeMainForm))
+        .findElement(By.xpath(String.format("//div[text()='%s']", item)))
+        .click();
+  }
+
+  /**
+   * Click on faled, passed or ignored method on the result tree.
+   *
+   * @param nameOfMethod
+   * @param state
+   */
+  public void selectMethodWithDefinedStatus(JunitMethodsState state, String nameOfMethod) {
+    getAllMethodsMarkedDefinedStatus(state)
+        .stream()
+        .filter(webElement -> Objects.equals(webElement.getText(), nameOfMethod))
+        .findFirst()
+        .get()
+        .click();
   }
 }

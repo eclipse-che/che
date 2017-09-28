@@ -12,9 +12,7 @@
 
 import {Register} from '../components/utils/register';
 import {FactoryConfig} from './factories/factories-config';
-
 import {ComponentsConfig} from '../components/components-config';
-
 import {AdminsConfig} from './admin/admin-config';
 import {AdministrationConfig} from './administration/administration-config';
 import {DiagnosticsConfig} from './diagnostics/diagnostics-config';
@@ -33,20 +31,26 @@ import {StacksConfig} from './stacks/stacks-config';
 import {DemoComponentsController} from './demo-components/demo-components.controller';
 import {CheBranding} from '../components/branding/che-branding.factory';
 import {ChePreferences} from '../components/api/che-preferences.factory';
-
+import {RoutingRedirect} from '../components/routing/routing-redirect.factory';
+import IdeIFrameSvc from './ide/ide-iframe/ide-iframe.service';
+import {CheIdeFetcher} from '../components/ide-fetcher/che-ide-fetcher.service';
+import {RouteHistory} from '../components/routing/route-history.service';
+import {CheUIElementsInjectorService} from '../components/service/injector/che-ui-elements-injector.service';
+import {WorkspaceDetailsService} from './workspaces/workspace-details/workspace-details.service';
 
 // init module
-let initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
+const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
   'angular-websocket', 'ui.bootstrap', 'ui.codemirror', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
   'ngDropdowns', 'ngLodash', 'angularCharts', 'uuid4', 'angularFileUpload']);
-
 
 // add a global resolve flag on all routes (user needs to be resolved first)
 initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
   $routeProvider.accessWhen = (path: string, route: che.route.IRoute) => {
-    route.resolve || (route.resolve = {});
+    if (angular.isUndefined(route.resolve)) {
+      route.resolve = {};
+    }
     (route.resolve as any).app = ['cheBranding', '$q', 'chePreferences', (cheBranding: CheBranding, $q: ng.IQService, chePreferences: ChePreferences) => {
-      let deferred = $q.defer();
+      const deferred = $q.defer();
       if (chePreferences.getPreferences()) {
         deferred.resolve();
       } else {
@@ -56,7 +60,6 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
           deferred.reject(error);
         });
       }
-
       return deferred.promise;
     }];
 
@@ -64,9 +67,11 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
   };
 
   $routeProvider.accessOtherWise = (route: che.route.IRoute) => {
-    route.resolve || (route.resolve = {});
+    if (angular.isUndefined(route.resolve)) {
+      route.resolve = {};
+    }
     (route.resolve as any).app = ['$q', 'chePreferences', ($q: ng.IQService, chePreferences: ChePreferences) => {
-      let deferred = $q.defer();
+      const deferred = $q.defer();
       if (chePreferences.getPreferences()) {
         deferred.resolve();
       } else {
@@ -76,7 +81,6 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
           deferred.reject(error);
         });
       }
-
       return deferred.promise;
     }];
     return $routeProvider.otherwise(route);
@@ -85,11 +89,10 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
 
 }]);
 
-var DEV = false;
-
+const DEV = false;
 
 // configs
-initModule.config(['$routeProvider', ($routeProvider) => {
+initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
   // config routes (add demo page)
   if (DEV) {
     $routeProvider.accessWhen('/demo-components', {
@@ -106,12 +109,11 @@ initModule.config(['$routeProvider', ($routeProvider) => {
   });
 }]);
 
-
 /**
  * Setup route redirect module
  */
 initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
-  ($rootScope, $location, $routeParams, routingRedirect, $timeout, ideIFrameSvc, cheIdeFetcher, routeHistory, cheUIElementsInjectorService, workspaceDetailsService) => {
+  ($rootScope: che.IRootScopeService, $location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService, routingRedirect: RoutingRedirect, $timeout: ng.ITimeoutService, ideIFrameSvc: IdeIFrameSvc, cheIdeFetcher: CheIdeFetcher, routeHistory: RouteHistory, cheUIElementsInjectorService: CheUIElementsInjectorService, workspaceDetailsService: WorkspaceDetailsService) => {
     $rootScope.hideLoader = false;
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
@@ -119,8 +121,10 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
     workspaceDetailsService.addPage('SSH', '<workspace-details-ssh></workspace-details-ssh>', 'icon-ic_vpn_key_24px');
 
     // here only to create instances of these components
+    /* tslint:disable */
     cheIdeFetcher;
     routeHistory;
+    /* tslint:enable */
 
     $rootScope.$on('$viewContentLoaded', () => {
       cheUIElementsInjectorService.injectAll();
@@ -136,7 +140,7 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
       }, 1000);
     });
 
-    $rootScope.$on('$routeChangeStart', (event, next)=> {
+    $rootScope.$on('$routeChangeStart', (event: any, next: any) => {
       if (DEV) {
         console.log('$routeChangeStart event with route', next);
       }
@@ -165,20 +169,20 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
     $rootScope.$on('$routeChangeError', () => {
       $location.path('/');
     });
-  }]);
-
+  }
+]);
 
 // add interceptors
-initModule.factory('ETagInterceptor', ($window, $cookies, $q) => {
+initModule.factory('ETagInterceptor', ($window: ng.IWindowService, $cookies: ng.cookies.ICookiesService, $q: ng.IQService) => {
 
-  var etagMap = {};
+  const etagMap = {};
 
   return {
-    request: (config) => {
+    request: (config: any) => {
       // add IfNoneMatch request on the che api if there is an existing eTag
       if ('GET' === config.method) {
         if (config.url.indexOf('/api') === 0) {
-          let eTagURI = etagMap[config.url];
+          const eTagURI = etagMap[config.url];
           if (eTagURI) {
             config.headers = config.headers || {};
             angular.extend(config.headers, {'If-None-Match': eTagURI});
@@ -187,12 +191,12 @@ initModule.factory('ETagInterceptor', ($window, $cookies, $q) => {
       }
       return config || $q.when(config);
     },
-    response: (response) => {
+    response: (response: any) => {
 
       // if response is ok, keep ETag
       if ('GET' === response.config.method) {
         if (response.status === 200) {
-          var responseEtag = response.headers().etag;
+          const responseEtag = response.headers().etag;
           if (responseEtag) {
             if (response.config.url.indexOf('/api') === 0) {
 
@@ -207,11 +211,11 @@ initModule.factory('ETagInterceptor', ($window, $cookies, $q) => {
   };
 });
 
-initModule.config(($mdThemingProvider, jsonColors) => {
+initModule.config(($mdThemingProvider: ng.material.IThemingProvider, jsonColors: any) => {
 
-  var cheColors = angular.fromJson(jsonColors);
-  var getColor = (key) => {
-    var color = cheColors[key];
+  const cheColors = angular.fromJson(jsonColors);
+  const getColor = (key: string) => {
+    let color = cheColors[key];
     if (!color) {
       // return a flashy red color if color is undefined
       console.log('error, the color' + key + 'is undefined');
@@ -224,38 +228,37 @@ initModule.config(($mdThemingProvider, jsonColors) => {
 
   };
 
-
-  var cheMap = $mdThemingProvider.extendPalette('indigo', {
+  const cheMap = $mdThemingProvider.extendPalette('indigo', {
     '500': getColor('$dark-menu-color'),
     '300': 'D0D0D0'
   });
   $mdThemingProvider.definePalette('che', cheMap);
 
-  var cheDangerMap = $mdThemingProvider.extendPalette('red', {});
+  const cheDangerMap = $mdThemingProvider.extendPalette('red', {});
   $mdThemingProvider.definePalette('cheDanger', cheDangerMap);
 
-  var cheWarningMap = $mdThemingProvider.extendPalette('orange', {
+  const cheWarningMap = $mdThemingProvider.extendPalette('orange', {
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('cheWarning', cheWarningMap);
 
-  var cheGreenMap = $mdThemingProvider.extendPalette('green', {
+  const cheGreenMap = $mdThemingProvider.extendPalette('green', {
     'A100': '#46AF00',
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('cheGreen', cheGreenMap);
 
-  var cheDefaultMap = $mdThemingProvider.extendPalette('blue', {
+  const cheDefaultMap = $mdThemingProvider.extendPalette('blue', {
     'A400': getColor('$che-medium-blue-color')
   });
   $mdThemingProvider.definePalette('cheDefault', cheDefaultMap);
 
-  var cheNoticeMap = $mdThemingProvider.extendPalette('blue', {
+  const cheNoticeMap = $mdThemingProvider.extendPalette('blue', {
     'A400': getColor('$mouse-gray-color')
   });
   $mdThemingProvider.definePalette('cheNotice', cheNoticeMap);
 
-  var cheAccentMap = $mdThemingProvider.extendPalette('blue', {
+  const cheAccentMap = $mdThemingProvider.extendPalette('blue', {
     '700': getColor('$che-medium-blue-color'),
     'A400': getColor('$che-medium-blue-color'),
     'A200': getColor('$che-medium-blue-color'),
@@ -263,28 +266,26 @@ initModule.config(($mdThemingProvider, jsonColors) => {
   });
   $mdThemingProvider.definePalette('cheAccent', cheAccentMap);
 
-
-  var cheNavyPalette = $mdThemingProvider.extendPalette('purple', {
+  const cheNavyPalette = $mdThemingProvider.extendPalette('purple', {
     '500': getColor('$che-navy-color'),
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('cheNavyPalette', cheNavyPalette);
 
-
-  var toolbarPrimaryPalette = $mdThemingProvider.extendPalette('purple', {
+  const toolbarPrimaryPalette = $mdThemingProvider.extendPalette('purple', {
     '500': getColor('$che-white-color'),
     'contrastDefaultColor': 'dark'
   });
   $mdThemingProvider.definePalette('toolbarPrimaryPalette', toolbarPrimaryPalette);
 
-  var toolbarAccentPalette = $mdThemingProvider.extendPalette('purple', {
+  const toolbarAccentPalette = $mdThemingProvider.extendPalette('purple', {
     'A200': 'EF6C00',
     '700': 'E65100',
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('toolbarAccentPalette', toolbarAccentPalette);
 
-  var cheGreyPalette = $mdThemingProvider.extendPalette('grey', {
+  const cheGreyPalette = $mdThemingProvider.extendPalette('grey', {
     'A100': 'efefef',
     'contrastDefaultColor': 'light'
   });
@@ -356,18 +357,18 @@ initModule.constant('userDashboardConfig', {
   developmentMode: DEV
 });
 
-initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($routeProvider, $locationProvider, $httpProvider) => {
+initModule.config(['$routeProvider', '$httpProvider', ($routeProvider: che.route.IRouteProvider, $httpProvider: ng.IHttpProvider) => {
   // add the ETag interceptor for Che API
   $httpProvider.interceptors.push('ETagInterceptor');
 }]);
 
-
-var instanceRegister = new Register(initModule);
+const instanceRegister = new Register(initModule);
 
 if (DEV) {
   instanceRegister.controller('DemoComponentsController', DemoComponentsController);
 }
 
+/* tslint:disable */
 new ProxySettingsConfig(instanceRegister);
 new CheColorsConfig(instanceRegister);
 new CheOutputColorsConfig(instanceRegister);
@@ -385,3 +386,4 @@ new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);
 new FactoryConfig(instanceRegister);
+/* tslint:enable */

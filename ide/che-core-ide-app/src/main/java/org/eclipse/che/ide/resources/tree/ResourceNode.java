@@ -148,7 +148,6 @@ public abstract class ResourceNode<R extends Resource> extends AbstractTreeNode
     //problem reproduce randomly
     updatePresentation(nodePresentation);
 
-
     return nodePresentation;
   }
 

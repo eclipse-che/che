@@ -16,7 +16,6 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -147,22 +146,5 @@ public class ThreadDumpTest1 {
     assertEquals(threadState.getGroupName(), "main");
     assertTrue(threadState.isSuspended());
     assertEquals(threadState.getStatus(), ThreadStatus.RUNNING);
-
-    List<? extends StackFrameDump> frames = threadState.getFrames();
-    assertFalse(frames.isEmpty());
-
-    StackFrameDump stackFrameDump = frames.get(0);
-    assertTrue(stackFrameDump.getVariables().isEmpty());
-    assertTrue(stackFrameDump.getFields().isEmpty());
-
-    Location location = stackFrameDump.getLocation();
-    assertEquals(location.getLineNumber(), 41);
-    assertEquals(location.getTarget(), "/test/src/org/eclipse/ThreadDumpTest1.java");
-    assertEquals(location.getExternalResourceId(), -1);
-    assertEquals(location.getResourceProjectPath(), "/test");
-
-    Method method = location.getMethod();
-    assertEquals(method.getName(), "run");
-    assertTrue(method.getArguments().isEmpty());
   }
 }
