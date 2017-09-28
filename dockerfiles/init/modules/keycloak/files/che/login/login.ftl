@@ -6,10 +6,10 @@
         ${msg("loginTitleHtml",(realm.displayNameHtml!''))}
     <#elseif section = "form">        
         <#include "logo.ftl">
-        
+
         <#if realm.password>
             <form id="kc-form-login" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
-                <div class="${properties.kcFormGroupClass!}">                    
+                <div class="${properties.kcFormGroupClass!}">
                     <div class="kc-form-title">${msg("passwordLogin")}</div>
                     <div class="${properties.kcInputWrapperClass!}">
                         <#if usernameEditDisabled??>
@@ -55,8 +55,8 @@
             </form>
         </#if>
     <#elseif section = "info" >
-		<#if realm.password && social.providers??>
-		    <div class="kc-form-title">${msg("oauthLogin")}</div>
+        <#if realm.password && social.providers??>
+            <div class="kc-form-title">${msg("oauthLogin")}</div>
             <div id="kc-social-providers">
                 <ul>
                     <#list social.providers as p>
@@ -65,12 +65,11 @@
                 </ul>
             </div>
         </#if>
-    
+
         <#if realm.password && realm.registrationAllowed && !usernameEditDisabled??>
             <div id="kc-registration">
                 <span>${msg("noAccount")} <a href="${url.registrationUrl}">${msg("doRegister")}</a></span>
             </div>
         </#if>
-       
     </#if>
 </@layout.registrationLayout>
