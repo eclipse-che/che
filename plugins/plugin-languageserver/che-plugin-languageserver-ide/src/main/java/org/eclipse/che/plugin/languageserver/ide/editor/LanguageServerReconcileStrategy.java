@@ -71,6 +71,7 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
                     event.getDocument().getDocument(),
                     lastEventStart,
                     lastEventEnd,
+                    event.getRemoveCharCount(),
                     event.getText(),
                     ++version);
               }
