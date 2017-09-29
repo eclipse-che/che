@@ -28,7 +28,7 @@ export class CheNavBarController {
 
   accountItems = [
     {
-      name: 'Go to Profile',
+      name: 'Account',
       onclick: () => {
         this.gotoProfile();
       }
@@ -178,8 +178,7 @@ export class CheNavBarController {
    * Opens user profile in new browser page.
    */
   gotoProfile(): void {
-    const url = this.cheKeycloak.getProfileUrl();
-    this.$window.open(url);
+    this.$location.path('/account');
   }
 
   /**
