@@ -6,8 +6,6 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 # See: https://sipb.mit.edu/doc/safe-shell/
-set -e
-set -u
 
 . ./build.include
 init "$@"
