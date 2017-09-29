@@ -32,7 +32,6 @@ build
 
 # Build che-multiuser
 # grab assembly
-DIR=$(cd "$(dirname "$0")"; pwd)
 if [ ! -d "${DIR}/../../assembly-multiuser/assembly-main/target" ]; then
   echo "${ERROR}Have you built assembly-multiuser/assemby-main in ${DIR}/../assembly-multiuser/assembly-main 'mvn clean install'?"
   exit 2

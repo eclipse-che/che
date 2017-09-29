@@ -23,7 +23,6 @@ build_directory() {
       if echo ${DIRECTORIES_PROCESSED} | grep "${required_directory}/"; then
         printf "${BROWN}${required_directory} dependency already built [SKIP]${NC}\n"
       else
-        DIRECTORIES_PROCESSED="${DIRECTORIES_PROCESSED} ${required_directory}/"
         printf "${PURPLE}Build required dependency ${required_directory}${NC}\n"
         build_directory "${required_directory}/"
       fi
@@ -32,7 +31,8 @@ build_directory() {
   shift
   # Calling build.sh
   if [ -e ${directory}/build.sh ] ; then
-    bash ${directory}build.sh ${OPTIONS} ${ARGS}
+    ${directory}build.sh ${OPTIONS} ${ARGS}
+    DIRECTORIES_PROCESSED="${DIRECTORIES_PROCESSED} ${directory}"
   else
     printf "${RED}No build.sh in directory ${directory}${NC}\n"
     exit 2
