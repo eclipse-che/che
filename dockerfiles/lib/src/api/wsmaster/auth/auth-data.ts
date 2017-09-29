@@ -12,9 +12,8 @@
 import {RemoteIp} from "../../../spi/docker/remoteip";
 import {Log} from "../../../spi/log/log";
 import {ServerLocation} from "../../../utils/server-location";
-import {DefaultHttpJsonRequest, HttpJsonRequest, HttpJsonResponse} from "../../../spi/http/default-http-json-request";
-import {PermissionDto} from "../permissions/dto/permissiondto";
 import {error} from "util";
+import {WsMasterLocation} from "../wsmaster-location";
 
 /**
  * Defines a way to store the auth data in order to deal with remote REST or Websocket API
@@ -48,7 +47,7 @@ export class AuthData {
             this.authType = AUTH_TYPE.NO;
         } else if (process.env.CHE_MULTIUSER)  {
             this.authType = AUTH_TYPE.KEYCLOAK;
-            var authServer: string = process.env.CHE_KEYCLOAK_AUTH_SERVER_URL;
+            let authServer: string = process.env.CHE_KEYCLOAK_AUTH_SERVER_URL;
             if (authServer) {
                 this.authServerLocation = ServerLocation.parse(authServer);
             } else {
@@ -59,7 +58,7 @@ export class AuthData {
             if (cheMasterLocation) {
                 this.authServerLocation = cheMasterLocation;
             } else {
-                this.authServerLocation = ServerLocation.detectCheMasterLocation();
+                this.authServerLocation = new WsMasterLocation();
             }
         }
     }
@@ -86,8 +85,8 @@ export class AuthData {
             return AuthData.noLogin();
         }
 
-        var http:any;
-        var securedOrNot:string;
+        let http: any;
+        let securedOrNot: string;
         if (this.authServerLocation.isSecure()) {
             http = require('https');
             securedOrNot = ' using SSL.';
@@ -96,7 +95,7 @@ export class AuthData {
             securedOrNot = '.';
         }
 
-        var logMessage: string = 'Authenticating ';
+        let logMessage: string = 'Authenticating ';
         if (this.username && this.password) {
             logMessage += 'as ' + this.username;
         }
@@ -116,7 +115,7 @@ export class AuthData {
     }
 
     static parse(remoteUrl: string, username?: string, password?: string) : AuthData {
-        var serverApi: ServerLocation;
+        let serverApi: ServerLocation;
         if (remoteUrl) {
             serverApi = ServerLocation.parse(remoteUrl);
         }
@@ -209,7 +208,7 @@ export class AuthData {
     }
 
     private static noLogin() : Promise<boolean> {
-        return new Promise<any>((resolve, reject) => {
+        return new Promise<any>((resolve) => {
             resolve(true);
         });
     }

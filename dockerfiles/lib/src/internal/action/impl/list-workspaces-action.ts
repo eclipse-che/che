@@ -18,7 +18,7 @@ import {Log} from "../../../spi/log/log";
 import {DefaultAsciiArray} from "../../../spi/ascii/default-ascii-array";
 import {AsciiArray} from "../../../spi/ascii/ascii-array";
 import {FormatterMode} from "../../../spi/ascii/formatter-mode";
-import {ServerLocation} from "../../../utils/server-location";
+import {WsMasterLocation} from "../../../api/wsmaster/wsmaster-location";
 
 /**
  * This class list all workspaces
@@ -52,7 +52,7 @@ export class ListWorkspacesAction {
         ArgumentProcessor.inject(this, args);
 
         this.authData = AuthData.parse(this.url, this.username, this.password);
-        let apiLocation = ServerLocation.parse(this.url);
+        let apiLocation = new WsMasterLocation(this.url);
         this.workspace = new Workspace(this.authData, apiLocation);
     }
 

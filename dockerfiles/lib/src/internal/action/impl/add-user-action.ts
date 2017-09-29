@@ -19,6 +19,7 @@ import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
 import {Permissions} from "../../../api/wsmaster/permissions/permissions";
 import {ServerLocation} from "../../../utils/server-location";
+import {WsMasterLocation} from "../../../api/wsmaster/wsmaster-location";
 /**
  * This class is handling the add of a user and also consider to add user as being admin.
  * @author Florent Benoit
@@ -54,7 +55,7 @@ export class AddUserAction {
     constructor(args:Array<string>) {
         ArgumentProcessor.inject(this, args);
         this.authData = AuthData.parse(this.url, this.username, this.password);
-        this.apiLocation = ServerLocation.parse(this.url);
+        this.apiLocation = new WsMasterLocation(this.url);
         this.user = new User(this.authData, this.apiLocation);
     }
 

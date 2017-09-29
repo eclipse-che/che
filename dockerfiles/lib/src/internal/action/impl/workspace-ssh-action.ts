@@ -18,6 +18,7 @@ import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
 import {Ssh} from "../../../api/wsmaster/ssh/ssh";
 import {ServerLocation} from "../../../utils/server-location";
+import {WsMasterLocation} from "../../../api/wsmaster/wsmaster-location";
 /**
  * This class is handling the connection to a workspace with default ssh key (or custom one)
  * @author Florent Benoit
@@ -52,7 +53,7 @@ export class WorkspaceSshAction {
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
         this.authData = AuthData.parse(this.url, this.username, this.password);
-        this.apiLocation = ServerLocation.parse(this.url);
+        this.apiLocation = new WsMasterLocation(this.url);
         // disable printing info
         this.authData.printInfo = false;
         Log.disablePrefix();

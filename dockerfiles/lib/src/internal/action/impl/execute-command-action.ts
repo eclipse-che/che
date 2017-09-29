@@ -19,7 +19,7 @@ import {UUID} from "../../../utils/uuid";
 import {CheFileStructWorkspaceCommand} from "../../dir/chefile-struct/che-file-struct";
 import {CheFileStructWorkspaceCommandImpl} from "../../dir/chefile-struct/che-file-struct";
 import {ExecAgentServiceClientImpl} from "../../../api/exec-agent/exec-agent-service-client";
-import {ServerLocation} from "../../../utils/server-location";
+import {WsMasterLocation} from "../../../api/wsmaster/wsmaster-location";
 /**
  * This class is handling the removal of a user
  * @author Florent Benoit
@@ -47,7 +47,7 @@ export class ExecuteCommandAction {
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
         this.authData = AuthData.parse(this.url, this.username, this.password);
-        let apiLocation = ServerLocation.parse(this.url);
+        let apiLocation = new WsMasterLocation(this.url);
         // disable printing info
         this.authData.printInfo = false;
         Log.disablePrefix();

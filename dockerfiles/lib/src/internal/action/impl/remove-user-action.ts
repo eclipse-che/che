@@ -17,6 +17,7 @@ import {User} from "../../../api/wsmaster/user/user";
 import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
 import {ServerLocation} from "../../../utils/server-location";
+import {WsMasterLocation} from "../../../api/wsmaster/wsmaster-location";
 
 /**
  * This class is handling the removal of a user
@@ -44,7 +45,7 @@ export class RemoveUserAction {
     constructor(args:Array<string>) {
         ArgumentProcessor.inject(this, args);
         this.authData = AuthData.parse(this.url, this.username, this.password);
-        this.apiLocation = ServerLocation.parse(this.url);
+        this.apiLocation = new WsMasterLocation(this.url);
         this.user = new User(this.authData, this.apiLocation);
     }
 

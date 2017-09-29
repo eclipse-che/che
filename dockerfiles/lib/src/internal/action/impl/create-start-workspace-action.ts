@@ -17,7 +17,7 @@ import {AuthData} from "../../../api/wsmaster/auth/auth-data";
 import {Parameter} from "../../../spi/decorator/parameter";
 import {CreateWorkspaceConfig} from "../../../api/wsmaster/workspace/workspace";
 import {Log} from "../../../spi/log/log";
-import {ServerLocation} from "../../../utils/server-location";
+import {WsMasterLocation} from "../../../api/wsmaster/wsmaster-location";
 /**
  * This class is managing a post-check operation by creating a workspace, starting it and displaying the log data.
  * @author Florent Benoit
@@ -43,7 +43,7 @@ export class CreateStartWorkspaceAction {
         ArgumentProcessor.inject(this, args);
 
         this.authData = AuthData.parse(this.url, this.username, this.password);
-        let apiLocation = ServerLocation.parse(this.url);
+        let apiLocation = new WsMasterLocation(this.url);
         this.workspace = new Workspace(this.authData, apiLocation);
     }
 
@@ -60,14 +60,13 @@ export class CreateStartWorkspaceAction {
                     Log.getLogger().info('Starting workspace runtime');
                     return this.workspace.startWorkspace(workspaceDto.getId(), !this.isQuiet);
                 }).then((workspaceDto) => {
-                    var ideUrl: string;
+                    let ideUrl: string;
                     workspaceDto.getLinks().forEach((link) => {
                         if ('ide url' === link.getRel()) {
                             ideUrl = link.getHref();
+                            Log.getLogger().info(ideUrl);
                         }
                     });
-
-                    Log.getLogger().info(ideUrl);
                 });
 
         });

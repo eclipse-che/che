@@ -1,5 +1,4 @@
 import {error, isUndefined} from "util";
-import {RemoteIp} from "../spi/docker/remoteip";
 
 /**
  * Defines location of a server, e.g. hostname, port, etc.
@@ -7,9 +6,6 @@ import {RemoteIp} from "../spi/docker/remoteip";
  * @author Oleksandr Garagatyi
  */
 export class ServerLocation {
-    private static DEFAULT_HOSTNAME : string = new RemoteIp().getIp();
-    private static DEFAULT_PORT : number = 8080;
-
     private port : number;
     private hostname : string;
     private secure: boolean;
@@ -23,9 +19,10 @@ export class ServerLocation {
         this.hostname = hostname;
     }
 
+    // TODO get machine token for exec agent and wsagent
     static parse(stringUrl : string): ServerLocation {
         if (!stringUrl) {
-            return this.detectCheMasterLocation();
+            error('Server location parsing failed. Server url should not be undefined')
         }
         const url = require('url').parse(stringUrl);
         let port: number;
@@ -44,36 +41,6 @@ export class ServerLocation {
             port = +url.port;
         }
         return new ServerLocation(url.hostname, port, isSecured);
-    }
-
-    static detectCheMasterLocation(): ServerLocation {
-        // handle CHE_HOST if any
-        let hostname: string;
-        let port: number;
-        let secured = false;
-
-        if (process.env.CHE_HOST) {
-            hostname = process.env.CHE_HOST;
-        } else {
-            hostname = ServerLocation.DEFAULT_HOSTNAME;
-        }
-
-        // handle CHE_HOST_PROTOCOL if any
-        let hostProtocol :string = process.env.CHE_HOST_PROTOCOL;
-        if (hostProtocol && hostProtocol === "https") {
-            secured = true;
-        }
-
-        // handle CHE_PORT if any
-        if (process.env.CHE_PORT) {
-            port = process.env.CHE_PORT;
-        } else if (secured) {
-            port = 443;
-        } else {
-            port = ServerLocation.DEFAULT_PORT;
-        }
-
-        return new ServerLocation(hostname, port, secured);
     }
 
     isSecure(): boolean {
