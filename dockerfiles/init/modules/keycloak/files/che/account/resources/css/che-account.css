@@ -1,0 +1,79 @@
+body {
+    background-color: #fff;
+}
+
+#tabs-menu > div {
+    width: 75%;
+    border-top: 1px solid #e4e4e4;
+}
+
+#tabs-menu li a, #tabs-menu li a:hover {
+    font-size: 13px;
+    font-family: "Open Sans";
+    color: rgba(0, 0, 0, 0.54);
+    background-color: #fff;
+    padding: 12px 24px;
+}
+
+#tabs-menu li.active a {
+    color: #4a90e2;
+    border-bottom: 5px solid #fdb940;
+}
+
+#tabs-menu li a:active {
+    transition: background-color 0.35s cubic-bezier(0.35, 0, 0.25, 1);
+    background-color: #cce0f6;
+}
+
+#tabs-menu div[class="col-sm-2 col-md-2"] {
+    padding-left: 8px;
+    padding-right: 16px;
+}
+
+#tabs-menu div > label.control-label {
+    font-size: 13px;
+    letter-spacing: 1.3px;
+    font-family: "Open Sans";
+    padding-top: 10px;    
+}
+
+#tabs-menu div > input {
+    box-shadow: none;
+    border-color: #e4e4e4;
+    border-radius: 2px;
+    font-size: 13px;
+    font-family: "Open Sans";
+    height: 38px;
+    padding: 0 15px;   
+}
+
+#tabs-menu div > input:focus {
+    border-color: #4a90e2;
+}
+
+#tabs-menu div > button {
+    min-width: 88px;
+    min-height: 36px;
+    border-radius: 2px;
+    border-color: rgba(255, 255, 255, 0.87);
+    box-shadow: none;
+    background-image: none;
+}
+
+#tabs-menu div > button[value="Save"] {
+    background-color: #46af00;
+    text-transform: uppercase;
+}
+
+#tabs-menu div > button[value="Save"]:hover {
+    background-color: #3f9d00;
+}
+
+#tabs-menu div > button[value="Cancel"] {
+    color: #9c9c9c;
+    background-color: #d7d7d7;
+}
+
+#tabs-menu div > button[value="Cancel"]:hover {
+    background-color: #c9c9c9;
+}
