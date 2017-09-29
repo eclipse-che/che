@@ -6,10 +6,10 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-exec /opt/jboss/keycloak/bin/standalone.sh \
-        -Dkeycloak.migration.action=import \
-        -Dkeycloak.migration.provider=dir \
-        -Dkeycloak.migration.strategy=IGNORE_EXISTING \
-        -Dkeycloak.migration.dir=/opt/jboss/keycloak/realms/ \
-        -Djboss.bind.address=0.0.0.0
+exec start-keycloak.sh \
+     -Dkeycloak.migration.action=import \
+     -Dkeycloak.migration.provider=dir \
+     -Dkeycloak.migration.strategy=IGNORE_EXISTING \
+     -Dkeycloak.migration.dir=/opt/jboss/keycloak/realms/ \
+     -Djboss.bind.address=0.0.0.0
 

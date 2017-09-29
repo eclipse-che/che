@@ -136,7 +136,7 @@ services:
     ports:
       - '5050:8080'
     entrypoint:
-      - /opt/jboss/keycloak/bin/standalone.sh
+      - start-keycloak.sh
       - -Dkeycloak.migration.action=import
       - -Dkeycloak.migration.provider=dir
       - -Dkeycloak.migration.strategy=IGNORE_EXISTING

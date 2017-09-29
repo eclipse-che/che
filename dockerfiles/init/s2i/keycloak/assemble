@@ -8,6 +8,11 @@
 
 set -e
 
+if [ "${CHE_SERVER_URL}" == "" ]; then
+    echo "the 'CHE_SERVER_URL' environment variable should be set to the external URL that gives access to CHE"
+    exit 1
+fi
+
 echo "Current directory: $(pwd)"
 
 echo "Directory contents of /tmp/src:"
@@ -30,7 +35,9 @@ chmod -R 755 $(pwd)/keycloak/themes/che
 echo ""
 echo "Adding the Che configuration to import into directory: $(pwd)/keycloak/realms ..."
 mkdir -p $(pwd)/keycloak/realms
-cp -v /tmp/src/realms/che-realm.json.erb $(pwd)/keycloak/realms/che-realm.json && \
+
+cat /tmp/src/realms/che-realm.json.erb | sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${CHE_SERVER_URL}@" \
+> $(pwd)/keycloak/realms/che-realm.json && \
 cp -v /tmp/src/realms/che-users-0.json.erb $(pwd)/keycloak/realms/che-users-0.json && \
 cp -v /tmp/src/realms/master-realm.json.erb $(pwd)/keycloak/realms/master-realm.json && \
 cp -v /tmp/src/realms/master-users-0.json.erb $(pwd)/keycloak/realms/master-users-0.json

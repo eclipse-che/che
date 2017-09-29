@@ -33,13 +33,13 @@ spec:
     type: Dockerfile
   strategy:
     dockerStrategy:
+      forcePull: true
       from:
         kind: DockerImage
         name: '${IMAGE_INIT}'
     type: Docker
   triggers:
-    - type: ConfigChange
-    - type: "ImageChange" 
+    - type: ImageChange 
       imageChange: {}
 status:
 
@@ -63,3 +63,5 @@ spec:
       scheduled: true
       
 EOF
+
+oc start-build che-init-image-stream-build

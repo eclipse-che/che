@@ -31,7 +31,6 @@ spec:
         name: 'postgres-source:latest'
     type: Source
   triggers:
-  - type: "ConfigChange"
   - type: "ImageChange" 
     imageChange: {}
   - type: "ImageChange" 

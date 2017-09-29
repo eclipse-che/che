@@ -230,7 +230,7 @@ elif [ "${COMMAND}" != "deploy" ]; then
 fi
 
 # -------------------------------------------------------------
-# Starting secondary servers
+# Deploying secondary servers
 # for postgres and optionally Keycloak
 # -------------------------------------------------------------
 
@@ -257,7 +257,7 @@ fi
 if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
   CHE_KEYCLOAK_SERVER_ROUTE=$(oc get route keycloak -o jsonpath='{.spec.host}' || echo "")
   if [ "${CHE_KEYCLOAK_SERVER_ROUTE}" == "" ]; then
-    echo "[CHE] **ERROR**: The dedicated Keycloak server should be started and available through a route before starting the Che server"
+    echo "[CHE] **ERROR**: The dedicated Keycloak server should be deployed and visible through a route before starting the Che server"
     exit 1
   fi
 
@@ -396,6 +396,8 @@ else
     oc apply --force=true -f -
 fi
 echo
+
+${COMMAND_DIR}/multi-user/configure_and_start_keycloak.sh
 
 # --------------------------------
 # Setup debugging routes if needed

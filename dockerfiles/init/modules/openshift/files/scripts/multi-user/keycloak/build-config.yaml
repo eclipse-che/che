@@ -40,7 +40,6 @@ spec:
         name: 'keycloak-source:latest'
     type: Source
   triggers:
-  - type: "ConfigChange"
   - type: "ImageChange" 
     imageChange: {}
   - type: "ImageChange" 
