@@ -117,8 +117,9 @@ public class FileStructureNodesTest {
   @Test
   public void checkFileStructureNodes() {
     projectExplorer.waitProjectExplorer();
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    expandTReeProjectAndOpenClass(JAVA_FILE_NAME);
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.openItemByVisibleNameInExplorer("Company.java");
 
     // check work nodes in the 'file structure' by double click
     menu.runCommand(
@@ -142,7 +143,7 @@ public class FileStructureNodesTest {
     try {
       fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
       fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
-    } catch (Exception ex) {
+    } catch (org.openqa.selenium.TimeoutException ex) {
       fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
       fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
     }
@@ -166,7 +167,7 @@ public class FileStructureNodesTest {
       fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
       fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
       fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    } catch (Exception ex) {
+    } catch (org.openqa.selenium.TimeoutException ex) {
       fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
       fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
       fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
@@ -174,20 +175,5 @@ public class FileStructureNodesTest {
     }
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-  }
-
-  public void expandTReeProjectAndOpenClass(String fileName) {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src");
-    projectExplorer.waitItem(PROJECT_NAME + "/src" + "/main");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src" + "/main");
-    projectExplorer.waitItem(PROJECT_NAME + "/src" + "/main" + "/java");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src" + "/main" + "/java");
-    projectExplorer.waitItem(PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa");
-    projectExplorer.waitItem(
-        PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa/" + fileName + ".java");
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa/" + fileName + ".java");
-    editor.waitActiveEditor();
   }
 }

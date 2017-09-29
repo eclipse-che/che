@@ -120,7 +120,7 @@ public class FindUsagesBaseOperationTest {
       findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
       findUsages.clickOnIconNodeInFindUsagesPanel(
           "handleRequest(HttpServletRequest, HttpServletResponse)");
-    } catch (Exception ex) {
+    } catch (org.openqa.selenium.TimeoutException ex) {
       findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
       findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
       findUsages.clickOnIconNodeInFindUsagesPanel(
