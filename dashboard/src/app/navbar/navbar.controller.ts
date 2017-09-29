@@ -10,7 +10,7 @@
  */
 'use strict';
 import {CheAPI} from '../../components/api/che-api.factory';
-import {CheKeycloak, keycloakUserInfo} from '../../components/api/che-keycloak.factory';
+import {CheKeycloak} from '../../components/api/che-keycloak.factory';
 
 export class CheNavBarController {
   private menuItemUrl = {
@@ -53,7 +53,6 @@ export class CheNavBarController {
   private hasPersonalAccount: boolean;
   private organizations: Array<che.IOrganization>;
   private cheKeycloak: CheKeycloak;
-  private userInfo: keycloakUserInfo;
 
   /**
    * Default constructor
@@ -75,7 +74,6 @@ export class CheNavBarController {
     this.$window = $window;
     this.chePermissions = chePermissions;
     this.cheKeycloak = cheKeycloak;
-    this.userInfo = null;
 
     this.profile = cheAPI.getProfile().getProfile();
 
@@ -89,12 +87,6 @@ export class CheNavBarController {
 
     cheAPI.getWorkspace().fetchWorkspaces();
     cheAPI.getFactory().fetchFactories();
-
-    if (this.cheKeycloak.isPresent()) {
-      this.cheKeycloak.fetchUserInfo().then((userInfo: keycloakUserInfo) => {
-        this.userInfo = userInfo;
-      });
-    }
 
     if (this.chePermissions.getSystemPermissions()) {
       this.updateData();
@@ -121,6 +113,17 @@ export class CheNavBarController {
 
   reload(): void {
     this.$route.reload();
+  }
+
+  /**
+   * Returns user nickname.
+   * @return {string}
+   */
+  getUserName(): string {
+    const {attributes, email} = this.profile;
+    const fullName = this.cheAPI.getProfile().getFullName(attributes).trim();
+
+    return fullName ? fullName : email;
   }
 
   /**
@@ -161,17 +164,24 @@ export class CheNavBarController {
     return this.organizations.length;
   }
 
-  openLinkInNewTab(url: string): void {
-    this.$window.open(url, '_blank');
+  /**
+   * Returns number of root organizations.
+   *
+   * @return {number}
+   */
+  getRootOrganizationsNumber(): number {
+    if (!this.organizations) {
+      return 0;
+    }
+    let rootOrganizations = this.organizations.filter((organization: any) => {
+      return !organization.parent;
+    });
+
+    return rootOrganizations.length;
   }
 
-  /**
-   * Returns <code>true</code> if Keycloak is present.
-   *
-   * @returns {boolean}
-   */
-  isKeycloakPresent(): boolean {
-    return this.cheKeycloak.isPresent();
+  openLinkInNewTab(url: string): void {
+    this.$window.open(url, '_blank');
   }
 
   /**

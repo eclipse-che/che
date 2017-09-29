@@ -123,8 +123,7 @@
       <navbar-teams flex layout="column" layout-aling="start strength"></navbar-teams>
 
       <div class="admin-navbar-menu"
-           layout="column" layout-align="end stretch" flex
-           ng-if="navbarController.isKeycloakPresent() && navbarController.userInfo">
+           layout="column" layout-align="end stretch" flex>
         <section class="left-sidebar-menu navbar-account-section">
           <md-list layout="column" flex>
 
@@ -136,9 +135,9 @@
                   <div class="navbar-item navbar-identity" layout="row" layout-align="start center">
 
                     <i class="navbar-icon" flex="none">
-                      <img class="developers-face" gravatar-src="navbarController.userInfo.email"/>
+                      <img class="developers-face" gravatar-src="navbarController.profile.email"/>
                     </i>
-                    <span flex style="text-align: left;">{{navbarController.userInfo.name}}</span>
+                    <span flex style="text-align: left;">{{navbarController.getUserName()}}</span>
                     <i class="fa fa-angle-up navbar-icon" aria-hidden="true"></i>
                   </div>
                 </md-button>

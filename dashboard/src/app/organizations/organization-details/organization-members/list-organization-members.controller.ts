@@ -11,6 +11,10 @@
 'use strict';
 import {OrganizationsPermissionService} from '../../organizations-permission.service';
 
+interface IOrganizationMember extends che.IUser {
+  permissions: che.IPermissions;
+}
+
 /**
  * @ngdoc controller
  * @name organization.details.members:ListOrganizationMembersController
@@ -55,13 +59,17 @@ export class ListOrganizationMembersController {
    */
   private $q: ng.IQService;
   /**
+   * Logging service.
+   */
+  private $log: ng.ILogService;
+  /**
    * Lodash library.
    */
   private lodash: any;
   /**
    * Organization's members list.
    */
-  private members: Array<che.IMember>;
+  private members: Array<IOrganizationMember>;
   /**
    * Members list of parent organization (comes from directive's scope)
    */
@@ -106,7 +114,7 @@ export class ListOrganizationMembersController {
   constructor(chePermissions: che.api.IChePermissions, cheUser: any, cheProfile: any, cheOrganization: che.api.ICheOrganization,
               confirmDialogService: any, $mdDialog: angular.material.IDialogService, $q: ng.IQService, cheNotification: any,
               lodash: any, $location: ng.ILocationService, organizationsPermissionService: OrganizationsPermissionService,
-              $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory, resourcesService: che.service.IResourcesService) {
+              $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory, resourcesService: che.service.IResourcesService, $log: ng.ILogService) {
     this.chePermissions = chePermissions;
     this.cheProfile = cheProfile;
     this.cheUser = cheUser;
@@ -120,6 +128,7 @@ export class ListOrganizationMembersController {
     this.organizationsPermissionService = organizationsPermissionService;
     this.organizationActions = resourcesService.getOrganizationActions();
     this.organizationRoles = resourcesService.getOrganizationRoles();
+    this.$log = $log;
 
     this.members = [];
 
@@ -130,7 +139,7 @@ export class ListOrganizationMembersController {
       cheListHelperFactory.removeHelper(helperId);
     });
 
-    this.formUsersList();
+    this.formMemberList();
   }
 
   /**
@@ -153,7 +162,7 @@ export class ListOrganizationMembersController {
     }
     this.isLoading = true;
     this.chePermissions.fetchOrganizationPermissions(this.organization.id).then(() => {
-      this.formUsersList();
+      this.formMemberList();
     }, (error: any) => {
       let errorMessage = error && error.data && error.data.message ? error.data.message : 'Failed to retrieve organization permissions.';
       this.cheNotification.showError(errorMessage);
@@ -165,28 +174,28 @@ export class ListOrganizationMembersController {
   /**
    * Combines permissions and users data in one list.
    */
-  formUsersList(): void {
-    const permissions = this.chePermissions.getOrganizationPermissions(this.organization.id);
+  formMemberList(): void {
     this.members = [];
 
-    const promises: Array<ng.IPromise<any>> = [];
+    const permissions = this.chePermissions.getOrganizationPermissions(this.organization.id);
 
-    permissions.forEach((permission: any) => {
-      let userId = permission.userId;
-      let userProfile = this.cheProfile.getProfileById(userId);
+    const promises = permissions.map((permission: che.IPermissions) => {
+      const userId = permission.userId;
 
-      if (userProfile) {
-        this.formUserItem(userProfile, permission);
-      } else {
-        const promise = this.cheProfile.fetchProfileById(userId).then(() => {
-          this.formUserItem(this.cheProfile.getProfileById(userId), permission);
-        });
-        promises.push(promise);
+      if (this.cheUser.getUserFromId(userId)) {
+        this.formMemberItem(this.cheUser.getUserFromId(userId), permission);
+        return this.$q.when();
       }
+
+      return this.cheUser.fetchUserId(userId).then(() => {
+        this.formMemberItem(this.cheUser.getUserFromId(userId), permission);
+      }, (error: any) => {
+        this.$log.error(`Failed to fetch user by ID with error ${error}`);
+      });
     });
 
     this.$q.all(promises).finally(() => {
-      this.cheListHelper.setList(this.members, 'id');
+      this.cheListHelper.setList(this.members, 'email');
     });
 
     this.hasUpdatePermission = this.organizationsPermissionService.isUserAllowedTo(this.organizationActions.UPDATE.toString(), this.organization.id);
@@ -195,13 +204,11 @@ export class ListOrganizationMembersController {
   /**
    * Forms item to display with permissions and user data.
    *
-   * @param userProfile {che.IProfile} user's profile
+   * @param userInfo {che.IUser} user's profile
    * @param permissions {che.IPermissions} data
    */
-  formUserItem(userProfile: che.IProfile, permissions: che.IPermissions): void {
-    const member = <che.IMember>angular.copy(userProfile);
-    member.id = userProfile.userId;
-    member.name = this.cheProfile.getFullName(userProfile.attributes);
+  formMemberItem(userInfo: che.IUser, permissions: che.IPermissions): void {
+    const member = angular.copy(userInfo) as IOrganizationMember;
     member.permissions = permissions;
     this.members.push(member);
   }
