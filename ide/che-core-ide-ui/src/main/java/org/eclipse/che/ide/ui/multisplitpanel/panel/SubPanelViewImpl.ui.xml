@@ -74,7 +74,7 @@
                         <g:FlowPanel ui:field="tabsPanel" styleName="{style.tabsPanel}" debugId="multiSplitPanel-tabsPanel">
                             <g:FlowPanel ui:field="plusPanel" styleName="{style.plusPanel}" debugId="plusPanel"></g:FlowPanel>
                         </g:FlowPanel>
-                        <g:FlowPanel ui:field="menuPanel" styleName="{style.menuPanel}"></g:FlowPanel>
+                        <g:FlowPanel ui:field="menuPanel" styleName="{style.menuPanel}" debugId="menuSplitPanel"></g:FlowPanel>
                     </g:FlowPanel>
                 </g:north>
                 <g:center>

@@ -68,8 +68,8 @@ public class CheckExpressStackTest {
     createWorkspace.clickCreate();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME, 500);
+    projectExplorer.waitProjectExplorer(500);
+    projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(
         PROJECT_NAME, ProjectExplorer.FolderTypes.PROJECT_FOLDER);
   }

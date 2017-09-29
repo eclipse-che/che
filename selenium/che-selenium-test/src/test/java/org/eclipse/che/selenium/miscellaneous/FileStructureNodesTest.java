@@ -140,6 +140,7 @@ public class FileStructureNodesTest {
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
+    fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
 
     // check work nodes in the 'file structure' by click on the icon
@@ -156,6 +157,7 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
+    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
