@@ -10,6 +10,10 @@
  */
 'use strict';
 import {OrganizationsPermissionService} from '../../organizations-permission.service';
+import {CheUser} from '../../../../components/api/che-user.factory';
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
+import {CheProfile} from '../../../../components/api/che-profile.factory';
 
 interface IOrganizationMember extends che.IUser {
   permissions: che.IPermissions;
@@ -29,7 +33,7 @@ export class ListOrganizationMembersController {
   /**
    * User API interaction.
    */
-  private cheUser: any;
+  private cheUser: CheUser;
   /**
    * Organization API interaction.
    */
@@ -49,11 +53,11 @@ export class ListOrganizationMembersController {
   /**
    * Notifications service.
    */
-  private cheNotification: any;
+  private cheNotification: CheNotification;
   /**
    * Confirm dialog service.
    */
-  private confirmDialogService: any;
+  private confirmDialogService: ConfirmDialogService;
   /**
    * Promises service.
    */
@@ -111,8 +115,8 @@ export class ListOrganizationMembersController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(chePermissions: che.api.IChePermissions, cheUser: any, cheProfile: any, cheOrganization: che.api.ICheOrganization,
-              confirmDialogService: any, $mdDialog: angular.material.IDialogService, $q: ng.IQService, cheNotification: any,
+  constructor(chePermissions: che.api.IChePermissions, cheUser: CheUser, cheProfile: CheProfile, cheOrganization: che.api.ICheOrganization,
+              confirmDialogService: ConfirmDialogService, $mdDialog: angular.material.IDialogService, $q: ng.IQService, cheNotification: CheNotification,
               lodash: any, $location: ng.ILocationService, organizationsPermissionService: OrganizationsPermissionService,
               $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory, resourcesService: che.service.IResourcesService, $log: ng.ILogService) {
     this.chePermissions = chePermissions;

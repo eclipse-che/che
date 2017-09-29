@@ -162,7 +162,7 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
 const DEV = false;
 
 // configs
-initModule.config(['$routeProvider', ($routeProvider) => {
+initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
   // config routes (add demo page)
   if (DEV) {
     $routeProvider.accessWhen('/demo-components', {
