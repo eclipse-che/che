@@ -42,7 +42,12 @@ class FullTextDocumentSynchronize implements TextDocumentSynchronize {
 
   @Override
   public void syncTextDocument(
-      Document document, TextPosition start, TextPosition end, String insertedText, int version) {
+      Document document,
+      TextPosition start,
+      TextPosition end,
+      int removedChars,
+      String insertedText,
+      int version) {
 
     DidChangeTextDocumentParams changeDTO = dtoFactory.createDto(DidChangeTextDocumentParams.class);
     String uri = document.getFile().getLocation().toString();
