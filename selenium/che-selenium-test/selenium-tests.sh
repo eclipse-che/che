@@ -15,7 +15,7 @@ export CALLER=$(basename $0)
 cd $CUR_DIR
 
 TESTS_SCOPE="--suite=CheSuite.xml"
-CLEAN_TARGET_COMMAND="clean"
+CLEAN_GOAL="clean"
 for var in "$@"; do
     if [[ "$var" =~ --test=.* ]] || [[ "$var" =~ --suite=.* ]]; then
         TESTS_SCOPE=
@@ -26,12 +26,12 @@ for var in "$@"; do
         || [[ "$var" == "--failed-tests" ]] \
         || [[ "$var" == "--regression-tests" ]]; then
         TESTS_SCOPE=
-        CLEAN_TARGET_COMMAND=
+        CLEAN_GOAL=
         break
     fi
 done
 
-mvn $CLEAN_TARGET_COMMAND dependency:unpack-dependencies \
+mvn $CLEAN_GOAL dependency:unpack-dependencies \
     -DincludeArtifactIds=che-selenium-core \
     -DincludeGroupIds=org.eclipse.che.selenium \
     -Dmdep.unpack.includes=webdriver.sh \
