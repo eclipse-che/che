@@ -747,6 +747,7 @@
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-help-ext-client</artifactId>
                 <version>${che.version}</version>
+                <classifier>sources</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
@@ -1247,6 +1248,52 @@
                 <mdep.analyze.skip>true</mdep.analyze.skip>
                 <skipTests>true</skipTests>
             </properties>
+        </profile>
+        <!-- Profile for launching GTW Super DevMode -->
+        <profile>
+            <id>sdm</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>net.ltgt.gwt.maven</groupId>
+                            <artifactId>gwt-maven-plugin</artifactId>
+                            <version>1.0-rc-8</version>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                <plugins>
+                    <plugin>
+                        <groupId>net.ltgt.gwt.maven</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <configuration>
+                            <projects>assembly-ide-war</projects>
+                            <moduleName>org.eclipse.che.ide.IDE</moduleName>
+                            <jvmArgs>
+                                <arg>-Xss512m</arg>
+                                <arg>-Xmx2048m</arg>
+                            </jvmArgs>
+                            <codeserverArgs>
+                                <arg>-noincremental</arg>
+                                <arg>-noprecompile</arg>
+                            </codeserverArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <org.eclipse.jetty.version>9.2.14.v20151106</org.eclipse.jetty.version>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.google.gwt</groupId>
+                    <artifactId>gwt-dev</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>com.google.gwt</groupId>
+                    <artifactId>gwt-user</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>

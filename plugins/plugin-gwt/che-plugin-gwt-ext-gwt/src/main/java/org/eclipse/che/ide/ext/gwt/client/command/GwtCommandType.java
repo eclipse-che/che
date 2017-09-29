@@ -30,7 +30,8 @@ import org.eclipse.che.ide.macro.DevMachineHostNameMacro;
 @Singleton
 public class GwtCommandType implements CommandType {
 
-  public static final String COMMAND_TEMPLATE = "mvn clean gwt:run-codeserver";
+  public static final String COMMAND_TEMPLATE =
+      "mvn -DskipTests=true -Dfindbugs.skip=true -Dskip-enforce -Dskip-validate-sources -Dskip-enforce -pl :assembly-ide-war -am clean gwt:codeserver -Dsdm";
 
   private static final String ID = "gwt";
 
