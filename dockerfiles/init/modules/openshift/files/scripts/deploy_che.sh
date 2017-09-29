@@ -270,16 +270,10 @@ if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
   CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"http://${CHE_KEYCLOAK_SERVER_ROUTE}/auth"}
   CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"che"}
   CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"che-public"}
-  CHE_KEYCLOAK_PRIVATE_REALM=che
-  CHE_KEYCLOAK_PRIVATE_CLIENT__ID=che
-  CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET=2c1b2621-d251-4701-82c4-a7dd447faa97
 else
   CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"https://sso.openshift.io/auth"}
   CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"fabric8"}
   CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"openshiftio-public"}
-  CHE_KEYCLOAK_PRIVATE_REALM=NULL
-  CHE_KEYCLOAK_PRIVATE_CLIENT__ID=NULL
-  CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET=NULL
 fi
 
 
@@ -339,13 +333,7 @@ MULTI_USER_REPLACEMENT_STRING="s+- env:+- env:\\n\
           - name: \"CHE_KEYCLOAK_REALM\"\\n\
             value: \"${CHE_KEYCLOAK_REALM}\"\\n\
           - name: \"CHE_KEYCLOAK_CLIENT__ID\"\\n\
-            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_REALM\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_REALM}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__ID\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__ID}\"\\n\
-          - name: \"CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET\"\\n\
-            value: \"${CHE_KEYCLOAK_PRIVATE_CLIENT__SECRET}\"+"
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\"+"
 
 # TODO When merging the multi-user work to master, this replacement string should
 # be replaced by the corresponding change in the fabric8 deployment descriptor
