@@ -144,21 +144,17 @@ public class DashboardWorkspace {
     String SAVE_BUTTON = "//che-button-save-flat//span[text()='Save']";
     String CANCEL_BUTTON = "//che-button-cancel-flat//span[text()='Cancel']";
     String DELETE_BUTTON = "//che-button-primary[@che-button-title='Delete']/button";
-
-    //machine tab
     String ADD_MACHINE_BUTTON = "//che-button-primary[@che-button-title = 'Add machine']/button";
     String RAM_WORKSPACE = "//input[contains(@name, 'memory')]";
     String MACHINE_NAME = "//span[@machine-name='%s']";
     String MACHINE_IMAGE = "//span[@machine-image='%s']";
     String EDIT_MACHINE = "//div[@edit-machine='%s']";
     String DELETE_MACHINE = "//div[@delete-machine='%s']";
-
     String NEW_MACHINE_NAME = "//div[@che-form='editMachineForm']//input";
     String EDIT_MACHINE_NAME_BUTTON = "//che-button-primary[@che-button-title='Edit']/button";
     String EDIT_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Edit the machine']";
     String REMOVE_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Remove machine']";
     String ADD_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Add a new machine']";
-
     String CANCEL_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Cancel']";
     String CLOSE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Close']";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
@@ -166,8 +162,6 @@ public class DashboardWorkspace {
     String ADD_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Add']";
     String MACHINE_BUTTON =
         "//che-machine-selector[@content-title='%s']//toggle-single-button[@id = 'workspace-machine-%s']//span";
-
-    //environment
     String ENV_VARIABLE = "env-variable-name-%s";
     String ADD_ENV_VARIABLE_BUTTON =
         "//che-button-primary[@che-button-title='Add Env Variable']/button";
@@ -180,8 +174,6 @@ public class DashboardWorkspace {
     String NEW_ENV_VARIABLE_VALUE = "//textarea[@name='deskvalue']";
     String EDIT_ENV_VARIABLE = "//div[@edit-variable='%s']";
     String DELETE_ENV_VARIABLE = "//div[@delete-variable='%s']";
-
-    //servers
     String SERVER = "server-name-%s";
     String SERVER_REFERENCE = "//span[@server-reference='%s']";
     String SERVER_PORT = "//div[@id='server-name-%s']//span[@server-port='%s']";
@@ -193,13 +185,9 @@ public class DashboardWorkspace {
     String ADD_SERVER_REFERENCE_FIELD = "new-server-reference";
     String ADD_SERVER_PORT_FIELD = "new-server-port";
     String ADD_SERVER_PROTOCOL_FIELD = "new-server-protocol";
-
-    //agents
     String AGENT_NAME = "//span[@agent-name='%s']";
     String AGENT_DESCRIPTION = "//span[@agent-description='%s']";
     String AGENT_STATE = "//md-switch[@agent-switch='%s']";
-
-    //projects
     String ADD_NEW_PROJECT_BUTTON = "//che-button-primary[@che-button-title='Add Project']/button";
     String ADD_PROJECT_BUTTON = "//che-button-primary[@name='addButton']/button";
     String SAMPLE_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Sample %s']";
@@ -716,6 +704,7 @@ public class DashboardWorkspace {
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(format(Locators.MACHINE_NAME, machineName))));
+    loader.waitOnClosed();
   }
 
   public void clickOnAddMachineButton() {
@@ -877,6 +866,7 @@ public class DashboardWorkspace {
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(format(Locators.SERVER_PORT, serverName, port))));
+    loader.waitOnClosed();
   }
 
   public void clickOnDeleteServerButton(String serverName) {
@@ -993,6 +983,7 @@ public class DashboardWorkspace {
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(format(Locators.VARIABLE_VALUE, varName, varValue))));
+    loader.waitOnClosed();
   }
 
   public void clickOnDeleteEnvVariableButton(String varName) {

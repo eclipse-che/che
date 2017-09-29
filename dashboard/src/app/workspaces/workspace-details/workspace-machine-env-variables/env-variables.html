@@ -10,8 +10,7 @@
                        che-delete-button-title="Delete"
                        che-on-delete="envVariablesController.deleteSelectedEnvVariables()"
                        che-hide-delete="envVariablesController.envVariablesSelectedNumber === 0"
-                       che-hide-header="!envVariablesController.envVariablesList.length"
-                       id="addEnvVariableButton">
+                       che-hide-header="!envVariablesController.envVariablesList.length">
         <div flex="100"
              layout="row"
              layout-align="start stretch"
@@ -19,7 +18,6 @@
           <!-- Checkbox -->
           <div layout="column" layout-align="center center" class="che-list-item-checkbox">
             <md-checkbox class="che-list-item-checkbox"
-                         id="envVariablesBulkSelection"
                          aria-label="All environment variables"
                          md-theme="default"
                          ng-checked="envVariablesController.isBulkChecked"

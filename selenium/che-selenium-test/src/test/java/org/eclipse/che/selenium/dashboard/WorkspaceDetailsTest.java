@@ -98,7 +98,6 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.enterEnvVariableName("login");
     dashboardWorkspace.clickOnUpdateDialogButton();
     dashboardWorkspace.checkValue("login", "qaadmin");
-    loader.waitOnClosed();
     dashboardWorkspace.clickOnEnvVariableCheckbox("login");
     dashboardWorkspace.clickOnDeleteBtn();
     dashboardWorkspace.clickOnDeleteDialogButton();
@@ -162,13 +161,13 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.clickOnAddDialogButton();
     dashboardWorkspace.checkServerExists("agen", "8080");
     clickOnSaveButton();
+
     dashboardWorkspace.clickOnEditServerButton("agen");
     dashboardWorkspace.enterReference("agent");
     dashboardWorkspace.enterPort("80");
     dashboardWorkspace.enterProtocol("http");
     dashboardWorkspace.clickOnUpdateDialogButton();
     dashboardWorkspace.checkServerExists("agent", "80");
-    loader.waitOnClosed();
     dashboardWorkspace.clickOnDeleteServerButton("agent");
     dashboardWorkspace.clickOnDeleteDialogButton();
     clickOnSaveButton();
@@ -180,13 +179,11 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.MACHINES);
     dashboardWorkspace.checkMachineExists("db");
     dashboardWorkspace.checkMachineExists("dev-machine");
-
     dashboardWorkspace.clickOnAddMachineButton();
     dashboardWorkspace.checkAddNewMachineDialogIsOpen();
     dashboardWorkspace.setMachineNameInDialog(machineName);
     dashboardWorkspace.clickOnAddDialogButton();
     dashboardWorkspace.checkMachineExists(machineName);
-    loader.waitOnClosed();
     dashboardWorkspace.clickOnEditMachineButton(machineName);
     dashboardWorkspace.checkEditTheMachineDialogIsOpen();
     dashboardWorkspace.setMachineNameInDialog("machine");
@@ -199,7 +196,6 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.setMachineNameInDialog(machineName);
     dashboardWorkspace.clickOnAddDialogButton();
     dashboardWorkspace.checkMachineExists(machineName);
-    loader.waitOnClosed();
     dashboardWorkspace.clickOnDeleteMachineButton(machineName);
     dashboardWorkspace.clickOnCloseDialogButton();
     loader.waitOnClosed();
@@ -214,6 +210,7 @@ public class WorkspaceDetailsTest {
     dashboardWorkspace.selectSample("web-java-petclinic");
     dashboardWorkspace.clickOnAddProjects();
     clickOnSaveButton();
+
     dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.RUNNING);
     dashboardWorkspace.checkStateOfWorkspace(DashboardWorkspace.StateWorkspace.STOPPED);
     dashboardProject.waitProjectIsPresent(Template.WEB_JAVA_PETCLINIC.value());
