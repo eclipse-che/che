@@ -12,42 +12,43 @@ package org.eclipse.che.multiuser.keycloak.server.dao;
 
 import static java.util.Objects.requireNonNull;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** @author Max Shaposhnik (mshaposh@redhat.com) */
+/**
+ * Fetches user profile from Keycloack server.
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com)
+ * @author Sergii Leshchenko
+ */
 public class KeycloakProfileDao implements ProfileDao {
-
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakProfileDao.class);
 
-  private final String authServerUrl;
-  private final String realm;
+  private final String keyclockCurrentUserInfoUrl;
+  private final HttpJsonRequestFactory requestFactory;
 
   @Inject
   public KeycloakProfileDao(
       @Named(KeycloakConstants.AUTH_SERVER_URL_SETTING) String authServerUrl,
-      @Named(KeycloakConstants.REALM_SETTING) String realm) {
-    this.authServerUrl = authServerUrl;
-    this.realm = realm;
+      @Named(KeycloakConstants.REALM_SETTING) String realm,
+      HttpJsonRequestFactory requestFactory) {
+    this.requestFactory = requestFactory;
+    this.keyclockCurrentUserInfoUrl =
+        authServerUrl + "/realms/" + realm + "/protocol/openid-connect/userinfo";
   }
 
   @Override
@@ -68,57 +69,41 @@ public class KeycloakProfileDao implements ProfileDao {
   @Override
   public ProfileImpl getById(String userId) throws NotFoundException, ServerException {
     requireNonNull(userId, "Required non-null id");
-    if (userId.equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
-      // Retrieving own profile
-      try {
-        URL url = new URL(authServerUrl + "/realms/" + realm + "/protocol/openid-connect/userinfo");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty(
-            "Authorization", "bearer " + EnvironmentContext.getCurrent().getSubject().getToken());
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-          ObjectMapper mapper = new ObjectMapper();
-          //noinspection unchecked
-          Map<String, String> profileAttributes = mapper.readValue(in, Map.class);
-          return new ProfileImpl(userId, profileAttributes);
-        }
-      } catch (IOException e) {
-        LOG.error("Exception during retrieval of the Keycloak user profile", e);
-        throw new ServerException("Exception during retrieval of the Keycloak user profile", e);
-      }
-    } else {
-      // Admin service
-      // http://172.17.0.1:5050/auth/admin/realms/che/users/4959eda6-4286-4f39-92e2-42ffdfb4849d
-      try {
-        URL url = new URL(authServerUrl + "/admin/realms/" + realm + "/users/" + userId);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty(
-            "Authorization", "bearer " + EnvironmentContext.getCurrent().getSubject().getToken());
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-          ObjectMapper mapper = new ObjectMapper();
-          //noinspection unchecked
-          UserRepresentation user = mapper.readValue(in, UserRepresentation.class);
-          return new ProfileImpl(userId, toAttributes(user));
-        }
-      } catch (IOException e) {
-        LOG.error("Exception during retrieval of the Keycloak user profile", e);
-        throw new ServerException("Exception during retrieval of the Keycloak user profile", e);
-      }
+    String currentUserId = EnvironmentContext.getCurrent().getSubject().getUserId();
+    if (!userId.equals(currentUserId)) {
+      throw new ServerException(
+          "It's not allowed to get foreign profile on current configured storage.");
     }
+
+    Map<String, String> keycloakUserAttributes;
+    // Retrieving own profile
+    try {
+      keycloakUserAttributes =
+          requestFactory.fromUrl(keyclockCurrentUserInfoUrl).request().asProperties();
+    } catch (IOException | ApiException e) {
+      LOG.warn("Exception during retrieval of the Keycloak user profile", e);
+      throw new ServerException("Exception during retrieval of the Keycloak user profile", e);
+    }
+
+    return new ProfileImpl(userId, mapAttributes(keycloakUserAttributes));
   }
 
-  private Map<String, String> toAttributes(UserRepresentation user) {
-    Map<String, String> attributes = new HashMap<>();
-    for (Map.Entry<String, List<String>> attribute : user.getAttributes().entrySet()) {
-      attributes.put(attribute.getKey(), attribute.getValue().get(0));
+  private Map<String, String> mapAttributes(Map<String, String> keycloakUserAttributes) {
+    Map<String, String> profileAttributes = new HashMap<>();
+    String givenName = keycloakUserAttributes.remove("given_name");
+    if (givenName != null) {
+      profileAttributes.put("firstName", givenName);
     }
-    attributes.put("email", user.getEmail());
-    attributes.put("preferred_username", user.getUsername());
-    attributes.put("created", user.getCreatedTimestamp().toString());
-    attributes.put("firstName", user.getFirstName());
-    attributes.put("lastName", user.getLastName());
-    attributes.put("emailVerified", user.isEmailVerified().toString());
-    return attributes;
+
+    String familyName = keycloakUserAttributes.remove("family_name");
+    if (familyName != null) {
+      profileAttributes.put("lastName", familyName);
+    }
+
+    //profile should be accessible from user object
+    keycloakUserAttributes.remove("email");
+
+    profileAttributes.putAll(keycloakUserAttributes);
+    return profileAttributes;
   }
 }
