@@ -10,45 +10,52 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.GITHUB_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.LOGOUT_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.OSO_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.PASSWORD_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.PROFILE_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
+
+import com.google.common.collect.Maps;
+import java.util.Collections;
 import java.util.Map;
-import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author Max Shaposhnik (mshaposh@redhat.com) */
+@Singleton
 public class KeycloakSettings {
-  private static final Logger LOG = LoggerFactory.getLogger(KeycloakSettings.class);
 
-  private static Map<String, String> settings = null;
+  private final Map<String, String> settings;
 
-  public static Map<String, String> get() {
+  @Inject
+  public KeycloakSettings(
+      @Named(AUTH_SERVER_URL_SETTING) String serverURL,
+      @Named(REALM_SETTING) String realm,
+      @Named(CLIENT_ID_SETTING) String clientId,
+      @Nullable @Named(OSO_ENDPOINT_SETTING) String osoEndpoint,
+      @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint) {
+    Map<String, String> settings = Maps.newHashMap();
+    settings.put(AUTH_SERVER_URL_SETTING, serverURL);
+    settings.put(CLIENT_ID_SETTING, clientId);
+    settings.put(REALM_SETTING, realm);
+    settings.put(PROFILE_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/account");
+    settings.put(PASSWORD_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/account/password");
+    settings.put(
+        LOGOUT_ENDPOINT_SETTING,
+        serverURL + "/realms/" + realm + "/protocol/openid-connect/logout");
+    settings.put(OSO_ENDPOINT_SETTING, osoEndpoint);
+    settings.put(GITHUB_ENDPOINT_SETTING, gitHubEndpoint);
+
+    this.settings = Collections.unmodifiableMap(settings);
+  }
+
+  public Map<String, String> get() {
     return settings;
-  }
-
-  public static void set(Map<String, String> theSettings) {
-    settings = theSettings;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static void pullFromApiEndpointIfNecessary(String apiEndpoint) {
-    if (settings == null) {
-      HttpURLConnection conn;
-      try {
-        conn =
-            (HttpURLConnection)
-                new URL(KeycloakConstants.getEndpoint(apiEndpoint)).openConnection();
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-          settings = new ObjectMapper().readValue(in, Map.class);
-        }
-      } catch (IOException e) {
-        LOG.error("Exception during Keycloak settings retrieval", e);
-      }
-    }
   }
 }
