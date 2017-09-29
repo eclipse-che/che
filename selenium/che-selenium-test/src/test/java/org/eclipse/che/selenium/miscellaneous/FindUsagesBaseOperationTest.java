@@ -115,6 +115,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
     findUsages.selectNodeInFindUsagesByDoubleClick("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+    //try-catch was added because of issue: https://github.com/eclipse/che/issues/6499
     try {
       findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
       findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);

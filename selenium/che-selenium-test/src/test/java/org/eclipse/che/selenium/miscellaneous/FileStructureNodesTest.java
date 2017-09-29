@@ -140,6 +140,7 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
+    //try-catch was added because of issue: https://github.com/eclipse/che/issues/6499
     try {
       fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
       fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
@@ -162,6 +163,7 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
+    //try-catch was added because of issue: https://github.com/eclipse/che/issues/6499
     try {
       fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
       fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
