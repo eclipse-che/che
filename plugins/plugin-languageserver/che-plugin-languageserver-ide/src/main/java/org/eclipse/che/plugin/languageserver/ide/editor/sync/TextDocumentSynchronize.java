@@ -21,5 +21,10 @@ import org.eclipse.che.ide.api.editor.text.TextPosition;
  */
 public interface TextDocumentSynchronize {
   void syncTextDocument(
-      Document document, TextPosition start, TextPosition end, String insertedText, int version);
+      Document document,
+      TextPosition start,
+      TextPosition end,
+      int removedChars,
+      String insertedText,
+      int version);
 }
