@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -59,9 +60,9 @@ public class Consoles {
   public static final String PREVIEW_URL = "//div[@active]//a[@href]";
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
-
   protected final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
+  private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
 
   @Inject
   public Consoles(SeleniumWebDriver seleniumWebDriver, Loader loader) {
@@ -72,6 +73,9 @@ public class Consoles {
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
+
+  @FindBy(css = CONSOLE_PANEL_DRUGGER_CSS)
+  WebElement consolesPanelDrag;
 
   @FindBy(id = PROCESSES_TAB)
   WebElement processesTab;
@@ -299,5 +303,12 @@ public class Consoles {
   /** click on the maximize panel icon */
   public void clickOnMaximizePanelIcon() {
     redrawDriverWait.until(elementToBeClickable(By.xpath(MAXIMIZE_PANEL_ICON))).click();
+  }
+
+  public void dragConsolesInDefinePosition(int verticalShiftInPixels) {
+    WebElement drag = redrawDriverWait.until(ExpectedConditions.visibilityOf(consolesPanelDrag));
+    new Actions(seleniumWebDriver)
+        .dragAndDropBy(drag, verticalShiftInPixels, verticalShiftInPixels)
+        .perform();
   }
 }
