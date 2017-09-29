@@ -26,7 +26,11 @@ public class CheTestWorkspaceUrlResolver implements TestWorkspaceUrlResolver {
   @Override
   public URL resolve(TestWorkspace testWorkspace) throws MalformedURLException {
     try {
-      return new URL(testIdeUrlProvider.get() + "che/" + testWorkspace.getName());
+      return new URL(
+          testIdeUrlProvider.get()
+              + testWorkspace.getOwner().getName()
+              + "/"
+              + testWorkspace.getName());
     } catch (ExecutionException | InterruptedException e) {
       throw new IllegalStateException(e);
     }

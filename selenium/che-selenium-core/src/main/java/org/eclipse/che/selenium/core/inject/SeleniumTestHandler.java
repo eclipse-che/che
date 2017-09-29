@@ -38,8 +38,8 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.openqa.selenium.OutputType;
@@ -92,7 +92,7 @@ public abstract class SeleniumTestHandler
   @Named("sys.driver.version")
   private String webDriverVersion;
 
-  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private TestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
 
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
