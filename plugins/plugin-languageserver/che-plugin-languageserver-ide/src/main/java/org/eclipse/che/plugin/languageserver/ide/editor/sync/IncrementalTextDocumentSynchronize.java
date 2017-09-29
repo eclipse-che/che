@@ -47,6 +47,7 @@ class IncrementalTextDocumentSynchronize implements TextDocumentSynchronize {
       Document document,
       TextPosition startPosition,
       TextPosition endPosition,
+      int removedChars,
       String insertedText,
       int version) {
     DidChangeTextDocumentParams changeDTO = dtoFactory.createDto(DidChangeTextDocumentParams.class);
@@ -71,6 +72,7 @@ class IncrementalTextDocumentSynchronize implements TextDocumentSynchronize {
     TextDocumentContentChangeEvent actualChange =
         dtoFactory.createDto(TextDocumentContentChangeEvent.class);
     actualChange.setRange(range);
+    actualChange.setRangeLength(removedChars);
     actualChange.setText(insertedText);
 
     changeDTO.setContentChanges(Collections.singletonList(actualChange));
