@@ -242,6 +242,7 @@ public class Refactor {
 
   /** wait the 'Move item' form is open */
   public void waitMoveItemFormIsOpen() {
+    loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(moveItemForm));
   }

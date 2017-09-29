@@ -18,7 +18,11 @@ is_current_user_sudoer() {
 }
 
 set_sudo_command() {
-    if is_current_user_sudoer && ! is_current_user_root; then SUDO="sudo -E"; else unset SUDO; fi
+    if is_current_user_sudoer && ! is_current_user_root; then
+        SUDO="sudo -E"
+    else
+        unset SUDO;
+    fi
 }
 
 set_sudo_command
@@ -54,10 +58,12 @@ fi
 MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
-${SUDO} mkdir -p /projects
-${SUDO} sh -c "chown -R $(id -u -n) /projects"
-${SUDO} chmod 755 /projects
 
+if is_current_user_sudoer; then
+    ${SUDO} mkdir -p /projects
+    ${SUDO} sh -c "chown -R $(id -u -n) /projects"
+    find /projects -type d -exec ${SUDO} chmod 755 {} \;
+fi
 
 INSTALL_JDK=false
 command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {

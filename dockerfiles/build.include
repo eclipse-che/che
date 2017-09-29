@@ -10,6 +10,7 @@ set -e
 set -u
 
 IMAGE_ALIASES=${IMAGE_ALIASES:-}
+ERROR=${ERROR:-}
 
 skip_tests() {
   if [ $SKIP_TESTS = "true" ]; then

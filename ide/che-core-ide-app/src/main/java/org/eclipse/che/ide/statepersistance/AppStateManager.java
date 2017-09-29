@@ -78,7 +78,7 @@ public class AppStateManager {
         new WindowActionHandler() {
           @Override
           public void onWindowClosing(WindowActionEvent event) {
-            final Workspace workspace = appContext.getWorkspace();
+            Workspace workspace = appContext.getWorkspace();
             if (workspace != null) {
               persistWorkspaceState();
             }

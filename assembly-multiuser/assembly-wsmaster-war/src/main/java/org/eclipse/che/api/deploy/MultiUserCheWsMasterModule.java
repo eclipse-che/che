@@ -18,6 +18,7 @@ import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.hc.ServerCheckerFactoryImpl;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.multiuser.api.permission.server.AdminPermissionInitializer;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakModule;
@@ -55,6 +56,7 @@ public class MultiUserCheWsMasterModule extends AbstractModule {
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.factory.FactoryPermissionsFilter.class);
     bind(org.eclipse.che.plugin.activity.ActivityPermissionsFilter.class);
+    bind(AdminPermissionInitializer.class).asEagerSingleton();
     bind(
         org.eclipse.che.multiuser.permission.resource.filters.ResourceUsageServicePermissionsFilter
             .class);
