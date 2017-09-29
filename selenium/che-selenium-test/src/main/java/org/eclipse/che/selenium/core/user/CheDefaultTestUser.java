@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.core.user;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /**
  * Default {@link TestUser} that will be created before all tests and will be deleted after them.
@@ -23,42 +24,44 @@ import com.google.inject.Singleton;
  * @author Dmytro Nochevnov
  */
 @Singleton
-public class DefaultTestUser implements TestUser {
+public class CheDefaultTestUser implements TestUser {
 
-  private final TestUser testUser;
+  private final TestUser delegate;
 
   @Inject
-  public DefaultTestUser(TestUser testUser) throws Exception {
-    this.testUser = testUser;
+  public CheDefaultTestUser(
+      TestUserFactory userFactory,
+      @Named("che.test_user.email") String email,
+      @Named("che.test_user.password") String password)
+      throws Exception {
+    this.delegate = userFactory.create(email, password);
   }
 
   @Override
   public String getEmail() {
-    return testUser.getEmail();
+    return delegate.getEmail();
   }
 
   @Override
   public String getPassword() {
-    return testUser.getPassword();
+    return delegate.getPassword();
   }
 
   @Override
   public String getAuthToken() {
-    return testUser.getAuthToken();
+    return delegate.getAuthToken();
   }
 
   @Override
   public String getName() {
-    return testUser.getName();
+    return delegate.getName();
   }
 
   @Override
   public String getId() {
-    return testUser.getId();
+    return delegate.getId();
   }
 
   @Override
-  public void delete() {
-    testUser.delete();
-  }
+  public void delete() {}
 }

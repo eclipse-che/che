@@ -37,19 +37,21 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.pageobject.site.LoginPage;
 
 /** @author Anatolii Bazko */
 @Singleton
 public class TestFactoryInitializer {
 
-  @Inject private DefaultTestUser defaultUser;
+  @Inject private TestUser defaultUser;
   @Inject private TestIdeUrlProvider ideUrlProvider;
   @Inject private TestDashboardUrlProvider dashboardUrlProvider;
   @Inject private TestApiEndpointUrlProvider apiEndpointProvider;
   @Inject private HttpJsonRequestFactory requestFactory;
   @Inject private TestFactoryServiceClient testFactoryServiceClient;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private LoginPage loginPage;
 
   /**
    * Initialize {@link TestFactory} base upon template.
@@ -88,7 +90,8 @@ public class TestFactoryInitializer {
         factoryDto,
         dashboardUrlProvider,
         testFactoryServiceClient,
-        workspaceServiceClient);
+        workspaceServiceClient,
+        loginPage);
   }
 
   /** Builder for {@link TestFactory}. */
@@ -107,7 +110,8 @@ public class TestFactoryInitializer {
           factoryDto,
           dashboardUrlProvider,
           testFactoryServiceClient,
-          workspaceServiceClient);
+          workspaceServiceClient,
+          loginPage);
     }
 
     @Override

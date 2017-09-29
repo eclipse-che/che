@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.pageobject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -31,7 +31,7 @@ public class GitHub {
   private final org.eclipse.che.selenium.core.user.TestUser testUser;
 
   @Inject
-  public GitHub(SeleniumWebDriver seleniumWebDriver, DefaultTestUser testUser) {
+  public GitHub(SeleniumWebDriver seleniumWebDriver, TestUser testUser) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.testUser = testUser;
     PageFactory.initElements(seleniumWebDriver, this);

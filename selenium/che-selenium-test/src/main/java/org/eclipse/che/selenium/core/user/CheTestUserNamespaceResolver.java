@@ -15,6 +15,6 @@ public class CheTestUserNamespaceResolver implements TestUserNamespaceResolver {
 
   @Override
   public String resolve(String username) {
-    return "che";
+    return username.split("@")[0];
   }
 }
