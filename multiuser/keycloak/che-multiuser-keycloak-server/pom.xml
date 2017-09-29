@@ -23,8 +23,8 @@
     <name>Che Multiuser :: Keycloak Server</name>
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -83,10 +83,6 @@
             <artifactId>che-multiuser-keycloak-shared</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
@@ -96,4 +92,23 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <!-- compiler inlines constants, so it is impossible to find reference on dependency -->
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredDependencies>
+                                <ignoreDependenvy>org.eclipse.che.multiuser:che-multiuser-keycloak-shared</ignoreDependenvy>
+                            </ignoredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
