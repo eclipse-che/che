@@ -56,7 +56,12 @@ public class TextDocumentSynchronizeFactory {
   private static class NoneSynchronize implements TextDocumentSynchronize {
     @Override
     public void syncTextDocument(
-        Document document, TextPosition start, TextPosition end, String insertedText, int version) {
+        Document document,
+        TextPosition start,
+        TextPosition end,
+        int removedChars,
+        String insertedText,
+        int version) {
       // no-op implementation
     }
   }
