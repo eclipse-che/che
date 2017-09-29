@@ -17,6 +17,7 @@ import {Workspace} from "../../../api/wsmaster/workspace/workspace";
 import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
 import {Ssh} from "../../../api/wsmaster/ssh/ssh";
+import {ServerLocation} from "../../../utils/server-location";
 /**
  * This class is handling the connection to a workspace with default ssh key (or custom one)
  * @author Florent Benoit
@@ -39,6 +40,7 @@ export class WorkspaceSshAction {
 
     args: Array<string>;
     authData: AuthData;
+    apiLocation: ServerLocation;
 
     fs = require('fs');
     path = require('path');
@@ -50,10 +52,11 @@ export class WorkspaceSshAction {
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
         this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.apiLocation = ServerLocation.parse(this.url);
         // disable printing info
         this.authData.printInfo = false;
         Log.disablePrefix();
-        this.workspace = new Workspace(this.authData);
+        this.workspace = new Workspace(this.authData, this.apiLocation);
 
 
         // if extra args it's the machine name
@@ -70,8 +73,6 @@ export class WorkspaceSshAction {
         return this.authData.login().then(() => {
 
             let foundWorkspaceDTO : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-
-            let foundConfigMachineDTO;
 
             // then, search workspace
             return this.workspace.searchWorkspace(this.workspaceName).then((workspaceDto) => {
@@ -100,7 +101,7 @@ export class WorkspaceSshAction {
             }).then(() => {
 
                 // need to get ssh key for the workspace
-                let ssh:Ssh = new Ssh(this.authData);
+                let ssh:Ssh = new Ssh(this.authData, this.apiLocation);
                 return ssh.getPair("workspace", foundWorkspaceDTO.getId());
             }).then((sshPairDto : org.eclipse.che.api.ssh.shared.dto.SshPairDto) => {
 
@@ -114,12 +115,12 @@ export class WorkspaceSshAction {
                 let address: Array<string> = runtime.getServers().get("22/tcp").getProperties().getInternalAddress().split(":");
                 let ip:string = address[0];
                 let port:string = address[1];
-                var spawn = require('child_process').spawn;
+                let spawn = require('child_process').spawn;
 
                 let username:string = user + "@" + ip;
                 let cmd : string = "$(cat >>/tmp/ssh.key <<EOF\n" +  sshPairDto.getPrivateKey() + "\nEOF\n) && chmod 600 /tmp/ssh.key && ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no " + username + " -p " + port + " -i" + " /tmp/ssh.key";
                 Log.getLogger().debug('command is', cmd);
-                var p = spawn("docker", ["run", "-ti", "codenvy/alpine_jdk8", "bash", "-c" , cmd], {
+                let p = spawn("docker", ["run", "-ti", "codenvy/alpine_jdk8", "bash", "-c", cmd], {
                     stdio: 'inherit'
                 });
 

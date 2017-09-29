@@ -37,6 +37,7 @@ import {SSHGenerator} from "../../spi/docker/ssh-generator";
 import {CheFileStructWorkspaceProject} from "./chefile-struct/che-file-struct";
 import {StringUtils} from "../../utils/string-utils";
 import {ExecAgentServiceClientImpl} from "../../api/exec-agent/exec-agent-service-client";
+import {ServerLocation} from "../../utils/server-location";
 
 /**
  * Entrypoint for the Chefile handling in a directory.
@@ -95,6 +96,7 @@ export class CheDir {
 
   websocket: Websocket;
   authData: AuthData;
+  apiLocation: ServerLocation;
   workspace: Workspace;
 
   @Message('internal/dir/che-dir-constant')
@@ -277,7 +279,8 @@ export class CheDir {
     Log.getLogger().debug('Che file parsing object is ', JSON.stringify(this.chefileStruct));
     Log.getLogger().debug('Che workspace parsing object is ', JSON.stringify(this.chefileStructWorkspace));
 
-    this.authData.port = this.chefileStruct.server.port;
+    this.authData.setPort(this.chefileStruct.server.port);
+    this.apiLocation = new ServerLocation(this.chefileStruct.server.properties['CHE_HOST'], this.chefileStruct.server.port, false);
 
   }
 
@@ -471,7 +474,7 @@ export class CheDir {
         }
       }).then(() => {
         // check workspace exists
-        this.workspace = new Workspace(this.authData);
+        this.workspace = new Workspace(this.authData, this.apiLocation);
         return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
       }).then((workspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) => {
         // found it
@@ -561,7 +564,7 @@ export class CheDir {
         }
       }).then(() => {
         Log.getLogger().info(this.i18n.get('down.found', this.buildLocalCheURL()));
-        this.workspace = new Workspace(this.authData);
+        this.workspace = new Workspace(this.authData, this.apiLocation);
         // now, check if there is a workspace
         return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
       }).then((workspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) => {
@@ -642,7 +645,7 @@ export class CheDir {
       }).then((value) => {
         Log.getLogger().info(this.i18n.get('up.running', this.buildLocalCheURL()));
         // check workspace exists
-        this.workspace = new Workspace(this.authData);
+        this.workspace = new Workspace(this.authData, this.apiLocation);
         return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
       }).then((workspaceDto) => {
         // found it
@@ -693,7 +696,7 @@ export class CheDir {
     let promises : Array<Promise<any>> = new Array<Promise<any>>();
     Log.getLogger().info(this.i18n.get('up.updating-project'));
 
-    var projectAPI:Project = new Project(workspaceDto);
+    var projectAPI:Project = new Project(workspaceDto, this.authData);
 
     this.chefileStructWorkspace.projects.forEach(project => {
       // no location, use inner project
@@ -787,10 +790,8 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     if (execAgentURI.includes("localhost")) {
       execAgentURI = execAgentServer.getProperties().getInternalUrl();
     }
-    let execAgentAuthData = AuthData.parse(execAgentURI, this.authData.username, this.authData.password);
-    execAgentAuthData.token = this.authData.getToken();
 
-    let execAgentServiceClient:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, execAgentAuthData);
+    let execAgentServiceClient:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, this.authData, execAgentURI);
 
     let uuid:string = UUID.build();
 
@@ -800,7 +801,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     customCommand.type = 'custom';
     
    // store in workspace the public key
-   return execAgentServiceClient.executeCommand(workspaceDto, machineId, customCommand, uuid, false);
+   return execAgentServiceClient.executeCommand(customCommand, uuid, false);
  
 }
 
@@ -822,7 +823,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
         }
 
         // check workspace exists
-        this.workspace = new Workspace(this.authData);
+        this.workspace = new Workspace(this.authData, this.apiLocation);
         return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
       }).then((workspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) => {
         // found it
@@ -914,9 +915,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
     if (execAgentURI.includes("localhost")) {
       execAgentURI = execAgentServer.getProperties().getInternalUrl();
     }
-    let execAgentAuthData = AuthData.parse(execAgentURI, this.authData.username, this.authData.password);
-    execAgentAuthData.token = this.authData.getToken();
-    let execAgentServiceClientImpl:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, execAgentAuthData);
+    let execAgentServiceClientImpl:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, this.authData, execAgentURI);
 
     if (this.chefileStructWorkspace.postload.actions && this.chefileStructWorkspace.postload.actions.length > 0) {
       Log.getLogger().info(this.i18n.get("executeCommandsFromCurrentWorkspace.executing"));
@@ -934,7 +933,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
             customCommand.type = workspaceCommand.type;
             customCommand.attributes = workspaceCommand.attributes;
             Log.getLogger().debug('Executing post-loading workspace command \'' + postLoadingCommand.command + '\'.');
-            promises.push(execAgentServiceClientImpl.executeCommand(workspaceDto, machineId, customCommand, uuid, false));
+            promises.push(execAgentServiceClientImpl.executeCommand(customCommand, uuid, false));
           }
         });
       } else if (postLoadingCommand.script) {
@@ -942,7 +941,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
         customCommand.commandLine = postLoadingCommand.script;
         customCommand.name = 'custom postloading command';
         Log.getLogger().debug('Executing post-loading script \'' + postLoadingCommand.script + '\'.');
-        promises.push(execAgentServiceClientImpl.executeCommand(workspaceDto, machineId, customCommand, uuid, false));
+        promises.push(execAgentServiceClientImpl.executeCommand(customCommand, uuid, false));
       }
 
 
@@ -1118,7 +1117,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
 
   checkCheIsNotRunning() : Promise <boolean> {
-    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace', 200);
+    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace', 200);
     return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
       return false;
     }, (error) => {
@@ -1129,11 +1128,11 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
 
   checkCheIsRunning() : Promise<boolean> {
-    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace', 200);
+    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace', 200);
     return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
       return true;
     }, (error) => {
-      // find error when connecting so probaly not running
+      // find error when connecting so probably not running
       return false;
     });
   }
@@ -1259,7 +1258,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
       }).then(() => {
 
         // check workspace exists
-        this.workspace = new Workspace(this.authData);
+        this.workspace = new Workspace(this.authData, this.apiLocation);
 
         // take current Chefile and export it as a factory
 

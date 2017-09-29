@@ -9,7 +9,7 @@
  *   Red Hat, Inc.- initial API and implementation
  */
 
-import {org} from "../../../api/dto/che-dto"
+import {org} from "../../dto/che-dto"
 import {AuthData} from "../auth/auth-data";
 import {Websocket} from "../../../spi/websocket/websocket";
 import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
@@ -17,7 +17,7 @@ import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-reques
 import {HttpJsonResponse} from "../../../spi/http/default-http-json-request";
 import {MessageBus} from "../../../spi/websocket/messagebus";
 import {SystemStopEventPromiseMessageBusSubscriber} from "./system-stop-event-promise-subscriber";
-import {Log} from "../../../spi/log/log";
+import {ServerLocation} from "../../../utils/server-location";
 
 /**
  * System class allowing to get state of system and perform graceful stop, etc.
@@ -31,12 +31,18 @@ export class System {
     authData:AuthData;
 
     /**
+     * Location of API server
+     */
+    apiLocation : ServerLocation;
+
+    /**
      * websocket.
      */
     websocket:Websocket;
 
-    constructor(authData:AuthData) {
+    constructor(authData:AuthData, apiLocation : ServerLocation) {
         this.authData = authData;
+        this.apiLocation = apiLocation;
         this.websocket = new Websocket();
     }
 
@@ -44,7 +50,7 @@ export class System {
      * Get state of the system
      */
     getState():Promise<org.eclipse.che.api.system.shared.dto.SystemStateDto> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/system/state', 200);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/system/state', 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.system.shared.dto.SystemStateDtoImpl);
         });
@@ -58,7 +64,7 @@ export class System {
     getMessageBus(systemStateDto : org.eclipse.che.api.system.shared.dto.SystemStateDto): Promise<MessageBus> {
 
         // get link for websocket
-        var websocketLink:string;
+        let websocketLink: string;
         systemStateDto.getLinks().forEach(stateLink => {
             if ('system.state.channel' === stateLink.getRel()) {
                 websocketLink = stateLink.getHref();
@@ -115,7 +121,7 @@ export class System {
             return messageBus.subscribeAsync(channelToListen, callbackSubscriber);
         }).then((subscribed: string) => {
             if (callStop) {
-                var jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/system/stop', 204).setMethod('POST');
+                let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/system/stop', 204).setMethod('POST');
                 return jsonRequest.request().then((jsonResponse: HttpJsonResponse) => {
                     return;
                 }).then(() => {

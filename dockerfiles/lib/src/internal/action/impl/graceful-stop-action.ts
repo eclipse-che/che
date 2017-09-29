@@ -15,6 +15,7 @@ import {AuthData} from "../../../api/wsmaster/auth/auth-data";
 import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
 import {System} from "../../../api/wsmaster/system/system";
+import {ServerLocation} from "../../../utils/server-location";
 /**
  * This class is handling the graceful stop command to the remote Che system
  * @author Florent Benoit
@@ -42,7 +43,8 @@ export class GracefulStopAction {
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
         this.authData = AuthData.parse(this.url, this.username, this.password);
-        this.system = new System(this.authData);
+        let apiLocation = ServerLocation.parse(this.url);
+        this.system = new System(this.authData, apiLocation);
 
     }
 

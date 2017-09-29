@@ -8,11 +8,12 @@
  * Contributors:
  *   Red Hat, Inc.- initial API and implementation
  */
-import {org} from "../../../api/dto/che-dto"
+import {org} from "../../dto/che-dto"
 import {AuthData} from "../auth/auth-data";
 import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {HttpJsonResponse} from "../../../spi/http/default-http-json-request";
+import {ServerLocation} from "../../../utils/server-location";
 
 /**
  * Defines communication with remote User API
@@ -25,9 +26,14 @@ export class User {
      */
     authData : AuthData;
 
+    /**
+     * Location of API server
+     */
+    apiLocation : ServerLocation;
 
-    constructor(authData : AuthData) {
+    constructor(authData : AuthData, apiLocation : ServerLocation) {
         this.authData = authData;
+        this.apiLocation = apiLocation;
     }
 
 
@@ -36,7 +42,7 @@ export class User {
      */
     createUser(name: string, email: string, password : string) : Promise<org.eclipse.che.api.user.shared.dto.UserDto> {
 
-        var userData = {
+        let userData = {
             password: password,
             name: name,
         };
@@ -44,7 +50,7 @@ export class User {
         if (email) {
             userData['email'] = email;
         }
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/user', 201).setMethod('POST').setBody(userData);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/user', 201).setMethod('POST').setBody(userData);
         return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.user.shared.dto.UserDtoImpl);
         });
@@ -57,7 +63,7 @@ export class User {
      * @returns {Promise<UserDto>}
      */
     deleteUser(userId: string) : Promise<boolean> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/user/' + userId, 204).setMethod('DELETE')
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/user/' + userId, 204).setMethod('DELETE');
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return true;
         });
@@ -69,7 +75,7 @@ export class User {
      * @returns {Promise<UserDto>}
      */
     findUserName(username : string) : Promise<org.eclipse.che.api.user.shared.dto.UserDto> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/user/find?name=' + username, 200);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/user/find?name=' + username, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.user.shared.dto.UserDtoImpl);
         });
