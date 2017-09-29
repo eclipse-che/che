@@ -385,7 +385,9 @@ else
 fi
 echo
 
-${COMMAND_DIR}/multi-user/configure_and_start_keycloak.sh
+if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
+  ${COMMAND_DIR}/multi-user/configure_and_start_keycloak.sh
+fi
 
 # --------------------------------
 # Setup debugging routes if needed
