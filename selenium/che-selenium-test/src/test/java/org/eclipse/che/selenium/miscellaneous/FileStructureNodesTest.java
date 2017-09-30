@@ -140,9 +140,10 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
-    //try-catch was added because of issue: https://github.com/eclipse/che/issues/6499
+    fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
+    //try-catch was added because test fails while trying to open node by double click action
+    //issue: https://github.com/eclipse/che/issues/6499
     try {
-      fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
       fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
     } catch (org.openqa.selenium.TimeoutException ex) {
       fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
@@ -163,11 +164,12 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
-    //try-catch was added because of issue: https://github.com/eclipse/che/issues/6499
+    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
+    //try-catch was added because test fails while trying to open node by click action
+    //issue: https://github.com/eclipse/che/issues/6499
     try {
-      fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
-      fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-      fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
       fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
     } catch (org.openqa.selenium.TimeoutException ex) {
       fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);

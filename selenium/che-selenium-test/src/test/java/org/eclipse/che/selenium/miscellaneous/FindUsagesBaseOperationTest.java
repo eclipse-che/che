@@ -115,10 +115,11 @@ public class FindUsagesBaseOperationTest {
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
     findUsages.selectNodeInFindUsagesByDoubleClick("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
-    //try-catch was added because of issue: https://github.com/eclipse/che/issues/6499
+    findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
+    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+    //try-catch was added because test fails while trying to open node by click action
+    //issue: https://github.com/eclipse/che/issues/6499
     try {
-      findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
-      findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
       findUsages.clickOnIconNodeInFindUsagesPanel(
           "handleRequest(HttpServletRequest, HttpServletResponse)");
     } catch (org.openqa.selenium.TimeoutException ex) {
