@@ -54,11 +54,4 @@ mvn $CLEAN_GOAL dependency:unpack-dependencies \
 chmod +x target/bin/webdriver.sh
 
 
-for var in "$@"; do
-    if [[ "$var" =~ --test=.* ]] || [[ "$var" =~ --suite=.* ]]; then
-        TESTS_SCOPE=
-        break
-    fi
-done
-
 (target/bin/webdriver.sh "$TESTS_SCOPE" $@)
