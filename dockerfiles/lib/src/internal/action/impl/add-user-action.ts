@@ -18,8 +18,7 @@ import {User} from "../../../api/wsmaster/user/user";
 import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
 import {Permissions} from "../../../api/wsmaster/permissions/permissions";
-import {ServerLocation} from "../../../utils/server-location";
-import {WsMasterLocation} from "../../../api/wsmaster/wsmaster-location";
+
 /**
  * This class is handling the add of a user and also consider to add user as being admin.
  * @author Florent Benoit
@@ -49,14 +48,12 @@ export class AddUserAction {
 
 
     authData: AuthData;
-    apiLocation : ServerLocation;
     user: User;
 
     constructor(args:Array<string>) {
         ArgumentProcessor.inject(this, args);
         this.authData = new AuthData(this.url, this.username, this.password);
-        this.apiLocation = new WsMasterLocation(this.url);
-        this.user = new User(this.authData, this.apiLocation);
+        this.user = new User(this.authData);
     }
 
     run() : Promise<any> {
@@ -71,7 +68,7 @@ export class AddUserAction {
                 if (!this.admin) {
                     return Promise.resolve(true);
                 } else {
-                    let permissions: Permissions = new Permissions(this.authData, this.apiLocation);
+                    let permissions: Permissions = new Permissions(this.authData);
                     return permissions.copyCurrentPermissionsToUser(userDto.getId());
                 }
             })

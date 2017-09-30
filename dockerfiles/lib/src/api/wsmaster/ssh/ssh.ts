@@ -14,7 +14,6 @@ import {AuthData} from "../auth/auth-data";
 import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {HttpJsonResponse} from "../../../spi/http/default-http-json-request";
-import {ServerLocation} from "../../../utils/server-location";
 
 /**
  * SSh class allowing to manage all ssh operations
@@ -27,14 +26,8 @@ export class Ssh {
      */
     authData:AuthData;
 
-    /**
-     * Location of API server
-     */
-    apiLocation : ServerLocation;
-
-    constructor(authData:AuthData, apiLocation : ServerLocation) {
+    constructor(authData:AuthData) {
         this.authData = authData;
-        this.apiLocation = apiLocation;
     }
 
 
@@ -52,7 +45,7 @@ export class Ssh {
      *         when any other error occurs during ssh pair fetching
      */
     getPair(service: string, name: string):Promise<org.eclipse.che.api.ssh.shared.dto.SshPairDto> {
-        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/ssh/' + service + '/find?name=' + name, 200);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/ssh/' + service + '/find?name=' + name, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.ssh.shared.dto.SshPairDtoImpl);
         });

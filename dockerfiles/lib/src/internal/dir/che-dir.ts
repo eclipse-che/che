@@ -37,7 +37,6 @@ import {SSHGenerator} from "../../spi/docker/ssh-generator";
 import {CheFileStructWorkspaceProject} from "./chefile-struct/che-file-struct";
 import {StringUtils} from "../../utils/string-utils";
 import {ExecAgentServiceClientImpl} from "../../api/exec-agent/exec-agent-service-client";
-import {ServerLocation} from "../../utils/server-location";
 
 /**
  * Entrypoint for the Chefile handling in a directory.
@@ -96,7 +95,6 @@ export class CheDir {
 
   websocket: Websocket;
   authData: AuthData;
-  apiLocation: ServerLocation;
   workspace: Workspace;
 
   @Message('internal/dir/che-dir-constant')
@@ -280,7 +278,6 @@ export class CheDir {
     Log.getLogger().debug('Che workspace parsing object is ', JSON.stringify(this.chefileStructWorkspace));
 
     this.authData.setPort(this.chefileStruct.server.port);
-    this.apiLocation = new ServerLocation(this.chefileStruct.server.properties['CHE_HOST'], this.chefileStruct.server.port, false);
 
   }
 
@@ -474,7 +471,7 @@ export class CheDir {
         }
       }).then(() => {
         // check workspace exists
-        this.workspace = new Workspace(this.authData, this.apiLocation);
+        this.workspace = new Workspace(this.authData);
         return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
       }).then((workspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) => {
         // found it
@@ -564,7 +561,7 @@ export class CheDir {
         }
       }).then(() => {
         Log.getLogger().info(this.i18n.get('down.found', this.buildLocalCheURL()));
-        this.workspace = new Workspace(this.authData, this.apiLocation);
+        this.workspace = new Workspace(this.authData);
         // now, check if there is a workspace
         return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
       }).then((workspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) => {
@@ -645,7 +642,7 @@ export class CheDir {
       }).then((value) => {
         Log.getLogger().info(this.i18n.get('up.running', this.buildLocalCheURL()));
         // check workspace exists
-        this.workspace = new Workspace(this.authData, this.apiLocation);
+        this.workspace = new Workspace(this.authData);
         return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
       }).then((workspaceDto) => {
         // found it
@@ -823,7 +820,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
         }
 
         // check workspace exists
-        this.workspace = new Workspace(this.authData, this.apiLocation);
+        this.workspace = new Workspace(this.authData);
         return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
       }).then((workspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) => {
         // found it
@@ -1117,18 +1114,18 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
 
   checkCheIsNotRunning() : Promise <boolean> {
-    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace', 200);
+    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace', 200);
     return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
       return false;
     }, (error) => {
-      // find error when connecting so probaly not running
+      // find error when connecting so probably not running
       return true;
     });
   }
 
 
   checkCheIsRunning() : Promise<boolean> {
-    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace', 200);
+    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace', 200);
     return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
       return true;
     }, (error) => {
@@ -1258,7 +1255,7 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
       }).then(() => {
 
         // check workspace exists
-        this.workspace = new Workspace(this.authData, this.apiLocation);
+        this.workspace = new Workspace(this.authData);
 
         // take current Chefile and export it as a factory
 

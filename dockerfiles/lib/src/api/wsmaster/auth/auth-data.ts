@@ -16,7 +16,7 @@ import {error} from "util";
 import {WsMasterLocation} from "../wsmaster-location";
 
 /**
- * Defines a way to store the auth data in order to deal with remote REST or Websocket API
+ * Defines a way to store the WS master location and the auth data in order to deal with remote REST or Websocket API
  * @author Florent Benoit
  * @author Oleksandr Garagatyi
  */
@@ -31,16 +31,17 @@ export class AuthData {
 
     private token : string;
     private authServerLocation: ServerLocation;
-
     private username: string;
     private password: string;
     private authType: AUTH_TYPE;
+    private wsMasterLocation: ServerLocation;
 
     constructor(cheMasterLocation?: string, username?: string, password?: string) {
 
         this.username = username;
         this.password = password;
         this.token = this.DEFAULT_TOKEN;
+        this.wsMasterLocation = new WsMasterLocation(cheMasterLocation);
 
         // autodetect auth type
         if (!username && !password) {
@@ -55,7 +56,7 @@ export class AuthData {
             }
         } else {
             this.authType = AUTH_TYPE.CODENVY_SSO;
-            this.authServerLocation = new WsMasterLocation(cheMasterLocation);
+            this.authServerLocation = this.wsMasterLocation;
         }
     }
 
@@ -75,10 +76,14 @@ export class AuthData {
         this.authServerLocation.setPort(port);
     }
 
+    getMasterLocation(): ServerLocation {
+        return this.wsMasterLocation;
+    }
+
     login() : Promise<boolean> {
 
         if (this.authType == AUTH_TYPE.NO) {
-            return AuthData.noLogin();
+            return this.noLogin();
         }
 
         let http: any;
@@ -194,7 +199,7 @@ export class AuthData {
         });
     }
 
-    private static noLogin() : Promise<boolean> {
+    private noLogin() : Promise<boolean> {
         return new Promise<any>((resolve) => {
             resolve(true);
         });

@@ -18,6 +18,7 @@ export class WsMasterLocation extends ServerLocation {
         if (url) {
             let server = ServerLocation.parse(url);
             super(server.getHostname(), server.getPort(), server.isSecure());
+            return;
         }
 
         // handle CHE_HOST if any

@@ -17,7 +17,6 @@ import {CreateWorkspaceConfig} from "../../../api/wsmaster/workspace/workspace";
 import {Log} from "../../../spi/log/log";
 import {I18n} from "../../../spi/i18n/i18n";
 import {Message} from "../../../spi/decorator/message";
-import {WsMasterLocation} from "../../../api/wsmaster/wsmaster-location";
 
 /**
  * This class is managing a post-check operation by creating a workspace, starting it and displaying the log data.
@@ -52,12 +51,10 @@ export class PostFlightCheckTest {
             url = updatedArgs[0];
         }
         this.authData = new AuthData(url, this.username, this.password);
-        let apiLocation = new WsMasterLocation(url);
         if (this.portNumber) {
             this.authData.setPort(this.portNumber);
-            apiLocation.setPort(this.portNumber);
         }
-        this.workspace = new Workspace(this.authData, apiLocation);
+        this.workspace = new Workspace(this.authData);
     }
 
     run() : Promise<any> {

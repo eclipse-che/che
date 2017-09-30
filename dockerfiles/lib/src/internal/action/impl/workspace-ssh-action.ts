@@ -17,8 +17,6 @@ import {Workspace} from "../../../api/wsmaster/workspace/workspace";
 import {ArgumentProcessor} from "../../../spi/decorator/argument-processor";
 import {Log} from "../../../spi/log/log";
 import {Ssh} from "../../../api/wsmaster/ssh/ssh";
-import {ServerLocation} from "../../../utils/server-location";
-import {WsMasterLocation} from "../../../api/wsmaster/wsmaster-location";
 /**
  * This class is handling the connection to a workspace with default ssh key (or custom one)
  * @author Florent Benoit
@@ -41,7 +39,6 @@ export class WorkspaceSshAction {
 
     args: Array<string>;
     authData: AuthData;
-    apiLocation: ServerLocation;
 
     fs = require('fs');
     path = require('path');
@@ -53,11 +50,10 @@ export class WorkspaceSshAction {
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
         this.authData = new AuthData(this.url, this.username, this.password);
-        this.apiLocation = new WsMasterLocation(this.url);
         // disable printing info
         this.authData.printInfo = false;
         Log.disablePrefix();
-        this.workspace = new Workspace(this.authData, this.apiLocation);
+        this.workspace = new Workspace(this.authData);
 
 
         // if extra args it's the machine name
@@ -102,7 +98,7 @@ export class WorkspaceSshAction {
             }).then(() => {
 
                 // need to get ssh key for the workspace
-                let ssh:Ssh = new Ssh(this.authData, this.apiLocation);
+                let ssh:Ssh = new Ssh(this.authData);
                 return ssh.getPair("workspace", foundWorkspaceDTO.getId());
             }).then((sshPairDto : org.eclipse.che.api.ssh.shared.dto.SshPairDto) => {
 

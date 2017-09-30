@@ -17,7 +17,6 @@ import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-reques
 import {HttpJsonResponse} from "../../../spi/http/default-http-json-request";
 import {MessageBus} from "../../../spi/websocket/messagebus";
 import {SystemStopEventPromiseMessageBusSubscriber} from "./system-stop-event-promise-subscriber";
-import {ServerLocation} from "../../../utils/server-location";
 
 /**
  * System class allowing to get state of system and perform graceful stop, etc.
@@ -31,18 +30,12 @@ export class System {
     authData:AuthData;
 
     /**
-     * Location of API server
-     */
-    apiLocation : ServerLocation;
-
-    /**
      * websocket.
      */
     websocket:Websocket;
 
-    constructor(authData:AuthData, apiLocation : ServerLocation) {
+    constructor(authData:AuthData) {
         this.authData = authData;
-        this.apiLocation = apiLocation;
         this.websocket = new Websocket();
     }
 
@@ -50,7 +43,7 @@ export class System {
      * Get state of the system
      */
     getState():Promise<org.eclipse.che.api.system.shared.dto.SystemStateDto> {
-        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/system/state', 200);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/system/state', 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.system.shared.dto.SystemStateDtoImpl);
         });
@@ -121,7 +114,7 @@ export class System {
             return messageBus.subscribeAsync(channelToListen, callbackSubscriber);
         }).then((subscribed: string) => {
             if (callStop) {
-                let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/system/stop', 204).setMethod('POST');
+                let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/system/stop', 204).setMethod('POST');
                 return jsonRequest.request().then((jsonResponse: HttpJsonResponse) => {
                     return;
                 }).then(() => {

@@ -14,7 +14,6 @@ import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {HttpJsonResponse} from "../../../spi/http/default-http-json-request";
 import {PermissionDto} from "./dto/permissiondto";
-import {ServerLocation} from "../../../utils/server-location";
 /**
  * Defines communication with remote Permissions API
  * @author Florent Benoit
@@ -26,14 +25,8 @@ export class Permissions {
      */
     authData:AuthData;
 
-    /**
-     * Location of API server
-     */
-    apiLocation : ServerLocation;
-
-    constructor(authData:AuthData, apiLocation : ServerLocation) {
+    constructor(authData:AuthData) {
         this.authData = authData;
-        this.apiLocation = apiLocation;
     }
 
 
@@ -42,7 +35,7 @@ export class Permissions {
      */
     listPermissions():Promise<Array<DomainDto>> {
 
-        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/permissions', 200);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/permissions', 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             let domainsDto:Array<DomainDto> = [];
             JSON.parse(jsonResponse.getData()).forEach((entry)=> {
@@ -58,16 +51,16 @@ export class Permissions {
      */
     getPermission(domain:string):Promise<PermissionDto> {
 
-        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/permissions/' + domain, 200);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/permissions/' + domain, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return new PermissionDto(JSON.parse(jsonResponse.getData()));
-        }, (error) => {
+        }, () => {
             return new PermissionDto({});
         });
     }
 
     updatePermissions(permissionDto:PermissionDto) {
-        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/permissions', 204);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/permissions', 204);
         return jsonRequest.setMethod('POST').setBody(permissionDto.getContent()).request().then((jsonResponse:HttpJsonResponse) => {
             return new PermissionDto(jsonResponse.getData());
         });

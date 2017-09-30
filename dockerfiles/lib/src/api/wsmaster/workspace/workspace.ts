@@ -9,7 +9,7 @@
  *   Red Hat, Inc.- initial API and implementation
  */
 
-import {org} from "../../../api/dto/che-dto"
+import {org} from "../../dto/che-dto"
 import {AuthData} from "../auth/auth-data";
 import {Websocket} from "../../../spi/websocket/websocket";
 import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
@@ -23,7 +23,6 @@ import {Log} from "../../../spi/log/log";
 import {WorkspaceStopEventPromiseMessageBusSubscriber} from "./workspace-stop-event-promise-subscriber";
 import {RecipeBuilder} from "../../../spi/docker/recipebuilder";
 import {CheFileStructWorkspaceCommand} from "../../../internal/dir/chefile-struct/che-file-struct";
-import {ServerLocation} from "../../../utils/server-location";
 
 /**
  * Workspace class allowing to manage a workspace, like create/start/stop, etc operations
@@ -37,18 +36,12 @@ export class Workspace {
     authData:AuthData;
 
     /**
-     * Location of API server
-     */
-    apiLocation : ServerLocation;
-
-    /**
      * websocket.
      */
     websocket:Websocket;
 
-    constructor(authData:AuthData, apiLocation : ServerLocation) {
+    constructor(authData:AuthData) {
         this.authData = authData;
-        this.apiLocation = apiLocation;
         this.websocket = new Websocket();
     }
 
@@ -58,7 +51,7 @@ export class Workspace {
      * Get all workspaces
      */
     getWorkspaces():Promise<Array<org.eclipse.che.api.workspace.shared.dto.WorkspaceDto>> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace/', 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/', 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asArrayDto(org.eclipse.che.api.workspace.shared.dto.WorkspaceDtoImpl);
         });
@@ -109,7 +102,7 @@ export class Workspace {
         // TODO use ram ?
         //createWorkspaceConfig.ram
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace?account=', 201).setMethod('POST').setBody(workspaceConfigDto);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace?account=', 201).setMethod('POST').setBody(workspaceConfigDto);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.workspace.shared.dto.WorkspaceDtoImpl);
         });
@@ -141,7 +134,7 @@ export class Workspace {
             }
             return userWorkspaceDto;
         }).then((workspaceDto) => {
-            var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace/' + workspaceId + '/runtime?environment=default', 200).setMethod('POST');
+            var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/' + workspaceId + '/runtime?environment=default', 200).setMethod('POST');
             return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
                 return jsonResponse.asDto(org.eclipse.che.api.workspace.shared.dto.WorkspaceDtoImpl);
             }).then((workspaceDto) => {
@@ -168,7 +161,7 @@ export class Workspace {
             }
         }
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace/' + key, 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/' + key, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             Log.getLogger().debug('got workspace with key', key, 'result: ', jsonResponse.getData());
             return jsonResponse.asDto(org.eclipse.che.api.workspace.shared.dto.WorkspaceDtoImpl);
@@ -190,7 +183,7 @@ export class Workspace {
      * Get a workspace data by returning a Promise with WorkspaceDto.
      */
     getWorkspace(workspaceId:string):Promise<org.eclipse.che.api.workspace.shared.dto.WorkspaceDto> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace/' + workspaceId, 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/' + workspaceId, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.workspace.shared.dto.WorkspaceDtoImpl);
         });
@@ -217,7 +210,7 @@ export class Workspace {
      * Delete a workspace and returns a Promise with WorkspaceDto.
      */
     deleteWorkspace(workspaceId:string):Promise<org.eclipse.che.api.workspace.shared.dto.WorkspaceDto> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace/' + workspaceId, 204).setMethod('DELETE');
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/' + workspaceId, 204).setMethod('DELETE');
         return this.getWorkspace(workspaceId).then((workspaceDto:org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) => {
             return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
                 return workspaceDto;
@@ -231,7 +224,7 @@ export class Workspace {
      */
     stopWorkspace(workspaceId:string):Promise<org.eclipse.che.api.workspace.shared.dto.WorkspaceDto> {
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/workspace/' + workspaceId + '/runtime', 204).setMethod('DELETE');
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/' + workspaceId + '/runtime', 204).setMethod('DELETE');
         var callbackSubscriber:WorkspaceStopEventPromiseMessageBusSubscriber;
 
         var userWorkspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -272,7 +265,7 @@ export class Workspace {
     getMachineToken(workspaceDto:org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) {
 
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, this.apiLocation, '/api/machine/token/' + workspaceDto.getId(), 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/machine/token/' + workspaceDto.getId(), 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return JSON.parse(jsonResponse.getData()).machineToken;
         });

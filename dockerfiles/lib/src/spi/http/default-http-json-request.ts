@@ -28,6 +28,9 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
 
 
     constructor(authData : AuthData, server : ServerLocation, path : string, expectedStatusCode: number) {
+        if (!server) {
+            server = authData.getMasterLocation();
+        }
         if (server.isSecure()) {
             this.http = require('https');
         } else {
