@@ -42,7 +42,7 @@ export class CreateStartWorkspaceAction {
     constructor(args:Array<string>) {
         ArgumentProcessor.inject(this, args);
 
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         let apiLocation = new WsMasterLocation(this.url);
         this.workspace = new Workspace(this.authData, apiLocation);
     }

@@ -46,7 +46,7 @@ export class ExecuteCommandAction {
     workspace : Workspace;
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         let apiLocation = new WsMasterLocation(this.url);
         // disable printing info
         this.authData.printInfo = false;

@@ -51,7 +51,7 @@ export class PostFlightCheckTest {
         if (updatedArgs.length > 0) {
             url = updatedArgs[0];
         }
-        this.authData = AuthData.parse(url, this.username, this.password);
+        this.authData = new AuthData(url, this.username, this.password);
         let apiLocation = new WsMasterLocation(url);
         if (this.portNumber) {
             this.authData.setPort(this.portNumber);

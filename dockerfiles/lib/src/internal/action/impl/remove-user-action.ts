@@ -44,7 +44,7 @@ export class RemoveUserAction {
 
     constructor(args:Array<string>) {
         ArgumentProcessor.inject(this, args);
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         this.apiLocation = new WsMasterLocation(this.url);
         this.user = new User(this.authData, this.apiLocation);
     }

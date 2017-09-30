@@ -36,7 +36,7 @@ export class AuthData {
     private password: string;
     private authType: AUTH_TYPE;
 
-    constructor(cheMasterLocation?: ServerLocation, username?: string, password?: string) {
+    constructor(cheMasterLocation?: string, username?: string, password?: string) {
 
         this.username = username;
         this.password = password;
@@ -55,11 +55,7 @@ export class AuthData {
             }
         } else {
             this.authType = AUTH_TYPE.CODENVY_SSO;
-            if (cheMasterLocation) {
-                this.authServerLocation = cheMasterLocation;
-            } else {
-                this.authServerLocation = new WsMasterLocation();
-            }
+            this.authServerLocation = new WsMasterLocation(cheMasterLocation);
         }
     }
 
@@ -112,15 +108,6 @@ export class AuthData {
             default:
                 error('Che authentication type ' + this.authType + ' is illegal');
         }
-    }
-
-    static parse(remoteUrl: string, username?: string, password?: string) : AuthData {
-        let serverApi: ServerLocation;
-        if (remoteUrl) {
-            serverApi = ServerLocation.parse(remoteUrl);
-        }
-
-        return new AuthData(serverApi, username, password);
     }
 
     private ssoLogin(http) : Promise<boolean> {
