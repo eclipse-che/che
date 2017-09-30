@@ -200,7 +200,7 @@ public abstract class SeleniumTestHandler
 
   /** Is invoked when test or configuration is finished. */
   private void onTestFinish(ITestResult result) {
-    if (result.getStatus() == ITestResult.FAILURE) {
+    if (result.getStatus() == ITestResult.FAILURE || result.getStatus() == ITestResult.SKIP) {
       ofNullable(result.getThrowable()).ifPresent(e -> LOG.error("" + e.getMessage(), e));
 
       captureScreenshot(result);

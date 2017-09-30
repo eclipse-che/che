@@ -21,6 +21,8 @@ import io.fabric8.kubernetes.api.model.ContainerStateWaiting;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.DoneableEndpoints;
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.Node;
+import io.fabric8.kubernetes.api.model.NodeSystemInfo;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
@@ -101,6 +103,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
+import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.Filters;
@@ -110,6 +113,7 @@ import org.eclipse.che.plugin.docker.client.json.ImageInfo;
 import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.eclipse.che.plugin.docker.client.json.SystemInfo;
 import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
 import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
 import org.eclipse.che.plugin.docker.client.json.network.Ipam;
@@ -131,6 +135,7 @@ import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
+import org.eclipse.che.plugin.docker.client.params.TopParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.DisconnectContainerFromNetworkParams;
@@ -194,6 +199,9 @@ public class OpenShiftConnector extends DockerConnector {
 
   /** Regexp to extract port (under the form 22/tcp or 4401/tcp, etc.) from label references */
   public static final String LABEL_CHE_SERVER_REF_KEY = "^che:server:(.*):ref$";
+
+  private static final String PS_COMMAND = "ps";
+  private static final String TOP_REGEX_PATTERN = " +";
 
   private Map<String, KubernetesExecHolder> execMap = new HashMap<>();
 
@@ -331,8 +339,18 @@ public class OpenShiftConnector extends DockerConnector {
    */
   protected Set<String> getExposedPorts(ContainerConfig containerConfig, ImageConfig imageConfig) {
 
-    Set<String> containerExposedPorts = containerConfig.getExposedPorts().keySet();
-    Set<String> imageExposedPorts = imageConfig.getExposedPorts().keySet();
+    Map<String, Map<String, String>> containerExposedPortsMap = containerConfig.getExposedPorts();
+    if (containerExposedPortsMap == null) {
+      containerExposedPortsMap = Collections.emptyMap();
+    }
+    Map<String, org.eclipse.che.plugin.docker.client.json.ExposedPort> imageExposedPortsMap =
+        imageConfig.getExposedPorts();
+    if (imageExposedPortsMap == null) {
+      imageExposedPortsMap = Collections.emptyMap();
+    }
+
+    Set<String> containerExposedPorts = containerExposedPortsMap.keySet();
+    Set<String> imageExposedPorts = imageExposedPortsMap.keySet();
     return ImmutableSet.<String>builder()
         .addAll(containerExposedPorts)
         .addAll(imageExposedPorts)
@@ -1037,6 +1055,66 @@ public class OpenShiftConnector extends DockerConnector {
   }
 
   @Override
+  public ContainerProcesses top(final TopParams params) throws IOException {
+    String containerId = params.getContainer();
+    Pod pod = getChePodByContainerId(containerId);
+    String podName = pod.getMetadata().getName();
+    String[] command;
+    final String[] psArgs = params.getPsArgs();
+    if (psArgs != null && psArgs.length != 0) {
+      int length = psArgs.length + 1;
+      command = new String[length];
+      command[0] = PS_COMMAND;
+      System.arraycopy(psArgs, 0, command, 1, psArgs.length);
+    } else {
+      command = new String[1];
+      command[0] = PS_COMMAND;
+    }
+    ContainerProcesses processes = new ContainerProcesses();
+    OpenShiftClient openShiftClient = new DefaultOpenShiftClient();
+    try (ExecWatch watch =
+        openShiftClient
+            .pods()
+            .inNamespace(openShiftCheProjectName)
+            .withName(podName)
+            .redirectingOutput()
+            .redirectingError()
+            .exec(command)) {
+      BufferedReader reader = new BufferedReader(new InputStreamReader(watch.getOutput()));
+      boolean first = true;
+      int limit = 0;
+      try {
+        List<String[]> procList = new ArrayList<>();
+        while (reader.ready()) {
+          String line = reader.readLine();
+          if (line == null || line.isEmpty()) {
+            continue;
+          }
+          if (line.startsWith("rpc error")) {
+            throw new IOException(line);
+          }
+          line = line.trim();
+          if (first) {
+            String[] elements = line.split(TOP_REGEX_PATTERN);
+            limit = elements.length;
+            first = false;
+            processes.setTitles(elements);
+          } else {
+            String[] elements = line.split(TOP_REGEX_PATTERN, limit);
+            procList.add(elements);
+          }
+        }
+        processes.setProcesses(procList.toArray(new String[0][0]));
+      } catch (IOException e) {
+        throw new OpenShiftException(e.getMessage());
+      }
+    } catch (KubernetesClientException e) {
+      throw new OpenShiftException(e.getMessage());
+    }
+    return processes;
+  }
+
+  @Override
   public Exec createExec(final CreateExecParams params) throws IOException {
     String[] command = params.getCmd();
     String containerId = params.getContainer();
@@ -1096,6 +1174,38 @@ public class OpenShiftConnector extends DockerConnector {
       execMap.remove(execId);
       executor.shutdown();
       openShiftClient.close();
+    }
+  }
+
+  @Override
+  public SystemInfo getSystemInfo() throws IOException {
+    OpenShiftClient openShiftClient = new DefaultOpenShiftClient();
+    PodList chePods = openShiftClient.pods().inNamespace(this.openShiftCheProjectName).list();
+    if (chePods.getItems().size() > 0) {
+      Pod pod = chePods.getItems().get(0);
+      Node node = openShiftClient.nodes().withName(pod.getSpec().getNodeName()).get();
+      NodeSystemInfo nodeInfo = node.getStatus().getNodeInfo();
+      SystemInfo systemInfo = new SystemInfo();
+      systemInfo.setKernelVersion(nodeInfo.getKernelVersion());
+      systemInfo.setOperatingSystem(nodeInfo.getOperatingSystem());
+      systemInfo.setID(node.getMetadata().getUid());
+      int containers =
+          openShiftClient.pods().inNamespace(this.openShiftCheProjectName).list().getItems().size();
+      int images = node.getStatus().getImages().size();
+      systemInfo.setContainers(containers);
+      systemInfo.setImages(images);
+      systemInfo.setName(node.getMetadata().getName());
+      String[] labels =
+          node.getMetadata()
+              .getLabels()
+              .entrySet()
+              .stream()
+              .map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+              .toArray(String[]::new);
+      systemInfo.setLabels(labels);
+      return systemInfo;
+    } else {
+      throw new OpenShiftException("No pod found");
     }
   }
 

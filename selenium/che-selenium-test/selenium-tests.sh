@@ -16,14 +16,29 @@ cd $CUR_DIR
 
 index=0
 params=($*)
+CLEAN_GOAL="clean"
+TESTS_SCOPE="--suite=CheSuite.xml"
 cheMultiuserValue=${CHE_MULTIUSER:-false}
 for var in "$@"; do
-   if [[ "$var" =~ --multiuser ]]; then
+    if [[ "$var" =~ --test=.* ]] || [[ "$var" =~ --suite=.* ]]; then
+        TESTS_SCOPE=
+        break
+    fi
+
+    if [[ "$var" == "--compare-with-ci" ]] \
+        || [[ "$var" == "--failed-tests" ]] \
+        || [[ "$var" == "--regression-tests" ]]; then
+        TESTS_SCOPE=
+        CLEAN_GOAL=
+        break
+    fi
+
+    if [[ "$var" =~ --multiuser ]]; then
        cheMultiuserValue=true
        unset params[$index]                     # remove "--multiuser" from parameters
        break
-   fi
-   let "index+=1"
+    fi
+    let "index+=1"
 done
 
 export CHE_MULTIUSER=$cheMultiuserValue
@@ -31,14 +46,14 @@ export CHE_MULTIUSER=$cheMultiuserValue
 set -- "${params[@]}"
 
 
-mvn dependency:unpack-dependencies \
+mvn $CLEAN_GOAL dependency:unpack-dependencies \
     -DincludeArtifactIds=che-selenium-core \
     -DincludeGroupIds=org.eclipse.che.selenium \
     -Dmdep.unpack.includes=webdriver.sh \
     -DoutputDirectory=${CUR_DIR}/target/bin
 chmod +x target/bin/webdriver.sh
 
-TESTS_SCOPE="--suite=CheSuite.xml"
+
 for var in "$@"; do
     if [[ "$var" =~ --test=.* ]] || [[ "$var" =~ --suite=.* ]]; then
         TESTS_SCOPE=
