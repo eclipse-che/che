@@ -9,7 +9,6 @@
  *   Red Hat, Inc.- initial API and implementation
  */
 // imports
-import {org} from "../../../api/dto/che-dto"
 import {Argument} from "../../../spi/decorator/parameter";
 import {Parameter} from "../../../spi/decorator/parameter";
 import {AuthData} from "../../../api/wsmaster/auth/auth-data";
@@ -46,7 +45,7 @@ export class ExecuteCommandAction {
     workspace : Workspace;
     constructor(args:Array<string>) {
         this.args = ArgumentProcessor.inject(this, args);
-        this.authData = AuthData.parse(this.url, this.username, this.password);
+        this.authData = new AuthData(this.url, this.username, this.password);
         // disable printing info
         this.authData.printInfo = false;
         Log.disablePrefix();
@@ -65,9 +64,6 @@ export class ExecuteCommandAction {
                     throw new Error('Workspace should be in running state. Current state is ' + workspaceDto.getStatus());
                 }
 
-                // get dev machine
-                let machineId : string = workspaceDto.getRuntime().getDevMachine().getId();
-
                 // get exec-agent URI
                 let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4412/tcp");
                 let execAgentURI = execAgentServer.getUrl();
@@ -75,16 +71,13 @@ export class ExecuteCommandAction {
                     execAgentURI = execAgentServer.getProperties().getInternalUrl();
                 }
 
-                let execAgentAuthData = AuthData.parse(execAgentURI, this.authData.username, this.authData.password);
-                execAgentAuthData.token = this.authData.getToken();
-
                 // now, execute command
                 let uuid : string = UUID.build();
-                let execAgentServiceClientImpl : ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, execAgentAuthData);
+                let execAgentServiceClientImpl : ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, this.authData, execAgentURI);
 
                 let workspaceCommand : CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
                 workspaceCommand.commandLine = this.args.join(" ");
-                return execAgentServiceClientImpl.executeCommand(workspaceDto, machineId, workspaceCommand, uuid);
+                return execAgentServiceClientImpl.executeCommand(workspaceCommand, uuid);
             });
         });
     }
