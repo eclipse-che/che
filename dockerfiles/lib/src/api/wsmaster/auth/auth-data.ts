@@ -72,10 +72,6 @@ export class AuthData {
         }
     }
 
-    setPort(port : number) {
-        this.authServerLocation.setPort(port);
-    }
-
     getMasterLocation(): ServerLocation {
         return this.wsMasterLocation;
     }

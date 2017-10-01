@@ -19,7 +19,6 @@ export class ServerLocation {
         this.hostname = hostname;
     }
 
-    // TODO get machine token for exec agent and wsagent
     static parse(stringUrl : string): ServerLocation {
         if (!stringUrl) {
             error('Server location parsing failed. Server url should not be undefined')

@@ -277,7 +277,7 @@ export class CheDir {
     Log.getLogger().debug('Che file parsing object is ', JSON.stringify(this.chefileStruct));
     Log.getLogger().debug('Che workspace parsing object is ', JSON.stringify(this.chefileStructWorkspace));
 
-    this.authData.setPort(this.chefileStruct.server.port);
+    this.authData.getMasterLocation().setPort(this.chefileStruct.server.port);
 
   }
 

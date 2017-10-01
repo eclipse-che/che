@@ -52,7 +52,7 @@ export class PostFlightCheckTest {
         }
         this.authData = new AuthData(url, this.username, this.password);
         if (this.portNumber) {
-            this.authData.setPort(this.portNumber);
+            this.authData.getMasterLocation().setPort(this.portNumber);
         }
         this.workspace = new Workspace(this.authData);
     }

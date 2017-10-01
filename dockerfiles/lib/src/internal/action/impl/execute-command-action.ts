@@ -73,7 +73,6 @@ export class ExecuteCommandAction {
 
                 // now, execute command
                 let uuid : string = UUID.build();
-                // TODO won't work - use machine token instead
                 let execAgentServiceClientImpl : ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, this.authData, execAgentURI);
 
                 let workspaceCommand : CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
