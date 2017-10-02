@@ -97,17 +97,17 @@ public class TestUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestUtils.class);
 
-//  /**
-//   * Creates a virtual file system.
-//   *
-//   * @return the virtual file system
-//   * @throws Exception if anything goes wrong
-//   */
-//  public static VirtualFileSystem createVirtualFileSystem() throws Exception {
-//    File rootDirectory = java.nio.file.Files.createTempDirectory(null).toFile();
-//    VirtualFileSystemProvider vfsProvider = new LocalVirtualFileSystemProvider(rootDirectory, null);
-//    return vfsProvider.getVirtualFileSystem();
-//  }
+  //  /**
+  //   * Creates a virtual file system.
+  //   *
+  //   * @return the virtual file system
+  //   * @throws Exception if anything goes wrong
+  //   */
+  //  public static VirtualFileSystem createVirtualFileSystem() throws Exception {
+  //    File rootDirectory = java.nio.file.Files.createTempDirectory(null).toFile();
+  //    VirtualFileSystemProvider vfsProvider = new LocalVirtualFileSystemProvider(rootDirectory, null);
+  //    return vfsProvider.getVirtualFileSystem();
+  //  }
 
   public static class SystemOutLineConsumer implements LineConsumer {
     @Override

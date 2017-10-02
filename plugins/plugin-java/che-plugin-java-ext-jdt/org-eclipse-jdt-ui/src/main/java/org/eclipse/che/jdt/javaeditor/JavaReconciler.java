@@ -26,7 +26,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.fs.watcher.detectors.FileTrackingOperationEvent;
+import org.eclipse.che.api.watcher.server.detectors.FileTrackingOperationEvent;
 import org.eclipse.che.api.project.server.EditorWorkingCopy;
 import org.eclipse.che.api.project.server.EditorWorkingCopyManager;
 import org.eclipse.che.api.project.server.EditorWorkingCopyUpdatedEvent;

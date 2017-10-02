@@ -43,8 +43,8 @@ import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEven
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgClientMessages.AddBreakpointRequest;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgClientMessages.AddFilesRequest;
@@ -97,7 +97,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   private final ZendDbgSettings debugSettings;
   private final ZendDbgLocationHandler debugLocationHandler;
   private final ZendDbgConnection debugConnection;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
   private final FsManager fsManager;
   private final ZendDbgExpressionEvaluator debugExpressionEvaluator;
   private VariablesStorage debugVariableStorage;
@@ -110,7 +110,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
       ZendDbgSettings debugSettings,
       ZendDbgLocationHandler debugLocationHandler,
       DebuggerCallback debugCallback,
-      PathResolver pathResolver,
+      FsPathResolver fsPathResolver,
       ProjectManager projectManager,
       FsManager fsManager)
       throws DebuggerException {
@@ -118,7 +118,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     this.debugSettings = debugSettings;
     this.debugLocationHandler = debugLocationHandler;
     this.debugConnection = new ZendDbgConnection(this, debugSettings);
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
     this.fsManager = fsManager;
     this.debugExpressionEvaluator = new ZendDbgExpressionEvaluator(debugConnection);
     this.debugVariableStorage = new VariablesStorage(Collections.emptyList());
@@ -335,7 +335,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
       GetLocalFileContentRequest request) {
     String remoteFilePath = request.getFileName();
 
-    String wsPath = pathResolver.toAbsoluteWsPath(remoteFilePath);
+    String wsPath = fsPathResolver.toAbsoluteWsPath(remoteFilePath);
     if (!fsManager.exists(wsPath)) {
       LOG.error("Could not found corresponding local file for: " + remoteFilePath);
       return new GetLocalFileContentResponse(

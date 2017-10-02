@@ -17,7 +17,7 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.plugin.composer.server.executor.ComposerCommandExecutor;
@@ -27,13 +27,13 @@ import org.eclipse.che.plugin.composer.shared.Constants;
 public class ComposerProjectGenerator implements CreateProjectHandler {
 
   private final ComposerCommandExecutor commandExecutor;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
 
   @Inject
   public ComposerProjectGenerator(
-      ComposerCommandExecutor commandExecutor, PathResolver pathResolver) {
+      ComposerCommandExecutor commandExecutor, FsPathResolver fsPathResolver) {
     this.commandExecutor = commandExecutor;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
   }
 
   @Override
@@ -45,7 +45,7 @@ public class ComposerProjectGenerator implements CreateProjectHandler {
       throw new ServerException("Missed some required options (package)");
     }
 
-    Path path = pathResolver.toFsPath(projectWsPath);
+    Path path = fsPathResolver.toFsPath(projectWsPath);
     String projectAbsolutePath = path.toString();
     String[] commandLine = {
       "composer", "create-project", packageName.getString(), projectAbsolutePath, "--no-install"

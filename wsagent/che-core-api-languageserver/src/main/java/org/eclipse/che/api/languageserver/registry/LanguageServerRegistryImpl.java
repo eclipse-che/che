@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
@@ -54,7 +54,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private final Provider<ProjectManager> projectManagerProvider;
   private final ServerInitializer initializer;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
   private EventService eventService;
   private CheLanguageClientFactory clientFactory;
 
@@ -66,14 +66,14 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       ServerInitializer initializer,
       EventService eventService,
       CheLanguageClientFactory clientFactory,
-      PathResolver pathResolver) {
+      FsPathResolver fsPathResolver) {
     this.languages = new ArrayList<>(languages);
     this.launchers = new ArrayList<>(languageServerLaunchers);
     this.projectManagerProvider = projectManagerProvider;
     this.initializer = initializer;
     this.eventService = eventService;
     this.clientFactory = clientFactory;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
     this.launchedServers = new HashMap<>();
     this.initializedServers = new HashMap<>();
   }
@@ -213,7 +213,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       throw new LanguageServerException("Project not found for " + filePath);
     }
 
-    String wsPath = pathResolver.toAbsoluteWsPath(LanguageServiceUtils.removePrefixUri(filePath));
+    String wsPath = fsPathResolver.toAbsoluteWsPath(LanguageServiceUtils.removePrefixUri(filePath));
     RegisteredProject project =
         projectManagerProvider
             .get()

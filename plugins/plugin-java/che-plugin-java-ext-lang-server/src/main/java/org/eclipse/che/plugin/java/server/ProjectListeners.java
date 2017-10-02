@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
@@ -44,7 +44,7 @@ public class ProjectListeners {
   private final File workspace;
   private final ProjectManager projectRegistry;
   private final ProjectTypeRegistry projectTypeRegistry;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
 
   @Inject
   public ProjectListeners(
@@ -52,11 +52,11 @@ public class ProjectListeners {
       EventService eventService,
       ProjectManager projectRegistry,
       ProjectTypeRegistry projectTypeRegistry,
-      PathResolver pathResolver) {
+      FsPathResolver fsPathResolver) {
     this.projectRegistry = projectRegistry;
     this.projectTypeRegistry = projectTypeRegistry;
     workspace = new File(workspacePath);
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
     eventService.subscribe(new ProjectCreated());
     eventService.subscribe(
         new EventSubscriber<ProjectItemModifiedEvent>() {
@@ -96,7 +96,7 @@ public class ProjectListeners {
 
   private boolean isJavaProject(String projectPath) {
     try {
-      String wsPath = pathResolver.toAbsoluteWsPath(projectPath);
+      String wsPath = fsPathResolver.toAbsoluteWsPath(projectPath);
       ProjectConfig project =
           projectRegistry
               .get(wsPath)

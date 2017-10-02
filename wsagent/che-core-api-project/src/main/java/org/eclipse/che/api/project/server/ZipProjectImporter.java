@@ -27,7 +27,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.api.ProjectImporter;
 
 /** @author Vitaly Parfonov */

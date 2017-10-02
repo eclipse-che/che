@@ -29,20 +29,17 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * Test for {@link ProjectClasspathProvider}
- */
+/** Test for {@link ProjectClasspathProvider} */
 @Listeners(value = {MockitoTestNGListener.class})
 public class ProjectClasspathProviderTest {
 
   private static final String PROJECTS_PATH = "/projects";
 
   private static ResourcesPlugin RESOURCE_PLUGIN =
-      new ResourcesPlugin("target/test-classes/index", PROJECTS_PATH, () -> null, () -> null,
-          () -> null);
+      new ResourcesPlugin(
+          "target/test-classes/index", PROJECTS_PATH, () -> null, () -> null, () -> null);
 
-  @Mock
-  private IJavaProject javaProject;
+  @Mock private IJavaProject javaProject;
 
   private ProjectClasspathProvider classpathProvider;
 
@@ -58,7 +55,7 @@ public class ProjectClasspathProviderTest {
     IPath path = new Path("/testProject/target/classes");
     when(classpathEntry.getOutputLocation()).thenReturn(path);
 
-    IClasspathEntry[] entries = new IClasspathEntry[]{classpathEntry};
+    IClasspathEntry[] entries = new IClasspathEntry[] {classpathEntry};
     when(javaProject.getResolvedClasspath(false)).thenReturn(entries);
 
     Set<String> classPath = classpathProvider.getProjectClassPath(javaProject);
@@ -81,7 +78,7 @@ public class ProjectClasspathProviderTest {
     IPath jarPath = new Path("/absolute/path/to/jar.file");
     when(jarClasspathEntry.getPath()).thenReturn(jarPath);
 
-    IClasspathEntry[] entries = new IClasspathEntry[]{classpathEntry, jarClasspathEntry};
+    IClasspathEntry[] entries = new IClasspathEntry[] {classpathEntry, jarClasspathEntry};
     when(javaProject.getResolvedClasspath(false)).thenReturn(entries);
 
     Set<String> classPath = classpathProvider.getProjectClassPath(javaProject);
@@ -103,7 +100,7 @@ public class ProjectClasspathProviderTest {
             IClasspathEntry.CPE_SOURCE, "/anotherProject/src", "/anotherProject/target/classes");
 
     IJavaProject anotherProject = mock(IJavaProject.class);
-    when(anotherProject.getResolvedClasspath(false)).thenReturn(new IClasspathEntry[]{entry});
+    when(anotherProject.getResolvedClasspath(false)).thenReturn(new IClasspathEntry[] {entry});
     when(model.getJavaProject("/anotherProject")).thenReturn(anotherProject);
 
     IClasspathEntry classpathEntry =
@@ -114,7 +111,7 @@ public class ProjectClasspathProviderTest {
         mockClasspathEntry(IClasspathEntry.CPE_PROJECT, "/anotherProject", null);
 
     IClasspathEntry[] entries =
-        new IClasspathEntry[]{classpathEntry, jarClasspathEntry, projectEntry};
+        new IClasspathEntry[] {classpathEntry, jarClasspathEntry, projectEntry};
     when(javaProject.getResolvedClasspath(false)).thenReturn(entries);
 
     Set<String> classPath = classpathProvider.getProjectClassPath(javaProject);

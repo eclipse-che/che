@@ -23,6 +23,8 @@ import com.google.common.io.Files;
 import com.google.common.net.MediaType;
 import com.google.inject.Singleton;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -41,8 +43,8 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
-import org.eclipse.che.api.fs.util.DeleteOnCloseFileInputStream;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
@@ -1271,5 +1273,24 @@ public class SubversionApi {
     }
 
     return response;
+  }
+
+  public static final class DeleteOnCloseFileInputStream extends FileInputStream {
+    private final java.io.File file;
+
+    public DeleteOnCloseFileInputStream(java.io.File file) throws FileNotFoundException {
+      super(file);
+      this.file = file;
+    }
+
+    /** @see java.io.FileInputStream#close() */
+    @Override
+    public void close() throws IOException {
+      try {
+        super.close();
+      } finally {
+        FileCleaner.addFile(file);
+      }
+    }
   }
 }

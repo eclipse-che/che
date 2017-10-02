@@ -23,8 +23,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
@@ -83,7 +83,7 @@ public class Workspace implements IWorkspace {
   private static final Logger LOG = LoggerFactory.getLogger(Workspace.class);
   protected final IWorkspaceRoot defaultRoot = new WorkspaceRoot(Path.ROOT, this);
   private final Provider<ProjectManager> projectManager;
-  private final Provider<PathResolver> pathResolverProvider;
+  private final Provider<FsPathResolver> pathResolverProvider;
   private final Provider<FsManager> fsManagerProvider;
   /**
    * Work manager should never be accessed directly because accessor asserts that workspace is still
@@ -105,7 +105,7 @@ public class Workspace implements IWorkspace {
   public Workspace(
       String path,
       Provider<ProjectManager> projectManager,
-      Provider<PathResolver> pathResolverProvider,
+      Provider<FsPathResolver> pathResolverProvider,
       Provider<FsManager> fsManagerProvider) {
     this.wsPath = path;
     this.projectManager = projectManager;

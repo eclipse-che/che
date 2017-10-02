@@ -20,8 +20,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 
@@ -32,12 +32,12 @@ import org.eclipse.che.api.project.server.type.AttributeValue;
 public class JsonExampleCreateProjectHandler implements CreateProjectHandler {
 
   private final FsManager fsManager;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
 
   @Inject
-  public JsonExampleCreateProjectHandler(FsManager fsManager, PathResolver pathResolver) {
+  public JsonExampleCreateProjectHandler(FsManager fsManager, FsPathResolver fsPathResolver) {
     this.fsManager = fsManager;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
   }
 
   @Override
@@ -50,13 +50,13 @@ public class JsonExampleCreateProjectHandler implements CreateProjectHandler {
         InputStream personJsonContent =
             getClass().getClassLoader().getResourceAsStream("files/default_person")) {
 
-      String packageJsonWsPath = pathResolver.resolve(projectWsPath, "package.json");
+      String packageJsonWsPath = fsPathResolver.resolve(projectWsPath, "package.json");
       fsManager.createFile(packageJsonWsPath, packageJsonContent);
 
-      String myJsonFilesWsPath = pathResolver.resolve(projectWsPath, "myJsonFiles");
+      String myJsonFilesWsPath = fsPathResolver.resolve(projectWsPath, "myJsonFiles");
       fsManager.createDirectory(myJsonFilesWsPath);
 
-      String personJsonWsPath = pathResolver.resolve(myJsonFilesWsPath, "myJsonFiles");
+      String personJsonWsPath = fsPathResolver.resolve(myJsonFilesWsPath, "myJsonFiles");
       fsManager.createFile(personJsonWsPath, personJsonContent);
 
     } catch (IOException ioEx) {

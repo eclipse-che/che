@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.plugin.svn.server.rest;
 
-import java.io.File;
 import java.io.IOException;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -29,8 +28,8 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -66,23 +65,17 @@ import org.eclipse.che.plugin.svn.shared.StatusRequest;
 import org.eclipse.che.plugin.svn.shared.SwitchRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
 
-/**
- * REST API endpoints for this extension.
- */
+/** REST API endpoints for this extension. */
 @Path("svn")
 public class SubversionService extends Service {
 
-  @Inject
-  private ProjectManager projectManager;
+  @Inject private ProjectManager projectManager;
 
-  @Inject
-  private PathResolver pathResolver;
+  @Inject private FsPathResolver fsPathResolver;
 
-  @Inject
-  private FsManager fsManager;
+  @Inject private FsManager fsManager;
 
-  @Inject
-  private SubversionApi subversionApi;
+  @Inject private SubversionApi subversionApi;
 
   /**
    * Add the selected paths to version control.
@@ -169,9 +162,7 @@ public class SubversionService extends Service {
     return this.subversionApi.status(request);
   }
 
-  /**
-   * Retrieve information about subversion resource.
-   */
+  /** Retrieve information about subversion resource. */
   @Path("info")
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
@@ -494,12 +485,14 @@ public class SubversionService extends Service {
   public SourceStorageDto importDescriptor(
       @Context UriInfo uriInfo, @QueryParam("projectPath") String projectPath)
       throws ApiException, IOException {
-    String projectWsPath = pathResolver.toAbsoluteWsPath(projectPath);
-    final RegisteredProject project = projectManager.get(projectWsPath)
-        .orElseThrow(() -> new NotFoundException("Can't find a project: " + projectPath));
-    String dotSvnWsPath = pathResolver.resolve(projectWsPath, ".svn");
+    String projectWsPath = fsPathResolver.toAbsoluteWsPath(projectPath);
+    final RegisteredProject project =
+        projectManager
+            .get(projectWsPath)
+            .orElseThrow(() -> new NotFoundException("Can't find a project: " + projectPath));
+    String dotSvnWsPath = fsPathResolver.resolve(projectWsPath, ".svn");
 
-    if (fsManager.existsAsDirectory(dotSvnWsPath)){
+    if (fsManager.existsAsDirectory(dotSvnWsPath)) {
       return DtoFactory.getInstance()
           .createDto(SourceStorageDto.class)
           .withType("subversion")

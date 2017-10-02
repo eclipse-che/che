@@ -45,19 +45,19 @@ public interface ProjectManager {
 
   RegisteredProject create(ProjectConfig projectConfig, Map<String, String> options)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException;
+          BadRequestException;
 
   Set<RegisteredProject> createAll(Map<ProjectConfig, Map<String, String>> projectConfigs)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException;
+          BadRequestException;
 
   RegisteredProject update(ProjectConfig projectConfig)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-      BadRequestException;
+          BadRequestException;
 
   Set<RegisteredProject> updateAll(Set<ProjectConfig> projectConfigs)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-      BadRequestException;
+          BadRequestException;
 
   Optional<RegisteredProject> delete(String wsPath)
       throws ServerException, ForbiddenException, NotFoundException, ConflictException;
@@ -75,30 +75,30 @@ public interface ProjectManager {
 
   RegisteredProject setType(String wsPath, String type, boolean asMixin)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
-      ForbiddenException;
+          ForbiddenException;
 
   RegisteredProject removeType(String wsPath, String type)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
-      ForbiddenException;
+          ForbiddenException;
 
   RegisteredProject doImport(
       NewProjectConfig projectConfigs, boolean rewrite, BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException;
+          NotFoundException, BadRequestException;
 
   Set<RegisteredProject> doImport(
       Set<? extends NewProjectConfig> projectConfigs,
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException;
+          NotFoundException, BadRequestException;
 
   Set<RegisteredProject> doImport(
       Map<String, SourceStorage> projectLocations,
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException;
+          NotFoundException;
 
   RegisteredProject doImport(
       String wsPath,
@@ -106,7 +106,7 @@ public interface ProjectManager {
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException;
+          NotFoundException;
 
   ProjectTypeResolution qualify(String path, String projectTypeId)
       throws ServerException, NotFoundException;

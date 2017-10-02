@@ -37,8 +37,8 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.NewProjectConfigImpl;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
@@ -50,14 +50,13 @@ import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 
 @Singleton
 public class ProjectImportManager {
 
   private final FsManager fsManager;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
   private final WorkspaceProjectsSyncer syncer;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectImporterRegistry projectImporterRegistry;
@@ -66,12 +65,13 @@ public class ProjectImportManager {
   @Inject
   public ProjectImportManager(
       FsManager fsManager,
-      PathResolver pathResolver, ProjectConfigRegistry projectConfigs,
+      FsPathResolver fsPathResolver,
+      ProjectConfigRegistry projectConfigs,
       WorkspaceProjectsSyncer syncer,
       ProjectImporterRegistry projectImporterRegistry,
       ProjectHandlerRegistry projectHandlerRegistry) {
     this.fsManager = fsManager;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
     this.syncer = syncer;
     this.projectConfigRegistry = projectConfigs;
     this.projectImporterRegistry = projectImporterRegistry;
@@ -83,7 +83,7 @@ public class ProjectImportManager {
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
+          NotFoundException, BadRequestException {
     for (NewProjectConfig projectConfig : newProjectConfigs) {
       String wsPath = projectConfig.getPath();
       if (isNullOrEmpty(wsPath)) {
@@ -121,7 +121,7 @@ public class ProjectImportManager {
   public RegisteredProject doImport(
       NewProjectConfig projectConfig, boolean rewrite, BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
+          NotFoundException, BadRequestException {
     String wsPath = projectConfig.getPath();
     if (isNullOrEmpty(wsPath)) {
       throw new BadRequestException("Path for new project should be defined");
@@ -148,8 +148,9 @@ public class ProjectImportManager {
           throw new BadRequestException("Path is not defined.");
         }
 
-        String projectParentWsPath = pathResolver.getParentWsPath(projectWsPath);
-        if (!fsManager.isRoot(projectParentWsPath) || !fsManager.existsAsDirectory(projectParentWsPath)) {
+        String projectParentWsPath = fsPathResolver.getParentWsPath(projectWsPath);
+        if (!fsManager.isRoot(projectParentWsPath)
+            || !fsManager.existsAsDirectory(projectParentWsPath)) {
           throw new NotFoundException("The parent '" + projectParentWsPath + "' does not exist.");
         }
 
@@ -185,7 +186,8 @@ public class ProjectImportManager {
         types.add(project.getType());
 
         for (String item : types) {
-          Optional<ProjectInitHandler> hOptional = projectHandlerRegistry.getProjectInitHandler(item);
+          Optional<ProjectInitHandler> hOptional =
+              projectHandlerRegistry.getProjectInitHandler(item);
           if (hOptional.isPresent()) {
             hOptional.get().onProjectInitialized(project.getBaseFolder());
           }
@@ -211,7 +213,7 @@ public class ProjectImportManager {
       boolean rewrite,
       BiConsumer<String, String> jsonRpcConsumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     for (Entry<String, SourceStorage> entry : projectLocations.entrySet()) {
       String wsPath = entry.getKey();
 
@@ -263,10 +265,10 @@ public class ProjectImportManager {
       boolean rewrite,
       BiConsumer<String, String> jsonRpcConsumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     String type = sourceStorage.getType();
 
-    String parentWsPath = pathResolver.getParentWsPath(wsPath);
+    String parentWsPath = fsPathResolver.getParentWsPath(wsPath);
     if (!fsManager.existsAsDirectory(parentWsPath)) {
       throw new NotFoundException("Project parent does not exist: " + parentWsPath);
     }
@@ -296,7 +298,7 @@ public class ProjectImportManager {
   private RegisteredProject doImportInternally(
       String wsPath, SourceStorage sourceStorage, BiConsumer<String, String> jsonRpcConsumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     String type = sourceStorage.getType();
     ProjectImporter importer = projectImporterRegistry.getOrNull(type);
 
@@ -320,7 +322,8 @@ public class ProjectImportManager {
         projectConfigRegistry.put(newProjectConfig, true, false);
       }
 
-      return projectConfigRegistry.get(wsPath)
+      return projectConfigRegistry
+          .get(wsPath)
           .orElseThrow(() -> new ServerException("Unexpected error"));
     }
 
@@ -343,8 +346,7 @@ public class ProjectImportManager {
           }
 
           @Override
-          public void close() throws IOException {
-          }
+          public void close() throws IOException {}
         };
   }
 }

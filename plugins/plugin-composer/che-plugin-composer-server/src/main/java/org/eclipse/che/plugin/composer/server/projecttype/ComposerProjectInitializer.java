@@ -11,7 +11,6 @@ package org.eclipse.che.plugin.composer.server.projecttype;
 
 import static org.eclipse.che.plugin.composer.shared.Constants.COMPOSER_PROJECT_TYPE_ID;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;

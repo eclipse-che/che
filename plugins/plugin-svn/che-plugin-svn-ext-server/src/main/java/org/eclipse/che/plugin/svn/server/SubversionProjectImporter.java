@@ -23,7 +23,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.api.ProjectImporter;
 import org.eclipse.che.plugin.svn.shared.CheckoutRequest;
 
@@ -37,8 +37,7 @@ public class SubversionProjectImporter implements ProjectImporter {
   private final FsManager fsManager;
 
   @Inject
-  public SubversionProjectImporter(
-      final SubversionApi subversionApi, FsManager fsManager) {
+  public SubversionProjectImporter(final SubversionApi subversionApi, FsManager fsManager) {
     this.subversionApi = subversionApi;
     this.fsManager = fsManager;
   }
