@@ -315,37 +315,13 @@
             <class name="org.eclipse.che.selenium.miscellaneous.FileStructureBaseOperationTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.FileStructureByKeyboardTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.FileStructureCodeEditorTest"/>
-            <class name="org.eclipse.che.selenium.miscellaneous.FileStructureNodesTest">
-                <methods>
-                    <exclude name="checkFileStructureNodes"/>
-                </methods>
-                <methods>
-                    <exclude name="checkFindByFileMask"/>
-                </methods>
-                <methods>
-                    <exclude name="checkFindIntoSelectedPath"/>
-                </methods>
-                <methods>
-                    <exclude name="checkFindTextBasic"/>
-                </methods>
-                <methods>
-                    <exclude name="checkFindWholeWordOnly"/>
-                </methods>
-                <methods>
-                    <exclude name="checkRecentlyCreatedFiles"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.miscellaneous.FileStructureNodesTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.FindTextFeatureTest">
                 <methods>
                     <exclude name="checkFindByFileMask"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.miscellaneous.FindUsagesBaseOperationTest">
-                <methods>
-                    <exclude name="checkFindUsagesBaseOperation"/>
-                </methods>
-            </class>
-
+            <class name="org.eclipse.che.selenium.miscellaneous.FindUsagesBaseOperationTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.ImplementationBaseOperationsTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.NavigateToFileTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.ResolveDependencyAfterRecreateProjectTest"/>
