@@ -102,6 +102,9 @@
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteJSFilesTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteProposalJavaDocTest">
                 <methods>
+                    <exclude name="shouldDisplayJavaDocOfJreClass"/>
+                </methods>
+                <methods>
                     <exclude name="shouldReflectChangesInJavaDoc"/>
                 </methods>
             </class>
@@ -117,7 +120,11 @@
             </class>
             <class name="org.eclipse.che.selenium.editor.autocomplete.EditorMemberActiveLineForOpenedTabTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.EditorValidationTest"/>
-            <class name="org.eclipse.che.selenium.editor.autocomplete.FormatterTest"/>
+            <class name="org.eclipse.che.selenium.editor.autocomplete.FormatterTest">
+                <methods>
+                    <exclude name="formatterTest"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.editor.autocomplete.InheritClassTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.JavaDocPopupTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.OpenDeclarationTest"/>
@@ -193,14 +200,25 @@
             <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
             <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
             <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
-            <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest"/>
+            <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest">
+                <methods>
+                    <exclude name="fetchUpdatesAndMergeRemoteBranch"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.git.GitCompareTest">
                 <methods>
                     <exclude name="checkGitCompareTest"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.git.GitPullTest"/>
-            <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
+            <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest">
+                <methods>
+                    <exclude name="checkImportProjectSubmoduleBySshUrl"/>
+                </methods>
+                <methods>
+                    <exclude name="checkImportProjectSubmoduleFromGithub"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
             <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
             <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest">
@@ -208,15 +226,34 @@
                     <exclude name="keepDirectoryGitImportTest"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.git.PullRequestPluginTest"/>
+            <class name="org.eclipse.che.selenium.git.PullRequestPluginTest">
+                <methods>
+                    <exclude name="updatePullRequest"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.git.PullRequestPluginWithForkTest"/>
             <class name="org.eclipse.che.selenium.git.PushChangeNotUpdatedRepoTest"/>
-            <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
-            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
+            <class name="org.eclipse.che.selenium.git.PushingChangesTest">
+                <methods>
+                    <exclude name="pushChangesTest"/>
+                </methods>
+            </class>
+            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest">
+                <methods>
+                    <exclude name="pullConflictsTest"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest"/>
-            <class name="org.eclipse.che.selenium.intelligencecommand.CheckBasicFunctionalityInCommandsExplorerTest"/>
+            <class name="org.eclipse.che.selenium.intelligencecommand.CheckBasicFunctionalityInCommandsExplorerTest">
+                <methods>
+                    <exclude name="shouldCreateAndRunBuildCommand"/>
+                </methods>
+                <methods>
+                    <exclude name="shouldCreateDifferentTypesCommandsInDifferentGoals"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.intelligencecommand.CheckIntelligenceCommandFromToolbarTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.CommandsEditorTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.CommandsPaletteTest">
@@ -293,7 +330,11 @@
             <class name="org.eclipse.che.selenium.miscellaneous.WorkingWithTerminalTest"/>
             <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0087Test"/>
             <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0091Test"/>
-            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0093Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0093Test">
+                <methods>
+                    <exclude name="test0093"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0097Test"/>
             <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0114Test"/>
             <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0115Test">
@@ -302,7 +343,11 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0119Test"/>
-            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0120Test"/>
+            <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0120Test">
+                <methods>
+                    <exclude name="test0120"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.opendeclaration.Eclipse0121Test">
                 <methods>
                     <exclude name="test0121"/>
@@ -395,7 +440,11 @@
             <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.FileNotExistIntoEditorAfterDeleteTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.FileOpenedAfterCreationTest"/>
-            <class name="org.eclipse.che.selenium.projectexplorer.JustCreatedFileNotExistIntoEditorAfterDeleteTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.JustCreatedFileNotExistIntoEditorAfterDeleteTest">
+                <methods>
+                    <exclude name="deleteFileTest"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.projectexplorer.NavigationByKeyboardTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.OpenFileWithHelpContextMenuTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.PreviewHtmlFileTest"/>
@@ -425,7 +474,11 @@
                     <exclude name="checkProjectTreeAfterMoveJavaFile"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.refactor.move.MoveJavaFileInNewSourceFolderTest"/>
+            <class name="org.eclipse.che.selenium.refactor.move.MoveJavaFileInNewSourceFolderTest">
+                <methods>
+                    <exclude name="checkMoveJavaClassInNewSourceFolder"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.refactor.packages.RenamePackageSpringTest">
                 <methods>
                     <exclude name="checkRenamePackageSpringApp"/>
