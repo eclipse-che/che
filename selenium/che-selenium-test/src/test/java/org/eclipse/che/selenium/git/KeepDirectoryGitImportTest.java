@@ -84,11 +84,9 @@ public class KeepDirectoryGitImportTest {
     preferences.regenerateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
   }
 
-  @Test(
-    enabled = false,
-    description = "Need to fix the issue https://github.com/eclipse/che/issues/1853"
-  )
-  public void keepDirectoryGitImport() throws Exception {
+  // TODO should be fixed by issue https://github.com/eclipse/che/issues/6486
+  @Test
+  public void keepDirectoryGitImportTest() throws Exception {
     // Check the 'keep directory' from SSH Git url
     projectExplorer.waitProjectExplorer();
     makeKeepDirectoryFromGitUrl(
