@@ -13,7 +13,7 @@ package org.eclipse.che.api.git;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.fs.watcher.FileWatcherManager.EMPTY_CONSUMER;
+import static org.eclipse.che.api.watcher.server.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.ADDED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.MODIFIED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.NOT_MODIFIED;
@@ -32,9 +32,9 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
-import org.eclipse.che.api.fs.watcher.FileWatcherManager;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.server.RegisteredProject;
@@ -61,7 +61,7 @@ public class GitChangesDetector {
   private final FileWatcherManager manager;
   private final FsManager fsManager;
   private final ProjectManager projectManager;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
   private final GitConnectionFactory gitConnectionFactory;
 
   private final Set<String> endpointIds = newConcurrentHashSet();
@@ -74,13 +74,13 @@ public class GitChangesDetector {
       FileWatcherManager manager,
       FsManager fsManager,
       ProjectManager projectManager,
-      PathResolver pathResolver,
+      FsPathResolver fsPathResolver,
       GitConnectionFactory gitConnectionFactory) {
     this.transmitter = transmitter;
     this.manager = manager;
     this.fsManager = fsManager;
     this.projectManager = projectManager;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
     this.gitConnectionFactory = gitConnectionFactory;
   }
 
@@ -134,7 +134,7 @@ public class GitChangesDetector {
                 .orElseThrow(() -> new NotFoundException("Can't find project"));
 
         String projectWsPath = project.getPath();
-        Path projectFsPath = pathResolver.toFsPath(projectWsPath);
+        Path projectFsPath = fsPathResolver.toFsPath(projectWsPath);
         String stringifiedProjectFsPath = projectFsPath.toString();
         Status status =
             gitConnectionFactory

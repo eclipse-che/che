@@ -20,7 +20,7 @@ import java.io.File;
 import java.nio.file.PathMatcher;
 import java.util.Collections;
 import java.util.function.Consumer;
-import org.eclipse.che.api.fs.watcher.FileWatcherManager;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.api.languageserver.registry.LanguageServerFileWatcher;

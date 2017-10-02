@@ -17,8 +17,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.plugin.cpp.shared.Constants;
@@ -29,12 +29,12 @@ public class CProjectGenerator implements CreateProjectHandler {
   private static final String RESOURCE_NAME = "files/default_c_content";
 
   private final FsManager fsManager;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
 
   @Inject
-  public CProjectGenerator(FsManager fsManager, PathResolver pathResolver) {
+  public CProjectGenerator(FsManager fsManager, FsPathResolver fsPathResolver) {
     this.fsManager = fsManager;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
   }
 
   @Override
@@ -44,7 +44,7 @@ public class CProjectGenerator implements CreateProjectHandler {
 
     fsManager.createDirectory(projectWsPath);
     InputStream inputStream = getClass().getClassLoader().getResourceAsStream(RESOURCE_NAME);
-    String wsPath = pathResolver.resolve(projectWsPath, FILE_NAME);
+    String wsPath = fsPathResolver.resolve(projectWsPath, FILE_NAME);
     fsManager.createFile(wsPath, inputStream);
   }
 

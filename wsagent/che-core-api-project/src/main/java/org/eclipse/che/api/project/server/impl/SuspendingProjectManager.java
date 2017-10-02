@@ -25,20 +25,21 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
-import org.eclipse.che.api.fs.watcher.FileWatcherManager;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 
 @Singleton
-public class SuspendingProjectManager implements
-    org.eclipse.che.api.project.server.api.ProjectManager {
+public class SuspendingProjectManager
+    implements org.eclipse.che.api.project.server.api.ProjectManager {
 
   private final ProjectManager projectManager;
   private final FileWatcherManager fileWatcherManager;
 
   @Inject
-  public SuspendingProjectManager(ProjectManager projectManager, FileWatcherManager fileWatcherManager) {
+  public SuspendingProjectManager(
+      ProjectManager projectManager, FileWatcherManager fileWatcherManager) {
     this.fileWatcherManager = fileWatcherManager;
     this.projectManager = projectManager;
   }
@@ -81,7 +82,7 @@ public class SuspendingProjectManager implements
   @Override
   public Set<RegisteredProject> createAll(Map<ProjectConfig, Map<String, String>> projectConfigs)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException {
+          BadRequestException {
     fileWatcherManager.suspend();
     try {
       return projectManager.createAll(projectConfigs);
@@ -93,7 +94,7 @@ public class SuspendingProjectManager implements
   @Override
   public RegisteredProject create(ProjectConfig projectConfig, Map<String, String> options)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException {
+          BadRequestException {
     fileWatcherManager.suspend();
     try {
       return projectManager.create(projectConfig, options);
@@ -105,7 +106,7 @@ public class SuspendingProjectManager implements
   @Override
   public Set<RegisteredProject> updateAll(Set<ProjectConfig> projectConfigs)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-      BadRequestException {
+          BadRequestException {
     fileWatcherManager.suspend();
     try {
       return projectManager.updateAll(projectConfigs);
@@ -117,7 +118,7 @@ public class SuspendingProjectManager implements
   @Override
   public RegisteredProject update(ProjectConfig projectConfig)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-      BadRequestException {
+          BadRequestException {
     fileWatcherManager.suspend();
     try {
       return projectManager.update(projectConfig);
@@ -183,13 +184,15 @@ public class SuspendingProjectManager implements
 
   @Override
   public RegisteredProject setType(String wsPath, String type, boolean asMixin)
-      throws ConflictException, NotFoundException, ServerException, BadRequestException, ForbiddenException {
+      throws ConflictException, NotFoundException, ServerException, BadRequestException,
+          ForbiddenException {
     return null;
   }
 
   @Override
   public RegisteredProject removeType(String wsPath, String type)
-      throws ConflictException, NotFoundException, ServerException, BadRequestException, ForbiddenException {
+      throws ConflictException, NotFoundException, ServerException, BadRequestException,
+          ForbiddenException {
     return null;
   }
 
@@ -197,7 +200,7 @@ public class SuspendingProjectManager implements
   public RegisteredProject doImport(
       NewProjectConfig newProjectConfig, boolean rewrite, BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
+          NotFoundException, BadRequestException {
     fileWatcherManager.suspend();
     try {
       return projectManager.doImport(newProjectConfig, rewrite, consumer);
@@ -212,7 +215,7 @@ public class SuspendingProjectManager implements
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
+          NotFoundException, BadRequestException {
     fileWatcherManager.suspend();
     try {
       return projectManager.doImport(newProjectConfigs, rewrite, consumer);
@@ -228,7 +231,7 @@ public class SuspendingProjectManager implements
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     fileWatcherManager.suspend();
     try {
       return projectManager.doImport(wsPath, sourceStorage, rewrite, consumer);
@@ -243,7 +246,7 @@ public class SuspendingProjectManager implements
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     fileWatcherManager.suspend();
     try {
       return projectManager.doImport(projectLocations, rewrite, consumer);

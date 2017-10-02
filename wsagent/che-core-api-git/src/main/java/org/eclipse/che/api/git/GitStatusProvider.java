@@ -22,8 +22,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.server.RegisteredProject;
@@ -39,18 +39,18 @@ public class GitStatusProvider implements VcsStatusProvider {
 
   private final GitConnectionFactory gitConnectionFactory;
   private final FsManager fsManager;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
   private final ProjectManager projectManager;
 
   @Inject
   public GitStatusProvider(
       GitConnectionFactory gitConnectionFactory,
       FsManager fsManager,
-      PathResolver pathResolver,
+      FsPathResolver fsPathResolver,
       ProjectManager projectManager) {
     this.gitConnectionFactory = gitConnectionFactory;
     this.fsManager = fsManager;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
     this.projectManager = projectManager;
   }
 
@@ -66,8 +66,8 @@ public class GitStatusProvider implements VcsStatusProvider {
           projectManager
               .getClosest(wsPath)
               .orElseThrow(() -> new NotFoundException("Can't find project"));
-      String projectFsPath = pathResolver.toFsPath(project.getPath()).toString();
-      String projectName = pathResolver.getName(project.getPath());
+      String projectFsPath = fsPathResolver.toFsPath(project.getPath()).toString();
+      String projectName = fsPathResolver.getName(project.getPath());
       String itemPath = wsPath.substring(wsPath.indexOf(projectName + "/"));
       Status status =
           gitConnectionFactory.getConnection(projectFsPath).status(singletonList(itemPath));
@@ -95,7 +95,7 @@ public class GitStatusProvider implements VcsStatusProvider {
           projectManager
               .getClosest(wsPath)
               .orElseThrow(() -> new NotFoundException("Can't find project"));
-      String projectFsPath = pathResolver.toFsPath(project.getPath()).toString();
+      String projectFsPath = fsPathResolver.toFsPath(project.getPath()).toString();
       Status status = gitConnectionFactory.getConnection(projectFsPath).status(paths);
       paths.forEach(
           path -> {

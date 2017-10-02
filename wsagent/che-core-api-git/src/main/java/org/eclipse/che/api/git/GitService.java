@@ -34,8 +34,8 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.AddParams;
@@ -111,7 +111,7 @@ public class GitService {
 
   @Inject private FsManager fsManager;
 
-  @Inject private PathResolver pathResolver;
+  @Inject private FsPathResolver fsPathResolver;
 
   @QueryParam("projectPath")
   private String projectPath;
@@ -313,7 +313,7 @@ public class GitService {
             .get(projectPath)
             .orElseThrow(() -> new NotFoundException("Can't find project"));
 
-    String dotGitWsPath = pathResolver.resolve(projectPath, ".git");
+    String dotGitWsPath = fsPathResolver.resolve(projectPath, ".git");
     fsManager.deleteDirectoryQuietly(dotGitWsPath);
 
     projectManager.removeType(projectPath, GitProjectType.TYPE_ID);
@@ -590,7 +590,7 @@ public class GitService {
   }
 
   private String getAbsoluteProjectPath(String wsRelatedProjectPath) throws ApiException {
-    return pathResolver.toFsPath(wsRelatedProjectPath).toString();
+    return fsPathResolver.toFsPath(wsRelatedProjectPath).toString();
   }
 
   private GitConnection getGitConnection() throws ApiException {

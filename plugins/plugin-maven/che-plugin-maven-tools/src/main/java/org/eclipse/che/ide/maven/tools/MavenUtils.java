@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
@@ -197,11 +195,11 @@ public class MavenUtils {
     return list;
   }
 
-//  /** Get source directories. */
-//  public static List<String> getSourceDirectories(String pom)
-//      throws ServerException, IOException, ForbiddenException {
-//    return getSourceDirectories(Model.readFrom(pom));
-//  }
+  //  /** Get source directories. */
+  //  public static List<String> getSourceDirectories(String pom)
+  //      throws ServerException, IOException, ForbiddenException {
+  //    return getSourceDirectories(Model.readFrom(pom));
+  //  }
 
   /** Get source directories. */
   public static List<String> getSourceDirectories(java.io.File pom) throws IOException {
@@ -225,11 +223,11 @@ public class MavenUtils {
     return list;
   }
 
-//  /** Get resource directories. */
-//  public static List<String> getResourceDirectories(String pom)
-//      throws ServerException, IOException, ForbiddenException {
-//    return getResourceDirectories(Model.readFrom(pom));
-//  }
+  //  /** Get resource directories. */
+  //  public static List<String> getResourceDirectories(String pom)
+  //      throws ServerException, IOException, ForbiddenException {
+  //    return getResourceDirectories(Model.readFrom(pom));
+  //  }
 
   /** Get resource directories. */
   public static List<String> getResourceDirectories(java.io.File pom) throws IOException {

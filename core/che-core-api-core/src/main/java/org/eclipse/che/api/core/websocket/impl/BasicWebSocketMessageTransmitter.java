@@ -45,7 +45,7 @@ public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmi
   public synchronized void transmit(String endpointId, String message) {
     Optional<Session> sessionOptional = registry.get(endpointId);
 
-    if(!sessionOptional.isPresent()){
+    if (!sessionOptional.isPresent()) {
       sessionOptional = registry.getByPartialMatch(endpointId).stream().findFirst();
     }
 

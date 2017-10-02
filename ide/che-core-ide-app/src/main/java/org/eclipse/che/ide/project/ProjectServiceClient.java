@@ -152,7 +152,7 @@ public class ProjectServiceClient {
    * @param path path to the future project
    * @param source source configuration
    * @return a promise that will resolve when the project has been imported, or rejects with an
-   * error
+   *     error
    * @see Path
    * @see SourceStorageDto
    * @since 4.4.0
@@ -249,12 +249,16 @@ public class ProjectServiceClient {
    *
    * <p>Notes: a project will be created by importing when project configuration contains {@link
    * SourceStorageDto} object, otherwise this one will be created corresponding its {@link
-   * NewProjectConfigDto}: <li>- {@link NewProjectConfigDto} object contains only one mandatory
-   * {@link NewProjectConfigDto#setPath(String)} field. In this case Project will be created as
-   * project of "blank" type <li>- a project will be created as project of "blank" type when
-   * declared primary project type is not registered, <li>- a project will be created without mixin
-   * project type when declared mixin project type is not registered <li>- for creating a project by
-   * generator {@link NewProjectConfigDto#getOptions()} should be specified.
+   * NewProjectConfigDto}:
+   * <li>- {@link NewProjectConfigDto} object contains only one mandatory {@link
+   *     NewProjectConfigDto#setPath(String)} field. In this case Project will be created as project
+   *     of "blank" type
+   * <li>- a project will be created as project of "blank" type when declared primary project type
+   *     is not registered,
+   * <li>- a project will be created without mixin project type when declared mixin project type is
+   *     not registered
+   * <li>- for creating a project by generator {@link NewProjectConfigDto#getOptions()} should be
+   *     specified.
    *
    * @param configurations the list of configurations to creating projects
    * @return {@link Promise} with the list of {@link ProjectConfigDto}

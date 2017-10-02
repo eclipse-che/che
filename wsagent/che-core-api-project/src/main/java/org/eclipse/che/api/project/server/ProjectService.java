@@ -71,14 +71,14 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.fs.api.FsDtoConverter;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
-import org.eclipse.che.api.fs.search.LuceneSearcher;
-import org.eclipse.che.api.fs.search.QueryExpression;
-import org.eclipse.che.api.fs.search.SearchResult;
-import org.eclipse.che.api.fs.search.SearchResultEntry;
-import org.eclipse.che.api.fs.search.Searcher;
+import org.eclipse.che.api.fs.server.FsDtoConverter;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.search.server.impl.LuceneSearcher;
+import org.eclipse.che.api.search.server.impl.QueryExpression;
+import org.eclipse.che.api.search.server.impl.SearchResult;
+import org.eclipse.che.api.search.server.impl.SearchResultEntry;
+import org.eclipse.che.api.search.server.Searcher;
 import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
@@ -125,8 +125,7 @@ public class ProjectService extends Service {
   private final ProjectServiceLinksInjector projectServiceLinksInjector;
   private final ProjectServiceVcsStatusInjector vcsStatusInjector;
   private final RequestTransmitter transmitter;
-  private final PathResolver pathResolver;
-  private final String workspace;
+  private final FsPathResolver fsPathResolver;
 
   @Inject
   public ProjectService(
@@ -138,7 +137,7 @@ public class ProjectService extends Service {
       ProjectServiceLinksInjector projectServiceLinksInjector,
       ProjectServiceVcsStatusInjector vcsStatusInjector,
       RequestTransmitter transmitter,
-      PathResolver pathResolver) {
+      FsPathResolver fsPathResolver) {
     this.projectManager = projectManager;
     this.fsManager = fsManager;
     this.fsDtoConverter = fsDtoConverter;
@@ -147,19 +146,19 @@ public class ProjectService extends Service {
     this.projectServiceLinksInjector = projectServiceLinksInjector;
     this.vcsStatusInjector = vcsStatusInjector;
     this.transmitter = transmitter;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Gets list of projects in root folder",
-      response = ProjectConfigDto.class,
-      responseContainer = "List"
+    value = "Gets list of projects in root folder",
+    response = ProjectConfigDto.class,
+    responseContainer = "List"
   )
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 500, message = "Server error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 500, message = "Server error")
   })
   @GenerateLink(rel = LINK_REL_GET_PROJECTS)
   public List<ProjectConfigDto> getProjects()
@@ -177,20 +176,20 @@ public class ProjectService extends Service {
   @Path("/{path:.*}")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Gets project by ID of workspace and project's path",
-      response = ProjectConfigDto.class
+    value = "Gets project by ID of workspace and project's path",
+    response = ProjectConfigDto.class
   )
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
-      @ApiResponse(code = 403, message = "Access to requested project is forbidden"),
-      @ApiResponse(code = 500, message = "Server error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
+    @ApiResponse(code = 403, message = "Access to requested project is forbidden"),
+    @ApiResponse(code = 500, message = "Server error")
   })
   public ProjectConfigDto getProject(
       @ApiParam(value = "Path to requested project", required = true) @PathParam("path")
           String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
     return projectManager
         .get(wsPath)
         .map(DtoConverter::asDto)
@@ -203,17 +202,17 @@ public class ProjectService extends Service {
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Creates new project", response = ProjectConfigDto.class)
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 403, message = "Operation is forbidden"),
-      @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),
-      @ApiResponse(code = 500, message = "Server error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 403, message = "Operation is forbidden"),
+    @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),
+    @ApiResponse(code = 500, message = "Server error")
   })
   @GenerateLink(rel = LINK_REL_CREATE_PROJECT)
   public ProjectConfigDto createProject(
       @ApiParam(value = "Add to this project as module") @Context UriInfo uriInfo,
       @Description("descriptor of project") ProjectConfigDto projectConfig)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException {
+          BadRequestException {
 
     Map<String, String> options =
         uriInfo
@@ -236,28 +235,28 @@ public class ProjectService extends Service {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Creates batch of projects according to their configurations",
-      notes =
-          "A project will be created by importing when project configuration contains source object. "
-              + "For creating a project by generator options should be specified.",
-      response = ProjectConfigDto.class
+    value = "Creates batch of projects according to their configurations",
+    notes =
+        "A project will be created by importing when project configuration contains source object. "
+            + "For creating a project by generator options should be specified.",
+    response = ProjectConfigDto.class
   )
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 400, message = "Path for new project should be defined"),
-      @ApiResponse(code = 403, message = "Operation is forbidden"),
-      @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),
-      @ApiResponse(code = 500, message = "Server error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 400, message = "Path for new project should be defined"),
+    @ApiResponse(code = 403, message = "Operation is forbidden"),
+    @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),
+    @ApiResponse(code = 500, message = "Server error")
   })
   @GenerateLink(rel = LINK_REL_CREATE_BATCH_PROJECTS)
   public List<ProjectConfigDto> createBatchProjects(
       @Description("list of descriptors for projects") List<NewProjectConfigDto> projectConfigs,
       @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
-      @QueryParam("force")
+          @QueryParam("force")
           boolean rewrite,
       @QueryParam("clientId") String clientId)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException,
-      UnauthorizedException, BadRequestException {
+          UnauthorizedException, BadRequestException {
 
     Set<RegisteredProject> registeredProjects =
         projectManager.doImport(
@@ -285,20 +284,19 @@ public class ProjectService extends Service {
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Updates existing project", response = ProjectConfigDto.class)
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
-      @ApiResponse(code = 403, message = "Operation is forbidden"),
-      @ApiResponse(code = 409, message = "Update operation causes conflicts"),
-      @ApiResponse(code = 500, message = "Server error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
+    @ApiResponse(code = 403, message = "Operation is forbidden"),
+    @ApiResponse(code = 409, message = "Update operation causes conflicts"),
+    @ApiResponse(code = 500, message = "Server error")
   })
   public ProjectConfigDto updateProject(
       @ApiParam(value = "Path to updated project", required = true) @PathParam("path")
           String wsPath,
       ProjectConfigDto projectConfigDto)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException, IOException,
-      BadRequestException {
+          BadRequestException {
     if (wsPath != null) {
-      wsPath = pathResolver.toAbsoluteWsPath(wsPath);
       projectConfigDto.setPath(wsPath);
     }
 
@@ -309,20 +307,20 @@ public class ProjectService extends Service {
   @DELETE
   @Path("/{path:.*}")
   @ApiOperation(
-      value = "Delete a resource",
-      notes =
-          "Delete resources. If you want to delete a single project, specify project name. If a folder or file needs to "
-              + "be deleted a path to the requested resource needs to be specified"
+    value = "Delete a resource",
+    notes =
+        "Delete resources. If you want to delete a single project, specify project name. If a folder or file needs to "
+            + "be deleted a path to the requested resource needs to be specified"
   )
   @ApiResponses({
-      @ApiResponse(code = 204, message = ""),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 204, message = ""),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public void delete(@ApiParam("Path to a resource to be deleted") @PathParam("path") String wsPath)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     if (fsManager.isFile(wsPath)) {
       fsManager.deleteFile(wsPath);
@@ -337,14 +335,14 @@ public class ProjectService extends Service {
   @Path("/estimate/{path:.*}")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Estimates if the folder supposed to be project of certain type",
-      response = Map.class
+    value = "Estimates if the folder supposed to be project of certain type",
+    response = Map.class
   )
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
-      @ApiResponse(code = 403, message = "Access to requested project is forbidden"),
-      @ApiResponse(code = 500, message = "Server error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
+    @ApiResponse(code = 403, message = "Access to requested project is forbidden"),
+    @ApiResponse(code = 500, message = "Server error")
   })
   public SourceEstimation estimateProject(
       @ApiParam(value = "Path to requested project", required = true) @PathParam("path")
@@ -352,7 +350,7 @@ public class ProjectService extends Service {
       @ApiParam(value = "Project Type ID to estimate against", required = true) @QueryParam("type")
           String projectType)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     ProjectTypeResolution resolution = projectManager.qualify(wsPath, projectType);
 
@@ -377,7 +375,7 @@ public class ProjectService extends Service {
       @ApiParam(value = "Path to requested project", required = true) @PathParam("path")
           String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     return projectManager
         .qualify(wsPath)
@@ -405,29 +403,29 @@ public class ProjectService extends Service {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Import resource",
-      notes =
-          "Import resource. JSON with a designated importer and project location is sent. It is possible to import from "
-              + "VCS or ZIP"
+    value = "Import resource",
+    notes =
+        "Import resource. JSON with a designated importer and project location is sent. It is possible to import from "
+            + "VCS or ZIP"
   )
   @ApiResponses({
-      @ApiResponse(code = 204, message = ""),
-      @ApiResponse(code = 401, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 403, message = "Forbidden operation"),
-      @ApiResponse(code = 409, message = "Resource already exists"),
-      @ApiResponse(code = 500, message = "Unsupported source type")
+    @ApiResponse(code = 204, message = ""),
+    @ApiResponse(code = 401, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 403, message = "Forbidden operation"),
+    @ApiResponse(code = 409, message = "Resource already exists"),
+    @ApiResponse(code = 500, message = "Unsupported source type")
   })
   public void importProject(
       @ApiParam(value = "Path in the project", required = true) @PathParam("path") String wsPath,
       @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
-      @QueryParam("force")
+          @QueryParam("force")
           boolean force,
       @QueryParam("clientId") String clientId,
       SourceStorageDto sourceStorage)
       throws ConflictException, ForbiddenException, UnauthorizedException, IOException,
-      ServerException, NotFoundException, BadRequestException {
+          ServerException, NotFoundException, BadRequestException {
 
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     projectManager.doImport(wsPath, sourceStorage, force, jsonRpcImportConsumer(clientId));
   }
@@ -437,16 +435,16 @@ public class ProjectService extends Service {
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
   @Produces({MediaType.APPLICATION_JSON})
   @ApiOperation(
-      value = "Create file",
-      notes =
-          "Create a new file in a project. If file type isn't specified the server will resolve its type."
+    value = "Create file",
+    notes =
+        "Create a new file in a project. If file type isn't specified the server will resolve its type."
   )
   @ApiResponses({
-      @ApiResponse(code = 201, message = ""),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 409, message = "File already exists"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 201, message = ""),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 409, message = "File already exists"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response createFile(
       @ApiParam(value = "Path to a target directory", required = true) @PathParam("parent")
@@ -454,8 +452,8 @@ public class ProjectService extends Service {
       @ApiParam(value = "New file name", required = true) @QueryParam("name") String fileName,
       InputStream content)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
-    parentWsPath = pathResolver.toAbsoluteWsPath(parentWsPath);
-    String wsPath = pathResolver.resolve(parentWsPath, fileName);
+    parentWsPath = fsPathResolver.toAbsoluteWsPath(parentWsPath);
+    String wsPath = fsPathResolver.resolve(parentWsPath, fileName);
 
     fsManager.createFile(wsPath, content);
     String project =
@@ -473,10 +471,11 @@ public class ProjectService extends Service {
             .getServiceUriBuilder()
             .clone()
             .path(getClass(), "getFile")
-            .build(new String[]{wsPath.substring(1)}, false);
+            .build(new String[] {wsPath.substring(1)}, false);
     return Response.created(location)
-        .entity(injectFileLinks(
-            vcsStatusInjector.injectVcsStatus(fsDtoConverter.asDto(wsPath)))) // TODO refactor
+        .entity(
+            injectFileLinks(
+                vcsStatusInjector.injectVcsStatus(fsDtoConverter.asDto(wsPath)))) // TODO refactor
         .build();
   }
 
@@ -485,17 +484,17 @@ public class ProjectService extends Service {
   @Produces({MediaType.APPLICATION_JSON})
   @ApiOperation(value = "Create a folder", notes = "Create a folder is a specified project")
   @ApiResponses({
-      @ApiResponse(code = 201, message = ""),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 409, message = "File already exists"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 201, message = ""),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 409, message = "File already exists"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response createFolder(
       @ApiParam(value = "Path to a new folder destination", required = true) @PathParam("path")
           String wsPath)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
     fsManager.createDirectory(wsPath);
 
     final URI location =
@@ -503,7 +502,7 @@ public class ProjectService extends Service {
             .getServiceUriBuilder()
             .clone()
             .path(getClass(), "getChildren")
-            .build(new String[]{wsPath.substring(1)}, false);
+            .build(new String[] {wsPath.substring(1)}, false);
 
     String project =
         projectManager
@@ -526,18 +525,18 @@ public class ProjectService extends Service {
   @Produces({MediaType.TEXT_HTML})
   @ApiOperation(value = "Upload a file", notes = "Upload a new file")
   @ApiResponses({
-      @ApiResponse(code = 201, message = ""),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 409, message = "File already exists"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 201, message = ""),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 409, message = "File already exists"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response uploadFile(
       @ApiParam(value = "Destination path", required = true) @PathParam("parent")
           String parentWsPath,
       Iterator<FileItem> formData)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
-    parentWsPath = pathResolver.toAbsoluteWsPath(parentWsPath);
+    parentWsPath = fsPathResolver.toAbsoluteWsPath(parentWsPath);
 
     fsManager.createFile(parentWsPath, formData);
 
@@ -549,23 +548,23 @@ public class ProjectService extends Service {
   @Consumes({MediaType.MULTIPART_FORM_DATA})
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Upload zip folder",
-      notes = "Upload folder from local zip",
-      response = Response.class
+    value = "Upload zip folder",
+    notes = "Upload folder from local zip",
+    response = Response.class
   )
   @ApiResponses({
-      @ApiResponse(code = 200, message = ""),
-      @ApiResponse(code = 401, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 403, message = "Forbidden operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 409, message = "Resource already exists"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 200, message = ""),
+    @ApiResponse(code = 401, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 403, message = "Forbidden operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 409, message = "Resource already exists"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response uploadFolderFromZip(
       @ApiParam(value = "Path in the project", required = true) @PathParam("path") String wsPath,
       Iterator<FileItem> formData)
       throws ServerException, ConflictException, ForbiddenException, NotFoundException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     fsManager.createDirectory(wsPath, formData);
 
@@ -574,17 +573,17 @@ public class ProjectService extends Service {
 
   @ApiOperation(value = "Get file content", notes = "Get file content by its name")
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   @GET
   @Path("/file/{path:.*}")
   public Response getFile(
       @ApiParam(value = "Path to a file", required = true) @PathParam("path") String wsPath)
       throws IOException, NotFoundException, ForbiddenException, ServerException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     InputStream inputStream = fsManager.readFileAsInputStream(wsPath);
     String name = wsPath.substring(wsPath.lastIndexOf(separator));
@@ -598,16 +597,16 @@ public class ProjectService extends Service {
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
   @ApiOperation(value = "Update file", notes = "Update an existing file with new content")
   @ApiResponses({
-      @ApiResponse(code = 200, message = ""),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 200, message = ""),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response updateFile(
       @ApiParam(value = "Full path to a file", required = true) @PathParam("path") String wsPath,
       InputStream content)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     fsManager.updateFile(wsPath, content);
 
@@ -628,15 +627,15 @@ public class ProjectService extends Service {
   @Path("/copy/{path:.*}")
   @Consumes(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Copy resource",
-      notes = "Copy resource to a new location which is specified in a query parameter"
+    value = "Copy resource",
+    notes = "Copy resource to a new location which is specified in a query parameter"
   )
   @ApiResponses({
-      @ApiResponse(code = 201, message = ""),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 409, message = "Resource already exists"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 201, message = ""),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 409, message = "Resource already exists"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response copy(
       @ApiParam("Path to a resource") @PathParam("path") String wsPath,
@@ -644,12 +643,12 @@ public class ProjectService extends Service {
           String newParentWsPath,
       CopyOptions copyOptions)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
-    newParentWsPath = pathResolver.toAbsoluteWsPath(newParentWsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
+    newParentWsPath = fsPathResolver.toAbsoluteWsPath(newParentWsPath);
     String name = getNameValue(copyOptions, wsPath);
     boolean overwrite = getOverwriteValue(copyOptions);
 
-    pathResolver.resolve(newParentWsPath, name); // TODO refactor
+    fsPathResolver.resolve(newParentWsPath, name); // TODO refactor
     String dstWsPath = newParentWsPath + separator + name;
 
     boolean isProject = projectManager.isRegistered(wsPath);
@@ -668,7 +667,7 @@ public class ProjectService extends Service {
         getServiceContext()
             .getServiceUriBuilder()
             .path(getClass(), isFile ? "getFile" : "getChildren")
-            .build(new String[]{dstWsPath.substring(1)}, false);
+            .build(new String[] {dstWsPath.substring(1)}, false);
 
     return Response.created(location).build();
   }
@@ -677,7 +676,7 @@ public class ProjectService extends Service {
     if (copyOptions != null && copyOptions.getName() != null) {
       return copyOptions.getName();
     } else {
-      return pathResolver.getName(wsPath);
+      return fsPathResolver.getName(wsPath);
     }
   }
 
@@ -693,24 +692,24 @@ public class ProjectService extends Service {
   @Path("/move/{path:.*}")
   @Consumes(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Move resource",
-      notes = "Move resource to a new location which is specified in a query parameter"
+    value = "Move resource",
+    notes = "Move resource to a new location which is specified in a query parameter"
   )
   @ApiResponses({
-      @ApiResponse(code = 201, message = ""),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 409, message = "Resource already exists"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 201, message = ""),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 409, message = "Resource already exists"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response move(
       @ApiParam("Path to a resource to be moved") @PathParam("path") String wsPath,
       @ApiParam("Path to a new location") @QueryParam("to") String newParentWsPath,
       MoveOptions moveOptions)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
-    newParentWsPath = pathResolver.toAbsoluteWsPath(newParentWsPath);
-    String name = pathResolver.getName(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
+    newParentWsPath = fsPathResolver.toAbsoluteWsPath(newParentWsPath);
+    String name = fsPathResolver.getName(wsPath);
 
     boolean overwrite = false;
     if (moveOptions != null) {
@@ -722,7 +721,7 @@ public class ProjectService extends Service {
       }
     }
 
-    String dstWsPath = pathResolver.resolve(newParentWsPath, name);
+    String dstWsPath = fsPathResolver.resolve(newParentWsPath, name);
 
     boolean isProject = projectManager.isRegistered(wsPath);
     boolean isDirectory = fsManager.existsAsDirectory(wsPath);
@@ -740,7 +739,7 @@ public class ProjectService extends Service {
         getServiceContext()
             .getServiceUriBuilder()
             .path(getClass(), isFile ? "getFile" : "getChildren")
-            .build(new String[]{dstWsPath.substring(1)}, false);
+            .build(new String[] {dstWsPath.substring(1)}, false);
 
     return Response.created(location).build();
   }
@@ -750,26 +749,26 @@ public class ProjectService extends Service {
   @Consumes({MediaType.MULTIPART_FORM_DATA})
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Upload zip project",
-      notes = "Upload project from local zip",
-      response = ProjectConfigDto.class
+    value = "Upload zip project",
+    notes = "Upload project from local zip",
+    response = ProjectConfigDto.class
   )
   @ApiResponses({
-      @ApiResponse(code = 200, message = ""),
-      @ApiResponse(code = 401, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 403, message = "Forbidden operation"),
-      @ApiResponse(code = 409, message = "Resource already exists"),
-      @ApiResponse(code = 500, message = "Unsupported source type")
+    @ApiResponse(code = 200, message = ""),
+    @ApiResponse(code = 401, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 403, message = "Forbidden operation"),
+    @ApiResponse(code = 409, message = "Resource already exists"),
+    @ApiResponse(code = 500, message = "Unsupported source type")
   })
   public List<SourceEstimation> uploadProjectFromZip(
       @ApiParam(value = "Path in the project", required = true) @PathParam("path") String wsPath,
       @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
-      @QueryParam("force")
+          @QueryParam("force")
           boolean force,
       Iterator<FileItem> formData)
       throws ServerException, ConflictException, ForbiddenException, NotFoundException,
-      BadRequestException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+          BadRequestException {
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     fsManager.createDirectory(wsPath, formData);
 
@@ -781,28 +780,28 @@ public class ProjectService extends Service {
   @Consumes(ExtMediaType.APPLICATION_ZIP)
   @ApiOperation(value = "Import zip", notes = "Import resources as zip")
   @ApiResponses({
-      @ApiResponse(code = 201, message = ""),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 409, message = "Resource already exists"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 201, message = ""),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 409, message = "Resource already exists"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response importZip(
       @ApiParam(value = "Path to a location (where import to?)") @PathParam("path") String wsPath,
       InputStream zip,
       @DefaultValue("false") @QueryParam("skipFirstLevel") Boolean skipFirstLevel)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     fsManager.unzipDirectory(wsPath, zip, skipFirstLevel);
 
     eventService.publish(new ProjectCreatedEvent(workspace, wsPath));
 
     return Response.created(
-        getServiceContext()
-            .getServiceUriBuilder()
-            .path(getClass(), "getChildren")
-            .build(new String[]{wsPath.substring(1)}, false))
+            getServiceContext()
+                .getServiceUriBuilder()
+                .path(getClass(), "getChildren")
+                .build(new String[] {wsPath.substring(1)}, false))
         .build();
   }
 
@@ -810,19 +809,19 @@ public class ProjectService extends Service {
   @Path("/export/{path:.*}")
   @Produces(ExtMediaType.APPLICATION_ZIP)
   @ApiOperation(
-      value = "Download ZIP",
-      notes = "Export resource as zip. It can be an entire project or folder"
+    value = "Download ZIP",
+    notes = "Export resource as zip. It can be an entire project or folder"
   )
   @ApiResponses({
-      @ApiResponse(code = 201, message = ""),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 201, message = ""),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public InputStream exportZip(
       @ApiParam(value = "Path to resource to be exported") @PathParam("path") String wsPath)
       throws NotFoundException, ForbiddenException, ServerException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     return fsManager.existsAsFile(wsPath)
         ? fsManager.zipFileToInputStream(wsPath)
@@ -835,12 +834,12 @@ public class ProjectService extends Service {
   public Response exportFile(
       @ApiParam(value = "Path to resource to be imported") @PathParam("path") String wsPath)
       throws NotFoundException, ForbiddenException, ServerException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     InputStream inputStream = fsManager.readFileAsInputStream(wsPath);
     long length = fsManager.length(wsPath);
     long lastModified = fsManager.lastModified(wsPath);
-    String name = pathResolver.getName(wsPath);
+    String name = fsPathResolver.getName(wsPath);
 
     return Response.ok(inputStream, getTIKA().detect(name))
         .lastModified(new Date(lastModified))
@@ -853,21 +852,21 @@ public class ProjectService extends Service {
   @Path("/children/{parent:.*}")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Get project children items",
-      notes = "Request all children items for a project, such as files and folders",
-      response = ItemReference.class,
-      responseContainer = "List"
+    value = "Get project children items",
+    notes = "Request all children items for a project, such as files and folders",
+    response = ItemReference.class,
+    responseContainer = "List"
   )
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public List<ItemReference> getChildren(
       @ApiParam(value = "Path to a project", required = true) @PathParam("parent") String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, IOException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     Set<String> wsPaths = fsManager.getAllChildrenWsPaths(wsPath);
     Set<ItemReference> itemReferences = fsDtoConverter.asDto(wsPaths);
@@ -885,37 +884,37 @@ public class ProjectService extends Service {
   @Path("/tree/{parent:.*}")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Get project tree",
-      notes = "Get project tree. Depth is specified in a query parameter",
-      response = TreeElement.class
+    value = "Get project tree",
+    notes = "Get project tree. Depth is specified in a query parameter",
+    response = TreeElement.class
   )
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public TreeElement getTree(
       @ApiParam(value = "Path to resource. Can be project or its folders", required = true)
-      @PathParam("parent")
+          @PathParam("parent")
           String wsPath,
       @ApiParam(
-          value =
-              "Tree depth. This parameter can be dropped. If not specified ?depth=1 is used by default"
-      )
-      @DefaultValue("1")
-      @QueryParam("depth")
+            value =
+                "Tree depth. This parameter can be dropped. If not specified ?depth=1 is used by default"
+          )
+          @DefaultValue("1")
+          @QueryParam("depth")
           int depth,
       @ApiParam(
-          value =
-              "include children files (in addition to children folders). This parameter can be dropped"
-                  + ". If not specified ?includeFiles=false is used by default"
-      )
-      @DefaultValue("false")
-      @QueryParam("includeFiles")
+            value =
+                "include children files (in addition to children folders). This parameter can be dropped"
+                    + ". If not specified ?includeFiles=false is used by default"
+          )
+          @DefaultValue("false")
+          @QueryParam("includeFiles")
           boolean includeFiles)
       throws NotFoundException, ForbiddenException, ServerException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     ItemReference asDto = fsDtoConverter.asDto(wsPath);
     ItemReference asLinkedDto = injectFolderLinks(asDto);
@@ -929,17 +928,17 @@ public class ProjectService extends Service {
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Get file or folder", response = ItemReference.class)
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public ItemReference getItem(
       @ApiParam(value = "Path to resource. Can be project or its folders", required = true)
-      @PathParam("path")
+          @PathParam("path")
           String wsPath)
       throws NotFoundException, ForbiddenException, ServerException {
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     ItemReference asDto = fsDtoConverter.asDto(wsPath);
     return fsManager.isFile(wsPath)
@@ -951,36 +950,36 @@ public class ProjectService extends Service {
   @Path("/search/{path:.*}")
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(
-      value = "Search for resources",
-      notes = "Search for resources applying a number of search filters as query parameters",
-      response = SearchResult.class,
-      responseContainer = "List"
+    value = "Search for resources",
+    notes = "Search for resources applying a number of search filters as query parameters",
+    response = SearchResult.class,
+    responseContainer = "List"
   )
   @ApiResponses({
-      @ApiResponse(code = 200, message = "OK"),
-      @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-      @ApiResponse(code = 404, message = "Not found"),
-      @ApiResponse(code = 409, message = "Conflict error"),
-      @ApiResponse(code = 500, message = "Internal Server Error")
+    @ApiResponse(code = 200, message = "OK"),
+    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+    @ApiResponse(code = 404, message = "Not found"),
+    @ApiResponse(code = 409, message = "Conflict error"),
+    @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public ProjectSearchResponseDto search(
       @ApiParam(value = "Path to resource, i.e. where to search?", required = true)
-      @PathParam("path")
+          @PathParam("path")
           String wsPath,
       @ApiParam(value = "Resource name") @QueryParam("name") String name,
       @ApiParam(value = "Search keywords") @QueryParam("text") String text,
       @ApiParam(
-          value = "Maximum items to display. If this parameter is dropped, there are no limits"
-      )
-      @QueryParam("maxItems")
-      @DefaultValue("-1")
+            value = "Maximum items to display. If this parameter is dropped, there are no limits"
+          )
+          @QueryParam("maxItems")
+          @DefaultValue("-1")
           int maxItems,
       @ApiParam(value = "Skip count") @QueryParam("skipCount") int skipCount)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
     if (skipCount < 0) {
       throw new ConflictException(String.format("Invalid 'skipCount' parameter: %d.", skipCount));
     }
-    wsPath = pathResolver.toAbsoluteWsPath(wsPath);
+    wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     QueryExpression expr =
         new QueryExpression()
@@ -1067,7 +1066,7 @@ public class ProjectService extends Service {
       transmitter
           .newRequest()
           // TODO will be fixed after we start properly distinguish server side endpoints
-          .endpointId(clientId+"<-:->ws-agent-websocket-endpoint")
+          .endpointId(clientId + "<-:->ws-agent-websocket-endpoint")
           .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
           .paramsAsDto(progressRecord)
           .sendAndSkipResult();
@@ -1080,9 +1079,10 @@ public class ProjectService extends Service {
       return null;
     }
 
-    Set<String> childrenWsPaths = includeFiles
-        ? fsManager.getAllChildrenWsPaths(wsPath)
-        : fsManager.getDirectoryWsPaths(wsPath);
+    Set<String> childrenWsPaths =
+        includeFiles
+            ? fsManager.getAllChildrenWsPaths(wsPath)
+            : fsManager.getDirectoryWsPaths(wsPath);
 
     List<TreeElement> nodes = new ArrayList<>(childrenWsPaths.size());
     for (String childWsPath : childrenWsPaths) {
@@ -1115,9 +1115,7 @@ public class ProjectService extends Service {
     return projectServiceLinksInjector.injectProjectLinks(projectConfig, getServiceContext());
   }
 
-  /**
-   * Lazy init of Tika.
-   */
+  /** Lazy init of Tika. */
   private synchronized Tika getTIKA() {
     if (TIKA == null) {
       TIKA = new Tika();

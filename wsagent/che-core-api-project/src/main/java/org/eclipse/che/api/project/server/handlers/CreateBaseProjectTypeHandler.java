@@ -22,8 +22,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.slf4j.Logger;
@@ -40,14 +40,14 @@ public class CreateBaseProjectTypeHandler implements CreateProjectHandler {
   private static final Logger LOG = LoggerFactory.getLogger(CreateBaseProjectTypeHandler.class);
 
   private final FsManager fsManager;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
 
   private final String README_FILE_NAME = "README";
 
   @Inject
-  public CreateBaseProjectTypeHandler(FsManager fsManager, PathResolver pathResolver) {
+  public CreateBaseProjectTypeHandler(FsManager fsManager, FsPathResolver fsPathResolver) {
     this.fsManager = fsManager;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
   }
 
   @Override
@@ -55,7 +55,7 @@ public class CreateBaseProjectTypeHandler implements CreateProjectHandler {
       String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
       throws ForbiddenException, ConflictException, ServerException, NotFoundException {
     fsManager.createDirectory(projectWsPath);
-    String wsPath = pathResolver.resolve(projectWsPath, README_FILE_NAME);
+    String wsPath = fsPathResolver.resolve(projectWsPath, README_FILE_NAME);
     fsManager.createFile(wsPath, getReadmeContent());
   }
 

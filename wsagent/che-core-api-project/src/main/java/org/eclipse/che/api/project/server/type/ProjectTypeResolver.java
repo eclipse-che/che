@@ -29,15 +29,14 @@ public class ProjectTypeResolver {
   private final ProjectManager projectManager;
 
   @Inject
-  protected ProjectTypeResolver(
-      ProjectManager projectManager) {
+  protected ProjectTypeResolver(ProjectManager projectManager) {
     this.projectManager = projectManager;
   }
 
   public ProjectTypeResolution resolveSources(ProjectType projectType, String projectWsPath) {
     RegisteredProject project = projectManager.getOrNull(projectWsPath);
     if (project == null) {
-      return new DefaultResolution(projectType.getId(), newHashMap(), true);
+      return new DefaultResolution(projectType.getId(), newHashMap(), false);
     }
 
     Map<String, Value> matchAttrs = new HashMap<>();
@@ -86,9 +85,7 @@ public class ProjectTypeResolver {
       this.match = match;
     }
 
-    /**
-     * Use this one when source code not matches project type requirements
-     */
+    /** Use this one when source code not matches project type requirements */
     public DefaultResolution(String type, String resolution) {
       super(type, newHashMap(), resolution);
       this.match = false;

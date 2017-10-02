@@ -30,8 +30,8 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
@@ -61,7 +61,7 @@ public class WorkspaceService {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceService.class);
   private final FsManager fsManager;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
   private LanguageServerRegistry registry;
   private ProjectManager projectManager;
   private RequestHandlerConfigurator requestHandler;
@@ -72,12 +72,12 @@ public class WorkspaceService {
       ProjectManager projectManager,
       RequestHandlerConfigurator requestHandler,
       FsManager fsManager,
-      PathResolver pathResolver) {
+      FsPathResolver fsPathResolver) {
     this.registry = registry;
     this.projectManager = projectManager;
     this.requestHandler = requestHandler;
     this.fsManager = fsManager;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
   }
 
   @PostConstruct
@@ -106,7 +106,7 @@ public class WorkspaceService {
   private List<TextEditDto> editFile(FileEditParams params) {
     try {
       String path = LanguageServiceUtils.removePrefixUri(params.getUri());
-      String wsPath = pathResolver.toAbsoluteWsPath(path);
+      String wsPath = fsPathResolver.toAbsoluteWsPath(path);
 
       if (fsManager.existsAsFile(wsPath)) {
         List<TextEdit> undo = new ArrayList<>();

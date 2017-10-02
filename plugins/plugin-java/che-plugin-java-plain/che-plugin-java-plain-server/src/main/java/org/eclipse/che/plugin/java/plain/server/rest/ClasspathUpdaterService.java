@@ -31,7 +31,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.NewProjectConfigImpl;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.api.ProjectManager;
@@ -56,13 +56,12 @@ public class ClasspathUpdaterService {
   private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
 
   private final ProjectManager projectManager;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
 
   @Inject
-  public ClasspathUpdaterService(ProjectManager projectManager,
-      PathResolver pathResolver) {
+  public ClasspathUpdaterService(ProjectManager projectManager, FsPathResolver fsPathResolver) {
     this.projectManager = projectManager;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
   }
 
   /**
@@ -81,7 +80,7 @@ public class ClasspathUpdaterService {
   public void updateClasspath(
       @QueryParam("projectpath") String projectPath, List<ClasspathEntryDto> entries)
       throws JavaModelException, ServerException, ForbiddenException, ConflictException,
-      NotFoundException, IOException, BadRequestException {
+          NotFoundException, IOException, BadRequestException {
     IJavaProject javaProject = model.getJavaProject(projectPath);
 
     javaProject.setRawClasspath(
@@ -91,11 +90,13 @@ public class ClasspathUpdaterService {
   }
 
   private void updateProjectConfig(String projectWsPath)
-      throws IOException, ForbiddenException, ConflictException, NotFoundException,
-      ServerException, BadRequestException {
-    String wsPath = pathResolver.toAbsoluteWsPath(projectWsPath);
-    RegisteredProject project = projectManager.get(wsPath)
-        .orElseThrow(() -> new NotFoundException("Can't find project: " + projectWsPath));
+      throws IOException, ForbiddenException, ConflictException, NotFoundException, ServerException,
+          BadRequestException {
+    String wsPath = fsPathResolver.toAbsoluteWsPath(projectWsPath);
+    RegisteredProject project =
+        projectManager
+            .get(wsPath)
+            .orElseThrow(() -> new NotFoundException("Can't find project: " + projectWsPath));
 
     NewProjectConfig projectConfig =
         new NewProjectConfigImpl(

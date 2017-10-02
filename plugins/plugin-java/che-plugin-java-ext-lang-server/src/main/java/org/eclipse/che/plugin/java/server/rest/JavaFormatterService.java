@@ -26,8 +26,8 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaProject;
@@ -48,13 +48,13 @@ public class JavaFormatterService {
   private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
 
   private final FsManager fsManager;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
   private Formatter formatter;
 
   @Inject
-  public JavaFormatterService(FsManager fsManager, PathResolver pathResolver, Formatter formatter) {
+  public JavaFormatterService(FsManager fsManager, FsPathResolver fsPathResolver, Formatter formatter) {
     this.fsManager = fsManager;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
     this.formatter = formatter;
   }
 
@@ -104,13 +104,13 @@ public class JavaFormatterService {
           String content)
       throws ServerException {
     try {
-      String rootCheFolderWsPath = pathResolver.toAbsoluteWsPath(CHE_FOLDER);
+      String rootCheFolderWsPath = fsPathResolver.toAbsoluteWsPath(CHE_FOLDER);
 
       if (!fsManager.existsAsDirectory(rootCheFolderWsPath)) {
         fsManager.createDirectory(rootCheFolderWsPath);
       }
 
-      String cheFormatterWsPath = pathResolver.resolve(rootCheFolderWsPath, CHE_FORMATTER_XML);
+      String cheFormatterWsPath = fsPathResolver.resolve(rootCheFolderWsPath, CHE_FORMATTER_XML);
 
       if (!fsManager.existsAsFile(cheFormatterWsPath)) {
         fsManager.createFile(cheFormatterWsPath, content);
@@ -137,14 +137,14 @@ public class JavaFormatterService {
           String content)
       throws ServerException, NotFoundException {
     try {
-      String projectWsPath = pathResolver.toAbsoluteWsPath(projectPath);
-      String projectCheFolderWsPath = pathResolver.resolve(projectWsPath, CHE_FOLDER);
+      String projectWsPath = fsPathResolver.toAbsoluteWsPath(projectPath);
+      String projectCheFolderWsPath = fsPathResolver.resolve(projectWsPath, CHE_FOLDER);
 
       if (!fsManager.existsAsDirectory(projectCheFolderWsPath)) {
         fsManager.createDirectory(projectCheFolderWsPath);
       }
 
-      String cheFormatterWsPath = pathResolver.resolve(projectCheFolderWsPath, CHE_FORMATTER_XML);
+      String cheFormatterWsPath = fsPathResolver.resolve(projectCheFolderWsPath, CHE_FORMATTER_XML);
 
       if (!fsManager.existsAsFile(cheFormatterWsPath)) {
         fsManager.createFile(cheFormatterWsPath, content);
@@ -159,7 +159,7 @@ public class JavaFormatterService {
 
   private File getFormatterFromRootFolder(String formatterPath) {
     try {
-      String formatterWsPath = pathResolver.toAbsoluteWsPath(formatterPath);
+      String formatterWsPath = fsPathResolver.toAbsoluteWsPath(formatterPath);
       return fsManager.toIoFile(formatterWsPath);
     } catch (NotFoundException e) {
       return null;

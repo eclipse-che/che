@@ -10,16 +10,12 @@
  */
 package org.eclipse.che.api.project.server.type;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
-import org.eclipse.che.api.core.model.project.type.Value;
 
 /** @author gazarenkov */
 public abstract class ProjectTypeDef implements ProjectType {

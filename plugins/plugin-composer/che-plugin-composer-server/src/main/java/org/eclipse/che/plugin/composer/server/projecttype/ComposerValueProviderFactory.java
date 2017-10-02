@@ -13,10 +13,7 @@ import static org.eclipse.che.plugin.composer.shared.Constants.PACKAGE;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,8 +44,8 @@ public class ComposerValueProviderFactory implements ValueProviderFactory {
     @Override
     public List<String> getValues(String attributeName) throws ValueStorageException {
       try {
-        Path composerDotJsonFsPath = Paths
-            .get(projectFsPath.toAbsolutePath().toString(), "composer.json");
+        Path composerDotJsonFsPath =
+            Paths.get(projectFsPath.toAbsolutePath().toString(), "composer.json");
         if (!composerDotJsonFsPath.toFile().exists()) {
           return Collections.emptyList();
         }

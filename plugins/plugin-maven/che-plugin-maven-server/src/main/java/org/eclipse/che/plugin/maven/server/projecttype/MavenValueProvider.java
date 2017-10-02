@@ -47,9 +47,7 @@ import org.eclipse.che.maven.data.MavenResource;
 import org.eclipse.che.plugin.maven.server.core.MavenProjectManager;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 
-/**
- * @author Vitalii Parfonov
- */
+/** @author Vitalii Parfonov */
 public class MavenValueProvider extends ReadonlyValueProvider {
 
   private MavenProjectManager mavenProjectManager;
@@ -67,8 +65,7 @@ public class MavenValueProvider extends ReadonlyValueProvider {
         return readFromPom(attributeName);
       }
 
-      final MavenProject mavenProject =
-          mavenProjectManager.getMavenProject(projectWsPath);
+      final MavenProject mavenProject = mavenProjectManager.getMavenProject(projectWsPath);
       if (mavenProject != null) {
         return getFromMavenProject(mavenProject, attributeName);
       } else {
@@ -123,7 +120,7 @@ public class MavenValueProvider extends ReadonlyValueProvider {
         }
       case OUTPUT_FOLDER:
         return (mavenProject.getOutputDirectory() != null
-            && !mavenProject.getOutputDirectory().isEmpty())
+                && !mavenProject.getOutputDirectory().isEmpty())
             ? singletonList(mavenProject.getOutputDirectory())
             : singletonList(DEFAULT_OUTPUT_FOLDER);
 
@@ -134,7 +131,7 @@ public class MavenValueProvider extends ReadonlyValueProvider {
 
   private List<String> readFromPom(String attributeName)
       throws ServerException, ForbiddenException, IOException, XMLTreeException,
-      ValueStorageException {
+          ValueStorageException {
     final Model model = readModel(projectWsPath);
     switch (attributeName) {
       case ARTIFACT_ID:

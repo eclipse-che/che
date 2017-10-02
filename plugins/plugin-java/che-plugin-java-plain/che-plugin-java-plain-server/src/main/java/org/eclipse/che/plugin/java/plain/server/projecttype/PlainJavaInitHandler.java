@@ -18,7 +18,7 @@ import com.google.inject.Provider;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.ide.ext.java.shared.Constants;
@@ -42,12 +42,13 @@ public class PlainJavaInitHandler extends AbstractJavaInitHandler {
   private static final Logger LOG = LoggerFactory.getLogger(PlainJavaInitHandler.class);
   private final ClasspathBuilder classpathBuilder;
   private final Provider<ProjectManager> projectRegistryProvider;
-  private final Provider<PathResolver> pathResolverProvider;
+  private final Provider<FsPathResolver> pathResolverProvider;
 
   @Inject
   public PlainJavaInitHandler(
-      ClasspathBuilder classpathBuilder, Provider<ProjectManager> projectRegistryProvider,
-      Provider<PathResolver> pathResolverProvider) {
+      ClasspathBuilder classpathBuilder,
+      Provider<ProjectManager> projectRegistryProvider,
+      Provider<FsPathResolver> pathResolverProvider) {
     this.classpathBuilder = classpathBuilder;
     this.projectRegistryProvider = projectRegistryProvider;
     this.pathResolverProvider = pathResolverProvider;
@@ -66,15 +67,18 @@ public class PlainJavaInitHandler extends AbstractJavaInitHandler {
 
     //default classpath
     IClasspathEntry[] defaultClasspath =
-        new IClasspathEntry[]{JavaCore.newSourceEntry(javaProject.getPath())};
+        new IClasspathEntry[] {JavaCore.newSourceEntry(javaProject.getPath())};
     if (!Arrays.equals(defaultClasspath, projectClasspath)) {
       //classpath is already initialized
       return;
     }
 
     String wsPath = pathResolverProvider.get().toAbsoluteWsPath(javaProject.getPath().toOSString());
-    RegisteredProject project = projectRegistryProvider.get().get(wsPath)
-        .orElseThrow(() -> new ServerException("Can't find a project: " + wsPath));
+    RegisteredProject project =
+        projectRegistryProvider
+            .get()
+            .get(wsPath)
+            .orElseThrow(() -> new ServerException("Can't find a project: " + wsPath));
 
     List<String> sourceFolders = project.getAttributes().get(Constants.SOURCE_FOLDER);
     List<String> library = project.getAttributes().get(LIBRARY_FOLDER);

@@ -133,7 +133,7 @@ public class PHPUnitTestEngine {
     }
 
     try (InputStream inputStream =
-        Files.newInputStream(projectsRoot.resolve(projectPath + "/composer.json"));
+            Files.newInputStream(projectsRoot.resolve(projectPath + "/composer.json"));
         InputStreamReader reader = new InputStreamReader(inputStream)) {
       Gson gson = new GsonBuilder().create();
       Map<String, ?> composerJsonMap = gson.fromJson(reader, LinkedTreeMap.class);

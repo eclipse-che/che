@@ -40,8 +40,8 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.fs.api.FsManager;
-import org.eclipse.che.api.fs.api.PathResolver;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CloneParams;
@@ -64,18 +64,18 @@ public class GitProjectImporter implements ProjectImporter {
   private final GitConnectionFactory gitConnectionFactory;
   private final EventService eventService;
   private final FsManager fsManager;
-  private final PathResolver pathResolver;
+  private final FsPathResolver fsPathResolver;
 
   @Inject
   public GitProjectImporter(
       GitConnectionFactory gitConnectionFactory,
       EventService eventService,
       FsManager fsManager,
-      PathResolver pathResolver) {
+      FsPathResolver fsPathResolver) {
     this.gitConnectionFactory = gitConnectionFactory;
     this.eventService = eventService;
     this.fsManager = fsManager;
-    this.pathResolver = pathResolver;
+    this.fsPathResolver = fsPathResolver;
   }
 
   @Override
@@ -165,9 +165,9 @@ public class GitProjectImporter implements ProjectImporter {
         }
       }
       // Get path to local file. Git works with local filesystem only.
-      final String localPath = pathResolver.toAbsoluteFsPath(dst).toString();
+      final String localPath = fsPathResolver.toAbsoluteFsPath(dst).toString();
       final String location = src.getLocation();
-      final String projectName = pathResolver.getName(dst);
+      final String projectName = fsPathResolver.getName(dst);
 
       // Converting steps
       // 1. Clone to temporary folder on same device with /projects

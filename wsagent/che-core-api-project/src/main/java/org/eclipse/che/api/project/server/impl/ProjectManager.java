@@ -33,7 +33,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
-import org.eclipse.che.api.fs.api.FsManager;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.NewProjectConfigImpl;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
@@ -81,8 +81,8 @@ public class ProjectManager implements org.eclipse.che.api.project.server.api.Pr
   @Override
   public Optional<RegisteredProject> get(String wsPath) {
     return projectConfigs.get(wsPath);
-
   }
+
   public RegisteredProject getOrNull(String wsPath) {
     return projectConfigs.getOrNull(wsPath);
   }

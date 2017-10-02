@@ -214,7 +214,9 @@ public class ProjectTypes {
   void addTransient(String projectFolder) {
     for (ProjectTypeDef pt : projectTypeRegistry.getProjectTypes()) {
       // NOTE: Only mixable types allowed
-      if (pt.isMixable() && !pt.isPersisted() && projectTypeResolver.resolveSources(pt, projectFolder).matched()) {
+      if (pt.isMixable()
+          && !pt.isPersisted()
+          && projectTypeResolver.resolveSources(pt, projectFolder).matched()) {
         all.put(pt.getId(), pt);
         mixins.put(pt.getId(), pt);
         for (Attribute attr : pt.getAttributes()) {
