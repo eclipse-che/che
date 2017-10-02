@@ -20,12 +20,12 @@ public class KeycloakServletModule extends ServletModule {
   protected void configureServlets() {
     bind(KeycloakAuthenticationFilter.class).in(Singleton.class);
 
-    // Not contains '/websocket', /docs/ (for swagger) and not ends with '/ws' or '/eventbus' or '/settings/' or '/api/system/state'
+    // Not contains '/websocket', /docs/ (for swagger) and not ends with '/ws' or '/eventbus' or '/settings/'
     filterRegex(
-            "^(?!.*(/websocket/?|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?|/api/oauth/callback/?|/api/system/state/?)$).*")
+            "^(?!.*(/websocket/?|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?|/api/oauth/callback/?)$).*")
         .through(KeycloakAuthenticationFilter.class);
     filterRegex(
-            "^(?!.*(/websocket/?|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?|/api/oauth/callback/?|/api/system/state/?)$).*")
+            "^(?!.*(/websocket/?|/docs/))(?!.*(/ws/?|/eventbus/?|/settings/?|/api/oauth/callback/?)$).*")
         .through(KeycloakEnvironmentInitalizationFilter.class);
   }
 }
