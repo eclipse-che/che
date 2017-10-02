@@ -50,7 +50,8 @@ public class KeycloakSettings {
     settings.put(
         LOGOUT_ENDPOINT_SETTING,
         serverURL + "/realms/" + realm + "/protocol/openid-connect/logout");
-    settings.put(TOKEN_ENDPOINT_SETTING,serverURL + "/realms/" + realm + "/protocol/openid-connect/token");
+    settings.put(
+        TOKEN_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/protocol/openid-connect/token");
     settings.put(OSO_ENDPOINT_SETTING, osoEndpoint);
     settings.put(GITHUB_ENDPOINT_SETTING, gitHubEndpoint);
 
