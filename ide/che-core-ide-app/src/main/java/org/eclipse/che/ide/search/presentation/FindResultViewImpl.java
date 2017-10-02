@@ -28,6 +28,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
@@ -105,20 +106,22 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
 
   /** {@inheritDoc} */
   @Override
-  public void showResults(List<SearchResult> resources, String request) {
+  public void showResults(SearchResult result, String request) {
     StringBuilder resultTitle = new StringBuilder();
+    List<SearchItemReference> resources = result.getItemReferences();
     if (resources.isEmpty()) {
       resultTitle.append("No results found for ");
       resultLabel.setText(resultTitle.toString());
       requestedLabel.setText("\'" + request + "\'");
+      tree.getNodeStorage().clear();
       return;
     }
 
     int total = 0;
-    for (SearchResult searchResult : resources) {
-      total += searchResult.getOccurrences().size();
+    for (SearchItemReference searchItemReference : resources) {
+      total += searchItemReference.getOccurrences().size();
     }
-    resultTitle.append(total).append(" result");
+    resultTitle.append(total).append(" occurrence");
     if (total > 1) {
       resultTitle.append('s');
     }
@@ -126,12 +129,15 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
     if (resources.size() > 1) {
       resultTitle.append('s');
     }
-    resultTitle.append(" for ");
+    resultTitle.append(" (per page results) for '");
+    resultTitle.append(request);
+    resultTitle.append("'. Total file count - ");
+    resultTitle.append(result.getTotalHits());
+
     resultLabel.setText(resultTitle.toString());
-    requestedLabel.setText("\'" + request + "\'");
 
     tree.getNodeStorage().clear();
-    for (SearchResult item : resources) {
+    for (SearchItemReference item : resources) {
       tree.getNodeStorage().add(findResultNodeFactory.newFoundItemNode(item, request));
     }
     Node rootNode = tree.getRootNodes().get(0);

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.search;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
@@ -28,6 +29,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.search.presentation.FindResultPresenter;
@@ -52,13 +54,14 @@ public class FullTextSearchPresenterTest {
   @Mock private AppContext appContext;
   @Mock private Container workspaceRoot;
   @Mock private Container searchContainer;
+  @Mock private SearchResult searchResult;
   @Mock private QueryExpression queryExpression;
   @Mock private Promise<Optional<Container>> optionalContainerPromise;
   @Captor private ArgumentCaptor<Operation<Optional<Container>>> optionalContainerCaptor;
-  @Mock private Promise<List<SearchResult>> searchResultPromise;
-  @Captor private ArgumentCaptor<Operation<List<SearchResult>>> searchResultCaptor;
+  @Mock private Promise<SearchResult> searchResultPromise;
+  @Captor private ArgumentCaptor<Operation<SearchResult>> searchResultCaptor;
   @Captor private ArgumentCaptor<Operation<PromiseError>> operationErrorCapture;
-  @Captor private ArgumentCaptor<Operation<List<SearchResult>>> operationSuccessCapture;
+  @Captor private ArgumentCaptor<Operation<List<SearchItemReference>>> operationSuccessCapture;
 
   FullTextSearchPresenter fullTextSearchPresenter;
 
@@ -92,12 +95,12 @@ public class FullTextSearchPresenterTest {
     optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
 
     verify(searchResultPromise).then(searchResultCaptor.capture());
-    searchResultCaptor.getValue().apply(Collections.emptyList());
+    searchResultCaptor.getValue().apply(searchResult);
 
     verify(view, never()).showErrorMessage(anyString());
     verify(view).close();
     verify(findResultPresenter)
-        .handleResponse(eq(Collections.emptyList()), eq(queryExpression), eq(SEARCHED_TEXT));
+        .handleResponse(eq(searchResult), eq(queryExpression), eq(SEARCHED_TEXT));
   }
 
   @Test
@@ -117,14 +120,13 @@ public class FullTextSearchPresenterTest {
     optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
 
     verify(searchResultPromise).then(searchResultCaptor.capture());
-    searchResultCaptor.getValue().apply(Collections.emptyList());
+    searchResultCaptor.getValue().apply(searchResult);
 
     verify(searchContainer).search(queryExpression);
     verify(view).isWholeWordsOnly();
     verify(view, never()).showErrorMessage(anyString());
     verify(view).close();
-    verify(findResultPresenter)
-        .handleResponse(eq(Collections.emptyList()), eq(queryExpression), eq(search));
+    verify(findResultPresenter).handleResponse(eq(searchResult), eq(queryExpression), eq(search));
   }
 
   @Test
@@ -144,14 +146,13 @@ public class FullTextSearchPresenterTest {
     optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
 
     verify(searchResultPromise).then(searchResultCaptor.capture());
-    searchResultCaptor.getValue().apply(Collections.emptyList());
+    searchResultCaptor.getValue().apply(searchResult);
 
     verify(searchContainer).search(queryExpression);
     verify(view).isWholeWordsOnly();
     verify(view, never()).showErrorMessage(anyString());
     verify(view).close();
-    verify(findResultPresenter)
-        .handleResponse(eq(Collections.emptyList()), eq(queryExpression), eq(search));
+    verify(findResultPresenter).handleResponse(eq(searchResult), eq(queryExpression), eq(search));
   }
 
   @Test
@@ -168,7 +169,7 @@ public class FullTextSearchPresenterTest {
     verify(view).showErrorMessage(anyString());
     verify(view, never()).close();
     verify(findResultPresenter, never())
-        .handleResponse(any(List.class), eq(queryExpression), anyString());
+        .handleResponse(anyObject(), eq(queryExpression), anyString());
   }
 
   @Test
@@ -182,7 +183,7 @@ public class FullTextSearchPresenterTest {
     when(searchContainer.search(any(QueryExpression.class))).thenReturn(searchResultPromise);
     when(searchContainer.createSearchQueryExpression(anyString(), anyString()))
         .thenReturn(queryExpression);
-    List<SearchResult> result = Collections.emptyList();
+    List<SearchItemReference> result = Collections.emptyList();
 
     fullTextSearchPresenter.onEnterClicked();
 
@@ -190,11 +191,12 @@ public class FullTextSearchPresenterTest {
     optionalContainerCaptor.getValue().apply(Optional.of(searchContainer));
 
     verify(searchResultPromise).then(searchResultCaptor.capture());
-    searchResultCaptor.getValue().apply(result);
+    searchResultCaptor.getValue().apply(searchResult);
 
     verify(view, never()).showErrorMessage(anyString());
     verify(view).close();
-    verify(findResultPresenter).handleResponse(eq(result), eq(queryExpression), eq(SEARCHED_TEXT));
+    verify(findResultPresenter)
+        .handleResponse(eq(searchResult), eq(queryExpression), eq(SEARCHED_TEXT));
   }
 
   @Test

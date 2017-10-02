@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
-import java.util.List;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -34,6 +33,7 @@ import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.api.project.QueryExpression;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.api.resources.SearchResult;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,23 +59,24 @@ public class FindResultPresenterTest {
   @Mock private EventBus eventBus;
 
   @Mock private QueryExpression queryExpression;
-  @Mock private Promise<List<SearchResult>> searchResultPromise;
-  @Mock private SearchResult searchResult;
-  @Captor private ArgumentCaptor<Operation<List<SearchResult>>> argumentCaptor;
+  @Mock private Promise<SearchResult> searchResultPromise;
+  @Mock private SearchItemReference searchItemReference;
+  @Captor private ArgumentCaptor<Operation<SearchResult>> argumentCaptor;
+  @Mock private SearchResult result;
 
   @InjectMocks FindResultPresenter findResultPresenter;
-
-  private ArrayList<SearchResult> results = new ArrayList<>(SEARCH_RESULT_ITEMS);
+  private ArrayList<SearchItemReference> items = new ArrayList<>(SEARCH_RESULT_ITEMS);
 
   @Before
   public void setUp() throws Exception {
     for (int i = 0; i < SEARCH_RESULT_ITEMS; i++) {
-      results.add(searchResult);
+      items.add(searchItemReference);
     }
 
     when(projectServiceClient.search(queryExpression)).thenReturn(searchResultPromise);
-    when(searchResultPromise.then(Matchers.<Operation<List<SearchResult>>>any()))
+    when(searchResultPromise.then(Matchers.<Operation<SearchResult>>any()))
         .thenReturn(searchResultPromise);
+    when(result.getItemReferences()).thenReturn(items);
   }
 
   @Test
@@ -108,25 +109,25 @@ public class FindResultPresenterTest {
   @Test
   public void responseShouldBeHandled() throws Exception {
     QueryExpression queryExpression = mock(QueryExpression.class);
-    findResultPresenter.handleResponse(emptyList(), queryExpression, "request");
+    findResultPresenter.handleResponse(result, queryExpression, "request");
 
     verify(workspaceAgent).openPart(findResultPresenter, PartStackType.INFORMATION);
     verify(workspaceAgent).setActivePart(findResultPresenter);
-    verify(view).showResults(emptyList(), "request");
+    verify(view).showResults(result, "request");
     verify(view).setPreviousBtnActive(false);
-    verify(view).setNextBtnActive(false);
+    verify(view).setNextBtnActive(true);
   }
 
   @Test
   public void nextPageShouldNotBeShownIfNoResults() throws Exception {
-    findResultPresenter.handleResponse(emptyList(), queryExpression, "request");
+    findResultPresenter.handleResponse(result, queryExpression, "request");
     reset(view);
     findResultPresenter.onNextButtonClicked();
 
     verify(queryExpression).setSkipCount(SEARCH_RESULT_ITEMS);
 
     verify(searchResultPromise).then(argumentCaptor.capture());
-    argumentCaptor.getValue().apply(emptyList());
+    argumentCaptor.getValue().apply(new SearchResult(emptyList(), 0));
 
     verify(view).setPreviousBtnActive(true);
     verify(view).setNextBtnActive(false);
@@ -135,9 +136,9 @@ public class FindResultPresenterTest {
 
   @Test
   public void nextButtonShouldBeActiveIfResultHasMaxValueElements() throws Exception {
-    findResultPresenter.handleResponse(results, queryExpression, "request");
+    findResultPresenter.handleResponse(result, queryExpression, "request");
 
-    findResultPresenter.handleResponse(results, queryExpression, "request");
+    findResultPresenter.handleResponse(result, queryExpression, "request");
     reset(view);
     findResultPresenter.onNextButtonClicked();
 
@@ -145,17 +146,18 @@ public class FindResultPresenterTest {
 
     verify(searchResultPromise).then(argumentCaptor.capture());
 
-    argumentCaptor.getValue().apply(results);
+    SearchResult searchResult = new SearchResult(items, 0);
+    argumentCaptor.getValue().apply(searchResult);
 
     verify(view).setPreviousBtnActive(true);
     verify(view).setNextBtnActive(true);
-    verify(view).showResults(results, "request");
+    verify(view).showResults(searchResult, "request");
   }
 
   @Test
   public void nextButtonShouldBeDisableIfResultHasLessThanMaxValue() throws Exception {
-    results.remove(0);
-    findResultPresenter.handleResponse(results, queryExpression, "request");
+    items.remove(0);
+    findResultPresenter.handleResponse(result, queryExpression, "request");
     reset(view);
     findResultPresenter.onNextButtonClicked();
 
@@ -163,17 +165,18 @@ public class FindResultPresenterTest {
 
     verify(searchResultPromise).then(argumentCaptor.capture());
 
-    argumentCaptor.getValue().apply(results);
+    SearchResult searchResult = new SearchResult(items, 0);
+    argumentCaptor.getValue().apply(searchResult);
 
     verify(view).setPreviousBtnActive(true);
     verify(view).setNextBtnActive(false);
-    verify(view).showResults(results, "request");
+    verify(view).showResults(searchResult, "request");
   }
 
   @Test
   public void previousButtonShouldBeActiveIfResultHasLessThanMaxValue() throws Exception {
-    results.remove(0);
-    findResultPresenter.handleResponse(results, queryExpression, "request");
+    items.remove(0);
+    findResultPresenter.handleResponse(result, queryExpression, "request");
     reset(view);
     findResultPresenter.onPreviousButtonClicked();
 
@@ -181,16 +184,17 @@ public class FindResultPresenterTest {
 
     verify(searchResultPromise).then(argumentCaptor.capture());
 
-    argumentCaptor.getValue().apply(results);
+    SearchResult searchResult = new SearchResult(items, 0);
+    argumentCaptor.getValue().apply(searchResult);
 
     verify(view).setNextBtnActive(true);
     verify(view).setPreviousBtnActive(false);
-    verify(view).showResults(results, "request");
+    verify(view).showResults(searchResult, "request");
   }
 
   @Test
   public void previousButtonShouldBeActiveIfResultHasMaxValueElements() throws Exception {
-    findResultPresenter.handleResponse(results, queryExpression, "request");
+    findResultPresenter.handleResponse(result, queryExpression, "request");
     reset(view);
     findResultPresenter.onPreviousButtonClicked();
 
@@ -198,10 +202,11 @@ public class FindResultPresenterTest {
 
     verify(searchResultPromise).then(argumentCaptor.capture());
 
-    argumentCaptor.getValue().apply(results);
+    SearchResult searchResult = new SearchResult(items, 0);
+    argumentCaptor.getValue().apply(searchResult);
 
     verify(view).setNextBtnActive(true);
     verify(view).setPreviousBtnActive(true);
-    verify(view).showResults(results, "request");
+    verify(view).showResults(searchResult, "request");
   }
 }

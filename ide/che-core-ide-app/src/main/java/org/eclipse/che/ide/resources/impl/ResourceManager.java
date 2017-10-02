@@ -1282,7 +1282,7 @@ public final class ResourceManager {
     return promises.resolve(null);
   }
 
-  protected Promise<List<SearchResult>> search(
+  protected Promise<SearchResult> search(
       final Container container, String fileMask, String contentMask) {
     QueryExpression queryExpression = new QueryExpression();
     if (!isNullOrEmpty(contentMask)) {
@@ -1298,7 +1298,7 @@ public final class ResourceManager {
     return ps.search(queryExpression);
   }
 
-  protected Promise<List<SearchResult>> search(QueryExpression queryExpression) {
+  protected Promise<SearchResult> search(QueryExpression queryExpression) {
     return ps.search(queryExpression);
   }
 

@@ -16,7 +16,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
-import java.util.List;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Function;
@@ -184,12 +183,12 @@ abstract class ContainerImpl extends ResourceImpl implements Container {
 
   /** {@inheritDoc} */
   @Override
-  public Promise<List<SearchResult>> search(String fileMask, String contentMask) {
+  public Promise<SearchResult> search(String fileMask, String contentMask) {
     return resourceManager.search(this, fileMask, contentMask);
   }
 
   @Override
-  public Promise<List<SearchResult>> search(QueryExpression queryExpression) {
+  public Promise<SearchResult> search(QueryExpression queryExpression) {
     return resourceManager.search(queryExpression);
   }
 

@@ -12,7 +12,6 @@ package org.eclipse.che.ide.api.resources;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
-import java.util.List;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -450,7 +449,7 @@ public interface Container extends Resource {
    * @return the {@link Promise} with array of found results
    * @since 4.4.0
    */
-  Promise<List<SearchResult>> search(String fileMask, String contentMask);
+  Promise<SearchResult> search(String fileMask, String contentMask);
 
   /**
    * Searches the all possible files which configured into {@link QueryExpression}.
@@ -460,7 +459,7 @@ public interface Container extends Resource {
    * @param queryExpression the search query expression includes search parameters
    * @return the {@link Promise} with array of found results
    */
-  Promise<List<SearchResult>> search(QueryExpression queryExpression);
+  Promise<SearchResult> search(QueryExpression queryExpression);
 
   /**
    * Creates the search expression which matches given file or content mask.

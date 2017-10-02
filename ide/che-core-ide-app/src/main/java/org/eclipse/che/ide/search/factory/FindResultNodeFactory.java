@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.search.factory;
 
 import org.eclipse.che.api.project.shared.SearchOccurrence;
-import org.eclipse.che.ide.api.resources.SearchResult;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.search.presentation.FoundItemNode;
 import org.eclipse.che.ide.search.presentation.FoundOccurrenceNode;
 
@@ -24,11 +24,11 @@ public interface FindResultNodeFactory {
   /**
    * Create new instance of {@link FoundItemNode}.
    *
-   * @param searchResult the result of the search operation
+   * @param searchItemReference the result of the search operation
    * @param request requested text to search
    * @return new instance of {@link FoundItemNode}
    */
-  FoundItemNode newFoundItemNode(SearchResult searchResult, String request);
+  FoundItemNode newFoundItemNode(SearchItemReference searchItemReference, String request);
 
   /**
    * Create new instance of {@link FoundOccurrenceNode}.

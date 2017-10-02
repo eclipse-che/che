@@ -49,10 +49,10 @@ public interface FindResultView extends View<FindResultView.ActionDelegate> {
   /**
    * Activate Find results part and showing all occurrences.
    *
-   * @param resources list of files which contains requested text
+   * @param result search result of requested text
    * @param request requested text
    */
-  void showResults(List<SearchResult> resources, String request);
+  void showResults(SearchResult result, String request);
 
   Tree getTree();
 

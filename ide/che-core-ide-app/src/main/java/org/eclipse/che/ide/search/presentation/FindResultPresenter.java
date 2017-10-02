@@ -30,6 +30,7 @@ import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
@@ -102,19 +103,18 @@ public class FindResultPresenter extends BasePresenter
   /**
    * Activate Find results part and showing all occurrences.
    *
-   * @param resources list of files which contains requested text
+   * @param result search result of requested text
    * @param request requested text
    */
-  public void handleResponse(
-      List<SearchResult> resources, QueryExpression queryExpression, String request) {
+  public void handleResponse(SearchResult result, QueryExpression queryExpression, String request) {
     this.queryExpression = queryExpression;
     this.requestedString = request;
     workspaceAgent.openPart(this, PartStackType.INFORMATION);
     workspaceAgent.setActivePart(this);
 
     view.setPreviousBtnActive(false);
-    view.setNextBtnActive(resources.size() == SEARCH_RESULT_ITEMS);
-    view.showResults(resources, request);
+    view.setNextBtnActive(result.getItemReferences().size() == SEARCH_RESULT_ITEMS);
+    view.showResults(result, request);
   }
 
   @Override
@@ -129,13 +129,14 @@ public class FindResultPresenter extends BasePresenter
         .search(queryExpression)
         .then(
             result -> {
-              skipCount += result.size();
+              List<SearchItemReference> itemReferences = result.getItemReferences();
+              skipCount += itemReferences.size();
               view.setPreviousBtnActive(true);
-              if (result.isEmpty()) {
+              if (itemReferences.isEmpty()) {
                 view.setNextBtnActive(false);
                 return;
               }
-              if (result.size() % SEARCH_RESULT_ITEMS == 0) {
+              if (itemReferences.size() % SEARCH_RESULT_ITEMS == 0) {
                 view.setNextBtnActive(true);
               } else {
                 skipCount += SEARCH_RESULT_ITEMS;
@@ -153,9 +154,10 @@ public class FindResultPresenter extends BasePresenter
         .search(queryExpression)
         .then(
             result -> {
+              List<SearchItemReference> itemReferences = result.getItemReferences();
               view.setNextBtnActive(true);
               boolean hasPreviousResults =
-                  result.size() % SEARCH_RESULT_ITEMS == 0 && skipCount != 0;
+                  itemReferences.size() % SEARCH_RESULT_ITEMS == 0 && skipCount != 0;
               view.setPreviousBtnActive(hasPreviousResults);
               view.showResults(result, requestedString);
             });

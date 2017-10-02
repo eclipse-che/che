@@ -24,7 +24,7 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.resources.SearchResult;
+import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
@@ -41,7 +41,7 @@ public class FoundItemNode extends AbstractTreeNode implements HasPresentation {
   private FindResultNodeFactory nodeFactory;
   private PromiseProvider promiseProvider;
   private Resources resources;
-  private SearchResult searchResult;
+  private SearchItemReference searchItemReference;
   private String request;
 
   @Inject
@@ -49,12 +49,12 @@ public class FoundItemNode extends AbstractTreeNode implements HasPresentation {
       FindResultNodeFactory nodeFactory,
       PromiseProvider promiseProvider,
       Resources resources,
-      @Assisted SearchResult searchResult,
+      @Assisted SearchItemReference searchItemReference,
       @Assisted String request) {
     this.nodeFactory = nodeFactory;
     this.promiseProvider = promiseProvider;
     this.resources = resources;
-    this.searchResult = searchResult;
+    this.searchItemReference = searchItemReference;
     this.request = request;
   }
 
@@ -75,7 +75,7 @@ public class FoundItemNode extends AbstractTreeNode implements HasPresentation {
   /** {@inheritDoc} */
   @Override
   public String getName() {
-    return searchResult.getName();
+    return searchItemReference.getName();
   }
 
   /** {@inheritDoc} */
@@ -89,9 +89,9 @@ public class FoundItemNode extends AbstractTreeNode implements HasPresentation {
   public void updatePresentation(@NotNull NodePresentation presentation) {
     StringBuilder resultTitle = new StringBuilder();
     resultTitle.append(" (");
-    resultTitle.append(searchResult.getOccurrences().size());
+    resultTitle.append(searchItemReference.getOccurrences().size());
     resultTitle.append(" occurrence");
-    if (searchResult.getOccurrences().size() > 1) {
+    if (searchItemReference.getOccurrences().size() > 1) {
       resultTitle.append('s');
     }
     resultTitle.append(" of '");
@@ -100,15 +100,15 @@ public class FoundItemNode extends AbstractTreeNode implements HasPresentation {
     resultTitle.append(" found)");
     presentation.setPresentableText(resultTitle.toString());
     SpanElement spanElement = Elements.createSpanElement(resources.coreCss().foundItem());
-    spanElement.setId(searchResult.getPath());
-    spanElement.setInnerText(searchResult.getPath());
+    spanElement.setId(searchItemReference.getPath());
+    spanElement.setInnerText(searchItemReference.getPath());
     presentation.setUserElement((Element) spanElement);
   }
 
   @Override
   protected Promise<List<Node>> getChildrenImpl() {
     List<Node> fileNodes;
-    List<SearchOccurrence> occurrences = searchResult.getOccurrences();
+    List<SearchOccurrence> occurrences = searchItemReference.getOccurrences();
     occurrences.sort(
         Comparator.comparingInt(
             (SearchOccurrence searchOccurrence) -> searchOccurrence.getLineNumber()));
@@ -117,7 +117,7 @@ public class FoundItemNode extends AbstractTreeNode implements HasPresentation {
             .stream()
             .map(
                 occurrence ->
-                    nodeFactory.newFoundOccurrenceNode(occurrence, searchResult.getPath()))
+                    nodeFactory.newFoundOccurrenceNode(occurrence, searchItemReference.getPath()))
             .collect(Collectors.toList());
     return promiseProvider.resolve(fileNodes);
   }
