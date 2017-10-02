@@ -32,7 +32,8 @@ public class FsDtoConverter implements org.eclipse.che.api.fs.api.FsDtoConverter
   private final FsManager fsManager;
 
   @Inject
-  public FsDtoConverter(PathResolver pathResolver, ProjectManager projectManager, FsManager fsManager) {
+  public FsDtoConverter(PathResolver pathResolver, ProjectManager projectManager,
+      FsManager fsManager) {
     this.pathResolver = pathResolver;
     this.projectManager = projectManager;
     this.fsManager = fsManager;
@@ -40,10 +41,13 @@ public class FsDtoConverter implements org.eclipse.che.api.fs.api.FsDtoConverter
 
   @Override
   public ItemReference asDto(String wsPath) throws NotFoundException {
-    File file = pathResolver.toFsPath(wsPath).toFile();
+    if (!fsManager.exists(wsPath)) {
+      throw new NotFoundException("Can't find item: " + wsPath);
+    }
 
+    File file = pathResolver.toFsPath(wsPath).toFile();
     String name = file.getName();
-    String project = projectManager.getClosest(wsPath).orElseThrow(exception()).getName();
+    String projectPath = projectManager.getClosest(wsPath).orElseThrow(exception()).getPath();
     String type = fsManager.isFile(wsPath) ? "file" : "folder";
     long lastModified = fsManager.lastModified(wsPath);
 
@@ -51,7 +55,7 @@ public class FsDtoConverter implements org.eclipse.che.api.fs.api.FsDtoConverter
         newDto(ItemReference.class)
             .withName(name)
             .withPath(wsPath)
-            .withProject(project)
+            .withProject(projectPath)
             .withType(type)
             .withModified(lastModified);
 

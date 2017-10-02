@@ -12,6 +12,8 @@ package org.eclipse.che.api.fs.search;
 
 import static com.google.common.collect.Sets.newHashSet;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -20,6 +22,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.tika.config.TikaConfig;
+import org.apache.tika.detect.Detector;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
@@ -38,6 +41,7 @@ import org.eclipse.che.api.fs.api.PathResolver;
  */
 @Singleton
 public class MediaTypesExcludeMatcher implements PathMatcher {
+
   private final Set<MediaType> excludedMediaTypes;
   private final Set<String> excludedTypes;
 
@@ -55,12 +59,21 @@ public class MediaTypesExcludeMatcher implements PathMatcher {
   @Override
   public boolean matches(Path fsPath) {
     String wsPath = pathResolver.toWsPath(fsPath);
+
+    MediaType mimeType;
     try (InputStream content = fileSystemManager.readFileAsInputStream(wsPath)) {
-      TikaConfig tikaConfig = new TikaConfig();
-      MediaType mimeType = tikaConfig.getDetector().detect(content, new Metadata());
-      return excludedMediaTypes.contains(mimeType) || excludedTypes.contains(mimeType.getType());
-    } catch (TikaException | IOException | NotFoundException | ServerException e) {
-      return true;
+      mimeType = new TikaConfig().getDetector().detect(content, new Metadata());
+    } catch (TikaException | IOException | NotFoundException | ServerException e0) {
+      try {
+        // https://issues.apache.org/jira/browse/TIKA-2395
+        byte[] content = fileSystemManager.readFileAsByteArray(wsPath);
+        ByteArrayInputStream bais = new ByteArrayInputStream(content);
+        mimeType = new TikaConfig().getDetector().detect(bais, new Metadata());
+      } catch (TikaException | IOException | NotFoundException | ServerException e1) {
+        return true;
+      }
     }
+
+    return excludedMediaTypes.contains(mimeType) || excludedTypes.contains(mimeType.getType());
   }
 }

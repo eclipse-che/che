@@ -94,7 +94,7 @@ public class WsMasterJsonRpcInitializer {
     }
 
     String separator = url.contains("?") ? "&" : "?";
-    Optional<String> appWebSocketId = appContext.getApplicationWebsocketId();
+    Optional<String> appWebSocketId = appContext.getApplicationId();
     String queryParams = appWebSocketId.map(id -> separator + "clientId=" + id).orElse("");
     String wsMasterEndpointURL = url + queryParams;
 

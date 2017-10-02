@@ -59,7 +59,7 @@ public class ProjectImportOutputJsonRpcNotifier implements ProjectNotificationSu
     eventBus.addHandler(
         WsAgentServerStoppedEvent.TYPE,
         e -> {
-          requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
+          requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS);
           if (singletonNotification != null) {
             singletonNotification.setStatus(FAIL);
             singletonNotification.setContent("");
@@ -74,7 +74,7 @@ public class ProjectImportOutputJsonRpcNotifier implements ProjectNotificationSu
 
     configurator
         .newConfiguration()
-        .methodName(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName)
+        .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
         .paramsAsDto(ImportProgressRecordDto.class)
         .noResult()
         .withConsumer(
@@ -94,7 +94,7 @@ public class ProjectImportOutputJsonRpcNotifier implements ProjectNotificationSu
 
   @Override
   public void onSuccess() {
-    requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
+    requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS);
 
     singletonNotification.setStatus(SUCCESS);
     singletonNotification.setTitle(locale.importProjectMessageSuccess(projectName));
@@ -103,7 +103,7 @@ public class ProjectImportOutputJsonRpcNotifier implements ProjectNotificationSu
 
   @Override
   public void onFailure(String errorMessage) {
-    requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS + "/" + projectName);
+    requestHandlerManager.deregister(EVENT_IMPORT_OUTPUT_PROGRESS);
 
     singletonNotification.setStatus(FAIL);
     singletonNotification.setContent(errorMessage);

@@ -434,7 +434,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
   }
 
   @Override
-  public Optional<String> getApplicationWebsocketId() {
+  public Optional<String> getApplicationId() {
     return Optional.ofNullable(applicationWebsocketId);
   }
 

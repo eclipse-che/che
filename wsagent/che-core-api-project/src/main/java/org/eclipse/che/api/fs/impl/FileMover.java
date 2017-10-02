@@ -27,17 +27,12 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class FileMover {
-
   private static final Logger LOG = LoggerFactory.getLogger(FileMover.class);
 
-  private final FileCopier fileCopier;
-  private final FileDeleter fileDeleter;
   private final PathResolver pathResolver;
 
   @Inject
-  public FileMover(FileCopier fileCopier, FileDeleter fileDeleter, PathResolver pathResolver) {
-    this.fileCopier = fileCopier;
-    this.fileDeleter = fileDeleter;
+  public FileMover(PathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
 

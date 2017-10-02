@@ -152,13 +152,20 @@ public class ProjectServiceClient {
    * @param path path to the future project
    * @param source source configuration
    * @return a promise that will resolve when the project has been imported, or rejects with an
-   *     error
+   * error
    * @see Path
    * @see SourceStorageDto
    * @since 4.4.0
    */
   public Promise<Void> importProject(Path path, SourceStorageDto source) {
     String url = getBaseUrl() + IMPORT + encodePath(path);
+
+    if (url.contains("?")) {
+      url += "&clientId=" + appContext.getApplicationId().orElse("");
+    } else {
+
+      url += "?clientId=" + appContext.getApplicationId().orElse("");
+    }
 
     return reqFactory.createPostRequest(url, source).header(CONTENT_TYPE, APPLICATION_JSON).send();
   }
@@ -229,6 +236,7 @@ public class ProjectServiceClient {
     for (String key : options.keySet()) {
       urlBuilder.setParameter(key, options.get(key));
     }
+    urlBuilder.setParameter("clientId", appContext.getApplicationId().orElse(""));
     return reqFactory
         .createPostRequest(urlBuilder.buildString(), configuration)
         .header(ACCEPT, APPLICATION_JSON)
@@ -241,16 +249,12 @@ public class ProjectServiceClient {
    *
    * <p>Notes: a project will be created by importing when project configuration contains {@link
    * SourceStorageDto} object, otherwise this one will be created corresponding its {@link
-   * NewProjectConfigDto}:
-   * <li>- {@link NewProjectConfigDto} object contains only one mandatory {@link
-   *     NewProjectConfigDto#setPath(String)} field. In this case Project will be created as project
-   *     of "blank" type
-   * <li>- a project will be created as project of "blank" type when declared primary project type
-   *     is not registered,
-   * <li>- a project will be created without mixin project type when declared mixin project type is
-   *     not registered
-   * <li>- for creating a project by generator {@link NewProjectConfigDto#getOptions()} should be
-   *     specified.
+   * NewProjectConfigDto}: <li>- {@link NewProjectConfigDto} object contains only one mandatory
+   * {@link NewProjectConfigDto#setPath(String)} field. In this case Project will be created as
+   * project of "blank" type <li>- a project will be created as project of "blank" type when
+   * declared primary project type is not registered, <li>- a project will be created without mixin
+   * project type when declared mixin project type is not registered <li>- for creating a project by
+   * generator {@link NewProjectConfigDto#getOptions()} should be specified.
    *
    * @param configurations the list of configurations to creating projects
    * @return {@link Promise} with the list of {@link ProjectConfigDto}
@@ -258,7 +262,15 @@ public class ProjectServiceClient {
    */
   public Promise<List<ProjectConfigDto>> createBatchProjects(
       List<NewProjectConfigDto> configurations) {
-    final String url = getBaseUrl() + BATCH_PROJECTS;
+    String url = getBaseUrl() + BATCH_PROJECTS;
+
+    if (url.contains("?")) {
+      url += "&clientId=" + appContext.getApplicationId().orElse("");
+    } else {
+
+      url += "?clientId=" + appContext.getApplicationId().orElse("");
+    }
+
     final String loaderMessage =
         configurations.size() > 1 ? "Creating the batch of projects..." : "Creating project...";
     return reqFactory

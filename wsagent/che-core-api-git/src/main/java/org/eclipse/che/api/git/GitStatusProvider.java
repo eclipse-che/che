@@ -11,6 +11,10 @@
 package org.eclipse.che.api.git;
 
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.ADDED;
+import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.MODIFIED;
+import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.NOT_MODIFIED;
+import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.UNTRACKED;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,14 +72,14 @@ public class GitStatusProvider implements VcsStatusProvider {
       Status status =
           gitConnectionFactory.getConnection(projectFsPath).status(singletonList(itemPath));
       if (status.getUntracked().contains(itemPath)) {
-        return VcsStatus.UNTRACKED;
+        return UNTRACKED;
       } else if (status.getAdded().contains(itemPath)) {
-        return VcsStatus.ADDED;
+        return ADDED;
       } else if (status.getModified().contains(itemPath)
           || status.getChanged().contains(itemPath)) {
-        return VcsStatus.MODIFIED;
+        return MODIFIED;
       } else {
-        return VcsStatus.NOT_MODIFIED;
+        return NOT_MODIFIED;
       }
     } catch (GitException | NotFoundException e) {
       throw new ServerException(e.getMessage());
@@ -95,14 +99,15 @@ public class GitStatusProvider implements VcsStatusProvider {
       Status status = gitConnectionFactory.getConnection(projectFsPath).status(paths);
       paths.forEach(
           path -> {
+            String itemWsPath = project.getPath() + "/" + path;
             if (status.getUntracked().contains(path)) {
-              statusMap.put("/" + project + "/" + path, VcsStatus.UNTRACKED);
+              statusMap.put(itemWsPath, UNTRACKED);
             } else if (status.getAdded().contains(path)) {
-              statusMap.put("/" + project + "/" + path, VcsStatus.ADDED);
+              statusMap.put(itemWsPath, ADDED);
             } else if (status.getModified().contains(path) || status.getChanged().contains(path)) {
-              statusMap.put("/" + project + "/" + path, VcsStatus.MODIFIED);
+              statusMap.put(itemWsPath, MODIFIED);
             } else {
-              statusMap.put("/" + project + "/" + path, VcsStatus.NOT_MODIFIED);
+              statusMap.put(itemWsPath, NOT_MODIFIED);
             }
           });
 

@@ -42,7 +42,7 @@ public class FileCopier {
     Path dstFsPath = pathResolver.toFsPath(dstWsPath);
 
     mustExist(srcFsPath);
-    mustExist(dstFsPath);
+    mustNotExist(dstFsPath);
 
     Path fileName = srcFsPath.getFileName();
 

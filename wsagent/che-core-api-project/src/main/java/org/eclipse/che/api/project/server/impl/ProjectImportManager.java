@@ -266,7 +266,7 @@ public class ProjectImportManager {
       NotFoundException {
     String type = sourceStorage.getType();
 
-    String parentWsPath = wsPath.substring(0, wsPath.lastIndexOf(separator));
+    String parentWsPath = pathResolver.getParentWsPath(wsPath);
     if (!fsManager.existsAsDirectory(parentWsPath)) {
       throw new NotFoundException("Project parent does not exist: " + parentWsPath);
     }
@@ -275,7 +275,7 @@ public class ProjectImportManager {
       throw new ConflictException("Project already exists: " + wsPath);
     }
 
-    if (projectImporterRegistry.isRegistered(type)) {
+    if (!projectImporterRegistry.isRegistered(type)) {
       throw new NotFoundException("No corresponding importer found: " + type);
     }
     try {

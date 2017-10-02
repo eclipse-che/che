@@ -209,9 +209,8 @@ public class ProjectService extends Service {
       @ApiResponse(code = 500, message = "Server error")
   })
   @GenerateLink(rel = LINK_REL_CREATE_PROJECT)
-  /** NOTE: parentPath is added to make a module */
   public ProjectConfigDto createProject(
-      @ApiParam(value = "Add to this project as module", required = false) @Context UriInfo uriInfo,
+      @ApiParam(value = "Add to this project as module") @Context UriInfo uriInfo,
       @Description("descriptor of project") ProjectConfigDto projectConfig)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
       BadRequestException {
@@ -324,7 +323,14 @@ public class ProjectService extends Service {
   public void delete(@ApiParam("Path to a resource to be deleted") @PathParam("path") String wsPath)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
     wsPath = pathResolver.toAbsoluteWsPath(wsPath);
-    projectManager.delete(wsPath);
+
+    if (fsManager.isFile(wsPath)) {
+      fsManager.deleteFile(wsPath);
+    } else if (projectManager.isRegistered(wsPath)) {
+      projectManager.delete(wsPath);
+    } else {
+      fsManager.deleteDirectory(wsPath);
+    }
   }
 
   @GET
@@ -462,14 +468,15 @@ public class ProjectService extends Service {
         new ProjectItemModifiedEvent(
             ProjectItemModifiedEvent.EventType.CREATED, workspace, project, wsPath, false));
 
-    final URI location =
+    URI location =
         getServiceContext()
             .getServiceUriBuilder()
             .clone()
             .path(getClass(), "getFile")
             .build(new String[]{wsPath.substring(1)}, false);
     return Response.created(location)
-        .entity(injectFileLinks(vcsStatusInjector.injectVcsStatus(fsDtoConverter.asDto(wsPath))))
+        .entity(injectFileLinks(
+            vcsStatusInjector.injectVcsStatus(fsDtoConverter.asDto(wsPath)))) // TODO refactor
         .build();
   }
 
@@ -642,7 +649,7 @@ public class ProjectService extends Service {
     String name = getNameValue(copyOptions, wsPath);
     boolean overwrite = getOverwriteValue(copyOptions);
 
-    pathResolver.resolve(newParentWsPath, name);
+    pathResolver.resolve(newParentWsPath, name); // TODO refactor
     String dstWsPath = newParentWsPath + separator + name;
 
     boolean isProject = projectManager.isRegistered(wsPath);
@@ -1000,7 +1007,7 @@ public class ProjectService extends Service {
     List<SearchResultDto> results = new ArrayList<>(searchResultEntries.size());
     for (SearchResultEntry searchResultEntry : searchResultEntries) {
       String path = searchResultEntry.getFilePath();
-      if (fsManager.existsAsDirectory(path)) {
+      if (fsManager.existsAsFile(path)) {
         ItemReference asDto = fsDtoConverter.asDto(path);
         ItemReference itemReference = injectFileLinks(asDto);
         List<LuceneSearcher.OffsetData> datas = searchResultEntry.getData();
@@ -1059,7 +1066,8 @@ public class ProjectService extends Service {
 
       transmitter
           .newRequest()
-          .endpointId(clientId)
+          // TODO will be fixed after we start properly distinguish server side endpoints
+          .endpointId(clientId+"<-:->ws-agent-websocket-endpoint")
           .methodName(EVENT_IMPORT_OUTPUT_PROGRESS)
           .paramsAsDto(progressRecord)
           .sendAndSkipResult();

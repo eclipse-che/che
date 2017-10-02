@@ -72,7 +72,7 @@ public class PathResolver implements org.eclipse.che.api.fs.api.PathResolver {
 
   @Override
   public String getName(String wsPath) {
-    return wsPath.substring(wsPath.lastIndexOf("/"));
+    return wsPath.substring(wsPath.lastIndexOf("/") + 1);
   }
 
   @Override
