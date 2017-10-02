@@ -13,6 +13,8 @@ package org.eclipse.che.plugin.openshift.client;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerStateRunning;
@@ -57,6 +59,7 @@ import io.fabric8.openshift.api.model.ImageStream;
 import io.fabric8.openshift.api.model.ImageStreamTag;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftConfig;
 import io.fabric8.openshift.client.dsl.DeployableScalableResource;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -85,6 +88,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import okhttp3.OkHttpClient;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.event.ServerIdleEvent;
@@ -114,6 +118,7 @@ import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.client.json.SystemInfo;
+import org.eclipse.che.plugin.docker.client.json.Version;
 import org.eclipse.che.plugin.docker.client.json.network.ContainerInNetwork;
 import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
 import org.eclipse.che.plugin.docker.client.json.network.Ipam;
@@ -272,6 +277,24 @@ public class OpenShiftConnector extends DockerConnector {
             idleCheServer(event);
           }
         });
+  }
+
+  @Override
+  public Version getVersion() throws IOException {
+    OpenShiftClient openShiftClient = new DefaultOpenShiftClient();
+    final OpenShiftClientExtension client =
+        new OpenShiftClientExtension(
+            openShiftClient.adapt(OkHttpClient.class),
+            OpenShiftConfig.wrap(openShiftClient.getConfiguration()));
+    String versionString = client.getVersion();
+    if (isNullOrEmpty(versionString)) {
+      return null;
+    }
+    final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    OpenShiftVersion openShiftVersion = gson.fromJson(versionString, OpenShiftVersion.class);
+    Version version = openShiftVersion.getVersion();
+    version.setApiVersion(client.getApiVersion());
+    return version;
   }
 
   private void idleCheServer(ServerIdleEvent event) {
