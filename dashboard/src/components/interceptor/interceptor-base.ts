@@ -10,8 +10,10 @@
  */
 'use strict';
 
-// This class solves problem with losing the `this` binding of instance methods.
-// See http://www.couchcoder.com/angular-1-interceptors-using-typescript/
+/**
+ * This class solves problem with losing the `this` binding of instance methods.
+ * See http://www.couchcoder.com/angular-1-interceptors-using-typescript/
+ */
 
 export abstract class HttpInterceptorBase {
   constructor() {

@@ -25,7 +25,6 @@ export class Permissions {
      */
     authData:AuthData;
 
-
     constructor(authData:AuthData) {
         this.authData = authData;
     }
@@ -36,9 +35,9 @@ export class Permissions {
      */
     listPermissions():Promise<Array<DomainDto>> {
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/permissions', 200);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/permissions', 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
-            let domainsDto:Array<DomainDto> = new Array<DomainDto>();
+            let domainsDto:Array<DomainDto> = [];
             JSON.parse(jsonResponse.getData()).forEach((entry)=> {
                 domainsDto.push(new DomainDto(entry));
             });
@@ -52,16 +51,16 @@ export class Permissions {
      */
     getPermission(domain:string):Promise<PermissionDto> {
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/permissions/' + domain, 200);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/permissions/' + domain, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return new PermissionDto(JSON.parse(jsonResponse.getData()));
-        }, (error) => {
+        }, () => {
             return new PermissionDto({});
         });
     }
 
     updatePermissions(permissionDto:PermissionDto) {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/permissions', 204);
+        let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/permissions', 204);
         return jsonRequest.setMethod('POST').setBody(permissionDto.getContent()).request().then((jsonResponse:HttpJsonResponse) => {
             return new PermissionDto(jsonResponse.getData());
         });
@@ -71,7 +70,7 @@ export class Permissions {
     copyCurrentPermissionsToUser(newUserId:string):Promise<boolean> {
         return this.listPermissions().then(
             (domainsDto:Array<DomainDto>) => {
-                let adminPermissionsPromises:Array<Promise<PermissionDto>> = new Array<Promise<PermissionDto>>();
+                let adminPermissionsPromises:Array<Promise<PermissionDto>> = [];
                 domainsDto.forEach((domain) => {
                     adminPermissionsPromises.push(this.getPermission(domain.getContent().id));
                 });
@@ -79,7 +78,7 @@ export class Permissions {
             }
         ).then((adminsPermissions:Array<PermissionDto>) => {
 
-            let updatedPermissionsPromises:Array<Promise<PermissionDto>> = new Array<Promise<PermissionDto>>();
+            let updatedPermissionsPromises:Array<Promise<PermissionDto>> = [];
             adminsPermissions.forEach((adminPermission:PermissionDto)=> {
                 if (adminPermission.getContent().domain) {
                     // we replace the user by the new user

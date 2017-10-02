@@ -29,7 +29,7 @@ import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -70,7 +70,7 @@ public class PullRequestPluginTest {
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
-  @Inject private DefaultTestUser productUser;
+  @Inject private TestUser productUser;
 
   @Inject
   @Named("github.username")
@@ -80,7 +80,7 @@ public class PullRequestPluginTest {
   @Named("github.password")
   private String gitHubPassword;
 
-  @Inject private DefaultTestUser user;
+  @Inject private TestUser user;
   @Inject private Loader loader;
   @Inject private ImportProjectFromLocation importWidget;
   @Inject private Menu menu;

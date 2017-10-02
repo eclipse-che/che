@@ -184,9 +184,10 @@ public class AutocompleteFeaturesInEditorTest {
   //need for check ready - state the ide editor
   private void reparseEditorCode() {
     editor.setCursorToLine(36);
-    editor.typeTextIntoEditor("a");
+    editor.typeTextIntoEditor("a;");
     editor.waitMarkerInPosition(ERROR_MARKER, 36);
     editor.typeTextIntoEditor(Keys.END.toString());
+    editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     editor.waitMarkerDisappears(ERROR_MARKER, 36);
   }

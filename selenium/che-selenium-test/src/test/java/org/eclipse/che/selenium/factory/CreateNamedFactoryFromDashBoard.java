@@ -20,7 +20,7 @@ import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -43,7 +43,7 @@ public class CreateNamedFactoryFromDashBoard {
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
-  @Inject private DefaultTestUser user;
+  @Inject private TestUser user;
   @Inject private DashboardFactory dashboardFactory;
   @Inject private Dashboard dashboard;
   @Inject private LoadingBehaviorPage loadingBehaviorPage;

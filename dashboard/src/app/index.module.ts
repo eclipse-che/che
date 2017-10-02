@@ -38,6 +38,7 @@ import {RouteHistory} from '../components/routing/route-history.service';
 import {CheUIElementsInjectorService} from '../components/service/injector/che-ui-elements-injector.service';
 import {OrganizationsConfig} from './organizations/organizations-config';
 import {TeamsConfig} from './teams/teams-config';
+import {ProfileConfig} from './profile/profile-config';
 
 // init module
 const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
@@ -161,7 +162,7 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
 const DEV = false;
 
 // configs
-initModule.config(['$routeProvider', ($routeProvider) => {
+initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
   // config routes (add demo page)
   if (DEV) {
     $routeProvider.accessWhen('/demo-components', {
@@ -411,4 +412,5 @@ new StacksConfig(instanceRegister);
 new FactoryConfig(instanceRegister);
 new OrganizationsConfig(instanceRegister);
 new TeamsConfig(instanceRegister);
+new ProfileConfig(instanceRegister);
 /* tslint:enable */

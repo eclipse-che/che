@@ -26,6 +26,7 @@ public class KeycloakConstants {
   public static final String PASSWORD_ENDPOINT_SETTING =
       KEYCLOAK_SETTING_PREFIX + "password.endpoint";
   public static final String LOGOUT_ENDPOINT_SETTING = KEYCLOAK_SETTING_PREFIX + "logout.endpoint";
+  public static final String TOKEN_ENDPOINT_SETTING = KEYCLOAK_SETTING_PREFIX + "token.endpoint";
   public static final String GITHUB_ENDPOINT_SETTING = KEYCLOAK_SETTING_PREFIX + "github.endpoint";
 
   public static String getEndpoint(String apiEndpoint) {

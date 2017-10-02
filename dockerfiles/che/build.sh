@@ -5,8 +5,6 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-set -e
-
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
@@ -34,7 +32,6 @@ build
 
 # Build che-multiuser
 # grab assembly
-DIR=$(cd "$(dirname "$0")"; pwd)
 if [ ! -d "${DIR}/../../assembly-multiuser/assembly-main/target" ]; then
   echo "${ERROR}Have you built assembly-multiuser/assemby-main in ${DIR}/../assembly-multiuser/assembly-main 'mvn clean install'?"
   exit 2

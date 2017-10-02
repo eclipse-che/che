@@ -10,7 +10,8 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -18,6 +19,7 @@ import io.jsonwebtoken.SignatureException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyFactory;
@@ -43,6 +45,8 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
+  private static final Gson GSON = new Gson();
+  private static final Type STRING_MAP_TYPE = new TypeToken<Map<String, String>>() {}.getType();
 
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakAuthenticationFilter.class);
 
@@ -115,18 +119,15 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
       publicKey = null;
     }
     if (publicKey == null) {
-      URL url;
-      HttpURLConnection conn;
+      HttpURLConnection conn = null;
       try {
-        url = new URL(authServerUrl + "/realms/" + realm);
+        URL url = new URL(authServerUrl + "/realms/" + realm);
         LOG.info("Pulling realm public key from URL : {}", url);
         conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         Map<String, String> realmSettings;
         try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-          ObjectMapper mapper = new ObjectMapper();
-          //noinspection unchecked
-          realmSettings = mapper.readValue(in, Map.class);
+          realmSettings = GSON.fromJson(in, STRING_MAP_TYPE);
         }
         String encodedPublicKey = realmSettings.get("public_key");
         byte[] decoded = Base64.getDecoder().decode(encodedPublicKey);
@@ -135,6 +136,10 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
         publicKey = kf.generatePublic(keySpec);
       } catch (IOException e) {
         LOG.error("Exception during retrieval of the Keycloak realm public key", e);
+      } finally {
+        if (conn != null) {
+          conn.disconnect();
+        }
       }
     }
     return publicKey;

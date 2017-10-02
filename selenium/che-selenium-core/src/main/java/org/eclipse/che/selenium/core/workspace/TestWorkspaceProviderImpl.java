@@ -27,7 +27,6 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.ConfigurationException;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   private final int poolSize;
   private final ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
   private final ScheduledExecutorService executor;
-  private final DefaultTestUser defaultUser;
+  private final TestUser defaultUser;
   private final int defaultMemoryGb;
   private final TestWorkspaceServiceClient testWorkspaceServiceClient;
   private final TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
@@ -55,7 +54,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   public TestWorkspaceProviderImpl(
       @Named("sys.threads") int threads,
       @Named("workspace.default_memory_gb") int defaultMemoryGb,
-      DefaultTestUser defaultUser,
+      TestUser defaultUser,
       WorkspaceDtoDeserializer workspaceDtoDeserializer,
       TestWorkspaceServiceClient testWorkspaceServiceClient,
       TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
@@ -93,7 +92,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         owner,
         memoryGB,
         workspaceDtoDeserializer.deserializeWorkspaceTemplate(template),
-        testWorkspaceServiceClientFactory.create(owner.getAuthToken()));
+        testWorkspaceServiceClientFactory.create(owner.getEmail(), owner.getPassword()));
   }
 
   private boolean hasDefaultValues(TestUser testUser, int memoryGB, String template) {

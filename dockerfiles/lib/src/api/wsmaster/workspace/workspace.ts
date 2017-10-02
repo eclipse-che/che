@@ -9,7 +9,7 @@
  *   Red Hat, Inc.- initial API and implementation
  */
 
-import {org} from "../../../api/dto/che-dto"
+import {org} from "../../dto/che-dto"
 import {AuthData} from "../auth/auth-data";
 import {Websocket} from "../../../spi/websocket/websocket";
 import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
@@ -51,7 +51,7 @@ export class Workspace {
      * Get all workspaces
      */
     getWorkspaces():Promise<Array<org.eclipse.che.api.workspace.shared.dto.WorkspaceDto>> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/', 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/', 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asArrayDto(org.eclipse.che.api.workspace.shared.dto.WorkspaceDtoImpl);
         });
@@ -102,7 +102,7 @@ export class Workspace {
         // TODO use ram ?
         //createWorkspaceConfig.ram
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace?account=', 201).setMethod('POST').setBody(workspaceConfigDto);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace?account=', 201).setMethod('POST').setBody(workspaceConfigDto);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.workspace.shared.dto.WorkspaceDtoImpl);
         });
@@ -134,7 +134,7 @@ export class Workspace {
             }
             return userWorkspaceDto;
         }).then((workspaceDto) => {
-            var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime?environment=default', 200).setMethod('POST');
+            var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/' + workspaceId + '/runtime?environment=default', 200).setMethod('POST');
             return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
                 return jsonResponse.asDto(org.eclipse.che.api.workspace.shared.dto.WorkspaceDtoImpl);
             }).then((workspaceDto) => {
@@ -161,7 +161,7 @@ export class Workspace {
             }
         }
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + key, 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/' + key, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             Log.getLogger().debug('got workspace with key', key, 'result: ', jsonResponse.getData());
             return jsonResponse.asDto(org.eclipse.che.api.workspace.shared.dto.WorkspaceDtoImpl);
@@ -183,7 +183,7 @@ export class Workspace {
      * Get a workspace data by returning a Promise with WorkspaceDto.
      */
     getWorkspace(workspaceId:string):Promise<org.eclipse.che.api.workspace.shared.dto.WorkspaceDto> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId, 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/' + workspaceId, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return jsonResponse.asDto(org.eclipse.che.api.workspace.shared.dto.WorkspaceDtoImpl);
         });
@@ -193,13 +193,6 @@ export class Workspace {
     getMessageBus(workspaceDto:org.eclipse.che.api.workspace.shared.dto.WorkspaceDto): Promise<MessageBus> {
         // get id
         let workspaceId:string = workspaceDto.getId();
-
-        var protocol:string;
-        if (this.authData.isSecured()) {
-            protocol = 'wss';
-        } else {
-            protocol = 'ws';
-        }
 
         // get links for WS
         var link:string;
@@ -217,7 +210,7 @@ export class Workspace {
      * Delete a workspace and returns a Promise with WorkspaceDto.
      */
     deleteWorkspace(workspaceId:string):Promise<org.eclipse.che.api.workspace.shared.dto.WorkspaceDto> {
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId, 204).setMethod('DELETE');
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/' + workspaceId, 204).setMethod('DELETE');
         return this.getWorkspace(workspaceId).then((workspaceDto:org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) => {
             return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
                 return workspaceDto;
@@ -231,7 +224,7 @@ export class Workspace {
      */
     stopWorkspace(workspaceId:string):Promise<org.eclipse.che.api.workspace.shared.dto.WorkspaceDto> {
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime', 204).setMethod('DELETE');
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/workspace/' + workspaceId + '/runtime', 204).setMethod('DELETE');
         var callbackSubscriber:WorkspaceStopEventPromiseMessageBusSubscriber;
 
         var userWorkspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -272,7 +265,7 @@ export class Workspace {
     getMachineToken(workspaceDto:org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) {
 
 
-        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/machine/token/' + workspaceDto.getId(), 200);
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/machine/token/' + workspaceDto.getId(), 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return JSON.parse(jsonResponse.getData()).machineToken;
         });
