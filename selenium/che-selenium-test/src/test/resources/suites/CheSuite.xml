@@ -38,7 +38,20 @@
                     <exclude name="checkLaunchingCodeserver"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest">
+                <methods>
+                    <exclude name="shouldDeleteOpenedProjectByMenuFile"/>
+                </methods>
+                <methods>
+                    <exclude name="shouldDeleteOpenedProjectFromContextMenu"/>
+                </methods>
+                <methods>
+                    <exclude name="shouldDeleteProjectByContextMenu"/>
+                </methods>
+                <methods>
+                    <exclude name="shouldDeleteProjectByDeleteIcon"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.dashboard.DeleteRunningWorkspaceTest"/>
             <class name="org.eclipse.che.selenium.dashboard.DeleteStoppingWorkspaceTest"/>
             <class name="org.eclipse.che.selenium.dashboard.ImportMavenProjectFromGitHubTest"/>
@@ -87,7 +100,11 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.MultimoduleProjectDebuggingTest"/>
-            <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest"/>
+            <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest">
+                <methods>
+                    <exclude name="debugNodeJsTest"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.debugger.PhpProjectDebuggingTest">
                 <methods>
                     <exclude name="shouldDebugCliPhpScriptFromFirstLine"/>
@@ -254,7 +271,11 @@
                     <exclude name="shouldCreateDifferentTypesCommandsInDifferentGoals"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.intelligencecommand.CheckIntelligenceCommandFromToolbarTest"/>
+            <class name="org.eclipse.che.selenium.intelligencecommand.CheckIntelligenceCommandFromToolbarTest">
+                <methods>
+                    <exclude name="checkButtonsOnToolbar"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.intelligencecommand.CommandsEditorTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.CommandsPaletteTest">
                 <methods>
@@ -272,6 +293,9 @@
                 </methods>
                 <methods>
                     <exclude name="mavenStatusBarShouldDisplayResolvingProjectMessage"/>
+                </methods>
+                <methods>
+                    <exclude name="shouldExecuteCommandAndWaitTextInConsole"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.mavenplugin.GenerateEffectivePomTest"/>
@@ -377,6 +401,9 @@
                 </methods>
                 <methods>
                     <exclude name="shouldExecuteTestMethodsSuccessfully"/>
+                </methods>
+                <methods>
+                    <exclude name="shouldExecuteAlltets"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.preferences.CheckErrorsWarningsTabTest"/>
