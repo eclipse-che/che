@@ -8,11 +8,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+@external .git-change-marker, .insertion, .modification, .deletion;
+
 @eval insertion org.eclipse.che.ide.api.theme.Style.theme.vcsChangeMarkerInsertionColor();
 @eval modification org.eclipse.che.ide.api.theme.Style.theme.vcsChangeMarkerModificationColor();
 @eval deletion org.eclipse.che.ide.api.theme.Style.theme.vcsChangeMarkerDeletionColor();
 
-.markerInsertion:before {
+.git-change-marker.insertion:before {
     content: "";
     position: absolute;
     top: 0;
@@ -22,13 +24,13 @@
     background-color: insertion;
 }
 
-.markerInsertion {
+.git-change-marker.insertion {
     position: relative;
     font-size: 11px;
     line-height: 15px;
 }
 
-.markerModification:before {
+.git-change-marker.modification:before {
     content: "";
     position: absolute;
     top: 0;
@@ -38,24 +40,24 @@
     background-color: modification;
 }
 
-.markerModification {
+.git-change-marker.modification {
     position: relative;
     font-size: 11px;
     line-height: 15px;
 }
 
-.markerDeletion:before {
+.git-change-marker.deletion:before {
     content: "";
     position: absolute;
     top: 7px;
     z-index: 1;
     left: 0px;
-    border-bottom: 6px solid transparent;
-    border-top: 6px solid transparent;
-    border-left: 6px solid deletion;
+    border-bottom: 5px solid transparent;
+    border-top: 5px solid transparent;
+    border-left: 4px solid deletion;
 }
 
-.markerDeletion {
+.git-change-marker.deletion {
     position: relative;
     font-size: 11px;
     line-height: 15px;

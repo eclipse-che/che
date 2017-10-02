@@ -35,20 +35,21 @@ public class GitChangeMarkerRender implements VcsChangeMarkerRender {
   @Override
   public void addChangeMarker(int lineStart, int lineEnd, EditedRegionType type) {
     DivElement element;
+    GitResources.Css css = resources.changeMarkersCSS();
     switch (type) {
       case INSERTION:
         {
-          element = Elements.createDivElement(resources.changeMarkersCSS().markerInsertion());
+          element = Elements.createDivElement(css.marker(), css.insertion());
           break;
         }
       case MODIFICATION:
         {
-          element = Elements.createDivElement(resources.changeMarkersCSS().markerModification());
+          element = Elements.createDivElement(css.marker(), css.modification());
           break;
         }
       case DELETION:
         {
-          element = Elements.createDivElement(resources.changeMarkersCSS().markerDeletion());
+          element = Elements.createDivElement(css.marker(), css.deletion());
           break;
         }
       default:

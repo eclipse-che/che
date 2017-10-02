@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -59,6 +60,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class CodenvyEditor {
 
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
+  public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
 
   public static final class EditorContextMenu {
     public static final String REFACTORING = "contextMenu/Refactoring";
@@ -571,6 +573,88 @@ public class CodenvyEditor {
     expectedNumberOfActiveLine(position);
   }
 
+  /** Wait for no Git change markers in the opened editor. */
+  public void waitNoGitChangeMarkers() {
+
+    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+
+    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver ->
+                    rulerVcsElements
+                        .stream()
+                        .allMatch(element -> "".equals(element.getAttribute("class"))));
+  }
+
+  /**
+   * Wait for Git insertion marker in the opened editor.
+   *
+   * @param startLine line number of the markers start
+   * @param endLine line number of the markers end
+   */
+  public void waitGitInsertionMarkerInPosition(int startLine, int endLine) {
+
+    List<WebElement> rulerVcsElements =
+        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+
+    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> {
+                  for (int i = startLine; i <= endLine; i++) {
+                    if (!"git-change-marker insertion"
+                        .equals(rulerVcsElements.get(i).getAttribute("class"))) {
+                      return false;
+                    }
+                  }
+                  return true;
+                });
+  }
+
+  /**
+   * Wait for Git modification marker in the opened editor.
+   *
+   * @param startLine line number of the markers start
+   * @param endLine line number of the markers end
+   */
+  public void waitGitModificationMarkerInPosition(int startLine, int endLine) {
+
+    List<WebElement> rulerVcsElements =
+        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+
+    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> {
+                  for (int i = startLine; i <= endLine; i++) {
+                    if (!"git-change-marker modification"
+                        .equals(rulerVcsElements.get(i).getAttribute("class"))) {
+                      return false;
+                    }
+                  }
+                  return true;
+                });
+  }
+
+  /**
+   * Wait for Git deletion marker in the opened editor.
+   *
+   * @param line line number of the marker
+   */
+  public void waitGitDeletionMarkerInPosition(int line) {
+
+    List<WebElement> rulerVcsElements =
+        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+
+    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver ->
+                    "git-change-marker deletion"
+                        .equals(rulerVcsElements.get(line).getAttribute("class")));
+  }
+
   /**
    * wait the marker and click him
    *
@@ -903,6 +987,66 @@ public class CodenvyEditor {
             visibilityOfElementLocated(
                 By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile))))
         .click();
+  }
+
+  /**
+   * Wait editor's tab label to be colored in yellow.
+   *
+   * @param nameOfFile name of the tab
+   */
+  public void waitTabLabelToBeYellow(String nameOfFile) {
+    WebElement element =
+        seleniumWebDriver.findElement(
+            By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile)));
+    new WebDriverWait(seleniumWebDriver, 5)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> "rgba(224, 185, 29, 1)".equals(element.getCssValue("color")));
+  }
+
+  /**
+   * Wait editor's tab label to be colored in green.
+   *
+   * @param nameOfFile name of the tab
+   */
+  public void waitTabLabelToBeGreen(String nameOfFile) {
+    WebElement element =
+        seleniumWebDriver.findElement(
+            By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile)));
+    new WebDriverWait(seleniumWebDriver, 5)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> "rgba(114, 173, 66, 1)".equals(element.getCssValue("color")));
+  }
+
+  /**
+   * Wait editor's tab label to be colored in blue.
+   *
+   * @param nameOfFile name of the tab
+   */
+  public void waitTabLabelToBeBlue(String nameOfFile) {
+    WebElement element =
+        seleniumWebDriver.findElement(
+            By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile)));
+    new WebDriverWait(seleniumWebDriver, 5)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> "rgba(49, 147, 212, 1)".equals(element.getCssValue("color")));
+  }
+
+  /**
+   * Wait editor's tab label to be in colored default color.
+   *
+   * @param nameOfFile name of the tab
+   */
+  public void waitTabLabelToBeDefaultColor(String nameOfFile) {
+    WebElement element =
+        seleniumWebDriver.findElement(
+            By.xpath(String.format(Locators.TAB_FILE_NAME_XPATH, nameOfFile)));
+    new WebDriverWait(seleniumWebDriver, 5)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> "rgba(255, 255, 255, 1)".equals(element.getCssValue("color")));
   }
 
   /**
