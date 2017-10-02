@@ -113,9 +113,13 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
   private KeycloakToken requestToken(String grandType, List<Pair<String, ?>> params) {
     KeycloakToken token = null;
     HttpURLConnection http = null;
-    final String keycloakApiEndpoint = keycloakSettings.getKeycloakTokenEndpoint();
+    final String keycloakTokenEndpoint = keycloakSettings.getKeycloakTokenEndpoint();
+    if (keycloakTokenEndpoint == null) {
+      throw new RuntimeException("Keycloak token endpoint is not configured");
+    }
     try {
-      http = (HttpURLConnection) new URL(keycloakApiEndpoint).openConnection();
+
+      http = (HttpURLConnection) new URL(keycloakTokenEndpoint).openConnection();
       http.setRequestMethod(POST);
       http.setAllowUserInteraction(false);
       http.setRequestProperty(CONTENT_TYPE, FORM_MIME_TYPE);
@@ -137,7 +141,7 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
       if (http.getResponseCode() != 200) {
         throw new RuntimeException(
             "Can not get access token using the KeyCloak REST API. Server response code: "
-                + keycloakApiEndpoint
+                + keycloakTokenEndpoint
                 + " "
                 + http.getResponseCode()
                 + IoUtil.readStream(http.getErrorStream()));
