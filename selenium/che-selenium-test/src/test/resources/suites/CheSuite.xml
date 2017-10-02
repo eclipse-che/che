@@ -156,8 +156,35 @@
             <class name="org.eclipse.che.selenium.editor.CheckSearchFeatureInEditorTest"/>
             <class name="org.eclipse.che.selenium.editor.CheckWorkingWithTabByUsingTabListTest"/>
             <class name="org.eclipse.che.selenium.editor.CheckWorkingWithTabsByUsingContextMenuTest"/>
-            <class name="org.eclipse.che.selenium.editor.ContextMenuEditorTest"/>
-            <class name="org.eclipse.che.selenium.editor.ContextMenuEditorTest"/>
+            <class name="org.eclipse.che.selenium.editor.ContextMenuEditorTest">
+                <methods>
+                    <exclude name="checkClose"/>
+                </methods>
+                <methods>
+                    <exclude name="checkFind"/>
+                </methods>
+                <methods>
+                    <exclude name="checkFormatContextMenu"/>
+                </methods>
+                <methods>
+                    <exclude name="checkNaviFileStructure"/>
+                </methods>
+                <methods>
+                    <exclude name="checkOpenDeclaration"/>
+                </methods>
+                <methods>
+                    <exclude name="checkQuickDocumentation"/>
+                </methods>
+                <methods>
+                    <exclude name="checkQuickFix"/>
+                </methods>
+                <methods>
+                    <exclude name="checkRefactoring"/>
+                </methods>
+                <methods>
+                    <exclude name="checkUndoRedo"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.editor.SplitEditorFeatureTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerUserCreatePolicyTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerClickCreatePolicyTest"/>
