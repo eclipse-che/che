@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.resources.Project.ProjectRequest;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.NameUtils;
@@ -450,6 +451,32 @@ public interface Container extends Resource {
    * @since 4.4.0
    */
   Promise<List<SearchResult>> search(String fileMask, String contentMask);
+
+  /**
+   * Searches the all possible files which configured into {@link QueryExpression}.
+   *
+   * <p>Method doesn't guarantees the sorted order of the returned resources.
+   *
+   * @param queryExpression the search query expression includes search parameters
+   * @return the {@link Promise} with array of found results
+   */
+  Promise<List<SearchResult>> search(QueryExpression queryExpression);
+
+  /**
+   * Creates the search expression which matches given file or content mask.
+   *
+   * <p>Supplied file mask may supports wildcard:
+   *
+   * <ul>
+   *   <li>{@code *} - which matches any character sequence (including the empty one)
+   *   <li>{@code ?} - which matches any single character
+   * </ul>
+   *
+   * @param fileMask the file name mask
+   * @param query the content entity mask
+   * @return the instance of {@link QueryExpression}
+   */
+  QueryExpression createSearchQueryExpression(String fileMask, String query);
 
   /**
    * Returns the plain list of file tree with given {@code depth}.

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.search.presentation;
 
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
+import static org.eclipse.che.ide.search.FullTextSearchPresenter.SEARCH_RESULT_ITEMS;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -24,6 +25,8 @@ import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.project.ProjectServiceClient;
+import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
@@ -43,18 +46,25 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 public class FindResultPresenter extends BasePresenter
     implements FindResultView.ActionDelegate, ResourceChangedHandler {
   private final WorkspaceAgent workspaceAgent;
+  private ProjectServiceClient projectServiceClient;
   private final CoreLocalizationConstant localizationConstant;
   private final Resources resources;
   private final FindResultView view;
 
+  private int skipCount = 0;
+  private QueryExpression queryExpression;
+  private String requestedString;
+
   @Inject
   public FindResultPresenter(
       WorkspaceAgent workspaceAgent,
+      ProjectServiceClient projectServiceClient,
       CoreLocalizationConstant localizationConstant,
       Resources resources,
       FindResultView view,
       EventBus eventBus) {
     this.workspaceAgent = workspaceAgent;
+    this.projectServiceClient = projectServiceClient;
     this.localizationConstant = localizationConstant;
     this.resources = resources;
     this.view = view;
@@ -95,15 +105,60 @@ public class FindResultPresenter extends BasePresenter
    * @param resources list of files which contains requested text
    * @param request requested text
    */
-  public void handleResponse(List<SearchResult> resources, String request) {
+  public void handleResponse(
+      List<SearchResult> resources, QueryExpression queryExpression, String request) {
+    this.queryExpression = queryExpression;
+    this.requestedString = request;
     workspaceAgent.openPart(this, PartStackType.INFORMATION);
     workspaceAgent.setActivePart(this);
+
+    view.setPreviousBtnActive(false);
+    view.setNextBtnActive(resources.size() == SEARCH_RESULT_ITEMS);
     view.showResults(resources, request);
   }
 
   @Override
   public void onSelectionChanged(List<Node> selection) {
     setSelection(new Selection<>(selection));
+  }
+
+  @Override
+  public void onNextButtonClicked() {
+    queryExpression.setSkipCount(skipCount + SEARCH_RESULT_ITEMS);
+    projectServiceClient
+        .search(queryExpression)
+        .then(
+            result -> {
+              skipCount += result.size();
+              view.setPreviousBtnActive(true);
+              if (result.isEmpty()) {
+                view.setNextBtnActive(false);
+                return;
+              }
+              if (result.size() % SEARCH_RESULT_ITEMS == 0) {
+                view.setNextBtnActive(true);
+              } else {
+                skipCount += SEARCH_RESULT_ITEMS;
+                view.setNextBtnActive(false);
+              }
+              view.showResults(result, requestedString);
+            });
+  }
+
+  @Override
+  public void onPreviousButtonClicked() {
+    skipCount -= skipCount % SEARCH_RESULT_ITEMS + SEARCH_RESULT_ITEMS;
+    queryExpression.setSkipCount(skipCount);
+    projectServiceClient
+        .search(queryExpression)
+        .then(
+            result -> {
+              view.setNextBtnActive(true);
+              boolean hasPreviousResults =
+                  result.size() % SEARCH_RESULT_ITEMS == 0 && skipCount != 0;
+              view.setPreviousBtnActive(hasPreviousResults);
+              view.showResults(result, requestedString);
+            });
   }
 
   @Override

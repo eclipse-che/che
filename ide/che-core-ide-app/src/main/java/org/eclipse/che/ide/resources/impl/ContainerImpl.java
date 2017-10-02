@@ -12,6 +12,7 @@ package org.eclipse.che.ide.resources.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
@@ -22,6 +23,7 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Folder;
@@ -186,6 +188,11 @@ abstract class ContainerImpl extends ResourceImpl implements Container {
     return resourceManager.search(this, fileMask, contentMask);
   }
 
+  @Override
+  public Promise<List<SearchResult>> search(QueryExpression queryExpression) {
+    return resourceManager.search(queryExpression);
+  }
+
   /** {@inheritDoc} */
   @Override
   public Promise<Resource[]> getTree(int depth) {
@@ -195,5 +202,21 @@ abstract class ContainerImpl extends ResourceImpl implements Container {
   @Override
   public Promise<SourceEstimation> estimate(String projectType) {
     return resourceManager.estimate(this, projectType);
+  }
+
+  @Override
+  public QueryExpression createSearchQueryExpression(String fileMask, String contentMask) {
+    QueryExpression queryExpression = new QueryExpression();
+    if (!isNullOrEmpty(contentMask)) {
+      queryExpression.setText(contentMask);
+    }
+    if (!isNullOrEmpty(fileMask)) {
+      queryExpression.setName(fileMask);
+    }
+    if (!getLocation().isRoot()) {
+      queryExpression.setPath(getLocation().toString());
+    }
+
+    return queryExpression;
   }
 }

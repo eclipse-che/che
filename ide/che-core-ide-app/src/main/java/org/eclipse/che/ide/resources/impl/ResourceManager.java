@@ -1298,6 +1298,10 @@ public final class ResourceManager {
     return ps.search(queryExpression);
   }
 
+  protected Promise<List<SearchResult>> search(QueryExpression queryExpression) {
+    return ps.search(queryExpression);
+  }
+
   Promise<SourceEstimation> estimate(Container container, String projectType) {
     checkArgument(projectType != null, "Null project type");
     checkArgument(!projectType.isEmpty(), "Empty project type");
