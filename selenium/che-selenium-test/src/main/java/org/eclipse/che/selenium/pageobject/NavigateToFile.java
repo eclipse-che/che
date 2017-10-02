@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
@@ -64,13 +65,13 @@ public class NavigateToFile {
 
   /** wait opening of 'Navigate to file' widget */
   public void waitFormToOpen() {
-    new WebDriverWait(seleniumWebDriver, 10)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(navigateToFileForm));
   }
 
   /** wait closing of 'Navigate to file' widget */
   public void waitFormToClose() {
-    new WebDriverWait(seleniumWebDriver, 10)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.NAVIGATE_TO_FILE_FORM)));
   }
@@ -95,7 +96,8 @@ public class NavigateToFile {
    */
   public void typeSymbolInFileNameField(String symbol) {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(fileNameInput));
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(fileNameInput));
     fileNameInput.clear();
     fileNameInput.sendKeys(symbol);
   }
@@ -106,13 +108,14 @@ public class NavigateToFile {
    * @param symbol the first symbol of search with key word
    */
   public void typeSymbolWithoutClear(String symbol) {
-    new WebDriverWait(seleniumWebDriver, 10).until(ExpectedConditions.visibilityOf(fileNameInput));
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(fileNameInput));
     fileNameInput.sendKeys(symbol);
   }
 
   /** wait appearance of the dropdawn list (may be empty) */
   public void waitFileNamePopUp() {
-    new WebDriverWait(seleniumWebDriver, 10)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(suggestionPanel));
   }
 
@@ -122,7 +125,7 @@ public class NavigateToFile {
    * @param text a text that should be into list
    */
   public void waitListOfFilesNames(final String text) {
-    new WebDriverWait(seleniumWebDriver, 10)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until((ExpectedCondition<Boolean>) webDriver -> suggestionPanel.getText().contains(text));
   }
 

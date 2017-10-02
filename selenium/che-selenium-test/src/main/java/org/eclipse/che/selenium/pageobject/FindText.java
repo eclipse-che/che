@@ -14,6 +14,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
@@ -58,13 +59,11 @@ public class FindText {
     String FILE_MASK_FIELD = "gwt-debug-text-search-files";
     String CANCEL_BUTTON = "search-cancel-button";
     String SEARCH_BUTTON = "search-button";
-    String FIND_INFO_PANEL =
-        "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[9]";
+    String FIND_INFO_PANEL = "gwt-debug-find-info-panel";
     String FIND_TAB = "gwt-debug-partButton-Find";
     String HIDE_FIND_PANEL =
-        "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[3]";
-    String ITEM_FIND_PANEL =
-        "//div[@id='gwt-debug-infoPanel']//div[text()='Find']/following::div[9]//div[text()='%s']";
+        "//div[@id='gwt-debug-find-info-panel']//div[text()='Find']/following::div[3]";
+    String OCCURRENCE = "//span[@debugfilepath = '%s']";
   }
 
   @FindBy(id = Locators.WHOLE_WORD_CHECKLBOX_INP)
@@ -76,7 +75,7 @@ public class FindText {
   @FindBy(xpath = Locators.FILE_MASK_CHECKBOX_INP)
   WebElement fileMaskCheckBox;
 
-  @FindBy(xpath = Locators.FIND_INFO_PANEL)
+  @FindBy(id = Locators.FIND_INFO_PANEL)
   WebElement findInfoPanel;
 
   @FindBy(id = Locators.FIND_TAB)
@@ -352,7 +351,7 @@ public class FindText {
   /** wait the 'Find' info panel is open */
   public void waitFindInfoPanelIsOpen() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.FIND_INFO_PANEL)));
+        .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.FIND_INFO_PANEL)));
   }
 
   /** press on the 'Hide' button on the 'Find' info panel */
@@ -407,17 +406,32 @@ public class FindText {
     return findInfoPanel.getText();
   }
 
-  /**
-   * perform 'click' on the item in the 'Find' info panel
-   *
-   * @param item is the name of the item
-   */
-  public void selectItemInFindInfoPanel(String item) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.ITEM_FIND_PANEL, item))))
-        .click();
+  public void selectItemInFindInfoPanel(String fileName, String textToFind) {
+    List<WebElement> webElementList =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfAllElementsLocatedBy(
+                    By.xpath(String.format(Locators.OCCURRENCE, fileName))));
+    for (WebElement webElement : webElementList) {
+      if (webElement.getText().equals(textToFind)) {
+        webElement.click();
+        break;
+      }
+    }
+  }
+
+  public void selectItemInFindInfoPanelByDoubleClick(String fileName, String textToFind) {
+    List<WebElement> webElementList =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.visibilityOfAllElementsLocatedBy(
+                    By.xpath(String.format(Locators.OCCURRENCE, fileName))));
+    for (WebElement webElement : webElementList) {
+      if (webElement.getText().equals(textToFind)) {
+        actionsFactory.createAction(seleniumWebDriver).doubleClick(webElement).perform();
+        break;
+      }
+    }
   }
 
   /**
@@ -429,18 +443,5 @@ public class FindText {
     loader.waitOnClosed();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(command).perform();
     loader.waitOnClosed();
-  }
-
-  /**
-   * perform 'double click' on item in the 'Find' info panel
-   *
-   * @param item is the name of item into 'Find' info panel
-   */
-  public void selectItemInFindInfoPanelByDoubleClick(String item) {
-    WebElement element =
-        seleniumWebDriver.findElement(By.xpath(String.format(Locators.ITEM_FIND_PANEL, item)));
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(element));
-    actionsFactory.createAction(seleniumWebDriver).doubleClick(element).perform();
   }
 }

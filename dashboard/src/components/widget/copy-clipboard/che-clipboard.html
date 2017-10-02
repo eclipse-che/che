@@ -1,5 +1,8 @@
 <div class="copy-clipboard">
-  <div class="copy-clipboard-area fa fa-clipboard" uib-tooltip="{{isCopied ? 'Copied' : 'Copy'}}"
-       clip-copy="value" clip-click="isCopied=true" ng-mouseover="isCopied=false">
+  <input type="text" value="{{value}}" readonly>
+  <div class="copy-clipboard-area fa fa-clipboard"
+       ng-click="onClick()"
+       ng-mouseover="isCopied = false"
+       uib-tooltip="{{isCopied ? 'Copied' : 'Copy'}}">
   </div>
 </div>

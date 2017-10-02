@@ -135,7 +135,7 @@ export class WorkspaceDetailsService {
    * @param icon page icon
    * @param index optional page index (order)
    */
-  addPage(title: string, content: string, icon: string, index: number): void {
+  addPage(title: string, content: string, icon: string, index?: number): void {
     let page: IPage = {
       title: title,
       content: content,

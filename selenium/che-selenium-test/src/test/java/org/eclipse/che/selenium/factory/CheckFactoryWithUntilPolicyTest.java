@@ -23,7 +23,6 @@ import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
-import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -43,7 +42,6 @@ public class CheckFactoryWithUntilPolicyTest {
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestFactoryInitializer testFactoryInitializer;
-  @Inject private Ide ide;
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private Dashboard dashboard;
   @Inject private SeleniumWebDriver seleniumWebDriver;
@@ -69,7 +67,7 @@ public class CheckFactoryWithUntilPolicyTest {
   public void checkFactoryAcceptingWithUntilPolicy() throws Exception {
     // first
     dashboard.open();
-    testFactory.open(ide.driver());
+    testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
     while (System.currentTimeMillis() <= INIT_TIME + ADDITIONAL_TIME) {
@@ -81,12 +79,12 @@ public class CheckFactoryWithUntilPolicyTest {
     }
 
     // second
-    testFactory.open(ide.driver());
-    new WebDriverWait(ide.driver(), PREPARING_WS_TIMEOUT_SEC)
+    testFactory.open(seleniumWebDriver);
+    new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC)
         .until(ExpectedConditions.alertIsPresent());
     assertTrue(
-        ide.driver().switchTo().alert().getText().contains(ALERT_EXPIRE_MESSAGE),
-        "actual message: " + ide.driver().switchTo().alert().getText());
+        seleniumWebDriver.switchTo().alert().getText().contains(ALERT_EXPIRE_MESSAGE),
+        "actual message: " + seleniumWebDriver.switchTo().alert().getText());
     popupDialogsBrowser.acceptAlert();
   }
 }

@@ -26,6 +26,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import elemental.events.Event;
+import elemental.events.EventRemover;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,6 +102,8 @@ public class AppContextImpl
   private ResourceManager resourceManager;
   private Map<String, String> properties;
 
+  private EventRemover appStateEventRemover;
+
   /**
    * List of actions with parameters which comes from startup URL. Can be processed after IDE
    * initialization as usual after starting ws-agent.
@@ -129,12 +132,6 @@ public class AppContextImpl
     eventBus.addHandler(WindowActionEvent.TYPE, workspaceStateHandler);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, workspaceStateHandler);
     eventBus.addHandler(WorkspaceStatusChangedEvent.TYPE, workspaceStateHandler);
-
-    //in some cases IDE doesn't save preferences on window close
-    //so try to save if window lost focus
-    Elements.getWindow()
-        .addEventListener(
-            Event.BLUR, evt -> appStateManager.get().persistWorkspaceState(getWorkspaceId()));
   }
 
   private static native String masterFromIDEConfig() /*-{
@@ -152,11 +149,23 @@ public class AppContextImpl
 
   @Override
   public void setWorkspace(Workspace workspace) {
+    if (appStateEventRemover != null) {
+      appStateEventRemover.remove();
+    }
+
     if (workspace != null) {
       userWorkspace = workspace;
       if (workspace.getRuntime() != null) {
         runtime = new ActiveRuntime(workspace.getRuntime());
       }
+
+      //in some cases IDE doesn't save preferences on window close
+      //so try to save if window lost focus
+      appStateEventRemover =
+          Elements.getWindow()
+              .addEventListener(
+                  Event.BLUR,
+                  evt -> appStateManager.get().persistWorkspaceState(workspace.getId()));
     } else {
       userWorkspace = null;
       runtime = null;
@@ -481,7 +490,10 @@ public class AppContextImpl
 
     @Override
     public void onWindowClosing(WindowActionEvent event) {
-      appStateManager.get().persistWorkspaceState(getWorkspaceId());
+      Workspace workspace = getWorkspace();
+      if (workspace != null) {
+        appStateManager.get().persistWorkspaceState(workspace.getId());
+      }
     }
 
     @Override
@@ -496,13 +508,17 @@ public class AppContextImpl
     public void onWorkspaceStatusChangedEvent(WorkspaceStatusChangedEvent event) {
       WorkspaceStatus workspaceStatus = event.getWorkspaceStatusEvent().getStatus();
       if (STOPPING == workspaceStatus) {
-        persistWorkspaceStatePromise =
-            appStateManager.get().persistWorkspaceState(getWorkspaceId());
+        Workspace workspace = getWorkspace();
+        if (workspace != null) {
+          persistWorkspaceStatePromise =
+              appStateManager.get().persistWorkspaceState(workspace.getId());
+        }
       }
     }
 
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+      setWorkspace(null);
       if (persistWorkspaceStatePromise != null) {
         persistWorkspaceStatePromise.then(
             arg -> {

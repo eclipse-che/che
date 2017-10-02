@@ -193,9 +193,6 @@
             <class name="org.eclipse.che.selenium.editor.SplitEditorFeatureTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerUserCreatePolicyTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerClickCreatePolicyTest"/>
-            <class name="org.eclipse.che.selenium.factory.CheckBitnamiCodeIgniterFactory"/>
-            <class name="org.eclipse.che.selenium.factory.CheckBitnamiSwiftFactory"/>
-            <class name="org.eclipse.che.selenium.factory.CheckBitnamiLaravelFactoryTest"/>
             <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectory"/>
             <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolder"/>
             <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranch"/>
@@ -429,7 +426,7 @@
                     <exclude name="checkMacrosFeature"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.miscellaneous.CheckWsAgentAfterStopProcessTest">
+            <class name="org.eclipse.che.selenium.miscellaneous.CheckRestoringWorkspaceAfterStoppingWsAgentProcess">
                 <methods>
                     <!-- unstable -->
                     <exclude name="checkDialogAfterKillingProcess"/>
@@ -546,6 +543,7 @@
             </class>
             <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit4Test"/>
             <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginTestNgTest"/>
+            <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit4CheckRunSuitesAndScopesTest"/>
             <class name="org.eclipse.che.selenium.preferences.CheckErrorsWarningsTabTest">
                 <methods>
                     <!-- unstable -->
@@ -869,7 +867,7 @@
                     <exclude name="previewChangeTest"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.refactor.preview.PreviewRefreshTest"/>
+            <class name="org.eclipse.che.selenium.refactor.preview.PreviewRefactoringTest"/>
             <class name="org.eclipse.che.selenium.refactor.types.GenericsTest"/>
             <class name="org.eclipse.che.selenium.refactor.types.IllegalTypeNameTest">
                 <methods>

@@ -10,15 +10,17 @@
  */
 package org.eclipse.che.selenium.core.requestfactory;
 
+import com.google.inject.assistedinject.Assisted;
 import java.util.Objects;
-import javax.validation.constraints.NotNull;
+import javax.inject.Inject;
 
 /** @author Dmytro Nochevnov */
 public class TestUserHttpJsonRequestFactory extends TestHttpJsonRequestFactory {
 
   private final String authToken;
 
-  public TestUserHttpJsonRequestFactory(@NotNull String authToken) {
+  @Inject
+  public TestUserHttpJsonRequestFactory(@Assisted String authToken) {
     Objects.requireNonNull(authToken);
     this.authToken = authToken;
   }
