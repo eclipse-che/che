@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.resources;
 
 import java.util.List;
 
+/** Class contains an information about result of the text search operation. */
 public class SearchResult {
   private List<SearchItemReference> itemReferences;
   private int totalHits;
@@ -21,10 +22,12 @@ public class SearchResult {
     this.totalHits = totalHits;
   }
 
+  /** returns list of found items {@link SearchItemReference} */
   public List<SearchItemReference> getItemReferences() {
     return itemReferences;
   }
 
+  /** returns total file count where requested text was found */
   public int getTotalHits() {
     return totalHits;
   }
