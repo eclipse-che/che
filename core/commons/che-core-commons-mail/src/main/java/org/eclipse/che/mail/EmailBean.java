@@ -29,6 +29,36 @@ public class EmailBean {
   private String subject;
   private List<Attachment> attachments;
 
+  public EmailBean() {}
+
+  public EmailBean(EmailBean email) {
+    this(
+        email.getFrom(),
+        email.getTo(),
+        email.getReplyTo(),
+        email.getMimeType(),
+        email.getBody(),
+        email.getSubject(),
+        email.getAttachments());
+  }
+
+  public EmailBean(
+      String from,
+      String to,
+      String replyTo,
+      String mimeType,
+      String body,
+      String subject,
+      List<Attachment> attachments) {
+    this.from = from;
+    this.to = to;
+    this.replyTo = replyTo;
+    this.mimeType = mimeType;
+    this.body = body;
+    this.subject = subject;
+    this.attachments = attachments;
+  }
+
   public String getFrom() {
     return from;
   }
