@@ -21,6 +21,7 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author Alexander Garagatyi
  */
 public class EmailBean {
+
   private String from;
   private String to;
   private String replyTo;
@@ -153,8 +154,12 @@ public class EmailBean {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof EmailBean)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof EmailBean)) {
+      return false;
+    }
     EmailBean emailBean = (EmailBean) o;
     return Objects.equals(getFrom(), emailBean.getFrom())
         && Objects.equals(getTo(), emailBean.getTo())
