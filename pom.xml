@@ -1281,9 +1281,6 @@
                     </plugin>
                 </plugins>
             </build>
-            <properties>
-                <org.eclipse.jetty.version>9.2.14.v20151106</org.eclipse.jetty.version>
-            </properties>
             <dependencies>
                 <dependency>
                     <groupId>com.google.gwt</groupId>
