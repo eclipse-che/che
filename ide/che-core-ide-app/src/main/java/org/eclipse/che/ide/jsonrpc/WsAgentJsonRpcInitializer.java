@@ -100,11 +100,11 @@ public class WsAgentJsonRpcInitializer {
                         String separator = server.getUrl().contains("?") ? "&" : "?";
                         String queryParams =
                             appContext
-                                .getApplicationWebsocketId()
+                                .getApplicationId()
                                 .map(id -> separator + "clientId=" + id)
                                 .orElse("");
                         Set<Runnable> initActions =
-                            appContext.getApplicationWebsocketId().isPresent()
+                            appContext.getApplicationId().isPresent()
                                 ? emptySet()
                                 : singleton(this::processWsId);
 

@@ -72,7 +72,7 @@ public class ProjectApiModule extends AbstractModule {
     bind(ProjectConfigRegistry.class)
         .to(org.eclipse.che.api.project.server.impl.ProjectConfigRegistry.class);
     bind(ProjectHandlerRegistry.class)
-        .to(org.eclipse.che.api.project.server.impl.ProjectHandlerRegistry.class);
+        .to(org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry.class);
     bind(ProjectInitializer.class)
         .to(org.eclipse.che.api.project.server.impl.ProjectInitializer.class);
     bind(ProjectManager.class)

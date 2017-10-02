@@ -12,6 +12,7 @@ package org.eclipse.che.api.project.server.handlers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,19 +21,16 @@ import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author gazarenkov */
 @Singleton
-public class ProjectHandlerRegistry {
+public class ProjectHandlerRegistry
+    implements org.eclipse.che.api.project.server.api.ProjectHandlerRegistry {
 
-  private final Map<String, CreateProjectHandler> createProjectHandlers;
-  private final Map<String, PostImportProjectHandler> postImportProjectHandlers;
-  private final Map<String, GetItemHandler> getItemHandlers;
-  private final Map<String, ProjectInitHandler> projectInitHandlers;
+  private final Map<String, CreateProjectHandler> createProjectHandlers = new HashMap<>();
+  private final Map<String, PostImportProjectHandler> postImportProjectHandlers = new HashMap<>();
+  private final Map<String, GetItemHandler> getItemHandlers = new HashMap<>();
+  private final Map<String, ProjectInitHandler> projectInitHandlers = new HashMap<>();
 
   @Inject
   public ProjectHandlerRegistry(Set<ProjectHandler> projectHandlers) {
-    createProjectHandlers = new HashMap<>();
-    postImportProjectHandlers = new HashMap<>();
-    getItemHandlers = new HashMap<>();
-    projectInitHandlers = new HashMap<>();
     projectHandlers.forEach(this::register);
   }
 
@@ -48,23 +46,19 @@ public class ProjectHandlerRegistry {
     }
   }
 
-  @Nullable
-  public CreateProjectHandler getCreateProjectHandler(@NotNull String projectType) {
-    return createProjectHandlers.get(projectType);
+  public Optional<CreateProjectHandler> getCreateHandler(String projectType) {
+    return Optional.ofNullable(createProjectHandlers.get(projectType));
   }
 
-  @Nullable
-  public GetItemHandler getGetItemHandler(@NotNull String projectType) {
-    return getItemHandlers.get(projectType);
+  public Optional<GetItemHandler> getGetItemHandler(String projectType) {
+    return Optional.ofNullable(getItemHandlers.get(projectType));
   }
 
-  @Nullable
-  public PostImportProjectHandler getPostImportProjectHandler(@NotNull String projectType) {
-    return postImportProjectHandlers.get(projectType);
+  public Optional<PostImportProjectHandler> getPostImportHandler(String projectType) {
+    return Optional.ofNullable(postImportProjectHandlers.get(projectType));
   }
 
-  @Nullable
-  public ProjectInitHandler getProjectInitHandler(@NotNull String projectType) {
-    return projectInitHandlers.get(projectType);
+  public Optional<ProjectInitHandler> getProjectInitHandler(String projectType) {
+    return Optional.ofNullable(projectInitHandlers.get(projectType));
   }
 }

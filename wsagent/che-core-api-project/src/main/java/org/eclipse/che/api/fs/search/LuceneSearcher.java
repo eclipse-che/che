@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -139,7 +140,7 @@ public class LuceneSearcher implements Searcher {
     }
   }
 
-  @PostConstruct
+  @PreDestroy
   private void terminate() {
     doTerminate();
     executor.shutdown();
@@ -462,7 +463,7 @@ public class LuceneSearcher implements Searcher {
   }
 
   private Document createDocument(String wsPath, Reader reader) throws ServerException {
-    String name = wsPath.substring(wsPath.lastIndexOf(separator));
+    String name = pathResolver.getName(wsPath);
     Document doc = new Document();
     doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
     doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));

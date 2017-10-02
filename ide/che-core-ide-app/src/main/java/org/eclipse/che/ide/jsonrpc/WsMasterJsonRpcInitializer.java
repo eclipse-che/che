@@ -102,7 +102,7 @@ public class WsMasterJsonRpcInitializer {
               }
 
               char separator = url.contains("?") ? '&' : '?';
-              Optional<String> appWebSocketId = appContext.getApplicationWebsocketId();
+              Optional<String> appWebSocketId = appContext.getApplicationId();
               String queryParams =
                   separator
                       + "token="
