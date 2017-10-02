@@ -30,7 +30,8 @@ public class ZendDbgLocationHandler {
   }
 
   public static final Location createDBG(String resourcePath, int lineNumber) {
-    return new LocationImpl(Path.of(resourcePath).getName(), lineNumber, false, 0, null, null, -1);
+    return new LocationImpl(
+        Path.of(resourcePath).getName(), lineNumber, false, 0, resourcePath, null, -1);
   }
 
   /**
@@ -41,7 +42,7 @@ public class ZendDbgLocationHandler {
    */
   public Location convertToVFS(Location dbgLocation) {
     VirtualFileEntry localFileEntry =
-        ZendDbgFileUtils.findVirtualFileEntry(dbgLocation.getTarget());
+        ZendDbgFileUtils.findVirtualFileEntry(dbgLocation.getResourceProjectPath());
     if (localFileEntry == null) {
       return null;
     }
