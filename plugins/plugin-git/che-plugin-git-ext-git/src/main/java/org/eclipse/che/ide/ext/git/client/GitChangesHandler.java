@@ -25,7 +25,6 @@ import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.IndexChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.git.GitServiceClient;
@@ -50,7 +49,6 @@ import org.eclipse.che.ide.ui.smartTree.Tree;
 @Singleton
 public class GitChangesHandler {
 
-  private final AppContext appContext;
   private final Provider<EditorAgent> editorAgentProvider;
   private final Provider<ProjectExplorerPresenter> projectExplorerPresenterProvider;
   private final Provider<EditorMultiPartStack> multiPartStackProvider;
@@ -60,11 +58,9 @@ public class GitChangesHandler {
       RequestHandlerConfigurator configurator,
       EventBus eventBus,
       GitServiceClient gitServiceClient,
-      AppContext appContext,
       Provider<EditorAgent> editorAgentProvider,
       Provider<ProjectExplorerPresenter> projectExplorerPresenterProvider,
       Provider<EditorMultiPartStack> multiPartStackProvider) {
-    this.appContext = appContext;
     this.editorAgentProvider = editorAgentProvider;
     this.projectExplorerPresenterProvider = projectExplorerPresenterProvider;
     this.multiPartStackProvider = multiPartStackProvider;
@@ -98,7 +94,7 @@ public class GitChangesHandler {
 
     configurator
         .newConfiguration()
-        .methodName("event/git-index")
+        .methodName("event/git/indexChanged")
         .paramsAsDto(IndexChangedEventDto.class)
         .noResult()
         .withBiConsumer(this::apply);
@@ -148,9 +144,6 @@ public class GitChangesHandler {
                 handleEditedRegions(dto.getEditedRegions(), render);
               }
             });
-
-    //TODO: temporary comment this line because its freeze browser for big project details see in che#6208
-    //appContext.getWorkspaceRoot().synchronize();
   }
 
   private void handleEditedRegions(List<EditedRegion> editedRegions, VcsChangeMarkerRender render) {
@@ -173,19 +166,21 @@ public class GitChangesHandler {
               Resource resource = ((ResourceNode) node).getData();
               File file = resource.asFile();
               String nodeLocation = resource.getLocation().removeFirstSegments(1).toString();
-              if (status.getUntracked().contains(nodeLocation)
-                  && file.getVcsStatus() != UNTRACKED) {
-                file.setVcsStatus(UNTRACKED);
-                tree.refresh(node);
+
+              VcsStatus newVcsStatus;
+              if (status.getUntracked().contains(nodeLocation)) {
+                newVcsStatus = UNTRACKED;
               } else if (status.getModified().contains(nodeLocation)
                   || status.getChanged().contains(nodeLocation)) {
-                file.setVcsStatus(MODIFIED);
-                tree.refresh(node);
-              } else if (status.getAdded().contains(nodeLocation) && file.getVcsStatus() != ADDED) {
-                file.setVcsStatus(ADDED);
-                tree.refresh(node);
-              } else if (file.getVcsStatus() != NOT_MODIFIED) {
-                file.setVcsStatus(VcsStatus.NOT_MODIFIED);
+                newVcsStatus = MODIFIED;
+              } else if (status.getAdded().contains(nodeLocation)) {
+                newVcsStatus = ADDED;
+              } else {
+                newVcsStatus = NOT_MODIFIED;
+              }
+
+              if (file.getVcsStatus() != newVcsStatus) {
+                file.setVcsStatus(newVcsStatus);
                 tree.refresh(node);
               }
             });
@@ -206,7 +201,7 @@ public class GitChangesHandler {
                 tab.setTitleColor(MODIFIED.getColor());
               } else if (status.getAdded().contains(nodeLocation)) {
                 tab.setTitleColor(ADDED.getColor());
-              } else if (((File) tab.getFile()).getVcsStatus() != NOT_MODIFIED) {
+              } else {
                 tab.setTitleColor(NOT_MODIFIED.getColor());
               }
 
@@ -220,7 +215,5 @@ public class GitChangesHandler {
                 render.clearAllChangeMarkers();
               }
             });
-
-    appContext.getWorkspaceRoot().synchronize();
   }
 }

@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.git.shared.IndexChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
 import org.eclipse.che.api.git.shared.event.GitCommitEvent;
@@ -96,12 +97,14 @@ public class GitJsonRpcMessenger implements EventSubscriber<GitEvent> {
       status = ((GitRepositoryInitializedEvent) event).getStatus();
     }
 
+    IndexChangedEventDto indexChangeEventDto =
+        newDto(IndexChangedEventDto.class).withStatus(status);
     for (String endpointId : endpointIds) {
       transmitter
           .newRequest()
           .endpointId(endpointId)
           .methodName("event/git/indexChanged")
-          .paramsAsDto(status)
+          .paramsAsDto(indexChangeEventDto)
           .sendAndSkipResult();
     }
   }
