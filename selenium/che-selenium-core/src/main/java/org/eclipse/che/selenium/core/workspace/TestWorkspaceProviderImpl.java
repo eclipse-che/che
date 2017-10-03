@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.core.workspace;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -53,13 +52,13 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   public TestWorkspaceProviderImpl(
       @Named("sys.threads") int threads,
       @Named("workspace.default_memory_gb") int defaultMemoryGb,
-      Provider<TestUser> defaultUser,
+      TestUser defaultUser,
       TestWorkspaceServiceClient testWorkspaceServiceClient,
-      Provider<TestWorkspaceServiceClientFactory> testWorkspaceServiceClientFactory) {
-    this.defaultUser = defaultUser.get();
+      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
+    this.defaultUser = defaultUser;
     this.defaultMemoryGb = defaultMemoryGb;
     this.testWorkspaceServiceClient = testWorkspaceServiceClient;
-    this.testWorkspaceServiceClientFactory = testWorkspaceServiceClientFactory.get();
+    this.testWorkspaceServiceClientFactory = testWorkspaceServiceClientFactory;
 
     if (threads == 0) {
       throw new ConfigurationException("Threads number is 0");

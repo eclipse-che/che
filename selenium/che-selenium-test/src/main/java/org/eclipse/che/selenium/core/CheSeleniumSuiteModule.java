@@ -28,8 +28,6 @@ import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
-import org.eclipse.che.selenium.core.entrance.Entrance;
-import org.eclipse.che.selenium.core.entrance.LoginPageEntrance;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestIdeUrlProvider;
@@ -93,8 +91,6 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestWorkspaceProvider.class).to(TestWorkspaceProviderImpl.class).asEagerSingleton();
     bind(TestWorkspaceUrlResolver.class).to(CheTestWorkspaceUrlResolver.class);
     bind(TestUserNamespaceResolver.class).to(CheTestUserNamespaceResolver.class);
-
-    bind(Entrance.class).to(LoginPageEntrance.class);
 
     install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
     install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
