@@ -124,15 +124,6 @@ KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_E
 DEFAULT_OPENSHIFT_FLAVOR=minishift
 OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
 
-MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
-            value: \"${CHE_WORKSPACE_LOGS}\"
-          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"
-            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"
-          - name: \"CHE_KEYCLOAK_REALM\"
-            value: \"${CHE_KEYCLOAK_REALM}\"
-          - name: \"CHE_KEYCLOAK_CLIENT__ID\"
-            value: \"${CHE_KEYCLOAK_CLIENT__ID}\""
-
 # TODO move this env variable as a config map in the deployment config
 # as soon as the 'che-multiuser' branch is merged to master
 CHE_WORKSPACE_LOGS="/data/logs/machine/logs" \
@@ -361,6 +352,15 @@ CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
 # Escape slashes in CHE_IMAGE to use it with sed later
 # e.g. docker.io/rhchestage => docker.io\/rhchestage
 CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
+
+MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
+            value: \"${CHE_WORKSPACE_LOGS}\"
+          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"
+            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"
+          - name: \"CHE_KEYCLOAK_REALM\"
+            value: \"${CHE_KEYCLOAK_REALM}\"
+          - name: \"CHE_KEYCLOAK_CLIENT__ID\"
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\""
 
 # TODO When merging the multi-user work to master, this replacement string should
 # be replaced by the corresponding change in the fabric8 deployment descriptor
