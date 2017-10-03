@@ -34,7 +34,7 @@
       margin-left: 10px;
       padding: 0 0;
       font-family: 'Console', Times, serif;
-      font-size: 12pt;
+      font-size: 13pt;
       font-weight: bold;
     }
 

@@ -72,8 +72,8 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
     setTitle(localizationConstant.actionFullTextSearch());
     this.findResultNodeFactory = findResultNodeFactory;
 
-    nextBtn.setText(">");
-    previousBtn.setText("<");
+    nextBtn.setHTML("<i class=\"fa fa-angle-right\" aria-hidden=\"true\"></i>");
+    previousBtn.setHTML("<i class=\"fa fa-angle-left\" aria-hidden=\"true\"></i>");
 
     //do not remove debug id; it's needed for selenium tests
     tree.ensureDebugId("result-search-tree");
