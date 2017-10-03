@@ -15,8 +15,14 @@
     <md-progress-linear md-mode="indeterminate" ng-hide="navbarController.profile && navbarController.profile.userId"></md-progress-linear>
     <div ng-show="navbarController.profile && navbarController.profile.userId"
          layout="column" flex>
-      <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
-      </section>
+
+      <div flex="none"
+           layout="row" layout-align="start center">
+        <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
+        </section>
+        <div flex></div>
+        <navbar-notification></navbar-notification>
+      </div>
 
       <md-divider md-theme="factory-theme"></md-divider>
 
