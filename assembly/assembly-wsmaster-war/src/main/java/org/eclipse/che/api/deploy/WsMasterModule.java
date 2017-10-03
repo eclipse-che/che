@@ -124,8 +124,6 @@ public class WsMasterModule extends AbstractModule {
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
-    bind(org.eclipse.che.api.core.notification.WSocketEventBusServer.class);
-
     bind(org.eclipse.che.api.recipe.RecipeLoader.class);
     Multibinder.newSetBinder(
             binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
