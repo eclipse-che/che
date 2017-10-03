@@ -91,6 +91,7 @@ export class CheHttpBackend {
    */
   setup(): void {
     this.httpBackend.when('OPTIONS', '/api/').respond({});
+    this.httpBackend.when('GET', '/api/').respond(200, {rootResources: []});
 
     this.httpBackend.when('GET', '/api/keycloak/settings').respond(404);
 

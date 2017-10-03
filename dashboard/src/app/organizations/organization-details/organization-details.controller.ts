@@ -297,7 +297,7 @@ export class OrganizationDetailsController {
    */
   canChangeResourceLimits(): boolean {
     if (this.isRootOrganization()) {
-      return this.chePermissions.getUserServices().hasAdminUserService;
+      return this.chePermissions.getUserServices().hasInstallationManagerService;
     }
     return this.organizationsPermissionService.isUserAllowedTo(this.organizationActions.MANAGE_RESOURCES, this.organization.parent);
   }

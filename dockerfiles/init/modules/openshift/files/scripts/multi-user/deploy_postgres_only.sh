@@ -45,7 +45,7 @@ status:
 
 EOF
 
-IMAGE_POSTGRES=${IMAGE_POSTGRES:-centos/postgresql-95-centos7}
+IMAGE_POSTGRES=${IMAGE_POSTGRES:-centos/postgresql-96-centos7}
 
 oc create -f - <<-EOF
 

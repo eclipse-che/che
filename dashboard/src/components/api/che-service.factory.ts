@@ -21,7 +21,7 @@ export class CheService {
    */
   private $http: ng.IHttpService;
 
-  private servicesPromise: ng.IPromise;
+  private servicesPromise: ng.IPromise<any>;
   /**
    * The list of available services.
    */
@@ -37,14 +37,16 @@ export class CheService {
    */
   constructor ($http: ng.IHttpService) {
     this.$http = $http;
+
+    this.fetchServices();
   }
 
   /**
    * Fetches all available services.
    *
-   * @returns {ng.IPromise}
+   * @returns {ng.IPromise<any>}
    */
-  fetchServices(): ng.IPromise {
+  fetchServices(): ng.IPromise<any> {
     if (this.servicesPromise) {
       return this.servicesPromise;
     }
@@ -77,9 +79,9 @@ export class CheService {
   /**
    * Fetches the services info.
    *
-   * @returns {IHttpPromise<T>}
+   * @returns {IHttpPromise<any>}
    */
-  fetchServicesInfo(): ng.IPromise {
+  fetchServicesInfo(): ng.IPromise<any> {
     let promise = this.$http({'method': 'OPTIONS', 'url': '/api/'});
     let infoPromise = promise.then((response: any) => {
       this.servicesInfo = response.data;
