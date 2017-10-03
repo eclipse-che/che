@@ -137,8 +137,8 @@ public class PhpProjectDebuggingTest {
 
     // then
     editor.waitTabFileWithSavedStatus("lib.php");
-    debugPanel.waitDebugHighlightedText("return \"Hello, \" + $name;");
-    debugPanel.waitTextInVariablesPanel("$name: \"man\"");
+    debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
+    debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
     // when
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
@@ -146,52 +146,52 @@ public class PhpProjectDebuggingTest {
     //then
     editor.waitTabFileWithSavedStatus("index.php");
     debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
-    debugPanel.waitTextInVariablesPanel("$_GET: array [0]");
+    debugPanel.waitTextInVariablesPanel("$_GET=array [0]");
   }
 
-  //  @Test(priority = 1)
-  //  public void shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine() throws IOException {
-  //    // when
-  //    menu.runCommand(
-  //        TestMenuCommandsConstants.Run.RUN_MENU,
-  //        TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
-  //    debugConfig.createConfig(PROJECT, false, NON_DEFAULT_DEBUG_PORT);
-  //
-  //    menu.runCommandByXpath(
-  //        TestMenuCommandsConstants.Run.RUN_MENU,
-  //        TestMenuCommandsConstants.Run.DEBUG,
-  //        getXpathForDebugConfigurationMenuItem());
-  //
-  //    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed(
-  //        String.format(
-  //            "Remote debugger connected\nConnected to: Zend Debugger, port: %s.",
-  //            NON_DEFAULT_DEBUG_PORT));
-  //
-  //    projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
-  //    editor.setBreakPointAndWaitActiveState(14);
-  //    editor.closeAllTabs();
-  //
-  //    projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
-  //    projectExplorer.invokeCommandWithContextMenu(
-  //        ProjectExplorer.CommandsGoal.COMMON, PROJECT, START_APACHE_COMMAND_NAME);
-  //
-  //    startWebPhpScriptInDebugMode();
-  //
-  //    debugPanel.openDebugPanel();
-  //
-  //    // then
-  //    editor.waitTabFileWithSavedStatus("lib.php");
-  //    debugPanel.waitDebugHighlightedText("return \"Hello, \" + $name;");
-  //    debugPanel.waitTextInVariablesPanel("$name: \"man\"");
-  //
-  //    // when
-  //    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
-  //
-  //    //then
-  //    editor.waitTabFileWithSavedStatus("index.php");
-  //    debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
-  //    debugPanel.waitTextInVariablesPanel("$_GET: array [3]");
-  //  }
+  @Test(priority = 1)
+  public void shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine() throws IOException {
+    // when
+    menu.runCommand(
+        TestMenuCommandsConstants.Run.RUN_MENU,
+        TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION);
+    debugConfig.createConfig(PROJECT, false, NON_DEFAULT_DEBUG_PORT);
+
+    menu.runCommandByXpath(
+        TestMenuCommandsConstants.Run.RUN_MENU,
+        TestMenuCommandsConstants.Run.DEBUG,
+        getXpathForDebugConfigurationMenuItem());
+
+    notificationPopup.waitExpectedMessageOnProgressPanelAndClosed(
+        String.format(
+            "Remote debugger connected\nConnected to: Zend Debugger, port: %s.",
+            NON_DEFAULT_DEBUG_PORT));
+
+    projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
+    editor.setBreakPointAndWaitActiveState(14);
+    editor.closeAllTabs();
+
+    projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
+    projectExplorer.invokeCommandWithContextMenu(
+        ProjectExplorer.CommandsGoal.COMMON, PROJECT, START_APACHE_COMMAND_NAME);
+
+    startWebPhpScriptInDebugMode();
+
+    debugPanel.openDebugPanel();
+
+    // then
+    editor.waitTabFileWithSavedStatus("lib.php");
+    debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
+    debugPanel.waitTextInVariablesPanel("$name=\"man\"");
+
+    // when
+    debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.STEP_OUT);
+
+    //then
+    editor.waitTabFileWithSavedStatus("index.php");
+    debugPanel.waitDebugHighlightedText("echo sayHello(\"man\");");
+    debugPanel.waitTextInVariablesPanel("$_GET=array [3]");
+  }
 
   /**
    * Start Web PHP Application in debug mode by making HTTP GET request to this application

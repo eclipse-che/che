@@ -67,7 +67,7 @@ public class ZendDbgLocationHandler {
    */
   public Location convertToDBG(Location vfsLocation) {
     return new LocationImpl(
-        vfsLocation.getTarget(),
+        "/projects" + vfsLocation.getTarget(),
         vfsLocation.getLineNumber(),
         false,
         0,
