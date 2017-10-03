@@ -21,6 +21,19 @@
 
 set -e
 
+# ----------------
+# helper functions
+# ----------------
+append_after_match() {
+    while IFS= read -r line
+    do
+      printf '%s\n' "$line"
+      if [[ "$line" == *"$1"* ]];then
+          printf '%s\n' "$2"
+      fi
+    done < /dev/stdin
+}
+
 # --------------
 # Print Che logo 
 # --------------
@@ -110,6 +123,15 @@ KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_E
 # TODO Set flavour via a parameter
 DEFAULT_OPENSHIFT_FLAVOR=minishift
 OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
+
+MULTI_USER_REPLACEMENT_STRING="          - name: \"CHE_WORKSPACE_LOGS\"
+            value: \"${CHE_WORKSPACE_LOGS}\"
+          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"
+            value: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"
+          - name: \"CHE_KEYCLOAK_REALM\"
+            value: \"${CHE_KEYCLOAK_REALM}\"
+          - name: \"CHE_KEYCLOAK_CLIENT__ID\"
+            value: \"${CHE_KEYCLOAK_CLIENT__ID}\""
 
 # TODO move this env variable as a config map in the deployment config
 # as soon as the 'che-multiuser' branch is merged to master
@@ -364,16 +386,7 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
-    awk '/        - env:/{print $0 \
-        RS "          - name: \"CHE_WORKSPACE_LOGS\"" \
-        RS "            value: \"'${CHE_WORKSPACE_LOGS}'\"" \
-        RS "          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"" \
-        RS "            value: \"'${CHE_KEYCLOAK_AUTH__SERVER__URL}'\"" \
-        RS "          - name: \"CHE_KEYCLOAK_REALM\"" \
-        RS "            value: \"'${CHE_KEYCLOAK_REALM}'\"" \
-        RS "          - name: \"CHE_KEYCLOAK_CLIENT__ID\"" \
-        RS "            value: \"'${CHE_KEYCLOAK_CLIENT__ID}'\"" \
-        ;next}1' | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
@@ -385,16 +398,7 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
-    awk '/        - env:/{print $0 \
-        RS "          - name: \"CHE_WORKSPACE_LOGS\"" \
-        RS "            value: \"'${CHE_WORKSPACE_LOGS}'\"" \
-        RS "          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"" \
-        RS "            value: \"'${CHE_KEYCLOAK_AUTH__SERVER__URL}'\"" \
-        RS "          - name: \"CHE_KEYCLOAK_REALM\"" \
-        RS "            value: \"'${CHE_KEYCLOAK_REALM}'\"" \
-        RS "          - name: \"CHE_KEYCLOAK_CLIENT__ID\"" \
-        RS "            value: \"'${CHE_KEYCLOAK_CLIENT__ID}'\"" \
-        ;next}1' | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
@@ -412,16 +416,7 @@ else
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che.docker.server_evaluation_strategy.custom.external.protocol: https/    che.docker.server_evaluation_strategy.custom.external.protocol: http/" ; else cat -; fi | \
     if [ "${K8S_VERSION_PRIOR_TO_1_6}" == "true" ]; then sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/"  ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
-    awk '/        - env:/{print $0 \
-        RS "          - name: \"CHE_WORKSPACE_LOGS\"" \
-        RS "            value: \"'${CHE_WORKSPACE_LOGS}'\"" \
-        RS "          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"" \
-        RS "            value: \"'${CHE_KEYCLOAK_AUTH__SERVER__URL}'\"" \
-        RS "          - name: \"CHE_KEYCLOAK_REALM\"" \
-        RS "            value: \"'${CHE_KEYCLOAK_REALM}'\"" \
-        RS "          - name: \"CHE_KEYCLOAK_CLIENT__ID\"" \
-        RS "            value: \"'${CHE_KEYCLOAK_CLIENT__ID}'\"" \
-        ;next}1' | \
+    append_after_match "env:" "${MULTI_USER_REPLACEMENT_STRING}" | \
     oc apply --force=true -f -
 fi
 echo
