@@ -6,7 +6,9 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-COMMAND_DIR=$(dirname "$0") 
+set -e
+
+COMMAND_DIR=$(dirname "$0")
 
 if [ "${CHE_SERVER_URL}" == "" ]; then
   CHE_SERVER_ROUTE_HOST=$(oc get route che -o jsonpath='{.spec.host}' || echo "")
