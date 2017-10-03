@@ -363,8 +363,17 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
-    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    awk '/        - env:/{print $0 \
+        RS "          - name: \"CHE_WORKSPACE_LOGS\"" \
+        RS "            value: \"'${CHE_WORKSPACE_LOGS}'\"" \
+        RS "          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"" \
+        RS "            value: \"'${CHE_KEYCLOAK_AUTH__SERVER__URL}'\"" \
+        RS "          - name: \"CHE_KEYCLOAK_REALM\"" \
+        RS "            value: \"'${CHE_KEYCLOAK_REALM}'\"" \
+        RS "          - name: \"CHE_KEYCLOAK_CLIENT__ID\"" \
+        RS "            value: \"'${CHE_KEYCLOAK_CLIENT__ID}'\"" \
+        ;next}1' | \
     oc apply --force=true -f -
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
@@ -375,8 +384,17 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
-    sed "$MULTI_USER_REPLACEMENT_STRING" | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
+    awk '/        - env:/{print $0 \
+        RS "          - name: \"CHE_WORKSPACE_LOGS\"" \
+        RS "            value: \"'${CHE_WORKSPACE_LOGS}'\"" \
+        RS "          - name: \"CHE_KEYCLOAK_AUTH__SERVER__URL\"" \
+        RS "            value: \"'${CHE_KEYCLOAK_AUTH__SERVER__URL}'\"" \
+        RS "          - name: \"CHE_KEYCLOAK_REALM\"" \
+        RS "            value: \"'${CHE_KEYCLOAK_REALM}'\"" \
+        RS "          - name: \"CHE_KEYCLOAK_CLIENT__ID\"" \
+        RS "            value: \"'${CHE_KEYCLOAK_CLIENT__ID}'\"" \
+        ;next}1' | \
     oc apply --force=true -f -
 else
   echo "[CHE] Deploying Che on OpenShift Container Platform (image ${CHE_IMAGE})"
