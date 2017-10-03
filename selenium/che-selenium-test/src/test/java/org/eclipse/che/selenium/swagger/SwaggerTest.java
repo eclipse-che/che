@@ -21,6 +21,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertTrue;
+
 /** @author Andrey Chizhikov */
 public class SwaggerTest {
 
@@ -42,6 +44,6 @@ public class SwaggerTest {
   @Test
   public void checkNameProjectTest() throws Exception {
     driver.navigate().to(swaggerUrl);
-    Assert.assertTrue(swagger.getWsNamesFromWorkspacePage().contains(workspace.getName()));
+    assertTrue(swagger.getWsNamesFromWorkspacePage().contains(workspace.getName()));
   }
 }
