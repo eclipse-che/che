@@ -163,7 +163,9 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
   @Override
   public void hidePopup() {
-    suggestionsContainer.removeFromParent();
+    if (suggestionsContainer != null) {
+      suggestionsContainer.removeFromParent();
+    }
     suggestionsPanel.setVisible(false);
 
     suggestionsPanel.getElement().getStyle().setWidth(400, Style.Unit.PX);

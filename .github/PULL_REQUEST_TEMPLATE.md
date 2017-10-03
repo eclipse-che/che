@@ -8,9 +8,10 @@ Pull Request Policy: https://github.com/eclipse/che/wiki/Development-Workflow#pu
 
 ### What issues does this PR fix or reference?
 
+<!-- #### Changelog -->
+<!-- The changelog will be pulled from the PR's title. 
+     Please provide a clear and meaningful title to the PR and don't include issue number -->
 
-#### Changelog
-<!-- one line entry to be added to changelog -->
 
 #### Release Notes
 <!-- markdown to be included in marketing announcement - N/A for bugs -->

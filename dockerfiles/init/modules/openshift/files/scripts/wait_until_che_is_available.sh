@@ -44,7 +44,7 @@ elif [ ${SECONDS} -lt ${end} ]; then
   exit 1
 fi
 
-che_http_status=$(curl -s -o /dev/null -I -w "%{http_code}" "${CHE_API_ENDPOINT}/system/state")
+che_http_status=$(curl -s -o /dev/null -I -w "%{http_code}" "${CHE_API_ENDPOINT}/")
 if [ "${che_http_status}" == "200" ]; then  
   echo "[CHE] Che is up and running"
 else

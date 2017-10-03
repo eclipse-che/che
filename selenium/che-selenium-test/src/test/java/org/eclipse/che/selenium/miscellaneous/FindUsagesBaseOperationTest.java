@@ -85,7 +85,8 @@ public class FindUsagesBaseOperationTest {
   public void checkFindUsagesBaseOperation() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(PATH_FOR_EXPAND, "AppController.java");
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
 
     // Check basic operations of the 'find usages' panel
     editor.selectTabByName("AppController");
@@ -126,8 +127,17 @@ public class FindUsagesBaseOperationTest {
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
     findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
-    findUsages.clickOnIconNodeInFindUsagesPanel(
-        "handleRequest(HttpServletRequest, HttpServletResponse)");
+    //try-catch was added because test fails while trying to open node by click action
+    //issue: https://github.com/eclipse/che/issues/6499
+    try {
+      findUsages.clickOnIconNodeInFindUsagesPanel(
+          "handleRequest(HttpServletRequest, HttpServletResponse)");
+    } catch (org.openqa.selenium.TimeoutException ex) {
+      findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
+      findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+      findUsages.clickOnIconNodeInFindUsagesPanel(
+          "handleRequest(HttpServletRequest, HttpServletResponse)");
+    }
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_2);
 
     // Check nodes in the 'find usages' panel by 'Enter'

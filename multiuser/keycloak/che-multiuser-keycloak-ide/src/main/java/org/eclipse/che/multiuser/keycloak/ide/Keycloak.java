@@ -30,6 +30,7 @@ public final class Keycloak extends JavaScriptObject {
                     realm: theRealm,
                     clientId: theClientId
                 });
+                $wnd['_keycloak'] = keycloak;
                 keycloak.init({onLoad: 'login-required', checkLoginIframe: false})
                     .success(function (authenticated) {
                         resolve(keycloak);
