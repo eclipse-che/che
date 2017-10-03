@@ -10,10 +10,10 @@
         <div layout="column" layout-gt-xs="row" layout-align="start center"
              class="che-checkbox-area">
           <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
-            <md-checkbox class="che-list-item-checkbox"
+            <md-checkbox class="che-list-item-checkbox md-default-theme"
                          aria-label="Member list"
-                         ng-checked="addMemberController.isBulkChecked"
-                         ng-click="addMemberController.changeBulkSelection()"></md-checkbox>
+                         ng-checked="addMemberController.cheListHelper.areAllItemsSelected"
+                         ng-click="addMemberController.cheListHelper.changeBulkSelection()"></md-checkbox>
           </div>
         </div>
         <div flex hide-xs layout-gt-xs="row"
@@ -30,13 +30,9 @@
         </div>
       </div>
     </che-list-header>
-    <che-list ng-show="addMemberController.members.length > 0" class="members-list">
+    <che-list ng-show="addMemberController.cheListHelper.visibleItemsNumber > 0" class="members-list">
       <member-item
-        ng-repeat="member in addMemberController.members"
-        ng-model="addMemberController.membersSelectedStatus[member.userId]"
-        che-selectable="true"
-        che-display-labels="false"
-        che-on-checkbox-click="addMemberController.updateSelectedStatus()"
+        ng-repeat="member in addMemberController.cheListHelper.getVisibleItems()"
         callback="addMemberController"
         editable="true"
         hide-details="true"
@@ -53,7 +49,7 @@
 
     <div layout="row" layout-align="end center" class="buttons-panel">
       <che-button-primary
-        ng-disabled="addMemberController.isNoSelected || addMemberController.isLoading"
+        ng-disabled="addMemberController.cheListHelper.isNoItemSelected || addMemberController.isLoading"
         che-button-title="Share" name="shareButton"
         ng-click="addMemberController.shareWorkspace()"></che-button-primary>
       <che-button-notice che-button-title="Close"

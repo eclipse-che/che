@@ -78,6 +78,7 @@ declare namespace che {
       fetchSystemPermissions(): ng.IPromise<any>;
       getSystemPermissions(): ISystemPermissions;
       getUserServices(): IUserServices;
+      getPermissionsServicePath(): string;
     }
 
     export interface ICheTeam {

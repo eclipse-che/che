@@ -15,8 +15,14 @@
     <md-progress-linear md-mode="indeterminate" ng-hide="navbarController.profile && navbarController.profile.userId"></md-progress-linear>
     <div ng-show="navbarController.profile && navbarController.profile.userId"
          layout="column" flex>
-      <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
-      </section>
+
+      <div flex="none"
+           layout="row" layout-align="start center">
+        <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
+        </section>
+        <div flex></div>
+        <navbar-notification></navbar-notification>
+      </div>
 
       <md-divider md-theme="factory-theme"></md-divider>
 
@@ -69,7 +75,7 @@
                 </div>
               </md-button>
             </md-list-item>
-            <md-list-item flex class="navbar-subsection-item" ng-if="!navbarController.userServices.hasInstallationManagerService && !navbarController.hasPersonalAccount">
+            <md-list-item flex class="navbar-subsection-item" ng-if="navbarController.isPermissionServiceAvailable() && !navbarController.userServices.hasInstallationManagerService && !navbarController.hasPersonalAccount">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.organizations}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
@@ -124,7 +130,8 @@
 
       <div class="admin-navbar-menu"
            layout="column" layout-align="end stretch" flex>
-        <section class="left-sidebar-menu navbar-account-section">
+        <section class="left-sidebar-menu navbar-account-section"
+                 ng-if="navbarController.isPermissionServiceAvailable()">
           <md-list layout="column" flex>
 
             <md-list-item class="navbar-subsection-item">

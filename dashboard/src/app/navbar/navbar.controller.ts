@@ -11,6 +11,7 @@
 'use strict';
 import {CheAPI} from '../../components/api/che-api.factory';
 import {CheKeycloak} from '../../components/api/che-keycloak.factory';
+import {CheService} from '../../components/api/che-service.factory';
 
 export class CheNavBarController {
   private menuItemUrl = {
@@ -53,6 +54,7 @@ export class CheNavBarController {
   private hasPersonalAccount: boolean;
   private organizations: Array<che.IOrganization>;
   private cheKeycloak: CheKeycloak;
+  private cheService: CheService;
 
   /**
    * Default constructor
@@ -65,7 +67,8 @@ export class CheNavBarController {
               cheAPI: CheAPI,
               $window: ng.IWindowService,
               chePermissions: che.api.IChePermissions,
-              cheKeycloak: CheKeycloak) {
+              cheKeycloak: CheKeycloak,
+              cheService: CheService) {
     this.$mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
@@ -74,6 +77,7 @@ export class CheNavBarController {
     this.$window = $window;
     this.chePermissions = chePermissions;
     this.cheKeycloak = cheKeycloak;
+    this.cheService = cheService;
 
     this.profile = cheAPI.getProfile().getProfile();
 
@@ -88,13 +92,24 @@ export class CheNavBarController {
     cheAPI.getWorkspace().fetchWorkspaces();
     cheAPI.getFactory().fetchFactories();
 
-    if (this.chePermissions.getSystemPermissions()) {
-      this.updateData();
-    } else {
-      this.chePermissions.fetchSystemPermissions().finally(() => {
+    if (this.isPermissionServiceAvailable()) {
+      if (this.chePermissions.getSystemPermissions()) {
         this.updateData();
-      });
+      } else {
+        this.chePermissions.fetchSystemPermissions().finally(() => {
+          this.updateData();
+        });
+      }
     }
+  }
+
+  /**
+   * Returns <code>true</code> if Permissions service is available.
+   *
+   * @returns {boolean}
+   */
+  isPermissionServiceAvailable(): boolean {
+    return this.cheService.isServiceAvailable(this.chePermissions.getPermissionsServicePath());
   }
 
   /**
