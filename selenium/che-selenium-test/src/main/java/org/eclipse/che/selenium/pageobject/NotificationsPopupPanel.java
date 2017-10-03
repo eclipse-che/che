@@ -74,7 +74,7 @@ public class NotificationsPopupPanel {
   /** wait progress Popup panel disappear after timeout defined by user */
   public void waitProgressPopupPanelClose(int userTimeout) {
     new WebDriverWait(seleniumWebDriver, userTimeout)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(PROGRESS_POPUP_PANEL_ID)));
+        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(PROGRESS_POPUP_PANEL_ID)));
   }
 
   /**

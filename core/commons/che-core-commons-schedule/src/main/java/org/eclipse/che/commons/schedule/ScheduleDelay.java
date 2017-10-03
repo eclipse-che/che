@@ -42,6 +42,9 @@ public @interface ScheduleDelay {
   /** @return - name of configuration parameter for initialDelay */
   String initialDelayParameterName() default "";
 
-  /** @return - name of configuration parameter for delay */
+  /**
+   * @return - name of configuration parameter for delay. A non positive delay value will disable
+   *     the scheduling of the method.
+   */
   String delayParameterName() default "";
 }
