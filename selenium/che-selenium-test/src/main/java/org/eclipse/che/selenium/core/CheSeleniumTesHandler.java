@@ -12,6 +12,9 @@ package org.eclipse.che.selenium.core;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.che.selenium.core.inject.SeleniumTestHandler;
 
 /** @author Anatolii Bazko */
@@ -19,5 +22,12 @@ public class CheSeleniumTesHandler extends SeleniumTestHandler {
   @Override
   public Injector createParentInjector() {
     return Guice.createInjector(new CheSeleniumSuiteModule());
+  }
+
+  @Override
+  public List<Module> getChildModules() {
+    List<Module> modules = new ArrayList<>();
+    modules.add(new CheSeleniumWebDriverRelatedModule());
+    return modules;
   }
 }

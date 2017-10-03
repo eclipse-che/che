@@ -20,6 +20,4 @@ public interface Entrance {
    * @param user user to login
    */
   void login(TestUser user);
-
-  boolean loginPageIsOpen();
 }

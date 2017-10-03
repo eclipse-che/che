@@ -12,32 +12,32 @@ package org.eclipse.che.selenium.core.entrance;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.site.LoginPage;
+import org.openqa.selenium.Cookie;
 
 /**
- * Enter the product through the Login Page.
+ * Enter the product by adding "session-access-key=[auth_token]" to the cookie of web driver.
  *
  * @author Dmytro Nochevnov
  */
 @Singleton
-public class LoginPageEntrance implements Entrance {
+public class CookieEntrance implements Entrance {
 
-  private final LoginPage loginPage;
+  private final SeleniumWebDriver seleniumWebDriver;
 
   @Inject
-  public LoginPageEntrance(LoginPage loginPage) {
-    this.loginPage = loginPage;
+  public CookieEntrance(SeleniumWebDriver seleniumWebDriver) {
+    this.seleniumWebDriver = seleniumWebDriver;
   }
 
   /**
-   * Login to product.
+   * Login to product by using cookies.
    *
    * @param user
    */
   public void login(TestUser user) {
-    if (loginPage.isOpened()) {
-      loginPage.login(user.getName(), user.getPassword());
-    }
+    Cookie accessKey = new Cookie("session-access-key", user.getAuthToken());
+    seleniumWebDriver.manage().addCookie(accessKey);
   }
 }
