@@ -1,0 +1,4 @@
+Hi,\<br>
+\<b><initiator>\</b> added you to a Che organization called \<b><organizationName>\</b>.\<br>
+Access the organization here \<a href="<dashboardEndpoint>/#/organization/<orgQualifiedName>">link\</a>.\<br>
+Enjoy!
