@@ -21,7 +21,9 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
@@ -151,15 +153,16 @@ public class CommandsExplorer {
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//div[@class='popupContent']/select[contains(@class,'gwt-ListBox')]")));
+    WebElement commandTypeElement =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                ExpectedConditions.elementToBeClickable(getCommandTypeElementInContextMenu(type)));
+    commandTypeElement.click();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(getCommandTypeElementInContextMenu(type)))
-        .click();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeSelected(getCommandTypeElementInContextMenu(type)));
-    new Actions(seleniumWebDriver)
-        .doubleClick(getCommandTypeElementInContextMenu(type))
-        .build()
-        .perform();
+        .until(ExpectedConditions.elementToBeSelected(commandTypeElement));
+    //add timeout to be sure webelement ready to dbClick in some test got exception here
+    WaitUtils.sleepQuietly(200, TimeUnit.MILLISECONDS);
+    new Actions(seleniumWebDriver).doubleClick(commandTypeElement).perform();
   }
 
   /**
