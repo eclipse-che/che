@@ -142,19 +142,19 @@ public class JavaTestRunnerPluginConsole extends Consoles {
     List<String> definedMethods = null;
     switch (methodState) {
       case PASSED:
-        definedMethods = getNamesOfMetodsWithDefinedStatus(METHODS_MARKED_AS_PASSED);
+        definedMethods = getNamesOfMethodsWithDefinedStatus(METHODS_MARKED_AS_PASSED);
         break;
       case FAILED:
-        definedMethods = getNamesOfMetodsWithDefinedStatus(METHODS_MARKED_AS_FAILED);
+        definedMethods = getNamesOfMethodsWithDefinedStatus(METHODS_MARKED_AS_FAILED);
         break;
       case IGNORED:
-        definedMethods = getNamesOfMetodsWithDefinedStatus(METHODS_MARKED_AS_IGNORED);
+        definedMethods = getNamesOfMethodsWithDefinedStatus(METHODS_MARKED_AS_IGNORED);
         break;
     }
     return definedMethods;
   }
 
-  private List<String> getNamesOfMetodsWithDefinedStatus(String definedMethod) {
+  private List<String> getNamesOfMethodsWithDefinedStatus(String definedMethod) {
     return new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
         .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.id(definedMethod)))
         .stream()
