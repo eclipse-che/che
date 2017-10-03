@@ -15,9 +15,9 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
     <ui:with field='res' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
-    <g:DockLayoutPanel unit="PX" width="750px" height="450px" debugId="git-revert-mainForm">
+    <g:DockLayoutPanel unit="PX" width="750px" height="400px" debugId="git-revert-mainForm">
         <g:center>
-            <g:ScrollPanel ui:field="revisionsPanel" />
+            <g:ScrollPanel ui:field="revisionsPanel" debugId="revert-commit-panel"/>
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>
