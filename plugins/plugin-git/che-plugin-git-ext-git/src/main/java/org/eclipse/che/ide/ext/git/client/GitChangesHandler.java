@@ -21,7 +21,6 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
@@ -42,7 +41,6 @@ import org.eclipse.che.ide.ui.smartTree.Tree;
 @Singleton
 public class GitChangesHandler {
 
-  private final AppContext appContext;
   private final Provider<EditorAgent> editorAgentProvider;
   private final Provider<ProjectExplorerPresenter> projectExplorerPresenterProvider;
   private final Provider<EditorMultiPartStack> multiPartStackProvider;
@@ -50,11 +48,9 @@ public class GitChangesHandler {
   @Inject
   public GitChangesHandler(
       RequestHandlerConfigurator configurator,
-      AppContext appContext,
       Provider<EditorAgent> editorAgentProvider,
       Provider<ProjectExplorerPresenter> projectExplorerPresenterProvider,
       Provider<EditorMultiPartStack> multiPartStackProvider) {
-    this.appContext = appContext;
     this.editorAgentProvider = editorAgentProvider;
     this.projectExplorerPresenterProvider = projectExplorerPresenterProvider;
     this.multiPartStackProvider = multiPartStackProvider;
@@ -114,9 +110,6 @@ public class GitChangesHandler {
                 tab.setTitleColor(vcsStatus.getColor());
               }
             });
-
-    //TODO: temporary comment this line because its freeze browser for big project details see in che#6208
-    //appContext.getWorkspaceRoot().synchronize();
   }
 
   public void apply(String endpointId, Status status) {
@@ -130,19 +123,21 @@ public class GitChangesHandler {
               Resource resource = ((ResourceNode) node).getData();
               File file = resource.asFile();
               String nodeLocation = resource.getLocation().removeFirstSegments(1).toString();
-              if (status.getUntracked().contains(nodeLocation)
-                  && file.getVcsStatus() != UNTRACKED) {
-                file.setVcsStatus(UNTRACKED);
-                tree.refresh(node);
+
+              VcsStatus newVcsStatus;
+              if (status.getUntracked().contains(nodeLocation)) {
+                newVcsStatus = UNTRACKED;
               } else if (status.getModified().contains(nodeLocation)
                   || status.getChanged().contains(nodeLocation)) {
-                file.setVcsStatus(MODIFIED);
-                tree.refresh(node);
-              } else if (status.getAdded().contains(nodeLocation) && file.getVcsStatus() != ADDED) {
-                file.setVcsStatus(ADDED);
-                tree.refresh(node);
-              } else if (file.getVcsStatus() != NOT_MODIFIED) {
-                file.setVcsStatus(VcsStatus.NOT_MODIFIED);
+                newVcsStatus = MODIFIED;
+              } else if (status.getAdded().contains(nodeLocation)) {
+                newVcsStatus = ADDED;
+              } else {
+                newVcsStatus = NOT_MODIFIED;
+              }
+
+              if (file.getVcsStatus() != newVcsStatus) {
+                file.setVcsStatus(newVcsStatus);
                 tree.refresh(node);
               }
             });
@@ -161,11 +156,9 @@ public class GitChangesHandler {
                 tab.setTitleColor(MODIFIED.getColor());
               } else if (status.getAdded().contains(nodeLocation)) {
                 tab.setTitleColor(ADDED.getColor());
-              } else if (((File) tab.getFile()).getVcsStatus() != NOT_MODIFIED) {
+              } else {
                 tab.setTitleColor(NOT_MODIFIED.getColor());
               }
             });
-
-    appContext.getWorkspaceRoot().synchronize();
   }
 }
