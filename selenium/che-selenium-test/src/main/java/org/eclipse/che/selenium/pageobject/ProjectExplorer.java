@@ -221,7 +221,7 @@ public class ProjectExplorer {
    * @param path
    */
   public void waitVisibleItem(String path) {
-    String locator = "//div[@path='/" + path + "']/div";
+    String locator = "//div[@path='/" + path + "']//div[string-length(text()) > 0]";
     new WebDriverWait(seleniumWebDriver, 20)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(locator)));
   }

@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -44,6 +45,7 @@ public class CheckFindActionFeatureInCheTest {
           + "Commit ... [Alt+C]  GitCommandGroup\n"
           + "Commit...  SvnFileCommandGroup\n"
           + "Community  Help\n"
+          + "Revert commit...  GitCommandGroup\n"
           + "SvnCredentialsCommandGroup  Subversion";
 
   private static final String THIRD_ACTION_NAME_EXPECTED_ARRAY_LOCAL_MODE =
@@ -72,6 +74,7 @@ public class CheckFindActionFeatureInCheTest {
           + "Execute default command of Debug goal [Alt+D] \n"
           + "Execute default command of Run goal [Alt+R] \n"
           + "GitCommandGroup \n"
+          + "Revert commit...  GitCommandGroup\n"
           + "SvnAddCommandGroup \n"
           + "SvnCredentialsCommandGroup  Subversion\n"
           + "SvnFileCommandGroup \n"
@@ -91,6 +94,7 @@ public class CheckFindActionFeatureInCheTest {
   @Inject private Menu menu;
   @Inject private Ide ide;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -105,6 +109,7 @@ public class CheckFindActionFeatureInCheTest {
         ProjectTemplates.MAVEN_SPRING);
 
     ide.open(testWorkspace);
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitVisibleItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(
