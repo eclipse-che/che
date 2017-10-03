@@ -128,15 +128,7 @@
                     <exclude name="debugNodeJsTest"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.debugger.PhpProjectDebuggingTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="shouldDebugCliPhpScriptFromFirstLine"/>
-
-                    <!-- unstable -->
-                    <exclude name="shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.debugger.PhpProjectDebuggingTest"/>
             <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest"/>
             <class name="org.eclipse.che.selenium.debugger.ThreadDumpTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteFeaturesInEditorTest"/>

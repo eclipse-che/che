@@ -168,7 +168,7 @@ public class PhpProjectDebuggingTest {
             NON_DEFAULT_DEBUG_PORT));
 
     projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
-    editor.setBreakPointAndWaitActiveState(14);
+    editor.setBreakpoint(14);
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
