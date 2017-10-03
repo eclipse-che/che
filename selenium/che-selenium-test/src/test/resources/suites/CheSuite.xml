@@ -88,12 +88,7 @@
                     <exclude name="checkCleanStoragedAfterEndDebugSession"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.debugger.PhpProjectDebuggingTest">
-                <methods>
-                    <exclude name="shouldDebugCliPhpScriptFromFirstLine"/>
-                    <exclude name="shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.debugger.PhpProjectDebuggingTest"/>
             <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest"/>
             <class name="org.eclipse.che.selenium.debugger.ThreadDumpTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteFeaturesInEditorTest"/>
@@ -214,6 +209,9 @@
                 <methods>
                     <exclude name="createNewLocalBranchTest"/>
                 </methods>
+                <methods>
+                    <exclude name="deleteLocalBranch"/>
+                </methods>
             </class>
             <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest">
                 <methods>
@@ -281,6 +279,7 @@
             <class name="org.eclipse.che.selenium.mavenplugin.CheckMavenPluginTest">
                 <methods>
                     <exclude name="excludeIncludeModules"/>
+                    <exclude name="shouldAccessClassCreatedInAnotherModule"/>
                     <exclude name="shouldAccessClassCreatedInAnotherModuleAfterIncludingModule"/>
                     <exclude name="mavenStatusBarShouldDisplayResolvingProjectMessage"/>
                     <exclude name="shouldExecuteCommandAndWaitTextInConsole"/>
@@ -304,6 +303,7 @@
             <class name="org.eclipse.che.selenium.miscellaneous.FileStructureNodesTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.FindTextFeatureTest">
                 <methods>
+                    <exclude name="checkFindTextBasic"/>
                     <exclude name="checkFindByFileMask"/>
                     <exclude name="checkFindIntoSelectedPath"/>
                 </methods>
@@ -484,7 +484,11 @@
             <class name="org.eclipse.che.selenium.refactor.parameters.RenameParametersTest"/>
             <class name="org.eclipse.che.selenium.refactor.preview.CheckTreeInRefactorPanelTest"/>
             <class name="org.eclipse.che.selenium.refactor.preview.PreviewRefactoringTest"/>
-            <class name="org.eclipse.che.selenium.refactor.types.GenericsTest"/>
+            <class name="org.eclipse.che.selenium.refactor.types.GenericsTest">
+                <methods>
+                    <exclude name="testGenerics2"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.refactor.types.IllegalTypeNameTest"/>
             <class name="org.eclipse.che.selenium.refactor.types.RenameTypeTest"/>
             <class name="org.eclipse.che.selenium.refactor.types.TestAnnotationsTest"/>
