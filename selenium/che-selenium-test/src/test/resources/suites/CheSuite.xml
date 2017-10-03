@@ -31,7 +31,7 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest"/>
-            <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForCharpLanguageTest">
+            <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForCSharpLanguageTest">
                 <methods>
                     <exclude name="checkLaunchingCodeserver"/>
                 </methods>
@@ -358,6 +358,7 @@
                     <exclude name="shouldExecuteJUnit4MethodWithDifferentStatuses"/>
                 </methods>
             </class>
+            <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit4CheckRunSuitesAndScopesTest"/>
             <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginTestNgTest">
                 <methods>
                     <exclude name="shouldExecuteTestClassSuccessfully"/>
