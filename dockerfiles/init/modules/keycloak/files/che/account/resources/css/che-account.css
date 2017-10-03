@@ -2,9 +2,28 @@ body {
     background-color: #fff;
 }
 
-#tabs-menu > div {
-    width: 75%;
-    border-top: 1px solid #e4e4e4;
+header div.container {
+    width: 100%;
+    margin: 0;
+}
+
+#referrer {
+    max-height: 36px;
+    background-color: #fdb940;
+    border-radius: 5px;
+    padding: 5px 15px;
+    margin-top: 5px;
+    margin-right: 10px;
+}
+
+#referrer:hover {
+    background-color: #fca70e;
+}
+
+#content {
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 #tabs-menu li a, #tabs-menu li a:hover {
@@ -25,33 +44,37 @@ body {
     background-color: #cce0f6;
 }
 
-#tabs-menu div[class="col-sm-2 col-md-2"] {
-    padding-left: 8px;
-    padding-right: 16px;
+#tab-content {
+    border-top: 1px solid #e4e4e4;
+    border-right: none;
+    border-left: none;
 }
 
-#tabs-menu div > label.control-label {
+#tab-content div > label.control-label {
+    color: #5a5a5a;
+    text-align: left;
     font-size: 13px;
+    font-weight: bold;
     letter-spacing: 1.3px;
     font-family: "Open Sans";
-    padding-top: 10px;    
+    padding-top: 10px;
 }
 
-#tabs-menu div > input {
+#tab-content div > input {
     box-shadow: none;
     border-color: #e4e4e4;
     border-radius: 2px;
     font-size: 13px;
     font-family: "Open Sans";
     height: 38px;
-    padding: 0 15px;   
+    padding: 0 15px;
 }
 
-#tabs-menu div > input:focus {
+#tab-content div > input:focus {
     border-color: #4a90e2;
 }
 
-#tabs-menu div > button {
+#tab-content div > button {
     min-width: 88px;
     min-height: 36px;
     border-radius: 2px;
@@ -60,20 +83,20 @@ body {
     background-image: none;
 }
 
-#tabs-menu div > button[value="Save"] {
+#tab-content div > button[value="Save"] {
     background-color: #46af00;
     text-transform: uppercase;
 }
 
-#tabs-menu div > button[value="Save"]:hover {
+#tab-content div > button[value="Save"]:hover {
     background-color: #3f9d00;
 }
 
-#tabs-menu div > button[value="Cancel"] {
+#tab-content div > button[value="Cancel"] {
     color: #9c9c9c;
     background-color: #d7d7d7;
 }
 
-#tabs-menu div > button[value="Cancel"]:hover {
+#tab-content div > button[value="Cancel"]:hover {
     background-color: #c9c9c9;
 }

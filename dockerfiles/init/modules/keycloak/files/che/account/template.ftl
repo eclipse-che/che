@@ -51,8 +51,8 @@
         </nav>
     </header>
 
-    <div class="container" id="tabs-menu">
-        <div>
+    <div class="container" id="content">
+        <div id="tabs-menu">
             <ul class="nav navbar-nav">
                 <li class="<#if active=='account'>active</#if>"><a href="${url.accountUrl}">${msg("account")}</a></li>
                 <#if features.passwordUpdateSupported><li class="<#if active=='password'>active</#if>"><a href="${url.passwordUrl}">${msg("password")}</a></li></#if>
@@ -64,7 +64,7 @@
             </ul>
         </div>
 
-        <div class="col-sm-9 content-area">
+        <div class="col-sm-12 content-area" id="tab-content">
             <#if message?has_content>
                 <div class="alert alert-${message.type}">
                     <#if message.type=='success' ><span class="pficon pficon-ok"></span></#if>
