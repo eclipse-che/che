@@ -188,8 +188,9 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /**
-   * Click on failed, passed or ignored method on the result tree. If in the result tree will be
-   * methods with the same status and name will be selected first
+   * Click on failed, passed or ignored method of the result tree. If in the result tree will be
+   * methods with the same statuses and names - will be selected first method in the DOM
+   * methods with the same statuses and names - will be selected first method in the DOM
    *
    * @param nameOfMethod
    * @param methodState
