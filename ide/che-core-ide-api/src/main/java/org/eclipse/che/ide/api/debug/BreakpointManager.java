@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.debug;
 
 import java.util.List;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 
 /**
  * Breakpoint manager.

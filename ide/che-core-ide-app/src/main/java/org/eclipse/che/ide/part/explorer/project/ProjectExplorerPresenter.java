@@ -13,6 +13,8 @@ package org.eclipse.che.ide.part.explorer.project;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -21,6 +23,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 import com.google.common.collect.Sets;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -42,6 +45,7 @@ import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.extension.ExtensionsInitializedEvent;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -64,6 +68,7 @@ import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -90,6 +95,7 @@ public class ProjectExplorerPresenter extends BasePresenter
   private final TreeExpander treeExpander;
   private final AppContext appContext;
   private final RequestTransmitter requestTransmitter;
+  private NotificationManager notificationManager;
   private final DtoFactory dtoFactory;
   private UpdateTask updateTask = new UpdateTask();
   private Set<Path> expandQueue = new HashSet<>();
@@ -106,6 +112,7 @@ public class ProjectExplorerPresenter extends BasePresenter
       AppContext appContext,
       Provider<WorkspaceAgent> workspaceAgentProvider,
       RequestTransmitter requestTransmitter,
+      NotificationManager notificationManager,
       DtoFactory dtoFactory) {
     this.view = view;
     this.eventBus = eventBus;
@@ -115,6 +122,7 @@ public class ProjectExplorerPresenter extends BasePresenter
     this.resources = resources;
     this.appContext = appContext;
     this.requestTransmitter = requestTransmitter;
+    this.notificationManager = notificationManager;
     this.dtoFactory = dtoFactory;
     this.view.setDelegate(this);
 
@@ -170,6 +178,10 @@ public class ProjectExplorerPresenter extends BasePresenter
               partStack.addPart(ProjectExplorerPresenter.this);
               partStack.setActivePart(ProjectExplorerPresenter.this);
             });
+  }
+
+  public void addSelectionHandler(SelectionHandler<Node> handler) {
+    getTree().getSelectionModel().addSelectionHandler(handler);
   }
 
   @Inject
@@ -296,6 +308,10 @@ public class ProjectExplorerPresenter extends BasePresenter
 
         if (node != null) {
           tree.getNodeStorage().remove(node);
+          if (resource.isProject()) {
+            notificationManager.notify(
+                locale.projectRemoved(node.getName()), SUCCESS, NOT_EMERGE_MODE);
+          }
         }
       } else if (delta.getKind() == UPDATED) {
         for (Node node : tree.getNodeStorage().getAll()) {
@@ -319,6 +335,18 @@ public class ProjectExplorerPresenter extends BasePresenter
 
         if (node != null && tree.isExpanded(node)) {
           expandQueue.add(delta.getToPath());
+        }
+      }
+
+      final Node node = getNode(delta.getResource().getLocation());
+      if (node != null) {
+
+        if (node instanceof ResourceNode && !delta.getResource().isProject()) {
+          ((ResourceNode) node).setData(delta.getResource());
+        }
+
+        if (node instanceof HasPresentation) {
+          tree.refresh(node);
         }
       }
 
@@ -478,26 +506,30 @@ public class ProjectExplorerPresenter extends BasePresenter
 
     @Override
     public void onExecute() {
-      if (view.getTree().getNodeLoader().isBusy()) {
-        delay(500);
+      Scheduler.get()
+          .scheduleDeferred(
+              () -> {
+                if (view.getTree().getNodeLoader().isBusy()) {
+                  delay(500);
 
-        return;
-      }
+                  return;
+                }
 
-      final Set<Path> updateQueue = Sets.newHashSet(toRefresh);
-      toRefresh.clear();
+                final Set<Path> updateQueue = Sets.newHashSet(toRefresh);
+                toRefresh.clear();
 
-      for (Path path : updateQueue) {
-        final Node node = getNode(path);
+                for (Path path : updateQueue) {
+                  final Node node = getNode(path);
 
-        if (node == null) {
-          continue;
-        }
+                  if (node == null) {
+                    continue;
+                  }
 
-        if (getTree().isExpanded(node)) {
-          view.getTree().getNodeLoader().loadChildren(node, true);
-        }
-      }
+                  if (getTree().isExpanded(node)) {
+                    view.getTree().getNodeLoader().loadChildren(node, true);
+                  }
+                }
+              });
     }
   }
 }

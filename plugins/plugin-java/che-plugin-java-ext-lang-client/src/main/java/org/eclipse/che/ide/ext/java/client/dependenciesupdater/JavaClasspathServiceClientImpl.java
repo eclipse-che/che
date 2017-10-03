@@ -12,7 +12,9 @@ package org.eclipse.che.ide.ext.java.client.dependenciesupdater;
 
 import static com.google.gwt.http.client.RequestBuilder.GET;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.resource.Path.valueOf;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import static org.eclipse.che.ide.util.PathEncoder.encodePath;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -48,7 +50,8 @@ public class JavaClasspathServiceClientImpl implements JavaClasspathServiceClien
   @Override
   public void updateDependencies(
       String projectPath, RequestCallback<ClassPathBuilderResult> callback) {
-    final String requestUrl = baseHttpUrl + "/classpath/update?projectpath=" + projectPath;
+    final String requestUrl =
+        baseHttpUrl + "/classpath/update?projectpath=" + encodePath(valueOf(projectPath));
 
     MessageBuilder builder = new MessageBuilder(GET, requestUrl);
     builder.header(ACCEPT, APPLICATION_JSON);

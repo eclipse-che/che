@@ -37,10 +37,10 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.project.NewProjectConfig;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
-import org.eclipse.che.api.project.server.RegisteredProject.Problem;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -61,6 +61,7 @@ import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
+import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -308,9 +309,9 @@ public class ProjectManager {
    *     NewProjectConfig#setPath(String)} field. In this case Project will be created as project of
    *     {@link BaseProjectType} type
    * <li>- a project will be created as project of {@link BaseProjectType} type with {@link
-   *     Problem#code} = 12 when declared primary project type is not registered,
-   * <li>- a project will be created with {@link Problem#code} = 12 and without mixin project type
-   *     when declared mixin project type is not registered
+   *     ProjectProblem#getCode()} code} = 12 when declared primary project type is not registered,
+   * <li>- a project will be created with {@link ProjectProblem#getCode()} code} = 12 and without
+   *     mixin project type when declared mixin project type is not registered
    * <li>- for creating a project by generator {@link NewProjectConfig#getOptions()} should be
    *     specified.
    *
@@ -377,8 +378,8 @@ public class ProjectManager {
           } catch (Exception e) {
             registeredProject =
                 projectRegistry.putProject(projectConfig, asFolder(pathToProject), true, false);
-            final Problem problem =
-                new Problem(
+            final ProjectProblem problem =
+                new ProjectProblemImpl(
                     NOT_UPDATED_PROJECT,
                     "The project is not updated, caused by " + e.getLocalizedMessage());
             registeredProject.getProblems().add(problem);

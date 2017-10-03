@@ -51,7 +51,7 @@ public class CheckFactoryWithMultiModuleTest {
         testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL);
     ProjectConfigDto projectConfigDto = factoryBuilder.getWorkspace().getProjects().get(0);
     projectConfigDto.setName(PROJECT_NAME);
-    projectConfigDto.setPath(PROJECT_NAME);
+    projectConfigDto.setPath("/" + PROJECT_NAME);
     projectConfigDto.getSource().setParameters(ImmutableMap.of("branch", "master"));
     projectConfigDto
         .getSource()

@@ -58,6 +58,9 @@ public interface NewProjectConfigDto extends ProjectConfigDto, NewProjectConfig 
 
   NewProjectConfigDto withLinks(List<Link> links);
 
+  @Override
+  List<ProjectProblemDto> getProblems();
+
   NewProjectConfigDto withProblems(List<ProjectProblemDto> problems);
 
   NewProjectConfigDto withOptions(Map<String, String> options);

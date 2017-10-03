@@ -14,10 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.debug.DebuggerManager;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.DebuggerResourceHandlerFactory;
 import org.eclipse.che.plugin.jdb.ide.debug.JavaDebugger;
-import org.eclipse.che.plugin.jdb.ide.fqn.JavaClassFqnResolver;
-import org.eclipse.che.plugin.jdb.ide.fqn.JavaFqnResolver;
+import org.eclipse.che.plugin.jdb.ide.debug.JavaDebuggerResourceHandler;
 
 /**
  * Extension allows debug Java web applications.
@@ -36,11 +35,9 @@ public class JavaDebuggerExtension {
   public JavaDebuggerExtension(
       DebuggerManager debuggerManager,
       JavaDebugger javaDebugger,
-      FqnResolverFactory resolverFactory,
-      JavaFqnResolver javaFqnResolver,
-      JavaClassFqnResolver javaClassFqnResolver) {
+      DebuggerResourceHandlerFactory debuggerResourceHandlerFactory,
+      JavaDebuggerResourceHandler javaDebuggerResourceHandler) {
     debuggerManager.registeredDebugger(JavaDebugger.ID, javaDebugger);
-    resolverFactory.addResolver("java", javaFqnResolver);
-    resolverFactory.addResolver("class", javaClassFqnResolver);
+    debuggerResourceHandlerFactory.register(JavaDebugger.ID, javaDebuggerResourceHandler);
   }
 }

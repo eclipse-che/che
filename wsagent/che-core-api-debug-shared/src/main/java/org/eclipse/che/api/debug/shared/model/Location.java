@@ -18,9 +18,6 @@ public interface Location {
   /** The line number in a file or in a class. */
   int getLineNumber();
 
-  /** Returns path to the resource. */
-  String getResourcePath();
-
   /** Returns true if breakpoint resource is external resource, or false otherwise. */
   boolean isExternalResource();
 
@@ -29,4 +26,10 @@ public interface Location {
 
   /** Returns project path, for resource which we are debugging now. */
   String getResourceProjectPath();
+
+  /** Returns the method is being executed. */
+  Method getMethod();
+
+  /** Returns thread id. */
+  long getThreadId();
 }

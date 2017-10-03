@@ -75,7 +75,7 @@ public class Wizard {
 
   public interface SamplesName {
     String WEB_JAVA_SPRING = "web-java-spring";
-    String ASP_DOT_NET_WEB_SIMPLE = "aspnet-web-simple";
+    String ASP_DOT_NET_WEB_SIMPLE = "dotnet-web-simple";
   }
 
   public interface TypeFolder {

@@ -13,15 +13,19 @@ package org.eclipse.che.selenium.core.workspace;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.ConfigurationException;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -42,17 +46,20 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   private final ScheduledExecutorService executor;
   private final DefaultTestUser defaultUser;
   private final int defaultMemoryGb;
-  private final TestWorkspaceServiceClient workspaceServiceClient;
+  private final TestWorkspaceServiceClient testWorkspaceServiceClient;
+  private final TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
 
   @Inject
   public TestWorkspaceProviderImpl(
       @Named("sys.threads") int threads,
       @Named("workspace.default_memory_gb") int defaultMemoryGb,
       DefaultTestUser defaultUser,
-      TestWorkspaceServiceClient workspaceServiceClient) {
+      TestWorkspaceServiceClient testWorkspaceServiceClient,
+      TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
     this.defaultUser = defaultUser;
     this.defaultMemoryGb = defaultMemoryGb;
-    this.workspaceServiceClient = workspaceServiceClient;
+    this.testWorkspaceServiceClient = testWorkspaceServiceClient;
+    this.testWorkspaceServiceClientFactory = testWorkspaceServiceClientFactory;
 
     if (threads == 0) {
       throw new ConfigurationException("Threads number is 0");
@@ -77,7 +84,12 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
       return doGetWorkspaceFromPool();
     }
 
-    return new TestWorkspaceImpl(generateName(), owner, memoryGB, template, workspaceServiceClient);
+    return new TestWorkspaceImpl(
+        generateName(),
+        owner,
+        memoryGB,
+        template,
+        testWorkspaceServiceClientFactory.create(owner.getAuthToken()));
   }
 
   private boolean hasDefaultValues(TestUser testUser, int memoryGB, String template) {
@@ -91,10 +103,10 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
       // insure workspace is running
       TestWorkspace testWorkspace = testWorkspaceQueue.take();
       WorkspaceStatus testWorkspaceStatus =
-          workspaceServiceClient.getById(testWorkspace.getId()).getStatus();
+          testWorkspaceServiceClient.getById(testWorkspace.getId()).getStatus();
 
       if (testWorkspaceStatus != WorkspaceStatus.RUNNING) {
-        workspaceServiceClient.start(
+        testWorkspaceServiceClient.start(
             testWorkspace.getId(), testWorkspace.getName(), testWorkspace.getOwner());
       }
 
@@ -129,12 +141,26 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
       LOG.info("Workspace threads pool is terminated");
     }
 
-    LOG.info("Destroy remained workspaces: {}.", testWorkspaceQueue.size());
+    LOG.info("Destroy remained workspaces: {}.", extractWorkspaceInfo());
     testWorkspaceQueue.forEach(TestWorkspace::delete);
 
     if (isInterrupted) {
       Thread.currentThread().interrupt();
     }
+  }
+
+  private List<String> extractWorkspaceInfo() {
+    return testWorkspaceQueue
+        .stream()
+        .map(
+            s -> {
+              try {
+                return s.getName();
+              } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException("Error of getting name of workspace.", e);
+              }
+            })
+        .collect(Collectors.toList());
   }
 
   @Inject

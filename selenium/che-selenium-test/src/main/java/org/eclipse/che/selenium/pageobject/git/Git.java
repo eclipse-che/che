@@ -610,11 +610,6 @@ public class Git {
     gitCompare.waitGitCompareFormIsOpen();
   }
 
-  /** switch to the frame 'git compare' form */
-  public void toSwitchFrameGitCompareForm() {
-    gitCompare.toSwitchFrameGitCompareForm();
-  }
-
   /** wait the main form 'Git Compare' is closed */
   public void waitGitCompareFormIsClosed() {
     gitCompare.waitGitCompareFormIsClosed();

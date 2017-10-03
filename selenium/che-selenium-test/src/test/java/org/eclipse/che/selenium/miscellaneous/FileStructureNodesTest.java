@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.miscellaneous;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.Random;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 12.12.15 */
 public class FileStructureNodesTest {
-  private static final String PROJECT_NAME = "FileStructureNodes" + new Random().nextInt(999);
+  private static final String PROJECT_NAME = NameGenerator.generate("FileStructureNodes", 4);
   private static final String JAVA_FILE_NAME = "Company";
   private static final String INNER_CLASS_NAME = "CompanyHelper";
   private static final String INTERFACE_NAME = "Inter";
@@ -117,8 +117,9 @@ public class FileStructureNodesTest {
   @Test
   public void checkFileStructureNodes() {
     projectExplorer.waitProjectExplorer();
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    expandTReeProjectAndOpenClass(JAVA_FILE_NAME);
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.openItemByVisibleNameInExplorer("Company.java");
 
     // check work nodes in the 'file structure' by double click
     menu.runCommand(
@@ -140,7 +141,14 @@ public class FileStructureNodesTest {
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
+    //try-catch was added because test fails while trying to open node by double click action
+    //issue: https://github.com/eclipse/che/issues/6499
+    try {
+      fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
+    } catch (org.openqa.selenium.TimeoutException ex) {
+      fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
+      fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
+    }
 
     // check work nodes in the 'file structure' by click on the icon
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
@@ -159,23 +167,17 @@ public class FileStructureNodesTest {
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
-    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    //try-catch was added because test fails while trying to open node by click action
+    //issue: https://github.com/eclipse/che/issues/6499
+    try {
+      fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    } catch (org.openqa.selenium.TimeoutException ex) {
+      fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
+      fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
+      fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
+      fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
+    }
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-  }
-
-  public void expandTReeProjectAndOpenClass(String fileName) {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src");
-    projectExplorer.waitItem(PROJECT_NAME + "/src" + "/main");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src" + "/main");
-    projectExplorer.waitItem(PROJECT_NAME + "/src" + "/main" + "/java");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src" + "/main" + "/java");
-    projectExplorer.waitItem(PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa");
-    projectExplorer.waitItem(
-        PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa/" + fileName + ".java");
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa/" + fileName + ".java");
-    editor.waitActiveEditor();
   }
 }

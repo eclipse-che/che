@@ -16,7 +16,8 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -32,26 +33,46 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.MemoryMeasure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/** @author Musienko Maxim */
-@Singleton
+/**
+ * @author Musienko Maxim
+ * @author Dmytro Nochevnov
+ */
 public class TestWorkspaceServiceClient {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TestWorkspaceServiceClient.class);
+
   private final TestApiEndpointUrlProvider apiEndpointProvider;
   private final HttpJsonRequestFactory requestFactory;
-  private final TestUserNamespaceResolver testUserNamespaceResolver;
+  private final TestUserNamespaceResolver userNamespaceResolver;
 
   @Inject
   public TestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider,
       HttpJsonRequestFactory requestFactory,
-      TestUserNamespaceResolver testUserNamespaceResolver) {
+      TestUserNamespaceResolver userNamespaceResolver) {
     this.apiEndpointProvider = apiEndpointProvider;
     this.requestFactory = requestFactory;
-    this.testUserNamespaceResolver = testUserNamespaceResolver;
+    this.userNamespaceResolver = userNamespaceResolver;
+  }
+
+  @AssistedInject
+  public TestWorkspaceServiceClient(
+      TestApiEndpointUrlProvider apiEndpointProvider,
+      TestUserNamespaceResolver userNamespaceResolver,
+      TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
+      @Assisted String authToken) {
+    this(
+        apiEndpointProvider,
+        userHttpJsonRequestFactoryCreator.create(authToken),
+        userNamespaceResolver);
   }
 
   private String getBaseUrl() {
@@ -125,6 +146,12 @@ public class TestWorkspaceServiceClient {
     }
 
     requestFactory.fromUrl(getIdBasedUrl(workspace.getId())).useDeleteMethod().request();
+
+    LOG.info(
+        "Workspace name='{}', id='{}', username='{}' removed",
+        workspaceName,
+        workspace.getId(),
+        userName);
   }
 
   /** Waits needed status. */
@@ -165,12 +192,17 @@ public class TestWorkspaceServiceClient {
     workspace.setName(workspaceName);
     workspace.setDefaultEnv(workspaceName);
 
-    return requestFactory
-        .fromUrl(getBaseUrl())
-        .usePostMethod()
-        .setBody(workspace)
-        .request()
-        .asDto(WorkspaceDto.class);
+    WorkspaceDto workspaceDto =
+        requestFactory
+            .fromUrl(getBaseUrl())
+            .usePostMethod()
+            .setBody(workspace)
+            .request()
+            .asDto(WorkspaceDto.class);
+
+    LOG.info("Workspace name='{}' and id='{}' created", workspaceName, workspaceDto.getId());
+
+    return workspaceDto;
   }
 
   /** Sends start workspace request. */
@@ -242,7 +274,7 @@ public class TestWorkspaceServiceClient {
   }
 
   private String getNameBasedUrl(String workspaceName, String username) {
-    return getBaseUrl() + "/" + testUserNamespaceResolver.resolve(username) + "/" + workspaceName;
+    return getBaseUrl() + "/" + userNamespaceResolver.resolve(username) + "/" + workspaceName;
   }
 
   private String getIdBasedUrl(String workspaceId) {
@@ -266,5 +298,22 @@ public class TestWorkspaceServiceClient {
         break;
     }
     return calculatedValue;
+  }
+
+  /**
+   * Delete workspaces which could be created from factory
+   *
+   * @param originalName name workspace which was used to create factory
+   */
+  public void deleteFactoryWorkspaces(String originalName, String username) throws Exception {
+    String workspace2delete = originalName;
+    for (int i = 1; ; i++) {
+      if (!exists(workspace2delete, username)) {
+        break;
+      }
+
+      delete(workspace2delete, username);
+      workspace2delete = originalName + "_" + i;
+    }
   }
 }

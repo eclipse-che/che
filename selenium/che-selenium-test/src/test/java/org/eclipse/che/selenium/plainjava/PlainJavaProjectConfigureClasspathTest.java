@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.plainjava;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.BUILD_PATH;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuBuildPath.CONFIGURE_CLASSPATH;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuBuildPath.UNMARK_AS_SOURCE_FOLDER;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
@@ -25,6 +24,7 @@ import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -142,7 +142,8 @@ public class PlainJavaProjectConfigureClasspathTest {
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.clickOnItemInContextMenu(BUILD_PATH);
-    projectExplorer.clickOnItemInContextMenu(CONFIGURE_CLASSPATH);
+    projectExplorer.clickOnItemInContextMenu(
+        TestProjectExplorerContextMenuConstants.SubMenuBuildPath.CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.selectSourceCategory();
     configureClasspath.deleteJarOrFolderFromBuildPath("/" + PROJECT_NAME + "/test");
@@ -154,7 +155,7 @@ public class PlainJavaProjectConfigureClasspathTest {
 
     // check the library container
     projectExplorer.selectItem(PROJECT_NAME);
-    menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
+    menu.runCommand(PROJECT, TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.clickLibraryContainer("org.eclipse.jdt.launching.JRE_CONTAINER");
     for (String jarName : listJar) {

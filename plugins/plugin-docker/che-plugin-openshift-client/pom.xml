@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-docker-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.18.0-SNAPSHOT</version>
+        <version>5.19.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-openshift-client</artifactId>
     <packaging>jar</packaging>
@@ -34,6 +34,10 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>

@@ -73,7 +73,7 @@ public abstract class AbstractZendDbgSessionTest {
     }
     assertTrue(debuggerEvent instanceof SuspendEvent);
     SuspendEvent suspendEvent = (SuspendEvent) debuggerEvent;
-    assertEquals(suspendEvent.getLocation().getResourcePath(), dbgFile);
+    assertEquals(suspendEvent.getLocation().getTarget(), dbgFile);
     assertEquals(suspendEvent.getLocation().getLineNumber(), lineNumber);
   }
 

@@ -87,6 +87,16 @@ public class ThreadPullLauncher implements Launcher {
   @Override
   public void scheduleWithFixedDelay(
       Runnable runnable, long initialDelay, long delay, TimeUnit unit) {
+    if (delay <= 0) {
+      LOG.debug(
+          "Method {} has not been scheduled (delay <= 0). Initial delay {} delay {} unit {}",
+          runnable,
+          initialDelay,
+          delay,
+          unit);
+      return;
+    }
+
     service.scheduleWithFixedDelay(runnable, initialDelay, delay, unit);
     LOG.debug(
         "Schedule method {} with fixed initial delay {} delay {} unit {}",
@@ -99,6 +109,16 @@ public class ThreadPullLauncher implements Launcher {
   @Override
   public void scheduleAtFixedRate(
       Runnable runnable, long initialDelay, long period, TimeUnit unit) {
+    if (period <= 0) {
+      LOG.debug(
+          "Method {} with fixed rate has not been scheduled (period <= 0). Initial delay {} period {} unit {}",
+          runnable,
+          initialDelay,
+          period,
+          unit);
+      return;
+    }
+
     service.scheduleAtFixedRate(runnable, initialDelay, period, unit);
     LOG.debug(
         "Schedule method {} with fixed rate. Initial delay {} period {} unit {}",

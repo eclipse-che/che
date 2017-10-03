@@ -16,12 +16,12 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.18.0-SNAPSHOT</version>
+        <version>5.19.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.dashboard</groupId>
     <artifactId>che-dashboard-war</artifactId>
-    <version>5.18.0-SNAPSHOT</version>
+    <version>5.19.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Che Dashboard :: Web App</name>
     <inceptionYear>2015</inceptionYear>
@@ -221,8 +221,8 @@
                                     <target unless="skipTests">
                                         <!-- Run unit tests -->
                                         <exec dir="${basedir}" executable="npm" failonerror="true">
-                                          <arg value="run" />
-                                          <arg value="test" />
+                                            <arg value="run" />
+                                            <arg value="test" />
                                         </exec>
                                     </target>
                                 </configuration>

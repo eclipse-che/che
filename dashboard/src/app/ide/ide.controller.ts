@@ -12,7 +12,7 @@
 import IdeSvc from './ide.service';
 import IdeIFrameSvc from './ide-iframe/ide-iframe.service';
 import {RouteHistory} from '../../components/routing/route-history.service';
-import {CheWorkspace} from '../../components/api/che-workspace.factory';
+import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 
 /**
  * This class is handling the controller for the IDE

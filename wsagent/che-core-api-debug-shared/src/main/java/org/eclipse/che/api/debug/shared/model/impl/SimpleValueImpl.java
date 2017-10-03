@@ -26,8 +26,12 @@ public class SimpleValueImpl implements SimpleValue {
     this.value = value;
   }
 
+  public SimpleValueImpl(String value) {
+    this(Collections.<VariableImpl>emptyList(), value);
+  }
+
   public SimpleValueImpl(SimpleValueDto dto) {
-    this(dto.getVariables(), dto.getValue());
+    this(dto.getVariables(), dto.getString());
   }
 
   @Override
@@ -36,7 +40,7 @@ public class SimpleValueImpl implements SimpleValue {
   }
 
   @Override
-  public String getValue() {
+  public String getString() {
     return value;
   }
 

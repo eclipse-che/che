@@ -13,13 +13,9 @@ package org.eclipse.che.plugin.testing.junit.server.junit4;
 import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
-import org.eclipse.che.api.testing.shared.TestResult;
-import org.eclipse.che.api.testing.shared.dto.TestResultDto;
-import org.eclipse.che.api.testing.shared.dto.TestResultRootDto;
 import org.eclipse.che.commons.lang.execution.CommandLine;
 import org.eclipse.che.commons.lang.execution.ExecutionException;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
@@ -134,21 +130,5 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
     }
 
     return null;
-  }
-
-  @Override
-  @Deprecated
-  public TestResult execute(Map<String, String> testParameters) throws Exception {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public TestResultRootDto runTests(Map<String, String> testParameters) throws Exception {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public List<TestResultDto> getTestResults(List<String> testResultsPath) {
-    throw new UnsupportedOperationException();
   }
 }

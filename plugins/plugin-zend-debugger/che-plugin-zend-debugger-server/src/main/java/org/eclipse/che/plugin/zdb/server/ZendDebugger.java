@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -36,7 +37,6 @@ import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
-import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
@@ -117,7 +117,13 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
           if (currentVariablePathElement.equals(pathElement)) {
             matchingVariable = currentVariable;
             if (pathIterator.hasNext()) {
-              currentVariables = new ArrayList<>(currentVariable.getVariables());
+              currentVariables =
+                  currentVariable
+                      .getValue()
+                      .getVariables()
+                      .stream()
+                      .map(v -> (IDbgVariable) v)
+                      .collect(Collectors.toList());
             }
             break;
           }
@@ -255,7 +261,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   public SimpleValue getValue(VariablePath variablePath) {
     IDbgVariable matchingVariable = debugVariableStorage.findVariable(variablePath);
     matchingVariable.makeComplete();
-    return new SimpleValueImpl(matchingVariable.getVariables(), matchingVariable.getValue());
+    return matchingVariable.getValue();
   }
 
   @Override
@@ -320,7 +326,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   @Override
   public void setValue(Variable variable) throws DebuggerException {
     Variable matchingVariable = debugVariableStorage.findVariable(variable.getVariablePath());
-    ((ZendDbgVariable) matchingVariable).setValue(variable.getValue());
+    ((ZendDbgVariable) matchingVariable).setValue(variable.getValue().getString());
   }
 
   @Override
@@ -456,7 +462,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   private void sendAddBreakpointFiles() {
     Set<String> breakpointFiles = new HashSet<>();
     for (ZendDbgBreakpoint dbgBreakpoint : breakpoints.values()) {
-      breakpointFiles.add(dbgBreakpoint.getLocation().getResourcePath());
+      breakpointFiles.add(dbgBreakpoint.getLocation().getTarget());
     }
     debugConnection.sendRequest(new AddFilesRequest(breakpointFiles));
   }
@@ -464,7 +470,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   private void sendAddBreakpoints(String remoteFilePath) {
     List<ZendDbgBreakpoint> fileBreakpoints = new ArrayList<>();
     for (ZendDbgBreakpoint dbgBreakpoint : breakpoints.values()) {
-      if (dbgBreakpoint.getLocation().getResourcePath().equals(remoteFilePath)) {
+      if (dbgBreakpoint.getLocation().getTarget().equals(remoteFilePath)) {
         fileBreakpoints.add(dbgBreakpoint);
       }
     }
@@ -488,7 +494,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
                 1,
                 2,
                 dbgBreakpoint.getLocation().getLineNumber(),
-                dbgBreakpoint.getLocation().getResourcePath()));
+                dbgBreakpoint.getLocation().getTarget()));
     if (isOK(response)) {
       // Breakpoint was successfully registered in active session, send breakpoint activated event
       breakpointIds.put(dbgBreakpoint, response.getBreakpointID());

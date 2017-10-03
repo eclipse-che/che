@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 import javax.inject.Named;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
@@ -25,6 +26,7 @@ import org.eclipse.che.selenium.core.client.CheTestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.CheTestMachineServiceClient;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestMachineServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
@@ -42,11 +44,13 @@ import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
 import org.eclipse.che.selenium.core.requestfactory.TestDefaultUserHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.CheAdminTestUser;
 import org.eclipse.che.selenium.core.user.CheTestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.TestUserFactory;
 import org.eclipse.che.selenium.core.user.TestUserImpl;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
@@ -81,14 +85,22 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestDashboardUrlProvider.class).to(CheTestDashboardUrlProvider.class);
 
     bind(HttpJsonRequestFactory.class).to(TestDefaultUserHttpJsonRequestFactory.class);
-
-    bind(AdminTestUser.class).to(CheAdminTestUser.class);
+    install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
 
     bind(TestAuthServiceClient.class).to(CheTestAuthServiceClient.class);
     bind(TestMachineServiceClient.class).to(CheTestMachineServiceClient.class);
 
     bind(TestUser.class).to(TestUserImpl.class);
     bind(TestWorkspaceProvider.class).to(TestWorkspaceProviderImpl.class).asEagerSingleton();
+
+    install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
+
+    install(
+        new FactoryModuleBuilder()
+            .implement(TestUser.class, TestUserImpl.class)
+            .build(TestUserFactory.class));
+
+    bind(AdminTestUser.class).to(CheAdminTestUser.class);
   }
 
   @Provides
