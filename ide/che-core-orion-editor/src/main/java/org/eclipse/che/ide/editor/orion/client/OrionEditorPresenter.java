@@ -98,6 +98,7 @@ import org.eclipse.che.ide.api.editor.quickfix.QuickAssistantFactory;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.CanWrapLines;
@@ -187,6 +188,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   private final AutoSaveMode autoSaveMode;
   private final ClientServerEventService clientServerEventService;
   private final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation;
+  private final WordDetectionUtil wordDetectionUtil;
 
   private final AnnotationRendering rendering = new AnnotationRendering();
   private HasKeyBindings keyBindingsManager;
@@ -231,7 +233,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       final EditorContextMenu contextMenu,
       final AutoSaveMode autoSaveMode,
       final ClientServerEventService clientServerEventService,
-      final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation) {
+      final EditorFileStatusNotificationOperation editorFileStatusNotificationOperation,
+      final WordDetectionUtil wordDetectionUtil) {
     this.codeAssistantFactory = codeAssistantFactory;
     this.deletedFilesController = deletedFilesController;
     this.breakpointManager = breakpointManager;
@@ -255,6 +258,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
     this.autoSaveMode = autoSaveMode;
     this.clientServerEventService = clientServerEventService;
     this.editorFileStatusNotificationOperation = editorFileStatusNotificationOperation;
+    this.wordDetectionUtil = wordDetectionUtil;
 
     keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -780,6 +784,11 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
       this.updateActions = new ArrayList<>();
     }
     this.updateActions.add(action);
+  }
+
+  @Override
+  public Position getWordAtOffset(int offset) {
+    return wordDetectionUtil.getWordAtOffset(getDocument(), offset);
   }
 
   @Override

@@ -35,6 +35,7 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.references.FindRefer
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
+import org.eclipse.che.plugin.languageserver.ide.rename.LSRenameAction;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -63,13 +64,15 @@ public class LanguageServerExtension {
       FindDefinitionAction findDefinitionAction,
       FindReferencesAction findReferencesAction,
       ApplyTextEditAction applyTextEditAction,
-      ApplyWorkspaceEditAction applyWorkspaceEditAction) {
+      ApplyWorkspaceEditAction applyWorkspaceEditAction,
+      LSRenameAction renameAction) {
     actionManager.registerAction("LSGoToSymbolAction", goToSymbolAction);
     actionManager.registerAction("LSFindSymbolAction", findSymbolAction);
     actionManager.registerAction("LSFindDefinitionAction", findDefinitionAction);
     actionManager.registerAction("LSFindReferencesAction", findReferencesAction);
     actionManager.registerAction("lsp.applyTextEdit", applyTextEditAction);
     actionManager.registerAction("lsp.applyWorkspaceEdit", applyWorkspaceEditAction);
+    actionManager.registerAction("LS.rename", renameAction);
 
     DefaultActionGroup assistantGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_ASSISTANT);
@@ -81,6 +84,15 @@ public class LanguageServerExtension {
         findDefinitionAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
     assistantGroup.add(
         findReferencesAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
+
+    DefaultActionGroup refactoringGroup =
+        (DefaultActionGroup) actionManager.getAction(GROUP_ASSISTANT_REFACTORING);
+    if (refactoringGroup == null) {
+      refactoringGroup = new DefaultActionGroup("Refactoring", true, actionManager);
+      actionManager.registerAction(GROUP_ASSISTANT_REFACTORING, refactoringGroup);
+    }
+
+    refactoringGroup.add(renameAction, new Constraints(Anchor.AFTER, "javaRenameRefactoring"));
 
     if (UserAgent.isMac()) {
       keyBindingManager
@@ -101,6 +113,10 @@ public class LanguageServerExtension {
     keyBindingManager
         .getGlobal()
         .addKey(new KeyBuilder().charCode(KeyCodeMap.F4).build(), "LSFindDefinitionAction");
+
+    keyBindingManager
+        .getGlobal()
+        .addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F6).build(), "LS.rename");
   }
 
   @Inject
@@ -134,12 +150,15 @@ public class LanguageServerExtension {
                 break;
             }
           }
-          //            onOpen(event.getEditor(), event.getFile(), dtoFactory, serviceClient, fileTypeRegister);
+          //            onOpen(event.getEditor(), event.getFile(), dtoFactory, serviceClient,
+          // fileTypeRegister);
         });
   }
 
-  //    private boolean checkIsLSExist(Path location, LanguageServerFileTypeRegister fileTypeRegister){
-  //        return !(location.getFileExtension() == null || !fileTypeRegister.hasLSForExtension(location.getFileExtension()));
+  //    private boolean checkIsLSExist(Path location, LanguageServerFileTypeRegister
+  // fileTypeRegister){
+  //        return !(location.getFileExtension() == null ||
+  // !fileTypeRegister.hasLSForExtension(location.getFileExtension()));
   //    }
 
   private void onSave(

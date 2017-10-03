@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.editor.texteditor;
 
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.editorconfig.EditorUpdateAction;
@@ -18,6 +19,7 @@ import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 
@@ -175,4 +177,13 @@ public interface TextEditor extends EditorPartPresenter {
    * @param action the action to add
    */
   void addEditorUpdateAction(EditorUpdateAction action);
+
+  /**
+   * Get word position under offset.
+   *
+   * @param offset the offset for look for a word
+   * @return the word position
+   */
+  @Nullable
+  Position getWordAtOffset(int offset);
 }

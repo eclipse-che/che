@@ -68,4 +68,13 @@ public interface LanguageServerLocalization extends Messages {
 
   @Key("find.symbol.action.title")
   String findSymbolActionTitle();
+
+  @Key("rename.action.title")
+  String renameActionTitle();
+
+  @Key("rename.view.title")
+  String renameViewTitle();
+
+  @Key("rename.view.tooltip")
+  String renameViewTooltip();
 }
