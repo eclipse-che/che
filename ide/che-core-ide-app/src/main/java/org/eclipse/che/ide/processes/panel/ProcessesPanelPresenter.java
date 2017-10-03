@@ -1357,7 +1357,7 @@ public class ProcessesPanelPresenter extends BasePresenter
             + DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss").format(new Date())
             + ".log";
 
-    download(fileName, getText(devMachine.getId()));
+    download(fileName, getText(devMachine.getConfig().getName()));
   }
 
   @Override
