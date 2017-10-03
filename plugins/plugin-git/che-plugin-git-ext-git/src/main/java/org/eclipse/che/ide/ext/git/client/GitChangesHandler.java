@@ -122,20 +122,24 @@ public class GitChangesHandler {
             node -> {
               Resource resource = ((ResourceNode) node).getData();
               File file = resource.asFile();
-
               String nodeLocation = resource.getLocation().removeFirstSegments(1).toString();
+
+              VcsStatus newVcsStatus;
               if (status.getUntracked().contains(nodeLocation)) {
-                file.setVcsStatus(UNTRACKED);
+                newVcsStatus = UNTRACKED;
               } else if (status.getModified().contains(nodeLocation)
                   || status.getChanged().contains(nodeLocation)) {
-                file.setVcsStatus(MODIFIED);
+                newVcsStatus = MODIFIED;
               } else if (status.getAdded().contains(nodeLocation)) {
-                file.setVcsStatus(ADDED);
+                newVcsStatus = ADDED;
               } else {
-                file.setVcsStatus(VcsStatus.NOT_MODIFIED);
+                newVcsStatus = NOT_MODIFIED;
               }
 
-              tree.refresh(node);
+              if (file.getVcsStatus() != newVcsStatus) {
+                file.setVcsStatus(newVcsStatus);
+                tree.refresh(node);
+              }
             });
 
     editorAgentProvider
