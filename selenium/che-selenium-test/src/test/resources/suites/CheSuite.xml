@@ -287,6 +287,7 @@
                     <exclude name="pullConflictsTest"/>
                 </methods>
             </class>
+            <class name="org.eclipse.che.selenium.git.RevertCommitTest"/>
             <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest"/>

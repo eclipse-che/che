@@ -17,7 +17,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -98,16 +97,10 @@ public class GitStatusBar {
   }
 
   /** wait expected message into the IDE git status bar */
-  public void waitMesageIntoGitInfoPAnel(final String message) {
+  public void waitMessageInGitTab(final String message) {
     waitGitStatusBarInfoPanel();
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            new ExpectedCondition<Boolean>() {
-              @Override
-              public Boolean apply(WebDriver webDriver) {
-                return getTextStatus().contains(message);
-              }
-            });
+        .until((ExpectedCondition<Boolean>) webDriver -> getTextStatus().contains(message));
   }
 
   /** wait and click on navigate button in the 'git console' */
