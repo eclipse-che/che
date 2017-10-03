@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.swagger;
 
+import static org.testng.Assert.assertTrue;
+
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
@@ -17,11 +19,8 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Swagger;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertTrue;
 
 /** @author Andrey Chizhikov */
 public class SwaggerTest {
