@@ -1,3 +1,4 @@
+### Description
 <!--- 
 Replace this comment with a description of the problem.
 
@@ -6,12 +7,10 @@ Please help us by providing all of the details listed below. A complete and thou
 COMMITTERS: please include labels on each issue. Labels are listed here: https://github.com/eclipse/che/wiki/Labels but at a minimum you should include `kind` and `status` labels.
 --> 
 
-**Reproduction Steps:**
+### Reproduction Steps
+<!-- Describe the issue in as much detail as possible including steps to reproduce. Screenshots are very helpful. -->
 
 **OS and version:**    
 
 **Diagnostics:** 
-<!-- Provide output of 'docker run <DOCKER_OPTIONS> eclipse/che info' -->
-
-<!-- If asked, provide a support bundle with 'docker run <DOCKER_OPTIONS> eclipse/che info --bundle' -->
-<!-- If asked, provide CLI debugging info by adding '--trace' to your commands -->
+<!-- Provide logs and any other relevant diagnostic information -->
