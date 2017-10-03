@@ -1,5 +1,4 @@
 # Eclipse Che - Eclipse Next-Generation IDE
-[![Join the chat at https://gitter.im/eclipse/che](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/eclipse/che?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Eclipse License](https://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/codenvy/che/blob/master/LICENSE)
 [![Build Status](https://ci.codenvycorp.com/buildStatus/icon?job=che-ci-master)](https://ci.codenvycorp.com/job/che-ci-master)
 
@@ -28,6 +27,7 @@ If you are interested in fixing issues and contributing directly to the code bas
 
 ### Feedback
 * **Support:** You can ask questions, report bugs, and request features using [GitHub issues](https://github.com/eclipse/che/issues).
+* **Public Chat:** Join the public [eclipse-che](https://mattermost.eclipse.org/eclipse/channels/eclipse-che) Mattermost channel to discuss with community and contributors.
 * **Roadmap:** We maintain [the roadmap](https://github.com/eclipse/che/wiki/Roadmap) on the wiki. 
 * **Weekly Meetings:** Join us on [a hangout](https://github.com/eclipse/che/wiki/Weekly-Planning-Meetings). 
 

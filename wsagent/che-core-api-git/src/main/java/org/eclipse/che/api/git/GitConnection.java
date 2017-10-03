@@ -42,6 +42,7 @@ import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.RebaseResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.RemoteReference;
+import org.eclipse.che.api.git.shared.RevertResult;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
@@ -389,4 +390,12 @@ public interface GitConnection extends Closeable {
    * @throws GitException if any exception occurs
    */
   String getCurrentBranch() throws GitException;
+
+  /**
+   * Revert the specified commit
+   *
+   * @param commit the commit to revert
+   * @throws GitException if any error occurs
+   */
+  RevertResult revert(String commit) throws GitException;
 }

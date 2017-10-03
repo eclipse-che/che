@@ -46,6 +46,9 @@ public @interface ScheduleRate {
   /** @return - name of configuration parameter for initialDelay */
   String initialDelayParameterName() default "";
 
-  /** @return - name of configuration parameter for period */
+  /**
+   * @return - name of configuration parameter for period. A non positive period value will disable
+   *     the scheduling of the method.
+   */
   String periodParameterName() default "";
 }
