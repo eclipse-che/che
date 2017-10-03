@@ -110,7 +110,7 @@ promise.then((keycloakSettings: any) => {
 }).catch((error: any) => {
   console.error('Keycloak initialization failed with error: ', error);
 }).then(() => {
-  angular.bootstrap(document.body, ['userDashboard'], {strictDi: true}); // manually bootstrap Angular
+  angular.bootstrap(document, ['userDashboard'], {strictDi: true}); // manually bootstrap Angular
 });
 
 // add a global resolve flag on all routes (user needs to be resolved first)
