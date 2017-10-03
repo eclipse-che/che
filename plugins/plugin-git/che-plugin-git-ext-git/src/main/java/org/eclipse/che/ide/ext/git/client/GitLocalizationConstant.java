@@ -72,6 +72,9 @@ public interface GitLocalizationConstant extends Messages {
   @Key("button.compare")
   String buttonCompare();
 
+  @Key("button.revert")
+  String buttonRevert();
+
   @Key("button.save_changes")
   String buttonSaveChanges();
 
@@ -222,6 +225,12 @@ public interface GitLocalizationConstant extends Messages {
 
   @Key("messages.reset_fail")
   String resetFail();
+
+  @Key("messages.revert_commit_failed")
+  String revertCommitFailed();
+
+  @Key("messages.revert_commit_successfully")
+  String revertCommitSuccessfully();
 
   @Key("messages.status_failed")
   String statusFailed();
@@ -424,6 +433,37 @@ public interface GitLocalizationConstant extends Messages {
 
   @Key("view.reset.hard.type.description")
   String resetHardTypeDescription();
+
+  // Revert
+  @Key("view.revert.commit.title")
+  String revertCommitViewTitle();
+
+  @Key("view.revert.no_commit.type.title")
+  String revertNoCommitTypeTitle();
+
+  @Key("view.revert.no_commit.type.description")
+  String revertNoCommitTypeDescription();
+
+  @Key("view.revert.revision.table.id.title")
+  String viewRevertRevisionTableIdTitle();
+
+  @Key("view.revert.revision.table.date.title")
+  String viewRevertRevisionTableDateTitle();
+
+  @Key("view.revert.revision.table.author.title")
+  String viewRevertRevisionTableAuthorTitle();
+
+  @Key("view.revert.revision.table.comment.title")
+  String viewRevertRevisionTableCommentTitle();
+
+  @Key("reverted.commits")
+  String revertedCommits(String commits);
+
+  @Key("reverted.new.head")
+  String revertedNewHead(String newHead);
+
+  @Key("reverted.conflicts")
+  String revertedConflicts();
 
   // Remove
   @Key("view.remove_from_index.all")
@@ -679,6 +719,12 @@ public interface GitLocalizationConstant extends Messages {
   @Key("control.resetToCommit.prompt")
   String resetToCommitControlPrompt();
 
+  @Key("control.revert.commit.title")
+  String revertCommitControlTitle();
+
+  @Key("control.revert.commit.prompt")
+  String revertCommitControlPrompt();
+
   @Key("control.history.title")
   String historyControlTitle();
 
@@ -723,4 +769,10 @@ public interface GitLocalizationConstant extends Messages {
 
   @Key("console.project.name")
   String consoleProjectName(String projectName);
+
+  @Key("console.log.command.name")
+  String consoleLogCommandName();
+
+  @Key("console.revert.command.name")
+  String consoleRevertCommandName();
 }

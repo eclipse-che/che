@@ -74,6 +74,8 @@ import org.eclipse.che.api.git.shared.RemoteAddRequest;
 import org.eclipse.che.api.git.shared.RemoteUpdateRequest;
 import org.eclipse.che.api.git.shared.RepoInfo;
 import org.eclipse.che.api.git.shared.ResetRequest;
+import org.eclipse.che.api.git.shared.RevertRequest;
+import org.eclipse.che.api.git.shared.RevertResult;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
@@ -437,6 +439,15 @@ public class GitService {
       gitConnection.reset(
           ResetParams.create(request.getCommit(), request.getType())
               .withFilePattern(request.getFilePattern()));
+    }
+  }
+
+  @POST
+  @Path("revert")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public RevertResult revert(RevertRequest request) throws ApiException {
+    try (GitConnection gitConnection = getGitConnection()) {
+      return gitConnection.revert(request.getCommit());
     }
   }
 
