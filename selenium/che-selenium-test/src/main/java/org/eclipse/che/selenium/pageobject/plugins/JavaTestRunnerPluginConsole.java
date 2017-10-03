@@ -39,7 +39,6 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   private static final String METHODS_MARKED_AS_PASSED = "gwt-debug-test_state_passed";
   private static final String METHODS_MARKED_AS_FAILED = "gwt-debug-test_state_failed";
   private static final String METHODS_MARKED_AS_IGNORED = "gwt-debug-test_state_ignore";
-
   private static final String TEST_RESULT_NAVIGATION_TREE = "gwt-debug-test-tree-navigation-panel";
 
   @FindAll({@FindBy(xpath = TEST_OUTPUT_XPATH)})
@@ -200,17 +199,25 @@ public class JavaTestRunnerPluginConsole extends Consoles {
     switch (methodState) {
       case PASSED:
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_PASSED)))
-            .findElement(By.xpath(String.format("//div[text()='%s']", nameOfMethod)))
+            .findElement(
+                By.xpath(
+                    String.format("//div[@style='color: green;' and text()='%s']", nameOfMethod)))
             .click();
         break;
       case FAILED:
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_FAILED)))
-            .findElement(By.xpath(String.format("//div[text()='%s']", nameOfMethod)))
+            .findElement(
+                By.xpath(
+                    String.format("//div[@style='color: red;' and text()='%s']", nameOfMethod)))
             .click();
         break;
       case IGNORED:
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_IGNORED)))
-            .findElement(By.xpath(String.format("//div[text()='%s']", nameOfMethod)))
+            .findElement(
+                By.xpath(
+                    String.format(
+                        "//div[@style[contains(.,'color: yellow')] and text()='%s']",
+                        nameOfMethod)))
             .click();
         break;
     }
