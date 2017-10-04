@@ -16,6 +16,7 @@ import static org.eclipse.che.ide.editor.orion.client.KeyMode.VI;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -256,7 +257,7 @@ public class OrionEditorWidget extends Composite
           @Override
           public void onEvent(OrionInputChangedEventOverlay event) {
             if (initializationHandler != null) {
-              initializationHandler.onContentInitialized();
+              Scheduler.get().scheduleDeferred(initializationHandler::onContentInitialized);
             }
           }
         },

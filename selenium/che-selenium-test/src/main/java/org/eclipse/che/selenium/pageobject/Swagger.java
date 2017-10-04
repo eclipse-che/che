@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
@@ -107,7 +108,7 @@ public class Swagger {
    *
    * @return result search by key
    */
-  public String getWsNameFromWorkspacePage() {
+  public List<String> getWsNamesFromWorkspacePage() {
     expandWorkSpaceItem();
     clickElementByXpath(Locators.GET_WORKSPACES);
     clickTryItOutByXpath(Locators.TRY_IT_OUT);
@@ -117,7 +118,10 @@ public class Swagger {
             .getText();
     List<WorkspaceDto> workspaces =
         DtoFactory.getInstance().createListDtoFromJson(json, WorkspaceDto.class);
-    return workspaces.get(0).getConfig().getName();
+    return workspaces
+        .stream()
+        .map(workspaceDto -> workspaceDto.getConfig().getName())
+        .collect(Collectors.toList());
   }
 
   /**
