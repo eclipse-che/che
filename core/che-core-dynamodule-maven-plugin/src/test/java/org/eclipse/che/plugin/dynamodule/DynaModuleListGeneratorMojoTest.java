@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.dynamodule;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -121,6 +122,31 @@ public class DynaModuleListGeneratorMojoTest {
     assertTrue(
         moduleList.stream().anyMatch(item -> item.getClass().equals(AnotherCustomModule.class)));
     assertFalse(iterator.hasNext());
+  }
+
+  /** Check that the plugin is able to scan war files */
+  @Test
+  public void testScanWarFiles() throws Exception {
+
+    File projectCopy = this.resources.getBasedir("project");
+    File pom = new File(projectCopy, "pom.xml");
+    assertNotNull(pom);
+    assertTrue(pom.exists());
+
+    DynaModuleListGeneratorMojo mojo =
+        (DynaModuleListGeneratorMojo) this.rule.lookupMojo("build", pom);
+    configure(mojo, projectCopy);
+    this.rule.setVariableValueToObject(mojo, "scanWarDependencies", true);
+    mojo.execute();
+    List<String> findClasses =
+        mojo.getDynaModuleListGenerator().getDynaModuleScanner().getDynaModuleClasses();
+    assertTrue(
+        findClasses
+                .stream()
+                .filter(className -> className.contains("org.eclipse.che.wsagent"))
+                .collect(toList())
+                .size()
+            > 2);
   }
 
   private static class CustomClassLoader extends ClassLoader {

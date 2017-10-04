@@ -177,6 +177,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                  <scanWarDependencies>true</scanWarDependencies>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

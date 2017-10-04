@@ -23,10 +23,16 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -62,11 +68,31 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
   /** Directory used to generate the code */
   private File generatedDirectory;
 
+  /** Local Repository. */
+  @Parameter(defaultValue = "${localRepository}", readonly = true, required = true)
+  protected ArtifactRepository localRepository;
+
   /** Path to the generated file */
   private File guiceGeneratedModuleFile;
 
   /** Use of classpath instead of dependencies */
   private boolean useClassPath;
+
+  /** Scan war dependencies */
+  @Parameter private boolean scanWarDependencies;
+
+  private DynaModuleListByteCodeGenerator dynaModuleListGenerator;
+
+  /** Repository system used to generate a repository session. */
+  @Component private org.apache.maven.repository.RepositorySystem repositorySystem;
+
+  /** The remote repositories used to get artifacts. */
+  @Parameter(
+    defaultValue = "${project.remoteArtifactRepositories}",
+    required = true,
+    readonly = true
+  )
+  private List<ArtifactRepository> artifactRepositories;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -79,7 +105,7 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
               + "'.");
     }
 
-    DynaModuleListByteCodeGenerator dynaModuleListGenerator = new DynaModuleListByteCodeGenerator();
+    dynaModuleListGenerator = new DynaModuleListByteCodeGenerator();
     dynaModuleListGenerator.setSkipJars(skipJars);
 
     String className = LOWER_HYPHEN.to(UPPER_CAMEL, project.getArtifactId().replace(".", "-"));
@@ -114,6 +140,44 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
         }
       }
     }
+
+    // do we have extra wars ?
+    if (scanWarDependencies) {
+      for (Artifact dependencyArtifact :
+          this.project
+              .getDependencyArtifacts()
+              .stream()
+              .filter(dependency -> "war".equals(dependency.getType()))
+              .collect(Collectors.toList())) {
+        Artifact toResolveArtifact =
+            repositorySystem.createArtifact(
+                dependencyArtifact.getGroupId(),
+                dependencyArtifact.getArtifactId(),
+                dependencyArtifact.getVersion(),
+                dependencyArtifact.getScope(),
+                dependencyArtifact.getType());
+
+        ArtifactResolutionRequest artifactResolutionRequest = new ArtifactResolutionRequest();
+        artifactResolutionRequest.setArtifact(toResolveArtifact);
+        artifactResolutionRequest
+            .setLocalRepository(localRepository)
+            .setRemoteRepositories(artifactRepositories);
+
+        ArtifactResolutionResult resolutionResult;
+        resolutionResult = this.repositorySystem.resolve(artifactResolutionRequest);
+
+        // The file should exists, but we never know.
+        File file = resolutionResult.getArtifacts().stream().findFirst().get().getFile();
+        if (file != null && file.exists()) {
+          try {
+            urls.add(file.toURI().toURL());
+          } catch (MalformedURLException e) {
+            throw new MojoExecutionException("Unable to get URL from file " + file, e);
+          }
+        }
+      }
+    }
+
     dynaModuleListGenerator.setUrls(urls);
     dynaModuleListGenerator.setClassName(className);
 
@@ -177,5 +241,9 @@ public class DynaModuleListGeneratorMojo extends AbstractMojo {
    */
   public File getGuiceGeneratedModuleFile() {
     return guiceGeneratedModuleFile;
+  }
+
+  public DynaModuleListByteCodeGenerator getDynaModuleListGenerator() {
+    return dynaModuleListGenerator;
   }
 }

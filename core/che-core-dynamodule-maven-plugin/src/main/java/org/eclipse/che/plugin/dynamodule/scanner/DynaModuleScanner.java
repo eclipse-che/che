@@ -100,11 +100,11 @@ public class DynaModuleScanner {
     if (Files.isDirectory(path)) {
       scanDirectory(path);
     } else {
-      if (path.toString().endsWith(".jar")) {
+      if (path.toString().endsWith(".jar") || path.toString().endsWith(".war")) {
         try (JarFile jarFile = new JarFile(path.toFile())) {
           scanJar(jarFile);
         }
-      } else {
+      } else if (path.toString().endsWith(".class")) {
         scanFile(path);
       }
     }

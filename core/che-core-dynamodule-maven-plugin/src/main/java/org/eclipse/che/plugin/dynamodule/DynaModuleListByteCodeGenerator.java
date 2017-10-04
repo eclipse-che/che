@@ -165,4 +165,8 @@ public class DynaModuleListByteCodeGenerator {
   public void setSkipJars(String[] additionalSkipJars) {
     this.additionalSkipJars = additionalSkipJars;
   }
+
+  protected DynaModuleScanner getDynaModuleScanner() {
+    return dynaModuleScanner;
+  }
 }

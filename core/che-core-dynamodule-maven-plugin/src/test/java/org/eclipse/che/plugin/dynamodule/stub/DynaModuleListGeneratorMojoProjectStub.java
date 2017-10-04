@@ -14,10 +14,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Build;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
@@ -37,6 +40,8 @@ public class DynaModuleListGeneratorMojoProjectStub extends MavenProjectStub {
     return new File(super.getBasedir() + "/src/test/projects/project");
   }
 
+  private List<Dependency> dependencies;
+
   /** Default constructor */
   public DynaModuleListGeneratorMojoProjectStub() {
     MavenXpp3Reader pomReader = new MavenXpp3Reader();
@@ -54,6 +59,7 @@ public class DynaModuleListGeneratorMojoProjectStub extends MavenProjectStub {
     setName(model.getName());
     setUrl(model.getUrl());
     setPackaging(model.getPackaging());
+    setDependencies(model.getDependencies());
 
     Build build = new Build();
     build.setFinalName(model.getArtifactId());
@@ -83,5 +89,27 @@ public class DynaModuleListGeneratorMojoProjectStub extends MavenProjectStub {
     when(artifact.getVersionRange())
         .thenReturn(VersionRange.createFromVersion(getModel().getVersion()));
     return artifact;
+  }
+
+  @Override
+  public Set<Artifact> getDependencyArtifacts() {
+    Artifact artifact = Mockito.mock(Artifact.class);
+    when(artifact.getArtifactId()).thenReturn(getDependencies().get(0).getArtifactId());
+    when(artifact.getGroupId()).thenReturn(getDependencies().get(0).getGroupId());
+    when(artifact.getVersion()).thenReturn(getDependencies().get(0).getVersion());
+    when(artifact.getType()).thenReturn(getDependencies().get(0).getType());
+    HashSet hashSet = new HashSet<Artifact>();
+    hashSet.add(artifact);
+    return hashSet;
+  }
+
+  @Override
+  public List<Dependency> getDependencies() {
+    return dependencies;
+  }
+
+  @Override
+  public void setDependencies(List<Dependency> dependencies) {
+    this.dependencies = dependencies;
   }
 }
