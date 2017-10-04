@@ -34,7 +34,7 @@
                    che-place-holder="Name of the stack"
                    ng-model="stackController.stackName"
                    custom-validator="stackController.isUniqueName($value)"
-                   ng-change="stackController.updateStackName(stackForm.$valid)"
+                   ng-change="stackController.updateStackName()"
                    required
                    ng-maxlength="128"
                    ng-pattern="/^[A-Za-z0-9_\s\-\.\+]+$/">
