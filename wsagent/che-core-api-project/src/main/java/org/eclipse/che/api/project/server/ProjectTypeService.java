@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.api.project.server;
 
-import static org.eclipse.che.api.project.server.DtoConverter.asDto;
+import static org.eclipse.che.api.project.server.impl.ProjectDtoConverter.asDto;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_PROJECT_TYPES;
 
 import io.swagger.annotations.Api;
@@ -29,8 +29,8 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
+import org.eclipse.che.api.project.server.impl.ProjectDtoConverter;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.project.shared.*;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 
 /**
@@ -62,7 +62,7 @@ public class ProjectTypeService extends Service {
     return registry
         .getProjectTypes()
         .stream()
-        .map(DtoConverter::asDto)
+        .map(ProjectDtoConverter::asDto)
         .collect(Collectors.toList());
   }
 

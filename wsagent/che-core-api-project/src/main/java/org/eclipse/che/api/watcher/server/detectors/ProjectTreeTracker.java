@@ -11,7 +11,6 @@
 package org.eclipse.che.api.watcher.server.detectors;
 
 import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.api.watcher.server.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.CREATED;
 import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -31,14 +30,15 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 
 @Singleton
 public class ProjectTreeTracker {
+
   private static final Logger LOG = getLogger(ProjectTreeTracker.class);
 
   private static final String OUTGOING_METHOD = "event/project-tree-state-changed";
@@ -67,66 +67,61 @@ public class ProjectTreeTracker {
   }
 
   private BiConsumer<String, ProjectTreeTrackingOperationDto>
-      getProjectTreeTrackingOperationConsumer() {
+  getProjectTreeTrackingOperationConsumer() {
     return (String endpointId, ProjectTreeTrackingOperationDto operation) -> {
       final Type type = operation.getType();
       final String path = operation.getPath();
 
       switch (type) {
-        case START:
-          {
-            LOG.debug("Received project tree tracking operation START trigger.");
+        case START: {
+          LOG.debug("Received project tree tracking operation START trigger.");
 
-            int pathRegistrationId =
-                fileWatcherManager.registerByPath(
-                    path,
-                    getCreateOperation(endpointId),
-                    getModifyConsumer(endpointId),
-                    getDeleteOperation(endpointId));
-            watchIdRegistry.put(path + endpointId, pathRegistrationId);
-            break;
-          }
-        case STOP:
-          {
-            LOG.debug("Received project tree tracking operation STOP trigger.");
+          int pathRegistrationId =
+              fileWatcherManager.registerByPath(
+                  path,
+                  getCreateOperation(endpointId),
+                  getModifyConsumer(endpointId),
+                  getDeleteOperation(endpointId));
+          watchIdRegistry.put(path + endpointId, pathRegistrationId);
+          break;
+        }
+        case STOP: {
+          LOG.debug("Received project tree tracking operation STOP trigger.");
 
-            Predicate<Entry<String, Integer>> isSubPath =
-                it -> it.getKey().startsWith(path) && it.getKey().endsWith(endpointId);
+          Predicate<Entry<String, Integer>> isSubPath =
+              it -> it.getKey().startsWith(path) && it.getKey().endsWith(endpointId);
 
-            watchIdRegistry
-                .entrySet()
-                .stream()
-                .filter(isSubPath)
-                .map(Entry::getKey)
-                .collect(toSet())
-                .stream()
-                .map(watchIdRegistry::remove)
-                .forEach(fileWatcherManager::unRegisterByPath);
+          watchIdRegistry
+              .entrySet()
+              .stream()
+              .filter(isSubPath)
+              .map(Entry::getKey)
+              .collect(toSet())
+              .stream()
+              .map(watchIdRegistry::remove)
+              .forEach(fileWatcherManager::unRegisterByPath);
 
-            break;
-          }
-        case SUSPEND:
-          {
-            LOG.debug("Received project tree tracking operation SUSPEND trigger.");
+          break;
+        }
+        case SUSPEND: {
+          LOG.debug("Received project tree tracking operation SUSPEND trigger.");
 
-            fileWatcherManager.suspend();
+          fileWatcherManager.suspend();
 
-            break;
-          }
-        case RESUME:
-          {
-            LOG.debug("Received project tree tracking operation RESUME trigger.");
+          break;
+        }
+        case RESUME: {
+          LOG.debug("Received project tree tracking operation RESUME trigger.");
 
-            fileWatcherManager.resume();
+          fileWatcherManager.resume();
 
-            break;
-          }
-        default:
-          {
-            LOG.error("Received file tracking operation UNKNOWN trigger.");
+          break;
+        }
+        default: {
+          LOG.error("Received file tracking operation UNKNOWN trigger.");
 
-            break;
-          }
+          break;
+        }
       }
     };
   }
@@ -149,7 +144,8 @@ public class ProjectTreeTracker {
   }
 
   private Consumer<String> getModifyConsumer(String endpointId) {
-    return EMPTY_CONSUMER;
+    return it -> {
+    };
   }
 
   private Consumer<String> getDeleteOperation(String endpointId) {

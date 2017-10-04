@@ -25,60 +25,50 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
-import org.eclipse.che.api.project.server.api.ProjectConfigRegistry;
-import org.eclipse.che.api.project.server.api.ProjectHandlerRegistry;
+import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 
 @Singleton
-public class SimpleProjectInitializer
-    implements org.eclipse.che.api.project.server.api.ProjectInitializer {
+public class SimpleProjectInitializer implements ProjectInitializer {
 
   private final FsManager fileSystemManager;
-  private final WorkspaceProjectsSyncer syncer;
-  private final ProjectConfigRegistry projectConfigs;
+  private final ProjectSynchronizer projectSynchronizer;
+  private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectHandlerRegistry projectHandlers;
 
   @Inject
   public SimpleProjectInitializer(
       FsManager fileSystemManager,
-      WorkspaceProjectsSyncer syncer,
-      ProjectConfigRegistry projectConfigs,
+      ProjectSynchronizer projectSynchronizer,
+      ProjectConfigRegistry projectConfigRegistry,
       ProjectHandlerRegistry projectHandlers) {
     this.fileSystemManager = fileSystemManager;
-    this.syncer = syncer;
-    this.projectConfigs = projectConfigs;
+    this.projectSynchronizer = projectSynchronizer;
+    this.projectConfigRegistry = projectConfigRegistry;
     this.projectHandlers = projectHandlers;
   }
 
   @Override
   public void initialize()
       throws ConflictException, NotFoundException, ServerException, ForbiddenException,
-          IOException {
+      IOException {
     initializeRegisteredProjects();
     initializeNotRegisteredProjects();
     firePostInitializationHandlers();
   }
 
   private void initializeRegisteredProjects()
-      throws ConflictException, NotFoundException, ServerException, ForbiddenException,
-          IOException {
-
-    List<? extends ProjectConfig> projectConfigs = syncer.getProjects();
-
-    for (ProjectConfig projectConfig : projectConfigs) {
-      this.projectConfigs.put(projectConfig, false, false);
+      throws ServerException {
+    for (ProjectConfig projectConfig : projectSynchronizer.getAll()) {
+      projectConfigRegistry.put(projectConfig, false, false);
     }
   }
 
-  private void initializeNotRegisteredProjects()
-      throws ConflictException, NotFoundException, ServerException, ForbiddenException,
-          IOException {
+  private void initializeNotRegisteredProjects() throws ServerException {
     Set<String> wsPaths = fileSystemManager.getDirectoryWsPaths(ROOT);
     for (String wsPath : wsPaths) {
-      if (!projectConfigs.isRegistered(wsPath)) {
-        projectConfigs.put(wsPath, true, true);
+      if (!projectConfigRegistry.isRegistered(wsPath)) {
+        projectConfigRegistry.put(wsPath, true, true);
       }
     }
   }
@@ -86,7 +76,7 @@ public class SimpleProjectInitializer
   private void firePostInitializationHandlers()
       throws ServerException, ConflictException, NotFoundException, ForbiddenException {
 
-    for (RegisteredProject project : projectConfigs.getAll()) {
+    for (RegisteredProject project : projectConfigRegistry.getAll()) {
       if (project.getBaseFolder() == null) {
         continue;
       }

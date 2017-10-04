@@ -25,7 +25,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.FsPathResolver;
-import org.eclipse.che.api.project.server.api.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.core.internal.utils.Policy;

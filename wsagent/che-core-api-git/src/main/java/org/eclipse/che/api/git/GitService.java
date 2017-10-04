@@ -87,8 +87,8 @@ import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.git.shared.event.GitRepositoryDeletedEvent;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.api.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

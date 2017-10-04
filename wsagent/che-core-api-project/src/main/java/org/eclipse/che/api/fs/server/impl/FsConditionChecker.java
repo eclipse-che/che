@@ -18,37 +18,11 @@ import org.slf4j.LoggerFactory;
 
 public class FsConditionChecker {
 
-  private static final Logger LOG = LoggerFactory.getLogger(FsConditionChecker.class);
-
-  public static void mustExist(Path fsPath) throws NotFoundException {
-    if (!fsPath.toFile().exists()) {
-      String message = "FS item '" + fsPath.toString() + "' does not exist";
-      LOG.error(message);
-      throw new NotFoundException(message);
-    }
-  }
-
-  public static void mustBeAFile(Path fsPath) throws ConflictException {
-    if (!fsPath.toFile().isFile()) {
-      String message = "FS item '" + fsPath.toString() + "' must be a file";
-      LOG.error(message);
-      throw new ConflictException(message);
-    }
-  }
 
   public static void mustBeADirectory(Path fsPath) throws ConflictException {
     if (!fsPath.toFile().isDirectory()) {
-      String message = "FS item '" + fsPath.toString() + "' must be a directory";
-      LOG.error(message);
-      throw new ConflictException(message);
+      throw new ConflictException("FS item '" + fsPath.toString() + "' must be a directory");
     }
   }
 
-  public static void mustNotExist(Path fsPath) throws ConflictException {
-    if (fsPath.toFile().exists()) {
-      String message = "FS item '" + fsPath.toString() + "' already exists";
-      LOG.error(message);
-      throw new ConflictException(message);
-    }
-  }
 }

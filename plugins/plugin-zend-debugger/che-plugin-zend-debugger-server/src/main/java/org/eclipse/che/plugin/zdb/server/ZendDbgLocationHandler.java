@@ -15,7 +15,7 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.FsPathResolver;
-import org.eclipse.che.api.project.server.api.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectManager;
 
 /**
  * Zend debugger location handler. This class is responsible for bidirectional mapping/converting

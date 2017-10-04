@@ -11,10 +11,10 @@
 package org.eclipse.che.api.git;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.ADDED;
-import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.MODIFIED;
-import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.NOT_MODIFIED;
-import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.UNTRACKED;
+import static org.eclipse.che.api.project.server.impl.VcsStatusProvider.VcsStatus.ADDED;
+import static org.eclipse.che.api.project.server.impl.VcsStatusProvider.VcsStatus.MODIFIED;
+import static org.eclipse.che.api.project.server.impl.VcsStatusProvider.VcsStatus.NOT_MODIFIED;
+import static org.eclipse.che.api.project.server.impl.VcsStatusProvider.VcsStatus.UNTRACKED;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,9 +26,9 @@ import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.FsPathResolver;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.VcsStatusProvider;
-import org.eclipse.che.api.project.server.api.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.project.server.impl.VcsStatusProvider;
+import org.eclipse.che.api.project.server.ProjectManager;
 
 /**
  * Git implementation of {@link VcsStatusProvider}.

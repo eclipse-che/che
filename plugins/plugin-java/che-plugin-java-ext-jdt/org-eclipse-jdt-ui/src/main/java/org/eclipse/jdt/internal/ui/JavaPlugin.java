@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import org.eclipse.che.api.project.server.api.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.che.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.core.resources.ResourcesPlugin;

@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.search.server.impl.QueryExpression;
-import org.eclipse.che.api.search.server.impl.SearchResult;
 
 public interface Searcher {
   /**

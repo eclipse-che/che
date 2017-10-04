@@ -37,7 +37,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
-import org.eclipse.che.api.watcher.server.FileWatcherUtils;
+import org.eclipse.che.api.watcher.server.impl.FileWatcherUtils;
 import org.eclipse.che.api.project.shared.dto.event.FileStateUpdateDto;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type;

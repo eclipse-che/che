@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -28,24 +26,20 @@ public class DirectoryDeleter {
 
   private static final Logger LOG = LoggerFactory.getLogger(DirectoryDeleter.class);
 
-  private final FsPathResolver pathResolver;
+  private final SimpleFsPathResolver pathResolver;
 
   @Inject
-  public DirectoryDeleter(FsPathResolver pathResolver) {
+  public DirectoryDeleter(SimpleFsPathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
 
   public void delete(String wsPath) throws NotFoundException, ServerException {
     Path fsPath = pathResolver.toFsPath(wsPath);
 
-    mustExist(fsPath);
-
     try {
       FileUtils.deleteDirectory(fsPath.toFile());
     } catch (IOException e) {
-      String msg = "Failed to delete directory: " + wsPath;
-      LOG.error(msg, e);
-      throw new ServerException(msg, e);
+      throw new ServerException("Failed to delete directory: " + wsPath, e);
     }
   }
 

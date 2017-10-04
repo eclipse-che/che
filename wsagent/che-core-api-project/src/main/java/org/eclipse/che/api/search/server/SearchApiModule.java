@@ -13,13 +13,19 @@ package org.eclipse.che.api.search.server;
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import org.eclipse.che.api.search.server.impl.DotCheExcludeMatcher;
-import org.eclipse.che.api.search.server.impl.DotNumberSignExcludeMatcher;
+import java.util.function.Consumer;
+import org.eclipse.che.api.search.server.consumers.IndexedFileCreateConsumer;
+import org.eclipse.che.api.search.server.consumers.IndexedFileDeleteConsumer;
+import org.eclipse.che.api.search.server.consumers.IndexedFileUpdateConsumer;
+import org.eclipse.che.api.search.server.excludes.DotCheExcludeMatcher;
+import org.eclipse.che.api.search.server.excludes.DotNumberSignExcludeMatcher;
+import org.eclipse.che.api.search.server.excludes.MediaTypesExcludeMatcher;
 import org.eclipse.che.api.search.server.impl.LuceneSearcher;
-import org.eclipse.che.api.search.server.impl.MediaTypesExcludeMatcher;
 
 public class SearchApiModule extends AbstractModule {
 
@@ -32,5 +38,15 @@ public class SearchApiModule extends AbstractModule {
     excludeMatcher.addBinding().to(MediaTypesExcludeMatcher.class);
     excludeMatcher.addBinding().to(DotCheExcludeMatcher.class);
     excludeMatcher.addBinding().to(DotNumberSignExcludeMatcher.class);
+
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.file.create")).addBinding().to(IndexedFileCreateConsumer.class);
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.file.update")).addBinding().to(IndexedFileUpdateConsumer.class);
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.file.delete")).addBinding().to(IndexedFileDeleteConsumer.class);
   }
 }

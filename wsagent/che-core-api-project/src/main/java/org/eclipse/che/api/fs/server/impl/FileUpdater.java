@@ -12,8 +12,6 @@ package org.eclipse.che.api.fs.server.impl;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustBeAFile;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
 import static org.eclipse.che.commons.lang.IoUtil.readStream;
 
 import java.io.BufferedInputStream;
@@ -40,10 +38,10 @@ public class FileUpdater {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileUpdater.class);
 
-  private final FsPathResolver pathResolver;
+  private final SimpleFsPathResolver pathResolver;
 
   @Inject
-  public FileUpdater(FsPathResolver pathResolver) {
+  public FileUpdater(SimpleFsPathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
 
@@ -99,9 +97,6 @@ public class FileUpdater {
   private void updateInternally(String wsPath, SupplierWithException<byte[], IOException> supplier)
       throws NotFoundException, ConflictException, ServerException {
     Path fsPath = pathResolver.toFsPath(wsPath);
-
-    mustExist(fsPath);
-    mustBeAFile(fsPath);
 
     try {
       Files.write(fsPath, supplier.get());

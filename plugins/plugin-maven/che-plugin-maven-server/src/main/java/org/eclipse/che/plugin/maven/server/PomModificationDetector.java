@@ -11,17 +11,17 @@
 package org.eclipse.che.plugin.maven.server;
 
 import static java.nio.file.Files.isDirectory;
-import static org.eclipse.che.api.watcher.server.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.google.inject.Inject;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.project.shared.dto.event.PomModifiedEventDto;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 
 public class PomModificationDetector {
+
   private static final String POM_XML = "pom.xml";
 
   private final FileWatcherManager manager;
@@ -40,9 +40,11 @@ public class PomModificationDetector {
     id =
         manager.registerByMatcher(
             it -> !isDirectory(it) && POM_XML.equals(it.getFileName().toString()),
-            EMPTY_CONSUMER,
+            it -> {
+            },
             it -> eventService.publish(newDto(PomModifiedEventDto.class).withPath(it)),
-            EMPTY_CONSUMER);
+            it -> {
+            });
   }
 
   @PreDestroy

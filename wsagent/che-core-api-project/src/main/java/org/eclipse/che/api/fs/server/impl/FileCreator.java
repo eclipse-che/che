@@ -11,8 +11,6 @@
 package org.eclipse.che.api.fs.server.impl;
 
 import static com.google.common.io.ByteStreams.toByteArray;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustNotExist;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,10 +31,10 @@ public class FileCreator {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileCreator.class);
 
-  private final FsPathResolver pathResolver;
+  private final SimpleFsPathResolver pathResolver;
 
   @Inject
-  public FileCreator(FsPathResolver pathResolver) {
+  public FileCreator(SimpleFsPathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
 
@@ -63,7 +61,9 @@ public class FileCreator {
       throws NotFoundException, ConflictException, ServerException {
     Path parentFsPath = pathResolver.toFsPath(parentWsPath);
 
-    mustExist(parentFsPath);
+    if (!parentFsPath.toFile().exists()) {
+      throw new NotFoundException("FS item '" + parentFsPath.toString() + "' does not exist");
+    }
 
     FileItem contentItem = null;
     String fileName = null;
@@ -75,9 +75,7 @@ public class FileCreator {
         if (contentItem == null) {
           contentItem = item;
         } else {
-          String message = "Expected no more than one file to upload";
-          LOG.error(message);
-          throw new ServerException(message);
+          throw new ServerException("Expected no more than one file to upload");
         }
       } else if ("name".equals(item.getFieldName())) {
         fileName = item.getString().trim();
@@ -97,17 +95,19 @@ public class FileCreator {
     Path fsPath = parentFsPath.resolve(fileName);
     String wsPath = pathResolver.toWsPath(fsPath);
 
-    mustNotExist(parentFsPath);
+    if (parentFsPath.toFile().exists()) {
+      throw new ConflictException("FS item '" + parentFsPath.toString() + "' already exists");
+    }
     if (!overwrite) {
-      mustNotExist(fsPath);
+      if (fsPath.toFile().exists()) {
+        throw new ConflictException("FS item '" + fsPath.toString() + "' already exists");
+      }
     }
 
     try {
       createQuietly(wsPath, contentItem.getInputStream());
     } catch (IOException e) {
-      String message = "Can't read content for file: " + wsPath;
-      LOG.error(message);
-      throw new ServerException(message, e);
+      throw new ServerException("Can't read content for file: " + wsPath, e);
     }
   }
 
@@ -171,10 +171,6 @@ public class FileCreator {
       String wsPath, SupplierWithException<byte[], IOException> contentSupplier)
       throws NotFoundException, ConflictException, ServerException {
     Path fsPath = pathResolver.toFsPath(wsPath);
-
-    mustExist(fsPath.getParent());
-    mustNotExist(fsPath);
-
     try {
       if (contentSupplier != null) {
         byte[] content = contentSupplier.get();
@@ -183,9 +179,7 @@ public class FileCreator {
         Files.createFile(fsPath);
       }
     } catch (IOException e) {
-      String msg = "Failed to create file: " + wsPath;
-      LOG.error(msg, e);
-      throw new ServerException(msg, e);
+      throw new ServerException("Failed to create file: " + wsPath, e);
     }
   }
 

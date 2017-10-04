@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,24 +25,21 @@ public class FileDeleter {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileDeleter.class);
 
-  private final FsPathResolver pathResolver;
+  private final SimpleFsPathResolver pathResolver;
 
   @Inject
-  public FileDeleter(FsPathResolver pathResolver) {
+  public FileDeleter(SimpleFsPathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
 
   public void delete(String wsPath) throws NotFoundException, ServerException {
     Path fsPath = pathResolver.toFsPath(wsPath);
 
-    mustExist(fsPath);
-
     try {
       Files.delete(fsPath);
     } catch (IOException e) {
-      String msg = "Failed to delete file: " + wsPath;
-      LOG.error(msg);
-      throw new ServerException(msg, e);
+      LOG.error("Failed to delete file: " + wsPath);
+      throw new ServerException("Failed to delete file: " + wsPath, e);
     }
   }
 

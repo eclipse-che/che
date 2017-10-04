@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 /** @author gazarenkov */
 @Singleton
 public class SimpleProjectHandlerRegistry
-    implements org.eclipse.che.api.project.server.api.ProjectHandlerRegistry {
+    implements ProjectHandlerRegistry {
 
   private final Map<String, CreateProjectHandler> createProjectHandlers = new HashMap<>();
   private final Map<String, PostImportProjectHandler> postImportProjectHandlers = new HashMap<>();

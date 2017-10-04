@@ -49,7 +49,7 @@ import org.eclipse.che.api.git.params.FetchParams;
 import org.eclipse.che.api.git.params.RemoteAddParams;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
-import org.eclipse.che.api.project.server.api.ProjectImporter;
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.slf4j.Logger;
