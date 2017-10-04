@@ -24,6 +24,7 @@ import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
@@ -61,13 +62,13 @@ public class MediaTypesExcludeMatcher implements PathMatcher {
     MediaType mimeType;
     try (InputStream content = fileSystemManager.readFileAsInputStream(wsPath)) {
       mimeType = new TikaConfig().getDetector().detect(content, new Metadata());
-    } catch (TikaException | IOException | NotFoundException | ServerException e0) {
+    } catch (TikaException | IOException | NotFoundException | ServerException | ConflictException e0) {
       try {
         // https://issues.apache.org/jira/browse/TIKA-2395
         byte[] content = fileSystemManager.readFileAsByteArray(wsPath);
         ByteArrayInputStream bais = new ByteArrayInputStream(content);
         mimeType = new TikaConfig().getDetector().detect(bais, new Metadata());
-      } catch (TikaException | IOException | NotFoundException | ServerException e1) {
+      } catch (TikaException | IOException | NotFoundException | ServerException | ConflictException e1) {
         return true;
       }
     }

@@ -39,13 +39,13 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceProjectSynchronizer.class);
 
-  private final String userToken;
-  private final WorkspaceSyncCommunication workspaceSyncCommunication;
   private final ProjectConfigRegistry projectConfigRegistry;
+  private final HttpJsonRequestFactory httpJsonRequestFactory;
+  private final WorkspaceSyncCommunication workspaceSyncCommunication;
 
-  private String apiEndpoint;
-  private String workspaceId;
-  private HttpJsonRequestFactory httpJsonRequestFactory;
+  private final String userToken;
+  private final String apiEndpoint;
+  private final String workspaceId;
 
   @Inject
   public WorkspaceProjectSynchronizer(

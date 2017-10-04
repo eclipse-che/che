@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
@@ -34,7 +33,8 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
 
   @Inject
   public SimpleFsDtoConverter(
-      SimpleFsPathResolver pathResolver, ProjectManager projectManager, ExecutiveFsManager executiveFsManager) {
+      SimpleFsPathResolver pathResolver, ProjectManager projectManager,
+      ExecutiveFsManager executiveFsManager) {
     this.pathResolver = pathResolver;
     this.projectManager = projectManager;
     this.executiveFsManager = executiveFsManager;
@@ -48,8 +48,19 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
 
     File file = pathResolver.toFsPath(wsPath).toFile();
     String name = file.getName();
-    String projectPath = projectManager.getClosest(wsPath).orElseThrow(exception()).getPath();
-    String type = executiveFsManager.isFile(wsPath) ? "file" : "folder";
+    String projectPath = projectManager
+        .getClosest(wsPath)
+        .orElseThrow(() -> new NotFoundException("Can't find project that item belongs to"))
+        .getPath();
+
+    String type;
+    if (projectManager.isRegistered(wsPath)) {
+      type = "project";
+    } else if (executiveFsManager.isDirectory(wsPath)) {
+      type = "folder";
+    } else {
+      type = "file";
+    }
     long lastModified = executiveFsManager.lastModified(wsPath);
 
     ItemReference itemReference =
@@ -85,7 +96,4 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
     return result;
   }
 
-  private Supplier<NotFoundException> exception() {
-    return () -> new NotFoundException("Did find the project that the item belongs to");
-  }
 }

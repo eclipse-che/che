@@ -99,10 +99,6 @@ public class DirectoryPacker {
     try {
       Path fsPath = pathResolver.toFsPath(wsPath);
 
-      if (!fsPath.toFile().exists()) {
-        throw new NotFoundException("FS item '" + fsPath.toString() + "' does not exist");
-      }
-
       unzipInternally(content, skipRoot, fsPath);
     } catch (IOException e) {
       throw new ServerException("Failed to unzip directory: " + wsPath, e);
