@@ -78,33 +78,14 @@
                 <methods>
                     <exclude name="shouldDebugJreClass"/>
                 </methods>
-                <methods>
-                    <exclude name="shouldDebugMavenArtifactClassWithSources"/>
-                </methods>
-                <methods>
-                    <exclude name="shouldHandleDebugOfMavenArtifactWithoutSources"/>
-                </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.InnerClassAndLambdaDebuggingTest">
                 <methods>
-                    <exclude name="shouldDebugInnerClass"/>
-                </methods>
-                <methods>
-                    <exclude name="shouldDebugLambdaExpressions"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDebugMethodLocalInnerClass"/>
-                </methods>
-                <methods>
-                    <exclude name="shouldDebugStaticInnerClass"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.MultimoduleProjectDebuggingTest"/>
-            <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest">
-                <methods>
-                    <exclude name="debugNodeJsTest"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest"/>
             <class name="org.eclipse.che.selenium.debugger.PhpProjectDebuggingTest"/>
             <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest"/>
             <class name="org.eclipse.che.selenium.debugger.ThreadDumpTest"/>
