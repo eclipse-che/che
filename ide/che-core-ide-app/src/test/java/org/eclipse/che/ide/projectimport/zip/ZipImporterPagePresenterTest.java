@@ -87,18 +87,6 @@ public class ZipImporterPagePresenterTest {
   }
 
   @Test
-  public void projectUrlWithoutZipEnteredTest() {
-    //url without .zip was entered
-    String incorrectUrl = "https://host.com/some/path/angularjs.ip";
-    when(view.getProjectName()).thenReturn("");
-
-    presenter.projectUrlChanged(incorrectUrl);
-
-    verify(view).showUrlError(anyString());
-    verify(delegate).updateControls();
-  }
-
-  @Test
   public void projectUrlStartWithWhiteSpaceEnteredTest() {
     when(view.getProjectName()).thenReturn("name");
 

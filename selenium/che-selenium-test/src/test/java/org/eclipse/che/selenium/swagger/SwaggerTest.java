@@ -10,13 +10,15 @@
  */
 package org.eclipse.che.selenium.swagger;
 
+import static org.testng.Assert.assertTrue;
+
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Swagger;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -28,6 +30,7 @@ public class SwaggerTest {
   @Inject private TestWorkspace workspace;
   @Inject private Loader loader;
   @Inject private Swagger swagger;
+  @Inject private SeleniumWebDriver driver;
 
   private String swaggerUrl;
 
@@ -39,8 +42,7 @@ public class SwaggerTest {
 
   @Test
   public void checkNameProjectTest() throws Exception {
-    ide.driver().navigate().to(swaggerUrl);
-    String wsNameFromSwaggerPage = swagger.getWsNameFromWorkspacePage();
-    Assert.assertEquals(wsNameFromSwaggerPage, workspace.getName());
+    driver.navigate().to(swaggerUrl);
+    assertTrue(swagger.getWsNamesFromWorkspacePage().contains(workspace.getName()));
   }
 }
