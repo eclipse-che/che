@@ -117,6 +117,8 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
       return;
     }
 
+    requestedLabel.setText("");
+
     int total = 0;
     for (SearchItemReference searchItemReference : resources) {
       total += searchItemReference.getOccurrences().size();
