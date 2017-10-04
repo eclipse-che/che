@@ -30,7 +30,7 @@ import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CodenvyAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -60,7 +60,7 @@ public class AdminOfParentOrganizationTest {
   @Inject private CodenvyAdminDashboard dashboard;
   @Inject private TestIdeUrlProvider testIdeUrlProvider;
   @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
-  @Inject private DefaultTestUser testUser;
+  @Inject private TestUser testUser;
 
   @Inject
   @Named("admin")
