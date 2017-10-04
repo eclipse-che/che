@@ -29,8 +29,8 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
- * Page object extends {@link Dashboard} page object to cover elements which are specific for
- * Codenvy Admin dashboard content.
+ * Page object extends {@link Dashboard} page object to cover elements which are specific for Che
+ * Admin dashboard content.
  *
  * @author Dmytro Nochevnov
  */
