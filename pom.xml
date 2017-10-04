@@ -1253,6 +1253,7 @@
             <id>sdm</id>
             <build>
                 <pluginManagement>
+                    <!-- TODO: move to maven-parent-pom after migration from mojo's gwt-maven-plugin -->
                     <plugins>
                         <plugin>
                             <groupId>net.ltgt.gwt.maven</groupId>
@@ -1280,6 +1281,14 @@
                     </plugin>
                 </plugins>
             </build>
+            <!-- These steps aren't important for launching GWT SDM -->
+            <properties>
+                <enforcer.skip>true</enforcer.skip>
+                <findbugs.skip>true</findbugs.skip>
+                <license.skip>true</license.skip>
+                <mdep.analyze.skip>true</mdep.analyze.skip>
+                <sort.skip>true</sort.skip>
+            </properties>
             <dependencyManagement>
                 <dependencies>
                     <dependency>

@@ -453,6 +453,7 @@
         <!-- Profile for launching GTW Super DevMode -->
         <profile>
             <id>sdm</id>
+            <!-- CodeServer will watch changes in projects which added as source dependencies -->
             <dependencies>
                 <dependency>
                     <groupId>javax.servlet</groupId>
