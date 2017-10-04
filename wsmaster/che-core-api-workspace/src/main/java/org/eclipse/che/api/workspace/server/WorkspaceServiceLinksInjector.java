@@ -19,10 +19,8 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_STATUS_CHANNEL_TEMPLATE;
-import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
-import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
@@ -230,6 +228,8 @@ public class WorkspaceServiceLinksInjector {
 
       final MachineDto devMachine = runtime.getDevMachine();
       if (devMachine != null) {
+        injectMachineLinks(devMachine, serviceContext);
+
         final Collection<ServerDto> servers = devMachine.getRuntime().getServers().values();
         servers
             .stream()
@@ -238,66 +238,18 @@ public class WorkspaceServiceLinksInjector {
             .ifPresent(
                 wsAgent -> {
                   runtime.getLinks().add(createLink("GET", wsAgent.getUrl(), WSAGENT_REFERENCE));
-                  runtime
-                      .getLinks()
-                      .add(
-                          createLink(
-                              "GET",
-                              UriBuilder.fromUri(wsAgent.getUrl())
-                                  .path("ws")
-                                  .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                  .build()
-                                  .toString(),
-                              WSAGENT_WEBSOCKET_REFERENCE));
-                  devMachine
-                      .getLinks()
-                      .add(
-                          createLink(
-                              "GET",
-                              UriBuilder.fromUri(wsAgent.getUrl())
-                                  .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                  .path("/ws")
-                                  .build()
-                                  .toString(),
-                              WSAGENT_WEBSOCKET_REFERENCE));
-                });
+                  Link wsAgentWebsocketLink =
+                      createLink(
+                          "GET",
+                          UriBuilder.fromUri(wsAgent.getUrl())
+                              .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
+                              .path("/ws")
+                              .build()
+                              .toString(),
+                          WSAGENT_WEBSOCKET_REFERENCE);
 
-        servers
-            .stream()
-            .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
-            .findAny()
-            .ifPresent(
-                terminal -> {
-                  devMachine
-                      .getLinks()
-                      .add(
-                          createLink(
-                              "GET",
-                              UriBuilder.fromUri(terminal.getUrl())
-                                  .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                  .path("/pty")
-                                  .build()
-                                  .toString(),
-                              TERMINAL_REFERENCE));
-                });
-
-        servers
-            .stream()
-            .filter(server -> EXEC_AGENT_REFERENCE.equals(server.getRef()))
-            .findAny()
-            .ifPresent(
-                exec -> {
-                  devMachine
-                      .getLinks()
-                      .add(
-                          createLink(
-                              "GET",
-                              UriBuilder.fromUri(exec.getUrl())
-                                  .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                  .path("/connect")
-                                  .build()
-                                  .toString(),
-                              EXEC_AGENT_REFERENCE));
+                  runtime.getLinks().add(wsAgentWebsocketLink);
+                  devMachine.getLinks().add(wsAgentWebsocketLink);
                 });
       }
     }

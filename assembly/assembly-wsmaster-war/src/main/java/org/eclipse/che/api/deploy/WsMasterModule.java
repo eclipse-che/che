@@ -175,6 +175,7 @@ public class WsMasterModule extends AbstractModule {
             "$HOME/che/terminal/che-websocket-terminal "
                 + "-addr :4411 "
                 + "-cmd ${SHELL_INTERPRETER} "
+                + "-enable-auth "
                 + "-enable-activity-tracking");
     bindConstant()
         .annotatedWith(Names.named("machine.exec_agent.run_command"))
@@ -182,6 +183,7 @@ public class WsMasterModule extends AbstractModule {
             "$HOME/che/exec-agent/che-exec-agent "
                 + "-addr :4412 "
                 + "-cmd ${SHELL_INTERPRETER} "
+                + "-enable-auth "
                 + "-logs-dir $HOME/che/exec-agent/logs");
 
     bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
