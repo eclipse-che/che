@@ -53,6 +53,7 @@ public class SimpleProjectConfigRegistry
             .entrySet()
             .stream()
             .filter(it -> it.getKey().startsWith(wsPath))
+            .filter(it -> !it.getKey().equals(wsPath))
             .map(Entry::getValue)
             .collect(toSet());
     return ImmutableSet.copyOf(children);

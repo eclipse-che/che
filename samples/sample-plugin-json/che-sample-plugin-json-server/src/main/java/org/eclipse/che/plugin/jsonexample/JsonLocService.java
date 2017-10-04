@@ -18,6 +18,7 @@ import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -51,7 +52,7 @@ public class JsonLocService {
   private int countLines(String fileWsPath) throws ServerException, ForbiddenException {
     try {
       return fsManager.readFileAsString(fileWsPath).split("\r\n|\r|\n").length;
-    } catch (NotFoundException e) {
+    } catch (NotFoundException | ConflictException e) {
       throw new ServerException(e);
     }
   }

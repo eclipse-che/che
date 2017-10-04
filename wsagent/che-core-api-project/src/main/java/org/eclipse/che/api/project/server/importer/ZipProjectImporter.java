@@ -92,22 +92,7 @@ public class ZipProjectImporter implements ProjectImporter {
         skipFirstLevel = Boolean.parseBoolean(parameters.get("skipFirstLevel"));
       }
 
-      if (!skipFirstLevel) {
-        fsManager.unzipDirectory(dst, zip);
-        return;
-      }
-
-      String commonParent = dst.substring(0, dst.lastIndexOf(separator));
-      fsManager.unzipDirectory(commonParent, zip);
-
-      // TODO works incorrect, it is necessary to redo
-      String correctName = dst.substring(dst.lastIndexOf(separator));
-      String incorrectName = fsManager.getDirectoryNames(commonParent).iterator().next();
-
-      String newSrc = commonParent + separator + incorrectName;
-      String newDst = commonParent + separator + correctName;
-
-      fsManager.moveDirectory(newSrc, newDst);
+      fsManager.unzipDirectory(dst, zip, skipFirstLevel);
     }
   }
 

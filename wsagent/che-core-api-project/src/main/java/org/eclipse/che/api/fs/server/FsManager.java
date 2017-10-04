@@ -135,11 +135,14 @@ public interface FsManager {
 
   boolean createDirectoryQuietly(String wsPath, Iterator<FileItem> formData);
 
-  InputStream zipDirectoryToInputStream(String wsPath) throws NotFoundException, ServerException;
+  InputStream zipDirectoryToInputStream(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
-  String zipDirectoryToString(String wsPath) throws NotFoundException, ServerException;
+  String zipDirectoryToString(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
-  byte[] zipDirectoryToByteArray(String wsPath) throws NotFoundException, ServerException;
+  byte[] zipDirectoryToByteArray(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
   Optional<InputStream> zipDirectoryToInputStreamQuietly(String wsPath)
       throws NotFoundException, ServerException;
