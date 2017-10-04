@@ -91,7 +91,10 @@ public class MavenExecutiveProjectManagerTest {
     when(project.getFile(MavenConstants.POM_FILE_NAME)).thenReturn(pom);
     when(pom.getLocation())
         .thenReturn(
-            new Path(MavenExecutiveProjectManagerTest.class.getResource("/FirstProject/pom.xml").getFile()));
+            new Path(
+                MavenExecutiveProjectManagerTest.class
+                    .getResource("/FirstProject/pom.xml")
+                    .getFile()));
     when(pom.getFullPath()).thenReturn(new Path("/FirstProject/pom.xml"));
     when(project.getFullPath()).thenReturn(new Path("/FirstProject/"));
 
@@ -133,7 +136,10 @@ public class MavenExecutiveProjectManagerTest {
     when(project.getFile(MavenConstants.POM_FILE_NAME)).thenReturn(pom);
     when(pom.getLocation())
         .thenReturn(
-            new Path(MavenExecutiveProjectManagerTest.class.getResource("/BadProject/pom.xml").getFile()));
+            new Path(
+                MavenExecutiveProjectManagerTest.class
+                    .getResource("/BadProject/pom.xml")
+                    .getFile()));
     when(pom.getFullPath()).thenReturn(new Path("/BadProject/pom.xml"));
     when(project.getFullPath()).thenReturn(new Path("/BadProject"));
 
@@ -154,7 +160,10 @@ public class MavenExecutiveProjectManagerTest {
     when(project.getFile(MavenConstants.POM_FILE_NAME)).thenReturn(pom);
     when(pom.getLocation())
         .thenReturn(
-            new Path(MavenExecutiveProjectManagerTest.class.getResource("/FirstProject/pom.xml").getFile()));
+            new Path(
+                MavenExecutiveProjectManagerTest.class
+                    .getResource("/FirstProject/pom.xml")
+                    .getFile()));
     when(pom.getFullPath()).thenReturn(new Path("/FirstProject/pom.xml"));
     when(project.getFullPath()).thenReturn(new Path("/FirstProject/"));
 

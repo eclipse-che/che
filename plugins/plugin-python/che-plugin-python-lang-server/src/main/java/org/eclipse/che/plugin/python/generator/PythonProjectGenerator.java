@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.plugin.python.shared.ProjectAttributes;
@@ -27,12 +27,12 @@ import org.eclipse.che.plugin.python.shared.ProjectAttributes;
 public class PythonProjectGenerator implements CreateProjectHandler {
 
   private FsManager fsManager;
-  private FsPathResolver fsPathResolver;
+  private FsPaths fsPaths;
 
   @Inject
-  public PythonProjectGenerator(FsManager fsManager, FsPathResolver fsPathResolver) {
+  public PythonProjectGenerator(FsManager fsManager, FsPaths fsPaths) {
     this.fsManager = fsManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
   }
 
   @Override
@@ -42,7 +42,7 @@ public class PythonProjectGenerator implements CreateProjectHandler {
     fsManager.createDirectory(projectWsPath);
     InputStream inputStream =
         getClass().getClassLoader().getResourceAsStream("files/default_python_content");
-    String wsPath = fsPathResolver.resolve(projectWsPath, "main.py");
+    String wsPath = fsPaths.resolve(projectWsPath, "main.py");
     fsManager.createFile(wsPath, inputStream);
   }
 

@@ -23,7 +23,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.plugin.csharp.shared.Constants;
@@ -38,12 +38,12 @@ public class CreateNetCoreProjectHandler implements CreateProjectHandler {
   private static final String PROJECT_FILE_NAME = "project.json";
 
   private final FsManager fsManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
 
   @Inject
-  public CreateNetCoreProjectHandler(FsManager fsManager, FsPathResolver fsPathResolver) {
+  public CreateNetCoreProjectHandler(FsManager fsManager, FsPaths fsPaths) {
     this.fsManager = fsManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
   }
 
   @Override
@@ -53,7 +53,7 @@ public class CreateNetCoreProjectHandler implements CreateProjectHandler {
 
     fsManager.createDirectory(projectWsPath);
     InputStream inputStream = new ByteArrayInputStream(getProjectContent());
-    String wsPath = fsPathResolver.resolve(projectWsPath, PROJECT_FILE_NAME);
+    String wsPath = fsPaths.resolve(projectWsPath, PROJECT_FILE_NAME);
     fsManager.createFile(wsPath, inputStream);
   }
 

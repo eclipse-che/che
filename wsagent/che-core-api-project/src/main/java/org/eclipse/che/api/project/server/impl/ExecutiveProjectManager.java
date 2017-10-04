@@ -34,12 +34,10 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
-import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
-import org.eclipse.che.api.project.server.importer.ProjectImportManager;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectQualifier;
@@ -50,7 +48,7 @@ import org.eclipse.che.api.project.shared.NewProjectConfig;
 public class ExecutiveProjectManager implements ProjectManager {
 
   private final FsManager fsManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final ProjectQualifier projectQualifier;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectHandlerRegistry projectHandlerRegistry;
@@ -59,13 +57,13 @@ public class ExecutiveProjectManager implements ProjectManager {
   @Inject
   public ExecutiveProjectManager(
       FsManager fsManager,
-      FsPathResolver fsPathResolver,
+      FsPaths fsPaths,
       ProjectConfigRegistry projectConfigRegistry,
       ProjectHandlerRegistry projectHandlerRegistry,
       ProjectQualifier projectQualifier,
       ProjectImportManager projectImportManager) {
     this.fsManager = fsManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
     this.projectConfigRegistry = projectConfigRegistry;
     this.projectHandlerRegistry = projectHandlerRegistry;
     this.projectQualifier = projectQualifier;
@@ -118,7 +116,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   @Override
   public Set<RegisteredProject> createAll(Map<ProjectConfig, Map<String, String>> projectConfigs)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException {
+          BadRequestException {
     Set<RegisteredProject> projects = new HashSet<>();
 
     for (Entry<ProjectConfig, Map<String, String>> entry : projectConfigs.entrySet()) {
@@ -134,7 +132,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   @Override
   public RegisteredProject create(ProjectConfig projectConfig, Map<String, String> options)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException,
-      BadRequestException {
+          BadRequestException {
     String wsPath = projectConfig.getPath();
     String type = projectConfig.getType();
     Optional<CreateProjectHandler> cphOptional = projectHandlerRegistry.getCreateHandler(type);
@@ -163,7 +161,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   @Override
   public Set<RegisteredProject> updateAll(Set<ProjectConfig> projectConfigs)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-      BadRequestException {
+          BadRequestException {
     Set<RegisteredProject> projects = new HashSet<>();
 
     for (ProjectConfig projectConfig : projectConfigs) {
@@ -177,7 +175,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   @Override
   public RegisteredProject update(ProjectConfig projectConfig)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
-      BadRequestException {
+          BadRequestException {
     RegisteredProject project = projectConfigRegistry.put(projectConfig, true, false);
     fireInitHandlers(project);
 
@@ -225,9 +223,7 @@ public class ExecutiveProjectManager implements ProjectManager {
     fsManager.copyDirectory(srcWsPath, dstWsPath);
 
     RegisteredProject oldProjectConfig =
-        projectConfigRegistry
-            .get(srcWsPath)
-            .orElseThrow(IllegalStateException::new);
+        projectConfigRegistry.get(srcWsPath).orElseThrow(IllegalStateException::new);
 
     String newProjectName = dstWsPath.substring(dstWsPath.lastIndexOf(separator));
     NewProjectConfig newProjectConfig =
@@ -249,7 +245,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   @Override
   public RegisteredProject setType(String wsPath, String type, boolean asMixin)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
-      ForbiddenException {
+          ForbiddenException {
 
     RegisteredProject project =
         get(wsPath).orElseThrow(() -> new NotFoundException("Can't find project"));
@@ -261,7 +257,7 @@ public class ExecutiveProjectManager implements ProjectManager {
       }
     }
 
-    NewProjectConfig conf =
+    NewProjectConfig newProjectConfig =
         new NewProjectConfigImpl(
             project.getPath(),
             type,
@@ -272,13 +268,15 @@ public class ExecutiveProjectManager implements ProjectManager {
             null,
             project.getSource());
 
-    return update(conf);
+    projectConfigRegistry.put(newProjectConfig, true, false);
+
+    return projectConfigRegistry.getOrNull(wsPath);
   }
 
   @Override
   public RegisteredProject removeType(String wsPath, String type)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
-      ForbiddenException {
+          ForbiddenException {
 
     RegisteredProject project =
         get(wsPath).orElseThrow(() -> new NotFoundException("Can't find project"));
@@ -288,7 +286,7 @@ public class ExecutiveProjectManager implements ProjectManager {
     if (mixins.contains(type)) {
       mixins.remove(type);
 
-      return update(
+      NewProjectConfigImpl projectConfig =
           new NewProjectConfigImpl(
               project.getPath(),
               project.getType(),
@@ -297,20 +295,29 @@ public class ExecutiveProjectManager implements ProjectManager {
               project.getDescription(),
               project.getAttributes(),
               null,
-              project.getSource()));
+              project.getSource());
+
+      projectConfigRegistry.put(projectConfig, true, false);
+
+      return projectConfigRegistry.getOrNull(wsPath);
     }
 
     if (project.getType().equals(type) && !project.isDetected()) {
-      return update(
+
+      NewProjectConfigImpl projectConfig =
           new NewProjectConfigImpl(
               project.getPath(),
               BaseProjectType.ID,
-              mixins,
+              project.getMixins(),
               project.getName(),
               project.getDescription(),
               project.getAttributes(),
               null,
-              project.getSource()));
+              project.getSource());
+
+      projectConfigRegistry.put(projectConfig, true, false);
+
+      return projectConfigRegistry.getOrNull(wsPath);
     }
 
     if (project.getType().equals(type) && project.isDetected()) {
@@ -326,11 +333,9 @@ public class ExecutiveProjectManager implements ProjectManager {
     fsManager.moveDirectory(srcWsPath, dstWsPath);
 
     RegisteredProject oldProjectConfig =
-        projectConfigRegistry
-            .remove(srcWsPath)
-            .orElseThrow(IllegalStateException::new);
+        projectConfigRegistry.remove(srcWsPath).orElseThrow(IllegalStateException::new);
 
-    String dstName = fsPathResolver.getName(dstWsPath);
+    String dstName = fsPaths.getName(dstWsPath);
     NewProjectConfig newProjectConfig =
         new NewProjectConfigImpl(
             dstWsPath,
@@ -349,10 +354,10 @@ public class ExecutiveProjectManager implements ProjectManager {
 
   @Override
   public RegisteredProject doImport(
-      NewProjectConfig newProjectConfig, boolean rewrite, BiConsumer<String, String> consumer)
+      NewProjectConfig projectConfig, boolean rewrite, BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
-    return projectImportManager.doImport(newProjectConfig, rewrite, consumer);
+          NotFoundException, BadRequestException {
+    return projectImportManager.doImport(projectConfig, rewrite, consumer);
   }
 
   @Override
@@ -361,7 +366,7 @@ public class ExecutiveProjectManager implements ProjectManager {
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException, BadRequestException {
+          NotFoundException, BadRequestException {
     return projectImportManager.doImport(newProjectConfigs, rewrite, consumer);
   }
 
@@ -372,7 +377,7 @@ public class ExecutiveProjectManager implements ProjectManager {
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     return projectImportManager.doImport(wsPath, sourceStorage, rewrite, consumer);
   }
 
@@ -382,20 +387,20 @@ public class ExecutiveProjectManager implements ProjectManager {
       boolean rewrite,
       BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
-      NotFoundException {
+          NotFoundException {
     return projectImportManager.doImport(projectLocations, rewrite, consumer);
   }
 
   @Override
-  public ProjectTypeResolution qualify(String path, String projectTypeId)
+  public ProjectTypeResolution qualify(String wsPath, String projectTypeId)
       throws ServerException, NotFoundException {
-    return projectQualifier.qualify(path, projectTypeId);
+    return projectQualifier.qualify(wsPath, projectTypeId);
   }
 
   @Override
-  public List<ProjectTypeResolution> qualify(String path)
+  public List<ProjectTypeResolution> qualify(String wsPath)
       throws ServerException, NotFoundException {
-    return projectQualifier.qualify(path);
+    return projectQualifier.qualify(wsPath);
   }
 
   private void fireInitHandlers(RegisteredProject registeredProject)

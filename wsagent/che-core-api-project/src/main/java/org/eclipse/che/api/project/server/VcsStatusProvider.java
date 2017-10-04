@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.server.impl;
+package org.eclipse.che.api.project.server;
 
 import java.util.List;
 import java.util.Map;

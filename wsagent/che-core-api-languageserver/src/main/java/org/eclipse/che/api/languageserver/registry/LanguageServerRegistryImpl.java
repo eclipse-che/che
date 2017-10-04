@@ -25,13 +25,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -54,7 +54,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private final Provider<ProjectManager> projectManagerProvider;
   private final ServerInitializer initializer;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private EventService eventService;
   private CheLanguageClientFactory clientFactory;
 
@@ -66,14 +66,14 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       ServerInitializer initializer,
       EventService eventService,
       CheLanguageClientFactory clientFactory,
-      FsPathResolver fsPathResolver) {
+      FsPaths fsPaths) {
     this.languages = new ArrayList<>(languages);
     this.launchers = new ArrayList<>(languageServerLaunchers);
     this.projectManagerProvider = projectManagerProvider;
     this.initializer = initializer;
     this.eventService = eventService;
     this.clientFactory = clientFactory;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
     this.launchedServers = new HashMap<>();
     this.initializedServers = new HashMap<>();
   }
@@ -213,7 +213,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       throw new LanguageServerException("Project not found for " + filePath);
     }
 
-    String wsPath = fsPathResolver.toAbsoluteWsPath(LanguageServiceUtils.removePrefixUri(filePath));
+    String wsPath = fsPaths.absolutize(LanguageServiceUtils.removePrefixUri(filePath));
     RegisteredProject project =
         projectManagerProvider
             .get()

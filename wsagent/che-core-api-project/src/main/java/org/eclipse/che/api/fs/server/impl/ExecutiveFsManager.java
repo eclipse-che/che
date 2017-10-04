@@ -39,7 +39,7 @@ public class ExecutiveFsManager implements org.eclipse.che.api.fs.server.FsManag
 
   private static final Logger LOG = LoggerFactory.getLogger(ExecutiveFsManager.class);
 
-  private final SimpleFsPathResolver pathResolver;
+  private final StandardFsPaths pathResolver;
   private final DirectoryCreator directoryCreator;
   private final DirectoryCopier directoryCopier;
   private final DirectoryDeleter directoryDeleter;
@@ -55,7 +55,7 @@ public class ExecutiveFsManager implements org.eclipse.che.api.fs.server.FsManag
 
   @Inject
   public ExecutiveFsManager(
-      SimpleFsPathResolver pathResolver,
+      StandardFsPaths pathResolver,
       DirectoryCreator directoryCreator,
       DirectoryCopier directoryCopier,
       DirectoryDeleter directoryDeleter,

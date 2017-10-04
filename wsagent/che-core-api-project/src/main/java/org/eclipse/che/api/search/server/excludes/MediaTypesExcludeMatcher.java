@@ -28,7 +28,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 
 /**
  * Filter based on media type of the file. The filter includes in result files with media type
@@ -45,11 +45,11 @@ public class MediaTypesExcludeMatcher implements PathMatcher {
   private final Set<String> excludedTypes;
 
   private final FsManager fileSystemManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
 
   @Inject
-  public MediaTypesExcludeMatcher(FsManager fileSystemManager, FsPathResolver fsPathResolver) {
-    this.fsPathResolver = fsPathResolver;
+  public MediaTypesExcludeMatcher(FsManager fileSystemManager, FsPaths fsPaths) {
+    this.fsPaths = fsPaths;
     this.excludedMediaTypes = newHashSet(MediaType.APPLICATION_ZIP, MediaType.OCTET_STREAM);
     this.excludedTypes = newHashSet("video", "audio", "image");
     this.fileSystemManager = fileSystemManager;
@@ -57,18 +57,26 @@ public class MediaTypesExcludeMatcher implements PathMatcher {
 
   @Override
   public boolean matches(Path fsPath) {
-    String wsPath = fsPathResolver.toWsPath(fsPath);
+    String wsPath = fsPaths.toWsPath(fsPath);
 
     MediaType mimeType;
     try (InputStream content = fileSystemManager.readFileAsInputStream(wsPath)) {
       mimeType = new TikaConfig().getDetector().detect(content, new Metadata());
-    } catch (TikaException | IOException | NotFoundException | ServerException | ConflictException e0) {
+    } catch (TikaException
+        | IOException
+        | NotFoundException
+        | ServerException
+        | ConflictException e0) {
       try {
         // https://issues.apache.org/jira/browse/TIKA-2395
         byte[] content = fileSystemManager.readFileAsByteArray(wsPath);
         ByteArrayInputStream bais = new ByteArrayInputStream(content);
         mimeType = new TikaConfig().getDetector().detect(bais, new Metadata());
-      } catch (TikaException | IOException | NotFoundException | ServerException | ConflictException e1) {
+      } catch (TikaException
+          | IOException
+          | NotFoundException
+          | ServerException
+          | ConflictException e1) {
         return true;
       }
     }

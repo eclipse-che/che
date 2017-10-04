@@ -26,7 +26,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,28 +35,27 @@ public class ValidatingFsManager implements FsManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(ValidatingFsManager.class);
 
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final SuspendingFsManager suspendingFsManager;
 
   @Inject
-  public ValidatingFsManager(
-      FsPathResolver fsPathResolver,
-      SuspendingFsManager suspendingFsManager) {
-    this.fsPathResolver = fsPathResolver;
+  public ValidatingFsManager(FsPaths fsPaths, SuspendingFsManager suspendingFsManager) {
+    this.fsPaths = fsPaths;
     this.suspendingFsManager = suspendingFsManager;
   }
 
   @Override
   public void createDirectory(String wsPath)
       throws NotFoundException, ConflictException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     Path parentFsPath = fsPath.getParent();
 
     if (!Files.exists(parentFsPath)) {
-      throw new NotFoundException("Can't create directory, parent does not exist: " + parentFsPath);
+      throw new NotFoundException("Can't create directory, parent does not exist: " + wsPath);
     }
+
     if (Files.exists(fsPath)) {
-      throw new ConflictException("Can't create directory, item already exists: " + fsPath);
+      throw new ConflictException("Can't create directory, item already exists: " + wsPath);
     }
 
     suspendingFsManager.createDirectory(wsPath);
@@ -81,16 +80,16 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public InputStream zipDirectoryToInputStream(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
 
     if (!Files.exists(fsPath)) {
       throw new NotFoundException(
-          "Can't zip directory to input stream, item does not exist: " + fsPath);
+          "Can't zip directory to input stream, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isDirectory()) {
       throw new ConflictException(
-          "Can't zip directory to input stream, item is not directory: " + fsPath);
+          "Can't zip directory to input stream, item is not directory: " + wsPath);
     }
 
     return suspendingFsManager.zipDirectoryToInputStream(wsPath);
@@ -99,15 +98,15 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public String zipDirectoryToString(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
 
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't zip directory to string, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't zip directory to string, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isDirectory()) {
       throw new ConflictException(
-          "Can't zip directory to string, item is not directory: " + fsPath);
+          "Can't zip directory to string, item is not directory: " + wsPath);
     }
 
     return suspendingFsManager.zipDirectoryToString(wsPath);
@@ -116,16 +115,16 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public byte[] zipDirectoryToByteArray(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
 
     if (!Files.exists(fsPath)) {
       throw new NotFoundException(
-          "Can't zip directory to byte array, item does not exist: " + fsPath);
+          "Can't zip directory to byte array, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isDirectory()) {
       throw new ConflictException(
-          "Can't zip directory to byte array, item is not directory: " + fsPath);
+          "Can't zip directory to byte array, item is not directory: " + wsPath);
     }
 
     return suspendingFsManager.zipDirectoryToByteArray(wsPath);
@@ -173,10 +172,14 @@ public class ValidatingFsManager implements FsManager {
 
   @Override
   public void deleteDirectory(String wsPath) throws NotFoundException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
 
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't delete directory, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't delete directory, item does not exist: " + wsPath);
+    }
+
+    if (!Files.isDirectory(fsPath)) {
+      throw new NotFoundException("Can't delete directory, item is not directory: " + wsPath);
     }
 
     suspendingFsManager.deleteDirectory(wsPath);
@@ -191,20 +194,21 @@ public class ValidatingFsManager implements FsManager {
   public void copyDirectory(String srcWsPath, String dstWsPath)
       throws NotFoundException, ConflictException, ServerException {
 
-    Path srcFsPath = fsPathResolver.toFsPath(srcWsPath);
+    Path srcFsPath = fsPaths.toFsPath(srcWsPath);
     if (!Files.exists(srcFsPath)) {
-      throw new NotFoundException("Can't copy directory, item does not exist: " + srcFsPath);
+      throw new NotFoundException("Can't copy directory, item does not exist: " + srcWsPath);
     }
 
-    Path dstFsPath = fsPathResolver.toFsPath(dstWsPath);
+    Path dstFsPath = fsPaths.toFsPath(dstWsPath);
     if (Files.exists(dstFsPath)) {
-      throw new ConflictException("Can't copy directory, item already exists: " + dstFsPath);
+      throw new ConflictException("Can't copy directory, item already exists: " + dstWsPath);
     }
 
     Path dstParentFsPath = dstFsPath.getParent();
     if (!Files.exists(dstParentFsPath)) {
+      String dstParentWsPath = fsPaths.getParentWsPath(dstWsPath);
       throw new NotFoundException(
-          "Can't copy directory, destination parent does not exist: " + dstParentFsPath);
+          "Can't copy directory, destination parent does not exist: " + dstParentWsPath);
     }
 
     suspendingFsManager.copyDirectory(srcWsPath, dstWsPath);
@@ -218,20 +222,21 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void moveDirectory(String srcWsPath, String dstWsPath)
       throws NotFoundException, ConflictException, ServerException {
-    Path srcFsPath = fsPathResolver.toFsPath(srcWsPath);
+    Path srcFsPath = fsPaths.toFsPath(srcWsPath);
     if (!Files.exists(srcFsPath)) {
-      throw new NotFoundException("Can't move directory, item does not exist: " + srcFsPath);
+      throw new NotFoundException("Can't move directory, item does not exist: " + srcWsPath);
     }
 
-    Path dstFsPath = fsPathResolver.toFsPath(dstWsPath);
+    Path dstFsPath = fsPaths.toFsPath(dstWsPath);
     if (Files.exists(dstFsPath)) {
-      throw new ConflictException("Can't move directory, item already exists: " + dstFsPath);
+      throw new ConflictException("Can't move directory, item already exists: " + dstWsPath);
     }
 
     Path dstParentFsPath = dstFsPath.getParent();
     if (!Files.exists(dstParentFsPath)) {
+      String dstParentWsPath = fsPaths.getParentWsPath(dstWsPath);
       throw new NotFoundException(
-          "Can't move directory, destination parent does not exist: " + dstParentFsPath);
+          "Can't move directory, destination parent does not exist: " + dstParentWsPath);
     }
 
     suspendingFsManager.moveDirectory(srcWsPath, dstWsPath);
@@ -245,14 +250,15 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void createFile(String wsPath)
       throws NotFoundException, ConflictException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (Files.exists(fsPath)) {
-      throw new ConflictException("Can't create file, item already exists: " + fsPath);
+      throw new ConflictException("Can't create file, item already exists: " + wsPath);
     }
 
     Path parentFsPath = fsPath.getParent();
     if (!Files.exists(parentFsPath)) {
-      throw new NotFoundException("Can't create file, parent does not exist: " + parentFsPath);
+      String parentWsPath = fsPaths.getParentWsPath(wsPath);
+      throw new NotFoundException("Can't create file, parent does not exist: " + parentWsPath);
     }
 
     suspendingFsManager.createFile(wsPath);
@@ -261,14 +267,15 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void createFile(String wsPath, InputStream content)
       throws NotFoundException, ConflictException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (Files.exists(fsPath)) {
-      throw new ConflictException("Can't create file, item already exists: " + fsPath);
+      throw new ConflictException("Can't create file, item already exists: " + wsPath);
     }
 
     Path parentFsPath = fsPath.getParent();
     if (!Files.exists(parentFsPath)) {
-      throw new NotFoundException("Can't create file, parent does not exist: " + parentFsPath);
+      String parentWsPath = fsPaths.getParentWsPath(wsPath);
+      throw new NotFoundException("Can't create file, parent does not exist: " + parentWsPath);
     }
 
     if (content == null) {
@@ -281,14 +288,15 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void createFile(String wsPath, String content)
       throws NotFoundException, ConflictException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (Files.exists(fsPath)) {
-      throw new ConflictException("Can't create file, item already exists: " + fsPath);
+      throw new ConflictException("Can't create file, item already exists: " + wsPath);
     }
 
     Path parentFsPath = fsPath.getParent();
     if (!Files.exists(parentFsPath)) {
-      throw new NotFoundException("Can't create file, parent does not exist: " + parentFsPath);
+      String parentWsPath = fsPaths.getParentWsPath(wsPath);
+      throw new NotFoundException("Can't create file, parent does not exist: " + parentWsPath);
     }
 
     if (content == null || content.isEmpty()) {
@@ -301,14 +309,15 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void createFile(String wsPath, byte[] content)
       throws NotFoundException, ConflictException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (Files.exists(fsPath)) {
-      throw new ConflictException("Can't create file, item already exists: " + fsPath);
+      throw new ConflictException("Can't create file, item already exists: " + wsPath);
     }
 
     Path parentFsPath = fsPath.getParent();
     if (!Files.exists(parentFsPath)) {
-      throw new NotFoundException("Can't create file, parent does not exist: " + parentFsPath);
+      String parentWsPath = fsPaths.getParentWsPath(wsPath);
+      throw new NotFoundException("Can't create file, parent does not exist: " + parentWsPath);
     }
 
     if (content == null || content.length == 0) {
@@ -352,13 +361,13 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public InputStream readFileAsInputStream(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't read file as stream, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't read file as stream, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't read file as stream, item is not a file: " + fsPath);
+      throw new ConflictException("Can't read file as stream, item is not a file: " + wsPath);
     }
 
     return suspendingFsManager.readFileAsInputStream(wsPath);
@@ -367,13 +376,13 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public String readFileAsString(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't read file as string, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't read file as string, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't read file as string, item is not a file: " + fsPath);
+      throw new ConflictException("Can't read file as string, item is not a file: " + wsPath);
     }
 
     return suspendingFsManager.readFileAsString(wsPath);
@@ -382,13 +391,13 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public byte[] readFileAsByteArray(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't read file as byte array, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't read file as byte array, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't read file as byte array, item is not a file: " + fsPath);
+      throw new ConflictException("Can't read file as byte array, item is not a file: " + wsPath);
     }
 
     return suspendingFsManager.readFileAsByteArray(wsPath);
@@ -412,13 +421,13 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public InputStream zipFileToInputStream(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't zip file to input stream, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't zip file to input stream, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't zip file to input stream, item is not a file: " + fsPath);
+      throw new ConflictException("Can't zip file to input stream, item is not a file: " + wsPath);
     }
 
     return suspendingFsManager.zipFileToInputStream(wsPath);
@@ -427,13 +436,13 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public String zipFileToString(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't zip file to string, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't zip file to string, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't zip file to string, item is not a file: " + fsPath);
+      throw new ConflictException("Can't zip file to string, item is not a file: " + wsPath);
     }
 
     return suspendingFsManager.zipFileToString(wsPath);
@@ -442,13 +451,13 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public byte[] zipFileToByteArray(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't zip file to byte array, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't zip file to byte array, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't zip file to byte array, item is not a file: " + fsPath);
+      throw new ConflictException("Can't zip file to byte array, item is not a file: " + wsPath);
     }
 
     return suspendingFsManager.zipFileToByteArray(wsPath);
@@ -472,13 +481,13 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public InputStream tarFileToInputStream(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't tar file to input stream, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't tar file to input stream, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't tar file to input stream, item is not a file: " + fsPath);
+      throw new ConflictException("Can't tar file to input stream, item is not a file: " + wsPath);
     }
 
     return suspendingFsManager.tarFileToInputStream(wsPath);
@@ -487,13 +496,13 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public String tarFileToString(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't tar file to string, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't tar file to string, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't tar file to string, item is not a file: " + fsPath);
+      throw new ConflictException("Can't tar file to string, item is not a file: " + wsPath);
     }
 
     return suspendingFsManager.tarFileToString(wsPath);
@@ -502,13 +511,13 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public byte[] tarFileToByteArray(String wsPath)
       throws NotFoundException, ServerException, ConflictException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't tar file to byte array, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't tar file to byte array, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't tar file to byte array, item is not a file: " + fsPath);
+      throw new ConflictException("Can't tar file to byte array, item is not a file: " + wsPath);
     }
 
     return suspendingFsManager.tarFileToByteArray(wsPath);
@@ -532,14 +541,14 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void updateFile(String wsPath, BiConsumer<InputStream, OutputStream> updater)
       throws NotFoundException, ConflictException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
 
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't update file with updater, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't update file with updater, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't update file with updater, item is not a file: " + fsPath);
+      throw new ConflictException("Can't update file with updater, item is not a file: " + wsPath);
     }
 
     if (updater == null) {
@@ -552,14 +561,14 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void updateFile(String wsPath, InputStream content)
       throws NotFoundException, ConflictException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
 
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't update file with stream, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't update file with stream, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't update file with stream, item is not a file: " + fsPath);
+      throw new ConflictException("Can't update file with stream, item is not a file: " + wsPath);
     }
 
     if (content == null) {
@@ -572,14 +581,14 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void updateFile(String wsPath, String content)
       throws NotFoundException, ConflictException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
 
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't update file with string, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't update file with string, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't update file with string, item is not a file: " + fsPath);
+      throw new ConflictException("Can't update file with string, item is not a file: " + wsPath);
     }
 
     if (content == null || content.isEmpty()) {
@@ -592,14 +601,14 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void updateFile(String wsPath, byte[] content)
       throws NotFoundException, ConflictException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
 
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Can't update file with string, item does not exist: " + fsPath);
+      throw new NotFoundException("Can't update file with string, item does not exist: " + wsPath);
     }
 
     if (!fsPath.toFile().isFile()) {
-      throw new ConflictException("Can't update file with string, item is not a file: " + fsPath);
+      throw new ConflictException("Can't update file with string, item is not a file: " + wsPath);
     }
 
     if (content == null || content.length == 0) {
@@ -625,7 +634,7 @@ public class ValidatingFsManager implements FsManager {
 
   @Override
   public void deleteFile(String wsPath) throws NotFoundException, ServerException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
 
     if (!fsPath.toFile().exists()) {
       throw new NotFoundException("FS item '" + fsPath.toString() + "' does not exist");
@@ -642,24 +651,25 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void copyFile(String srcWsPath, String dstWsPath)
       throws NotFoundException, ConflictException, ServerException {
-    Path srcFsPath = fsPathResolver.toFsPath(srcWsPath);
+    Path srcFsPath = fsPaths.toFsPath(srcWsPath);
     if (!Files.exists(srcFsPath)) {
-      throw new NotFoundException("Can't copy file, item does not exist: " + srcFsPath);
+      throw new NotFoundException("Can't copy file, item does not exist: " + srcWsPath);
     }
 
     if (!srcFsPath.toFile().isFile()) {
-      throw new ConflictException("Can't copy file, item is not a file: " + srcFsPath);
+      throw new ConflictException("Can't copy file, item is not a file: " + srcWsPath);
     }
 
-    Path dstFsPath = fsPathResolver.toFsPath(dstWsPath);
+    Path dstFsPath = fsPaths.toFsPath(dstWsPath);
     if (Files.exists(dstFsPath)) {
-      throw new ConflictException("Can't copy file, destination item already exists: " + dstFsPath);
+      throw new ConflictException("Can't copy file, destination item already exists: " + dstWsPath);
     }
 
     Path parentDstFsPath = dstFsPath.getParent();
     if (!Files.exists(parentDstFsPath)) {
+      String parentDstWsPath = fsPaths.getParentWsPath(dstWsPath);
       throw new NotFoundException(
-          "Can't copy file, destination parent does not exist: " + parentDstFsPath);
+          "Can't copy file, destination parent does not exist: " + parentDstWsPath);
     }
 
     suspendingFsManager.copyFile(srcWsPath, dstWsPath);
@@ -673,24 +683,25 @@ public class ValidatingFsManager implements FsManager {
   @Override
   public void moveFile(String srcWsPath, String dstWsPath)
       throws NotFoundException, ConflictException, ServerException {
-    Path srcFsPath = fsPathResolver.toFsPath(srcWsPath);
+    Path srcFsPath = fsPaths.toFsPath(srcWsPath);
     if (!Files.exists(srcFsPath)) {
-      throw new NotFoundException("Can't move file, item does not exist: " + srcFsPath);
+      throw new NotFoundException("Can't move file, item does not exist: " + srcWsPath);
     }
 
     if (!srcFsPath.toFile().isFile()) {
-      throw new ConflictException("Can't move file, item is not a file: " + srcFsPath);
+      throw new ConflictException("Can't move file, item is not a file: " + srcWsPath);
     }
 
-    Path dstFsPath = fsPathResolver.toFsPath(dstWsPath);
+    Path dstFsPath = fsPaths.toFsPath(dstWsPath);
     if (Files.exists(dstFsPath)) {
-      throw new ConflictException("Can't move file, destination item already exists: " + dstFsPath);
+      throw new ConflictException("Can't move file, destination item already exists: " + dstWsPath);
     }
 
     Path parentDstFsPath = dstFsPath.getParent();
     if (!Files.exists(parentDstFsPath)) {
+      String parentDstWsPath = fsPaths.getParentWsPath(dstWsPath);
       throw new NotFoundException(
-          "Can't move file, destination parent does not exist: " + parentDstFsPath);
+          "Can't move file, destination parent does not exist: " + parentDstWsPath);
     }
 
     suspendingFsManager.moveFile(srcWsPath, dstWsPath);
@@ -753,9 +764,9 @@ public class ValidatingFsManager implements FsManager {
 
   @Override
   public File toIoFile(String wsPath) throws NotFoundException {
-    Path fsPath = fsPathResolver.toFsPath(wsPath);
+    Path fsPath = fsPaths.toFsPath(wsPath);
     if (!Files.exists(fsPath)) {
-      throw new NotFoundException("Cant convert to IO file, item does not exist: " + fsPath);
+      throw new NotFoundException("Cant convert to IO file, item does not exist: " + wsPath);
     }
 
     return suspendingFsManager.toIoFile(wsPath);

@@ -82,7 +82,7 @@ public interface ProjectManager {
           ForbiddenException;
 
   RegisteredProject doImport(
-      NewProjectConfig projectConfigs, boolean rewrite, BiConsumer<String, String> consumer)
+      NewProjectConfig projectConfig, boolean rewrite, BiConsumer<String, String> consumer)
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
           NotFoundException, BadRequestException;
 
@@ -108,8 +108,8 @@ public interface ProjectManager {
       throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
           NotFoundException;
 
-  ProjectTypeResolution qualify(String path, String projectTypeId)
+  ProjectTypeResolution qualify(String wsPath, String projectTypeId)
       throws ServerException, NotFoundException;
 
-  List<ProjectTypeResolution> qualify(String path) throws ServerException, NotFoundException;
+  List<ProjectTypeResolution> qualify(String wsPath) throws ServerException, NotFoundException;
 }

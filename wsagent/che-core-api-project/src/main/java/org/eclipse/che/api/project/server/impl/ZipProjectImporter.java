@@ -8,9 +8,8 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.server.importer;
+package org.eclipse.che.api.project.server.impl;
 
-import static java.io.File.separator;
 import static org.eclipse.che.api.project.shared.Constants.ZIP_IMPORTER_ID;
 
 import java.io.File;
@@ -28,6 +27,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.project.server.ProjectImporter;
 
 /** @author Vitaly Parfonov */
 @Singleton

@@ -11,7 +11,7 @@ package org.eclipse.che.plugin.zdb.server.utils;
 
 import com.google.inject.Singleton;
 import javax.inject.Inject;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 
 /**
  * Zend debug utils.
@@ -21,11 +21,11 @@ import org.eclipse.che.api.fs.server.FsPathResolver;
 @Singleton
 public class ZendDbgFileUtils {
 
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
 
   @Inject
-  public ZendDbgFileUtils(FsPathResolver fsPathResolver) {
-    this.fsPathResolver = fsPathResolver;
+  public ZendDbgFileUtils(FsPaths fsPaths) {
+    this.fsPaths = fsPaths;
   }
 
   /**
@@ -34,6 +34,6 @@ public class ZendDbgFileUtils {
    * @return local file absolute path
    */
   public String findAbsolutePath(String vfsPath) {
-    return fsPathResolver.toAbsoluteFsPath(vfsPath).toString();
+    return fsPaths.toFsPath(vfsPath).toString();
   }
 }

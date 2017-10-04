@@ -35,14 +35,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class DirectoryPacker {
+class DirectoryPacker {
 
   private static final Logger LOG = LoggerFactory.getLogger(DirectoryPacker.class);
 
-  private final SimpleFsPathResolver pathResolver;
+  private final StandardFsPaths pathResolver;
 
   @Inject
-  public DirectoryPacker(SimpleFsPathResolver pathResolver) {
+  DirectoryPacker(StandardFsPaths pathResolver) {
     this.pathResolver = pathResolver;
   }
 
@@ -62,54 +62,52 @@ public class DirectoryPacker {
     }
   }
 
-  public InputStream zipToInputStream(String wsPath) throws NotFoundException, ServerException {
+  InputStream zipToInputStream(String wsPath) throws NotFoundException, ServerException {
     return zipInternally(wsPath, fsPath -> newInputStream(fsPath));
   }
 
-  public String zipToString(String wsPath) throws NotFoundException, ServerException {
+  String zipToString(String wsPath) throws NotFoundException, ServerException {
     return zipInternally(wsPath, fsPath -> new String(readAllBytes(fsPath)));
   }
 
-  public byte[] zipToByteArray(String wsPath) throws NotFoundException, ServerException {
+  byte[] zipToByteArray(String wsPath) throws NotFoundException, ServerException {
     return zipInternally(wsPath, Files::readAllBytes);
   }
 
-  public Optional<InputStream> zipToInputStreamQuietly(String wsPath)
+  Optional<InputStream> zipToInputStreamQuietly(String wsPath)
       throws NotFoundException, ServerException {
     return zipInternallyAndQuietly(wsPath, fsPath -> newInputStream(fsPath));
   }
 
-  public Optional<String> zipToStringQuietly(String wsPath)
-      throws NotFoundException, ServerException {
+  Optional<String> zipToStringQuietly(String wsPath) throws NotFoundException, ServerException {
     return zipInternallyAndQuietly(wsPath, fsPath -> new String(readAllBytes(fsPath)));
   }
 
-  public Optional<byte[]> zipToByteArrayQuietly(String wsPath)
-      throws NotFoundException, ServerException {
+  Optional<byte[]> zipToByteArrayQuietly(String wsPath) throws NotFoundException, ServerException {
     return zipInternallyAndQuietly(wsPath, Files::readAllBytes);
   }
 
-  public void unzip(String wsPath, InputStream content)
+  void unzip(String wsPath, InputStream content)
       throws NotFoundException, ConflictException, ServerException {
     unzip(wsPath, content, false);
   }
 
-  public void unzip(String wsPath, InputStream content, boolean skipRoot)
+  void unzip(String wsPath, InputStream content, boolean skipRoot)
       throws NotFoundException, ConflictException, ServerException {
     try {
       Path fsPath = pathResolver.toFsPath(wsPath);
 
       unzipInternally(content, skipRoot, fsPath);
     } catch (IOException e) {
-      throw new ServerException("Failed to unzip directory: " + wsPath, e);
+      throw new ServerException("Failed to unzip directory " + wsPath, e);
     }
   }
 
-  public boolean unzipQuietly(String wsPath, InputStream content) {
+  boolean unzipQuietly(String wsPath, InputStream content) {
     return unzipQuietly(wsPath, content, false);
   }
 
-  public boolean unzipQuietly(String wsPath, InputStream content, boolean skipRoot) {
+  boolean unzipQuietly(String wsPath, InputStream content, boolean skipRoot) {
     try {
       Path fsPath = pathResolver.toFsPath(wsPath);
 
@@ -118,7 +116,7 @@ public class DirectoryPacker {
       unzipInternally(content, skipRoot, fsPath);
       return true;
     } catch (IOException e) {
-      LOG.error("Failed to quietly unzip directory: " + wsPath, e);
+      LOG.error("Failed to quietly unzip directory {}", wsPath, e);
       return false;
     }
   }
@@ -149,10 +147,6 @@ public class DirectoryPacker {
   private <R> R zipInternally(String wsPath, FunctionWithException<Path, R, IOException> function)
       throws ServerException, NotFoundException {
     Path fsPath = pathResolver.toFsPath(wsPath);
-    if (!fsPath.toFile().exists()) {
-      throw new NotFoundException("FS item '" + fsPath.toString() + "' does not exist");
-    }
-
     try {
       File inFile = fsPath.toFile();
       File outFile = createTempFile(fsPath.getFileName().toString(), ".zip").toFile();
@@ -164,7 +158,7 @@ public class DirectoryPacker {
 
       return function.apply(outFile.toPath());
     } catch (IOException e) {
-      throw new ServerException("Failed to zip directory: " + wsPath, e);
+      throw new ServerException("Failed to zip directory " + wsPath, e);
     }
   }
 
@@ -187,7 +181,7 @@ public class DirectoryPacker {
       R apply = function.apply(outFile.toPath());
       return Optional.of(apply);
     } catch (IOException e) {
-      LOG.error("Failed to quietly zip directory: " + wsPath, e);
+      LOG.error("Failed to quietly zip directory {}", wsPath, e);
       return Optional.empty();
     }
   }

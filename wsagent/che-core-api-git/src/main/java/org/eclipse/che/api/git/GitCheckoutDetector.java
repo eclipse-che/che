@@ -106,8 +106,7 @@ public class GitCheckoutDetector {
   }
 
   private Consumer<String> deleteConsumer() {
-    return it -> {
-    };
+    return it -> {};
   }
 
   private Consumer<String> fsEventConsumer() {

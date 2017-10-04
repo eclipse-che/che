@@ -33,14 +33,10 @@ public class FileWatcherManagerTest {
 
   @Rule public TemporaryFolder rootFolder = new TemporaryFolder();
 
-  @Mock
-  FileWatcherByPathValue fileWatcherByPathValue;
-  @Mock
-  FileWatcherByPathMatcher fileWatcherByPathMatcher;
-  @Mock
-  FileWatcherExcludePatternsRegistry fileWatcherExcludePatternsRegistry;
-  @Mock
-  FileWatcherService service;
+  @Mock FileWatcherByPathValue fileWatcherByPathValue;
+  @Mock FileWatcherByPathMatcher fileWatcherByPathMatcher;
+  @Mock FileWatcherExcludePatternsRegistry fileWatcherExcludePatternsRegistry;
+  @Mock FileWatcherService service;
 
   FileWatcherManager manager;
 

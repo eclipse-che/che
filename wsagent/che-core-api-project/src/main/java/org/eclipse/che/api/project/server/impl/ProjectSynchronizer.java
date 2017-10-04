@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.api.project.server.impl;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.eclipse.che.api.core.ServerException;
@@ -18,29 +17,19 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
 public interface ProjectSynchronizer {
 
-  /**
-   * Synchronizes Project Config state on Agent and Master
-   */
+  /** Synchronizes Project Config state on Agent and Master */
   void synchronize() throws ServerException;
 
-  /**
-   * @return projects from Workspace Config
-   */
+  /** @return projects from Workspace Config */
   Set<ProjectConfig> getAll() throws ServerException;
 
-  /**
-   * @return sub projects from Workspace Config
-   */
+  /** @return sub projects from Workspace Config */
   Set<ProjectConfig> getAll(String wsPath) throws ServerException;
 
-  /**
-   * @return project with workspace path
-   */
+  /** @return project with workspace path */
   Optional<ProjectConfig> get(String wsPath) throws ServerException;
 
-  /**
-   * @return project with workspace path
-   */
+  /** @return project with workspace path */
   ProjectConfig getOrNull(String wsPath) throws ServerException;
   /**
    * Adds project to Workspace Config

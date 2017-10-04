@@ -19,26 +19,15 @@ import org.eclipse.che.api.core.notification.EventOrigin;
  */
 @EventOrigin("project")
 public class ProjectCreatedEvent {
-  private String workspaceId;
+
   private String projectPath;
 
-  public ProjectCreatedEvent(String workspaceId, String projectPath) {
-    this.workspaceId = workspaceId;
+  public ProjectCreatedEvent(String projectPath) {
     this.projectPath = projectPath;
-  }
-
-  public ProjectCreatedEvent() {}
-
-  public String getWorkspaceId() {
-    return workspaceId;
   }
 
   public String getProjectPath() {
     return projectPath;
-  }
-
-  public void setWorkspaceId(String workspaceId) {
-    this.workspaceId = workspaceId;
   }
 
   public void setProjectPath(String projectPath) {
@@ -47,13 +36,6 @@ public class ProjectCreatedEvent {
 
   @Override
   public String toString() {
-    return "ProjectCreatedEvent{"
-        + "workspaceId='"
-        + workspaceId
-        + '\''
-        + ", projectPath='"
-        + projectPath
-        + '\''
-        + '}';
+    return "ProjectCreatedEvent{" + "projectPath='" + projectPath + '\'' + '}';
   }
 }

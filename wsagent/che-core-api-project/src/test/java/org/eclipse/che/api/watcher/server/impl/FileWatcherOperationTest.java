@@ -24,19 +24,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- * Tests for {@link FileWatcherOperation}
- */
+/** Tests for {@link FileWatcherOperation} */
 @RunWith(MockitoJUnitRunner.class)
 public class FileWatcherOperationTest {
 
   private static final int ID = 0;
-  @Mock
-  Consumer<String> create;
-  @Mock
-  Consumer<String> modify;
-  @Mock
-  Consumer<String> delete;
+  @Mock Consumer<String> create;
+  @Mock Consumer<String> modify;
+  @Mock Consumer<String> delete;
 
   FileWatcherOperation operation;
 

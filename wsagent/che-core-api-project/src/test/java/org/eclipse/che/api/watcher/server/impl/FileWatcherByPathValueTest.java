@@ -34,10 +34,8 @@ public class FileWatcherByPathValueTest {
 
   @Rule public TemporaryFolder rootFolder = new TemporaryFolder();
 
-  @Mock
-  FileWatcherEventHandler handler;
-  @Mock
-  FileWatcherService service;
+  @Mock FileWatcherEventHandler handler;
+  @Mock FileWatcherService service;
   @InjectMocks FileWatcherByPathValue watcher;
 
   @Mock Consumer<String> create;

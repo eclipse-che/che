@@ -29,9 +29,9 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.svn.server.SubversionApi;
@@ -71,7 +71,7 @@ public class SubversionService extends Service {
 
   @Inject private ProjectManager projectManager;
 
-  @Inject private FsPathResolver fsPathResolver;
+  @Inject private FsPaths fsPaths;
 
   @Inject private FsManager fsManager;
 
@@ -485,12 +485,12 @@ public class SubversionService extends Service {
   public SourceStorageDto importDescriptor(
       @Context UriInfo uriInfo, @QueryParam("projectPath") String projectPath)
       throws ApiException, IOException {
-    String projectWsPath = fsPathResolver.toAbsoluteWsPath(projectPath);
+    String projectWsPath = fsPaths.absolutize(projectPath);
     final RegisteredProject project =
         projectManager
             .get(projectWsPath)
             .orElseThrow(() -> new NotFoundException("Can't find a project: " + projectPath));
-    String dotSvnWsPath = fsPathResolver.resolve(projectWsPath, ".svn");
+    String dotSvnWsPath = fsPaths.resolve(projectWsPath, ".svn");
 
     if (fsManager.existsAsDirectory(dotSvnWsPath)) {
       return DtoFactory.getInstance()

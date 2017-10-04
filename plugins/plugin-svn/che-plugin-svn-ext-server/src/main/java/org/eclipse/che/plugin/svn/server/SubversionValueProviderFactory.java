@@ -20,7 +20,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
@@ -38,14 +38,14 @@ public class SubversionValueProviderFactory implements ValueProviderFactory {
   private static final Logger LOG = LoggerFactory.getLogger(SubversionValueProviderFactory.class);
 
   private final SubversionApi subversionApi;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final FsManager fsManager;
 
   @Inject
   public SubversionValueProviderFactory(
-      SubversionApi subversionApi, FsPathResolver fsPathResolver, FsManager fsManager) {
+      SubversionApi subversionApi, FsPaths fsPaths, FsManager fsManager) {
     this.subversionApi = subversionApi;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
     this.fsManager = fsManager;
   }
 
@@ -97,7 +97,7 @@ public class SubversionValueProviderFactory implements ValueProviderFactory {
 
   private boolean isSvn(String projectWsPath) throws ForbiddenException, ServerException {
     LOG.debug("Searching for '.svn' in {}.", projectWsPath);
-    String svnDirectoryWsPath = fsPathResolver.resolve(projectWsPath, ".svn");
+    String svnDirectoryWsPath = fsPaths.resolve(projectWsPath, ".svn");
     if (fsManager.existsAsDirectory(svnDirectoryWsPath)) {
       LOG.debug("Found it.");
       return true;

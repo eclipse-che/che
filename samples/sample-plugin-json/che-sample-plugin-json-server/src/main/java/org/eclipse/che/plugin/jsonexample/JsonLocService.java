@@ -23,9 +23,9 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 
 /** Service for counting lines of code within all JSON files in a given project. */
 @Path("json-example/{ws-id}")
@@ -33,7 +33,7 @@ import org.eclipse.che.api.project.server.ProjectManager;
 public class JsonLocService {
 
   private final ProjectManager projectManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final FsManager fsManager;
 
   /**
@@ -42,10 +42,9 @@ public class JsonLocService {
    * @param projectManager the {@link ProjectManager} that is used to access the project resources
    */
   @Inject
-  public JsonLocService(
-      ProjectManager projectManager, FsPathResolver fsPathResolver, FsManager fsManager) {
+  public JsonLocService(ProjectManager projectManager, FsPaths fsPaths, FsManager fsManager) {
     this.projectManager = projectManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
     this.fsManager = fsManager;
   }
 
@@ -58,7 +57,7 @@ public class JsonLocService {
   }
 
   private boolean isJsonFile(String fileWsPath) {
-    return fsPathResolver.getName(fileWsPath).endsWith("json");
+    return fsPaths.getName(fileWsPath).endsWith("json");
   }
 
   /**
@@ -75,7 +74,7 @@ public class JsonLocService {
   @Path("{projectPath}")
   public Map<String, String> countLinesPerFile(@PathParam("projectPath") String projectPath)
       throws ServerException, NotFoundException, ForbiddenException {
-    String projectWsPath = fsPathResolver.toAbsoluteWsPath(projectPath);
+    String projectWsPath = fsPaths.absolutize(projectPath);
     Map<String, String> linesPerFile = new LinkedHashMap<>();
     RegisteredProject project =
         projectManager
@@ -84,7 +83,7 @@ public class JsonLocService {
     Set<String> fileWsPaths = fsManager.getFileWsPaths(projectWsPath);
     for (String fileWsPath : fileWsPaths) {
       if (isJsonFile(fileWsPath)) {
-        String name = fsPathResolver.getName(fileWsPath);
+        String name = fsPaths.getName(fileWsPath);
         linesPerFile.put(name, Integer.toString(countLines(fileWsPath)));
       }
     }

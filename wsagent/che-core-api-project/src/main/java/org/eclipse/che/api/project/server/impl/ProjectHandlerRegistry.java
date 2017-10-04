@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.server.handlers;
+package org.eclipse.che.api.project.server.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,11 +17,15 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
+import org.eclipse.che.api.project.server.handlers.GetItemHandler;
+import org.eclipse.che.api.project.server.handlers.PostImportProjectHandler;
+import org.eclipse.che.api.project.server.handlers.ProjectHandler;
+import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 
 /** @author gazarenkov */
 @Singleton
-public class SimpleProjectHandlerRegistry
-    implements ProjectHandlerRegistry {
+public class ProjectHandlerRegistry {
 
   private final Map<String, CreateProjectHandler> createProjectHandlers = new HashMap<>();
   private final Map<String, PostImportProjectHandler> postImportProjectHandlers = new HashMap<>();
@@ -29,7 +33,7 @@ public class SimpleProjectHandlerRegistry
   private final Map<String, ProjectInitHandler> projectInitHandlers = new HashMap<>();
 
   @Inject
-  public SimpleProjectHandlerRegistry(Set<ProjectHandler> projectHandlers) {
+  public ProjectHandlerRegistry(Set<ProjectHandler> projectHandlers) {
     projectHandlers.forEach(this::register);
   }
 

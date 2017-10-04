@@ -26,10 +26,10 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 
@@ -49,7 +49,7 @@ public class GitIndexChangedDetector {
 
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final ProjectManager projectManager;
   private final GitConnectionFactory gitConnectionFactory;
 
@@ -61,12 +61,12 @@ public class GitIndexChangedDetector {
   public GitIndexChangedDetector(
       RequestTransmitter transmitter,
       FileWatcherManager manager,
-      FsPathResolver fsPathResolver,
+      FsPaths fsPaths,
       ProjectManager projectManager,
       GitConnectionFactory gitConnectionFactory) {
     this.transmitter = transmitter;
     this.manager = manager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
     this.projectManager = projectManager;
     this.gitConnectionFactory = gitConnectionFactory;
   }
@@ -99,8 +99,7 @@ public class GitIndexChangedDetector {
   }
 
   private Consumer<String> createConsumer() {
-    return it -> {
-    };
+    return it -> {};
   }
 
   private Consumer<String> modifyConsumer() {
@@ -108,8 +107,7 @@ public class GitIndexChangedDetector {
   }
 
   private Consumer<String> deleteConsumer() {
-    return it -> {
-    };
+    return it -> {};
   }
 
   private Consumer<String> fsEventConsumer() {
@@ -124,7 +122,7 @@ public class GitIndexChangedDetector {
                 .getClosest(wsPath)
                 .orElseThrow(() -> new NotFoundException("Can't find a project"));
 
-        String projectFsPath = fsPathResolver.toFsPath(project.getPath()).toString();
+        String projectFsPath = fsPaths.toFsPath(project.getPath()).toString();
         Status status = gitConnectionFactory.getConnection(projectFsPath).status(emptyList());
         Status statusDto = newDto(Status.class);
         statusDto.setAdded(status.getAdded());

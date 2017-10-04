@@ -10,9 +10,7 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.io.FileUtils;
@@ -22,32 +20,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class DirectoryDeleter {
+class DirectoryDeleter {
 
   private static final Logger LOG = LoggerFactory.getLogger(DirectoryDeleter.class);
 
-  private final SimpleFsPathResolver pathResolver;
+  private final StandardFsPaths pathResolver;
 
   @Inject
-  public DirectoryDeleter(SimpleFsPathResolver pathResolver) {
+  DirectoryDeleter(StandardFsPaths pathResolver) {
     this.pathResolver = pathResolver;
   }
 
-  public void delete(String wsPath) throws NotFoundException, ServerException {
-    Path fsPath = pathResolver.toFsPath(wsPath);
-
+  void delete(String wsPath) throws NotFoundException, ServerException {
     try {
-      FileUtils.deleteDirectory(fsPath.toFile());
+      FileUtils.deleteDirectory(pathResolver.toFsPath(wsPath).toFile());
     } catch (IOException e) {
-      throw new ServerException("Failed to delete directory: " + wsPath, e);
+      throw new ServerException("Failed to delete directory " + wsPath, e);
     }
   }
 
-  public boolean deleteQuietly(String wsPath) {
-    File directory = pathResolver.toFsPath(wsPath).toFile();
-
+  boolean deleteQuietly(String wsPath) {
     try {
-      FileUtils.deleteDirectory(directory);
+      FileUtils.deleteDirectory(pathResolver.toFsPath(wsPath).toFile());
       return true;
     } catch (IOException e) {
       LOG.error("Failed to quietly delete directory: " + wsPath, e);

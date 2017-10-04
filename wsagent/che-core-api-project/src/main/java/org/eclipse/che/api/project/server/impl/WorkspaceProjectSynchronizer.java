@@ -159,7 +159,6 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
 
   @Override
   public void add(ProjectConfig project) throws ServerException {
-
     final UriBuilder builder =
         UriBuilder.fromUri(apiEndpoint)
             .path(WorkspaceService.class)
@@ -186,7 +185,7 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
       builder.queryParam("token", userToken);
     }
     final String href =
-        builder.build(new String[]{workspaceId, project.getPath()}, false).toString();
+        builder.build(new String[] {workspaceId, project.getPath()}, false).toString();
     try {
       httpJsonRequestFactory.fromUrl(href).usePutMethod().setBody(asDto(project)).request();
     } catch (IOException | ApiException e) {
@@ -205,7 +204,7 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
       builder.queryParam("token", userToken);
     }
     final String href =
-        builder.build(new String[]{workspaceId, project.getPath()}, false).toString();
+        builder.build(new String[] {workspaceId, project.getPath()}, false).toString();
     try {
       httpJsonRequestFactory.fromUrl(href).useDeleteMethod().request();
     } catch (IOException | ApiException e) {
@@ -213,9 +212,7 @@ public class WorkspaceProjectSynchronizer implements ProjectSynchronizer {
     }
   }
 
-  /**
-   * @return WorkspaceDto
-   */
+  /** @return WorkspaceDto */
   private WorkspaceDto workspaceDto() throws ServerException {
 
     final UriBuilder builder =

@@ -44,10 +44,8 @@ public class FileWatcherServiceTest {
 
   @Rule public TemporaryFolder rootFolder = new TemporaryFolder();
 
-  @Mock
-  FileWatcherEventHandler handler;
-  @Mock
-  FileWatcherExcludePatternsRegistry fileWatcherExcludePatternsRegistry;
+  @Mock FileWatcherEventHandler handler;
+  @Mock FileWatcherExcludePatternsRegistry fileWatcherExcludePatternsRegistry;
   WatchService watchService = FileSystems.getDefault().newWatchService();
 
   FileWatcherService service;

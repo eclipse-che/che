@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
-import org.eclipse.che.api.project.server.importer.ProjectImporter;
+import org.eclipse.che.api.project.server.ProjectImporter;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.shared.dto.AttributeDto;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
@@ -67,12 +67,8 @@ public class ProjectDtoConverter {
         .withAttributes(typeAttributes);
   }
 
-  /**
-   * Converts {@link ProjectImporter} to {@link
-   * ProjectImporterDescriptor}.
-   */
-  public static ProjectImporterDescriptor asDto(
-      ProjectImporter importer) {
+  /** Converts {@link ProjectImporter} to {@link ProjectImporterDescriptor}. */
+  public static ProjectImporterDescriptor asDto(ProjectImporter importer) {
     return newDto(ProjectImporterDescriptor.class)
         .withId(importer.getId())
         .withInternal(importer.isInternal())
@@ -100,7 +96,11 @@ public class ProjectDtoConverter {
         .withType(project.getProjectType().getId())
         .withMixins(new ArrayList<>(project.getMixinTypes().keySet()))
         .withProblems(
-            project.getProblems().stream().map(ProjectDtoConverter::asDto).collect(Collectors.toList()));
+            project
+                .getProblems()
+                .stream()
+                .map(ProjectDtoConverter::asDto)
+                .collect(Collectors.toList()));
   }
 
   public static ProjectConfigDto asDto(ProjectConfig project) {

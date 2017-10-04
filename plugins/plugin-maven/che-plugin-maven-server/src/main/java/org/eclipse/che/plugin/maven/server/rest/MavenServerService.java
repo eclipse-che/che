@@ -33,12 +33,12 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.lsp.MavenLanguageServer;
 import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
@@ -63,7 +63,7 @@ public class MavenServerService {
   private final ProjectManager projectManager;
   private final MavenWorkspace mavenWorkspace;
   private final EclipseWorkspaceProvider eclipseWorkspaceProvider;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
   private final FsManager fsManager;
 
   @Inject private MavenProgressNotifier notifier;
@@ -82,14 +82,14 @@ public class MavenServerService {
       ProjectManager projectManager,
       MavenWorkspace mavenWorkspace,
       EclipseWorkspaceProvider eclipseWorkspaceProvider,
-      FsPathResolver fsPathResolver,
+      FsPaths fsPaths,
       FsManager fsManager) {
 
     this.wrapperManager = wrapperManager;
     this.projectManager = projectManager;
     this.mavenWorkspace = mavenWorkspace;
     this.eclipseWorkspaceProvider = eclipseWorkspaceProvider;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
     this.fsManager = fsManager;
   }
 
@@ -107,7 +107,7 @@ public class MavenServerService {
   @Produces(TEXT_XML)
   public String getEffectivePom(@QueryParam("projectpath") String projectPath)
       throws ServerException, NotFoundException, ForbiddenException {
-    String projectWsPath = fsPathResolver.toAbsoluteWsPath(projectPath);
+    String projectWsPath = fsPaths.absolutize(projectPath);
 
     RegisteredProject project =
         projectManager
@@ -120,7 +120,7 @@ public class MavenServerService {
     try {
       mavenServer.customize(
           mavenProjectManager.copyWorkspaceCache(), terminal, notifier, false, false);
-      String pomWsPath = fsPathResolver.resolve(projectWsPath, "pom.xml");
+      String pomWsPath = fsPaths.resolve(projectWsPath, "pom.xml");
       if (!fsManager.existsAsFile(pomWsPath)) {
         throw new NotFoundException("pom.xml doesn't exist");
       }

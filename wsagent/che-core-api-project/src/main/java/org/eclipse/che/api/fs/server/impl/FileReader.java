@@ -24,38 +24,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class FileReader {
+class FileReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileReader.class);
 
-  private final SimpleFsPathResolver pathResolver;
+  private final StandardFsPaths pathResolver;
 
   @Inject
-  public FileReader(SimpleFsPathResolver pathResolver) {
+  FileReader(StandardFsPaths pathResolver) {
     this.pathResolver = pathResolver;
   }
 
-  public InputStream readAsInputStream(String wsPath) throws NotFoundException, ServerException {
+  InputStream readAsInputStream(String wsPath) throws NotFoundException, ServerException {
     return readInternally(wsPath, fsPath -> FileUtils.openInputStream(fsPath.toFile()));
   }
 
-  public String readAsString(String wsPath) throws NotFoundException, ServerException {
+  String readAsString(String wsPath) throws NotFoundException, ServerException {
     return readInternally(wsPath, fsPath -> new String(Files.readAllBytes(fsPath)));
   }
 
-  public byte[] readAsByteArray(String wsPath) throws NotFoundException, ServerException {
+  byte[] readAsByteArray(String wsPath) throws NotFoundException, ServerException {
     return readInternally(wsPath, Files::readAllBytes);
   }
 
-  public Optional<InputStream> readAsInputStreamQuietly(String wsPath) {
+  Optional<InputStream> readAsInputStreamQuietly(String wsPath) {
     return readInternallyAndQuietly(wsPath, fsPath -> FileUtils.openInputStream(fsPath.toFile()));
   }
 
-  public Optional<String> readAsStringQuietly(String wsPath) {
+  Optional<String> readAsStringQuietly(String wsPath) {
     return readInternallyAndQuietly(wsPath, fsPath -> new String(Files.readAllBytes(fsPath)));
   }
 
-  public Optional<byte[]> readAsByteArrayQuietly(String wsPath) {
+  Optional<byte[]> readAsByteArrayQuietly(String wsPath) {
     return readInternallyAndQuietly(wsPath, Files::readAllBytes);
   }
 
@@ -64,6 +64,7 @@ public class FileReader {
     try {
       return Optional.ofNullable(readInternally(wsPath, function));
     } catch (NotFoundException | ServerException e) {
+      LOG.error("Can't read content of file {}", wsPath, e);
       return Optional.empty();
     }
   }
@@ -72,14 +73,10 @@ public class FileReader {
       throws NotFoundException, ServerException {
     Path fsPath = pathResolver.toFsPath(wsPath);
 
-    if (!fsPath.toFile().exists()) {
-      throw new NotFoundException("FS item '" + fsPath.toString() + "' does not exist");
-    }
-
     try {
       return function.apply(fsPath);
     } catch (IOException e) {
-      throw new ServerException("Can't read content for file: " + fsPath, e);
+      throw new ServerException("Can't read content of file " + wsPath, e);
     }
   }
 }

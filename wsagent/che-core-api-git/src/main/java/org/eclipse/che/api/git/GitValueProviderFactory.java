@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
@@ -35,7 +35,7 @@ import org.eclipse.che.api.project.server.type.ValueStorageException;
 @Singleton
 public class GitValueProviderFactory implements ValueProviderFactory {
 
-  @Inject private FsPathResolver fsPathResolver;
+  @Inject private FsPaths fsPaths;
 
   @Inject private GitConnectionFactory gitConnectionFactory;
 
@@ -48,7 +48,7 @@ public class GitValueProviderFactory implements ValueProviderFactory {
           return emptyList();
         }
 
-        String fsPath = fsPathResolver.toFsPath(projectConfig.getPath()).toString();
+        String fsPath = fsPaths.toFsPath(projectConfig.getPath()).toString();
 
         try (GitConnection gitConnection = gitConnectionFactory.getConnection(fsPath)) {
           //check whether the folder belongs to git repository

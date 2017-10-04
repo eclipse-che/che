@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 
@@ -32,12 +32,12 @@ import org.eclipse.che.api.project.server.type.AttributeValue;
 public class JsonExampleCreateProjectHandler implements CreateProjectHandler {
 
   private final FsManager fsManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
 
   @Inject
-  public JsonExampleCreateProjectHandler(FsManager fsManager, FsPathResolver fsPathResolver) {
+  public JsonExampleCreateProjectHandler(FsManager fsManager, FsPaths fsPaths) {
     this.fsManager = fsManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
   }
 
   @Override
@@ -50,13 +50,13 @@ public class JsonExampleCreateProjectHandler implements CreateProjectHandler {
         InputStream personJsonContent =
             getClass().getClassLoader().getResourceAsStream("files/default_person")) {
 
-      String packageJsonWsPath = fsPathResolver.resolve(projectWsPath, "package.json");
+      String packageJsonWsPath = fsPaths.resolve(projectWsPath, "package.json");
       fsManager.createFile(packageJsonWsPath, packageJsonContent);
 
-      String myJsonFilesWsPath = fsPathResolver.resolve(projectWsPath, "myJsonFiles");
+      String myJsonFilesWsPath = fsPaths.resolve(projectWsPath, "myJsonFiles");
       fsManager.createDirectory(myJsonFilesWsPath);
 
-      String personJsonWsPath = fsPathResolver.resolve(myJsonFilesWsPath, "myJsonFiles");
+      String personJsonWsPath = fsPaths.resolve(myJsonFilesWsPath, "myJsonFiles");
       fsManager.createFile(personJsonWsPath, personJsonContent);
 
     } catch (IOException ioEx) {

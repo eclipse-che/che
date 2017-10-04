@@ -41,7 +41,7 @@ import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CloneParams;
@@ -49,7 +49,7 @@ import org.eclipse.che.api.git.params.FetchParams;
 import org.eclipse.che.api.git.params.RemoteAddParams;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
-import org.eclipse.che.api.project.server.importer.ProjectImporter;
+import org.eclipse.che.api.project.server.ProjectImporter;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.slf4j.Logger;
@@ -64,18 +64,18 @@ public class GitProjectImporter implements ProjectImporter {
   private final GitConnectionFactory gitConnectionFactory;
   private final EventService eventService;
   private final FsManager fsManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
 
   @Inject
   public GitProjectImporter(
       GitConnectionFactory gitConnectionFactory,
       EventService eventService,
       FsManager fsManager,
-      FsPathResolver fsPathResolver) {
+      FsPaths fsPaths) {
     this.gitConnectionFactory = gitConnectionFactory;
     this.eventService = eventService;
     this.fsManager = fsManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
   }
 
   @Override
@@ -165,9 +165,9 @@ public class GitProjectImporter implements ProjectImporter {
         }
       }
       // Get path to local file. Git works with local filesystem only.
-      final String localPath = fsPathResolver.toAbsoluteFsPath(dst).toString();
+      final String localPath = fsPaths.toFsPath(dst).toString();
       final String location = src.getLocation();
-      final String projectName = fsPathResolver.getName(dst);
+      final String projectName = fsPaths.getName(dst);
 
       // Converting steps
       // 1. Clone to temporary folder on same device with /projects

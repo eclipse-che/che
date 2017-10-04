@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.project.server.handlers;
+package org.eclipse.che.api.project.server.impl;
 
 import static com.google.common.io.Resources.getResource;
 import static com.google.common.io.Resources.toByteArray;
@@ -23,7 +23,8 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.fs.server.FsPaths;
+import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.slf4j.Logger;
@@ -40,14 +41,14 @@ public class CreateBaseProjectTypeHandler implements CreateProjectHandler {
   private static final Logger LOG = LoggerFactory.getLogger(CreateBaseProjectTypeHandler.class);
 
   private final FsManager fsManager;
-  private final FsPathResolver fsPathResolver;
+  private final FsPaths fsPaths;
 
   private final String README_FILE_NAME = "README";
 
   @Inject
-  public CreateBaseProjectTypeHandler(FsManager fsManager, FsPathResolver fsPathResolver) {
+  public CreateBaseProjectTypeHandler(FsManager fsManager, FsPaths fsPaths) {
     this.fsManager = fsManager;
-    this.fsPathResolver = fsPathResolver;
+    this.fsPaths = fsPaths;
   }
 
   @Override
@@ -55,7 +56,7 @@ public class CreateBaseProjectTypeHandler implements CreateProjectHandler {
       String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
       throws ForbiddenException, ConflictException, ServerException, NotFoundException {
     fsManager.createDirectory(projectWsPath);
-    String wsPath = fsPathResolver.resolve(projectWsPath, README_FILE_NAME);
+    String wsPath = fsPaths.resolve(projectWsPath, README_FILE_NAME);
     fsManager.createFile(wsPath, getReadmeContent());
   }
 

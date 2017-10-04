@@ -10,14 +10,14 @@
  */
 package org.eclipse.che.api.project.server.impl;
 
-import java.io.IOException;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
+import com.google.inject.assistedinject.Assisted;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
-public interface ProjectInitializer {
+public interface RegisteredProjectFactory {
 
-  void initialize()
-      throws ConflictException, NotFoundException, ServerException, ForbiddenException, IOException;
+  RegisteredProject create(
+      @Assisted("folder") String folder,
+      @Assisted("config") ProjectConfig config,
+      @Assisted("updated") boolean updated,
+      @Assisted("detected") boolean detected);
 }

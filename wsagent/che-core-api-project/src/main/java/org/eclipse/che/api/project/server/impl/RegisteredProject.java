@@ -15,6 +15,8 @@ import static org.eclipse.che.api.core.ErrorCodes.ATTRIBUTE_NAME_PROBLEM;
 import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_CONFIGURED_IN_WS;
 import static org.eclipse.che.api.core.ErrorCodes.NO_PROJECT_ON_FILE_SYSTEM;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,9 +30,8 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.project.server.type.ProjectTypeResolver;
 import org.eclipse.che.api.project.server.type.ProjectTypes;
+import org.eclipse.che.api.project.server.type.ProjectTypesFactory;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.Variable;
@@ -59,16 +60,16 @@ public class RegisteredProject implements ProjectConfig {
    * @param config project configuration in workspace
    * @param updated if this object was updated, i.e. no more synchronized with workspace master
    * @param detected if this project was detected, initialized when "parent" project initialized
-   * @param projectTypeRegistry project type registry
+   * @param projectTypesFactory project types factory
    * @throws ServerException when path for project is undefined
    */
+  @AssistedInject
   public RegisteredProject(
-      String folder,
-      ProjectConfig config,
-      boolean updated,
-      boolean detected,
-      ProjectTypeResolver projectTypeResolver,
-      ProjectTypeRegistry projectTypeRegistry)
+      @Assisted("folder") String folder,
+      @Assisted("config") ProjectConfig config,
+      @Assisted("updated") boolean updated,
+      @Assisted("detected") boolean detected,
+      ProjectTypesFactory projectTypesFactory)
       throws ServerException {
     problems = new ArrayList<>();
     attributes = new HashMap<>();
@@ -103,13 +104,8 @@ public class RegisteredProject implements ProjectConfig {
 
     // 1. init project types
     this.types =
-        new ProjectTypes(
-            this.config.getPath(),
-            this.config.getType(),
-            this.config.getMixins(),
-            projectTypeRegistry,
-            projectTypeResolver,
-            problems);
+        projectTypesFactory.create(
+            this.config.getPath(), this.config.getType(), this.config.getMixins(), problems);
 
     // 2. init transient (implicit, like git) project types.
     types.addTransient(folder);
@@ -183,74 +179,58 @@ public class RegisteredProject implements ProjectConfig {
     }
   }
 
-  /**
-   * @return primary project type
-   */
+  /** @return primary project type */
   public ProjectTypeDef getProjectType() {
     return types.getPrimary();
   }
 
-  /**
-   * @return mixin project types
-   */
+  /** @return mixin project types */
   public Map<String, ProjectTypeDef> getMixinTypes() {
     return types.getMixins();
   }
 
-  /**
-   * @return all project types (primary + mixins, convenient method)
-   */
+  /** @return all project types (primary + mixins, convenient method) */
   public Map<String, ProjectTypeDef> getTypes() {
     return types.getAll();
   }
 
-  /**
-   * @return attributes as name / Value Map
-   */
+  /** @return attributes as name / Value Map */
   public Map<String, Value> getAttributeEntries() {
     return attributes;
   }
 
   /**
    * @return whether this project is synchronized with Workspace storage On the other words this
-   * project is not updated
+   *     project is not updated
    */
   public boolean isSynced() {
     return !this.updated;
   }
 
-  /**
-   * should be called after synchronization with Workspace storage
-   */
+  /** should be called after synchronization with Workspace storage */
   public void setSync() {
     this.updated = false;
   }
 
   /**
    * @return whether this project is detected using Project Type resolver If so it should not be
-   * persisted to Workspace storage
+   *     persisted to Workspace storage
    */
   public boolean isDetected() {
     return detected;
   }
 
-  /**
-   * @return root folder or null
-   */
+  /** @return root folder or null */
   public String getBaseFolder() {
     return folder;
   }
 
-  /**
-   * @return problems in case if root or config is null (project is not synced)
-   */
+  /** @return problems in case if root or config is null (project is not synced) */
   public List<ProjectProblem> getProblems() {
     return problems;
   }
 
-  /**
-   * @return list of Problems as a String
-   */
+  /** @return list of Problems as a String */
   public String getProblemsStr() {
     StringBuilder builder = new StringBuilder();
     int i = 0;
@@ -260,16 +240,14 @@ public class RegisteredProject implements ProjectConfig {
     return builder.toString();
   }
 
-  /**
-   * @return non provided attributes, those attributes can be persisted to Workspace storage
-   */
+  /** @return non provided attributes, those attributes can be persisted to Workspace storage */
   public Map<String, List<String>> getPersistableAttributes() {
     Map<String, List<String>> attrs = new HashMap<>();
     for (HashMap.Entry<String, Value> entry : getAttributeEntries().entrySet()) {
       Attribute def = types.getAttributeDefs().get(entry.getKey());
       // not provided, not constants
-      if (def != null && ((def.isVariable()
-          && ((Variable) def).getValueProviderFactory() == null))) {
+      if (def != null
+          && ((def.isVariable() && ((Variable) def).getValueProviderFactory() == null))) {
         attrs.put(entry.getKey(), entry.getValue().getList());
       }
     }

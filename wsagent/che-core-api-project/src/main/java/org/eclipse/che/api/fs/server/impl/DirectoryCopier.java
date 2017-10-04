@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,26 +28,26 @@ class DirectoryCopier {
 
   private static final Logger LOG = LoggerFactory.getLogger(DirectoryCopier.class);
 
-  private final SimpleFsPathResolver pathResolver;
+  private final StandardFsPaths pathResolver;
 
   @Inject
-  public DirectoryCopier(SimpleFsPathResolver pathResolver) {
+  public DirectoryCopier(StandardFsPaths pathResolver) {
     this.pathResolver = pathResolver;
   }
 
-  public void copy(String srcWsPath, String dstWsPath)
+  void copy(String srcWsPath, String dstWsPath)
       throws NotFoundException, ConflictException, ServerException {
+    File srcFile = pathResolver.toFsPath(srcWsPath).toFile();
+    File dstFile = pathResolver.toFsPath(dstWsPath).toFile();
 
     try {
-      FileUtils.copyDirectory(
-          pathResolver.toFsPath(srcWsPath).toFile(),
-          pathResolver.toFsPath(dstWsPath).toFile());
+      FileUtils.copyDirectory(srcFile, dstFile);
     } catch (IOException e) {
-      throw new ServerException("Failed to copy directory: " + srcWsPath, e);
+      throw new ServerException("Failed to copy directory " + srcWsPath + " to " + dstWsPath, e);
     }
   }
 
-  public boolean copyQuietly(String srcWsPath, String dstWsPath) {
+  boolean copyQuietly(String srcWsPath, String dstWsPath) {
     Path srcFsPath = pathResolver.toFsPath(srcWsPath);
     Path dstFsPath = pathResolver.toFsPath(dstWsPath);
 
@@ -57,7 +58,7 @@ class DirectoryCopier {
       FileUtils.copyDirectory(srcFsPath.toFile(), dstFsPath.toFile());
       return true;
     } catch (IOException e) {
-      LOG.error("Failed to quietly copy directory: " + srcWsPath, e);
+      LOG.error("Failed to quietly copy directory {} to {}", srcWsPath, dstWsPath, e);
       return false;
     }
   }

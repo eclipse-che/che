@@ -39,14 +39,14 @@ public class SearchApiModule extends AbstractModule {
     excludeMatcher.addBinding().to(DotCheExcludeMatcher.class);
     excludeMatcher.addBinding().to(DotNumberSignExcludeMatcher.class);
 
-    newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.file.create")).addBinding().to(IndexedFileCreateConsumer.class);
-    newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.file.update")).addBinding().to(IndexedFileUpdateConsumer.class);
-    newSetBinder(
-        binder(), new TypeLiteral<Consumer<Path>>() {
-        }, Names.named("che.fs.file.delete")).addBinding().to(IndexedFileDeleteConsumer.class);
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.create"))
+        .addBinding()
+        .to(IndexedFileCreateConsumer.class);
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.update"))
+        .addBinding()
+        .to(IndexedFileUpdateConsumer.class);
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.delete"))
+        .addBinding()
+        .to(IndexedFileDeleteConsumer.class);
   }
 }

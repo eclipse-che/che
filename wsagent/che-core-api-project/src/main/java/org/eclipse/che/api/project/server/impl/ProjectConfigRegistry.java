@@ -10,30 +10,79 @@
  */
 package org.eclipse.che.api.project.server.impl;
 
+import static java.util.stream.Collectors.toSet;
+
+import com.google.common.collect.ImmutableSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 
-public interface ProjectConfigRegistry {
+@Singleton
+public class ProjectConfigRegistry {
 
-  Set<RegisteredProject> getAll();
+  private final Map<String, RegisteredProject> projects = new ConcurrentHashMap<>();
 
-  Set<RegisteredProject> getAll(String wsPath);
+  private final RegisteredProjectFactory registeredProjectFactory;
 
-  Optional<RegisteredProject> get(String wsPath);
+  @Inject
+  public ProjectConfigRegistry(RegisteredProjectFactory registeredProjectFactory) {
+    this.registeredProjectFactory = registeredProjectFactory;
+  }
 
-  RegisteredProject getOrNull(String wsPath);
+  public Set<RegisteredProject> getAll() {
+    return ImmutableSet.copyOf(projects.values());
+  }
 
-  RegisteredProject put(ProjectConfig config, boolean updated, boolean detected)
-      throws ServerException;
+  public Set<RegisteredProject> getAll(String wsPath) {
+    Set<RegisteredProject> children =
+        projects
+            .entrySet()
+            .stream()
+            .filter(it -> it.getKey().startsWith(wsPath))
+            .filter(it -> !it.getKey().equals(wsPath))
+            .map(Entry::getValue)
+            .collect(toSet());
+    return ImmutableSet.copyOf(children);
+  }
 
-  RegisteredProject put(String path, boolean updated, boolean detected) throws ServerException;
+  public Optional<RegisteredProject> get(String wsPath) {
+    return Optional.ofNullable(projects.get(wsPath));
+  }
 
-  Optional<RegisteredProject> remove(String wsPath);
+  public RegisteredProject getOrNull(String wsPath) {
+    return projects.get(wsPath);
+  }
 
-  RegisteredProject removeOrNull(String wsPath);
+  public RegisteredProject put(ProjectConfig config, boolean updated, boolean detected)
+      throws ServerException {
+    String wsPath = config.getPath();
+    RegisteredProject project = registeredProjectFactory.create(wsPath, config, updated, detected);
+    projects.put(wsPath, project);
+    return project;
+  }
 
-  boolean isRegistered(String path);
+  public RegisteredProject put(String wsPath, boolean updated, boolean detected)
+      throws ServerException {
+    RegisteredProject project = registeredProjectFactory.create(wsPath, null, updated, detected);
+    projects.put(wsPath, project);
+    return project;
+  }
+
+  public Optional<RegisteredProject> remove(String wsPath) {
+    return Optional.ofNullable(projects.remove(wsPath));
+  }
+
+  public RegisteredProject removeOrNull(String wsPath) {
+    return projects.remove(wsPath);
+  }
+
+  public boolean isRegistered(String path) {
+    return projects.containsKey(path);
+  }
 }
