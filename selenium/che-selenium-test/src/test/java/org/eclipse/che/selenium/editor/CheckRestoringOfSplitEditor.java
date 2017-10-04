@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.selenium.editor;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -23,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -59,6 +58,7 @@ public class CheckRestoringOfSplitEditor {
   @Inject private CodenvyEditor editor;
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -80,8 +80,6 @@ public class CheckRestoringOfSplitEditor {
   @Test
   public void checkRestoringStateSplittedEditor() throws IOException {
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     splitEditorAndOpenFiles();
     setPositionsForSplittedEditor();
 
@@ -89,7 +87,8 @@ public class CheckRestoringOfSplitEditor {
     if (popupDialogsBrowser.isAlertPresent()) {
       popupDialogsBrowser.acceptAlert();
     }
-    ide.driver().navigate().refresh();
+
+    seleniumWebDriver.navigate().refresh();
     checkSplitdEditorAfterRefreshing(
         1, nameJavaClass.split("\\.")[0], expectedText.get(0), cursorPositionForJavaFile);
     checkSplitdEditorAfterRefreshing(
@@ -107,9 +106,11 @@ public class CheckRestoringOfSplitEditor {
 
     editor.waitActiveEditor();
     editor.selectTabByName(nameOfEditorTab);
-    editor.waitSpecifiedValueForLineAndChar(pair.first, pair.second);
-    editor.waitTextInDefinedSplitEditor(
-        numOfEditor, REDRAW_UI_ELEMENTS_TIMEOUT_SEC, expectedTextAfterRefresh);
+    //    editor.waitSpecifiedValueForLineAndChar(pair.first, pair.second);
+    System.out.println("**");
+    System.out.println(expectedTextAfterRefresh);
+    System.out.println("**");
+    editor.waitTextInDefinedSplitEditor(numOfEditor, 10, expectedTextAfterRefresh);
   }
 
   private void splitEditorAndOpenFiles() {
@@ -121,7 +122,7 @@ public class CheckRestoringOfSplitEditor {
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.SPIT_HORISONTALLY);
     editor.selectTabByIndexEditorWindowAndOpenMenu(0, nameJavaClass.split("\\.")[0]);
     editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.SPLIT_VERTICALLY);
-    editor.selectTabByIndexEditorWindow(1, nameJavaClass.split("\\.")[0]);
+    //    editor.selectTabByIndexEditorWindow(1, nameJavaClass.split("\\.")[0]);
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + nameReadmeFile);
     editor.selectTabByIndexEditorWindow(2, nameJavaClass.split("\\.")[0]);
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + namePomFile);
