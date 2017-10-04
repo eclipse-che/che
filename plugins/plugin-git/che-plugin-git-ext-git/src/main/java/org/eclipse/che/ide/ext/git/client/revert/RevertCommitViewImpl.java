@@ -116,7 +116,7 @@ public class RevertCommitViewImpl extends Window implements RevertCommitView {
         new Column<Revision, String>(new TextCell()) {
           @Override
           public String getValue(Revision revision) {
-            return revision.getId().substring(0, 8) + "...";
+            return revision.getId().substring(0, 8);
           }
         };
     Column<Revision, String> dateColumn =

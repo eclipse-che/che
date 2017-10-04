@@ -22,8 +22,6 @@
             <class name="org.eclipse.che.selenium.assistant.CheckFindActionFeatureInCheTest">
                 <methods>
                     <exclude name="checkSearchActionsForAllItemsTest"/>
-                </methods>
-                <methods>
                     <exclude name="checkSearchActionsForMenuItemsTest"/>
                 </methods>
             </class>
@@ -33,7 +31,7 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest"/>
-            <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForCharpLanguageTest">
+            <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForCSharpLanguageTest">
                 <methods>
                     <exclude name="checkLaunchingCodeserver"/>
                 </methods>
@@ -41,14 +39,8 @@
             <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest">
                 <methods>
                     <exclude name="shouldDeleteOpenedProjectByMenuFile"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDeleteOpenedProjectFromContextMenu"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDeleteProjectByContextMenu"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDeleteProjectByDeleteIcon"/>
                 </methods>
             </class>
@@ -77,25 +69,15 @@
             <class name="org.eclipse.che.selenium.debugger.DebugExternalClassTest">
                 <methods>
                     <exclude name="shouldDebugJreClass"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDebugMavenArtifactClassWithSources"/>
-                </methods>
-                <methods>
                     <exclude name="shouldHandleDebugOfMavenArtifactWithoutSources"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.debugger.InnerClassAndLambdaDebuggingTest">
                 <methods>
                     <exclude name="shouldDebugInnerClass"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDebugLambdaExpressions"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDebugMethodLocalInnerClass"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDebugStaticInnerClass"/>
                 </methods>
             </class>
@@ -103,16 +85,10 @@
             <class name="org.eclipse.che.selenium.debugger.NodeJsDebugTest">
                 <methods>
                     <exclude name="debugNodeJsTest"/>
+                    <exclude name="checkCleanStoragedAfterEndDebugSession"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.debugger.PhpProjectDebuggingTest">
-                <methods>
-                    <exclude name="shouldDebugCliPhpScriptFromFirstLine"/>
-                </methods>
-                <methods>
-                    <exclude name="shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.debugger.PhpProjectDebuggingTest"/>
             <class name="org.eclipse.che.selenium.debugger.StepIntoStepOverStepReturnWithChangeVariableTest"/>
             <class name="org.eclipse.che.selenium.debugger.ThreadDumpTest"/>
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteFeaturesInEditorTest"/>
@@ -120,8 +96,6 @@
             <class name="org.eclipse.che.selenium.editor.autocomplete.AutocompleteProposalJavaDocTest">
                 <methods>
                     <exclude name="shouldDisplayJavaDocOfJreClass"/>
-                </methods>
-                <methods>
                     <exclude name="shouldReflectChangesInJavaDoc"/>
                 </methods>
             </class>
@@ -159,29 +133,13 @@
             <class name="org.eclipse.che.selenium.editor.ContextMenuEditorTest">
                 <methods>
                     <exclude name="checkClose"/>
-                </methods>
-                <methods>
                     <exclude name="checkFind"/>
-                </methods>
-                <methods>
                     <exclude name="checkFormatContextMenu"/>
-                </methods>
-                <methods>
                     <exclude name="checkNaviFileStructure"/>
-                </methods>
-                <methods>
                     <exclude name="checkOpenDeclaration"/>
-                </methods>
-                <methods>
                     <exclude name="checkQuickDocumentation"/>
-                </methods>
-                <methods>
                     <exclude name="checkQuickFix"/>
-                </methods>
-                <methods>
                     <exclude name="checkRefactoring"/>
-                </methods>
-                <methods>
                     <exclude name="checkUndoRedo"/>
                 </methods>
             </class>
@@ -200,7 +158,11 @@
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithMultiModuleTest"/>
-            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSincePolicyTest"/>
+            <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSincePolicyTest">
+                <methods>
+                    <exclude name="checkFactoryAcceptingWithSincePolicy"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSvnCVSTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckFactoryWithUntilPolicyTest"/>
             <class name="org.eclipse.che.selenium.factory.CheckOpenFileFeatureTest"/>
@@ -243,7 +205,14 @@
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
             <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
             <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
-            <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
+            <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest">
+                <methods>
+                    <exclude name="createNewLocalBranchTest"/>
+                </methods>
+                <methods>
+                    <exclude name="deleteLocalBranch"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest">
                 <methods>
                     <exclude name="fetchUpdatesAndMergeRemoteBranch"/>
@@ -258,8 +227,6 @@
             <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest">
                 <methods>
                     <exclude name="checkImportProjectSubmoduleBySshUrl"/>
-                </methods>
-                <methods>
                     <exclude name="checkImportProjectSubmoduleFromGithub"/>
                 </methods>
             </class>
@@ -287,14 +254,13 @@
                     <exclude name="pullConflictsTest"/>
                 </methods>
             </class>
+            <class name="org.eclipse.che.selenium.git.RevertCommitTest"/>
             <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.CheckBasicFunctionalityInCommandsExplorerTest">
                 <methods>
                     <exclude name="shouldCreateAndRunBuildCommand"/>
-                </methods>
-                <methods>
                     <exclude name="shouldCreateDifferentTypesCommandsInDifferentGoals"/>
                 </methods>
             </class>
@@ -314,14 +280,9 @@
             <class name="org.eclipse.che.selenium.mavenplugin.CheckMavenPluginTest">
                 <methods>
                     <exclude name="excludeIncludeModules"/>
-                </methods>
-                <methods>
+                    <exclude name="shouldAccessClassCreatedInAnotherModule"/>
                     <exclude name="shouldAccessClassCreatedInAnotherModuleAfterIncludingModule"/>
-                </methods>
-                <methods>
                     <exclude name="mavenStatusBarShouldDisplayResolvingProjectMessage"/>
-                </methods>
-                <methods>
                     <exclude name="shouldExecuteCommandAndWaitTextInConsole"/>
                 </methods>
             </class>
@@ -331,8 +292,6 @@
             <class name="org.eclipse.che.selenium.miscellaneous.CheckRestoringWorkspaceAfterStoppingWsAgentProcess">
                 <methods>
                     <exclude name="checkRestoreIdeItems"/>
-                </methods>
-                <methods>
                     <exclude name="checkRestoreWsAgentByApi"/>
                 </methods>
             </class>
@@ -345,7 +304,9 @@
             <class name="org.eclipse.che.selenium.miscellaneous.FileStructureNodesTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.FindTextFeatureTest">
                 <methods>
+                    <exclude name="checkFindTextBasic"/>
                     <exclude name="checkFindByFileMask"/>
+                    <exclude name="checkFindIntoSelectedPath"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.miscellaneous.FindUsagesBaseOperationTest"/>
@@ -398,14 +359,11 @@
                     <exclude name="shouldExecuteJUnit4MethodWithDifferentStatuses"/>
                 </methods>
             </class>
+            <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginJunit4CheckRunSuitesAndScopesTest"/>
             <class name="org.eclipse.che.selenium.testrunner.JavaTestPluginTestNgTest">
                 <methods>
                     <exclude name="shouldExecuteTestClassSuccessfully"/>
-                </methods>
-                <methods>
                     <exclude name="shouldExecuteTestMethodsSuccessfully"/>
-                </methods>
-                <methods>
                     <exclude name="shouldExecuteAlltets"/>
                 </methods>
             </class>
@@ -447,17 +405,9 @@
             <class name="org.eclipse.che.selenium.projectexplorer.DeleteProjectsTest">
                 <methods>
                     <exclude name="shouldDeleteOpenedProjectByMenuFile"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDeleteOpenedProjectFromContextMenu"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDeleteProjectByContextMenu"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDeleteProjectByDeleteIcon"/>
-                </methods>
-                <methods>
                     <exclude name="shouldDeleteProjectByMenuFile"/>
                 </methods>
             </class>
@@ -466,8 +416,11 @@
                     <exclude name="transitiveDependencyTest"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest"/>
-            <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest"/>
+            <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest">
+                <methods>
+                    <exclude name="checkUpdateLibraryAfterChangingDependencyTest"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.projectexplorer.FileNotExistIntoEditorAfterDeleteTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.FileOpenedAfterCreationTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.JustCreatedFileNotExistIntoEditorAfterDeleteTest">
@@ -512,37 +465,19 @@
             <class name="org.eclipse.che.selenium.refactor.packages.RenamePackageSpringTest">
                 <methods>
                     <exclude name="checkRenamePackageSpringApp"/>
-                </methods>
-                <methods>
                     <exclude name="checkRenamePackageWithMainMethod"/>
-                </methods>
-                <methods>
                     <exclude name="checkTest3"/>
-                </methods>
-                <methods>
                     <exclude name="checkTest4"/>
-                </methods>
-                <methods>
                     <exclude name="checkTestDisableImport11"/>
-                </methods>
-                <methods>
                     <exclude name="checkTestHierarchical9_1"/>
                 </methods>
             </class>
             <class name="org.eclipse.che.selenium.refactor.packages.RenamePackageTest">
                 <methods>
                     <exclude name="checkTest3"/>
-                </methods>
-                <methods>
                     <exclude name="checkTest4"/>
-                </methods>
-                <methods>
                     <exclude name="checkTestDisableImport11"/>
-                </methods>
-                <methods>
                     <exclude name="checkTestHierarchical9_1"/>
-                </methods>
-                <methods>
                     <exclude name="checkTestPackageRenameWithResource12"/>
                 </methods>
             </class>
@@ -550,7 +485,11 @@
             <class name="org.eclipse.che.selenium.refactor.parameters.RenameParametersTest"/>
             <class name="org.eclipse.che.selenium.refactor.preview.CheckTreeInRefactorPanelTest"/>
             <class name="org.eclipse.che.selenium.refactor.preview.PreviewRefactoringTest"/>
-            <class name="org.eclipse.che.selenium.refactor.types.GenericsTest"/>
+            <class name="org.eclipse.che.selenium.refactor.types.GenericsTest">
+                <methods>
+                    <exclude name="testGenerics2"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.refactor.types.IllegalTypeNameTest"/>
             <class name="org.eclipse.che.selenium.refactor.types.RenameTypeTest"/>
             <class name="org.eclipse.che.selenium.refactor.types.TestAnnotationsTest"/>
@@ -579,7 +518,11 @@
                     <exclude name="updateToRevisionTest"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.swagger.SwaggerTest"/>
+            <class name="org.eclipse.che.selenium.swagger.SwaggerTest">
+                <methods>
+                    <exclude name="checkNameProjectTest"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.workspaces.CheckStopStartWsTest"/>
             <class name="org.eclipse.che.selenium.workspaces.CreateWorkspaceOnDashboardTest"/>
             <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRefreshTest"/>
@@ -591,7 +534,11 @@
             <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
             <class name="org.eclipse.che.selenium.workspaces.SnapshotTest"/>
             <class name="org.eclipse.che.selenium.workspaces.WorkingWithJavaMySqlStackTest"/>
-            <class name="org.eclipse.che.selenium.workspaces.WorkingWithNodeWsTest"/>
+            <class name="org.eclipse.che.selenium.workspaces.WorkingWithNodeWsTest">
+                <methods>
+                    <exclude name="checkNodeJsWsAndRunApp"/>
+                </methods>
+            </class>
             <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
         </classes>
     </test>
