@@ -16,7 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.TIMEOUT_30_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -196,7 +196,7 @@ public class ProjectExplorer {
    * @param libraryName name of library
    */
   public void waitLibraryIsPresent(String libraryName) {
-    new WebDriverWait(seleniumWebDriver, TIMEOUT_30_SEC)
+    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(
             ExpectedConditions.presenceOfElementLocated(
                 By.xpath(String.format("//div[@synthetic='true'and @name='%s']", libraryName))));
@@ -208,7 +208,7 @@ public class ProjectExplorer {
    * @param libraryName name of library
    */
   public void waitLibraryIsNotPresent(String libraryName) {
-    new WebDriverWait(seleniumWebDriver, TIMEOUT_30_SEC)
+    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath(String.format("//div[@synthetic='true'and @name='%s']", libraryName))));
@@ -475,7 +475,7 @@ public class ProjectExplorer {
 
   /** wait for context menu. */
   public void waitContextMenu() {
-    new WebDriverWait(seleniumWebDriver, TIMEOUT_30_SEC)
+    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.CONTEXT_MENU_ID)));
   }
 
