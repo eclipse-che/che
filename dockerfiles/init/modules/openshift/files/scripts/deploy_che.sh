@@ -24,6 +24,10 @@ set -e
 # ----------------
 # helper functions
 # ----------------
+
+# append_after_match allows to append content after matching line
+# this is needed to append content of yaml files
+# first arg is mathing string, second string to insert after match
 append_after_match() {
     while IFS= read -r line
     do
