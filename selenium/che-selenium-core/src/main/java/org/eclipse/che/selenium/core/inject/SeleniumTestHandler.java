@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.core.inject;
 
+import static com.google.inject.Guice.createInjector;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
@@ -27,7 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
 import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
@@ -137,7 +138,7 @@ public abstract class SeleniumTestHandler
   public void onStart(ISuite suite) {
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 
-    Injector injector = createParentInjector();
+    Injector injector = createInjector(getParentModules());
     injector.injectMembers(this);
 
     suite.setParentInjector(injector);
@@ -341,11 +342,11 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  /** Returns parent injector. */
-  public abstract Injector createParentInjector();
+  /** Returns list of parent modules */
+  @NotNull
+  public abstract List<Module> getParentModules();
 
   /** Returns list of child modules */
-  public List<Module> getChildModules() {
-    return Collections.emptyList();
-  }
+  @NotNull
+  public abstract List<Module> getChildModules();
 }
