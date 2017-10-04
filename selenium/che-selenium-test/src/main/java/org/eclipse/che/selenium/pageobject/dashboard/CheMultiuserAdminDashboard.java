@@ -35,10 +35,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * @author Dmytro Nochevnov
  */
 @Singleton
-public class CodenvyAdminDashboard extends Dashboard {
+public class CheMultiuserAdminDashboard extends Dashboard {
 
   @Inject
-  public CodenvyAdminDashboard(
+  public CheMultiuserAdminDashboard(
       SeleniumWebDriver seleniumWebDriver,
       TestUser defaultUser,
       TestIdeUrlProvider testIdeUrlProvider,

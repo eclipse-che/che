@@ -24,7 +24,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
 import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
-import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
@@ -123,9 +123,9 @@ public class CheSeleniumSuiteModule extends AbstractModule {
 
   @Provides
   @Named("admin")
-  public OnpremTestOrganizationServiceClient getAdminOrganizationServiceClient(
+  public TestOrganizationServiceClient getAdminOrganizationServiceClient(
       TestApiEndpointUrlProvider apiEndpointUrlProvider,
       TestCheAdminHttpJsonRequestFactory requestFactory) {
-    return new OnpremTestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
+    return new TestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
   }
 }

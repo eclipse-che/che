@@ -18,7 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
-import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -52,7 +52,7 @@ public class RenameOrganizationTest {
 
   @Inject
   @Named("admin")
-  private OnpremTestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient organizationServiceClient;
 
   @Inject private TestUser testUser;
   @Inject private AdminTestUser adminTestUser;

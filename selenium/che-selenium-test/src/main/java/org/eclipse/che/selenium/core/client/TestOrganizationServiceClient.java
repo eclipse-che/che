@@ -28,15 +28,14 @@ import org.slf4j.LoggerFactory;
 
 /** This util is handling the requests to Organization API. */
 @Singleton
-public class OnpremTestOrganizationServiceClient {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(OnpremTestOrganizationServiceClient.class);
+public class TestOrganizationServiceClient {
+  private static final Logger LOG = LoggerFactory.getLogger(TestOrganizationServiceClient.class);
 
   private final String apiEndpoint;
   private final HttpJsonRequestFactory requestFactory;
 
   @Inject
-  public OnpremTestOrganizationServiceClient(
+  public TestOrganizationServiceClient(
       TestApiEndpointUrlProvider apiEndpointUrlProvider, HttpJsonRequestFactory requestFactory) {
     this.apiEndpoint = apiEndpointUrlProvider.get().toString();
     this.requestFactory = requestFactory;

@@ -17,7 +17,7 @@ import com.google.inject.name.Named;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
-import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -47,7 +47,7 @@ public class OrganizationTest {
 
   @Inject
   @Named("admin")
-  private OnpremTestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient organizationServiceClient;
 
   @Inject private Dashboard dashboard;
   @Inject private TestUser testUser1;

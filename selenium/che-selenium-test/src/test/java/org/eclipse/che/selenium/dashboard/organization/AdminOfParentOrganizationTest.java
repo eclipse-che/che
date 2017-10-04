@@ -26,13 +26,13 @@ import com.google.inject.name.Named;
 import java.util.ArrayList;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
-import org.eclipse.che.selenium.core.client.OnpremTestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
-import org.eclipse.che.selenium.pageobject.dashboard.CodenvyAdminDashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
@@ -57,14 +57,14 @@ public class AdminOfParentOrganizationTest {
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
-  @Inject private CodenvyAdminDashboard dashboard;
+  @Inject private CheMultiuserAdminDashboard dashboard;
   @Inject private TestIdeUrlProvider testIdeUrlProvider;
   @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
   @Inject private TestUser testUser;
 
   @Inject
   @Named("admin")
-  private OnpremTestOrganizationServiceClient organizationServiceClient;
+  private TestOrganizationServiceClient organizationServiceClient;
 
   @Inject private AdminTestUser adminTestUser;
 
