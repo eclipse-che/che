@@ -126,6 +126,7 @@ public class PhpProjectDebuggingTest {
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     projectExplorer.invokeCommandWithContextMenu(
         ProjectExplorer.CommandsGoal.COMMON, PROJECT, DEBUG_PHP_SCRIPT_COMMAND_NAME);
+
     debugPanel.openDebugPanel();
 
     // then
@@ -136,6 +137,7 @@ public class PhpProjectDebuggingTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerButtonsPanel.RESUME_BTN_ID);
 
     // then
+    editor.waitAcitveBreakpoint(14);
     editor.waitTabFileWithSavedStatus("lib.php");
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
@@ -180,6 +182,7 @@ public class PhpProjectDebuggingTest {
     debugPanel.openDebugPanel();
 
     // then
+    editor.waitAcitveBreakpoint(14);
     editor.waitTabFileWithSavedStatus("lib.php");
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
