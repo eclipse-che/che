@@ -1276,6 +1276,8 @@
                             <codeserverArgs>
                                 <arg>-noincremental</arg>
                                 <arg>-noprecompile</arg>
+                                <arg>-bindAddress</arg>
+                                <arg>0.0.0.0</arg>
                             </codeserverArgs>
                         </configuration>
                     </plugin>
