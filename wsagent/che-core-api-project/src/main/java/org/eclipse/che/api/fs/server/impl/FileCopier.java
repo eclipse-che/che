@@ -10,9 +10,6 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustNotExist;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,10 +26,10 @@ public class FileCopier {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileCopier.class);
 
-  private final FsPathResolver pathResolver;
+  private final SimpleFsPathResolver pathResolver;
 
   @Inject
-  public FileCopier(FsPathResolver pathResolver) {
+  public FileCopier(SimpleFsPathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
 
@@ -40,13 +37,6 @@ public class FileCopier {
       throws NotFoundException, ConflictException, ServerException {
     Path srcFsPath = pathResolver.toFsPath(srcWsPath);
     Path dstFsPath = pathResolver.toFsPath(dstWsPath);
-
-    mustExist(srcFsPath);
-    mustNotExist(dstFsPath);
-
-    Path fileName = srcFsPath.getFileName();
-
-    mustNotExist(dstFsPath.resolve(fileName));
 
     try {
       Files.copy(srcFsPath, dstFsPath);

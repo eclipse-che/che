@@ -10,54 +10,25 @@
  */
 package org.eclipse.che.api.watcher.server;
 
-import static org.eclipse.che.api.watcher.server.FileWatcherUtils.toNormalPath;
-
-import com.google.inject.Inject;
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.function.Consumer;
-import javax.inject.Named;
 import javax.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/** Facade for all dynamic file watcher system related operations. */
-@Singleton
-public class FileWatcherManager {
-  public static final Consumer<String> EMPTY_CONSUMER = it -> {};
+/**
+ * Facade for all dynamic file watcher system related operations.
+ */
+public interface FileWatcherManager {
 
-  private static final Logger LOG = LoggerFactory.getLogger(FileWatcherManager.class);
+  /**
+   * Suspend dynamic file watching system. If already suspended does nothing
+   */
+  void suspend();
 
-  private final FileWatcherByPathValue fileWatcherByPathValue;
-  private final FileWatcherByPathMatcher fileWatcherByPathMatcher;
-  private final FileWatcherService service;
-  private final Path root;
-  private final FileWatcherExcludePatternsRegistry excludePatternsRegistry;
-
-  @Inject
-  public FileWatcherManager(
-      @Named("che.user.workspaces.storage") File root,
-      FileWatcherByPathValue watcherByPathValue,
-      FileWatcherByPathMatcher watcherByPathMatcher,
-      FileWatcherService service,
-      FileWatcherExcludePatternsRegistry excludePatternsRegistry) {
-    this.fileWatcherByPathMatcher = watcherByPathMatcher;
-    this.fileWatcherByPathValue = watcherByPathValue;
-    this.service = service;
-    this.root = root.toPath().normalize().toAbsolutePath();
-    this.excludePatternsRegistry = excludePatternsRegistry;
-  }
-
-  /** Suspend dynamic file watching system. If already suspended does nothing */
-  public void suspend() {
-    service.suspend();
-  }
-
-  /** Resume dynamic file watching system. If already resumed does nothing */
-  public void resume() {
-    service.resume();
-  }
+  /**
+   * Resume dynamic file watching system. If already resumed does nothing
+   */
+  void resume();
 
   /**
    * Start watching a file system item by specifying its path. If path points to a file than only
@@ -67,23 +38,19 @@ public class FileWatcherManager {
    *
    * <p>To react on events related to an aforementioned item you can specify {@link Consumer} for
    * create, modify and delete event correspondingly. It is possible to omit one ore more event
-   * consumers if it is needed by using {@link this#EMPTY_CONSUMER} stub.
+   * consumers if it is needed by using empty consumer stub.
    *
    * <p>On successful start you receive a registration identifier to distinguish your specific
    * consumer set as there can be registered arbitrary number of consumers to a single path.
    *
-   * @param path absolute internal path
+   * @param wsPath absolute workspace path
    * @param create consumer for create event
    * @param modify consumer for modify event
    * @param delete consumer for delete event
    * @return operation set identifier
    */
-  public int registerByPath(
-      String path, Consumer<String> create, Consumer<String> modify, Consumer<String> delete) {
-    LOG.debug("Registering operations to an item with path '{}'", path);
-
-    return fileWatcherByPathValue.watch(toNormalPath(root, path), create, modify, delete);
-  }
+  int registerByPath(
+      String wsPath, Consumer<String> create, Consumer<String> modify, Consumer<String> delete);
 
   /**
    * Stops watching a file system item. More accurately it cancels registration of an operation set
@@ -93,12 +60,7 @@ public class FileWatcherManager {
    *
    * @param id operation set identifier
    */
-  public void unRegisterByPath(int id) {
-    LOG.debug(
-        "Canceling registering of an operation with id '{}' registered to an item with path", id);
-
-    fileWatcherByPathValue.unwatch(id);
-  }
+  void unRegisterByPath(int id);
 
   /**
    * Start watching a file system item by specifying its path matcher. Any item on file system that
@@ -108,26 +70,22 @@ public class FileWatcherManager {
    *
    * <p>To react on events related to an aforementioned item you can specify {@link Consumer} for
    * create, modify and delete event correspondingly. It is possible to omit one ore more event
-   * consumers if it is needed by using {@link this#EMPTY_CONSUMER} stub.
+   * consumers if it is needed by using empty consumer stub.
    *
    * <p>On successful start you receive a registration identifier to distinguish specific consumer
    * sets as there can be registered arbitrary number of consumers to a single path matcher.
    *
-   * @param matcher absolute internal path
+   * @param matcher absolute workspace path
    * @param create consumer for create event
    * @param modify consumer for modify event
    * @param delete consumer for delete event
    * @return operation set identifier
    */
-  public int registerByMatcher(
+  int registerByMatcher(
       PathMatcher matcher,
       Consumer<String> create,
       Consumer<String> modify,
-      Consumer<String> delete) {
-    LOG.debug("Registering operations to an item with matcher '{}'", matcher);
-
-    return fileWatcherByPathMatcher.watch(matcher, create, modify, delete);
-  }
+      Consumer<String> delete);
 
   /**
    * Stops watching all file system items registered to corresponding path matcher. More accurately
@@ -138,11 +96,7 @@ public class FileWatcherManager {
    *
    * @param id operation set identifier
    */
-  public void unRegisterByMatcher(int id) {
-    LOG.debug("Canceling registering of an operation with id '{}' registered to path matcher", id);
-
-    fileWatcherByPathMatcher.unwatch(id);
-  }
+  void unRegisterByMatcher(int id);
 
   /**
    * Registers a matcher to skip tracking of creation, modification and deletion events for
@@ -150,9 +104,7 @@ public class FileWatcherManager {
    *
    * @param exclude matcher's pattern
    */
-  public void addExcludeMatcher(PathMatcher exclude) {
-    excludePatternsRegistry.addExcludeMatcher(exclude);
-  }
+  void addExcludeMatcher(PathMatcher exclude);
 
   /**
    * Removes a matcher from excludes to resume tracking of corresponding entries creation,
@@ -160,9 +112,7 @@ public class FileWatcherManager {
    *
    * @param exclude matcher's pattern
    */
-  public void removeExcludeMatcher(PathMatcher exclude) {
-    excludePatternsRegistry.removeExcludeMatcher(exclude);
-  }
+  void removeExcludeMatcher(PathMatcher exclude);
 
   /**
    * Adds entries to includes by path matcher for tracking creation, modification and deletion
@@ -171,9 +121,7 @@ public class FileWatcherManager {
    *
    * @param matcher matcher's pattern
    */
-  public void addIncludeMatcher(PathMatcher matcher) {
-    excludePatternsRegistry.addIncludeMatcher(matcher);
-  }
+  void addIncludeMatcher(PathMatcher matcher);
 
   /**
    * Removes entries from includes by path matcher. Note: use this method to remove some entries
@@ -181,9 +129,7 @@ public class FileWatcherManager {
    *
    * @param matcher matcher's pattern
    */
-  public void removeIncludeMatcher(PathMatcher matcher) {
-    excludePatternsRegistry.removeIncludeMatcher(matcher);
-  }
+  void removeIncludeMatcher(PathMatcher matcher);
 
   /**
    * Checks if specified path is within excludes
@@ -191,7 +137,5 @@ public class FileWatcherManager {
    * @param path path being examined
    * @return true if path is within excludes, false otherwise
    */
-  public boolean isExcluded(Path path) {
-    return excludePatternsRegistry.isExcluded(path);
-  }
+  boolean isExcluded(Path path);
 }

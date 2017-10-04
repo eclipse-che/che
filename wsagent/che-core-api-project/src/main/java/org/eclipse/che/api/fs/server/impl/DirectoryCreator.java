@@ -10,9 +10,6 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustNotExist;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,11 +28,11 @@ public class DirectoryCreator {
 
   private static final Logger LOG = LoggerFactory.getLogger(DirectoryCreator.class);
 
-  private final FsPathResolver pathResolver;
+  private final SimpleFsPathResolver pathResolver;
   private final DirectoryPacker directoryPacker;
 
   @Inject
-  public DirectoryCreator(FsPathResolver pathResolver, DirectoryPacker directoryPacker) {
+  public DirectoryCreator(SimpleFsPathResolver pathResolver, DirectoryPacker directoryPacker) {
     this.pathResolver = pathResolver;
     this.directoryPacker = directoryPacker;
   }
@@ -43,15 +40,10 @@ public class DirectoryCreator {
   public void create(String wsPath) throws NotFoundException, ConflictException, ServerException {
     Path fsPath = pathResolver.toFsPath(wsPath);
 
-    mustExist(fsPath.getParent());
-    mustNotExist(fsPath);
-
     try {
       Files.createDirectory(fsPath);
     } catch (IOException e) {
-      String msg = "Failed to create directory: " + wsPath;
-      LOG.error(msg, e);
-      throw new ServerException(msg, e);
+      throw new ServerException("Failed to create directory: " + wsPath, e);
     }
   }
 
@@ -64,8 +56,8 @@ public class DirectoryCreator {
       return true;
     } catch (IOException e) {
       LOG.error("Failed to quietly create directory: " + wsPath, e);
+      return false;
     }
-    return false;
   }
 
   public void create(String wsPath, Iterator<FileItem> formData)
@@ -90,9 +82,7 @@ public class DirectoryCreator {
     try {
       directoryPacker.unzip(wsPath, contentItem.getInputStream());
     } catch (IOException e) {
-      String msg = "Failed to create directory: " + wsPath;
-      LOG.error(msg, e);
-      throw new ServerException(msg, e);
+      throw new ServerException("Failed to create directory: " + wsPath, e);
     }
   }
 

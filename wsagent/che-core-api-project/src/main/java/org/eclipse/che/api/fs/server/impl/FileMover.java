@@ -10,12 +10,8 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustNotExist;
-
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
@@ -27,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class FileMover {
+
   private static final Logger LOG = LoggerFactory.getLogger(FileMover.class);
 
   private final FsPathResolver fsPathResolver;
@@ -38,38 +35,20 @@ public class FileMover {
 
   public void move(String srcWsPath, String dstWsPath)
       throws NotFoundException, ConflictException, ServerException {
-
-    Path srcFsPath = fsPathResolver.toFsPath(srcWsPath);
-    Path dstFsPath = fsPathResolver.toFsPath(dstWsPath);
-
-    mustExist(srcFsPath);
-    mustNotExist(dstFsPath);
-
     try {
-      Files.move(srcFsPath, dstFsPath);
+      Files.move(fsPathResolver.toFsPath(srcWsPath), fsPathResolver.toFsPath(dstWsPath));
     } catch (IOException e) {
-      String msg = "Failed to move file: " + srcWsPath;
-      LOG.error(msg);
-      throw new ServerException(msg, e);
+      throw new ServerException("Failed to move file: " + srcWsPath, e);
     }
   }
 
   public boolean moveQuietly(String srcWsPath, String dstWsPath) {
-    Path srcFsPath = fsPathResolver.toFsPath(srcWsPath);
-    Path dstFsPath = fsPathResolver.toFsPath(dstWsPath);
-
-    if (!srcFsPath.toFile().exists()) {
-      return false;
-    }
-
     try {
-      Files.createDirectories(dstFsPath.getParent());
-
-      Files.move(srcFsPath, dstFsPath);
+      Files.createDirectories(fsPathResolver.toFsPath(dstWsPath).getParent());
+      Files.move(fsPathResolver.toFsPath(srcWsPath), fsPathResolver.toFsPath(dstWsPath));
       return true;
     } catch (IOException e) {
       LOG.error("Failed to move file: {}", srcWsPath);
-
       return false;
     }
   }

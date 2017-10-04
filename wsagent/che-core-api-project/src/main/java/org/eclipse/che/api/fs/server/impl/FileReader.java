@@ -28,10 +28,10 @@ public class FileReader {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileReader.class);
 
-  private final FsPathResolver pathResolver;
+  private final SimpleFsPathResolver pathResolver;
 
   @Inject
-  public FileReader(FsPathResolver pathResolver) {
+  public FileReader(SimpleFsPathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
 
@@ -72,14 +72,14 @@ public class FileReader {
       throws NotFoundException, ServerException {
     Path fsPath = pathResolver.toFsPath(wsPath);
 
-    FsConditionChecker.mustExist(fsPath);
+    if (!fsPath.toFile().exists()) {
+      throw new NotFoundException("FS item '" + fsPath.toString() + "' does not exist");
+    }
 
     try {
       return function.apply(fsPath);
     } catch (IOException e) {
-      String msg = "Can't read content for file: " + fsPath;
-      LOG.error(msg);
-      throw new ServerException(msg, e);
+      throw new ServerException("Can't read content for file: " + fsPath, e);
     }
   }
 }

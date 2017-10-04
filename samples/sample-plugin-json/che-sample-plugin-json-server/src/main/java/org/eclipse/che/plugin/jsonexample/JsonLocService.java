@@ -23,8 +23,8 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.FsPathResolver;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.api.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.project.server.ProjectManager;
 
 /** Service for counting lines of code within all JSON files in a given project. */
 @Path("json-example/{ws-id}")

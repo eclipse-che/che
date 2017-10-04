@@ -10,9 +10,6 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustNotExist;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,11 +46,6 @@ public class DirectoryMover {
       throws NotFoundException, ConflictException, ServerException {
     Path srcFsPath = fsPathResolver.toFsPath(srcWsPath);
     Path dstFsPath = fsPathResolver.toFsPath(dstWsPath);
-
-    mustExist(srcFsPath);
-    mustExist(dstFsPath.getParent());
-    mustNotExist(dstFsPath);
-
     try {
       FileUtils.moveDirectory(srcFsPath.toFile(), dstFsPath.toFile());
     } catch (IOException e) {

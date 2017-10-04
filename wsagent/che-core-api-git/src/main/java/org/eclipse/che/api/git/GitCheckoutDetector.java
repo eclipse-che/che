@@ -13,7 +13,6 @@ package org.eclipse.che.api.git;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static java.util.regex.Pattern.compile;
-import static org.eclipse.che.api.watcher.server.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type.BRANCH;
 import static org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type.REVISION;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -34,10 +33,10 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.watcher.server.FileWatcherManager;
-import org.eclipse.che.api.project.server.api.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 
 public class GitCheckoutDetector {
@@ -107,7 +106,8 @@ public class GitCheckoutDetector {
   }
 
   private Consumer<String> deleteConsumer() {
-    return EMPTY_CONSUMER;
+    return it -> {
+    };
   }
 
   private Consumer<String> fsEventConsumer() {

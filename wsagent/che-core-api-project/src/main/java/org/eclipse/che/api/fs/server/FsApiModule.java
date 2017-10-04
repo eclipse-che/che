@@ -11,13 +11,16 @@
 package org.eclipse.che.api.fs.server;
 
 import com.google.inject.AbstractModule;
+import org.eclipse.che.api.fs.server.impl.SimpleFsDtoConverter;
+import org.eclipse.che.api.fs.server.impl.SimpleFsPathResolver;
+import org.eclipse.che.api.fs.server.impl.ValidatingFsManager;
 
 public class FsApiModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(FsManager.class).to(org.eclipse.che.api.fs.server.impl.FsManager.class);
-    bind(FsDtoConverter.class).to(org.eclipse.che.api.fs.server.impl.FsDtoConverter.class);
-    bind(FsPathResolver.class).to(org.eclipse.che.api.fs.server.impl.FsPathResolver.class);
+    bind(FsManager.class).to(ValidatingFsManager.class);
+    bind(FsDtoConverter.class).to(SimpleFsDtoConverter.class);
+    bind(FsPathResolver.class).to(SimpleFsPathResolver.class);
   }
 }

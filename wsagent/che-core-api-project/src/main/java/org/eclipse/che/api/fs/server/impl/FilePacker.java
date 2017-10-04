@@ -12,7 +12,6 @@ package org.eclipse.che.api.fs.server.impl;
 
 import static java.nio.file.Files.createTempFile;
 import static java.nio.file.Files.newInputStream;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,10 +36,10 @@ public class FilePacker {
 
   private static final Logger LOG = LoggerFactory.getLogger(FilePacker.class);
 
-  private final FsPathResolver pathResolver;
+  private final SimpleFsPathResolver pathResolver;
 
   @Inject
-  public FilePacker(FsPathResolver pathResolver) {
+  public FilePacker(SimpleFsPathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
 
@@ -110,8 +109,6 @@ public class FilePacker {
       Path fsPath = pathResolver.toFsPath(wsPath);
       File inFile = fsPath.toFile();
 
-      mustExist(fsPath);
-
       File outFile = createTempFile(fsPath.getFileName().toString(), ".zip").toFile();
 
       try (FileOutputStream fos = new FileOutputStream(outFile);
@@ -123,9 +120,7 @@ public class FilePacker {
       }
       return function.apply(outFile.toPath());
     } catch (IOException e) {
-      String msg = "Failed to zip file: " + wsPath;
-      LOG.error(msg);
-      throw new ServerException(msg, e);
+      throw new ServerException("Failed to zip file: " + wsPath, e);
     }
   }
 

@@ -10,9 +10,6 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustNotExist;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,28 +27,22 @@ class DirectoryCopier {
 
   private static final Logger LOG = LoggerFactory.getLogger(DirectoryCopier.class);
 
-  private final FsPathResolver pathResolver;
+  private final SimpleFsPathResolver pathResolver;
 
   @Inject
-  public DirectoryCopier(FsPathResolver pathResolver) {
+  public DirectoryCopier(SimpleFsPathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
 
   public void copy(String srcWsPath, String dstWsPath)
       throws NotFoundException, ConflictException, ServerException {
-    Path srcFsPath = pathResolver.toFsPath(srcWsPath);
-    Path dstFsPath = pathResolver.toFsPath(dstWsPath);
-
-    mustExist(srcFsPath);
-    mustExist(dstFsPath.getParent());
-    mustNotExist(dstFsPath);
 
     try {
-      FileUtils.copyDirectory(srcFsPath.toFile(), dstFsPath.toFile());
+      FileUtils.copyDirectory(
+          pathResolver.toFsPath(srcWsPath).toFile(),
+          pathResolver.toFsPath(dstWsPath).toFile());
     } catch (IOException e) {
-      String msg = "Failed to copy directory: " + srcWsPath;
-      LOG.error(msg, e);
-      throw new ServerException(msg, e);
+      throw new ServerException("Failed to copy directory: " + srcWsPath, e);
     }
   }
 

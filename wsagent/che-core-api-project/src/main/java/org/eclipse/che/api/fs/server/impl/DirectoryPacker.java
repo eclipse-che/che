@@ -13,7 +13,6 @@ package org.eclipse.che.api.fs.server.impl;
 import static java.nio.file.Files.createTempFile;
 import static java.nio.file.Files.newInputStream;
 import static java.nio.file.Files.readAllBytes;
-import static org.eclipse.che.api.fs.server.impl.FsConditionChecker.mustExist;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,10 +39,10 @@ public class DirectoryPacker {
 
   private static final Logger LOG = LoggerFactory.getLogger(DirectoryPacker.class);
 
-  private final FsPathResolver pathResolver;
+  private final SimpleFsPathResolver pathResolver;
 
   @Inject
-  public DirectoryPacker(FsPathResolver pathResolver) {
+  public DirectoryPacker(SimpleFsPathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
 
@@ -100,13 +99,13 @@ public class DirectoryPacker {
     try {
       Path fsPath = pathResolver.toFsPath(wsPath);
 
-      mustExist(fsPath);
+      if (!fsPath.toFile().exists()) {
+        throw new NotFoundException("FS item '" + fsPath.toString() + "' does not exist");
+      }
 
       unzipInternally(content, skipRoot, fsPath);
     } catch (IOException e) {
-      String msg = "Failed to unzip directory: " + wsPath;
-      LOG.error(msg, e);
-      throw new ServerException(msg, e);
+      throw new ServerException("Failed to unzip directory: " + wsPath, e);
     }
   }
 
@@ -123,7 +122,7 @@ public class DirectoryPacker {
       unzipInternally(content, skipRoot, fsPath);
       return true;
     } catch (IOException e) {
-      LOG.error("Failed to unzip directory: " + wsPath, e);
+      LOG.error("Failed to quietly unzip directory: " + wsPath, e);
       return false;
     }
   }
@@ -154,7 +153,9 @@ public class DirectoryPacker {
   private <R> R zipInternally(String wsPath, FunctionWithException<Path, R, IOException> function)
       throws ServerException, NotFoundException {
     Path fsPath = pathResolver.toFsPath(wsPath);
-    mustExist(fsPath);
+    if (!fsPath.toFile().exists()) {
+      throw new NotFoundException("FS item '" + fsPath.toString() + "' does not exist");
+    }
 
     try {
       File inFile = fsPath.toFile();
@@ -167,9 +168,7 @@ public class DirectoryPacker {
 
       return function.apply(outFile.toPath());
     } catch (IOException e) {
-      String message = "Failed to zip directory: " + wsPath;
-      LOG.error(message, e);
-      throw new ServerException(message, e);
+      throw new ServerException("Failed to zip directory: " + wsPath, e);
     }
   }
 
@@ -192,7 +191,7 @@ public class DirectoryPacker {
       R apply = function.apply(outFile.toPath());
       return Optional.of(apply);
     } catch (IOException e) {
-      LOG.error("Failed to zip directory: " + wsPath, e);
+      LOG.error("Failed to quietly zip directory: " + wsPath, e);
       return Optional.empty();
     }
   }

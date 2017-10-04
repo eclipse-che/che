@@ -10,19 +10,18 @@
  */
 package org.eclipse.che.plugin.jdb.server.util;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
-/** @author Anatolii Bazko */
+/**
+ * @author Anatolii Bazko
+ */
 public class ProjectApiUtils {
 
   private static final AtomicBoolean initialized = new AtomicBoolean();
 
-  /** Ensures that project api has been initialized only once. */
+  /**
+   * Ensures that project api has been initialized only once.
+   */
   public static void ensure() throws Exception {
     if (!initialized.get()) {
       synchronized (initialized) {
@@ -34,7 +33,9 @@ public class ProjectApiUtils {
     }
   }
 
-  /** Initialize project API for tests. */
+  /**
+   * Initialize project API for tests.
+   */
   private static void init() throws Exception {
     //    TestWorkspaceHolder workspaceHolder = new TestWorkspaceHolder(new ArrayList<>());
     //    File root = new File("target/test-classes/workspace");
@@ -93,31 +94,31 @@ public class ProjectApiUtils {
     //    JavaModelManager.getDeltaState().initializeRoots(true);
   }
 
-  private static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
-    private List<ProjectConfigDto> projects;
-
-    TestWorkspaceHolder(List<ProjectConfigDto> projects) {
-      super(null);
-      this.projects = projects;
-    }
-
-    @Override
-    public List<? extends ProjectConfig> getProjects() {
-      return projects;
-    }
-
-    @Override
-    public String getWorkspaceId() {
-      return "id";
-    }
-
-    @Override
-    protected void addProject(ProjectConfig project) throws ServerException {}
-
-    @Override
-    protected void updateProject(ProjectConfig project) throws ServerException {}
-
-    @Override
-    protected void removeProject(ProjectConfig project) throws ServerException {}
-  }
+//  private static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
+//    private List<ProjectConfigDto> projects;
+//
+//    TestWorkspaceHolder(List<ProjectConfigDto> projects) {
+//      super(null);
+//      this.projects = projects;
+//    }
+//
+//    @Override
+//    public List<? extends ProjectConfig> getProjects() {
+//      return projects;
+//    }
+//
+//    @Override
+//    public String getWorkspaceId() {
+//      return "id";
+//    }
+//
+//    @Override
+//    protected void addProject(ProjectConfig project) throws ServerException {}
+//
+//    @Override
+//    protected void updateProject(ProjectConfig project) throws ServerException {}
+//
+//    @Override
+//    protected void removeProject(ProjectConfig project) throws ServerException {}
+//  }
 }

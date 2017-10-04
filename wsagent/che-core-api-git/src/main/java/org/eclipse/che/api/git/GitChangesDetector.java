@@ -13,7 +13,6 @@ package org.eclipse.che.api.git;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.watcher.server.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.ADDED;
 import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.MODIFIED;
 import static org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto.Type.UNTRACKED;
@@ -33,11 +32,11 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.FsPathResolver;
-import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.api.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.shared.dto.event.GitChangeEventDto;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 
 /**
@@ -114,7 +113,8 @@ public class GitChangesDetector {
   }
 
   private Consumer<String> deleteConsumer() {
-    return EMPTY_CONSUMER;
+    return it -> {
+    };
   }
 
   private Consumer<String> fsEventConsumer() {

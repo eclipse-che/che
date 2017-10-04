@@ -25,22 +25,24 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.WatchService;
 import java.util.function.Consumer;
-import org.eclipse.che.api.project.server.EditorChangesTracker;
-import org.eclipse.che.api.project.server.EditorWorkingCopyManager;
-import org.eclipse.che.api.search.server.impl.DotCheExcludeMatcher;
-import org.eclipse.che.api.search.server.impl.DotNumberSignExcludeMatcher;
-import org.eclipse.che.api.search.server.impl.IndexedFileCreateConsumer;
-import org.eclipse.che.api.search.server.impl.IndexedFileDeleteConsumer;
-import org.eclipse.che.api.search.server.impl.IndexedFileUpdateConsumer;
-import org.eclipse.che.api.search.server.impl.MediaTypesExcludeMatcher;
+import org.eclipse.che.api.search.server.excludes.DotCheExcludeMatcher;
+import org.eclipse.che.api.search.server.excludes.DotNumberSignExcludeMatcher;
+import org.eclipse.che.api.search.server.excludes.MediaTypesExcludeMatcher;
 import org.eclipse.che.api.watcher.server.detectors.EditorFileOperationHandler;
 import org.eclipse.che.api.watcher.server.detectors.EditorFileTracker;
 import org.eclipse.che.api.watcher.server.detectors.ProjectTreeTracker;
+import org.eclipse.che.api.watcher.server.impl.FileTreeWalker;
+import org.eclipse.che.api.watcher.server.impl.FileWatcherByPathMatcher;
+import org.eclipse.che.api.watcher.server.impl.FileWatcherIgnoreFileTracker;
+import org.eclipse.che.api.watcher.server.impl.SimpleFileWatcherManager;
 
 public class FileWatcherApiModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(FileWatcherManager.class).to(SimpleFileWatcherManager.class);
+    bind(FileWatcherIgnoreFileTracker.class).asEagerSingleton();
+
     Multibinder<PathMatcher> fileWatcherExcludes =
         newSetBinder(
             binder(), PathMatcher.class, Names.named("che.user.workspaces.storage.excludes"));
@@ -48,65 +50,53 @@ public class FileWatcherApiModule extends AbstractModule {
     fileWatcherExcludes.addBinding().to(DotCheExcludeMatcher.class);
     fileWatcherExcludes.addBinding().to(DotNumberSignExcludeMatcher.class);
 
-    bind(EditorChangesTracker.class).asEagerSingleton();
-    bind(EditorWorkingCopyManager.class).asEagerSingleton();
-    bind(FileWatcherIgnoreFileTracker.class).asEagerSingleton();
-
     configureVfsEvent();
     configureTreeWalker();
+    configureFileWatcherManagerPathMatcher();
   }
 
   private void configureTreeWalker() {
     bind(FileTreeWalker.class).asEagerSingleton();
 
-    Multibinder<Consumer<Path>> directoryUpdateConsumers =
-        newSetBinder(
-            binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.directory.update"));
-    Multibinder<Consumer<Path>> directoryCreateConsumers =
-        newSetBinder(
-            binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.directory.create"));
-    Multibinder<Consumer<Path>> directoryDeleteConsumers =
-        newSetBinder(
-            binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.directory.delete"));
-    Multibinder<PathMatcher> directoryExcludes =
-        newSetBinder(
-            binder(), new TypeLiteral<PathMatcher>() {}, Names.named("che.fs.directory.excludes"));
-
-    Multibinder<Consumer<Path>> fileUpdateConsumers =
-        newSetBinder(
-            binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.update"));
-    Multibinder<Consumer<Path>> fileCreateConsumers =
-        newSetBinder(
-            binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.create"));
-    Multibinder<Consumer<Path>> fileDeleteConsumers =
-        newSetBinder(
-            binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.delete"));
-    Multibinder<PathMatcher> fileExcludes =
-        newSetBinder(
-            binder(), new TypeLiteral<PathMatcher>() {}, Names.named("che.fs.file.excludes"));
-
-    fileCreateConsumers.addBinding().to(IndexedFileCreateConsumer.class);
-    fileUpdateConsumers.addBinding().to(IndexedFileUpdateConsumer.class);
-    fileDeleteConsumers.addBinding().to(IndexedFileDeleteConsumer.class);
-
-    fileCreateConsumers.addBinding().to(FileWatcherByPathMatcher.class);
-    fileDeleteConsumers.addBinding().to(FileWatcherByPathMatcher.class);
-    directoryCreateConsumers.addBinding().to(FileWatcherByPathMatcher.class);
-    directoryDeleteConsumers.addBinding().to(FileWatcherByPathMatcher.class);
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.directory.update"));
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.directory.create"));
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.directory.delete"));
+    newSetBinder(
+        binder(), new TypeLiteral<PathMatcher>() {
+        }, Names.named("che.fs.directory.excludes"));
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.file.update"));
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.file.create"));
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.file.delete"));
+    newSetBinder(
+        binder(), new TypeLiteral<PathMatcher>() {
+        }, Names.named("che.fs.file.excludes"));
   }
 
-  private void addVfsFilter(Multibinder<PathMatcher> excludeMatcher, String filter) {
-    excludeMatcher
-        .addBinding()
-        .toInstance(
-            path -> {
-              for (Path pathElement : path) {
-                if (pathElement == null || filter.equals(pathElement.toString())) {
-                  return true;
-                }
-              }
-              return false;
-            });
+  private void configureFileWatcherManagerPathMatcher() {
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.file.create")).addBinding().to(FileWatcherByPathMatcher.class);
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.file.delete")).addBinding().to(FileWatcherByPathMatcher.class);
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.directory.create")).addBinding().to(FileWatcherByPathMatcher.class);
+    newSetBinder(
+        binder(), new TypeLiteral<Consumer<Path>>() {
+        }, Names.named("che.fs.directory.delete")).addBinding().to(FileWatcherByPathMatcher.class);
   }
 
   private void configureVfsEvent() {

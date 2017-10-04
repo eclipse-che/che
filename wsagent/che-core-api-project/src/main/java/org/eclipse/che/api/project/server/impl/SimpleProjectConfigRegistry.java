@@ -22,13 +22,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolver;
 
 @Singleton
 public class SimpleProjectConfigRegistry
-    implements org.eclipse.che.api.project.server.api.ProjectConfigRegistry {
+    implements ProjectConfigRegistry {
 
   private final Map<String, RegisteredProject> projects = new ConcurrentHashMap<>();
 

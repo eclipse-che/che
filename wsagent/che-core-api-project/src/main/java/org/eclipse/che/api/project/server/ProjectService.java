@@ -14,7 +14,7 @@ import static java.io.File.separator;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.api.project.server.DtoConverter.asDto;
+import static org.eclipse.che.api.project.server.impl.ProjectDtoConverter.asDto;
 import static org.eclipse.che.api.project.shared.Constants.EVENT_IMPORT_OUTPUT_PROGRESS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_BATCH_PROJECTS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
@@ -74,12 +74,16 @@ import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.fs.server.FsDtoConverter;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.FsPathResolver;
+import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
+import org.eclipse.che.api.project.server.impl.ProjectDtoConverter;
+import org.eclipse.che.api.project.server.impl.ProjectServiceLinksInjector;
+import org.eclipse.che.api.project.server.impl.ProjectServiceVcsStatusInjector;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.search.server.impl.LuceneSearcher;
 import org.eclipse.che.api.search.server.impl.QueryExpression;
-import org.eclipse.che.api.search.server.impl.SearchResult;
+import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.search.server.impl.SearchResultEntry;
 import org.eclipse.che.api.search.server.Searcher;
-import org.eclipse.che.api.project.server.api.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -167,7 +171,7 @@ public class ProjectService extends Service {
     return projectManager
         .getAll()
         .stream()
-        .map(DtoConverter::asDto)
+        .map(ProjectDtoConverter::asDto)
         .map(this::injectProjectLinks)
         .collect(Collectors.toList());
   }
@@ -192,7 +196,7 @@ public class ProjectService extends Service {
     wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
     return projectManager
         .get(wsPath)
-        .map(DtoConverter::asDto)
+        .map(ProjectDtoConverter::asDto)
         .map(this::injectProjectLinks)
         .orElseThrow(() -> new NotFoundException("Project is not found"));
   }
@@ -265,7 +269,7 @@ public class ProjectService extends Service {
     Set<ProjectConfigDto> result =
         registeredProjects
             .stream()
-            .map(DtoConverter::asDto)
+            .map(ProjectDtoConverter::asDto)
             .map(this::injectProjectLinks)
             .collect(toSet());
 
@@ -582,7 +586,7 @@ public class ProjectService extends Service {
   @Path("/file/{path:.*}")
   public Response getFile(
       @ApiParam(value = "Path to a file", required = true) @PathParam("path") String wsPath)
-      throws IOException, NotFoundException, ForbiddenException, ServerException {
+      throws IOException, NotFoundException, ForbiddenException, ServerException, ConflictException {
     wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     InputStream inputStream = fsManager.readFileAsInputStream(wsPath);
@@ -820,7 +824,7 @@ public class ProjectService extends Service {
   })
   public InputStream exportZip(
       @ApiParam(value = "Path to resource to be exported") @PathParam("path") String wsPath)
-      throws NotFoundException, ForbiddenException, ServerException {
+      throws NotFoundException, ForbiddenException, ServerException, ConflictException {
     wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     return fsManager.existsAsFile(wsPath)
@@ -833,7 +837,7 @@ public class ProjectService extends Service {
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response exportFile(
       @ApiParam(value = "Path to resource to be imported") @PathParam("path") String wsPath)
-      throws NotFoundException, ForbiddenException, ServerException {
+      throws NotFoundException, ForbiddenException, ServerException, ConflictException {
     wsPath = fsPathResolver.toAbsoluteWsPath(wsPath);
 
     InputStream inputStream = fsManager.readFileAsInputStream(wsPath);
@@ -983,7 +987,7 @@ public class ProjectService extends Service {
 
     QueryExpression expr =
         new QueryExpression()
-            .setPath(wsPath.startsWith("/") ? wsPath : ('/' + wsPath))
+            .setPath(wsPath)
             .setName(name)
             .setText(text)
             .setMaxItems(maxItems)

@@ -13,7 +13,6 @@ package org.eclipse.che.api.git;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static java.util.Collections.emptyList;
-import static org.eclipse.che.api.watcher.server.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -28,10 +27,10 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.fs.server.FsPathResolver;
-import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.git.shared.Status;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.api.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 
 /**
@@ -40,6 +39,7 @@ import org.slf4j.Logger;
  * @author Igor Vinokur
  */
 public class GitIndexChangedDetector {
+
   private static final Logger LOG = getLogger(GitIndexChangedDetector.class);
 
   private static final String GIT_DIR = ".git";
@@ -99,15 +99,17 @@ public class GitIndexChangedDetector {
   }
 
   private Consumer<String> createConsumer() {
-    return fsEventConsumer();
+    return it -> {
+    };
   }
 
   private Consumer<String> modifyConsumer() {
-    return EMPTY_CONSUMER;
+    return fsEventConsumer();
   }
 
   private Consumer<String> deleteConsumer() {
-    return EMPTY_CONSUMER;
+    return it -> {
+    };
   }
 
   private Consumer<String> fsEventConsumer() {

@@ -51,11 +51,14 @@ public interface FsManager {
 
   boolean createFileQuietly(String parentWsPath, Iterator<FileItem> content);
 
-  InputStream readFileAsInputStream(String wsPath) throws NotFoundException, ServerException;
+  InputStream readFileAsInputStream(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
-  String readFileAsString(String wsPath) throws NotFoundException, ServerException;
+  String readFileAsString(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
-  byte[] readFileAsByteArray(String wsPath) throws NotFoundException, ServerException;
+  byte[] readFileAsByteArray(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
   Optional<InputStream> readFileAsInputStreamQuietly(String wsPath);
 
@@ -63,11 +66,13 @@ public interface FsManager {
 
   Optional<byte[]> readFileAsByteArrayQuietly(String wsPath);
 
-  InputStream zipFileToInputStream(String wsPath) throws NotFoundException, ServerException;
+  InputStream zipFileToInputStream(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
-  String zipFileToString(String wsPath) throws NotFoundException, ServerException;
+  String zipFileToString(String wsPath) throws NotFoundException, ServerException, ConflictException;
 
-  byte[] zipFileToByteArray(String wsPath) throws NotFoundException, ServerException;
+  byte[] zipFileToByteArray(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
   Optional<InputStream> zipFileToInputStreamQuietly(String wsPath);
 
@@ -75,11 +80,13 @@ public interface FsManager {
 
   Optional<byte[]> zipFileToByteArrayQuietly(String wsPath);
 
-  InputStream tarFileToInputStream(String wsPath) throws NotFoundException, ServerException;
+  InputStream tarFileToInputStream(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
-  String tarFileToString(String wsPath) throws NotFoundException, ServerException;
+  String tarFileToString(String wsPath) throws NotFoundException, ServerException, ConflictException;
 
-  byte[] tarFileToByteArray(String wsPath) throws NotFoundException, ServerException;
+  byte[] tarFileToByteArray(String wsPath)
+      throws NotFoundException, ServerException, ConflictException;
 
   Optional<InputStream> tarFileToInputStreamQuietly(String wsPath);
 
@@ -209,5 +216,7 @@ public interface FsManager {
 
   File toIoFile(String wsPath) throws NotFoundException;
 
-  File toIoFileQuietly(String wsPath);
+  Optional<File> toIoFileQuietly(String wsPath);
+
+  File toIoFileQuietlyOrNull(String wsPath);
 }
