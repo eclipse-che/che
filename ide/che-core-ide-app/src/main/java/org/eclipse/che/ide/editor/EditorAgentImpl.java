@@ -179,7 +179,7 @@ public class EditorAgentImpl
         preferencesManager.getValue(LinkWithEditorAction.LINK_WITH_EDITOR);
     if (parseBoolean(isLinkedWithEditor)) {
       final VirtualFile file = activeEditor.getEditorInput().getFile();
-      eventBus.fireEvent(new RevealResourceEvent(file.getLocation()));
+      eventBus.fireEvent(new RevealResourceEvent(file.getLocation(), true, false));
     }
   }
 
