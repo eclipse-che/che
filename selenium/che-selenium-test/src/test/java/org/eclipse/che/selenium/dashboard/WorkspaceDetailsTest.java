@@ -87,29 +87,31 @@ public class WorkspaceDetailsTest {
   public void workingWithEnvVariables() {
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.ENV_VARIABLES);
 
-    //create a new variable and check it exists
+    //create a new variable, save changes and check it exists
     dashboardWorkspace.selectMachine("Environment variables", "dev-machine");
     dashboardWorkspace.clickOnAddEnvVariableButton();
     dashboardWorkspace.checkAddNewEnvVarialbleDialogIsOpen();
     dashboardWorkspace.addNewEnvironmentVariable("logi", "admin");
     dashboardWorkspace.clickOnAddDialogButton();
+    clickOnSaveButton();
     Assert.assertTrue(dashboardWorkspace.checkEnvVariableExists("logi"));
 
-    //rename the variable and check it is renamed
+    //rename the variable, save changes and check it is renamed
     Assert.assertTrue(dashboardWorkspace.checkValueExists("logi", "admin"));
     dashboardWorkspace.clickOnEditEnvVariableButton("logi");
     dashboardWorkspace.enterEnvVariableName("login");
     dashboardWorkspace.clickOnUpdateDialogButton();
+    clickOnSaveButton();
     Assert.assertTrue(dashboardWorkspace.checkValueExists("login", "admin"));
 
-    //delete the variable and check it is not exists
+    //delete the variable, save changes and check it is not exists
     dashboardWorkspace.clickOnEnvVariableCheckbox("login");
     dashboardWorkspace.clickOnDeleteBtn();
     dashboardWorkspace.clickOnDeleteDialogButton();
     clickOnSaveButton();
     dashboardWorkspace.checkValueIsNotExists("login", "admin");
 
-    //delete all variable from db machine and save changes
+    //delete all variable from db machine, check they don't exist and save changes
     dashboardWorkspace.selectMachine("Environment variables", "db");
     for (int i = 0; i < variablesList.size(); i++) {
       loader.waitOnClosed();
@@ -119,7 +121,7 @@ public class WorkspaceDetailsTest {
     }
     clickOnSaveButton();
 
-    //restore variables to db machine and save changes
+    //restore variables to db machine, check they exist and save changes
     for (int i = 0; i < variablesList.size(); i++) {
       loader.waitOnClosed();
       dashboardWorkspace.clickOnAddEnvVariableButton();
@@ -151,7 +153,7 @@ public class WorkspaceDetailsTest {
     }
     clickOnSaveButton();
 
-    //switch all agents,save changes and check its states are as previous(by default for the Java-MySql stack)
+    //switch all agents, save changes and check its states are as previous(by default for the Java-MySql stack)
     for (String agentName : agentsList) {
       dashboardWorkspace.switchAgentState(agentName);
     }
@@ -166,7 +168,7 @@ public class WorkspaceDetailsTest {
   public void workingWithServers() {
     dashboardWorkspace.selectTabInWorspaceMenu(TabNames.SERVERS);
 
-    //add a new server to db machine,save changes and check it exists
+    //add a new server to db machine, save changes and check it exists
     dashboardWorkspace.selectMachine("Servers", "db");
     dashboardWorkspace.clickOnAddServerButton();
     dashboardWorkspace.waitAddServerDialogIsOpen();
@@ -256,6 +258,7 @@ public class WorkspaceDetailsTest {
   }
 
   private void createWsFromJavaMySqlStack() {
+    //create and start a workspace from the Java-MySql stack
     dashboard.open();
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
