@@ -61,13 +61,13 @@ public class DeleteOrganizationInListTest {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
 
     String organizationName = NameGenerator.generate("organization", 5);
-    organization = organizationServiceClient.createOrganization(organizationName);
-    organizations = organizationServiceClient.getOrganizations();
+    organization = organizationServiceClient.create(organizationName);
+    organizations = organizationServiceClient.getList();
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteOrganizationById(organization.getId());
+    organizationServiceClient.deleteById(organization.getId());
   }
 
   @Test

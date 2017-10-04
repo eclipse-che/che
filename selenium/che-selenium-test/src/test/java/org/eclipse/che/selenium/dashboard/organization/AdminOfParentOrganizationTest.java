@@ -70,22 +70,22 @@ public class AdminOfParentOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
+    organizationServiceClient.create(NameGenerator.generate("organization", 5));
     parentOrganization =
-        organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
+        organizationServiceClient.create(NameGenerator.generate("organization", 5));
     childOrganization =
-        organizationServiceClient.createOrganization(
+        organizationServiceClient.create(
             NameGenerator.generate("organization", 5), parentOrganization.getId());
 
-    organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
-    organizationServiceClient.addOrganizationMember(childOrganization.getId(), testUser.getId());
+    organizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
+    organizationServiceClient.addMember(childOrganization.getId(), testUser.getId());
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteOrganizationById(childOrganization.getId());
-    organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
+    organizationServiceClient.deleteById(childOrganization.getId());
+    organizationServiceClient.deleteById(parentOrganization.getId());
   }
 
   @Test(priority = 1)

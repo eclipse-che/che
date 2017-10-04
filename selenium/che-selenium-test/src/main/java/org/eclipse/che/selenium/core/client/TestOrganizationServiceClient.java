@@ -41,11 +41,11 @@ public class TestOrganizationServiceClient {
     this.requestFactory = requestFactory;
   }
 
-  public List<OrganizationDto> getOrganizations() throws Exception {
-    return getOrganizations(null);
+  public List<OrganizationDto> getList() throws Exception {
+    return getList(null);
   }
 
-  public List<OrganizationDto> getOrganizations(@Nullable String parent) throws Exception {
+  public List<OrganizationDto> getList(@Nullable String parent) throws Exception {
     List<OrganizationDto> organizations =
         requestFactory.fromUrl(getApiUrl()).request().asList(OrganizationDto.class);
 
@@ -60,7 +60,7 @@ public class TestOrganizationServiceClient {
     return apiEndpoint + "organization/";
   }
 
-  public OrganizationDto createOrganization(String name, String parentId) throws Exception {
+  public OrganizationDto create(String name, String parentId) throws Exception {
     OrganizationDto data = newDto(OrganizationDto.class).withName(name).withParent(parentId);
 
     OrganizationDto organizationDto =
@@ -80,11 +80,11 @@ public class TestOrganizationServiceClient {
     return organizationDto;
   }
 
-  public OrganizationDto createOrganization(String name) throws Exception {
-    return createOrganization(name, null);
+  public OrganizationDto create(String name) throws Exception {
+    return create(name, null);
   }
 
-  public void deleteOrganizationById(String id) throws Exception {
+  public void deleteById(String id) throws Exception {
     String apiUrl = format("%s%s", getApiUrl(), id);
 
     try {
@@ -96,39 +96,39 @@ public class TestOrganizationServiceClient {
     LOG.debug("Organization with id='{}' removed", id);
   }
 
-  public void deleteOrganizationByName(String name) throws Exception {
-    OrganizationDto organization = getOrganization(name);
+  public void deleteByName(String name) throws Exception {
+    OrganizationDto organization = get(name);
 
     if (organization != null) {
-      deleteOrganizationById(organization.getId());
+      deleteById(organization.getId());
     }
   }
 
-  public void deleteAllOrganizations(String user) throws Exception {
-    getOrganizations(user)
+  public void deleteAll(String user) throws Exception {
+    getList(user)
         .stream()
         .filter(organization -> organization.getParent() != null)
         .forEach(
             organization -> {
               try {
-                deleteOrganizationById(organization.getId());
+                deleteById(organization.getId());
               } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
               }
             });
   }
 
-  public OrganizationDto getOrganization(String organizationName) throws Exception {
+  public OrganizationDto get(String organizationName) throws Exception {
     String apiUrl = format("%sfind?name=%s", getApiUrl(), organizationName);
     return requestFactory.fromUrl(apiUrl).request().asDto(OrganizationDto.class);
   }
 
-  public void addOrganizationMember(String organizationId, String userId) throws Exception {
-    addOrganizationMember(organizationId, userId, asList("createWorkspaces"));
+  public void addMember(String organizationId, String userId) throws Exception {
+    addMember(organizationId, userId, asList("createWorkspaces"));
   }
 
-  public void addOrganizationAdmin(String organizationId, String userId) throws Exception {
-    addOrganizationMember(
+  public void addAdmin(String organizationId, String userId) throws Exception {
+    addMember(
         organizationId,
         userId,
         asList(
@@ -141,7 +141,7 @@ public class TestOrganizationServiceClient {
             "manageSuborganizations"));
   }
 
-  public void addOrganizationMember(String organizationId, String userId, List<String> actions)
+  public void addMember(String organizationId, String userId, List<String> actions)
       throws Exception {
     String apiUrl = apiEndpoint + "permissions";
     PermissionsDto data =

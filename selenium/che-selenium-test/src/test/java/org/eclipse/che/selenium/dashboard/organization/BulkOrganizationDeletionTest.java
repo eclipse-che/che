@@ -63,15 +63,15 @@ public class BulkOrganizationDeletionTest {
     String organizationName1 = NameGenerator.generate("organization", 5);
     String organizationName2 = NameGenerator.generate("organization", 5);
 
-    organization1 = organizationServiceClient.createOrganization(organizationName1);
-    organization2 = organizationServiceClient.createOrganization(organizationName2);
-    organizations = organizationServiceClient.getOrganizations();
+    organization1 = organizationServiceClient.create(organizationName1);
+    organization2 = organizationServiceClient.create(organizationName2);
+    organizations = organizationServiceClient.getList();
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteOrganizationById(organization1.getId());
-    organizationServiceClient.deleteOrganizationById(organization2.getId());
+    organizationServiceClient.deleteById(organization1.getId());
+    organizationServiceClient.deleteById(organization2.getId());
   }
 
   @Test

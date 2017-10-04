@@ -63,12 +63,12 @@ public class OrganizationTest {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     orgName = generate("orgX", 6);
 
-    organization = organizationServiceClient.createOrganization(orgName);
+    organization = organizationServiceClient.create(orgName);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteOrganizationById(organization.getId());
+    organizationServiceClient.deleteById(organization.getId());
   }
 
   @Test

@@ -51,14 +51,13 @@ public class OrganizationListTest {
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-    organization =
-        organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
-    organizations = organizationServiceClient.getOrganizations();
+    organization = organizationServiceClient.create(NameGenerator.generate("organization", 5));
+    organizations = organizationServiceClient.getList();
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    organizationServiceClient.deleteOrganizationById(organization.getId());
+    organizationServiceClient.deleteById(organization.getId());
   }
 
   @Test
