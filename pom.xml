@@ -1276,6 +1276,8 @@
                             <codeserverArgs>
                                 <arg>-noincremental</arg>
                                 <arg>-noprecompile</arg>
+                                <!-- CodeServer should be reachable at all IPs but not 127.0.0.1 only.
+                                 To be able to use SDM on the local machine when it's running inside the container. -->
                                 <arg>-bindAddress</arg>
                                 <arg>0.0.0.0</arg>
                             </codeserverArgs>
