@@ -430,6 +430,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("messages.unableOpenResource")
   String unableOpenResource(String path);
 
+  @Key("messages.canNotOpenFileInSplitMode")
+  String canNotOpenFileInSplitMode(String path);
+
   @Key("messages.canNotOpenFileWithoutParams")
   String canNotOpenFileWithoutParams();
 

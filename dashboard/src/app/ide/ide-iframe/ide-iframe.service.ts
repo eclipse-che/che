@@ -46,7 +46,7 @@ class IdeIFrameSvc {
 
       } else if ("show-navbar" === event.data) {
         $rootScope.hideNavbar = false;
-        $mdSidenav('left').toggle();
+        $mdSidenav('left').open();
 
       } else if ("hide-navbar" === event.data) {
         $rootScope.hideNavbar = true;

@@ -133,6 +133,30 @@ public class RouterRulesRegistry {
        when statically configured value. Same for delay and delayParameterName.</p>
 </blockquote>
 
+### Disabling scheduling by rate or period
+If a scheduled method has been configured through `delayParameterName` or `periodParameterName`, it is possible to disable
+the scheduling by setting a non positive value to the parameter.
+
+Example: Disabling scheduling of this `registerRoutingRules` method:
+
+```java
+@Singleton // should be eager
+public class RouterRulesRegistry {
+
+    @ScheduleDelay(initialDelayParameterName = "router.rules.initialDelay",
+            delayParameterName = "router.rules.delay",
+            unit = TimeUnit.MINUTES)
+    private void registerRoutingRules() throws Exception {
+     ...
+    }
+```
+
+In che.properties:
+```
+router.rules.delay=-1
+```
+will disable the scheduling
+
 ### Run job according to the cron expression
 If you would like to execute some method according to the cron expression you can mark method with annotation @ScheduleCron
 Example 1 :  Send each Sunday at 1:00 AM.

@@ -209,6 +209,7 @@ defineTestsScope() {
         if [[ "$var" =~ --test=.* ]]; then
             TESTS_SCOPE="-Dit.test="$(echo "$var" | sed -e "s/--test=//g")
             TEST_INCLUSION=${TEST_INCLUSION_SINGLE_TEST}
+            THREADS=1
 
         elif [[ "$var" =~ --suite=.* ]]; then
             TESTS_SCOPE="-DrunSuite=src/test/resources/suites/"$(echo "$var" | sed -e "s/--suite=//g")
@@ -529,17 +530,11 @@ fetchActualResults() {
         ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${job}"/"
     fi
 
-    # from 'Failed Tests:' to 'Skipped Tests:'
+    # get list of failed tests from CI server
     local actualResults=($(curl -s ${ACTUAL_RESULTS_URL} | \
                            tr '>' '\n' | tr '<' '\n' | tr '"' '\n'  | \
-                           grep -A9999999 "Failed Tests:" | grep -B9999999 "Skipped Tests:" | \
+                           grep -A9999999 "Test Result" | \
                            grep [a-z][a-z0-9_]*[.][a-z] | grep -v http | grep -v junit ))
-
-    # from 'Failed Configurations:' to 'Skipped Configurations:'
-    actualResults+=($(curl -s ${ACTUAL_RESULTS_URL} | \
-                     tr '>' '\n' | tr '<' '\n' | tr '"' '\n'  | \
-                     grep -A9999999 "Failed Configurations:" | grep -B9999999 "Skipped Configurations:" | \
-                     grep [a-z][a-z0-9_]*[.][a-z] | grep -v http | grep -v junit))
 
     ACTUAL_RESULTS=$(echo ${actualResults[*]} | tr ' ' '\n' | sort | uniq)
 }
@@ -908,10 +903,13 @@ else
 fi
 
 analyseTestsResults $@
-generateFailSafeReport
-printProposals $@
-storeTestReport
-printElapsedTime
+
+if [[ ${COMPARE_WITH_CI} == false ]]; then
+    generateFailSafeReport
+    printProposals $@
+    storeTestReport
+    printElapsedTime
+fi
 
 if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
       && [[ $(fetchFailedTestsNumber) == 0 ]] \
